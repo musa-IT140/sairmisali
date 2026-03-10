@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPB Cyber Academy - Excellence</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #0a0b1e; 
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Kopfzeile mit Logo */
+        header {
+            background-color: rgba(16, 17, 40, 0.95);
+            border-bottom: 2px solid #0ff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cyber-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .cyber-logo .icon {
+            font-size: 32px;
+            text-shadow: 0 0 15px #0ff;
+        }
+
+        .cyber-logo .gpb {
+            color: #ffffff;
+        }
+
+        .cyber-logo .academy {
+            color: #0ff;
+            text-shadow: 0 0 8px #0ff;
+        }
+
+        /* Sticky Navigation */
+        nav.cyber-nav {
+            background-color: #050510;
+            border-bottom: 1px solid #ff00ff;
+            padding: 15px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
+        }
+
+        nav.cyber-nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+
+        nav.cyber-nav a:hover {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        /* Hauptinhalt */
+        main {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            flex-grow: 1;
+        }
+
+        /* Top Section Grid */
+        .top-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Trophäen-Display */
+        .trophy-base {
+            background-color: rgba(16, 17, 40, 0.8);
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .trophy-base h2 {
+            color: #ff00ff;
+            border-bottom: 1px solid #0ff;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+            font-size: 1.2em;
+        }
+
+        /* Punktesystem */
+        .grading-system {
+            background-color: rgba(20, 0, 40, 0.6);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+        }
+
+        .grading-system h3 {
+            color: #ff0;
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 1px solid #ff00ff;
+            padding-bottom: 10px;
+            text-shadow: 0 0 5px #ff0;
+        }
+
+        .grading-system ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .grading-system li {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0, 255, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .grading-system li:last-child {
+            border-bottom: none;
+            color: #aaa;
+        }
+
+        .grade-score {
+            color: #0ff;
+            font-weight: bold;
+            width: 80px;
+        }
+
+        /* Hall of Fame */
+        .hall-of-fame {
+            width: 100%;
+            max-width: 1200px;
+            border: 1px solid #ff00ff;
+            padding: 30px;
+            background-color: rgba(20, 0, 40, 0.4);
+            border-radius: 8px;
+        }
+
+        .hall-of-fame h3 {
+            color: #0ff;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-shadow: 0 0 8px #0ff;
+        }
+
+        /* Spezielle Formatierung Dozent & Punkte */
+        .hochdozent {
+            color: #ff00ff;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 0 8px #ff00ff;
+        }
+
+        .student-score {
+            display: block;
+            font-size: 11px;
+            color: #ffd700;
+            margin-top: 5px;
+            text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .student-grid li {
+            background-color: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .student-grid li:hover {
+            background-color: rgba(0, 255, 255, 0.2);
+            border-color: #0ff;
+            box-shadow: 0 0 10px #0ff;
+            transform: scale(1.05);
+        }
+
+        /* Module Grid */
+        .module-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .module-section {
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(16, 17, 40, 0.8);
+            border-top: 4px solid #0ff;
+            border-radius: 8px;
+            padding: 20px;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s;
+        }
+
+        .module-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.2);
+            border-top-color: #ff00ff;
+        }
+        
+        .module-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .office-logos {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(45deg, #0a0b1e, #1a1a3a);
+            border: 1px solid #333;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .office-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .icon-word { background-color: #2b579a; border: 2px solid #4a7fd6; }
+        .icon-excel { background-color: #217346; border: 2px solid #33a566; }
+        .icon-ppt { background-color: #b7472a; border: 2px solid #e06c4c; }
+        
+        .module-text h3 {
+            color: #0ff;
+            margin-top: 0;
+            text-shadow: 0 0 5px #0ff;
+            font-size: 20px;
+        }
+
+        .module-text p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* Fußzeile */
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #0ff;
+            background-color: #050510;
+            color: #666;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="cyber-logo">
+            <span class="icon">🛡️</span>
+            <span class="gpb">GPB</span>
+            <span class="academy">Cyber Academy</span>
+        </div>
+    </header>
+
+    <nav class="cyber-nav">
+        <a href="#linux">Linux</a>
+        <a href="#java">Java</a>
+        <a href="#csharp">C#</a>
+        <a href="#netzwerke">Netzwerke</a>
+        <a href="#git">Git</a>
+        <a href="#html-css">HTML/CSS</a>
+        <a href="#office">Office & PPT</a>
+        <a href="#projekte">Projekte</a>
+    </nav>
+
+    <main>
+        <div class="top-section">
+            <div class="trophy-base">
+                <h2>🏆 EXCELLENCE PROTOKOLL 🏆</h2>
+                <p>Die Schulleitung wird informiert: Die Klasse <strong>IT 140/141</strong> hat die praktischen Git-Aufgabenpunkte (1. Github Account, 2. Git auf Ubuntu, 3. SSH Key generieren, 4. Public Key ins Git, 5. Create Repository, 6. Commit & Push) <span class="highlight">hervorragend</span> gelöst.</p>
+            </div>
+
+            <div class="grading-system">
+                <h3>📊 Bewertungsskala</h3>
+                <ul>
+                    <li><span class="grade-score">100 - 92</span> <span>Sehr gut</span></li>
+                    <li><span class="grade-score"> 91 - 81</span> <span>Gut</span></li>
+                    <li><span class="grade-score"> 80 - 67</span> <span>Befriedigend</span></li>
+                    <li><span class="grade-score"> 66 - 50</span> <span>Ausreichend</span></li>
+                    <li><span class="grade-score"> 49 - 30</span> <span>Mangelhaft</span></li>
+                    <li><span class="grade-score"> 29 -  0</span> <span>Ungenügend</span></li>
+                    <li><span class="grade-score">****</span> <span>Ohne / Noch keine Bewertung</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <section class="hall-of-fame">
+            <h3>👨‍🏫 <span class="hochdozent">Leitender Dozent</span>: Ottavio Braun | Klasse IT 140/141</h3>
+            <ul class="student-grid">
+                <li>Kuroosh Ahmadvand <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Maan Assaf <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Liam Blaney <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Alexander Bode <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Duke Moyomade Gbokoyi <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Musa Ispirli <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Süleyman Kinaci <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Kai Kissing <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Sven Medin Kolenovic <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Jonas Kretzschmar <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Tobias Kropp <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Jason Leiß <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Mani Moghaser Bagheri <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Randy Neuwald <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Hoai Nam Ngo <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Cao Tuan Kiet Nguyen <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Oliver Preuss <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Kadir Salman <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Steven Sembach <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Alexander Shchetinin <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Kassem Tarraf <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Melek Terzi <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Christian Thiel <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>William Tornieporth <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Anh Tuan Tran <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Jakob von der Decken <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Niclas Weber <span class="student-score">100/100 Punkte (Linux)</span></li>
+                <li>Meik Weltz <span class="student-score">100/100 Punkte (Linux)</span></li>
+            </ul>
+        </section>
+
+        <div class="module-container">
+            <section id="linux" class="module-section">
+                <img src="https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=800&q=80" alt="Linux" class="module-img">
+                <div class="module-text">
+                    <h3>Linux 🐧</h3>
+                    <p>Ein quelloffenes, extrem stabiles Betriebssystem. In der IT-Welt ist Linux das Rückgrat für Server, Cloud-Infrastrukturen und Netzwerke. Wir behandeln hier Rechteverwaltung, Shell-Skripte und Cronjobs.</p>
+                </div>
+            </section>
+
+            <section id="java" class="module-section">
+                <img src="https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&q=80" alt="Java" class="module-img">
+                <div class="module-text">
+                    <h3>Java ☕</h3>
+                    <p>Eine objektorientierte Programmiersprache, die nach dem Prinzip "Write Once, Run Anywhere" funktioniert. Verwendet für die Entwicklung von Unternehmensanwendungen und Web-Backends.</p>
+                </div>
+            </section>
+
+            <section id="csharp" class="module-section">
+                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80" alt="C# Code" class="module-img">
+                <div class="module-text">
+                    <h3>C# 💠</h3>
+                    <p>Eine moderne, objektorientierte Programmiersprache von Microsoft. Sie ist besonders stark in der Entwicklung von Windows-Anwendungen, Unternehmenssoftware und Backend-Services.</p>
+                </div>
+            </section>
+
+            <section id="netzwerke" class="module-section">
+                <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80" alt="Netzwerke" class="module-img">
+                <div class="module-text">
+                    <h3>Netzwerke 🌐</h3>
+                    <p>Die Infrastruktur der IT. Hier geht es um Datenübertragung, Routing, Switching und Netzwerksicherheit. Kernkonzepte sind das OSI-Modell und TCP/IP-Protokolle.</p>
+                </div>
+            </section>
+
+            <section id="git" class="module-section">
+                <img src="https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&q=80" alt="Git" class="module-img">
+                <div class="module-text">
+                    <h3>Git 🐙</h3>
+                    <p>Das Standard-Versionskontrollsystem der Industrie. Es ermöglicht Teams, Code-Änderungen zu verfolgen, asynchron zusammenzuarbeiten und Branches sicher zusammenzuführen.</p>
+                </div>
+            </section>
+
+            <section id="html-css" class="module-section">
+                <img src="https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800&q=80" alt="HTML CSS" class="module-img">
+                <div class="module-text">
+                    <h3>HTML & CSS 🎨</h3>
+                    <p>Die grundlegenden Bausteine des Webs. HTML strukturiert die Inhalte semantisch, während CSS für das visuelle Layout, Farben und Animationen sorgt.</p>
+                </div>
+            </section>
+
+            <section id="office" class="module-section">
+                <div class="office-logos">
+                    <div class="office-icon icon-word">W</div>
+                    <div class="office-icon icon-excel">X</div>
+                    <div class="office-icon icon-ppt">P</div>
+                </div>
+                <div class="module-text">
+                    <h3>Office Prg & PowerPoint 📊</h3>
+                    <p>Essenzielles Werkzeugzeug für die IT-Dokumentation. Umfasst die professionelle Aufbereitung von Daten (Excel), Textverarbeitung (Word) und das Erstellen technischer Präsentationen (PowerPoint).</p>
+                </div>
+            </section>
+
+            <section id="projekte" class="module-section">
+                <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&q=80" alt="Projekte" class="module-img">
+                <div class="module-text">
+                    <h3>Projekte 🚀</h3>
+                    <p>Die praktische Anwendung des theoretischen Wissens. In agilen Teams werden reale Software- oder Infrastruktur-Szenarien von der Planung bis zum Deployment umgesetzt.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 GPB Juliusstraße 2 | IT 140/141 Cyber Division</p>
+    </footer>
+
+</body>
+</html>
