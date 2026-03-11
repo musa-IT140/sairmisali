@@ -27,4 +27,4 @@ Da es sich um ein reines Frontend-Projekt (HTML/CSS) handelt, ist keine komplexe
 
 1. **Repository klonen:**
    ```bash
-   git clone [https://github.com/musa-IT140/GPB-ACADEMY-MUSA.git](https://github.com/musa-IT140/GPB-ACADEMY-MUSA.git)
+   git clone (https://github.com/musa-IT140/GPB-ACADEMY-MUSA.git)
