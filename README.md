@@ -3,6 +3,8 @@
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 
+[![Live Demo](https://img.shields.io/badge/🌐_LIVE_WEBSITE_ANSEHEN-Hier_Klicken!-success?style=for-the-badge)](https://musa-it140.github.io/GPB-ACADEMY-MUSA/gpblinux.html)
+
 ## 📖 Projektbeschreibung
 Dieses Repository enthält das hochmoderne, interaktive Dashboard der **GPB Cyber Academy**. Die "Ultra HD Edition" wurde speziell als Single-Page-Anwendung entwickelt, um den Lernfortschritt, die absolvierten IT-Module und die exzellenten Leistungen der Klasse **IT 140/141** im Linux-Modul visuell ansprechend zu dokumentieren.
 
