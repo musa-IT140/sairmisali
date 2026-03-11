@@ -9,52 +9,38 @@ Dieses Repository enthält das hochmoderne, interaktive Dashboard der **GPB Cybe
 ## 🚀 Installation & Ausführung
 Da es sich um ein reines Frontend-Projekt (HTML/CSS) handelt, ist keine komplexe Server-Umgebung erforderlich.
 
-1.  **Repository klonen:**
+1. **Repository klonen:**
    ```bash
    git clone (https://github.com/musa-IT140/GPB-ACADEMY-MUSA.git)
+   ```
+2. **Verzeichnis öffnen:**
+   ```bash
+   cd GPB-ACADEMY-MUSA
+   ```
+3. **Anwendung starten:**
+   Öffne die Datei `gpblinux.html` einfach per Doppelklick in einem modernen Webbrowser (Google Chrome, Mozilla Firefox oder Microsoft Edge werden für die optimale Darstellung der Animationen empfohlen).
 
-2.  ** Verzeichnis öffnen:**
-    Bash
-
-    cd GPB-ACADEMY-MUSA
-
-3.  ** Anwendung starten:**
-    Öffne die Datei gpblinux.html einfach per Doppelklick in einem modernen Webbrowser (Google Chrome, Mozilla Firefox oder Microsoft Edge werden für die optimale Darstellung der Animationen empfohlen).
-
-✨ Hauptmerkmale (Features)
-
+## ✨ Hauptmerkmale (Features)
 Das Projekt zeichnet sich durch ein aufwendiges Frontend-Design ohne den Einsatz von externen Frameworks oder JavaScript aus:
 
-    Dynamisches Cyber-Design: Futuristisches UI-Konzept mit Glassmorphism-Effekten, Neon-Glow und einem komplett in CSS geschriebenen, animierten Partikelsystem im Hintergrund.
+* **Dynamisches Cyber-Design:** Futuristisches UI-Konzept mit Glassmorphism-Effekten, Neon-Glow und einem komplett in CSS geschriebenen, animierten Partikelsystem im Hintergrund.
+* **Excellence Protokoll:** Live-Tracking der Git-Fortschritte (Account-Erstellung, SSH Keys, Repositories, Commits).
+* **Interaktives Bewertungssystem:** Eine farbcodierte und animierte Skala für die übersichtliche Darstellung des Notenschlüssels.
+* **Hall of Fame:** Ehrung der herausragenden Schüler (100/100 Punkte) unter der Leitung von Dozent Ottavio Braun.
+* **Modul-Matrix:** Intuitive, kartenbasierte Navigation durch Kern-IT-Themen (Linux, Java, C#, Netzwerke, Git, HTML/CSS, Office, Projekte) mit Hover-Effekten.
+* **Vollständig Responsiv:** Optimiert für Desktop, Tablet und Smartphone durch fließende Media Queries und CSS Grid/Flexbox-Layouts.
 
-    Excellence Protokoll: Live-Tracking der Git-Fortschritte (Account-Erstellung, SSH Keys, Repositories, Commits).
+## 💻 Verwendete Technologien
+* **HTML5:** Saubere, semantische Strukturierung der Inhalte.
+* **CSS3:** * Fortgeschrittene Keyframe-Animationen (`@keyframes` für Glitch-, Puls- und Partikel-Effekte).
+  * CSS Grid & Flexbox für das Layout-Management.
+  * Backdrop-Filter für moderne Transparenz-Effekte.
 
-    Interaktives Bewertungssystem: Eine farbcodierte und animierte Skala für die übersichtliche Darstellung des Notenschlüssels.
+## 👨‍💻 Autor & Credits
+* **Code Crafted by:** MUSA ISPIR-LEE ("muss er oder muss er nicht: MUSA !!")
+* **Leitender Dozent:** Ottavio Braun
+* **Institution:** GPB College, Juliusstraße 2, 12051 Berlin
+* **Division:** IT 140/141
 
-    Hall of Fame: Ehrung der herausragenden Schüler (100/100 Punkte) unter der Leitung von Dozent Ottavio Braun.
-
-    Modul-Matrix: Intuitive, kartenbasierte Navigation durch Kern-IT-Themen (Linux, Java, C#, Netzwerke, Git, HTML/CSS, Office, Projekte) mit Hover-Effekten.
-
-    Vollständig Responsiv: Optimiert für Desktop, Tablet und Smartphone durch fließende Media Queries und CSS Grid/Flexbox-Layouts.
-
-💻 Verwendete Technologien
-
-    HTML5: Saubere, semantische Strukturierung der Inhalte.
-
-    CSS3: * Fortgeschrittene Keyframe-Animationen (@keyframes für Glitch-, Puls- und Partikel-Effekte).
-
-        CSS Grid & Flexbox für das Layout-Management.
-
-        Backdrop-Filter für moderne Transparenz-Effekte.
-
-👨‍💻 Autor & Credits
-
-    Code Crafted by: MUSA ISPIR-LEE ("muss er oder muss er nicht: MUSA !!")
-
-    Leitender Dozent: Ottavio Braun
-
-    Institution: GPB College, Juliusstraße 2, 12051 Berlin
-
-    Division: IT 140/141
-
-© 2026 GPB Cyber Academy
+---
+*© 2026 GPB Cyber Academy*
