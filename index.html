@@ -26,7 +26,7 @@
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse at center, #1b2735 0%, #050608 100%); color: var(--text-color); line-height: 1.6; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; position: relative; -webkit-overflow-scrolling: touch; top: 0 !important; }
         body.modal-open { overflow: hidden; touch-action: none; }
         
-        /* Google Translate Banner Gizleme */
+        /* Google Translate ausblenden */
         .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
         
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -112,12 +112,12 @@
         .weather-widget { font-family: 'Space Mono', monospace; font-size: clamp(0.7rem, 1vw, 0.8rem); color: #cbd5e1; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.2); cursor: pointer; transition: 0.3s;}
         .weather-widget:hover { background: rgba(212,175,55,0.2); color: white; transform: scale(1.05); }
         
-        /* PROBLEM 2 FIX: DİL MENÜSÜ 2x4 GRID (Ekrana Taşma Düzeltildi) */
+        /* PROBLEM 2 & 4 FIX: DİL MENÜSÜ & MOBİL TAŞMA DÜZELTMESİ */
         .lang-dropdown { position: relative; display: inline-block; z-index: 9999; }
-        .lang-btn-main { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: 0.3s;}
+        .lang-btn-main { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: 0.3s; outline: none;}
         .lang-dropdown::after { content: ''; position: absolute; top: 100%; left: -10px; right: -10px; height: 20px; } 
-        .lang-menu { display: none; position: absolute; top: calc(100% + 5px); right: -5px; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 10px; gap: 8px; width: 140px; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 10005; grid-template-columns: 1fr 1fr; }
-        .lang-dropdown:hover .lang-menu, .lang-dropdown:focus-within .lang-menu { display: grid !important; }
+        .lang-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 10px; gap: 8px; width: 140px; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 10005; grid-template-columns: 1fr 1fr; }
+        .lang-dropdown:hover .lang-menu, .lang-menu.show-lang { display: grid !important; }
         .lang-item { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 5px; cursor: pointer; border-radius: 8px; background: rgba(255,255,255,0.05); transition: 0.2s; position: relative; z-index: 10006; pointer-events: auto; }
         .lang-item:hover { background: rgba(212,175,55,0.3); }
         .lang-item span.text { font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #cbd5e1; font-weight: 600; pointer-events: none;}
@@ -346,12 +346,14 @@
 
         footer { text-align: center; padding: 20px; color: #a0aec0; font-size: 0.8rem; border-top: 1px solid rgba(212,175,55,0.2); background: rgba(0,0,0,0.3); margin-top: auto; z-index: 10;}
 
-        /* MOBIL DÜZENLEME */
+        /* PROBLEM 2 & 3 FIX: MOBIL DÜZENLEME (Header Scroll & Ticker Font) */
         @media (max-width: 900px) {
+            .ticker-text { font-size: 0.85rem !important; }
             .ticker-wrap { top: 0; }
             header { flex-direction: column; padding: 10px; gap: 10px; min-height: auto; top: 35px;}
             .header-left { width: 100%; justify-content: space-between; }
-            .header-center { width: 100%; }
+            .header-center { width: 100vw; margin-left: -10px; margin-right: -10px; padding-bottom: 5px; overflow-x: auto; }
+            nav { padding: 0 15px; justify-content: flex-start; }
             .header-right { width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; flex-wrap: wrap;}
             
             .page-view { padding-top: 220px; }
@@ -364,6 +366,7 @@
             
             .modal-content { padding: 15px; width: 95%; max-height: 85vh;}
             .sidebar.wide-sidebar { width: 100vw; max-width: 100vw; }
+            .lang-menu { right: 5%; left: auto; transform: none; }
         }
     </style>
 </head>
@@ -1564,20 +1567,41 @@ window.badWords = ["küfür", "aptal", "salak", "pislik", "lan", "siktir", "oros
 
 window.isItemNew = function(timestamp) { if(!timestamp) return false; return (Date.now() - timestamp) < (7 * 24 * 60 * 60 * 1000); }; 
 
-// ================= 3. BİLDİRİMLER & LOGLAR & KAYIT LİSTENER =================
-// DİĞER SEKMELERDE/PENCERELERDE GÜNCELLENEN VERİYİ YAKALAMA (Echtzeit-Aktualisierung)
-window.addEventListener('storage', (e) => {
-    if (e.key === 'misaliUsersDB') {
-        window.userDatabase = JSON.parse(e.newValue);
-        if (document.getElementById('adminUsersModal') && document.getElementById('adminUsersModal').classList.contains('active-modal')) {
-            window.openAdminUsersModal();
+window.zodiacs = [
+    {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]}, {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]},
+    {id:'gemini', icon:'♊', tr:'İkizler', de:'Zwillinge', start:[5,21], end:[6,21]}, {id:'cancer', icon:'♋', tr:'Yengeç', de:'Krebs', start:[6,22], end:[7,22]},
+    {id:'leo', icon:'♌', tr:'Aslan', de:'Löwe', start:[7,23], end:[8,22]}, {id:'virgo', icon:'♍', tr:'Başak', de:'Jungfrau', start:[8,23], end:[9,22]},
+    {id:'libra', icon:'♎', tr:'Terazi', de:'Waage', start:[9,23], end:[10,22]}, {id:'scorpio', icon:'♏', tr:'Akrep', de:'Skorpion', start:[10,23], end:[11,21]},
+    {id:'sagittarius', icon:'♐', tr:'Yay', de:'Schütze', start:[11,22], end:[12,21]}, {id:'capricorn', icon:'♑', tr:'Oğlak', de:'Steinbock', start:[12,22], end:[1,19]},
+    {id:'aquarius', icon:'♒', tr:'Kova', de:'Wassermann', start:[1,20], end:[2,18]}, {id:'pisces', icon:'♓', tr:'Balık', de:'Fische', start:[2,19], end:[3,20]}
+];
+
+window.getZodiacSign = function(day, month) {
+    if(!day || !month) return null; let d = parseInt(day); let m = parseInt(month);
+    for(let z of window.zodiacs) { if ((m === z.start[0] && d >= z.start[1]) || (m === z.end[0] && d <= z.end[1])) return z; }
+    return window.zodiacs[9]; 
+};
+
+// ================= 3. BİLDİRİMLER & LOGLAR =================
+// PROBLEM 1 & 4 & 5 FIX: Admin Sync Loop (3 Saniye) - Gerçek zamanlı Glocke ve Kayıtlı listesi güncellemesi!
+setInterval(() => {
+    if(window.currentUser && window.currentUser.role === 'admin') {
+        const newUsersDB = JSON.parse(localStorage.getItem('misaliUsersDB')) || window.userDatabase;
+        const newMsgs = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || window.adminMessages;
+        
+        if(Object.keys(newUsersDB).length !== Object.keys(window.userDatabase).length || JSON.stringify(newUsersDB) !== JSON.stringify(window.userDatabase)) {
+            window.userDatabase = newUsersDB;
+            if (document.getElementById('adminUsersModal') && document.getElementById('adminUsersModal').classList.contains('active-modal')) { window.openAdminUsersModal(); }
+            window.renderOnlineUsers(); // Ziyaretçi ve Kayıtlı sayısını güncelle
+        }
+        
+        if(newMsgs.length !== window.adminMessages.length) {
+            window.adminMessages = newMsgs;
+            window.updateNotifyBadge();
+            if (document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) { window.openAdminMessages(); }
         }
     }
-    if (e.key === 'misaliAdminMsgs') {
-        window.adminMessages = JSON.parse(e.newValue);
-        window.updateNotifyBadge();
-    }
-});
+}, 3000);
 
 window.updateNotifyBadge = function() {
     const badge = document.getElementById('user-notify-badge');
@@ -1681,6 +1705,21 @@ document.addEventListener('DOMContentLoaded', () => {
     window.navigate(localStorage.getItem('misaliActivePage') || 'home-view');
     window.renderOnlineUsers(); window.updateNotifyBadge();
     
+    // PROBLEM 2 FIX: Mobil Lang Menüsü toggle
+    const langBtn = document.querySelector('.lang-btn-main');
+    const langMenu = document.querySelector('.lang-menu');
+    if(langBtn && langMenu) {
+        langBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langMenu.classList.toggle('show-lang');
+        });
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.lang-dropdown')) {
+                langMenu.classList.remove('show-lang');
+            }
+        });
+    }
+
     const inputs = ['user-poem-input', 'chat-input'];
     inputs.forEach(id => {
         const el = document.getElementById(id);
@@ -1703,6 +1742,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 });
 
+// PROBLEM 1 FIX: Hava Durumu Fallback
 window.fetchWeather = async function() {
     try {
         const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json'); const geoData = await geoRes.json(); const city = geoData.city || "Berlin";
@@ -1710,7 +1750,11 @@ window.fetchWeather = async function() {
         const wData = await wRes.json();
         window.weatherData = { temp: Math.round(wData.current_weather.temperature), city: city, code: wData.current_weather.weathercode };
         document.getElementById('weather-widget').innerHTML = `<span class="anim-sun">☀️</span> ${city}, ${window.weatherData.temp}°C`;
-    } catch (err) { window.weatherData = { temp: '15', city: 'Berlin', code: 0 }; document.getElementById('weather-widget').innerHTML = `<span class="anim-sun">☀️</span> Berlin, 15°C`; }
+    } catch (err) { 
+        // Fallback wenn API blockiert
+        window.weatherData = { temp: '15', city: 'Berlin', code: 0 }; 
+        document.getElementById('weather-widget').innerHTML = `<span class="anim-sun">☀️</span> Berlin, 15°C`; 
+    }
 };
 
 window.openWeatherModal = function(e) {
@@ -1746,10 +1790,10 @@ window.closeAllModals = function(e) {
         document.querySelectorAll('.modal').forEach(m => { m.classList.remove('active-modal'); });
         window.closeAllSidebars(); document.body.classList.remove('modal-open'); 
         if(typeof window.breathInt !== 'undefined') clearInterval(window.breathInt);
-        if(window.snakeInt) clearInterval(window.snakeInt);
-        if(window.pongInt) clearInterval(window.pongInt);
-        if(window.tetrisInt) clearInterval(window.tetrisInt);
-        if(window.breakoutInt) clearInterval(window.breakoutInt);
+        if(typeof window.snakeInt !== 'undefined') clearInterval(window.snakeInt);
+        if(typeof window.pongInt !== 'undefined') clearInterval(window.pongInt);
+        if(typeof window.tetrisInt !== 'undefined') clearInterval(window.tetrisInt);
+        if(typeof window.breakoutInt !== 'undefined') clearInterval(window.breakoutInt);
     }
 };
 
@@ -1805,7 +1849,7 @@ window.m_logout = function(e) {
     });
 };
 
-// PROBLEM 5 FIX: Kayıt Olurken Hatırla + Anında Admin'e Bildirim
+// PROBLEM 4 & 5 FIX: Kayıt Olurken Hatırla, Anında Bildirim ve Senkronizasyon
 window.m_register = function() {
     const u = document.getElementById('m-reg-user').value.trim(); const n = document.getElementById('m-reg-name').value.trim(); const em = document.getElementById('m-reg-email').value.trim();
     const s = document.getElementById('m-reg-surname').value.trim(); const day = document.getElementById('m-reg-day').value.trim(); const month = document.getElementById('m-reg-month').value.trim();
@@ -1818,11 +1862,10 @@ window.m_register = function() {
     window.userDatabase[u] = { username: u, email: em, name: n, surname: s, day: day, month: month, year: year, pass: p, role: "user", alerts: ["Hesabınız onay bekliyor! Lütfen Admin'in onaylamasını bekleyin. / Dein Konto wartet auf Bestätigung!"], approved: false }; 
     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
     
-    if(rem) localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p}));
+    if(rem) { localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); }
     
     window.m_sendNotify(`${n} (${u}) adında yeni bir kullanıcı kayıt oldu. Onayınızı bekliyor!`, "👤");
-    if(document.getElementById('adminUsersModal') && document.getElementById('adminUsersModal').classList.contains('active-modal')) { window.openAdminUsersModal(); }
-
+    
     window.customAlert("Kayıt başarılı! Hesabınız Admin onayından sonra aktifleşecektir. (Admin onayı bekleniyor)", "✅"); 
     window.closeAllModals('force');
 };
@@ -2237,7 +2280,6 @@ window.deleteChatMsg = function(idx, e) { if(e) e.stopPropagation(); window.cust
 
 // ================= 15. OYUNLAR, TAKVİM & YENİ SORU ALGORİTMASI =================
 
-// Marşlar Buton Highlight
 window.switchAnthemLang = function(lang) {
     document.getElementById('anthem-tr-content').classList.remove('active'); document.getElementById('anthem-de-content').classList.remove('active');
     document.getElementById('btn-anthem-tr').classList.remove('active'); document.getElementById('btn-anthem-de').classList.remove('active');
@@ -2249,7 +2291,6 @@ window.toggleSidebar = function(id, e) { if(e) e.stopPropagation(); window.close
 window.openAnthemsModal = function(e) { if(e) e.stopPropagation(); window.closeAllSidebars(); document.getElementById('anthemSidebar')?.classList.add('open'); document.getElementById('sidebarOverlay')?.classList.add('show'); window.switchAnthemLang('TR'); };
 window.closeAllSidebars = function() { document.querySelectorAll('.sidebar, .sidebar-right').forEach(el => el.classList.remove('open')); document.getElementById('sidebarOverlay')?.classList.remove('show'); };
 
-// Takvim & Notlar
 window.calQuotes = ["Bugün harika bir gün olacak! / Heute wird ein toller Tag!", "Gülümse, hayat güzel. / Lächle, das Leben ist schön.", "Her yeni gün yeni bir umut. / Jeder neue Tag ist neue Hoffnung.", "Başarmak için başla. / Fang an, um erfolgreich zu sein.", "Kendine inan! / Glaube an dich selbst!", "Sevgiyle yaşa. / Lebe mit Liebe.", "Küçük şeyler büyük fark yaratır. / Kleine Dinge machen große Unterschiede.", "Güneş her gün yenidir. / Die Sonne ist jeden Tag neu.", "Anı yaşa! / Lebe im Moment!", "Hayallerinin peşinden git. / Folge deinen Träumen."];
 window.holidays = { "01-01": { title: "Yılbaşı / Neujahr", desc: "Yeni bir yıl, yeni umutlar.", icon: "🎆" }, "14-02": { title: "Sevgililer Günü / Valentinstag", desc: "Sevgi, paylaştıkça çoğalır.", icon: "💖" }, "08-03": { title: "Kadınlar Günü / Frauentag", desc: "Kadınlar, toplumun mimarlarıdır.", icon: "👩" }, "23-04": { title: "Çocuk Bayramı", desc: "Egemenlik kayıtsız şartsız milletindir.", icon: "🇹🇷" }, "01-05": { title: "Emek Günü / Tag der Arbeit", desc: "Tüm emekçilerin bayramı kutlu olsun.", icon: "🛠️" }, "19-05": { title: "Gençlik Bayramı", desc: "Gençlik, milletin geleceğidir.", icon: "🇹🇷" }, "30-08": { title: "Zafer Bayramı", desc: "Büyük taarruzun şanlı zaferi.", icon: "🇹🇷" }, "03-10": { title: "Alman Birlik Günü", desc: "Doğu ve Batı Almanya'nın birleşmesi.", icon: "🇩🇪" }, "29-10": { title: "Cumhuriyet Bayramı", desc: "Yaşasın Cumhuriyet!", icon: "🇹🇷" }, "31-10": { title: "Cadılar Bayramı", desc: "Halloween.", icon: "🎃" }, "25-12": { title: "Noel / Weihnachten", desc: "Mutlu Noeller!", icon: "🎄" } };
 window.currentMonth = new Date().getMonth(); window.currentYear = new Date().getFullYear(); window.monthsTR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
@@ -2281,7 +2322,7 @@ window.selectDate = function(y, m, d) {
 window.saveCalNote = function() { if(!window.currentUser || !window.currentSelectedDate) return; const val = document.getElementById('cal-note-input').value.trim(); const uName = window.currentUser.username; window.calNotesDB[`${uName}_${window.currentSelectedDate}`] = val; localStorage.setItem('misaliCalNotes', JSON.stringify(window.calNotesDB)); window.showToast('Not Kaydedildi / Notiz gespeichert'); };
 window.openEventsModal = function(e) { if(e) e.stopPropagation(); window.currentMonth = new Date().getMonth(); window.currentYear = new Date().getFullYear(); window.renderCalendar(window.currentMonth, window.currentYear); window.selectDate(window.currentYear, window.currentMonth, new Date().getDate()); window.openFastModal('eventsModal'); };
 
-// Eski Küçük Oyunlar
+// Eski Oyunlar
 window.openFalModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('falModal'); document.getElementById('fal-cup')?.classList.remove('spilled'); document.getElementById('fal-result').style.display = 'none'; };
 window.crackFal = function() { const cup = document.getElementById('fal-cup'); if(cup.classList.contains('spilled')) return; cup.classList.add('spilled'); const forts = [{ tr: "Yakında kalbini ısıtacak bir haber alacaksın.", de: "Bald erhältst du eine Nachricht, die dein Herz erwärmt." }, { tr: "Bugün sabırlı ol, beklediğin şey kapıda.", de: "Sei heute geduldig, das, worauf du wartest, steht vor der Tür." }, { tr: "Geçmişten gelen bir dost yüzünü güldürecek.", de: "Ein Freund aus der Vergangenheit bringt dich zum Lächeln." }]; setTimeout(() => { const r = forts[Math.floor(Math.random() * forts.length)]; document.getElementById('fal-text-tr').innerText = r.tr; document.getElementById('fal-text-de').innerText = r.de; document.getElementById('fal-result').style.display = 'block'; }, 800); };
 window.openMemoryModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('memoryModal'); window.initMemoryGame(); };
@@ -2303,7 +2344,6 @@ window.openCookieModal = (e) => { if(e) e.stopPropagation(); window.openFastModa
 window.openHangmanModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('hangmanModal'); window.initHangman(); }; window.wordsTR = ["ŞİİR", "SANAT", "İLHAM", "VİCDAN", "VEFA", "UMUT", "ADALET", "HUZUR", "SEVGİ", "SADAKAT"]; window.wordsDE = ["GEDICHT", "KUNST", "GEFUEHL", "HERZ", "FRIEDEN", "TREUE", "HOFFNUNG", "LIEBE", "FREUNDSCHAFT", "GEDULD"]; window.hangmanLang = "TR"; window.chosenWord = ""; window.guessedLetters = []; window.lives = 6; window.setHangmanLang = (lang) => { window.hangmanLang = lang; document.getElementById('btn-tr').style.background = lang === "TR" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-tr').style.color = lang === "TR" ? "black" : "white"; document.getElementById('btn-de').style.background = lang === "DE" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-de').style.color = lang === "DE" ? "black" : "white"; window.initHangman(); }; window.initHangman = () => { window.lives = 6; window.guessedLetters = []; document.getElementById('hangman-msg').innerText = "Bir harf seç..."; document.getElementById('hangman-msg').style.color = "#cbd5e1"; document.getElementById('hangman-reset').style.display = "none"; window.updateLivesDisplay(); const list = window.hangmanLang === "TR" ? window.wordsTR : window.wordsDE; window.chosenWord = list[Math.floor(Math.random() * list.length)]; window.renderHangmanWord(); window.generateKeyboard(); }; window.updateLivesDisplay = () => { let hearts = ""; for(let i=0; i<6; i++) hearts += i < window.lives ? "❤️" : "🖤"; document.getElementById('hangman-lives').innerHTML = hearts; }; window.renderHangmanWord = () => { let display = ""; for(let char of window.chosenWord) display += window.guessedLetters.includes(char) ? char + " " : "_ "; document.getElementById('hangman-word').innerText = display.trim(); }; window.generateKeyboard = () => { const kb = document.getElementById('hangman-keyboard'); kb.innerHTML = ""; let keys = window.hangmanLang === "TR" ? "A B C Ç D E F G Ğ H I İ J K L M N O Ö P R S Ş T U Ü V Y Z".split(" ") : "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z Ä Ö Ü ß".split(" "); keys.forEach(key => { const btn = document.createElement("button"); btn.style.padding = "5px 10px"; btn.style.margin = "2px"; btn.style.border = "none"; btn.style.borderRadius = "5px"; btn.style.cursor = "pointer"; btn.className = "key-btn"; btn.innerText = key; btn.onclick = () => window.handleGuess(key, btn); kb.appendChild(btn); }); }; window.handleGuess = (letter, btnNode) => { btnNode.disabled = true; window.guessedLetters.push(letter); if(window.chosenWord.includes(letter)) { btnNode.style.background = "rgba(34, 197, 94, 0.8)"; window.renderHangmanWord(); window.checkHangmanWin(); } else { btnNode.style.background = "rgba(239, 68, 68, 0.8)"; window.lives--; window.updateLivesDisplay(); window.checkHangmanLoss(); } }; window.checkHangmanWin = () => { if(document.getElementById('hangman-word').innerText.replace(/ /g, "") === window.chosenWord) { document.getElementById('hangman-msg').innerText = "Tebrikler! 🎉"; document.getElementById('hangman-msg').style.color = "lime"; window.endHangman(); } }; window.checkHangmanLoss = () => { if(window.lives <= 0) { document.getElementById('hangman-word').innerText = window.chosenWord.split("").join(" "); document.getElementById('hangman-msg').innerText = "Bilemediniz! 😢"; document.getElementById('hangman-msg').style.color = "red"; window.endHangman(); } }; window.endHangman = () => { document.querySelectorAll('.key-btn').forEach(b => b.disabled = true); document.getElementById('hangman-reset').style.display = "block"; };
 window.anagrams = [ { word: "ŞİİR", scrambled: "İRŞİ" }, { word: "SANAT", scrambled: "TNASA" }, { word: "AŞK", scrambled: "ŞAK" }, { word: "UMUT", scrambled: "TUMU" }, { word: "VEFA", scrambled: "AFEV" }, { word: "HUZUR", scrambled: "RUZUH" }, { word: "SEVGİ", scrambled: "GİSEV" }, { word: "İNSAN", scrambled: "NİSNA" }, { word: "ZAMAN", scrambled: "MAZAN" }, { word: "SABIR", scrambled: "RBASI" }, { word: "İKLİM", scrambled: "MİLİK" }, { word: "HAYAL", scrambled: "YALAH" } ]; window.currAnagram = {}; window.openAnagramModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('anagramModal'); window.currAnagram = window.anagrams[Math.floor(Math.random() * window.anagrams.length)]; document.getElementById('anagram-word').innerText = window.currAnagram.scrambled; document.getElementById('anagram-input').value = ""; document.getElementById('anagram-msg').innerText = ""; }; window.checkAnagram = () => { const val = document.getElementById('anagram-input').value.trim().toUpperCase(); if(val === window.currAnagram.word) { document.getElementById('anagram-msg').innerText = "Doğru! 🎉"; document.getElementById('anagram-msg').style.color = "lime"; } else { document.getElementById('anagram-msg').innerText = "Yanlış! 😢"; document.getElementById('anagram-msg').style.color = "#ef4444"; } };
 
-// PROBLEM 12 FIX: 60 Soruluk Şiirsel Quiz ve Aylık 30 Soru Döngüsü
 window.allQuizQuestions = [
     { q: "Hangi kelime 'Empati' anlamına gelir?", opts: ["Hemhal", "Kibir", "Hasret", "Gurbet"], ans: 0 },
     { q: "Türkiye'nin başkenti neresidir?", opts: ["İstanbul", "Ankara", "İzmir", "Bursa"], ans: 1 },
@@ -2335,7 +2375,6 @@ window.allQuizQuestions = [
     { q: "Hangisi bir noktalama işareti değildir?", opts: ["Virgül", "Nokta", "Bağlaç", "Soru İşareti"], ans: 2 },
     { q: "Şiirde dize sonlarındaki ses benzerliğine ne denir?", opts: ["Vezin", "Uyak (Kafiye)", "Redif", "Aruz"], ans: 1 },
     { q: "'Bir fincan kahvenin kırk yıl hatırı vardır' bir nedir?", opts: ["Şiir", "Deyim", "Atasözü", "Masal"], ans: 2 },
-    // Aylık dönüşüm için 2. Grup (Toplam 60 soru)
     { q: "Kendi küllerinden yeniden doğan efsanevi kuş hangisidir?", opts: ["Anka (Zümrüdüanka)", "Kartal", "Şahin", "Baykuş"], ans: 0 },
     { q: "'Gölgesinden korkan adam' deyimi neyi ifade eder?", opts: ["Cesareti", "Aşırı Korkaklığı", "Zekayı", "Sabrı"], ans: 1 },
     { q: "Hangi kelime 'Sadakat' ile eş anlamlıdır?", opts: ["Vefa", "İhanet", "Yalan", "Korku"], ans: 0 },
@@ -2369,19 +2408,14 @@ window.allQuizQuestions = [
 ];
 window.currQ = 0; window.questions = [];
 window.openQuizModal = (e) => { 
-    if(e) e.stopPropagation(); 
-    window.openFastModal('quizModal'); 
-    window.currQ = 0; 
-    const month = new Date().getMonth(); 
-    // Ay çiftse ilk 30, tekse son 30 soruyu al (Her ay otomatik değişir)
-    window.questions = month % 2 === 0 ? window.allQuizQuestions.slice(0, 30) : window.allQuizQuestions.slice(30, 60);
+    if(e) e.stopPropagation(); window.openFastModal('quizModal'); window.currQ = 0; 
+    const month = new Date().getMonth(); window.questions = month % 2 === 0 ? window.allQuizQuestions.slice(0, 30) : window.allQuizQuestions.slice(30, 60);
     window.loadQuiz(); 
 };
 window.loadQuiz = () => { 
     document.getElementById('quiz-msg').innerText = ""; document.getElementById('quiz-next').style.display = "none"; 
     if(window.currQ >= window.questions.length) { document.getElementById('quiz-q').innerHTML = "<span style='color:var(--accent-color)'>Test Bitti! 🎉</span>"; document.getElementById('quiz-options').innerHTML = ""; return; } 
-    document.getElementById('quiz-q').innerText = window.questions[window.currQ].q; 
-    let optsHtml = ""; 
+    document.getElementById('quiz-q').innerText = window.questions[window.currQ].q; let optsHtml = ""; 
     window.questions[window.currQ].opts.forEach((o, i) => { optsHtml += `<div class="quiz-opt" onclick="window.checkQuiz(${i}, this)" style="background: rgba(212,175,55,0.1); border: 1px solid var(--accent-color); color: white; padding: 10px; margin-bottom: 10px; width: 100%; border-radius: 10px; cursor: pointer; transition: 0.3s;">${o}</div>`; }); 
     document.getElementById('quiz-options').innerHTML = optsHtml; 
 };
@@ -2393,7 +2427,7 @@ window.checkQuiz = (idx, el) => {
 };
 window.nextQuiz = () => { window.currQ++; window.loadQuiz(); };
 
-// PROBLEM 5 FIX: RPS Orta Seviye AI
+// RPS, Tic Tac Toe & Canvas Games
 window.rpsActive = true; window.rpsScoreP = 0; window.rpsScoreC = 0;
 window.openRPSModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('rpsModal'); window.rpsScoreP = 0; window.rpsScoreC = 0; document.getElementById('rps-s-p').innerText = "0"; document.getElementById('rps-s-c').innerText = "0"; document.getElementById('rps-player').innerText = "✊"; document.getElementById('rps-computer').innerText = "✊"; document.getElementById('rps-msg').innerText = "Seçimini Yap!"; document.getElementById('rps-msg').style.color = "#cbd5e1"; window.rpsActive = true; };
 window.playRPS = (playerChoice) => { 
@@ -2408,7 +2442,6 @@ window.playRPS = (playerChoice) => {
     }, 800); 
 };
 
-// PROBLEM 5 FIX: Tic Tac Toe (Orta Seviye AI Bot)
 window.openTicTacToeModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('tictactoeModal'); window.initTicTacToe(); };
 window.tttBoard = ["", "", "", "", "", "", "", "", ""]; window.tttActive = true;
 window.initTicTacToe = () => { window.tttBoard = ["", "", "", "", "", "", "", "", ""]; window.tttActive = true; document.getElementById('ttt-msg').innerHTML = `Sıra: <span style="color:var(--accent-color)">X (Sen)</span>`; document.querySelectorAll('.cell').forEach(c => { c.innerText = ""; c.className = "cell"; c.style.background = "rgba(255,255,255,0.05)"; }); };
@@ -2428,7 +2461,6 @@ window.checkWin = (player) => {
     if(!window.tttBoard.includes("")) { document.getElementById('ttt-msg').innerHTML = `<span style="color:#cbd5e1">BERABERE! 🤝</span>`; window.tttActive = false; return; }
 };
 
-// PROBLEM 4 FIX: YILAN (Snake) - Modern Görsel Güncellemesi
 window.openSnakeModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('snakeModal'); };
 window.snakeInt = null;
 window.startSnake = () => {
@@ -2449,87 +2481,46 @@ window.startSnake = () => {
     if(window.snakeInt) clearInterval(window.snakeInt);
     window.snakeInt = setInterval(() => {
         ctx.fillStyle = "#111"; ctx.fillRect(0,0,300,300);
-        
-        // Elma (Yemek) Çizimi
-        ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(food.x + box/2, food.y + box/2, box/2, 0, 2*Math.PI); ctx.fill();
-        ctx.fillStyle = "#22c55e"; ctx.beginPath(); ctx.arc(food.x + box/2, food.y + box/4, box/4, 0, Math.PI); ctx.fill(); // Yaprak
-
-        // Yılan Çizimi (Modernleştirilmiş)
+        ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(food.x + box/2, food.y + box/2, box/2, 0, 2*Math.PI); ctx.fill(); ctx.fillStyle = "#22c55e"; ctx.beginPath(); ctx.arc(food.x + box/2, food.y + box/4, box/4, 0, Math.PI); ctx.fill();
         for(let i=0; i<snake.length; i++) { 
-            ctx.fillStyle = (i===0) ? "#fbbf24" : "#d4af37"; 
-            ctx.beginPath();
-            ctx.roundRect ? ctx.roundRect(snake[i].x, snake[i].y, box, box, 4) : ctx.rect(snake[i].x, snake[i].y, box, box);
-            ctx.fill();
-            ctx.strokeStyle = "#111"; ctx.lineWidth = 1; ctx.stroke();
-            
-            // Gözler
+            ctx.fillStyle = (i===0) ? "#fbbf24" : "#d4af37"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(snake[i].x, snake[i].y, box, box, 4) : ctx.rect(snake[i].x, snake[i].y, box, box); ctx.fill(); ctx.strokeStyle = "#111"; ctx.lineWidth = 1; ctx.stroke();
             if(i === 0) {
                 ctx.fillStyle = "#000";
-                if(d==="RIGHT") { ctx.fillRect(snake[i].x + 10, snake[i].y + 3, 3, 3); ctx.fillRect(snake[i].x + 10, snake[i].y + 9, 3, 3); }
-                else if(d==="LEFT") { ctx.fillRect(snake[i].x + 2, snake[i].y + 3, 3, 3); ctx.fillRect(snake[i].x + 2, snake[i].y + 9, 3, 3); }
-                else if(d==="UP") { ctx.fillRect(snake[i].x + 3, snake[i].y + 2, 3, 3); ctx.fillRect(snake[i].x + 9, snake[i].y + 2, 3, 3); }
-                else if(d==="DOWN") { ctx.fillRect(snake[i].x + 3, snake[i].y + 10, 3, 3); ctx.fillRect(snake[i].x + 9, snake[i].y + 10, 3, 3); }
+                if(d==="RIGHT") { ctx.fillRect(snake[i].x + 10, snake[i].y + 3, 3, 3); ctx.fillRect(snake[i].x + 10, snake[i].y + 9, 3, 3); } else if(d==="LEFT") { ctx.fillRect(snake[i].x + 2, snake[i].y + 3, 3, 3); ctx.fillRect(snake[i].x + 2, snake[i].y + 9, 3, 3); } else if(d==="UP") { ctx.fillRect(snake[i].x + 3, snake[i].y + 2, 3, 3); ctx.fillRect(snake[i].x + 9, snake[i].y + 2, 3, 3); } else if(d==="DOWN") { ctx.fillRect(snake[i].x + 3, snake[i].y + 10, 3, 3); ctx.fillRect(snake[i].x + 9, snake[i].y + 10, 3, 3); }
             }
         }
-
         let snakeX = snake[0].x; let snakeY = snake[0].y;
         if(d == "LEFT") snakeX -= box; if(d == "UP") snakeY -= box; if(d == "RIGHT") snakeX += box; if(d == "DOWN") snakeY += box;
-        
         if(snakeX == food.x && snakeY == food.y) { score++; document.getElementById('snake-score').innerText = score; food = {x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box}; } else { snake.pop(); }
-        
         let newHead = {x: snakeX, y: snakeY};
-        if(snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || snake.some(s => s.x === snakeX && s.y === snakeY)) {
-            clearInterval(window.snakeInt); document.getElementById('snake-start-btn').style.display = 'block'; document.getElementById('snake-start-btn').innerText = "Tekrar Oyna"; return;
-        }
+        if(snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || snake.some(s => s.x === snakeX && s.y === snakeY)) { clearInterval(window.snakeInt); document.getElementById('snake-start-btn').style.display = 'block'; document.getElementById('snake-start-btn').innerText = "Tekrar Oyna"; return; }
         snake.unshift(newHead);
     }, 100);
 };
 
-// 2. PONG (Orta Seviye AI Bot)
 window.openPongModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('pongModal'); };
 window.pongInt = null;
 window.startPong = () => {
     document.getElementById('pong-start-btn').style.display = 'none';
     const cvs = document.getElementById('pong-game'); const ctx = cvs.getContext('2d');
-    const user = { x: 110, y: 380, width: 80, height: 10, color: "#d4af37", score: 0 };
-    const com = { x: 110, y: 10, width: 80, height: 10, color: "red", score: 0 };
-    const ball = { x: 150, y: 200, radius: 8, speed: 4, velocityX: 3, velocityY: 3, color: "WHITE" };
+    const user = { x: 110, y: 380, width: 80, height: 10, color: "#d4af37", score: 0 }; const com = { x: 110, y: 10, width: 80, height: 10, color: "red", score: 0 }; const ball = { x: 150, y: 200, radius: 8, speed: 4, velocityX: 3, velocityY: 3, color: "WHITE" };
     document.getElementById('pong-score-p').innerText = "0"; document.getElementById('pong-score-c').innerText = "0";
-    
     cvs.addEventListener("touchmove", e => { let rect = cvs.getBoundingClientRect(); user.x = e.touches[0].clientX - rect.left - user.width/2; e.preventDefault(); }, {passive:false});
     cvs.addEventListener("mousemove", e => { let rect = cvs.getBoundingClientRect(); user.x = e.clientX - rect.left - user.width/2; });
-
     if(window.pongInt) clearInterval(window.pongInt);
     window.pongInt = setInterval(() => {
         user.x = Math.max(0, Math.min(300 - user.width, user.x));
-        ctx.fillStyle = "#111"; ctx.fillRect(0,0,300,400);
-        ctx.fillStyle = user.color; ctx.fillRect(user.x, user.y, user.width, user.height);
-        ctx.fillStyle = com.color; ctx.fillRect(com.x, com.y, com.width, com.height);
+        ctx.fillStyle = "#111"; ctx.fillRect(0,0,300,400); ctx.fillStyle = user.color; ctx.fillRect(user.x, user.y, user.width, user.height); ctx.fillStyle = com.color; ctx.fillRect(com.x, com.y, com.width, com.height);
         ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fillStyle = ball.color; ctx.fill(); ctx.closePath();
-        
-        ball.x += ball.velocityX; ball.y += ball.velocityY;
-        com.x += ((ball.x - (com.x + com.width/2))) * 0.08; 
-        com.x = Math.max(0, Math.min(300 - com.width, com.x));
-
+        ball.x += ball.velocityX; ball.y += ball.velocityY; com.x += ((ball.x - (com.x + com.width/2))) * 0.08; com.x = Math.max(0, Math.min(300 - com.width, com.x));
         if(ball.x - ball.radius < 0 || ball.x + ball.radius > 300) ball.velocityX = -ball.velocityX;
         let player = (ball.y + ball.radius > 200) ? user : com;
-        if(ball.x > player.x && ball.x < player.x + player.width && ball.y + (ball.radius * Math.sign(ball.velocityY)) > player.y && ball.y - (ball.radius * Math.sign(ball.velocityY)) < player.y + player.height) {
-            ball.velocityY = -ball.velocityY; ball.speed += 0.2;
-            let dir = (ball.x - (player.x + player.width/2)) / (player.width/2); ball.velocityX = dir * ball.speed;
-        }
-
-        if(ball.y - ball.radius < 0) { user.score++; document.getElementById('pong-score-p').innerText = user.score; ball.x=150; ball.y=200; ball.speed=4; ball.velocityX=3; ball.velocityY=3; }
-        else if(ball.y + ball.radius > 400) { com.score++; document.getElementById('pong-score-c').innerText = com.score; ball.x=150; ball.y=200; ball.speed=4; ball.velocityX=3; ball.velocityY=-3; }
-        
-        if(user.score >= 5 || com.score >= 5) {
-            clearInterval(window.pongInt); 
-            ctx.fillStyle = "white"; ctx.font = "20px Poppins"; ctx.fillText(user.score>=5 ? "Kazandın!" : "Kaybettin!", 100, 200);
-            document.getElementById('pong-start-btn').style.display = 'block'; document.getElementById('pong-start-btn').innerText = "Tekrar";
-        }
+        if(ball.x > player.x && ball.x < player.x + player.width && ball.y + (ball.radius * Math.sign(ball.velocityY)) > player.y && ball.y - (ball.radius * Math.sign(ball.velocityY)) < player.y + player.height) { ball.velocityY = -ball.velocityY; ball.speed += 0.2; let dir = (ball.x - (player.x + player.width/2)) / (player.width/2); ball.velocityX = dir * ball.speed; }
+        if(ball.y - ball.radius < 0) { user.score++; document.getElementById('pong-score-p').innerText = user.score; ball.x=150; ball.y=200; ball.speed=4; ball.velocityX=3; ball.velocityY=3; } else if(ball.y + ball.radius > 400) { com.score++; document.getElementById('pong-score-c').innerText = com.score; ball.x=150; ball.y=200; ball.speed=4; ball.velocityX=3; ball.velocityY=-3; }
+        if(user.score >= 5 || com.score >= 5) { clearInterval(window.pongInt); ctx.fillStyle = "white"; ctx.font = "20px Poppins"; ctx.fillText(user.score>=5 ? "Kazandın!" : "Kaybettin!", 100, 200); document.getElementById('pong-start-btn').style.display = 'block'; document.getElementById('pong-start-btn').innerText = "Tekrar"; }
     }, 1000/50);
 };
 
-// 3. TETRIS
 window.openTetrisModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('tetrisModal'); };
 window.tetrisInt = null; window.tBoard = []; window.tPiece = null;
 const T_ROWS = 20, T_COLS = 12, SQ = 20;
@@ -2538,51 +2529,20 @@ window.startTetris = () => {
     const cvs = document.getElementById('tetris-game'); const ctx = cvs.getContext('2d');
     let score = 0; document.getElementById('tetris-score').innerText = score;
     window.tBoard = Array.from({length: T_ROWS}, () => Array(T_COLS).fill("black"));
-    
-    const pieces = [[[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]], [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]]];
-    const colors = ["cyan", "yellow", "purple", "blue", "orange", "green", "red"];
-    
+    const pieces = [[[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]], [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]]]; const colors = ["cyan", "yellow", "purple", "blue", "orange", "green", "red"];
     function drawSquare(x, y, color) { ctx.fillStyle = color; ctx.fillRect(x*SQ, y*SQ, SQ, SQ); ctx.strokeStyle = "#333"; ctx.strokeRect(x*SQ, y*SQ, SQ, SQ); }
     function drawBoard() { for(let r=0; r<T_ROWS; r++) for(let c=0; c<T_COLS; c++) drawSquare(c, r, window.tBoard[r][c]); }
     function randomPiece() { let r = Math.floor(Math.random() * pieces.length); return { shape: pieces[r], color: colors[r], x: 4, y: 0 }; }
     window.tPiece = randomPiece();
-
     window.tetrisMove = (dir) => { window.tPiece.x += dir; if(collision()) window.tPiece.x -= dir; drawAll(); };
     window.tetrisRotate = () => { let temp = window.tPiece.shape; window.tPiece.shape = window.tPiece.shape[0].map((_, i) => window.tPiece.shape.map(row => row[i]).reverse()); if(collision()) window.tPiece.shape = temp; drawAll(); };
-
-    function collision() {
-        for(let r=0; r<window.tPiece.shape.length; r++) {
-            for(let c=0; c<window.tPiece.shape[r].length; c++) {
-                if(!window.tPiece.shape[r][c]) continue;
-                let newX = window.tPiece.x + c; let newY = window.tPiece.y + r;
-                if(newX < 0 || newX >= T_COLS || newY >= T_ROWS || (newY >= 0 && window.tBoard[newY][newX] !== "black")) return true;
-            }
-        } return false;
-    }
-
-    function lock() {
-        for(let r=0; r<window.tPiece.shape.length; r++) {
-            for(let c=0; c<window.tPiece.shape[r].length; c++) {
-                if(!window.tPiece.shape[r][c]) continue;
-                if(window.tPiece.y + r < 0) { clearInterval(window.tetrisInt); document.getElementById('tetris-start-btn').style.display='block'; return; }
-                window.tBoard[window.tPiece.y + r][window.tPiece.x + c] = window.tPiece.color;
-            }
-        }
-        for(let r=0; r<T_ROWS; r++) {
-            let isFull = true; for(let c=0; c<T_COLS; c++) { isFull = isFull && window.tBoard[r][c] !== "black"; }
-            if(isFull) { window.tBoard.splice(r, 1); window.tBoard.unshift(Array(T_COLS).fill("black")); score+=10; document.getElementById('tetris-score').innerText = score; }
-        }
-        window.tPiece = randomPiece();
-    }
-
+    function collision() { for(let r=0; r<window.tPiece.shape.length; r++) { for(let c=0; c<window.tPiece.shape[r].length; c++) { if(!window.tPiece.shape[r][c]) continue; let newX = window.tPiece.x + c; let newY = window.tPiece.y + r; if(newX < 0 || newX >= T_COLS || newY >= T_ROWS || (newY >= 0 && window.tBoard[newY][newX] !== "black")) return true; } } return false; }
+    function lock() { for(let r=0; r<window.tPiece.shape.length; r++) { for(let c=0; c<window.tPiece.shape[r].length; c++) { if(!window.tPiece.shape[r][c]) continue; if(window.tPiece.y + r < 0) { clearInterval(window.tetrisInt); document.getElementById('tetris-start-btn').style.display='block'; return; } window.tBoard[window.tPiece.y + r][window.tPiece.x + c] = window.tPiece.color; } } for(let r=0; r<T_ROWS; r++) { let isFull = true; for(let c=0; c<T_COLS; c++) { isFull = isFull && window.tBoard[r][c] !== "black"; } if(isFull) { window.tBoard.splice(r, 1); window.tBoard.unshift(Array(T_COLS).fill("black")); score+=10; document.getElementById('tetris-score').innerText = score; } } window.tPiece = randomPiece(); }
     function drop() { window.tPiece.y++; if(collision()) { window.tPiece.y--; lock(); } drawAll(); }
     function drawAll() { drawBoard(); for(let r=0; r<window.tPiece.shape.length; r++) { for(let c=0; c<window.tPiece.shape[r].length; c++) { if(window.tPiece.shape[r][c]) drawSquare(window.tPiece.x + c, window.tPiece.y + r, window.tPiece.color); } } }
-
-    if(window.tetrisInt) clearInterval(window.tetrisInt);
-    window.tetrisInt = setInterval(drop, 500);
+    if(window.tetrisInt) clearInterval(window.tetrisInt); window.tetrisInt = setInterval(drop, 500);
 };
 
-// 4. BREAKOUT (Tuğla Kırma)
 window.openBreakoutModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('breakoutModal'); };
 window.breakoutInt = null;
 window.startBreakout = () => {
@@ -2598,29 +2558,12 @@ window.startBreakout = () => {
 
     if(window.breakoutInt) clearInterval(window.breakoutInt);
     window.breakoutInt = setInterval(() => {
-        ctx.fillStyle = "#111"; ctx.fillRect(0,0,300,400);
-        paddle.x = Math.max(0, Math.min(300 - paddle.width, paddle.x));
-        ctx.fillStyle = "#d4af37"; ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill(); ctx.closePath();
-        
-        for(let c=0; c<bCol; c++) {
-            for(let r=0; r<bRow; r++) {
-                let b = bricks[c][r];
-                if(b.status === 1) {
-                    let bX = (c*(bW+bPad))+bOffLeft; let bY = (r*(bH+bPad))+bOffTop; b.x = bX; b.y = bY;
-                    ctx.fillStyle = "red"; ctx.fillRect(bX, bY, bW, bH);
-                    if(ball.x > bX && ball.x < bX+bW && ball.y > bY && ball.y < bY+bH) { ball.dy = -ball.dy; b.status = 0; score++; document.getElementById('breakout-score').innerText = score; }
-                }
-            }
-        }
-        
+        ctx.fillStyle = "#111"; ctx.fillRect(0,0,300,400); paddle.x = Math.max(0, Math.min(300 - paddle.width, paddle.x)); ctx.fillStyle = "#d4af37"; ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height); ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill(); ctx.closePath();
+        for(let c=0; c<bCol; c++) { for(let r=0; r<bRow; r++) { let b = bricks[c][r]; if(b.status === 1) { let bX = (c*(bW+bPad))+bOffLeft; let bY = (r*(bH+bPad))+bOffTop; b.x = bX; b.y = bY; ctx.fillStyle = "red"; ctx.fillRect(bX, bY, bW, bH); if(ball.x > bX && ball.x < bX+bW && ball.y > bY && ball.y < bY+bH) { ball.dy = -ball.dy; b.status = 0; score++; document.getElementById('breakout-score').innerText = score; } } } }
         ball.x += ball.dx; ball.y += ball.dy;
         if(ball.x + ball.dx > 300-ball.r || ball.x + ball.dx < ball.r) ball.dx = -ball.dx;
         if(ball.y + ball.dy < ball.r) ball.dy = -ball.dy;
-        else if(ball.y + ball.dy > 400-ball.r) {
-            if(ball.x > paddle.x && ball.x < paddle.x + paddle.width) { ball.dy = -ball.dy; ball.dx = 4 * ((ball.x-(paddle.x+paddle.width/2))/paddle.width); }
-            else { clearInterval(window.breakoutInt); document.getElementById('breakout-start-btn').style.display='block'; return; }
-        }
+        else if(ball.y + ball.dy > 400-ball.r) { if(ball.x > paddle.x && ball.x < paddle.x + paddle.width) { ball.dy = -ball.dy; ball.dx = 4 * ((ball.x-(paddle.x+paddle.width/2))/paddle.width); } else { clearInterval(window.breakoutInt); document.getElementById('breakout-start-btn').style.display='block'; return; } }
         if(score === bRow*bCol) { clearInterval(window.breakoutInt); document.getElementById('breakout-start-btn').style.display='block'; }
     }, 1000/60);
 };
