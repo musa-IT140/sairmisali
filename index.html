@@ -26,7 +26,7 @@
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse at center, #1b2735 0%, #050608 100%); color: var(--text-color); line-height: 1.6; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; position: relative; -webkit-overflow-scrolling: touch; top: 0 !important; }
         body.modal-open { overflow: hidden; touch-action: none; }
         
-        /* Google Translate ausblenden */
+        /* Google Translate Banner Gizleme */
         .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
         
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -112,13 +112,13 @@
         .weather-widget { font-family: 'Space Mono', monospace; font-size: clamp(0.7rem, 1vw, 0.8rem); color: #cbd5e1; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.2); cursor: pointer; transition: 0.3s;}
         .weather-widget:hover { background: rgba(212,175,55,0.2); color: white; transform: scale(1.05); }
         
-        /* DİL MENÜSÜ 2x4 GRID */
-        .lang-dropdown { position: relative; display: inline-block; }
+        /* PROBLEM 2 FIX: DİL MENÜSÜ 2x4 GRID (Ekrana Taşma Düzeltildi) */
+        .lang-dropdown { position: relative; display: inline-block; z-index: 9999; }
         .lang-btn-main { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: 0.3s;}
         .lang-dropdown::after { content: ''; position: absolute; top: 100%; left: -10px; right: -10px; height: 20px; } 
-        .lang-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 10px; gap: 8px; width: max-content; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 1001; grid-template-columns: 1fr 1fr;}
-        .lang-dropdown:hover .lang-menu { display: grid !important; }
-        .lang-item { display: flex; align-items: center; gap: 6px; padding: 8px 15px; cursor: pointer; border-radius: 8px; background: rgba(255,255,255,0.05); transition: 0.2s;}
+        .lang-menu { display: none; position: absolute; top: calc(100% + 5px); right: -5px; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 10px; gap: 8px; width: 140px; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 10005; grid-template-columns: 1fr 1fr; }
+        .lang-dropdown:hover .lang-menu, .lang-dropdown:focus-within .lang-menu { display: grid !important; }
+        .lang-item { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 5px; cursor: pointer; border-radius: 8px; background: rgba(255,255,255,0.05); transition: 0.2s; position: relative; z-index: 10006; pointer-events: auto; }
         .lang-item:hover { background: rgba(212,175,55,0.3); }
         .lang-item span.text { font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #cbd5e1; font-weight: 600; pointer-events: none;}
         .lang-item span.emoji { pointer-events: none; }
@@ -374,11 +374,11 @@
     </div>
 
     <div class="floating-bg-icons">
-        <i class="fas fa-feather-alt bg-icon" style="left: 15%; animation-duration: 25s;"></i>
-        <i class="fas fa-book-open bg-icon" style="left: 35%; animation-duration: 22s;"></i>
-        <i class="fas fa-paint-brush bg-icon" style="left: 55%; animation-duration: 28s;"></i>
-        <i class="fas fa-scroll bg-icon" style="left: 75%; animation-duration: 24s;"></i>
-        <i class="fas fa-pen-nib bg-icon" style="left: 90%; animation-duration: 26s;"></i>
+        <i class="fas fa-feather-alt bg-icon" style="left: 15%; animation-duration: 25s; animation-delay: 0s;"></i>
+        <i class="fas fa-book-open bg-icon" style="left: 35%; animation-duration: 22s; animation-delay: 5s;"></i>
+        <i class="fas fa-paint-brush bg-icon" style="left: 55%; animation-duration: 28s; animation-delay: 2s;"></i>
+        <i class="fas fa-scroll bg-icon" style="left: 75%; animation-duration: 24s; animation-delay: 8s;"></i>
+        <i class="fas fa-pen-nib bg-icon" style="left: 90%; animation-duration: 26s; animation-delay: 4s;"></i>
     </div>
     <div class="construction-watermark">Yapım Aşamasında<br><span style="font-size: 0.6em; font-family: 'Poppins', sans-serif;">(Im Aufbau)</span></div>
 
@@ -438,7 +438,7 @@
                 <span class="anim-sun">☀️</span> Yükleniyor...
             </div>
 
-            <div class="icon-action-btn admin-only" id="user-notify-btn" onclick="window.openUserNotifications(event)" title="Bildirimler">
+            <div class="icon-action-btn admin-only" id="user-notify-btn" onclick="window.openUserNotifications(event)" title="Bildirimler / Nachrichten">
                 <i class="fas fa-bell"></i>
                 <div class="badge-count badge-red hidden" id="user-notify-badge">0</div>
             </div>
@@ -511,7 +511,10 @@
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="window.closeAllSidebars()"></div>
     
     <div id="fihristSidebar" class="sidebar" onclick="event.stopPropagation()">
-        <div class="sidebar-header"><h2>📜 Eserlerim</h2><span class="close-btn" onclick="window.closeAllSidebars()">&times;</span></div>
+        <div class="sidebar-header">
+            <h2>📜 Eserlerim</h2>
+            <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
+        </div>
         <div class="sidebar-content">
             <div class="sidebar-section"><h3>Şiirlerim</h3><ul id="fihrist-siirler-list"></ul></div>
             <div class="sidebar-section"><h3>Sözlerim</h3><ul id="fihrist-sozler-list"></ul></div>
@@ -520,7 +523,10 @@
     </div>
 
     <div id="kissaFikraSidebar" class="sidebar" onclick="event.stopPropagation()">
-        <div class="sidebar-header"><h2>📚 Kıssa / Fıkra</h2><span class="close-btn" onclick="window.closeAllSidebars()">&times;</span></div>
+        <div class="sidebar-header">
+            <h2>📚 Kıssa / Fıkra</h2>
+            <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
+        </div>
         <div class="sidebar-content">
             <div class="sidebar-section"><h3>Kıssalar</h3><ul id="fihrist-hikayeler-list"></ul></div>
             <div class="sidebar-section"><h3>Fıkralar</h3><ul id="fihrist-fikralar-list"></ul></div>
@@ -528,19 +534,32 @@
     </div>
 
     <div id="userWorksSidebar" class="sidebar" onclick="event.stopPropagation()">
-        <div class="sidebar-header"><h2>✍️ Kullanıcı Eserleri</h2><span class="close-btn" onclick="window.closeAllSidebars()">&times;</span></div>
-        <div class="sidebar-content"><div class="sidebar-section"><h3>Bizim Kalemimizden</h3><ul id="fihrist-user-works-list"></ul></div></div>
+        <div class="sidebar-header">
+            <h2>✍️ Kullanıcı Eserleri</h2>
+            <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h3 style="font-size: 1.2rem;">Bizim Kalemimizden</h3>
+                <ul id="fihrist-user-works-list"></ul>
+            </div>
+        </div>
     </div>
 
     <div id="anthemSidebar" class="sidebar wide-sidebar" onclick="event.stopPropagation()">
-        <div class="sidebar-header"><h2>🎵 Marşlar / Hymnen</h2><span class="close-btn" onclick="window.closeAllSidebars()">&times;</span></div>
+        <div class="sidebar-header">
+            <h2>🎵 Marşlar / Hymnen</h2>
+            <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
+        </div>
         <div class="sidebar-content" style="padding:15px;">
             <div class="lang-toggle" style="margin-bottom:20px; display:flex; justify-content:center; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px solid var(--accent-color);">
-                <button id="btn-anthem-tr" class="active" onclick="window.switchAnthemLang('TR')" style="border-radius:15px 0 0 15px; padding: 10px; flex:1; cursor:pointer;">🇹🇷 İstiklal Marşı</button>
-                <button id="btn-anthem-de" onclick="window.switchAnthemLang('DE')" style="border-radius:0 15px 15px 0; padding: 10px; flex:1; cursor:pointer;">🇩🇪 Deutschlandlied</button>
+                <button id="btn-anthem-tr" class="active" onclick="window.switchAnthemLang('TR')" style="border-radius:15px 0 0 15px; padding: 10px 15px; flex:1; font-family:'Poppins', sans-serif; cursor:pointer; font-size:1.1rem; outline:none;">🇹🇷 İstiklal Marşı</button>
+                <button id="btn-anthem-de" onclick="window.switchAnthemLang('DE')" style="border-radius:0 15px 15px 0; padding: 10px 15px; flex:1; font-family:'Poppins', sans-serif; cursor:pointer; font-size:1.1rem; outline:none;">🇩🇪 Deutschlandlied</button>
             </div>
+            
             <div id="anthem-tr-content" class="anthem-section active">
-                <h3 style="color:var(--accent-color);">İstiklal Marşı</h3><p style="color:#a0aec0; font-size:0.85rem; margin-bottom:10px;">Mehmet Akif Ersoy</p>
+                <h3 style="color:var(--accent-color); font-family:'Playfair Display',serif; font-size: 1.8rem;">İstiklal Marşı</h3>
+                <p style="color:#a0aec0; font-size:1rem; margin-bottom:15px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 10px;">Mehmet Akif Ersoy</p>
                 <div class="anthem-lyrics">Korkma, sönmez bu şafaklarda yüzen al sancak;
 Sönmeden yurdumun üstünde tüten en son ocak.
 O benim milletimin yıldızıdır, parlayacak;
@@ -566,8 +585,10 @@ Siper et gövdeni, dursun bu hayâsızca akın.
 Doğacaktır sana va'dettiği günler Hakk'ın...
 Kim bilir, belki yarın, belki yarından da yakın.</div>
             </div>
+            
             <div id="anthem-de-content" class="anthem-section">
-                <h3 style="color:var(--accent-color);">Das Lied der Deutschen</h3><p style="color:#a0aec0; font-size:0.85rem; margin-bottom:10px;">August Heinrich Hoffmann von Fallersleben</p>
+                <h3 style="color:var(--accent-color); font-family:'Playfair Display',serif; font-size: 1.8rem;">Das Lied der Deutschen</h3>
+                <p style="color:#a0aec0; font-size:1rem; margin-bottom:15px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 10px;">August Heinrich Hoffmann von Fallersleben</p>
                 <div class="anthem-lyrics">Deutschland, Deutschland über alles,
 Über alles in der Welt,
 Wenn es stets zu Schutz und Trutze
@@ -599,7 +620,10 @@ Blühe, deutsches Vaterland!</div>
     </div>
 
     <div id="onlineUserSidebar" class="sidebar" onclick="event.stopPropagation()">
-        <div class="sidebar-header"><h2>👥 Online</h2><span class="close-btn" onclick="window.closeAllSidebars()">&times;</span></div>
+        <div class="sidebar-header">
+            <h2>👥 Online</h2>
+            <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
+        </div>
         <div class="sidebar-content">
             <h3 style="font-family:'Poppins', sans-serif; font-size:1.1rem; color:var(--accent-color); margin-bottom:10px;">Aktif & Çıkış Yapanlar</h3>
             <p style="font-size: 0.8rem; color: #a0aec0; margin-bottom: 15px;">Not: Yöneticiler bu listede gizlidir.</p>
@@ -608,34 +632,65 @@ Blühe, deutsches Vaterland!</div>
     </div>
 
     <div id="onlineAdminSidebar" class="sidebar-right" onclick="event.stopPropagation()">
-        <div class="sidebar-header"><h2>👥 Online (Admin)</h2><span class="close-btn" onclick="window.closeAllSidebars()">&times;</span></div>
+        <div class="sidebar-header">
+            <h2>👥 Online (Admin)</h2>
+            <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
+        </div>
         <div class="sidebar-content">
             <h3 style="font-family:'Poppins', sans-serif; font-size:1rem; color:var(--accent-color); margin-bottom:10px;">Tüm Kullanıcılar</h3>
             <div id="admin-only-online-list"></div>
-            <div id="admin-daily-logs" style="background: rgba(0,0,0,0.5); border-top: 1px solid var(--accent-color); padding: 15px; margin-top: 20px; border-radius: 10px;">
-                <h3 style="font-size:0.95rem; color:var(--accent-color);">📋 Günlük Rapor</h3>
-                <button onclick="window.clearAdminLogs()" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.75rem; outline:none; margin-bottom: 10px;"><i class="fas fa-trash"></i> Temizle</button>
-                <div id="admin-logs-content" style="font-size:0.8rem;"></div>
+            <div id="admin-daily-logs" style="background: rgba(0,0,0,0.5); border-top: 1px solid var(--accent-color); padding: 15px; margin-top: 20px; border-radius: 10px; font-size: 0.85rem;">
+                <h3 style="font-family:'Poppins', sans-serif; font-size:0.95rem; color:var(--accent-color); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>📋 Günlük Rapor</span>
+                    <button onclick="window.clearAdminLogs()" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.75rem; outline:none;"><i class="fas fa-trash"></i> Temizle</button>
+                </h3>
+                <div id="admin-logs-content"></div>
             </div>
         </div>
     </div>
 
     <main class="main-content">
+        
         <section class="page-view active-view" id="home-view">
             <div class="profile-container">
                 <img src="image_01d1a0.png" alt="Şair Misal.i" class="profile-pic" id="home-profile-pic">
                 <div class="home-speech-bubble-wrapper hidden" id="home-bubble-wrapper">
                     <div class="speech-bubble" id="home-bubble">
                         <p>"Güven sözde değil özde olacak<br>Gül toprakta değil kalpte solacak"</p>
-                        <hr style="border:0; height:1px; background:rgba(212,175,55,0.3); margin:10px 0;">
-                        <p style="font-size:0.85em; color:#a0aec0; font-family:'Poppins',sans-serif; font-style:normal;">"Vertrauen sollte nicht im Wort, sondern im Kern sein..."</p>
+                        <hr style="border:0; height:1px; background:rgba(212,175,55,0.3); margin:8px 0;">
+                        <p style="font-size:0.85em; color:#a0aec0; font-family:'Poppins',sans-serif; font-style:normal; font-weight:300;">"Vertrauen sollte nicht im Wort, sondern im Kern sein,<br>Die Rose sollte nicht in der Erde, sondern im Herzen welken."</p>
                     </div>
                 </div>
             </div>
             <div id="home-default-content">
                 <h1 class="hero-title">ŞAİR MİSAL.İ</h1>
                 <p class="hero-subtitle">Gönülden dile, dilden şiire.</p>
-                <p class="hero-info blink-text">Eserlerimi Görmek İçin Menüyü Kullanın</p>
+                <p class="hero-info blink-text">Eserlerimi Görmek İçin Menüyü Kullanın<br><span style="font-size: 0.8rem; font-weight: normal; color:#a0aec0;">(Benutze das Menü, um meine Werke zu sehen)</span></p>
+            </div>
+        </section>
+
+        <section class="page-view" id="hakkimda-view">
+            <h2 class="section-title">My Profil <br><span>(Über mich)</span></h2>
+            <div class="bio-wrapper">
+                <div class="bio-card">
+                    <div class="bio-left"><img src="image_01d1a0.png" alt="Şair Misal.i Profil" class="bio-pic"></div>
+                    <div class="bio-right">
+                        <h3 class="bio-name">Şair Misal.i</h3>
+                        <p class="bio-meta"><i class="fas fa-calendar-alt"></i> 3 Haziran 1980 &nbsp; | &nbsp; <i class="fas fa-map-marker-alt"></i> Berlin</p>
+                        <div style="background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent-color); padding: 15px; border-radius: 0 10px 10px 0; margin-bottom: 20px;">
+                            <div style="font-size: 1rem; color: #e2e8f0; margin-bottom: 8px; font-weight: 600; display: flex; align-items: flex-start; gap: 10px;"><i class="fas fa-briefcase" style="color: var(--accent-color); margin-top: 4px;"></i><div>Kaufmann für Bürokommunikation<small style="display: block; font-weight: 300; color: #a0aec0; font-size: 0.85rem; margin-top: 2px;">(Büro İletişim Uzmanı)</small></div></div>
+                            <div style="font-size: 1rem; color: #e2e8f0; margin-bottom: 8px; font-weight: 600; display: flex; align-items: flex-start; gap: 10px;"><i class="fas fa-laptop-code" style="color: var(--accent-color); margin-top: 4px;"></i><div>IT Systemadministrator<small style="display: block; font-weight: 300; color: #a0aec0; font-size: 0.85rem; margin-top: 2px;">(Bilişim Sistemleri Yöneticisi)</small></div></div>
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <div style="font-family: 'Great Vibes', cursive; color: var(--accent-color); font-size: 1.6rem; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">Türkçe</div>
+                            <p class="bio-text">İç dünyam her zaman kodlardan ve rakamlardan çok daha derin, çok daha hissiyatlıydı. <strong>Yüksek empatiye sahip, yaratıcı ve duygusal</strong> bir ruha sahibim. Hayattaki en büyük gayem insanlarla <strong>"hemhal olmak"</strong>; onların dertleriyle dertlenip, görünmeyen hislerine tercüman olmaktır. İşte bu yüzden; gönülden süzülenleri dile, dilden dökülenleri şiire ve sözlere dönüştürüyorum. Yazdığım her satırda kendinizden bir parça bulmanız dileğiyle...</p>
+                        </div>
+                        <div>
+                            <div style="font-family: 'Great Vibes', cursive; color: var(--accent-color); font-size: 1.6rem; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">Deutsch</div>
+                            <p class="bio-text" style="color:#a0aec0;">Meine innere Welt war stets tiefer und emotionaler als Codes und Zahlen. Ich besitze eine <strong>hohe Empathie, bin kreativ und habe eine gefühlvolle Seele</strong>. Mein größtes Lebensziel ist es, mit den Menschen <strong>"eins zu werden" (hemhal)</strong>; ihre Sorgen zu teilen und ihren unsichtbaren Gefühlen eine Stimme zu geben. Genau aus diesem Grund verwandle ich das, was aus dem Herzen fließt, in Worte und das, was über die Lippen kommt, in Gedichte und Sprüche. In der Hoffnung, dass Sie in jeder geschriebenen Zeile ein Stück von sich selbst finden...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -647,14 +702,16 @@ Blühe, deutsches Vaterland!</div>
         <section class="page-view" id="sahsiyetler-view">
             <h2 class="section-title">Önemli Şahsiyetler <br><span>(Bedeutende Persönlichkeiten)</span></h2>
             <div class="split-container">
-                <div class="split-col" id="sahsiyetler-tr-col"></div>
-                <div class="split-col" id="sahsiyetler-de-col"></div>
+                <div class="split-col" id="sahsiyetler-tr-col">
+                    </div>
+                <div class="split-col" id="sahsiyetler-de-col">
+                    </div>
             </div>
         </section>
 
         <section class="page-view" id="oyunlar-view">
             <h2 class="section-title">Eğlence Köşesi <br><span>(Spiele)</span></h2>
-            <div class="grid">
+            <div class="grid" style="max-width: 1400px;">
                 <div class="card" onclick="window.openFalModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">☕</h3><h3>Fal Bakma<br><span class="card-sub">(Kaffeesatzlesen)</span></h3></div>
                 <div class="card" onclick="window.openMemoryModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">🧠</h3><h3>Hafıza Oyunu<br><span class="card-sub">(Memory)</span></h3></div>
                 <div class="card" onclick="window.openFastClickModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">⏱️</h3><h3>Hızlı Tıklama<br><span class="card-sub">(Reaktionstest)</span></h3></div>
@@ -669,7 +726,7 @@ Blühe, deutsches Vaterland!</div>
                 <div class="card" onclick="window.openQuizModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">💡</h3><h3>Şiirsel Quiz<br><span class="card-sub">(Poetisches Quiz)</span></h3></div>
                 <div class="card" onclick="window.openRPSModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">✌️</h3><h3>Taş Kağıt Makas<br><span class="card-sub">(Schere Stein Papier)</span></h3></div>
                 <div class="card" onclick="window.openTicTacToeModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">⭕❌</h3><h3>Tic Tac Toe<br><span class="card-sub">(Yapay Zeka / KI)</span></h3></div>
-                <div class="card" onclick="window.openCoinFlipModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">🪙</h3><h3>Yazı Tura<br><span class="card-sub">(Kopf oder Zahl)</span></h3></div>
+                <div class="card" onclick="window.openCoinFlipModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">🪙</h3><h3>Yazı Tura<br><span class="card-sub">(Kopf veya Zahl)</span></h3></div>
                 <div class="card" onclick="window.openDiceModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">🎲</h3><h3>Zar At<br><span class="card-sub">(Glückswürfel)</span></h3></div>
                 
                 <div class="card" onclick="window.openSnakeModal(event)"><h3 style="font-size: 3rem; margin-bottom: 10px;">🐍</h3><h3>Yılan<br><span class="card-sub">(Snake)</span></h3></div>
@@ -703,33 +760,8 @@ Blühe, deutsches Vaterland!</div>
                 <div id="area-chat" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
                     <div class="chat-box" id="chat-box" style="flex-grow: 1; overflow-y: auto;"></div>
                     <div class="chat-input-area" style="flex-direction: row; height: 60px;">
-                        <input type="text" id="chat-input" placeholder="Bir mesaj yazın... (Schreibe etwas...)" style="flex-grow: 1;">
+                        <input type="text" id="chat-input" placeholder="Bir mesaj yazın... (Schreibe etwas...)" style="flex-grow: 1;" onkeypress="if(event.key === 'Enter') window.sendChat()">
                         <button class="submit-btn" style="width: 70px; font-size: 1.5rem; outline:none;" onclick="window.sendChat()"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="page-view" id="hakkimda-view">
-            <h2 class="section-title">My Profil <br><span>(Über mich)</span></h2>
-            <div class="bio-wrapper">
-                <div class="bio-card">
-                    <div class="bio-left"><img src="image_01d1a0.png" alt="Şair Misal.i Profil" class="bio-pic"></div>
-                    <div class="bio-right">
-                        <h3 class="bio-name">Şair Misal.i</h3>
-                        <p class="bio-meta"><i class="fas fa-calendar-alt"></i> 3 Haziran 1980 &nbsp; | &nbsp; <i class="fas fa-map-marker-alt"></i> Berlin</p>
-                        <div style="background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent-color); padding: 15px; border-radius: 0 10px 10px 0; margin-bottom: 20px;">
-                            <div style="font-size: 1rem; color: #e2e8f0; margin-bottom: 8px; font-weight: 600; display: flex; align-items: flex-start; gap: 10px;"><i class="fas fa-briefcase" style="color: var(--accent-color); margin-top: 4px;"></i><div>Kaufmann für Bürokommunikation<small style="display: block; font-weight: 300; color: #a0aec0; font-size: 0.85rem; margin-top: 2px;">(Büro İletişim Uzmanı)</small></div></div>
-                            <div style="font-size: 1rem; color: #e2e8f0; margin-bottom: 8px; font-weight: 600; display: flex; align-items: flex-start; gap: 10px;"><i class="fas fa-laptop-code" style="color: var(--accent-color); margin-top: 4px;"></i><div>IT Systemadministrator<small style="display: block; font-weight: 300; color: #a0aec0; font-size: 0.85rem; margin-top: 2px;">(Bilişim Sistemleri Yöneticisi)</small></div></div>
-                        </div>
-                        <div style="margin-bottom: 25px;">
-                            <div style="font-family: 'Great Vibes', cursive; color: var(--accent-color); font-size: 1.6rem; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">Türkçe</div>
-                            <p class="bio-text">İç dünyam her zaman kodlardan ve rakamlardan çok daha derin, çok daha hissiyatlıydı. <strong>Yüksek empatiye sahip, yaratıcı ve duygusal</strong> bir ruha sahibim. Hayattaki en büyük gayem insanlarla <strong>"hemhal olmak"</strong>; onların dertleriyle dertlenip, görünmeyen hislerine tercüman olmaktır. İşte bu yüzden; gönülden süzülenleri dile, dilden dökülenleri şiire ve sözlere dönüştürüyorum. Yazdığım her satırda kendinizden bir parça bulmanız dileğiyle...</p>
-                        </div>
-                        <div>
-                            <div style="font-family: 'Great Vibes', cursive; color: var(--accent-color); font-size: 1.6rem; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">Deutsch</div>
-                            <p class="bio-text" style="color:#a0aec0;">Meine innere Welt war stets tiefer und emotionaler als Codes und Zahlen. Ich besitze eine <strong>hohe Empathie, bin kreativ und habe eine gefühlvolle Seele</strong>. Mein größtes Lebensziel ist es, mit den Menschen <strong>"eins zu werden" (hemhal)</strong>; ihre Sorgen zu teilen und ihren unsichtbaren Gefühlen eine Stimme zu geben. Genau aus diesem Grund verwandle ich das, was aus dem Herzen fließt, in Worte und das, was über die Lippen kommt, in Gedichte und Sprüche. In der Hoffnung, dass Sie in jeder geschriebenen Zeile ein Stück von sich selbst finden...</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -754,6 +786,7 @@ Blühe, deutsches Vaterland!</div>
                 <p style="color:#a0aec0; font-size:0.95rem; font-style:italic;">Unsere Website verwendet nur einfache Daten, die für die grundlegende Funktionalität erforderlich sind, um das beste Besuchererlebnis zu bieten. Ihre persönlichen Daten werden nicht ohne Erlaubnis an Dritte weitergegeben.</p>
             </div>
         </section>
+
     </main>
 
     <footer>
@@ -1013,6 +1046,11 @@ Blühe, deutsches Vaterland!</div>
                     <input type="password" id="m-reg-pass" class="auth-input" placeholder="Şifre *" style="width: 100%; padding-right: 40px; margin-bottom: 0;">
                     <i class="fas fa-eye" onmousedown="document.getElementById('m-reg-pass').type='text'; this.style.color='#d4af37';" onmouseup="document.getElementById('m-reg-pass').type='password'; this.style.color='#cbd5e1';" onmouseleave="document.getElementById('m-reg-pass').type='password'; this.style.color='#cbd5e1';" ontouchstart="document.getElementById('m-reg-pass').type='text'; this.style.color='#d4af37';" ontouchend="document.getElementById('m-reg-pass').type='password'; this.style.color='#cbd5e1';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #cbd5e1; cursor: pointer; z-index: 10; font-size: 1.3rem; padding: 5px;"></i>
                 </div>
+                
+                <label style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; color: #cbd5e1; cursor: pointer;">
+                    <input type="checkbox" id="m-reg-rem" style="width: 17px; height: 17px; accent-color: var(--accent-color);" checked> Bilgilerimi Hatırla / Daten merken
+                </label>
+                
                 <button class="reset-btn" style="width:100%; margin-top:0;" onclick="window.m_register()">Kayıt Ol</button>
             </div>
         </div>
@@ -1379,7 +1417,7 @@ function googleTranslateElementInit() {
 <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
-// ================= 1. ZİYARETÇİ SAYACI (PROBLEM 7) =================
+// ================= 1. ZİYARETÇİ SAYACI =================
 let siteVisits = parseInt(localStorage.getItem('misaliSiteVisits') || "0");
 if(!sessionStorage.getItem('misaliVisited')) {
     siteVisits++; localStorage.setItem('misaliSiteVisits', siteVisits); sessionStorage.setItem('misaliVisited', 'true');
@@ -1524,24 +1562,23 @@ window.adminLogs = JSON.parse(localStorage.getItem('misaliAdminLogs')) || [];
 window.calNotesDB = JSON.parse(localStorage.getItem('misaliCalNotes')) || {};
 window.badWords = ["küfür", "aptal", "salak", "pislik", "lan", "siktir", "orospu"];
 
-window.isItemNew = function(timestamp) { if(!timestamp) return false; return (Date.now() - timestamp) < (7 * 24 * 60 * 60 * 1000); };
+window.isItemNew = function(timestamp) { if(!timestamp) return false; return (Date.now() - timestamp) < (7 * 24 * 60 * 60 * 1000); }; 
 
-window.zodiacs = [
-    {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]}, {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]},
-    {id:'gemini', icon:'♊', tr:'İkizler', de:'Zwillinge', start:[5,21], end:[6,21]}, {id:'cancer', icon:'♋', tr:'Yengeç', de:'Krebs', start:[6,22], end:[7,22]},
-    {id:'leo', icon:'♌', tr:'Aslan', de:'Löwe', start:[7,23], end:[8,22]}, {id:'virgo', icon:'♍', tr:'Başak', de:'Jungfrau', start:[8,23], end:[9,22]},
-    {id:'libra', icon:'♎', tr:'Terazi', de:'Waage', start:[9,23], end:[10,22]}, {id:'scorpio', icon:'♏', tr:'Akrep', de:'Skorpion', start:[10,23], end:[11,21]},
-    {id:'sagittarius', icon:'♐', tr:'Yay', de:'Schütze', start:[11,22], end:[12,21]}, {id:'capricorn', icon:'♑', tr:'Oğlak', de:'Steinbock', start:[12,22], end:[1,19]},
-    {id:'aquarius', icon:'♒', tr:'Kova', de:'Wassermann', start:[1,20], end:[2,18]}, {id:'pisces', icon:'♓', tr:'Balık', de:'Fische', start:[2,19], end:[3,20]}
-];
+// ================= 3. BİLDİRİMLER & LOGLAR & KAYIT LİSTENER =================
+// DİĞER SEKMELERDE/PENCERELERDE GÜNCELLENEN VERİYİ YAKALAMA (Echtzeit-Aktualisierung)
+window.addEventListener('storage', (e) => {
+    if (e.key === 'misaliUsersDB') {
+        window.userDatabase = JSON.parse(e.newValue);
+        if (document.getElementById('adminUsersModal') && document.getElementById('adminUsersModal').classList.contains('active-modal')) {
+            window.openAdminUsersModal();
+        }
+    }
+    if (e.key === 'misaliAdminMsgs') {
+        window.adminMessages = JSON.parse(e.newValue);
+        window.updateNotifyBadge();
+    }
+});
 
-window.getZodiacSign = function(day, month) {
-    if(!day || !month) return null; let d = parseInt(day); let m = parseInt(month);
-    for(let z of window.zodiacs) { if ((m === z.start[0] && d >= z.start[1]) || (m === z.end[0] && d <= z.end[1])) return z; }
-    return window.zodiacs[9]; 
-};
-
-// ================= 3. BİLDİRİMLER & LOGLAR =================
 window.updateNotifyBadge = function() {
     const badge = document.getElementById('user-notify-badge');
     const adminBadge = document.getElementById('admin-badge');
@@ -1634,9 +1671,7 @@ window.renderOnlineUsers = function() {
 };
 
 window.clearAdminLogs = function() {
-    window.customConfirm('Tüm logları silmek istediğinize emin misiniz?', () => {
-        window.adminLogs = []; localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.renderOnlineUsers(); window.showToast('Loglar temizlendi.');
-    });
+    window.customConfirm('Tüm logları silmek istediğinize emin misiniz?', () => { window.adminLogs = []; localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.renderOnlineUsers(); window.showToast('Loglar temizlendi.'); });
 };
 
 // ================= 4. STARTUP, WEATHER, TICKER, CLOCK =================
@@ -1711,10 +1746,10 @@ window.closeAllModals = function(e) {
         document.querySelectorAll('.modal').forEach(m => { m.classList.remove('active-modal'); });
         window.closeAllSidebars(); document.body.classList.remove('modal-open'); 
         if(typeof window.breathInt !== 'undefined') clearInterval(window.breathInt);
-        if(typeof window.snakeInt !== 'undefined') clearInterval(window.snakeInt);
-        if(typeof window.pongInt !== 'undefined') clearInterval(window.pongInt);
-        if(typeof window.tetrisInt !== 'undefined') clearInterval(window.tetrisInt);
-        if(typeof window.breakoutInt !== 'undefined') clearInterval(window.breakoutInt);
+        if(window.snakeInt) clearInterval(window.snakeInt);
+        if(window.pongInt) clearInterval(window.pongInt);
+        if(window.tetrisInt) clearInterval(window.tetrisInt);
+        if(window.breakoutInt) clearInterval(window.breakoutInt);
     }
 };
 
@@ -1770,15 +1805,26 @@ window.m_logout = function(e) {
     });
 };
 
+// PROBLEM 5 FIX: Kayıt Olurken Hatırla + Anında Admin'e Bildirim
 window.m_register = function() {
     const u = document.getElementById('m-reg-user').value.trim(); const n = document.getElementById('m-reg-name').value.trim(); const em = document.getElementById('m-reg-email').value.trim();
     const s = document.getElementById('m-reg-surname').value.trim(); const day = document.getElementById('m-reg-day').value.trim(); const month = document.getElementById('m-reg-month').value.trim();
     const year = document.getElementById('m-reg-year').value.trim(); const p = document.getElementById('m-reg-pass').value;
+    const rem = document.getElementById('m-reg-rem') ? document.getElementById('m-reg-rem').checked : false;
+
     if(!u || !n || !p || !em || !day || !month || !year) { window.customAlert("Lütfen yıldızlı (*) alanları doldurun!", "⚠️"); return; }
     if(window.userDatabase[u]) { window.customAlert("Bu kullanıcı adı alınmış.", "❌"); return; }
-    window.userDatabase[u] = { username: u, email: em, name: n, surname: s, day: day, month: month, year: year, pass: p, role: "user", alerts: [], approved: false }; 
-    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); window.m_sendNotify(`${n} adında yeni bir kullanıcı kayıt oldu. Onayınızı bekliyor!`, "🎉");
-    window.customAlert("Kayıt başarılı! Hesabınız Admin onayından sonra aktifleşecektir.", "✅"); window.closeAllModals('force');
+    
+    window.userDatabase[u] = { username: u, email: em, name: n, surname: s, day: day, month: month, year: year, pass: p, role: "user", alerts: ["Hesabınız onay bekliyor! Lütfen Admin'in onaylamasını bekleyin. / Dein Konto wartet auf Bestätigung!"], approved: false }; 
+    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
+    
+    if(rem) localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p}));
+    
+    window.m_sendNotify(`${n} (${u}) adında yeni bir kullanıcı kayıt oldu. Onayınızı bekliyor!`, "👤");
+    if(document.getElementById('adminUsersModal') && document.getElementById('adminUsersModal').classList.contains('active-modal')) { window.openAdminUsersModal(); }
+
+    window.customAlert("Kayıt başarılı! Hesabınız Admin onayından sonra aktifleşecektir. (Admin onayı bekleniyor)", "✅"); 
+    window.closeAllModals('force');
 };
 
 window.openProfileEditModal = function(e) {
@@ -1799,6 +1845,7 @@ window.saveProfile = function() {
 
 window.openAdminUsersModal = function(e) {
     if(e) e.stopPropagation(); if(!window.currentUser || window.currentUser.role !== 'admin') return;
+    window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || window.userDatabase;
     const list = document.getElementById('admin-users-list'); list.innerHTML = "";
     for(let key in window.userDatabase) {
         const u = window.userDatabase[key];
@@ -1842,7 +1889,7 @@ window.openAdminMessages = function(e) {
 window.delAdminMsg = function(idx, e) { if(e) e.stopPropagation(); window.customConfirm("Mesajı silmek istediğinize emin misiniz?", () => { window.adminMessages.splice(idx, 1); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.updateNotifyBadge(); window.openAdminMessages(); }); };
 window.delAllAdminMsgs = function(e) { if(e) e.stopPropagation(); window.customConfirm("Tüm bildirimleri silmek istediğinize emin misiniz?", () => { window.adminMessages = []; localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.updateNotifyBadge(); window.openAdminMessages(); }); };
 
-// ================= 7. ADMIN PANEL (EDIT / IN OUT) =================
+// ================= 7. ADMIN PANEL (EDIT / IN OUT) & EMOJILER =================
 window.openInOutAdminModal = function(e) { if(e) e.stopPropagation(); window.openFastModal('inOutAdminModal'); window.switchAdminTab('add'); window.renderEmojiPickers(); };
 window.switchAdminTab = function(tab) {
     document.getElementById('admin-tab-add').style.background = tab === 'add' ? 'var(--accent-color)' : 'rgba(255,255,255,0.1)'; document.getElementById('admin-tab-add').style.color = tab === 'add' ? 'black' : 'white';
@@ -1869,7 +1916,10 @@ window.toggleAdminAddFields = function() {
 };
 
 window.renderEmojiPickers = function() {
-    const commonEmojis = ["✨","🖋️","📜","❤️","🌟","📖","🕊️","🕯️","🎭","🕰️","🌹","🥀","🍃","🔥","🌈","☀️","🌙","⭐","🌍","💎","🧩","💡","🔔","⚖️","🌊","🏔️","🌲","🌳","☕","🧠","🌌","🧘","🎲","🎱","🥠","🪙","🔑","🔮","🧿","🎐","🎶","🎵","🎻","👑","💍","💎","🤍","🖤","🤎","💜","💙","💚","💛","🧡","💔","💘","💝","💞","💓","💗","💖","💕","🍂","🍁","🍄","🌾","🌵","🌺","🌻","🌼","🌷","🌱","🍀","🍎","🍏","🍒","🍓","🍅","🍷","🍸","🍹","🍺","🍻","🥂","🍼","🍵","🧊","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🎷","🎺","🎸","🎯","🎳","🎮","🎰","🎉","🎊","🎈","🎁","🪄","🏆","🏅","🥇","⚽","🏀","🏈","⚾","🎾","🏐","🎱","🏓","🏸","🎣","🥊","🥋","🛹","⛷️","🏋️","🤸","🤺","🏌️","🏇","🏄","🏊","🚣","🧗","🚴"];
+    const commonEmojis = [
+        "✨","🖋️","📜","❤️","🌟","📖","🕊️","🕯️","🎭","🕰️","🌹","🥀","🍃","🔥","🌈","☀️","🌙","⭐","🌍","💎","🧩","💡","🔔","⚖️","🌊","🏔️","🌲","🌳","☕","🧠","🌌","🧘","🎲","🎱","🥠","🪙","🔑","🔮","🧿","🎐","🎶","🎵","🎻","👑","💍","💎","🤍","🖤","🤎","💜","💙","💚","💛","🧡","💔","💘","💝","💞","💓","💗","💖","💕","🍂","🍁","🍄","🌾","🌵","🌺","🌻","🌼","🌷","🌱","🍀","🍎","🍏","🍒","🍓","🍅","🍷","🍸","🍹","🍺","🍻","🥂","🍼","🍵","🧊","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🎷","🎺","🎸","🎯","🎳","🎮","🎰","🎉","🎊","🎈","🎁","🪄","🏆","🏅","🥇","⚽","🏀","🏈","⚾","🎾","🏐","🎱","🏓","🏸","🎣","🥊","🥋","🛹","⛷️","🏋️","🤸","🤺","🏌️","🏇","🏄","🏊","🚣","🧗","🚴",
+        "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🛻","🚚","🚛","🚜","🦯","🦽","🦼","🛴","🚲","🛵","🏍️","🛺","🚨","🚔","🚍","🚘","🚖","🚡","🚠","🚟","🚃","🚋","🚞","🚝","🚄","🚅","🚈","🚂","🚆","🚇","🚊","🚉","✈️","🛫","🛬","🛩️","🚀","🛸","🛰️","🚁","🛶","⛵","🚤","🛥️","🛳️","⛴️","🚢","⚓","🚧","⛽","🚏","🚦","🚥","🗺️","🗿","🗽","🗼","🏰","🏯","🏟️","🎡","🎢","🎠","⛲","⛱️","🏖️","🏝️","🏜️","🌋","⛰️","🏔️","🏕️","⛺","🛖","🏘️","🏚️","🏠","🏡","🏢","🏣","🏤","🏥","🏦","🏨","🏩","🏪","🏫","🏬","🏭","🏯","🏰","💒","🗼","🗽","⛪","🕌","🛕","🕍","⛩️","🕋","⛩"
+    ];
     const pAdd = document.getElementById('emoji-picker-add'); const pEdit = document.getElementById('emoji-picker-edit');
     [pAdd, pEdit].forEach(p => {
         if(!p) return; p.innerHTML = "";
@@ -2185,9 +2235,9 @@ window.renderChat = function() {
 window.editChatMsg = function(idx, e) { if(e) e.stopPropagation(); const msg = window.chatDB[idx]; window.customDualPrompt("Mesajı düzenle:", null, msg.text, (newTitle, newText) => { if(newText && newText.trim() !== "") { window.chatDB[idx].text = newText.trim(); window.chatDB[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); window.renderChat(); } }); };
 window.deleteChatMsg = function(idx, e) { if(e) e.stopPropagation(); window.customConfirm("Mesajı silmek istediğinize emin misiniz?", () => { window.chatDB.splice(idx, 1); localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); window.renderChat(); }); };
 
-// ================= 15. OYUNLAR & TAKVİM =================
+// ================= 15. OYUNLAR, TAKVİM & YENİ SORU ALGORİTMASI =================
 
-// PROBLEM 4 FIX: Marşlar Buton Highlight (CSS inline müdahalesi olmadan class yönetimi)
+// Marşlar Buton Highlight
 window.switchAnthemLang = function(lang) {
     document.getElementById('anthem-tr-content').classList.remove('active'); document.getElementById('anthem-de-content').classList.remove('active');
     document.getElementById('btn-anthem-tr').classList.remove('active'); document.getElementById('btn-anthem-de').classList.remove('active');
@@ -2199,7 +2249,7 @@ window.toggleSidebar = function(id, e) { if(e) e.stopPropagation(); window.close
 window.openAnthemsModal = function(e) { if(e) e.stopPropagation(); window.closeAllSidebars(); document.getElementById('anthemSidebar')?.classList.add('open'); document.getElementById('sidebarOverlay')?.classList.add('show'); window.switchAnthemLang('TR'); };
 window.closeAllSidebars = function() { document.querySelectorAll('.sidebar, .sidebar-right').forEach(el => el.classList.remove('open')); document.getElementById('sidebarOverlay')?.classList.remove('show'); };
 
-// PROBLEM 6 FIX: Takvim Motive Edici Sözler ve Not Alanı
+// Takvim & Notlar
 window.calQuotes = ["Bugün harika bir gün olacak! / Heute wird ein toller Tag!", "Gülümse, hayat güzel. / Lächle, das Leben ist schön.", "Her yeni gün yeni bir umut. / Jeder neue Tag ist neue Hoffnung.", "Başarmak için başla. / Fang an, um erfolgreich zu sein.", "Kendine inan! / Glaube an dich selbst!", "Sevgiyle yaşa. / Lebe mit Liebe.", "Küçük şeyler büyük fark yaratır. / Kleine Dinge machen große Unterschiede.", "Güneş her gün yenidir. / Die Sonne ist jeden Tag neu.", "Anı yaşa! / Lebe im Moment!", "Hayallerinin peşinden git. / Folge deinen Träumen."];
 window.holidays = { "01-01": { title: "Yılbaşı / Neujahr", desc: "Yeni bir yıl, yeni umutlar.", icon: "🎆" }, "14-02": { title: "Sevgililer Günü / Valentinstag", desc: "Sevgi, paylaştıkça çoğalır.", icon: "💖" }, "08-03": { title: "Kadınlar Günü / Frauentag", desc: "Kadınlar, toplumun mimarlarıdır.", icon: "👩" }, "23-04": { title: "Çocuk Bayramı", desc: "Egemenlik kayıtsız şartsız milletindir.", icon: "🇹🇷" }, "01-05": { title: "Emek Günü / Tag der Arbeit", desc: "Tüm emekçilerin bayramı kutlu olsun.", icon: "🛠️" }, "19-05": { title: "Gençlik Bayramı", desc: "Gençlik, milletin geleceğidir.", icon: "🇹🇷" }, "30-08": { title: "Zafer Bayramı", desc: "Büyük taarruzun şanlı zaferi.", icon: "🇹🇷" }, "03-10": { title: "Alman Birlik Günü", desc: "Doğu ve Batı Almanya'nın birleşmesi.", icon: "🇩🇪" }, "29-10": { title: "Cumhuriyet Bayramı", desc: "Yaşasın Cumhuriyet!", icon: "🇹🇷" }, "31-10": { title: "Cadılar Bayramı", desc: "Halloween.", icon: "🎃" }, "25-12": { title: "Noel / Weihnachten", desc: "Mutlu Noeller!", icon: "🎄" } };
 window.currentMonth = new Date().getMonth(); window.currentYear = new Date().getFullYear(); window.monthsTR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
@@ -2231,9 +2281,9 @@ window.selectDate = function(y, m, d) {
 window.saveCalNote = function() { if(!window.currentUser || !window.currentSelectedDate) return; const val = document.getElementById('cal-note-input').value.trim(); const uName = window.currentUser.username; window.calNotesDB[`${uName}_${window.currentSelectedDate}`] = val; localStorage.setItem('misaliCalNotes', JSON.stringify(window.calNotesDB)); window.showToast('Not Kaydedildi / Notiz gespeichert'); };
 window.openEventsModal = function(e) { if(e) e.stopPropagation(); window.currentMonth = new Date().getMonth(); window.currentYear = new Date().getFullYear(); window.renderCalendar(window.currentMonth, window.currentYear); window.selectDate(window.currentYear, window.currentMonth, new Date().getDate()); window.openFastModal('eventsModal'); };
 
-// ================= ESKI OYUNLAR =================
+// Eski Küçük Oyunlar
 window.openFalModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('falModal'); document.getElementById('fal-cup')?.classList.remove('spilled'); document.getElementById('fal-result').style.display = 'none'; };
-window.crackFal = function() { const cup = document.getElementById('fal-cup'); if(cup.classList.contains('spilled')) return; cup.classList.add('spilled'); const forts = [{ tr: "Yakında kalbini ısıtacak bir haber alacaksın.", de: "Bald erhältst du eine Nachricht, die dein Herz erwärmt." }, { tr: "Bugün sabırlı ol, beklediğin şey kapıda.", de: "Sei heute geduldig, das, worauf du wartest, steht vor der Tür." }]; setTimeout(() => { const r = forts[Math.floor(Math.random() * forts.length)]; document.getElementById('fal-text-tr').innerText = r.tr; document.getElementById('fal-text-de').innerText = r.de; document.getElementById('fal-result').style.display = 'block'; }, 800); };
+window.crackFal = function() { const cup = document.getElementById('fal-cup'); if(cup.classList.contains('spilled')) return; cup.classList.add('spilled'); const forts = [{ tr: "Yakında kalbini ısıtacak bir haber alacaksın.", de: "Bald erhältst du eine Nachricht, die dein Herz erwärmt." }, { tr: "Bugün sabırlı ol, beklediğin şey kapıda.", de: "Sei heute geduldig, das, worauf du wartest, steht vor der Tür." }, { tr: "Geçmişten gelen bir dost yüzünü güldürecek.", de: "Ein Freund aus der Vergangenheit bringt dich zum Lächeln." }]; setTimeout(() => { const r = forts[Math.floor(Math.random() * forts.length)]; document.getElementById('fal-text-tr').innerText = r.tr; document.getElementById('fal-text-de').innerText = r.de; document.getElementById('fal-result').style.display = 'block'; }, 800); };
 window.openMemoryModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('memoryModal'); window.initMemoryGame(); };
 window.memCards = []; window.flipped = []; window.memMatched = 0; window.memLock = false;
 window.initMemoryGame = () => { window.memLock = false; document.getElementById('memory-msg').innerText = "Eşleri Bul!"; document.getElementById('memory-reset').style.display = "none"; const board = document.getElementById('memory-board'); board.innerHTML = ""; window.memMatched = 0; window.flipped = []; window.memCards = ["❤️", "🌹", "🕊️", "🕰️", "🖋️", "📜", "🎭", "🕯️", "❤️", "🌹", "🕊️", "🕰️", "🖋️", "📜", "🎭", "🕯️"].sort(() => 0.5 - Math.random()); window.memCards.forEach((icon) => { const card = document.createElement('div'); card.className = "mem-card"; card.dataset.icon = icon; card.innerHTML = '<span style="opacity:0; transition:0.3s;">'+icon+'</span>'; card.onclick = () => window.flipMemoryCard(card); board.appendChild(card); }); };
@@ -2242,17 +2292,106 @@ window.checkMemoryMatch = () => { window.memLock = true; const [c1, c2] = window
 window.breathInt = null; window.openBreathModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('breathModal'); document.getElementById('breath-circle').innerText = "Hazır..."; document.getElementById('breath-circle').style.transform = "scale(1)"; document.getElementById('breath-start').style.display="block"; };
 window.startBreath = () => { document.getElementById('breath-start').style.display = "none"; const circle = document.getElementById('breath-circle'); let isBreatheIn = true; circle.style.transform = "scale(1.8)"; circle.innerText = "Nefes Al..."; window.breathInt = setInterval(() => { isBreatheIn = !isBreatheIn; if(isBreatheIn) { circle.style.transform = "scale(1.8)"; circle.innerText = "Nefes Al..."; } else { circle.style.transform = "scale(1)"; circle.innerText = "Nefes Ver..."; } }, 4000); };
 window.openHoroscopeModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('horoscopeModal'); const grid = document.getElementById('zodiac-grid'); grid.innerHTML = ""; grid.style.display = "grid"; document.getElementById('horoscope-result').style.display = "none"; window.zodiacs.forEach(z => { grid.innerHTML += `<div class="zodiac-btn" onclick="window.showHoroInfo('${z.id}')"><div style="font-size: 2rem;">${z.icon}</div><span class="zodiac-name">${z.tr}<br><span style="font-size:0.75rem; color:#a0aec0;">${z.de}</span></span></div>`; }); };
-window.showHoroInfo = (id) => { const z = window.zodiacs.find(x => x.id === id); document.getElementById('zodiac-grid').style.display = "none"; document.getElementById('horoscope-result').style.display = "block"; document.getElementById('horo-title').innerText = `${z.icon} ${z.tr} / ${z.de}`; document.getElementById('horo-text-tr').innerText = "Bu ay yeniliklere açık olun."; document.getElementById('horo-text-de').innerText = "Sei diesen Monat offen für Neues."; };
+window.showHoroInfo = (id) => { const z = window.zodiacs.find(x => x.id === id); document.getElementById('zodiac-grid').style.display = "none"; document.getElementById('horoscope-result').style.display = "block"; document.getElementById('horo-title').innerText = `${z.icon} ${z.tr} / ${z.de}`; document.getElementById('horo-text-tr').innerText = "Yıldızlar bugün senden yana."; document.getElementById('horo-text-de').innerText = "Die Sterne sind heute auf deiner Seite."; };
 window.openGuessNumberModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('guessNumberModal'); window.initGuessGame(); }; window.initGuessGame = function() { window.targetNumber = Math.floor(Math.random()*100)+1; window.guessAttempts = 0; document.getElementById('guess-input').value = ""; document.getElementById('guess-input').disabled = false; document.getElementById('guess-msg').innerText = "Hadi başla! / Fange an!"; document.getElementById('guess-hint').innerText = "🤔"; document.getElementById('guess-reset').style.display = "none"; }; window.checkGuess = function() { const val = parseInt(document.getElementById('guess-input').value); const m = document.getElementById('guess-msg'); const h = document.getElementById('guess-hint'); if(isNaN(val) || val < 1 || val > 100) return; window.guessAttempts++; if(val === window.targetNumber) { h.innerText = "🎉"; m.innerText = `Tebrikler! ${window.guessAttempts} denemede buldun!`; m.style.color = "lime"; document.getElementById('guess-input').disabled = true; document.getElementById('guess-reset').style.display = "block"; } else { h.innerText = val < window.targetNumber ? "⬆️" : "⬇️"; m.innerText = val < window.targetNumber ? "Daha büyük!" : "Daha küçük!"; m.style.color = "#fbbf24"; } document.getElementById('guess-input').value = ""; };
 window.simonSeq = []; window.playerSeq = []; window.simonLevel = 0; window.simonWait = false; window.openSimonModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('simonModal'); window.simonSeq=[]; document.getElementById('simon-msg').innerText="Başlamak için butona bas!"; document.getElementById('simon-start-btn').style.display='block'; document.getElementById('simon-start-btn').innerText="Başla / Start"; }; window.startSimon = async function() { document.getElementById('simon-start-btn').style.display = 'none'; window.simonSeq = []; window.simonLevel = 0; await window.nextSimonRound(); }; window.nextSimonRound = async function() { window.playerSeq = []; window.simonLevel++; document.getElementById('simon-msg').innerText = `Seviye / Level: ${window.simonLevel}`; document.getElementById('simon-msg').style.color = "var(--accent-color)"; window.simonSeq.push(['green','red','yellow','blue'][Math.floor(Math.random() * 4)]); window.simonWait = true; await new Promise(r => setTimeout(r, 800)); for(let color of window.simonSeq) { const btn = document.getElementById(`simon-${color}`); btn.classList.add('active'); await new Promise(r => setTimeout(r, 400)); btn.classList.remove('active'); await new Promise(r => setTimeout(r, 300)); } window.simonWait = false; document.getElementById('simon-msg').innerText = "Sıra Sende / Du bist dran!"; document.getElementById('simon-msg').style.color = "#fff"; }; window.simonInput = function(color) { if(window.simonWait) return; const btn = document.getElementById(`simon-${color}`); btn.classList.add('active'); setTimeout(() => btn.classList.remove('active'), 200); window.playerSeq.push(color); const cur = window.playerSeq.length - 1; if(window.playerSeq[cur] !== window.simonSeq[cur]) { document.getElementById('simon-msg').innerText = `Oyun Bitti! (Skor: ${window.simonLevel - 1})`; document.getElementById('simon-msg').style.color = "#ef4444"; document.getElementById('simon-start-btn').style.display = 'block'; document.getElementById('simon-start-btn').innerText = "Yeniden Oyna"; window.simonWait = true; return; } if(window.playerSeq.length === window.simonSeq.length) { window.simonWait = true; document.getElementById('simon-msg').innerText = "Harika! ✅"; document.getElementById('simon-msg').style.color = "lime"; setTimeout(window.nextSimonRound, 1000); } };
 window.openDiceModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('diceModal'); document.getElementById('dice-display').innerText="🎲"; document.getElementById('dice-display').classList.remove('rolling'); document.getElementById('dice-msg').innerText="Zarı atmak için butona bas."; document.getElementById('dice-msg').style.color="#cbd5e1"; }; window.rollDice = function() { const d = document.getElementById('dice-display'); const m = document.getElementById('dice-msg'); if(d.classList.contains('rolling')) return; d.classList.add('rolling'); m.innerText = "Zar atılıyor..."; m.style.color = "var(--accent-color)"; setTimeout(() => { d.classList.remove('rolling'); const res = Math.floor(Math.random()*6); d.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][res]; m.innerText = `Sonuç: ${res+1}`; m.style.color = "lime"; }, 500); };
 window.fcScore = 0; window.fcTime = 5.0; window.fcActive = false; window.fcTimer = null; window.openFastClickModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('fastClickModal'); window.startFastClick(); }; window.startFastClick = () => { window.fcScore = 0; window.fcTime = 5.0; window.fcActive = false; clearInterval(window.fcTimer); document.getElementById('fc-score').innerText = "0"; document.getElementById('fc-time').innerText = "⏱️ 5.0"; const btn = document.getElementById('fc-btn'); btn.innerText = "BAŞLA! / START!"; btn.disabled = false; document.getElementById('fc-start').style.display = "none"; }; window.clickFast = () => { const btn = document.getElementById('fc-btn'); if(!window.fcActive) { window.fcActive = true; btn.innerText = "TIKLA! / KLICK!"; window.fcTimer = setInterval(() => { window.fcTime -= 0.1; if(window.fcTime <= 0) { window.fcTime = 0; window.fcActive = false; clearInterval(window.fcTimer); btn.disabled = true; btn.innerText = "SÜRE BİTTİ!"; document.getElementById('fc-start').style.display = "block"; } document.getElementById('fc-time').innerText = "⏱️ " + window.fcTime.toFixed(1); }, 100); } if(window.fcActive) { window.fcScore++; document.getElementById('fc-score').innerText = window.fcScore; } };
 window.openMagicBallModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('magicBallModal'); document.getElementById('magic-answer').innerText=""; document.getElementById('magic-answer-de').innerText=""; }; window.shakeMagicBall = () => { const ball = document.getElementById('magic-ball'); const a = document.getElementById('magic-answer'); const aD = document.getElementById('magic-answer-de'); if(ball.classList.contains('magic-shaking')) return; a.innerText=""; aD.innerText=""; ball.classList.add('magic-shaking'); setTimeout(() => { ball.classList.remove('magic-shaking'); a.innerText = "Kesinlikle evet."; aD.innerText = "Definitiv ja."; }, 400); };
 window.openCoinFlipModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('coinFlipModal'); document.getElementById('coin').innerText="?"; document.getElementById('coin-msg').innerText="Fırlatmak için tıkla"; }; window.flipCoin = () => { const coin = document.getElementById('coin'); const msg = document.getElementById('coin-msg'); if(coin.classList.contains('coin-spinning')) return; msg.innerText="Fırlatılıyor..."; msg.style.color="var(--accent-color)"; coin.innerText=""; coin.classList.add('coin-spinning'); setTimeout(() => { coin.classList.remove('coin-spinning'); const isHeads = Math.random() > 0.5; coin.style.fontSize="3rem"; if(isHeads) { coin.innerText="YAZI"; msg.innerHTML="Sonuç: <strong style='color:lime;'>Yazı (Kopf)</strong>"; } else { coin.innerText="TURA"; msg.innerHTML="Sonuç: <strong style='color:lime;'>Tura (Zahl)</strong>"; } }, 1200); };
-window.openHangmanModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('hangmanModal'); window.initHangman(); }; window.wordsTR = ["ŞİİR", "SANAT", "İLHAM", "VİCDAN", "VEFA"]; window.wordsDE = ["GEDICHT", "KUNST", "GEFUEHL", "HERZ", "FRIEDEN"]; window.hangmanLang = "TR"; window.chosenWord = ""; window.guessedLetters = []; window.lives = 6; window.setHangmanLang = (lang) => { window.hangmanLang = lang; document.getElementById('btn-tr').style.background = lang === "TR" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-tr').style.color = lang === "TR" ? "black" : "white"; document.getElementById('btn-de').style.background = lang === "DE" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-de').style.color = lang === "DE" ? "black" : "white"; window.initHangman(); }; window.initHangman = () => { window.lives = 6; window.guessedLetters = []; document.getElementById('hangman-msg').innerText = "Bir harf seç..."; document.getElementById('hangman-msg').style.color = "#cbd5e1"; document.getElementById('hangman-reset').style.display = "none"; window.updateLivesDisplay(); const list = window.hangmanLang === "TR" ? window.wordsTR : window.wordsDE; window.chosenWord = list[Math.floor(Math.random() * list.length)]; window.renderHangmanWord(); window.generateKeyboard(); }; window.updateLivesDisplay = () => { let hearts = ""; for(let i=0; i<6; i++) hearts += i < window.lives ? "❤️" : "🖤"; document.getElementById('hangman-lives').innerHTML = hearts; }; window.renderHangmanWord = () => { let display = ""; for(let char of window.chosenWord) display += window.guessedLetters.includes(char) ? char + " " : "_ "; document.getElementById('hangman-word').innerText = display.trim(); }; window.generateKeyboard = () => { const kb = document.getElementById('hangman-keyboard'); kb.innerHTML = ""; let keys = window.hangmanLang === "TR" ? "A B C Ç D E F G Ğ H I İ J K L M N O Ö P R S Ş T U Ü V Y Z".split(" ") : "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z Ä Ö Ü ß".split(" "); keys.forEach(key => { const btn = document.createElement("button"); btn.style.padding = "5px 10px"; btn.style.margin = "2px"; btn.style.border = "none"; btn.style.borderRadius = "5px"; btn.style.cursor = "pointer"; btn.className = "key-btn"; btn.innerText = key; btn.onclick = () => window.handleGuess(key, btn); kb.appendChild(btn); }); }; window.handleGuess = (letter, btnNode) => { btnNode.disabled = true; window.guessedLetters.push(letter); if(window.chosenWord.includes(letter)) { btnNode.style.background = "rgba(34, 197, 94, 0.8)"; window.renderHangmanWord(); window.checkHangmanWin(); } else { btnNode.style.background = "rgba(239, 68, 68, 0.8)"; window.lives--; window.updateLivesDisplay(); window.checkHangmanLoss(); } }; window.checkHangmanWin = () => { if(document.getElementById('hangman-word').innerText.replace(/ /g, "") === window.chosenWord) { document.getElementById('hangman-msg').innerText = "Tebrikler! 🎉"; document.getElementById('hangman-msg').style.color = "lime"; window.endHangman(); } }; window.checkHangmanLoss = () => { if(window.lives <= 0) { document.getElementById('hangman-word').innerText = window.chosenWord.split("").join(" "); document.getElementById('hangman-msg').innerText = "Bilemediniz! 😢"; document.getElementById('hangman-msg').style.color = "red"; window.endHangman(); } }; window.endHangman = () => { document.querySelectorAll('.key-btn').forEach(b => b.disabled = true); document.getElementById('hangman-reset').style.display = "block"; };
 window.openCookieModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('cookieModal'); window.resetCookie(); }; window.crackCookie = () => { const cookie = document.getElementById('fortune-cookie'); if(cookie.classList.contains('cracked')) return; cookie.classList.add('cracked'); setTimeout(() => { cookie.style.display = "none"; const paper = document.getElementById('fortune-paper'); paper.innerHTML = `<strong>Bugün harika geçecek.</strong><br><span style='font-size:0.95rem; color:#718096; display:block; margin-top:8px;'>Heute wird ein toller Tag.</span>`; paper.classList.add('show'); document.getElementById('cookie-reset').style.display = "block"; }, 500); }; window.resetCookie = () => { const cookie = document.getElementById('fortune-cookie'); const paper = document.getElementById('fortune-paper'); cookie.classList.remove('cracked'); cookie.style.display = "inline-block"; cookie.style.opacity = "1"; cookie.style.transform = "scale(1) rotate(0deg)"; cookie.style.filter = "drop-shadow(0 15px 25px rgba(212,175,55,0.3))"; paper.classList.remove('show'); setTimeout(() => { paper.style.display = "none"; }, 300); document.getElementById('cookie-reset').style.display = "none"; };
-window.anagrams = [ { word: "ŞİİR", scrambled: "İRŞİ" }, { word: "SANAT", scrambled: "TNASA" }, { word: "AŞK", scrambled: "ŞAK" } ]; window.currAnagram = {}; window.openAnagramModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('anagramModal'); window.currAnagram = window.anagrams[Math.floor(Math.random() * window.anagrams.length)]; document.getElementById('anagram-word').innerText = window.currAnagram.scrambled; document.getElementById('anagram-input').value = ""; document.getElementById('anagram-msg').innerText = ""; }; window.checkAnagram = () => { const val = document.getElementById('anagram-input').value.trim().toUpperCase(); if(val === window.currAnagram.word) { document.getElementById('anagram-msg').innerText = "Doğru! 🎉"; document.getElementById('anagram-msg').style.color = "lime"; } else { document.getElementById('anagram-msg').innerText = "Yanlış! 😢"; document.getElementById('anagram-msg').style.color = "#ef4444"; } };
-window.questions = [ { q: "Hangi kelime 'Empati' anlamına gelir?", opts: ["Hemhal", "Kibir", "Hasret"], ans: 0 }, { q: "Türkiye'nin başkenti neresidir?", opts: ["İstanbul", "Ankara", "İzmir"], ans: 1 } ]; window.currQ = 0; window.openQuizModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('quizModal'); window.currQ = 0; window.loadQuiz(); }; window.loadQuiz = () => { document.getElementById('quiz-msg').innerText = ""; document.getElementById('quiz-next').style.display = "none"; if(window.currQ >= window.questions.length) { document.getElementById('quiz-q').innerHTML = "<span style='color:var(--accent-color)'>Test Bitti! 🎉</span>"; document.getElementById('quiz-options').innerHTML = ""; return; } document.getElementById('quiz-q').innerText = window.questions[window.currQ].q; let optsHtml = ""; window.questions[window.currQ].opts.forEach((o, i) => { optsHtml += `<div class="quiz-opt" onclick="window.checkQuiz(${i}, this)" style="background: rgba(212,175,55,0.1); border: 1px solid var(--accent-color); color: white; padding: 10px; margin-bottom: 10px; width: 100%; border-radius: 10px; cursor: pointer; transition: 0.3s;">${o}</div>`; }); document.getElementById('quiz-options').innerHTML = optsHtml; }; window.checkQuiz = (idx, el) => { const opts = document.querySelectorAll('.quiz-opt'); opts.forEach(o => o.onclick = null); if(idx === window.questions[window.currQ].ans) { el.style.background = "lime"; el.style.color = "black"; document.getElementById('quiz-msg').innerText = "Harika! ✅"; document.getElementById('quiz-msg').style.color = "lime"; } else { el.style.background = "red"; opts[window.questions[window.currQ].ans].style.background = "lime"; opts[window.questions[window.currQ].ans].style.color = "black"; document.getElementById('quiz-msg').innerText = "Yanlış! ❌"; document.getElementById('quiz-msg').style.color = "#ef4444"; } document.getElementById('quiz-next').style.display = "block"; }; window.nextQuiz = () => { window.currQ++; window.loadQuiz(); };
+window.openHangmanModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('hangmanModal'); window.initHangman(); }; window.wordsTR = ["ŞİİR", "SANAT", "İLHAM", "VİCDAN", "VEFA", "UMUT", "ADALET", "HUZUR", "SEVGİ", "SADAKAT"]; window.wordsDE = ["GEDICHT", "KUNST", "GEFUEHL", "HERZ", "FRIEDEN", "TREUE", "HOFFNUNG", "LIEBE", "FREUNDSCHAFT", "GEDULD"]; window.hangmanLang = "TR"; window.chosenWord = ""; window.guessedLetters = []; window.lives = 6; window.setHangmanLang = (lang) => { window.hangmanLang = lang; document.getElementById('btn-tr').style.background = lang === "TR" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-tr').style.color = lang === "TR" ? "black" : "white"; document.getElementById('btn-de').style.background = lang === "DE" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-de').style.color = lang === "DE" ? "black" : "white"; window.initHangman(); }; window.initHangman = () => { window.lives = 6; window.guessedLetters = []; document.getElementById('hangman-msg').innerText = "Bir harf seç..."; document.getElementById('hangman-msg').style.color = "#cbd5e1"; document.getElementById('hangman-reset').style.display = "none"; window.updateLivesDisplay(); const list = window.hangmanLang === "TR" ? window.wordsTR : window.wordsDE; window.chosenWord = list[Math.floor(Math.random() * list.length)]; window.renderHangmanWord(); window.generateKeyboard(); }; window.updateLivesDisplay = () => { let hearts = ""; for(let i=0; i<6; i++) hearts += i < window.lives ? "❤️" : "🖤"; document.getElementById('hangman-lives').innerHTML = hearts; }; window.renderHangmanWord = () => { let display = ""; for(let char of window.chosenWord) display += window.guessedLetters.includes(char) ? char + " " : "_ "; document.getElementById('hangman-word').innerText = display.trim(); }; window.generateKeyboard = () => { const kb = document.getElementById('hangman-keyboard'); kb.innerHTML = ""; let keys = window.hangmanLang === "TR" ? "A B C Ç D E F G Ğ H I İ J K L M N O Ö P R S Ş T U Ü V Y Z".split(" ") : "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z Ä Ö Ü ß".split(" "); keys.forEach(key => { const btn = document.createElement("button"); btn.style.padding = "5px 10px"; btn.style.margin = "2px"; btn.style.border = "none"; btn.style.borderRadius = "5px"; btn.style.cursor = "pointer"; btn.className = "key-btn"; btn.innerText = key; btn.onclick = () => window.handleGuess(key, btn); kb.appendChild(btn); }); }; window.handleGuess = (letter, btnNode) => { btnNode.disabled = true; window.guessedLetters.push(letter); if(window.chosenWord.includes(letter)) { btnNode.style.background = "rgba(34, 197, 94, 0.8)"; window.renderHangmanWord(); window.checkHangmanWin(); } else { btnNode.style.background = "rgba(239, 68, 68, 0.8)"; window.lives--; window.updateLivesDisplay(); window.checkHangmanLoss(); } }; window.checkHangmanWin = () => { if(document.getElementById('hangman-word').innerText.replace(/ /g, "") === window.chosenWord) { document.getElementById('hangman-msg').innerText = "Tebrikler! 🎉"; document.getElementById('hangman-msg').style.color = "lime"; window.endHangman(); } }; window.checkHangmanLoss = () => { if(window.lives <= 0) { document.getElementById('hangman-word').innerText = window.chosenWord.split("").join(" "); document.getElementById('hangman-msg').innerText = "Bilemediniz! 😢"; document.getElementById('hangman-msg').style.color = "red"; window.endHangman(); } }; window.endHangman = () => { document.querySelectorAll('.key-btn').forEach(b => b.disabled = true); document.getElementById('hangman-reset').style.display = "block"; };
+window.anagrams = [ { word: "ŞİİR", scrambled: "İRŞİ" }, { word: "SANAT", scrambled: "TNASA" }, { word: "AŞK", scrambled: "ŞAK" }, { word: "UMUT", scrambled: "TUMU" }, { word: "VEFA", scrambled: "AFEV" }, { word: "HUZUR", scrambled: "RUZUH" }, { word: "SEVGİ", scrambled: "GİSEV" }, { word: "İNSAN", scrambled: "NİSNA" }, { word: "ZAMAN", scrambled: "MAZAN" }, { word: "SABIR", scrambled: "RBASI" }, { word: "İKLİM", scrambled: "MİLİK" }, { word: "HAYAL", scrambled: "YALAH" } ]; window.currAnagram = {}; window.openAnagramModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('anagramModal'); window.currAnagram = window.anagrams[Math.floor(Math.random() * window.anagrams.length)]; document.getElementById('anagram-word').innerText = window.currAnagram.scrambled; document.getElementById('anagram-input').value = ""; document.getElementById('anagram-msg').innerText = ""; }; window.checkAnagram = () => { const val = document.getElementById('anagram-input').value.trim().toUpperCase(); if(val === window.currAnagram.word) { document.getElementById('anagram-msg').innerText = "Doğru! 🎉"; document.getElementById('anagram-msg').style.color = "lime"; } else { document.getElementById('anagram-msg').innerText = "Yanlış! 😢"; document.getElementById('anagram-msg').style.color = "#ef4444"; } };
+
+// PROBLEM 12 FIX: 60 Soruluk Şiirsel Quiz ve Aylık 30 Soru Döngüsü
+window.allQuizQuestions = [
+    { q: "Hangi kelime 'Empati' anlamına gelir?", opts: ["Hemhal", "Kibir", "Hasret", "Gurbet"], ans: 0 },
+    { q: "Türkiye'nin başkenti neresidir?", opts: ["İstanbul", "Ankara", "İzmir", "Bursa"], ans: 1 },
+    { q: "Alman Edebiyatının en ünlü şairi kimdir?", opts: ["Kant", "Goethe", "Nietzsche", "Heine"], ans: 1 },
+    { q: "'Aşk imiş her ne var alemde' kimin sözüdür?", opts: ["Yunus Emre", "Fuzûlî", "Mevlânâ", "Âşık Veysel"], ans: 1 },
+    { q: "İstiklal Marşı'nın şairi kimdir?", opts: ["Nazım Hikmet", "Mehmet Akif Ersoy", "Necip Fazıl", "Cahit Sıtkı"], ans: 1 },
+    { q: "'Düşünüyorum, öyleyse varım' kimin sözüdür?", opts: ["Platon", "Sokrates", "Descartes", "Aristoteles"], ans: 2 },
+    { q: "'Gülü seven dikenine katlanır' sözü neyi ifade eder?", opts: ["Bahçıvanlığı", "Fedakarlığı", "Açgözlülüğü", "Korkuyu"], ans: 1 },
+    { q: "Hangi şair 'Uzun ince bir yoldayım' demiştir?", opts: ["Neşet Ertaş", "Aşık Veysel", "Yunus Emre", "Karacaoğlan"], ans: 1 },
+    { q: "Hangi kelime 'Umut' anlamına gelmez?", opts: ["Beklenti", "Ümit", "Karamsarlık", "Arzu"], ans: 2 },
+    { q: "Mesnevi kime aittir?", opts: ["Fuzuli", "Baki", "Mevlana", "Şeyh Galip"], ans: 2 },
+    { q: "Goethe'nin ünlü eseri Faust ne türdür?", opts: ["Roman", "Tiyatro", "Şiir", "Masal"], ans: 1 },
+    { q: "'Sanat uzun, hayat kısadır' sözü kimindir?", opts: ["Hipokrat", "Sokrates", "Farabi", "Aristo"], ans: 0 },
+    { q: "Hangi şair 'Mavi Gözlü Dev' olarak anılır?", opts: ["Cemal Süreya", "Nazım Hikmet", "Orhan Veli", "Attila İlhan"], ans: 1 },
+    { q: "Divan edebiyatında şairlerin şiir topladıkları esere ne denir?", opts: ["Mesnevi", "Mersiye", "Divan", "Kaside"], ans: 2 },
+    { q: "'Bana bir harf öğretenin kırk yıl kölesi olurum' kimin sözüdür?", opts: ["Hz. Ömer", "Hz. Ali", "Hz. Ebu Bekir", "Hz. Osman"], ans: 1 },
+    { q: "Hangi Alman şair 'Ode an die Freude' (Neşeye Övgü) yazmıştır?", opts: ["Goethe", "Schiller", "Brecht", "Hesse"], ans: 1 },
+    { q: "Şair Misal.i'nin doğum yeri neresidir?", opts: ["İstanbul", "Frankfurt", "Berlin", "Münih"], ans: 2 },
+    { q: "Safahat adlı eser kime aittir?", opts: ["Mehmet Akif Ersoy", "Tevfik Fikret", "Yahya Kemal", "Necip Fazıl"], ans: 0 },
+    { q: "İlk Türkçe sözlük olan Divanü Lügati't-Türk'ü kim yazmıştır?", opts: ["Ali Şir Nevai", "Kaşgarlı Mahmud", "Yusuf Has Hacib", "Ahmet Yesevi"], ans: 1 },
+    { q: "Franz Kafka'nın 'Bozkırkurdu' adlı eseri kime aittir?", opts: ["Thomas Mann", "Hermann Hesse", "Kafka", "Zweig"], ans: 1 },
+    { q: "Hangi şair 'Otuz Beş Yaş' şiiri ile tanınır?", opts: ["Cahit Sıtkı Tarancı", "Cemal Süreya", "Orhan Veli", "Cemal Safi"], ans: 0 },
+    { q: "'Kitaplar soğuk ama güvenilir dostlardır' kimin sözüdür?", opts: ["Victor Hugo", "Dostoyevski", "Tolstoy", "Balzac"], ans: 0 },
+    { q: "Almanya'nın başkenti neresidir?", opts: ["Münih", "Hamburg", "Berlin", "Köln"], ans: 2 },
+    { q: "Hangi kelime 'Hoşgörü' anlamına gelir?", opts: ["Tolerans", "İnat", "Kibir", "Öfke"], ans: 0 },
+    { q: "'Ne içindeyim zamanın, ne de büsbütün dışında' kimin şiiridir?", opts: ["Ahmet Haşim", "Ahmet Hamdi Tanpınar", "Yahya Kemal", "Orhan Veli"], ans: 1 },
+    { q: "Kürk Mantolu Madonna'nın yazarı kimdir?", opts: ["Sabahattin Ali", "Oğuz Atay", "Reşat Nuri", "Peyami Safa"], ans: 0 },
+    { q: "Hangi filozof 'Übermensch' (Üstinsan) kavramını ortaya atmıştır?", opts: ["Kant", "Hegel", "Nietzsche", "Schopenhauer"], ans: 2 },
+    { q: "Hangisi bir noktalama işareti değildir?", opts: ["Virgül", "Nokta", "Bağlaç", "Soru İşareti"], ans: 2 },
+    { q: "Şiirde dize sonlarındaki ses benzerliğine ne denir?", opts: ["Vezin", "Uyak (Kafiye)", "Redif", "Aruz"], ans: 1 },
+    { q: "'Bir fincan kahvenin kırk yıl hatırı vardır' bir nedir?", opts: ["Şiir", "Deyim", "Atasözü", "Masal"], ans: 2 },
+    // Aylık dönüşüm için 2. Grup (Toplam 60 soru)
+    { q: "Kendi küllerinden yeniden doğan efsanevi kuş hangisidir?", opts: ["Anka (Zümrüdüanka)", "Kartal", "Şahin", "Baykuş"], ans: 0 },
+    { q: "'Gölgesinden korkan adam' deyimi neyi ifade eder?", opts: ["Cesareti", "Aşırı Korkaklığı", "Zekayı", "Sabrı"], ans: 1 },
+    { q: "Hangi kelime 'Sadakat' ile eş anlamlıdır?", opts: ["Vefa", "İhanet", "Yalan", "Korku"], ans: 0 },
+    { q: "Dünyanın en çok çevrilen kitabı (Kutsal kitaplar hariç) hangisidir?", opts: ["Sefiller", "Küçük Prens", "Suç ve Ceza", "1984"], ans: 1 },
+    { q: "Türkiye'nin en uzun nehri hangisidir?", opts: ["Fırat", "Dicle", "Kızılırmak", "Seyhan"], ans: 2 },
+    { q: "Albert Einstein hangi alanda Nobel Ödülü almıştır?", opts: ["Barış", "Edebiyat", "Fizik", "Kimya"], ans: 2 },
+    { q: "'Suç ve Ceza' romanının baş karakteri kimdir?", opts: ["Raskolnikov", "Karamazov", "Mişkin", "İvan"], ans: 0 },
+    { q: "Hangi şair 'Garip' akımının kurucusudur?", opts: ["Orhan Veli", "Nazım Hikmet", "Cemal Süreya", "Attila İlhan"], ans: 0 },
+    { q: "Almanca 'Danke' kelimesinin Türkçesi nedir?", opts: ["Merhaba", "Lütfen", "Teşekkürler", "Güle güle"], ans: 2 },
+    { q: "Mona Lisa tablosunu kim yapmıştır?", opts: ["Van Gogh", "Da Vinci", "Picasso", "Michelangelo"], ans: 1 },
+    { q: "'Bir adamın gerçek karakteri gücü eline aldığında belli olur' kimin sözüdür?", opts: ["Lincoln", "Churchill", "Washington", "Franklin"], ans: 0 },
+    { q: "Hangisi bir mevsim değildir?", opts: ["Sonbahar", "Eylül", "Kış", "İlkbahar"], ans: 1 },
+    { q: "Hangi harf Türk alfabesinde yoktur?", opts: ["Ş", "X", "Ç", "Ö"], ans: 1 },
+    { q: "Hangi yazar 'Dönüşüm' adlı eseriyle ünlüdür?", opts: ["Kafka", "Camus", "Sartre", "Zweig"], ans: 0 },
+    { q: "Edebiyatta abartma sanatına ne ad verilir?", opts: ["Mecaz", "Mübalağa", "Teşbih", "Tariz"], ans: 1 },
+    { q: "Hangi kelime 'Cahil'in zıt anlamlısıdır?", opts: ["Bilge", "Tembel", "Kötü", "Korkak"], ans: 0 },
+    { q: "Hangi hayvanın adı 'Çöl Gemisi' olarak bilinir?", opts: ["Aslan", "Deve", "At", "Kaplan"], ans: 1 },
+    { q: "Yüzüklerin Efendisi serisinin yazarı kimdir?", opts: ["J.K. Rowling", "Tolkien", "George R.R. Martin", "C.S. Lewis"], ans: 1 },
+    { q: "Gökyüzü neden mavidir?", opts: ["Işığın kırılması (Rayleigh)", "Okyanusun yansıması", "Gazlar yüzünden", "Isıdan"], ans: 0 },
+    { q: "Hangisi bir müzik aleti değildir?", opts: ["Keman", "Piyano", "Palet", "Gitar"], ans: 2 },
+    { q: "'Vatan yahut Silistre' eseri kime aittir?", opts: ["Namık Kemal", "Ziya Paşa", "Şinasi", "Ahmet Mithat"], ans: 0 },
+    { q: "Tarihte bilinen ilk yazılı antlaşma hangisidir?", opts: ["Kadeş", "Lozan", "Versay", "Westfalya"], ans: 0 },
+    { q: "Hangisi beş duyu organımızdan biri değildir?", opts: ["Göz", "Kulak", "Kalp", "Burun"], ans: 2 },
+    { q: "'Bir elin nesi var, iki elin sesi var' neyi vurgular?", opts: ["Temellliği", "Yardımlaşmayı", "Kavgayı", "Sessizliği"], ans: 1 },
+    { q: "Dünyanın en yüksek dağı hangisidir?", opts: ["Ağrı", "Alpler", "Everest", "Kilimanjaro"], ans: 2 },
+    { q: "Hangi şair 'Bütün şiirlerim benim otobiyografimdir' anlayışındadır?", opts: ["Genel bir şair algısı", "Yok", "Belki", "Evet"], ans: 0 },
+    { q: "Matematikte 'Pi' sayısı yaklaşık kaçtır?", opts: ["3.14", "3.12", "3.16", "3.18"], ans: 0 },
+    { q: "Hangi renk 'Barış' ve 'Saflık' sembolüdür?", opts: ["Siyah", "Kırmızı", "Beyaz", "Sarı"], ans: 2 },
+    { q: "Roman ve Hikaye arasındaki en belirgin fark nedir?", opts: ["Dil", "Uzunluk ve detay", "Kapak", "Yazar"], ans: 1 },
+    { q: "Şair Misal.i'nin mesleklerinden biri nedir?", opts: ["Doktor", "IT Systemadministrator", "Öğretmen", "Mimar"], ans: 1 }
+];
+window.currQ = 0; window.questions = [];
+window.openQuizModal = (e) => { 
+    if(e) e.stopPropagation(); 
+    window.openFastModal('quizModal'); 
+    window.currQ = 0; 
+    const month = new Date().getMonth(); 
+    // Ay çiftse ilk 30, tekse son 30 soruyu al (Her ay otomatik değişir)
+    window.questions = month % 2 === 0 ? window.allQuizQuestions.slice(0, 30) : window.allQuizQuestions.slice(30, 60);
+    window.loadQuiz(); 
+};
+window.loadQuiz = () => { 
+    document.getElementById('quiz-msg').innerText = ""; document.getElementById('quiz-next').style.display = "none"; 
+    if(window.currQ >= window.questions.length) { document.getElementById('quiz-q').innerHTML = "<span style='color:var(--accent-color)'>Test Bitti! 🎉</span>"; document.getElementById('quiz-options').innerHTML = ""; return; } 
+    document.getElementById('quiz-q').innerText = window.questions[window.currQ].q; 
+    let optsHtml = ""; 
+    window.questions[window.currQ].opts.forEach((o, i) => { optsHtml += `<div class="quiz-opt" onclick="window.checkQuiz(${i}, this)" style="background: rgba(212,175,55,0.1); border: 1px solid var(--accent-color); color: white; padding: 10px; margin-bottom: 10px; width: 100%; border-radius: 10px; cursor: pointer; transition: 0.3s;">${o}</div>`; }); 
+    document.getElementById('quiz-options').innerHTML = optsHtml; 
+};
+window.checkQuiz = (idx, el) => { 
+    const opts = document.querySelectorAll('.quiz-opt'); opts.forEach(o => o.onclick = null); 
+    if(idx === window.questions[window.currQ].ans) { el.style.background = "lime"; el.style.color = "black"; document.getElementById('quiz-msg').innerText = "Harika! ✅"; document.getElementById('quiz-msg').style.color = "lime"; } 
+    else { el.style.background = "red"; opts[window.questions[window.currQ].ans].style.background = "lime"; opts[window.questions[window.currQ].ans].style.color = "black"; document.getElementById('quiz-msg').innerText = "Yanlış! ❌"; document.getElementById('quiz-msg').style.color = "#ef4444"; } 
+    document.getElementById('quiz-next').style.display = "block"; 
+};
+window.nextQuiz = () => { window.currQ++; window.loadQuiz(); };
 
 // PROBLEM 5 FIX: RPS Orta Seviye AI
 window.rpsActive = true; window.rpsScoreP = 0; window.rpsScoreC = 0;
@@ -2261,14 +2400,10 @@ window.playRPS = (playerChoice) => {
     if(!window.rpsActive) return; window.rpsActive = false; 
     const choices = ['🪨', '📜', '✂️']; const compChoice = choices[Math.floor(Math.random() * choices.length)]; 
     const pEl = document.getElementById('rps-player'); const cEl = document.getElementById('rps-computer'); const msgEl = document.getElementById('rps-msg'); 
-    pEl.innerText = "✊"; cEl.innerText = "✊"; 
-    msgEl.innerText = "Yapay Zeka Karar Veriyor..."; msgEl.style.color = "var(--accent-color)"; 
+    pEl.innerText = "✊"; cEl.innerText = "✊"; msgEl.innerText = "Yapay Zeka Karar Veriyor..."; msgEl.style.color = "var(--accent-color)"; 
     setTimeout(() => { 
-        pEl.innerText = playerChoice; cEl.innerText = compChoice; 
-        let msg = "", color = ""; 
-        if (playerChoice === compChoice) { msg = "Berabere! / Unentschieden! 🤝"; color = "#cbd5e1"; } 
-        else if ((playerChoice === '🪨' && compChoice === '✂️') || (playerChoice === '📜' && compChoice === '🪨') || (playerChoice === '✂️' && compChoice === '📜')) { msg = "Kazandın! / Gewonnen! 🎉"; color = "lime"; window.rpsScoreP++; document.getElementById('rps-s-p').innerText = window.rpsScoreP; } 
-        else { msg = "Kaybettin! / Verloren! 😢"; color = "#ef4444"; window.rpsScoreC++; document.getElementById('rps-s-c').innerText = window.rpsScoreC; } 
+        pEl.innerText = playerChoice; cEl.innerText = compChoice; let msg = "", color = ""; 
+        if (playerChoice === compChoice) { msg = "Berabere! 🤝"; color = "#cbd5e1"; } else if ((playerChoice === '🪨' && compChoice === '✂️') || (playerChoice === '📜' && compChoice === '🪨') || (playerChoice === '✂️' && compChoice === '📜')) { msg = "Kazandın! 🎉"; color = "lime"; window.rpsScoreP++; document.getElementById('rps-s-p').innerText = window.rpsScoreP; } else { msg = "Kaybettin! 😢"; color = "#ef4444"; window.rpsScoreC++; document.getElementById('rps-s-c').innerText = window.rpsScoreC; } 
         msgEl.innerText = msg; msgEl.style.color = color; window.rpsActive = true; 
     }, 800); 
 };
@@ -2293,7 +2428,7 @@ window.checkWin = (player) => {
     if(!window.tttBoard.includes("")) { document.getElementById('ttt-msg').innerHTML = `<span style="color:#cbd5e1">BERABERE! 🤝</span>`; window.tttActive = false; return; }
 };
 
-// 1. SNAKE
+// PROBLEM 4 FIX: YILAN (Snake) - Modern Görsel Güncellemesi
 window.openSnakeModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('snakeModal'); };
 window.snakeInt = null;
 window.startSnake = () => {
@@ -2314,14 +2449,37 @@ window.startSnake = () => {
     if(window.snakeInt) clearInterval(window.snakeInt);
     window.snakeInt = setInterval(() => {
         ctx.fillStyle = "#111"; ctx.fillRect(0,0,300,300);
-        for(let i=0; i<snake.length; i++) { ctx.fillStyle = (i===0) ? "#d4af37" : "#fff"; ctx.fillRect(snake[i].x, snake[i].y, box, box); ctx.strokeStyle = "#000"; ctx.strokeRect(snake[i].x, snake[i].y, box, box); }
-        ctx.fillStyle = "red"; ctx.fillRect(food.x, food.y, box, box);
+        
+        // Elma (Yemek) Çizimi
+        ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(food.x + box/2, food.y + box/2, box/2, 0, 2*Math.PI); ctx.fill();
+        ctx.fillStyle = "#22c55e"; ctx.beginPath(); ctx.arc(food.x + box/2, food.y + box/4, box/4, 0, Math.PI); ctx.fill(); // Yaprak
+
+        // Yılan Çizimi (Modernleştirilmiş)
+        for(let i=0; i<snake.length; i++) { 
+            ctx.fillStyle = (i===0) ? "#fbbf24" : "#d4af37"; 
+            ctx.beginPath();
+            ctx.roundRect ? ctx.roundRect(snake[i].x, snake[i].y, box, box, 4) : ctx.rect(snake[i].x, snake[i].y, box, box);
+            ctx.fill();
+            ctx.strokeStyle = "#111"; ctx.lineWidth = 1; ctx.stroke();
+            
+            // Gözler
+            if(i === 0) {
+                ctx.fillStyle = "#000";
+                if(d==="RIGHT") { ctx.fillRect(snake[i].x + 10, snake[i].y + 3, 3, 3); ctx.fillRect(snake[i].x + 10, snake[i].y + 9, 3, 3); }
+                else if(d==="LEFT") { ctx.fillRect(snake[i].x + 2, snake[i].y + 3, 3, 3); ctx.fillRect(snake[i].x + 2, snake[i].y + 9, 3, 3); }
+                else if(d==="UP") { ctx.fillRect(snake[i].x + 3, snake[i].y + 2, 3, 3); ctx.fillRect(snake[i].x + 9, snake[i].y + 2, 3, 3); }
+                else if(d==="DOWN") { ctx.fillRect(snake[i].x + 3, snake[i].y + 10, 3, 3); ctx.fillRect(snake[i].x + 9, snake[i].y + 10, 3, 3); }
+            }
+        }
+
         let snakeX = snake[0].x; let snakeY = snake[0].y;
         if(d == "LEFT") snakeX -= box; if(d == "UP") snakeY -= box; if(d == "RIGHT") snakeX += box; if(d == "DOWN") snakeY += box;
+        
         if(snakeX == food.x && snakeY == food.y) { score++; document.getElementById('snake-score').innerText = score; food = {x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box}; } else { snake.pop(); }
+        
         let newHead = {x: snakeX, y: snakeY};
         if(snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || snake.some(s => s.x === snakeX && s.y === snakeY)) {
-            clearInterval(window.snakeInt); document.getElementById('snake-start-btn').style.display = 'block'; document.getElementById('snake-start-btn').innerText = "Tekrar"; return;
+            clearInterval(window.snakeInt); document.getElementById('snake-start-btn').style.display = 'block'; document.getElementById('snake-start-btn').innerText = "Tekrar Oyna"; return;
         }
         snake.unshift(newHead);
     }, 100);
@@ -2350,7 +2508,7 @@ window.startPong = () => {
         ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fillStyle = ball.color; ctx.fill(); ctx.closePath();
         
         ball.x += ball.velocityX; ball.y += ball.velocityY;
-        com.x += ((ball.x - (com.x + com.width/2))) * 0.08; // Bot Hızı (Orta Seviye)
+        com.x += ((ball.x - (com.x + com.width/2))) * 0.08; 
         com.x = Math.max(0, Math.min(300 - com.width, com.x));
 
         if(ball.x - ball.radius < 0 || ball.x + ball.radius > 300) ball.velocityX = -ball.velocityX;
