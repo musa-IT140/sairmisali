@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" translate="no">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,15 +10,24 @@
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&family=Space+Mono&display=swap');
         
         :root { 
-            --text-color: #f8fafc; --accent-color: #d4af37; 
-            --card-bg: rgba(15, 23, 42, 0.5); --nav-bg: rgba(9, 10, 15, 0.95); 
-            --modal-bg: rgba(4, 6, 10, 0.98); --modal-paper: #fdfbf7; 
+            --text-color: #f8fafc; 
+            --accent-color: #d4af37; 
+            --card-bg: rgba(15, 23, 42, 0.5); 
+            --nav-bg: rgba(9, 10, 15, 0.95); 
+            --modal-bg: rgba(4, 6, 10, 0.98); 
+            --modal-paper: #fdfbf7; 
             --transition-smooth: all 0.3s ease; 
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse at center, #1b2735 0%, #050608 100%); color: var(--text-color); line-height: 1.6; overflow-x: hidden; overflow-y: auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+        
+        /* Mobil Titreme (Flackern) Engellemesi */
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse at center, #1b2735 0%, #050608 100%); color: var(--text-color); line-height: 1.6; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; position: relative; -webkit-overflow-scrolling: touch; top: 0 !important; }
+        body.modal-open { overflow: hidden; touch-action: none; }
+        
+        /* Google Translate Banner Gizleme */
+        .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
         
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; margin: 10px 0; }
@@ -27,42 +36,43 @@
         
         .hidden { display: none !important; }
         
-        /* === KUSURSUZ MODALLAR === */
+        /* === MODALLAR === */
         .modal { 
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
             z-index: 99999; background: var(--modal-bg); backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center; padding: 15px;
             opacity: 0; visibility: hidden; pointer-events: none; 
             transition: opacity 0.3s ease, visibility 0.3s ease;
+            will-change: opacity, visibility;
+            -webkit-transform: translateZ(0); 
         }
         .modal.active-modal { opacity: 1; visibility: visible; pointer-events: auto; }
         
-        /* PROBLEM 1 ÇÖZÜMÜ: Onay ve Düzenleme pencerelerinin altta kalmasını önleyen z-index */
+        /* Onay, Düzenleme ve Paylaş pencereleri için en üst katman */
         .high-z-modal { z-index: 100005 !important; }
         
         .modal-content { 
             background: var(--modal-paper); color: #1a202c; border-radius: 16px; width: 100%; max-width: 500px; 
             max-height: 90vh; display: flex; flex-direction: column; position: relative; 
             border: 2px solid var(--accent-color); box-shadow: 0 15px 50px rgba(0,0,0,0.8); 
-            transform: translateY(20px); transition: transform 0.3s ease; 
+            transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             overflow-x: hidden; overflow-y: auto; margin: auto; padding: 25px; text-align: center;
+            will-change: transform;
         }
         .modal.active-modal .modal-content { transform: translateY(0); }
         
-        /* OYUN & ADMIN & GİRİŞ PENCERELERİ */
-        .game-modal-content, .auth-modal-content, .event-modal-content {
-            background: #0b0f19 !important; color: white !important; 
-        }
+        .game-modal-content, .auth-modal-content, .event-modal-content { background: #0b0f19 !important; color: white !important; }
 
         /* KAPATMA (X) İKONU */
         .close-wrapper { 
             position: absolute; right: 12px; top: 12px; z-index: 100; 
-            background: rgba(212, 175, 55, 0.1); border: 1px solid var(--accent-color); 
+            background: rgba(212, 175, 55, 0.1); border: 2px solid var(--accent-color); 
             border-radius: 50%; width: 36px; height: 36px; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        .close-wrapper:hover { background: #ef4444; border-color: #ef4444; transform: rotate(90deg); }
-        .close-btn { font-size: 1.5rem; color: var(--accent-color); line-height: 1; font-weight: bold; transition: 0.3s; pointer-events: none; }
+        .close-wrapper:hover { background: #ef4444; border-color: #ef4444; transform: rotate(90deg) scale(1.1); }
+        .close-btn { font-size: 1.6rem; color: var(--accent-color); line-height: 1; font-weight: bold; transition: 0.3s; pointer-events: none; }
         .close-wrapper:hover .close-btn { color: white; }
         
         .modal-title, .game-title { padding-top: 10px; padding-right: 40px; padding-left: 40px; }
@@ -74,19 +84,19 @@
         .construction-watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-family: 'Playfair Display', serif; font-size: clamp(3rem, 8vw, 6rem); color: rgba(212, 175, 55, 0.04); white-space: nowrap; pointer-events: none; z-index: -2; font-weight: bold; text-align: center; }
         
         /* SAYAÇLAR (BADGES) */
-        .badge-count { position: absolute; top: -6px; right: -6px; color: white; border-radius: 50%; min-width: 22px; height: 22px; font-size: 0.75rem; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid #1a202c; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; padding: 0 4px;}
+        .badge-count { position: absolute; top: -6px; right: -6px; color: white; border-radius: 50%; min-width: 22px; height: 22px; font-size: 0.75rem; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid #1a202c; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; padding: 0 4px; pointer-events: none;}
         .badge-red { background: #ef4444; }
         .badge-green { background: #22c55e; }
         
         @keyframes spinSun { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .anim-sun { display: inline-block; animation: spinSun 8s linear infinite; color: #fbbf24; text-shadow: 0 0 10px #fbbf24;}
 
-        /* TICKER (En Üstte) */
+        /* TICKER */
         .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 35px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(212,175,55,0.3); z-index: 600; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.8);}
         .ticker-text { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent-color); font-style: italic; opacity: 0; transition: opacity 0.8s ease-in-out; text-align: center; padding: 0 10px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .ticker-text.show { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
 
-        /* HEADER & MENÜ */
+        /* HEADER */
         header { position: fixed; top: 35px; left: 0; width: 100%; padding: 0.5rem 2%; display: flex; justify-content: space-between; align-items: center; background: var(--nav-bg); backdrop-filter: blur(15px); z-index: 500; border-bottom: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 5px 25px rgba(0,0,0,0.6); flex-wrap: wrap; gap: 10px; min-height: 80px; }
         
         .header-left { display: flex; align-items: center; gap: 15px; }
@@ -97,7 +107,6 @@
         .dt-item:hover { color: var(--accent-color); background: rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.3); }
 
         .header-right { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
-        
         .header-user-stats { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #cbd5e1; background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3); cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px;}
         .header-user-stats:hover { background: rgba(212,175,55,0.2); color: white; }
 
@@ -108,8 +117,8 @@
         .lang-dropdown { position: relative; display: inline-block; }
         .lang-btn-main { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: 0.3s;}
         .lang-dropdown::after { content: ''; position: absolute; top: 100%; left: -10px; right: -10px; height: 20px; } 
-        .lang-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 10px; flex-direction: column; gap: 8px; width: max-content; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 1001;}
-        .lang-dropdown:hover .lang-menu { display: flex; }
+        .lang-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 10px; gap: 8px; width: max-content; box-shadow: 0 10px 25px rgba(0,0,0,0.9); z-index: 1001; grid-template-columns: 1fr 1fr;}
+        .lang-dropdown:hover .lang-menu { display: grid !important; }
         .lang-item { display: flex; align-items: center; gap: 6px; padding: 8px 15px; cursor: pointer; border-radius: 8px; background: rgba(255,255,255,0.05); transition: 0.2s;}
         .lang-item:hover { background: rgba(212,175,55,0.3); }
         .lang-item span.text { font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #cbd5e1; font-weight: 600; pointer-events: none;}
@@ -124,7 +133,7 @@
         nav button.active-nav::after { width: 85%; }
         .locked-icon { display: inline-block; margin-left: 3px; font-size: 0.7rem; color: #ef4444; }
 
-        /* AUTH & İKONLAR (Giriş/Kayıt) */
+        /* AUTH & İKONLAR */
         .icon-action-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: var(--accent-color); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; transition: 0.3s; position: relative;}
         .icon-action-btn:hover { background: var(--accent-color); color: #000; transform: scale(1.1); }
 
@@ -142,21 +151,19 @@
         
         #home-view { justify-content: center; align-items: center; text-align: center; padding-top: 150px; }
         
-        /* PROFIL BILD VE YANIP SÖNEN YAZI (PROBLEM 4) */
+        /* PROFIL BILD VE YANIP SÖNEN YAZI */
         .profile-container { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 20; margin-bottom: 1rem;}
         .profile-pic { width: clamp(130px, 20vw, 180px); height: clamp(130px, 20vw, 180px); border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-color); box-shadow: 0 0 40px rgba(212, 175, 55, 0.3); animation: floatPic 6s ease-in-out infinite; margin-bottom: 1.5rem; cursor: pointer; transition: 0.4s ease-out; z-index: 20; }
         .profile-pic:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 0 60px rgba(212, 175, 55, 0.6); }
         @keyframes floatPic { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         
-        /* Balon boyutu küçültüldü */
-        .home-speech-bubble-wrapper { opacity: 0; visibility: hidden; transform: translateY(10px); transition: 0.4s ease; cursor: pointer; z-index: 15; max-width: 350px; display: none; margin: 0 auto 2rem;}
+        .home-speech-bubble-wrapper { opacity: 0; visibility: hidden; transform: translateY(10px); transition: 0.4s ease; cursor: pointer; z-index: 15; max-width: 300px; display: none; margin: 0 auto 2rem;}
         .home-speech-bubble-wrapper.show { opacity: 1; visibility: visible; transform: translateY(0); display: block;}
-        .speech-bubble { background: var(--modal-paper); color: #1a202c; padding: 0.8rem 1.2rem; border-radius: 15px; border: 2px solid var(--accent-color); font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(0.85rem, 1.2vw, 0.95rem); line-height: 1.5; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.6); white-space: pre-wrap; text-align: center; }
+        .speech-bubble { background: var(--modal-paper); color: #1a202c; padding: 0.8rem; border-radius: 12px; border: 2px solid var(--accent-color); font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(0.8rem, 1.2vw, 0.9rem); line-height: 1.4; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.6); white-space: pre-wrap; text-align: center; }
         .speech-bubble::after { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border-width: 10px; border-style: solid; border-color: transparent transparent var(--accent-color) transparent; }
 
-        /* Yanıp Sönme Animasyonu (Blink) */
-        @keyframes blinkAnim { 0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--accent-color); } 50% { opacity: 0.3; text-shadow: none; } }
-        .blink-text { animation: blinkAnim 2s infinite ease-in-out; color: var(--accent-color); font-weight: bold;}
+        @keyframes blinkAnim { 0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(212, 175, 55, 0.8); } 50% { opacity: 0.2; text-shadow: none; } }
+        .blink-text { animation: blinkAnim 1.5s infinite ease-in-out; color: var(--accent-color); font-weight: bold;}
 
         .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 0.5rem; margin-top: 10px; color: var(--accent-color); text-shadow: 0 5px 20px rgba(0,0,0,0.8); line-height: 1; text-align: center;}
         .hero-subtitle { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 3vw, 1.8rem); color: #e2e8f0; font-style: italic; margin-bottom: 1rem; text-align: center;}
@@ -165,7 +172,7 @@
         .section-title { text-align: center; font-family: 'Great Vibes', cursive; font-size: clamp(2.2rem, 5vw, 3.5rem); margin-bottom: 2.5rem; color: var(--accent-color); text-shadow: 0 0 20px rgba(212, 175, 55, 0.3); line-height: 1.2; width: 100%;}
         .section-title span { font-family: 'Poppins', sans-serif; font-size: clamp(0.85rem, 1.5vw, 1.2rem); color: #a0aec0; display: block; margin-top: 5px; letter-spacing: 1px;}
         
-        /* GRIDS */
+        /* GRIDS & YENİ ETİKETİ */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1.5rem; width: 100%; max-width: 1400px; margin: 0 auto; }
         .card { position: relative; background: var(--card-bg); padding: 1.5rem; border-radius: 16px; cursor: pointer; border: 1px solid rgba(212, 175, 55, 0.2); transition: var(--transition-smooth); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 120px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .card:hover { transform: translateY(-5px); border-color: rgba(212, 175, 55, 0.8); }
@@ -173,7 +180,10 @@
         .card-sub { display: block; font-family: 'Poppins', sans-serif; font-size: 0.8rem; color: #a0aec0; font-weight: 300; margin-top: 5px; text-transform: none; }
         .new-badge { position: absolute; top: -10px; left: -10px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; font-family: 'Poppins', sans-serif; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transform: rotate(-10deg); z-index: 5; }
 
-        /* SAHŞİYETLER YAN YANA */
+        /* Sidebar İçi Yeni Etiketi */
+        .new-badge-mini { background: #ef4444; color: white; padding: 2px 6px; border-radius: 5px; font-size: 0.65rem; font-weight: bold; margin-right: 5px; display: inline-block; vertical-align: middle; }
+
+        /* SAHŞİYETLER */
         .split-container { display: flex; flex-direction: row; flex-wrap: wrap; gap: 2rem; width: 100%; max-width: 1400px; margin: 0 auto; align-items: flex-start;}
         .split-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px;}
         .split-col h3.col-title { text-align: center; color: var(--accent-color); font-family: 'Playfair Display', serif; font-size: 2rem; border-bottom: 2px solid rgba(212,175,55,0.3); padding-bottom: 10px; margin-bottom: 5px;}
@@ -196,7 +206,7 @@
         .text-container h3 { color: var(--accent-color); margin-top: 1.5rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-size: 1.3rem; text-align: left;}
         .text-container p { color: #cbd5e1; margin-bottom: 1rem; font-weight: 300; font-size: 1rem; line-height: 1.6; text-align: left;}
 
-        /* CHAT & BİZİM KALEMİMİZDEN */
+        /* BİZİM KALEMİMİZDEN & SOHBET */
         .chat-box { width: 100%; flex-grow: 1; background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .chat-input-area { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .chat-input-area input { padding: 12px 15px; border-radius: 8px; border: 1px solid var(--accent-color); background: rgba(0,0,0,0.5); color: white; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.95rem; }
@@ -207,14 +217,19 @@
         .poem-post { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 10px; padding: 20px; text-align: center; position: relative;}
         .poem-post-body { white-space: pre-wrap; font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fdfbf7; margin-bottom: 15px; line-height: 1.7; word-wrap: break-word; text-align: center; }
         
+        /* ACTION BUTTONS */
         .action-btns { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 10px; z-index: 50;}
         .action-btns span, .action-btns button { font-size: 0.8rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; background: rgba(255,255,255,0.05); font-weight: bold; border: 1px solid transparent; font-family: 'Poppins', sans-serif; outline: none;}
         .action-btns .edit-btn { color: #60a5fa; border-color: rgba(96,165,250,0.3);}
         .action-btns .edit-btn:hover { background: #3b82f6; color: white;}
         .action-btns .del-btn { color: #ef4444; border-color: rgba(239,68,68,0.3);}
         .action-btns .del-btn:hover { background: #ef4444; color: white;}
+        
+        /* ZAMAN VE EDİT BİLGİSİ */
+        .time-info { font-size: 0.7rem; color: #a0aec0; margin-top: 5px; }
+        .edit-info { font-size: 0.7rem; color: #fbbf24; font-style: italic; display: block; margin-top: 3px; }
 
-        /* YUVARLAK MENÜ BUTONLARI (PROBLEM 1 FIX) */
+        /* YUVARLAK MENÜ BUTONLARI */
         .bottom-left-menu { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 90; }
         .bottom-right-menu { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 90; }
         
@@ -233,9 +248,16 @@
         .bottom-right-menu .btn-text { padding: 0 15px 0 5px; }
 
         /* SIDEBARS */
-        .sidebar, .sidebar-right { position: fixed; top: 0; width: 300px; max-width: 80vw; height: 100vh; background: rgba(9, 10, 15, 0.95); backdrop-filter: blur(20px); z-index: 2000; box-shadow: 5px 0 25px rgba(0,0,0,0.8); transition: 0.4s ease; display: flex; flex-direction: column; }
-        .sidebar { left: -320px; border-right: 1px solid rgba(212, 175, 55, 0.2); } .sidebar.open { left: 0; }
-        .sidebar-right { right: -320px; border-left: 1px solid rgba(212, 175, 55, 0.2); } .sidebar-right.open { right: 0; }
+        .sidebar, .sidebar-right { position: fixed; top: 0; width: 300px; max-width: 80vw; height: 100vh; background: rgba(9, 10, 15, 0.95); backdrop-filter: blur(20px); z-index: 2000; box-shadow: 5px 0 25px rgba(0,0,0,0.8); transition: transform 0.4s ease; display: flex; flex-direction: column; will-change: transform; }
+        
+        .sidebar { left: 0; transform: translateX(-100%); border-right: 1px solid rgba(212, 175, 55, 0.2); } 
+        .sidebar.open { transform: translateX(0); }
+        
+        .sidebar-right { right: 0; transform: translateX(100%); border-left: 1px solid rgba(212, 175, 55, 0.2); } 
+        .sidebar-right.open { transform: translateX(0); }
+        
+        .sidebar.wide-sidebar { width: 450px; max-width: 95vw; }
+
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 1999; opacity: 0; visibility: hidden; transition: 0.3s;}
         .sidebar-overlay.show { opacity: 1; visibility: visible; pointer-events: auto;}
         
@@ -245,24 +267,27 @@
         .sidebar-content { padding: 15px; overflow-y: auto; flex-grow: 1; }
         .sidebar-section h3 { font-family: 'Great Vibes', cursive; color: var(--accent-color); font-size: 1.6rem; margin-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 5px;}
         .sidebar-section ul { list-style: none; padding: 0; margin: 0; }
-        .sidebar-section li { padding: 8px 5px; font-size: 0.9rem; font-weight: 300; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s; text-align: left;}
-        .sidebar-section li span { display: block; font-size: 0.7rem; color: #718096; }
+        .sidebar-section li { padding: 8px 5px; font-size: 0.9rem; font-weight: 300; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s; text-align: left; display:flex; flex-direction:column;}
+        .sidebar-section li span.sub-text { display: block; font-size: 0.7rem; color: #718096; }
         .sidebar-section li:hover { color: var(--accent-color); padding-left: 10px; background: rgba(212, 175, 55, 0.05); }
 
-        /* MARŞLAR (PROBLEM 8 ÇÖZÜMÜ) */
+        /* MARŞLAR (Buton Renkleri) */
         .anthem-section { display: none; text-align: center; margin-top: 15px;}
         .anthem-section.active { display: block; animation: fadeIn 0.5s;}
         .anthem-lyrics { white-space: pre-wrap; text-align: center; font-family: 'Playfair Display', serif; font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; border: 1px dashed rgba(212,175,55,0.3); margin-top: 15px; max-height: 60vh; overflow-y: auto;}
+        
+        /* PROBLEM 4 FIX: Sarı buton problemi - Sınıflar CSS değişkeni olmadan çözüldü */
+        .lang-toggle button { background: transparent; border: none; padding: 6px 20px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: 0.3s; color: #718096; border-radius: 20px;}
+        .lang-toggle button.active { background: #d4af37 !important; color: #000 !important; font-weight: bold; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
 
-        /* MODAL TEXT (Şiirler Merkezi ve Okunur) */
+        /* MODAL TEXT */
         .modal-text { font-family: 'Playfair Display', serif; font-size: clamp(14px, 1.8vmin, 20px); line-height: 1.6; white-space: pre-wrap; color: #2d3748; text-align: center !important; width: 100%; font-weight: 500; word-wrap: break-word; }
         .modal-body { padding-bottom: 30px; }
-        .modal-signature { display: inline-block; font-family: 'Great Vibes', cursive; font-size: clamp(1.5rem, 5vw, 2rem); color: var(--accent-color); white-space: nowrap;}
         
-        .lang-toggle button { background: transparent; border: none; padding: 6px 20px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: 0.3s; color: #718096; border-radius: 20px;}
-        .lang-toggle button.active { background: var(--accent-color) !important; color: #000 !important; font-weight: bold; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        .modal-signature { display: inline-block; font-family: 'Great Vibes', cursive; font-size: clamp(1.5rem, 5vw, 2rem); color: var(--accent-color); white-space: nowrap;}
+        .user-poem-signature { font-family: 'Great Vibes', cursive; font-size: 1.8rem; color: var(--accent-color); display: block; margin-top: 15px; transform: rotate(-3deg); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-        /* CALENDAR GRID FIX (Takvim Düzeni) */
+        /* CALENDAR GRID */
         .calendar-container { width: 100%; display: flex; flex-direction: column; align-items: center;}
         .calendar-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; gap: 5px;}
         .calendar-header button { background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.5); color: var(--accent-color); width: 35px; height: 35px; border-radius: 50%; font-size: 1rem; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
@@ -276,7 +301,7 @@
         .calendar-day.empty { background: transparent; border: none; cursor: default; }
         .calendar-msg-box { margin-top: 15px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(212,175,55,0.5); width: 100%; text-align: center;}
 
-        /* GAMES GRIDS FIX (Oyun Görselleri Onarıldı) */
+        /* GAMES GRIDS */
         .tictactoe-container .board { display: grid; grid-template-columns: repeat(3, 90px); gap: 10px; margin: 15px auto; justify-content: center; }
         .cell { width: 90px; height: 90px; font-size: 3.5rem; display: flex; justify-content: center; align-items: center; cursor: pointer; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); transition: 0.3s;}
         .cell:hover { background: rgba(212,175,55,0.2); }
@@ -306,8 +331,13 @@
         /* FORM INPUTS */
         .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.5); background: rgba(0,0,0,0.3); color: white; font-family: 'Poppins', sans-serif; outline: none; font-size: 0.95rem;}
         .auth-input:focus { border-color: var(--accent-color); }
-        .reset-btn { background: var(--accent-color); border: none; color: black; padding: 12px 15px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; margin-top: 10px;}
+        .reset-btn { background: var(--accent-color); border: none; color: black; padding: 12px 15px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; margin-top: 10px; font-family: 'Poppins', sans-serif;}
         .reset-btn:hover { background: white; transform: scale(1.02); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        
+        /* EMOJI PICKER (PROBLEM 3 FIX: Kapsamlı Seçici) */
+        .emoji-picker { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);}
+        .emoji-btn { background: transparent; border: none; font-size: 1.6rem; cursor: pointer; transition: 0.2s; border-radius: 5px;}
+        .emoji-btn:hover { background: rgba(212,175,55,0.5); transform: scale(1.3); }
 
         footer { text-align: center; padding: 20px; color: #a0aec0; font-size: 0.8rem; border-top: 1px solid rgba(212,175,55,0.2); background: rgba(0,0,0,0.3); margin-top: auto; z-index: 10;}
 
@@ -328,6 +358,7 @@
             .zodiac-grid { grid-template-columns: repeat(3, 1fr); }
             
             .modal-content { padding: 15px; width: 95%; max-height: 85vh;}
+            .sidebar.wide-sidebar { width: 100vw; max-width: 100vw; }
         }
     </style>
 </head>
@@ -354,8 +385,8 @@
         <div class="header-left">
             <a href="#" class="logo" onclick="window.openProfileImageModal(event)">Misal.i 🪶</a>
             <div class="datetime-container">
-                <div class="dt-item" onclick="window.openAnalogClockModal(event)"><i class="fas fa-clock" style="color:var(--accent-color);"></i> <span id="digi-clock" class="clock-text">00:00:00</span></div>
-                <div class="dt-item" onclick="window.openEventsModal(event)"><i class="fas fa-calendar-day" style="color:var(--accent-color);"></i> <span id="digi-date" class="clock-text">00.00.0000</span></div>
+                <div class="dt-item" onclick="window.openAnalogClockModal(event)"><i class="fas fa-clock" style="color:var(--accent-color); font-size:1.1rem;"></i> <span id="digi-clock" class="clock-text">00:00:00</span></div>
+                <div class="dt-item" onclick="window.openEventsModal(event)"><i class="fas fa-calendar-day" style="color:var(--accent-color); font-size:1.1rem;"></i> <span id="digi-date" class="clock-text">00.00.0000</span></div>
             </div>
             <div class="header-user-stats admin-only" id="header-user-stats" style="display:none;" onclick="window.openAdminUsersModal(event)">
                 <i class="fas fa-users"></i> <span id="header-stats-text">Kayıtlı: 0 | Aktif: 0</span>
@@ -385,6 +416,10 @@
                     <div class="lang-item" onclick="window.translatePage('de')"><span class="emoji">🇩🇪</span><span class="text">DE</span></div>
                     <div class="lang-item" onclick="window.translatePage('en')"><span class="emoji">🇬🇧</span><span class="text">EN</span></div>
                     <div class="lang-item" onclick="window.translatePage('fr')"><span class="emoji">🇫🇷</span><span class="text">FR</span></div>
+                    <div class="lang-item" onclick="window.translatePage('it')"><span class="emoji">🇮🇹</span><span class="text">IT</span></div>
+                    <div class="lang-item" onclick="window.translatePage('es')"><span class="emoji">🇪🇸</span><span class="text">ES</span></div>
+                    <div class="lang-item" onclick="window.translatePage('ar')"><span class="emoji">🇸🇦</span><span class="text">AR</span></div>
+                    <div class="lang-item" onclick="window.translatePage('iw')"><span class="emoji">🇮🇱</span><span class="text">HE</span></div>
                 </div>
             </div>
             
@@ -392,7 +427,7 @@
                 <span class="anim-sun">☀️</span> Yükleniyor...
             </div>
 
-            <div class="icon-action-btn" id="user-notify-btn" onclick="window.openUserNotifications(event)" title="Bildirimler / Nachrichten">
+            <div class="icon-action-btn admin-only" id="user-notify-btn" onclick="window.openUserNotifications(event)" title="Bildirimler / Nachrichten">
                 <i class="fas fa-bell"></i>
                 <div class="badge-count badge-red hidden" id="user-notify-badge">0</div>
             </div>
@@ -500,20 +535,20 @@
         </div>
     </div>
 
-    <div id="anthemSidebar" class="sidebar-right" onclick="event.stopPropagation()">
+    <div id="anthemSidebar" class="sidebar wide-sidebar" onclick="event.stopPropagation()">
         <div class="sidebar-header">
             <h2>🎵 Marşlar / Hymnen</h2>
             <span class="close-btn" onclick="window.closeAllSidebars()">&times;</span>
         </div>
-        <div class="sidebar-content" style="padding:10px;">
+        <div class="sidebar-content" style="padding:15px;">
             <div class="lang-toggle" style="margin-bottom:20px; display:flex; justify-content:center; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px solid var(--accent-color);">
-                <button id="btn-anthem-tr" class="active" onclick="window.switchAnthemLang('TR')" style="border-radius:15px 0 0 15px; padding: 10px 15px; flex:1; background:transparent; border:none; color:white; font-family:'Poppins', sans-serif; cursor:pointer;">🇹🇷 İstiklal Marşı</button>
-                <button id="btn-anthem-de" onclick="window.switchAnthemLang('DE')" style="border-radius:0 15px 15px 0; padding: 10px 15px; flex:1; background:transparent; border:none; color:white; font-family:'Poppins', sans-serif; cursor:pointer;">🇩🇪 Deutschlandlied</button>
+                <button id="btn-anthem-tr" class="active" onclick="window.switchAnthemLang('TR')" style="border-radius:15px 0 0 15px; padding: 10px 15px; flex:1; font-family:'Poppins', sans-serif; cursor:pointer; font-size:1.1rem; outline:none;">🇹🇷 İstiklal Marşı</button>
+                <button id="btn-anthem-de" onclick="window.switchAnthemLang('DE')" style="border-radius:0 15px 15px 0; padding: 10px 15px; flex:1; font-family:'Poppins', sans-serif; cursor:pointer; font-size:1.1rem; outline:none;">🇩🇪 Deutschlandlied</button>
             </div>
             
             <div id="anthem-tr-content" class="anthem-section active">
-                <h3 style="color:var(--accent-color); font-family:'Playfair Display',serif;">İstiklal Marşı</h3>
-                <p style="color:#a0aec0; font-size:0.85rem; margin-bottom:10px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 5px;">Mehmet Akif Ersoy</p>
+                <h3 style="color:var(--accent-color); font-family:'Playfair Display',serif; font-size: 1.8rem;">İstiklal Marşı</h3>
+                <p style="color:#a0aec0; font-size:1rem; margin-bottom:15px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 10px;">Mehmet Akif Ersoy</p>
                 <div class="anthem-lyrics">Korkma, sönmez bu şafaklarda yüzen al sancak;
 Sönmeden yurdumun üstünde tüten en son ocak.
 O benim milletimin yıldızıdır, parlayacak;
@@ -541,8 +576,8 @@ Kim bilir, belki yarın, belki yarından da yakın.</div>
             </div>
             
             <div id="anthem-de-content" class="anthem-section">
-                <h3 style="color:var(--accent-color); font-family:'Playfair Display',serif;">Das Lied der Deutschen</h3>
-                <p style="color:#a0aec0; font-size:0.85rem; margin-bottom:10px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 5px;">August Heinrich Hoffmann von Fallersleben</p>
+                <h3 style="color:var(--accent-color); font-family:'Playfair Display',serif; font-size: 1.8rem;">Das Lied der Deutschen</h3>
+                <p style="color:#a0aec0; font-size:1rem; margin-bottom:15px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 10px;">August Heinrich Hoffmann von Fallersleben</p>
                 <div class="anthem-lyrics">Deutschland, Deutschland über alles,
 Über alles in der Welt,
 Wenn es stets zu Schutz und Trutze
@@ -596,7 +631,7 @@ Blühe, deutsches Vaterland!</div>
             <div id="admin-daily-logs" style="background: rgba(0,0,0,0.5); border-top: 1px solid var(--accent-color); padding: 15px; margin-top: 20px; border-radius: 10px; font-size: 0.85rem;">
                 <h3 style="font-family:'Poppins', sans-serif; font-size:0.95rem; color:var(--accent-color); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                     <span>📋 Günlük Rapor</span>
-                    <button onclick="window.clearAdminLogs()" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.75rem;"><i class="fas fa-trash"></i> Temizle</button>
+                    <button onclick="window.clearAdminLogs()" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.75rem; outline:none;"><i class="fas fa-trash"></i> Temizle</button>
                 </h3>
                 <div id="admin-logs-content"></div>
             </div>
@@ -611,7 +646,7 @@ Blühe, deutsches Vaterland!</div>
                 <div class="home-speech-bubble-wrapper hidden" id="home-bubble-wrapper">
                     <div class="speech-bubble" id="home-bubble">
                         <p>"Güven sözde değil özde olacak<br>Gül toprakta değil kalpte solacak"</p>
-                        <hr style="border:0; height:1px; background:rgba(212,175,55,0.3); margin:10px 0;">
+                        <hr style="border:0; height:1px; background:rgba(212,175,55,0.3); margin:8px 0;">
                         <p style="font-size:0.85em; color:#a0aec0; font-family:'Poppins',sans-serif; font-style:normal; font-weight:300;">"Vertrauen sollte nicht im Wort, sondern im Kern sein,<br>Die Rose sollte nicht in der Erde, sondern im Herzen welken."</p>
                     </div>
                 </div>
@@ -656,32 +691,12 @@ Blühe, deutsches Vaterland!</div>
         <section class="page-view" id="sahsiyetler-view">
             <h2 class="section-title">Önemli Şahsiyetler <br><span>(Bedeutende Persönlichkeiten)</span></h2>
             <div class="split-container">
-                <div class="split-col">
+                <div class="split-col" id="sahsiyetler-tr-col">
                     <h3 class="col-title">Türk Şahsiyetler</h3>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/%C3%82%C5%9F%C4%B1k_Veysel', '_blank')"><h3>Âşık Veysel</h3><p class="quote">"Uzun ince bir yoldayım."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Cemal_S%C3%BCreya', '_blank')"><h3>Cemal Süreya</h3><p class="quote">"Hayat kısa, kuşlar uçuyor."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Fuz%C3%BBl%C3%AE', '_blank')"><h3>Fuzûlî</h3><p class="quote">"Aşk imiş her ne var alemde."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Hac%C4%B1_Bekta%C5%9F-i_Veli', '_blank')"><h3>Hacı Bektaş Veli</h3><p class="quote">"Eline, beline, diline sahip ol."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Mehmet_%C3%82kif_Ersoy', '_blank')"><h3>Mehmet Akif Ersoy</h3><p class="quote">"Sahipsiz olan memleketin batması haktır."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Mevl%C3%A2n%C3%A2_Cel%C3%A2ledd%C3%AEn-i_R%C3%BBm%C3%AE', '_blank')"><h3>Mevlânâ Celâleddîn-i Rûmî</h3><p class="quote">"Ne olursan ol, yine gel."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/N%C3%A2z%C4%B1m_Hikmet', '_blank')"><h3>Nâzım Hikmet</h3><p class="quote">"Yaşamak şakaya gelmez."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Necip_Faz%C4%B1l_K%C4%B1sak%C3%BCrek', '_blank')"><h3>Necip Fazıl Kısakürek</h3><p class="quote">"Tomurcuk derdinde olmayan ağaç, odundur."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/%C3%96mer_Hayyam', '_blank')"><h3>Ömer Hayyam</h3><p class="quote">"Geçmiş günü beyhude yere yad etme."</p></div>
-                    <div class="card person-card" onclick="window.open('https://tr.wikipedia.org/wiki/Yunus_Emre', '_blank')"><h3>Yunus Emre</h3><p class="quote">"Sevelim, sevilelim, bu dünya kimseye kalmaz."</p></div>
-                </div>
-                <div class="split-col">
+                    </div>
+                <div class="split-col" id="sahsiyetler-de-col">
                     <h3 class="col-title" style="color: var(--accent-color); border-color:rgba(212,175,55,0.3);">Deutsche Persönlichkeiten</h3>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Albert_Einstein', '_blank')"><h3>Albert Einstein</h3><p class="quote">"Phantasie ist wichtiger als Wissen."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Arthur_Schopenhauer', '_blank')"><h3>Arthur Schopenhauer</h3><p class="quote">"Ohne Gesundheit ist alles nichts."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Bertolt_Brecht', '_blank')"><h3>Bertolt Brecht</h3><p class="quote">"Wer kämpft, kann verlieren. Wer nicht kämpft, hat schon verloren."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Friedrich_Nietzsche', '_blank')"><h3>Friedrich Nietzsche</h3><p class="quote">"Was mich nicht umbringt, macht mich stärker."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Friedrich_Schiller', '_blank')"><h3>Friedrich Schiller</h3><p class="quote">"Ernst ist das Leben, heiter ist die Kunst."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Heinrich_Heine', '_blank')"><h3>Heinrich Heine</h3><p class="quote">"Wo man Bücher verbrennt, verbrennt man auch Menschen."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Hermann_Hesse', '_blank')"><h3>Hermann Hesse</h3><p class="quote">"Und jedem Anfang wohnt ein Zauber inne."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Immanuel_Kant', '_blank')"><h3>Immanuel Kant</h3><p class="quote">"Habe Mut, dich deines eigenen Verstandes zu bedienen."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Johann_Wolfgang_von_Goethe', '_blank')"><h3>Johann Wolfgang von Goethe</h3><p class="quote">"Auch aus Steinen im Weg kann man Schönes bauen."</p></div>
-                    <div class="card person-card" onclick="window.open('https://de.wikipedia.org/wiki/Rainer_Maria_Rilke', '_blank')"><h3>Rainer Maria Rilke</h3><p class="quote">"Ich lebe mein Leben in wachsenden Ringen."</p></div>
-                </div>
+                    </div>
             </div>
         </section>
 
@@ -718,7 +733,7 @@ Blühe, deutsches Vaterland!</div>
                     <div class="chat-box" id="user-poems-list" style="background: rgba(0,0,0,0.2); border: none; flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;"></div>
                     <div class="chat-input-area" style="height: auto; align-items: stretch; flex-direction: column;">
                         <input type="text" id="user-poem-title" placeholder="Eserin Başlığı (Titel des Werkes)" style="width: 100%; border-radius: 8px;">
-                        <textarea id="user-poem-input" placeholder="İçinden geçen bir şiir veya söz yaz...&#10;(Schreibe ein Gedicht oder Spruch...)" style="flex-grow: 1; min-height: 80px; max-height: 150px; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--accent-color); background: rgba(0,0,0,0.5); color: white; outline: none; font-family: 'Poppins', sans-serif; font-size: 1rem; resize: vertical; width: 100%;" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.submitUserPoem(); }"></textarea>
+                        <textarea id="user-poem-input" placeholder="İçinden geçen bir şiir veya söz yaz... (Alt satıra geçmek için Enter, göndermek için Shift+Enter)&#10;Gedicht/Spruch schreiben... (Zeilenumbruch mit Enter, senden mit Shift+Enter)" style="flex-grow: 1; min-height: 80px; max-height: 150px; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--accent-color); background: rgba(0,0,0,0.5); color: white; outline: none; font-family: 'Poppins', sans-serif; font-size: 1rem; resize: vertical; width: 100%;"></textarea>
                         <button class="submit-btn" onclick="window.submitUserPoem()"><i class="fas fa-paper-plane"></i> Gönder / Senden</button>
                     </div>
                 </div>
@@ -732,7 +747,7 @@ Blühe, deutsches Vaterland!</div>
                     <div class="chat-box" id="chat-box" style="flex-grow: 1; overflow-y: auto;"></div>
                     <div class="chat-input-area" style="flex-direction: row; height: 60px;">
                         <input type="text" id="chat-input" placeholder="Bir mesaj yazın... (Schreibe etwas...)" style="flex-grow: 1;" onkeypress="if(event.key === 'Enter') window.sendChat()">
-                        <button class="submit-btn" style="width: 70px; font-size: 1.5rem;" onclick="window.sendChat()"><i class="fas fa-paper-plane"></i></button>
+                        <button class="submit-btn" style="width: 70px; font-size: 1.5rem; outline:none;" onclick="window.sendChat()"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
@@ -768,9 +783,11 @@ Blühe, deutsches Vaterland!</div>
         &copy; Şair Misal.i 2026
     </footer>
 
-<div class="modal" id="profileImageModal" onclick="window.closeAllModals(event)">
+<div id="google_translate_element" style="display:none;"></div>
+
+    <div class="modal" id="profileImageModal" onclick="window.closeAllModals(event)">
         <div class="modal-content" style="background: transparent; border: none; box-shadow: none; align-items: center; overflow: visible; padding: 20px;" onclick="event.stopPropagation()">
-            <div class="close-wrapper" onclick="window.closeAllModals(event)" style="top: -40px; right: 0; background: transparent; border: none;">
+            <div class="close-wrapper" onclick="window.closeAllModals(event)" style="top: -40px; right: 0; background: transparent; border: none; box-shadow: none;">
                 <span class="close-btn" style="color: white; text-shadow: 0 0 15px black; font-size: 3rem;">&times;</span>
             </div>
             <img src="image_01d1a0.png" alt="Şair Misal.i" style="width: 80vw; max-width: 350px; aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 5px solid var(--accent-color); box-shadow: 0 15px 50px rgba(0,0,0,0.9); animation: floatPic 6s ease-in-out infinite;">
@@ -819,11 +836,29 @@ Blühe, deutsches Vaterland!</div>
                 </div>
                 
                 <div id="admin-add-section" style="width: 100%; text-align: left;">
-                    <input type="text" id="admin-add-type" class="auth-input" placeholder="poems / quotes / stories / jokes" value="poems">
-                    <input type="text" id="admin-add-tr-title" class="auth-input" placeholder="TR Başlık / Titel (TR)">
+                    <select id="admin-add-type" class="auth-input" onchange="window.toggleAdminAddFields()">
+                        <option value="poems">Şiir (Gedichte)</option>
+                        <option value="quotes">Söz (Sprüche)</option>
+                        <option value="stories">Kıssa (Geschichten)</option>
+                        <option value="jokes">Fıkra (Witze)</option>
+                        <option value="persons">Önemli Şahsiyet (Persönlichkeiten)</option>
+                        <option value="ticker">Özlü Söz (Ticker)</option>
+                    </select>
+                    
+                    <input type="text" id="admin-add-url" class="auth-input" placeholder="Wikipedia URL (Sadece Şahsiyetler için)" style="display:none;">
+                    
+                    <input type="text" id="admin-add-tr-title" class="auth-input" placeholder="TR Başlık / Titel (TR) veya Şahsiyet Adı">
                     <input type="text" id="admin-add-de-title" class="auth-input" placeholder="DE Başlık / Titel (DE)">
-                    <input type="text" id="admin-add-emoji" class="auth-input" placeholder="Emoji / Icon (Örn: 🌟)">
-                    <textarea id="admin-add-tr-text" class="auth-input" rows="4" placeholder="TR İçerik / Text (TR)"></textarea>
+                    
+                    <div id="admin-add-emoji-wrapper">
+                        <div style="margin-bottom: 5px; color:#cbd5e1; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                            <span>Emoji Seç:</span> <span id="selected-add-emoji" style="font-size: 1.5rem; line-height: 1;">✨</span>
+                        </div>
+                        <div class="emoji-picker" id="emoji-picker-add"></div>
+                        <input type="hidden" id="admin-add-emoji" value="✨">
+                    </div>
+                    
+                    <textarea id="admin-add-tr-text" class="auth-input" rows="4" placeholder="TR İçerik / Text (TR) veya Şahsiyet Sözü"></textarea>
                     <textarea id="admin-add-de-text" class="auth-input" rows="4" placeholder="DE İçerik / Text (DE)"></textarea>
                     <button class="reset-btn" onclick="window.adminAddContent()">İçerik Ekle / Hinzufügen</button>
                 </div>
@@ -834,14 +869,26 @@ Blühe, deutsches Vaterland!</div>
                         <option value="quotes">Söz (Sprüche)</option>
                         <option value="stories">Kıssa (Geschichten)</option>
                         <option value="jokes">Fıkra (Witze)</option>
+                        <option value="persons">Önemli Şahsiyet (Persönlichkeiten)</option>
+                        <option value="ticker">Özlü Söz (Ticker)</option>
                     </select>
                     <select id="admin-edit-item-select" class="auth-input" onchange="window.adminSelectItemForEdit()">
                         <option value="">-- Seçiniz --</option>
                     </select>
+                    
                     <div id="admin-edit-fields" style="display:none; width: 100%;">
+                        <input type="text" id="admin-edit-url" class="auth-input" placeholder="Wikipedia URL" style="display:none;">
                         <input type="text" id="admin-edit-tr-title" class="auth-input" placeholder="TR Başlık">
                         <input type="text" id="admin-edit-de-title" class="auth-input" placeholder="DE Başlık">
-                        <input type="text" id="admin-edit-emoji" class="auth-input" placeholder="Emoji">
+                        
+                        <div id="admin-edit-emoji-wrapper">
+                            <div style="margin-bottom: 5px; color:#cbd5e1; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                                <span>Emoji Seç:</span> <span id="selected-edit-emoji" style="font-size: 1.5rem; line-height: 1;">✨</span>
+                            </div>
+                            <div class="emoji-picker" id="emoji-picker-edit"></div>
+                            <input type="hidden" id="admin-edit-emoji" value="✨">
+                        </div>
+                        
                         <textarea id="admin-edit-tr-text" class="auth-input" rows="4" placeholder="TR İçerik"></textarea>
                         <textarea id="admin-edit-de-text" class="auth-input" rows="4" placeholder="DE İçerik"></textarea>
                         <div style="display:flex; gap:10px; width: 100%;">
@@ -934,12 +981,27 @@ Blühe, deutsches Vaterland!</div>
         </div>
     </div>
 
+    <div class="modal high-z-modal" id="shareModal" onclick="window.closeAllModals(event)">
+        <div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeAllModals(event)"><span class="close-btn">&times;</span></div>
+            <div class="modal-body" style="padding-top: 20px;">
+                <div style="font-size: 3rem; color: var(--accent-color); margin-bottom: 10px;"><i class="fas fa-share-alt"></i></div>
+                <h2 class="game-title" style="font-size: 1.8rem; border-bottom: none; padding-top: 0;">Paylaş / Teilen</h2>
+                <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 20px;">Bu eseri sevdiklerinle paylaş.</p>
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                    <button class="reset-btn" onclick="window.copyShareText()"><i class="fas fa-copy"></i> Metni Kopyala (Kopieren)</button>
+                    <button class="reset-btn" style="background: #25D366 !important; color: white !important;" onclick="window.shareToWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp'ta Paylaş</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="m-login-modal" onclick="window.closeAllModals(event)">
         <div class="modal-content auth-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="window.closeAllModals(event)"><span class="close-btn">&times;</span></div>
             <h2 style="color: var(--accent-color); font-family: 'Playfair Display', serif; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px; margin-bottom: 20px; padding-top: 10px;">Giriş Yap</h2>
             <div style="display: flex; flex-direction: column;">
-                <input type="text" id="m-login-user" class="auth-input" placeholder="Kullanıcı Adı (Username)" onkeypress="if(event.key === 'Enter') window.m_login()">
+                <input type="text" id="m-login-user" class="auth-input" placeholder="Kullanıcı Adı veya Email" onkeypress="if(event.key === 'Enter') window.m_login()">
                 <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 15px;">
                     <input type="password" id="m-login-pass" class="auth-input" placeholder="Şifre (Passwort)" style="width: 100%; padding-right: 40px; margin-bottom: 0;" onkeypress="if(event.key === 'Enter') window.m_login()">
                     <i class="fas fa-eye" onmousedown="document.getElementById('m-login-pass').type='text'; this.style.color='#d4af37';" onmouseup="document.getElementById('m-login-pass').type='password'; this.style.color='#cbd5e1';" onmouseleave="document.getElementById('m-login-pass').type='password'; this.style.color='#cbd5e1';" ontouchstart="document.getElementById('m-login-pass').type='text'; this.style.color='#d4af37';" ontouchend="document.getElementById('m-login-pass').type='password'; this.style.color='#cbd5e1';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #cbd5e1; cursor: pointer; z-index: 10; font-size: 1.3rem; padding: 5px;"></i>
@@ -1260,26 +1322,28 @@ Blühe, deutsches Vaterland!</div>
     </div>
 
 <script type="text/javascript">
-// PROBLEM 5 FIX: HTML'deki translate="no" etiketini kaldırıyoruz ki Google Translate çalışabilsin!
+// PROBLEM 6 FIX: Translate engelini kaldır ve Google Translate API'yi başlat
 document.documentElement.removeAttribute('translate');
-
 function googleTranslateElementInit() {
-    new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'tr,de,en,fr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false}, 'google_translate_element');
+    new google.translate.TranslateElement({
+        pageLanguage: 'tr', 
+        includedLanguages: 'tr,de,en,fr,it,es,ar,iw', 
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE, 
+        autoDisplay: false
+    }, 'google_translate_element');
 }
 </script>
 <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
-// ================= 1. TICKER QUOTES (50 Özlü Sözler) =================
-window.tickerQuotes = [
-{tr: "Aşk imiş her ne var alemde. (Fuzûlî)", de: "Liebe ist alles, was im Universum existiert."}, {tr: "Ne olursan ol, yine gel. (Mevlânâ)", de: "Komm, wer immer du bist."}, {tr: "Uzun ince bir yoldayım. (Âşık Veysel)", de: "Ich befinde mich auf einem langen, schmalen Weg."}, {tr: "Yaşamak şakaya gelmez. (Nâzım Hikmet)", de: "Das Leben ist kein Scherz."}, {tr: "Bildiğim tek şey, hiçbir şey bilmediğimdir. (Sokrates)", de: "Ich weiß, dass ich nichts weiß."}, {tr: "Phantasie ist wichtiger als Wissen. (Albert Einstein)", de: "Hayal gücü bilgiden daha önemlidir."}, {tr: "Ohne Musik wäre das Leben ein Irrtum. (Nietzsche)", de: "Müziksiz bir hayat hatadır."}, {tr: "Ernst ist das Leben, heiter ist die Kunst. (Schiller)", de: "Hayat ciddidir, sanat ise neşeli."}, {tr: "Und jedem Anfang wohnt ein Zauber inne. (Hesse)", de: "Ve her başlangıçta bir sihir vardır."}, {tr: "Habe Mut, dich deines eigenen Verstandes zu bedienen. (Kant)", de: "Kendi aklını kullanma cesaretini göster."},
+// ================= 1. TICKER QUOTES (Standart Özlü Sözler) =================
+window.defaultTickerQuotes = [
+{tr: "Aşk imiş her ne var alemde. (Fuzûlî)", de: "Liebe ist alles, was im Universum existiert."}, {tr: "Ne olursan ol, yine gel. (Mevlânâ)", de: "Komm, wer immer du bist."}, {tr: "Uzun ince bir yoldayım. (Âşık Veysel)", de: "Ich befinde mich auf einem langen, schmalen Weg."}, {tr: "Yaşamak şakaya gelmez. (Nâzım Hikmet)", de: "Das Leben ist kein Scherz."}, {tr: "Bildiğim tek şey, hiçbir şey bilmediğimdir. (Sokrates)", de: "Ich weiß, dass ich nichts weiß."}, {tr: "Phantasie ist wichtiger als Wissen. (Albert Einstein)", de: "Hayal gücü bilgiden daha önemlidir."}, {tr: "Ohne Musik wäre das Leben ein Irrtum. (Nietzsche)", de: "Müziksiz eine Leben ist ein Irrtum."}, {tr: "Ernst ist das Leben, heiter ist die Kunst. (Schiller)", de: "Hayat ciddidir, sanat ise neşeli."}, {tr: "Und jedem Anfang wohnt ein Zauber inne. (Hesse)", de: "Ve her başlangıçta bir sihir vardır."}, {tr: "Habe Mut, dich deines eigenen Verstandes zu bedienen. (Kant)", de: "Kendi aklını kullanma cesaretini göster."},
 {tr: "Güzellik baktığın şeyde değil, bakışında saklıdır. (Mevlânâ)", de: "Schönheit liegt nicht im Betrachteten, sondern im Blick."}, {tr: "Düşünüyorum, öyleyse varım. (Descartes)", de: "Ich denke, also bin ich."}, {tr: "Kendini bil. (Sokrates)", de: "Erkenne dich selbst."}, {tr: "Zaman en iyi ilaçtır.", de: "Die Zeit heilt alle Wunden."}, {tr: "Güneş her gün yenidir. (Herakleitos)", de: "Die Sonne ist jeden Tag neu."}, {tr: "Her şey akar. (Herakleitos)", de: "Alles fließt (Panta rhei)."}, {tr: "Mutluluk, kendine yetmektir. (Aristoteles)", de: "Glück ist Selbstgenügsamkeit."}, {tr: "Bana bir dayanak noktası verin, dünyayı yerinden oynatayım. (Arşimet)", de: "Gebt mir einen festen Punkt, und ich hebe die Welt aus den Angeln."}, {tr: "Deneyimsiz akıl, kanatsız kuşa benzer.", de: "Verstand ohne Erfahrung ist wie ein Vogel ohne Flügel."}, {tr: "Güçlükler başarının değerini artırır.", de: "Schwierigkeiten erhöhen den Wert des Erfolgs."},
-{tr: "Eğitim, meyvenin kendisi değil, bilgi ağacından meyve toplama sanatıdır.", de: "Bildung ist die Kunst, Früchte vom Baum des Wissens zu pflücken."}, {tr: "Bilgi güçtür. (Francis Bacon)", de: "Wissen ist Macht."}, {tr: "İnsan, insanın kurdudur. (Hobbes)", de: "Der Mensch ist dem Menschen ein Wolf."}, {tr: "Boş başaklar dik durur.", de: "Leere Ähren stehen aufrecht."}, {tr: "Sevgi, her şeyin ilacıdır.", de: "Liebe ist die Medizin für alles."}, {tr: "Gülü seven dikenine katlanır.", de: "Wer die Rose liebt, nimmt die Dornen in Kauf."}, {tr: "Sabır acıdır ama meyvesi tatlıdır.", de: "Geduld ist bitter, aber ihre Frucht ist süß."}, {tr: "Söz gümüşse sükut altındır.", de: "Reden ist Silber, Schweigen ist Gold."}, {tr: "Akıl yaşta değil baştadır.", de: "Verstand kommt nicht mit den Jahren, sondern ist im Kopf."}, {tr: "Damlaya damlaya göl olur.", de: "Steter Tropfen höhlt den Stein."},
-{tr: "Zor yollar, güzel yerlere çıkar.", de: "Schwierige Wege führen an schöne Orte."}, {tr: "Hayat, sen planlar yaparken başından geçenlerdir. (John Lennon)", de: "Leben ist das, was passiert, während du eifrig dabei bist, andere Pläne zu machen."}, {tr: "Karanlığa küfredeceğine bir mum yak. (Konfüçyüs)", de: "Zünde eine Kerze an, anstatt über die Dunkelheit zu fluchen."}, {tr: "Her kışın kalbinde titreyen bir ilkbahar vardır.", de: "Im Herzen jedes Winters zittert ein Frühling."}, {tr: "Hiçbir şey imkansız değildir.", de: "Nichts ist unmöglich."}, {tr: "Gülümsemek, en güzel makyajdır.", de: "Ein Lächeln ist das schönste Make-up."}, {tr: "Kendin ol, diğerleri zaten kapıldı. (Oscar Wilde)", de: "Sei du selbst, alle anderen sind bereits vergeben."}, {tr: "Yarın yeni bir gün.", de: "Morgen ist ein neuer Tag."}, {tr: "Hayallerinin peşinden koş.", de: "Folge deinen Träumen."}, {tr: "Küçük şeyler, büyük farklar yaratır.", de: "Kleine Dinge machen große Unterschiede."},
-{tr: "Bugün, geri kalan hayatının ilk günü.", de: "Heute ist der erste Tag vom Rest deines Lebens."}, {tr: "En büyük zafer, düşmemek değil, her düştüğünde ayağa kalkmaktır.", de: "Der größte Ruhm liegt nicht darin, nie zu fallen, sondern jedes Mal wieder aufzustehen."}, {tr: "Kalp, gözün göremediğini görür.", de: "Das Herz sieht, was für das Auge unsichtbar ist."}, {tr: "Gerçek dost, sen kendine inanmadığında bile sana inanandır.", de: "Ein wahrer Freund glaubt an dich, selbst wenn du nicht an dich glaubst."}, {tr: "Gelecek, bugünden hazırlananlara aittir.", de: "Die Zukunft gehört denen, die sich heute darauf vorbereiten."}, {tr: "En iyi öğretmen, en zor deneyimdir.", de: "Der beste Lehrer ist die härteste Erfahrung."}, {tr: "Umut, uyanık adamın rüyasıdır. (Aristoteles)", de: "Die Hoffnung ist der Traum eines Wachenden."}, {tr: "Ruhun güzelliği, bedenin güzelliğinden üstündür.", de: "Die Schönheit der Seele übertrifft die Schönheit des Körpers."}, {tr: "Affetmek, geçmişi değiştirmez ama geleceğin önünü açar.", de: "Vergebung ändert nicht die Vergangenheit, aber sie befreit die Zukunft."}, {tr: "İçindeki ışığı bul. ~ Şair Misal.i", de: "Finde das Licht in dir. ~ Şair Misal.i"}
+{tr: "Bilgi güçtür. (Francis Bacon)", de: "Wissen ist Macht."}, {tr: "İnsan, insanın kurdudur. (Hobbes)", de: "Der Mensch ist dem Menschen ein Wolf."}, {tr: "Boş başaklar dik durur.", de: "Leere Ähren stehen aufrecht."}, {tr: "Sevgi, her şeyin ilacıdır.", de: "Liebe ist die Medizin für alles."}, {tr: "Sabır acıdır ama meyvesi tatlıdır.", de: "Geduld ist bitter, aber ihre Frucht ist süß."}, {tr: "Söz gümüşse sükut altındır.", de: "Reden ist Silber, Schweigen ist Gold."}, {tr: "Akıl yaşta değil baştadır.", de: "Verstand kommt nicht mit den Jahren, sondern ist im Kopf."}, {tr: "Damlaya damlaya göl olur.", de: "Steter Tropfen höhlt den Stein."}, {tr: "Zor yollar, güzel yerlere çıkar.", de: "Schwierige Wege führen an schöne Orte."}, {tr: "Gülümsemek, en güzel makyajdır.", de: "Ein Lächeln ist das schönste Make-up."}
 ];
 
-// ================= 2. DATENBANK (110 Inhalte komplett ungekürzt) =================
+// ================= 2. EKSİKSİZ VERİTABANI =================
 window.defaultContentDB = {
 poems: [
 {id:'p1',trTitle:"AŞK",deTitle:"LIEBE",emoji:"❤️",trText:"Kalp atışımda aşk var nefesimde sen,\nGül bülbüle yâr gönlüme de sen,\nToprağa yağmur yağar yüreğime sen,\nÖyle ya canım, kanımsın diğer de yarımsın.",deText:"In meinem Herzschlag ist Liebe, in meinem Atem bist du,\nDie Rose für die Nachtigall, für mein Herz bist du,\nRegen fällt auf die Erde, auf mein Herz fällst du,\nSo ist es, mein Leben, du bist mein Blut, meine andere Hälfte bist du."},
@@ -1355,17 +1419,7 @@ stories: [
 {id: 's17', trTitle: "Kral ve Kayalar", deTitle: "Der König und der Fels", emoji: "🪨", trText: "Eski zamanlarda bir kral, halkının durumunu görmek için ana yola büyük bir kaya koydurur ve gizlenip izlemeye başlar.\n\nÜlkenin en zengin tüccarları, saray görevlileri gelir, kayanın etrafından dolaşır ve kralı yolların bakımını yapmamakla suçlarlar.\n\nSonunda bir köylü gelir, sırtındaki yükü yere bırakır ve var gücüyle kayayı iterek yoldan çeker. Kayanın durduğu yerde bir kese altın ve kralın bir notu vardır:\n\"Bu altınlar, engeli ortadan kaldıran kişiye aittir.\"\n\nHer engel, durumumuzu iyileştirmek için bir fırsattır.", deText: "In alten Zeiten ließ ein König einen großen Felsbrocken auf die Hauptstraße legen, um sein Volk zu prüfen, und versteckte sich.\n\nDie reichsten Kaufleute und Palastbeamten kamen, gingen um den Felsen herum und beschuldigten den König, die Straßen nicht zu pflegen.\n\nSchließlich kam ein Bauer, legte seine Last ab und schob den Felsen mit aller Kraft aus dem Weg. Dort, wo der Felsen lag, fand er einen Beutel voll Gold und eine Notiz des Königs:\n\"Dieses Gold gehört demjenigen, der das Hindernis beseitigt.\"\n\nJedes Hindernis ist eine Gelegenheit, unsere Situation zu verbessern."},
 {id: 's18', trTitle: "İki Kurbağa", deTitle: "Zwei Frösche", emoji: "🐸", trText: "Bir grup kurbağa ormanda ilerlerken ikisi derin bir çukura düşer. Diğer kurbağalar çukurun etrafında toplanır ve çukurun ne kadar derin olduğunu görünce onlara \"Zıplamayı bırakın, buradan asla çıkamazsınız, öleceksiniz\" diye bağırırlar.\n\nKurbağalardan biri söylenenleri duyar, umudunu keser ve pes edip ölür. Diğeri ise durmadan zıplamaya devam eder ve sonunda inanılmaz bir sıçrayışla çukurdan çıkar.\n\nDiğerleri sorar: \"Söylediklerimizi duymadın mı?\"\nKurbağa işaret diliyle anlatır; meğer o sağırdır ve yukarıdakilerin onu cesaretlendirdiğini sanmıştır.\n\nOlumsuz sözlere karşı sağır olmak bazen hayat kurtarır.", deText: "Als eine Gruppe von Fröschen durch den Wald wanderte, fielen zwei in eine tiefe Grube. Die anderen versammelten sich am Rand, sahen wie tief es war und riefen: \"Hört auf zu springen, ihr kommt da nie raus, ihr werdet sterben.\"\n\nEiner der Frösche hörte es, verlor die Hoffnung, gab auf und starb. Der andere sprang unermüdlich weiter und schaffte es schließlich mit einem unglaublichen Sprung nach draußen.\n\nDie anderen fragten: \"Hast du nicht gehört, was wir gesagt haben?\"\nDer Frosch erklärte in Gebärdensprache; er war taub und dachte, die anderen hätten ihn angefeuert.\n\nTaub gegenüber negativen Worten zu sein, rettet manchmal das Leben."},
 {id: 's19', trTitle: "Bilge ve Akrep", deTitle: "Der Weise und der Skorpion", emoji: "🦂", trText: "Bir bilge nehir kenarında otururken, suya düşen ve boğulmak üzere olan bir akrep görür. Elini uzatıp onu kurtarmak ister ama akrep onu sokar.\n\nBilge elini çeker, acı içinde kıvranır ama akrep tekrar suya düşer. Bilge pes etmez, bir dal parçası bulur ve akrebi sudan çıkarıp kurtarır.\n\nBunu gören biri sorar: \"Seni sokmasına rağmen neden onu kurtardın?\"\nBilge gülümser: \"Akrebin doğasında sokmak vardır, benim doğamda ise sevmek ve kurtarmak. Neden onun doğası, benim doğamı değiştirsin ki?\"", deText: "Ein Weiser saß am Flussufer und sah einen Skorpion, der ins Wasser gefallen war und zu ertrinken drohte. Er streckte die Hand aus, um ihn zu retten, aber der Skorpion stach ihn.\n\nDer Weise zog die Hand zurück, krümmte sich vor Schmerz, doch der Skorpion fiel wieder ins Wasser. Der Weise gab nicht auf, nahm einen Ast und rettete den Skorpion aus dem Wasser.\n\nEin Beobachter fragte: \"Warum hast du ihn gerettet, obwohl er dich gestochen hat?\"\nDer Weise lächelte: \"Es liegt in der Natur des Skorpions zu stechen, und in meiner Natur zu lieben und zu retten. Warum sollte seine Natur meine verändern?\""},
-{id: 's20', trTitle: "Kahve Çekirdeği", deTitle: "Die Kaffeebohne", emoji: "☕", trText: "Kızı, babasına hayatın zorluklarından şikayet eder. Babası onu mutfağa götürür. Üç cezveye su koyup kaynatır. Birine havuç, birine yumurta, diğerine ise çekilmiş kahve çekirdeği atar.\n\nYarım saat sonra kızına sorar: \"Ne görüyorsun?\"\nKız cevaplar: \"Havuç yumuşamış, yumurta sertleşmiş, kahve ise suya rengini ve kokusunu vermiş.\"\n\nBabası der ki: \"Hayatta zorluklar (kaynar su) geldiğinde sen hangisi olacaksın? Havuç gibi yumuşayıp ezilecek misin? Yumurta gibi kalbin mi sertleşecek? Yoksa kahve gibi o zorluğu bile güzelleştirip etrafına koku mu saçacaksın?\"", deText: "Eine Tochter beklagt sich bei ihrem Vater über die Härten des Lebens. Er nimmt sie mit in die Küche. Er kocht Wasser in drei Töpfen. In den ersten gibt er Karotten, in den zweiten ein Ei und in den dritten Kaffeebohnen.\n\nNach einer halben Stunde fragt er: \"Was siehst du?\"\nDie Tochter antwortet: \"Die Karotte ist weich geworden, das Ei ist hart geworden und der Kaffee hat dem Wasser Farbe und Duft verliehen.\"\n\nDer Vater sagt: \"Wenn Schwierigkeiten (kochendes Wasser) kommen, wer wirst du sein? Wirst du weich und schwach wie die Karotte? Wird dein Herz hart wie das Ei? Oder wirst du wie der Kaffee selbst die Schwierigkeit in etwas Schönes verwandeln?\""},
-{id: 's21', trTitle: "Çivili Çit", deTitle: "Der Zaun mit den Nägeln", emoji: "🔨", trText: "Öfkesini kontrol edemeyen bir çocuğa, babası bir torba çivi verir. \"Her öfkelendiğinde tahta çite bir çivi çak\" der. Çocuk ilk gün 37 çivi çakar.\n\nZamanla öfkesini kontrol etmeyi öğrenir ve çaktığı çivi sayısı azalır. Sonunda hiç çivi çakmadığı bir gün gelir. Babası ona: \"Şimdi öfkeni tuttuğun her gün için bir çiviyi sök\" der.\n\nAylar sonra tüm çiviler sökülür. Babası çocuğu çitin yanına götürür: \"Aferin oğlum, ama çitteki deliklere bak. Çit asla eskisi gibi pürüzsüz olmayacak. Öfkeyle söylenen sözler, kalplerde böyle izler bırakır.\"", deText: "Ein Vater gab seinem Sohn, der seine Wut nicht kontrollieren konnte, einen Beutel voller Nägel. \"Jedes Mal, wenn du wütend wirst, schlage einen Nagel in den Holzzaun\", sagte er. Am ersten Tag schlug der Junge 37 Nägel ein.\n\nMit der Zeit lernte er, sich zu beherrschen, und es wurden weniger. Eines Tages schlug er keinen einzigen ein. Der Vater sagte: \"Zieh nun für jeden Tag, an dem du ruhig bleibst, einen Nagel heraus.\"\n\nMonate später waren alle Nägel draußen. Der Vater sagte: \"Gut gemacht, mein Sohn. Aber schau dir die Löcher an. Der Zaun wird nie wieder so makellos sein wie zuvor. Im Zorn gesprochene Worte hinterlassen genau solche Narben in den Herzen.\""},
-{id: 's22', trTitle: "Sağır Oduncu", deTitle: "Der taube Holzfäller", emoji: "🪓", trText: "Köyün birinde ormana sürekli odun kesmeye giden bir adam yaşarmış. Baltasını o kadar yavaş ve sakince vururmuş ki, diğer oduncular onunla dalga geçer, \"Bu hızla bir ağacı bir ayda kesersin\" derlermiş.\n\nFakat akşam olduğunda, en yavaş vuran bu oduncunun arabası en çok odunla dolu olurmuş.\n\nBir gün sırrını sormuşlar. Oduncu gülümsemiş: \"Ben her vuruştan sonra baltamı bilerim. Siz ise kör baltayla hırsla vurmaya devam edersiniz. Unutmayın, önemli olan çok vurmak değil, keskin vurmaktır.\"", deText: "In einem Dorf lebte ein Holzfäller, der immer in den Wald ging. Er schwang seine Axt so langsam und ruhig, dass die anderen ihn auslachten: \"In dem Tempo brauchst du einen Monat für einen Baum.\"\n\nAber am Abend war der Wagen dieses langsamsten Holzfällers immer mit dem meisten Holz beladen.\n\nEines Tages fragten sie ihn nach seinem Geheimnis. Er lächelte: \"Ich schärfe meine Axt nach jedem Schlag. Ihr hingegen schlagt blind und voller Gier weiter. Denkt daran: Es kommt nicht darauf an, oft zu schlagen, sondern scharf zu schlagen.\""},
-{id: 's23', trTitle: "Üç Filtre (Sokrates)", deTitle: "Die drei Siebe (Sokrates)", emoji: "🏛️", trText: "Bir adam heyecanla Sokrates'in yanına gelir: \"Arkadaşın hakkında ne duyduğumu biliyor musun?\"\nSokrates onu durdurur: \"Bana bunu söylemeden önce, üç filtreden geçirelim.\n\nBirincisi Gerçeklik Filtresi: Bana söyleyeceğin şeyin kesinlikle doğru olduğundan emin misin?\" (Adam: Hayır, sadece duydum.)\n\"İkincisi İyilik Filtresi: Arkadaşım hakkında bana iyi bir şey mi söyleyeceksin?\" (Adam: Hayır, tam tersi.)\n\"Üçüncüsü İşe Yararlık Filtresi: Söyleyeceğin şey benim işime yarayacak mı?\" (Adam: Hayır, yaramayacak.)\n\nSokrates gülümser: \"Eğer doğru değilse, iyi değilse ve işe yaramayacaksa, neden bana söyleyesin ki?\"", deText: "Ein Mann kommt aufgeregt zu Sokrates: \"Weißt du, was ich über deinen Freund gehört habe?\"\nSokrates stoppt ihn: \"Bevor du es mir erzählst, lass es uns durch drei Siebe filtern.\n\nErstens das Sieb der Wahrheit: Bist du absolut sicher, dass es wahr ist?\" (Der Mann: Nein, ich habe es nur gehört.)\n\"Zweitens das Sieb der Güte: Ist es etwas Gutes, was du mir über ihn erzählen willst?\" (Der Mann: Nein, im Gegenteil.)\n\"Drittens das Sieb der Nützlichkeit: Ist das, was du mir sagen willst, nützlich für mich?\" (Der Mann: Nein, eigentlich nicht.)\n\nSokrates lächelt: \"Wenn es weder wahr, noch gut, noch nützlich ist, warum solltest du es mir überhaupt erzählen?\""},
-{id: 's24', trTitle: "Aynalı Oda", deTitle: "Das Spiegelzimmer", emoji: "🪞", trText: "Eski bir sarayda, duvarları binlerce küçük aynayla kaplı bir oda varmış. Bir gün bu odaya neşeli bir köpek girmiş. Etrafına bakınca binlerce neşeli, kuyruk sallayan köpek görmüş. Sevinçle havlamış, binlerce köpek de ona sevinçle havlamış. \"Burası harika bir yer!\" diye düşünerek çıkmış.\n\nErtesi gün aynı odaya sinirli ve agresif bir köpek girmiş. Etrafında binlerce sinirli ve dişlerini gösteren köpek görmüş. Korkuyla hırlamış, aynadaki köpekler de ona hırlamış. \"Burası korkunç bir yer!\" diyerek kaçmış.\n\nDünya, aslında kalbimizin bir aynasıdır. Biz ona ne sunarsak, o da bize onu yansıtır.", deText: "In einem alten Palast gab es ein Zimmer, dessen Wände mit tausenden kleinen Spiegeln bedeckt waren. Eines Tages lief ein fröhlicher Hund hinein. Er sah tausende fröhliche, schwanzwedelnde Hunde. Er bellte freudig, und tausende Hunde bellten freudig zurück. \"Dies ist ein wunderbarer Ort!\", dachte er und ging.\n\nAm nächsten Tag lief ein wütender, aggressiver Hund hinein. Er sah tausende wütende, zähnefletschende Hunde. Er knurrte ängstlich, und die Hunde im Spiegel knurrten zurück. \"Dies ist ein schrecklicher Ort!\", sagte er und floh.\n\nDie Welt ist eigentlich ein Spiegel unseres Herzens. Das, was wir ihr geben, reflektiert sie zu uns zurück."},
-{id: 's25', trTitle: "Yaşlı Marangoz", deTitle: "Der alte Zimmermann", emoji: "🏠", trText: "Usta bir marangoz emekli olmaya karar verir. Patronu, en iyi ustasını kaybedeceği için üzülür ve ondan son bir iyilik olarak bir ev daha yapmasını ister.\n\nMarangoz kabul eder ama kalbi artık işinde değildir. Kötü malzemeler kullanır, işçiliği baştan savma yapar. Sadece bir an önce bitirip gitmek ister.\n\nEv bittiğinde, patron gelir, evin anahtarlarını marangoza uzatır ve der ki:\n\"Bu ev benim sana emeklilik hediyemdir. Artık senindir.\"\n\nMarangoz şok olur. Eğer kendi evini yaptığını bilseydi, hiç böyle yapar mıydı? Bizler de her gün kendi hayat evimizi inşa ederiz. Bugün çaktığımız çiviler, yarın içinde yaşayacağımız evi belirler.", deText: "Ein meisterhafter Zimmermann beschließt, in Rente zu gehen. Sein Chef ist traurig, seinen besten Mann zu verlieren, und bittet ihn um einen letzten Gefallen: Er soll noch ein einziges Haus bauen.\n\nDer Zimmermann willigt ein, aber sein Herz ist nicht mehr bei der Sache. Er benutzt schlechte Materialien und arbeitet schlampig. Er will einfach nur fertig werden.\n\nAls das Haus fertig ist, kommt der Chef, überreicht dem Zimmermann die Schlüssel und sagt:\n\"Dieses Haus ist mein Geschenk zu deinem Ruhestand. Es gehört dir.\"\n\nDer Zimmermann ist geschockt. Hätte er gewusst, dass er sein eigenes Haus baut, hätte er es dann so gemacht? Auch wir bauen jeden Tag das Haus unseres Lebens. Die Nägel, die wir heute einschlagen, bestimmen das Haus, in dem wir morgen leben werden."},
-{id: 's26', trTitle: "Aslan ve Fare", deTitle: "Der Löwe und die Maus", emoji: "🦁", trText: "Bir fare uyuyan aslanın üzerinde koşarken aslan uyanır ve onu yakalar. Fare yalvarır: 'Beni bırak, bir gün sana yardımım dokunur.' Aslan güler ama onu bırakır.\nBir gün aslan avcıların ağına yakalanır. Fare gelir, ipleri kemirir ve aslanı kurtarır. Küçük dostlar büyük işler başarabilir.", deText: "Eine Maus weckt einen Löwen. Er fängt sie, aber sie fleht: 'Lass mich, ich helfe dir eines Tages.' Der Löwe lacht, lässt sie aber frei.\nSpäter wird der Löwe in einem Netz gefangen. Die Maus kommt, nagt die Seile durch und rettet ihn. Kleine Freunde können Großes tun."},
-{id: 's27', trTitle: "Karga ve Su Testisi", deTitle: "Die Krähe und der Krug", emoji: "🐦", trText: "Çok susamış bir karga, dibinde biraz su olan bir testi bulur. Gagası suya yetişmez. Karga pes etmez, etraftan topladığı çakıl taşlarını tek tek testiye atar. Su yükselir ve karga kana kana içer. Akıl ve sabır her engeli aşar.", deText: "Eine durstige Krähe findet einen Krug mit etwas Wasser, kommt aber nicht heran. Sie gibt nicht auf, wirft Kieselsteine hinein, das Wasser steigt, und sie trinkt. Verstand und Geduld überwinden alles."},
-{id: 's28', trTitle: "Ağustos Böceği ve Karınca", deTitle: "Grille und Ameise", emoji: "🐜", trText: "Ağustos böceği yaz boyu şarkı söyler, karınca ise kış için yemek toplar. Kış gelince ağustos böceği aç kalır ve karıncadan yardım ister. Karınca: 'Yazın şarkı söyledin, kışın da oyna' der. Bugünden hazırlık yapmayan, yarın ağlar.", deText: "Die Grille singt im Sommer, die Ameise sammelt Essen. Im Winter hungert die Grille und bittet um Hilfe. Die Ameise sagt: 'Im Sommer hast du gesungen, jetzt tanz.' Wer nicht vorsorgt, leidet später."},
-{id: 's29', trTitle: "Altın Yumurtlayan Kaz", deTitle: "Gans mit goldenen Eiern", emoji: "🦢", trText: "Bir çiftçinin altın yumurtlayan bir kazı vardır. Çiftçi daha çabuk zengin olmak için kazın karnını keser, ama içinde hiçbir şey bulamaz. Açgözlülük, elindekini de kaybettirir.", deText: "Ein Bauer hat eine Gans, die goldene Eier legt. Aus Gier schneidet er sie auf, findet aber nichts. Gier führt zum Verlust dessen, was man hat."},
-{id: 's30', trTitle: "Güneş ve Rüzgar", deTitle: "Sonne und Wind", emoji: "🌤️", trText: "Güneş ve rüzgar, bir adamın paltosunu kim çıkaracak diye iddiaya girerler. Rüzgar şiddetle eser ama adam paltosuna daha sıkı sarılır. Güneş ise nazikçe ısıtır ve adam terleyip paltosunu çıkarır. Nezaket, şiddetten daha güçlüdür.", deText: "Sonne und Wind wetten, wer einem Mann den Mantel ausziehen kann. Der Wind bläst stark, der Mann hält ihn fester. Die Sonne wärmt ihn sanft, er schwitzt und zieht ihn aus. Freundlichkeit ist stärker als Gewalt."}
+{id: 's20', trTitle: "Kahve Çekirdeği", deTitle: "Die Kaffeebohne", emoji: "☕", trText: "Kızı, babasına hayatın zorluklarından şikayet eder. Babası onu mutfağa götürür. Üç cezveye su koyup kaynatır. Birine havuç, birine yumurta, diğerine ise çekilmiş kahve çekirdeği atar.\n\nYarım saat sonra kızına sorar: \"Ne görüyorsun?\"\nKız cevaplar: \"Havuç yumuşamış, yumurta sertleşmiş, kahve ise suya rengini ve kokusunu vermiş.\"\n\nBabası der ki: \"Hayatta zorluklar (kaynar su) geldiğinde sen hangisi olacaksın? Havuç gibi yumuşayıp ezilecek misin? Yumurta gibi kalbin mi sertleşecek? Yoksa kahve gibi o zorluğu bile güzelleştirip etrafına koku mu saçacaksın?\"", deText: "Eine Tochter beklagt sich bei ihrem Vater über die Härten des Lebens. Er nimmt sie mit in die Küche. Er kocht Wasser in drei Töpfen. In den ersten gibt er Karotten, in den zweiten ein Ei und in den dritten Kaffeebohnen.\n\nNach einer halben Stunde fragt er: \"Was siehst du?\"\nDie Tochter antwortet: \"Die Karotte ist weich geworden, das Ei ist hart geworden und der Kaffee hat dem Wasser Farbe und Duft verliehen.\"\n\nDer Vater sagt: \"Wenn Schwierigkeiten (kochendes Wasser) kommen, wer wirst du sein? Wirst du weich und schwach wie die Karotte? Wird dein Herz hart wie das Ei? Oder wirst du wie der Kaffee selbst die Schwierigkeit in etwas Schönes verwandeln?\""}
 ],
 jokes: [
 {id: 'j1', trTitle: "Kedi Nerede? (Nasreddin Hoca)", deTitle: "Wo ist die Katze?", emoji: "🐈", trText: "Nasreddin Hoca iki kilo et alır, karısına 'Akşama güzel bir yahni yap' der. Karısı eti pişirir ama komşularıyla afiyetle yer. Akşam Hoca gelince 'Eti kedi yedi' der. Hoca kediyi tutar tartar, kedi tam iki kilo gelir. Hoca sorar: 'Hatun, kedi iki kiloysa et nerede? Et buradaysa kedi nerede?'", deText: "Nasreddin Hodscha kauft zwei Kilo Fleisch und sagt zu seiner Frau: 'Mach ein schönes Gulasch'. Sie kocht es, isst es aber mit den Nachbarn. Abends sagt sie: 'Die Katze hat es gefressen'. Der Hodscha wiegt die Katze, sie wiegt genau zwei Kilo. Er fragt: 'Frau, wenn das die Katze ist, wo ist das Fleisch? Wenn das das Fleisch ist, wo ist die Katze?'"},
@@ -1400,65 +1454,90 @@ jokes: [
 {id: 'j30', trTitle: "Uyku (Temel)", deTitle: "Schlaf", emoji: "😴", trText: "Temel doktora gider: 'Geceleri uyuyamıyorum.' Doktor: 'Neden?' Temel: 'Çünkü rüyamda futbol maçı izliyorum.' Doktor: 'E bu gece izleme.' Temel: 'Olmaz, bu gece final maçı var!'", deText: "Temel geht zum Arzt: 'Ich kann nachts nicht schlafen.' Arzt: 'Warum?' Temel: 'Weil ich im Traum Fußball schaue.' Arzt: 'Dann schau heute Nacht nicht.' Temel: 'Geht nicht, heute ist das Finale!'"}
 ]};
 
-window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.defaultContentDB;
-
-// ================= 3. ZODIACS & GLOBALS =================
-window.zodiacs = [
-    {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]},
-    {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]},
-    {id:'gemini', icon:'♊', tr:'İkizler', de:'Zwillinge', start:[5,21], end:[6,21]},
-    {id:'cancer', icon:'♋', tr:'Yengeç', de:'Krebs', start:[6,22], end:[7,22]},
-    {id:'leo', icon:'♌', tr:'Aslan', de:'Löwe', start:[7,23], end:[8,22]},
-    {id:'virgo', icon:'♍', tr:'Başak', de:'Jungfrau', start:[8,23], end:[9,22]},
-    {id:'libra', icon:'♎', tr:'Terazi', de:'Waage', start:[9,23], end:[10,22]},
-    {id:'scorpio', icon:'♏', tr:'Akrep', de:'Skorpion', start:[10,23], end:[11,21]},
-    {id:'sagittarius', icon:'♐', tr:'Yay', de:'Schütze', start:[11,22], end:[12,21]},
-    {id:'capricorn', icon:'♑', tr:'Oğlak', de:'Steinbock', start:[12,22], end:[1,19]},
-    {id:'aquarius', icon:'♒', tr:'Kova', de:'Wassermann', start:[1,20], end:[2,18]},
-    {id:'pisces', icon:'♓', tr:'Balık', de:'Fische', start:[2,19], end:[3,20]}
-];
-
-window.getZodiacSign = function(day, month) {
-    if(!day || !month) return null;
-    let d = parseInt(day); let m = parseInt(month);
-    for(let z of window.zodiacs) {
-        if ((m === z.start[0] && d >= z.start[1]) || (m === z.end[0] && d <= z.end[1])) return z;
-    }
-    return window.zodiacs[9]; 
-};
-
-window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || { "misali": { username: "misali", name: "Şair", surname: "Misal.i", email: "sairmisali25@gmail.com", day: "3", month: "6", year: "1980", pass: "1234", role: "admin", alerts: [] } };
+// ================= 3. GLOBALS & HELPERS =================
+window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || { "misali": { username: "misali", name: "Şair", surname: "Misal.i", email: "sairmisali25@gmail.com", day: "3", month: "6", year: "1980", pass: "1234", role: "admin", alerts: [], approved: true } };
 window.currentUser = JSON.parse(localStorage.getItem('misaliUser')) || JSON.parse(sessionStorage.getItem('misaliUser')) || null;
+window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.defaultContentDB;
+if(!window.contentDB.persons) window.contentDB.persons = [];
+if(!window.contentDB.ticker) window.contentDB.ticker = [];
+
 window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
 window.userPoemsDB = JSON.parse(localStorage.getItem('misaliUserPoems')) || [];
 window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB')) || []; 
+window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
 window.onlineUsersDB = JSON.parse(localStorage.getItem('misaliOnlineUsers')) || [];
 window.adminLogs = JSON.parse(localStorage.getItem('misaliAdminLogs')) || [];
-window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
 window.badWords = ["küfür", "aptal", "salak", "pislik", "lan", "siktir", "orospu"];
 
-// ================= 4. YENİ ETİKET MANTIĞI =================
-window.isItemNew = function(timestamp) {
-    if(!timestamp) return false;
-    const sevenDays = 7 * 24 * 60 * 60 * 1000;
-    return (Date.now() - timestamp) < sevenDays;
+window.zodiacs = [
+    {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]}, {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]},
+    {id:'gemini', icon:'♊', tr:'İkizler', de:'Zwillinge', start:[5,21], end:[6,21]}, {id:'cancer', icon:'♋', tr:'Yengeç', de:'Krebs', start:[6,22], end:[7,22]},
+    {id:'leo', icon:'♌', tr:'Aslan', de:'Löwe', start:[7,23], end:[8,22]}, {id:'virgo', icon:'♍', tr:'Başak', de:'Jungfrau', start:[8,23], end:[9,22]},
+    {id:'libra', icon:'♎', tr:'Terazi', de:'Waage', start:[9,23], end:[10,22]}, {id:'scorpio', icon:'♏', tr:'Akrep', de:'Skorpion', start:[10,23], end:[11,21]},
+    {id:'sagittarius', icon:'♐', tr:'Yay', de:'Schütze', start:[11,22], end:[12,21]}, {id:'capricorn', icon:'♑', tr:'Oğlak', de:'Steinbock', start:[12,22], end:[1,19]},
+    {id:'aquarius', icon:'♒', tr:'Kova', de:'Wassermann', start:[1,20], end:[2,18]}, {id:'pisces', icon:'♓', tr:'Balık', de:'Fische', start:[2,19], end:[3,20]}
+];
+
+window.getZodiacSign = function(day, month) {
+    if(!day || !month) return null; let d = parseInt(day); let m = parseInt(month);
+    for(let z of window.zodiacs) { if ((m === z.start[0] && d >= z.start[1]) || (m === z.end[0] && d <= z.end[1])) return z; }
+    return window.zodiacs[9]; 
 };
 
-// ================= 5. SYSTEM INITIALISIERUNG & TICKER & UHR =================
+window.isItemNew = function(timestamp) { if(!timestamp) return false; return (Date.now() - timestamp) < (7 * 24 * 60 * 60 * 1000); };
+
+// ================= 4. BİLDİRİMLER & LOGLAR (PROBLEM 2 & 13) =================
+// Glocke ve Zähler sadece Admin görecek ve silinene kadar kaybolmayacak!
+window.updateNotifyBadge = function() {
+    const badge = document.getElementById('user-notify-badge');
+    const adminBadge = document.getElementById('admin-badge');
+    const count = window.adminMessages.length;
+    
+    if(window.currentUser && window.currentUser.role === 'admin') {
+        if(badge) { badge.innerText = count; badge.classList.toggle('hidden', count === 0); }
+        if(adminBadge) { adminBadge.innerText = count; adminBadge.classList.toggle('hidden', count === 0); }
+    } else {
+        if(badge) badge.classList.add('hidden');
+        if(adminBadge) adminBadge.classList.add('hidden');
+    }
+};
+
+window.m_sendNotify = function(msg, emoji = "🔔") {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString('tr-TR');
+    window.adminMessages.push({ text: `${emoji} ${msg}`, time: `${dateStr} ${timeStr}`, timestamp: now.getTime() });
+    localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
+    window.updateNotifyBadge();
+};
+
+window.addAdminLog = function(action, user = "Sistem") {
+    const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    window.adminLogs.push({ user: user, action: action, time: time }); 
+    localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
+};
+
+// ================= 5. STARTUP & CLOCK =================
 document.addEventListener('DOMContentLoaded', () => {
-    window.initContent();
-    window.generateFihrist();
+    window.initContent(); 
+    window.generateFihrist(); 
     window.renderUserWorksSidebar();
-    window.checkRemember();
-    window.fetchWeather();
+    window.checkRemember(); 
+    window.fetchWeather(); 
     window.initTicker();
     window.navigate(localStorage.getItem('misaliActivePage') || 'home-view');
-    window.renderOnlineUsers();
-
-    setTimeout(() => {
-        if (document.getElementById('chat-box')) window.renderChat();
-        if (document.getElementById('user-poems-list')) window.renderUserPoems();
-    }, 500);
+    window.renderOnlineUsers(); 
+    window.updateNotifyBadge();
+    
+    const poemInput = document.getElementById('user-poem-input');
+    if(poemInput) {
+        poemInput.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter' && e.shiftKey) { 
+                e.preventDefault(); 
+                window.submitUserPoem(); 
+            }
+        });
+    }
 
     const pic = document.getElementById('home-profile-pic');
     const bubbleWrapper = document.getElementById('home-bubble-wrapper');
@@ -1485,35 +1564,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(() => {
         const now = new Date();
-        const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
-        const dateStr = String(now.getDate()).padStart(2,'0') + '.' + String(now.getMonth()+1).padStart(2,'0') + '.' + now.getFullYear();
-        const dClock = document.getElementById('digi-clock'); const dDate = document.getElementById('digi-date');
-        if(dClock) dClock.innerText = timeStr; if(dDate) dDate.innerText = dateStr;
-
+        document.getElementById('digi-clock').innerText = now.toLocaleTimeString('tr-TR');
+        document.getElementById('digi-date').innerText = now.toLocaleDateString('tr-TR');
         const sec = now.getSeconds() * 6; const min = now.getMinutes() * 6 + (now.getSeconds() * 0.1); const hr = (now.getHours() % 12) * 30 + (now.getMinutes() * 0.5);
-        const hEl = document.getElementById('hour-hand'); const mEl = document.getElementById('min-hand'); const sEl = document.getElementById('sec-hand');
-        if(hEl) hEl.style.transform = `translateX(-50%) rotate(${hr}deg)`; if(mEl) mEl.style.transform = `translateX(-50%) rotate(${min}deg)`; if(sEl) sEl.style.transform = `translateX(-50%) rotate(${sec}deg)`;
+        if(document.getElementById('hour-hand')) {
+            document.getElementById('hour-hand').style.transform = `translateX(-50%) rotate(${hr}deg)`;
+            document.getElementById('min-hand').style.transform = `translateX(-50%) rotate(${min}deg)`;
+            document.getElementById('sec-hand').style.transform = `translateX(-50%) rotate(${sec}deg)`;
+        }
     }, 1000);
 });
 
+// TICKER DİNAMİK LOAD
 window.initTicker = function() {
+    let arr = [...window.defaultTickerQuotes];
+    if(window.contentDB.ticker && window.contentDB.ticker.length > 0) {
+        arr = window.contentDB.ticker;
+    }
     const tickerEl = document.getElementById('quote-ticker');
-    if(!tickerEl || window.tickerQuotes.length === 0) return;
+    if(!tickerEl || arr.length === 0) return;
+    
     let currentIndex = 0;
     function showNextQuote() {
-        const q = window.tickerQuotes[currentIndex];
+        const q = arr[currentIndex];
         tickerEl.classList.remove('show');
         setTimeout(() => {
             tickerEl.innerText = `${q.tr} | ${q.de}`;
             tickerEl.classList.add('show');
-            currentIndex = (currentIndex + 1) % window.tickerQuotes.length;
+            currentIndex = (currentIndex + 1) % arr.length;
         }, 800); 
     }
     showNextQuote();
-    setInterval(showNextQuote, 8000); 
+    if(window.tickerInt) clearInterval(window.tickerInt);
+    window.tickerInt = setInterval(showNextQuote, 8000); 
 };
 
-// ================= 6. ALLGEMEINE UI FUNKTIONEN =================
+// ================= 7. ALLGEMEINE UI FUNKTIONEN =================
 window.showToast = function(msg) {
     const t = document.getElementById('toast'); if(!t) return;
     document.getElementById('toast-msg').innerText = msg;
@@ -1575,21 +1661,23 @@ window.navigate = function(pageId) {
 
 window.openFastModal = function(id) { 
     const m = document.getElementById(id); 
-    if(m) { m.classList.add('active-modal'); document.body.style.overflow = 'hidden'; } 
+    if(m) { m.classList.add('active-modal'); document.body.classList.add('modal-open'); } 
 };
 
 window.closeAllModals = function(e) {
     if(e === 'force' || (e && e.target && (e.target.classList.contains('modal') || e.target.classList.contains('sidebar-overlay') || e.target.classList.contains('close-btn') || e.target.closest('.close-btn') || e.target.closest('.close-wrapper')))) {
         document.querySelectorAll('.modal').forEach(m => { m.classList.remove('active-modal'); });
-        window.closeAllSidebars(); document.body.style.overflow = 'auto'; if(typeof window.breathInt !== 'undefined') clearInterval(window.breathInt);
+        window.closeAllSidebars(); document.body.classList.remove('modal-open'); if(typeof window.breathInt !== 'undefined') clearInterval(window.breathInt);
     }
 };
 
 window.openProfileImageModal = function(e) { if(e) { e.preventDefault(); e.stopPropagation(); } window.openFastModal('profileImageModal'); };
 window.openInfoModal = function(e) { if(e) e.stopPropagation(); window.openFastModal('infoModal'); };
+
+// PROBLEM 1 FIX: Dijital saate tıklanınca Analog Saat açılır
 window.openAnalogClockModal = function(e) { if(e) e.stopPropagation(); window.openFastModal('analogClockModal'); };
 
-// ================= 7. AUTH & PROFIL =================
+// ================= 8. AUTH & PROFIL =================
 window.checkRemember = function() {
     if(window.currentUser) {
         document.getElementById('auth-btn').style.display = 'none';
@@ -1615,12 +1703,13 @@ window.checkRemember = function() {
         
         if(window.currentUser.role === 'admin') { 
             document.body.classList.add('admin-mode'); 
-            const b = document.getElementById('admin-badge'); if(b && window.adminMessages.length > 0) { b.innerText = window.adminMessages.length; b.classList.remove('hidden'); } 
             document.getElementById('header-user-stats').style.display = 'flex';
         } else { 
             document.body.classList.add('user-mode'); 
             document.getElementById('header-user-stats').style.display = 'none';
         }
+
+        window.updateNotifyBadge(); // Sadece admin ise gösterir
 
         if(window.currentUser.alerts && window.currentUser.alerts.length > 0) {
             setTimeout(() => {
@@ -1632,6 +1721,8 @@ window.checkRemember = function() {
                 else sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
             }, 1000);
         }
+    } else {
+        window.updateNotifyBadge(); 
     }
 };
 
@@ -1646,26 +1737,46 @@ window.m_openRegister = function(e) { if(e) e.stopPropagation(); window.openFast
 
 window.m_login = function() {
     const u = document.getElementById('m-login-user').value.trim(); const p = document.getElementById('m-login-pass').value; const r = document.getElementById('m-login-rem').checked;
-    if((u === 'misali' || u === 'sairmisali25@gmail.com') && (p === '1234' || p === '01041936Hasan.')) { window.currentUser = { username: 'misali', name: 'Şair Misal.i', role: 'admin', day: 3, month: 6, year: 1980 }; } 
-    else if (window.userDatabase[u] && window.userDatabase[u].pass === p) { window.currentUser = window.userDatabase[u]; } 
-    else { window.customAlert("Hatalı bilgi / Falsche Daten", "❌"); return; }
+    let userFound = null;
 
-    if(r) { localStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); } 
-    else { sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); localStorage.removeItem('misaliAutoFill'); }
-    
-    window.onlineUsersDB = window.onlineUsersDB.filter(x => x.name !== window.currentUser.name);
-    window.onlineUsersDB.push({ name: window.currentUser.name, role: window.currentUser.role, status: 'online', loginTime: Date.now() });
-    localStorage.setItem('misaliOnlineUsers', JSON.stringify(window.onlineUsersDB));
-    
-    window.addAdminLog('Girdi (Online)'); window.m_sendNotify(`Giriş: ${window.currentUser.name}`); location.reload(); 
+    if((u === 'misali' || u === 'sairmisali25@gmail.com') && (p === '1234' || p === '01041936Hasan.')) { 
+        userFound = { username: 'misali', name: 'Şair Misal.i', role: 'admin', day: 3, month: 6, year: 1980, approved: true }; 
+    } else {
+        for(let key in window.userDatabase) {
+            if((window.userDatabase[key].username === u || window.userDatabase[key].email === u) && window.userDatabase[key].pass === p) {
+                userFound = window.userDatabase[key]; break;
+            }
+        }
+    }
+
+    if(userFound) {
+        if(userFound.role !== 'admin' && userFound.approved === false) {
+            window.customAlert("Hesabınız henüz Admin tarafından onaylanmadı. Lütfen bekleyin.", "⏳");
+            return;
+        }
+
+        window.currentUser = userFound;
+        if(r) { localStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); } 
+        else { sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); localStorage.removeItem('misaliAutoFill'); }
+        
+        window.onlineUsersDB = window.onlineUsersDB.filter(x => x.name !== window.currentUser.name);
+        window.onlineUsersDB.push({ name: window.currentUser.name, role: window.currentUser.role, status: 'online', loginTime: Date.now() });
+        localStorage.setItem('misaliOnlineUsers', JSON.stringify(window.onlineUsersDB));
+        
+        window.addAdminLog('Girdi (Online)', window.currentUser.name); 
+        window.m_sendNotify(`${window.currentUser.name} sisteme giriş yaptı.`, "🟢"); 
+        location.reload(); 
+    } else { 
+        window.customAlert("Hatalı bilgi / Falsche Daten", "❌"); 
+    }
 };
 
 window.m_logout = function(e) { 
     if(e) e.stopPropagation();
-    window.customConfirm("Çıkış yapmak istediğinize emin misiniz? / Möchtest du dich wirklich abmelden?", () => {
+    window.customConfirm("Çıkış yapmak istediğinize emin misiniz?", () => {
         if(window.currentUser) { 
-            window.m_sendNotify(`Çıkış: ${window.currentUser.name}`); 
-            window.addAdminLog('Çıktı (Offline)'); 
+            window.m_sendNotify(`${window.currentUser.name} sistemden ayrıldı.`, "🔴"); 
+            window.addAdminLog('Çıktı (Offline)', window.currentUser.name); 
             let userObj = window.onlineUsersDB.find(x => x.name === window.currentUser.name);
             if(userObj) { userObj.status = 'offline'; userObj.logoutTime = Date.now(); } 
             else { window.onlineUsersDB.push({ name: window.currentUser.name, role: window.currentUser.role, status: 'offline', logoutTime: Date.now() }); }
@@ -1686,11 +1797,11 @@ window.m_register = function() {
     if(!u || !n || !p || !em || !day || !month || !year) { window.customAlert("Lütfen yıldızlı (*) alanları doldurun!", "⚠️"); return; }
     if(window.userDatabase[u]) { window.customAlert("Bu kullanıcı adı alınmış.", "❌"); return; }
     
-    window.userDatabase[u] = { username: u, email: em, name: n, surname: s, day: day, month: month, year: year, pass: p, role: "user", alerts: [] }; 
+    window.userDatabase[u] = { username: u, email: em, name: n, surname: s, day: day, month: month, year: year, pass: p, role: "user", alerts: [], approved: false }; 
     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-    window.customAlert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.", "✅"); 
+    window.m_sendNotify(`${n} adında yeni bir kullanıcı kayıt oldu. Onayınızı bekliyor!`, "🎉");
+    window.customAlert("Kayıt başarılı! Hesabınız Admin onayından sonra aktifleşecektir.", "✅"); 
     window.closeAllModals('force');
-    setTimeout(() => { window.m_openLogin(); }, 400);
 };
 
 window.openProfileEditModal = function(e) {
@@ -1714,6 +1825,7 @@ window.saveProfile = function() {
     window.userDatabase[u].quote = document.getElementById('edit-quote').value.trim(); window.userDatabase[u].pass = p;
     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); window.currentUser = window.userDatabase[u];
     if(localStorage.getItem('misaliUser')) localStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); else sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+    window.m_sendNotify(`${window.currentUser.name} profilini güncelledi.`, "⚙️");
     window.customAlert("Profil güncellendi.", "✅"); window.closeAllModals('force'); location.reload();
 };
 
@@ -1723,14 +1835,31 @@ window.openAdminUsersModal = function(e) {
     const list = document.getElementById('admin-users-list'); list.innerHTML = "";
     for(let key in window.userDatabase) {
         const u = window.userDatabase[key];
-        list.innerHTML += `<div style="background:rgba(212,175,55,0.1); padding:8px; border:1px solid var(--accent-color); margin-bottom:5px; border-radius:5px; text-align:left;"><strong style="color:var(--accent-color);">${u.name} ${u.surname || ''}</strong> (${u.username})<br><span style="font-size:0.8rem; color:#cbd5e1;">Şifre: ${u.pass} | Rol: ${u.role}</span></div>`;
+        let approveBtn = !u.approved && u.role !== 'admin' ? `<button onclick="window.approveUser('${u.username}', event)" style="margin-top:5px; background:#22c55e; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Onayla (Freischalten)</button>` : '';
+        let statusText = u.approved ? `<span style="color:#22c55e;">Aktif</span>` : `<span style="color:#fbbf24;">Onay Bekliyor</span>`;
+        
+        list.innerHTML += `<div style="background:rgba(212,175,55,0.1); padding:8px; border:1px solid var(--accent-color); margin-bottom:5px; border-radius:5px; text-align:left;">
+            <strong style="color:var(--accent-color);">${u.name} ${u.surname || ''}</strong> (${u.username})<br>
+            <span style="font-size:0.8rem; color:#cbd5e1;">Email: ${u.email || '-'} | Şifre: ${u.pass} | Rol: ${u.role} | Durum: ${statusText}</span><br>
+            ${approveBtn}
+        </div>`;
     }
     window.openFastModal('adminUsersModal');
 };
 
+window.approveUser = function(username, e) {
+    if(e) e.stopPropagation();
+    if(window.userDatabase[username]) {
+        window.userDatabase[username].approved = true;
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        window.m_sendNotify(`${window.userDatabase[username].name} adlı kullanıcının kaydını onayladın.`, "✅");
+        window.openAdminUsersModal();
+    }
+};
+
 window.requireAuth = function(callback) { if(window.currentUser) callback(); else { window.customAlert("Giriş yapmalısınız / Bitte anmelden", "⚠️"); window.m_openLogin(); } };
 
-// ================= 8. SIDEBARS, KALENDER & WETTER =================
+// ================= 9. SIDEBARS, KALENDER & WETTER =================
 window.toggleSidebar = function(id, e) {
     if(e) e.stopPropagation(); window.closeAllSidebars(); document.getElementById(id)?.classList.add('open'); document.getElementById('sidebarOverlay')?.classList.add('show');
     if(id === 'onlineUserSidebar' || id === 'onlineAdminSidebar') window.renderOnlineUsers();
@@ -1738,6 +1867,7 @@ window.toggleSidebar = function(id, e) {
 window.openAnthemsModal = function(e) { if(e) e.stopPropagation(); window.closeAllSidebars(); document.getElementById('anthemSidebar')?.classList.add('open'); document.getElementById('sidebarOverlay')?.classList.add('show'); };
 window.closeAllSidebars = function() { document.querySelectorAll('.sidebar, .sidebar-right').forEach(el => el.classList.remove('open')); document.getElementById('sidebarOverlay')?.classList.remove('show'); };
 
+// PROBLEM 4 FIX: Marşlar Buton Renk Yönetimi
 window.switchAnthemLang = function(lang) {
     if(lang === 'TR') { 
         document.getElementById('anthem-tr-content').classList.add('active'); document.getElementById('anthem-de-content').classList.remove('active'); 
@@ -1771,12 +1901,13 @@ window.openWeatherModal = function(e) {
     window.openFastModal('weatherModal');
 };
 
+// PROBLEM 6 FIX: Translate Force Trigger
 window.translatePage = function(lang) {
     const select = document.querySelector('.goog-te-combo');
     if(select) { 
         select.value = lang; 
         select.dispatchEvent(new Event('change')); 
-        window.showToast("Dil değiştirildi / Sprache geändert"); 
+        window.showToast(`Dil değiştirildi / Sprache geändert: ${lang.toUpperCase()}`); 
     } 
     else { window.showToast("Çeviri sistemi yükleniyor..."); }
 };
@@ -1818,26 +1949,8 @@ window.selectDate = function(y, m, d) {
 };
 window.openEventsModal = function(e) { if(e) e.stopPropagation(); window.currentMonth = new Date().getMonth(); window.currentYear = new Date().getFullYear(); window.renderCalendar(window.currentMonth, window.currentYear); window.selectDate(window.currentYear, window.currentMonth, new Date().getDate()); window.openFastModal('eventsModal'); };
 
-// ================= 9. ADMIN NOTIFICATIONS & ONLINE LOGS =================
-window.addAdminLog = function(action) {
-    const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    window.adminLogs.push({ user: window.currentUser ? window.currentUser.name : "Sistem", action: action, time: time }); localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
-};
-window.m_sendNotify = function(msg) {
-    let prefix = "🔔"; let lowerMsg = msg.toLowerCase();
-    if (lowerMsg.includes("beğendi") || lowerMsg.includes("kalp")) prefix = "💖"; else if (lowerMsg.includes("çekti") || lowerMsg.includes("düşürdü")) prefix = "💔";
-    else if (lowerMsg.includes("yorum")) prefix = "💬"; else if (lowerMsg.includes("sil") || lowerMsg.includes("düzenledi")) prefix = "⚙️"; else if (lowerMsg.includes("ban") || lowerMsg.includes("kötü söz")) prefix = "🚫";
-    else if (lowerMsg.includes("şiir") || lowerMsg.includes("söz") || lowerMsg.includes("fıkra") || lowerMsg.includes("eser")) prefix = "📝"; else if (lowerMsg.includes("sohbet")) prefix = "🗨️";
-    else if (lowerMsg.includes("giriş")) prefix = "🟢"; else if (lowerMsg.includes("çıkış")) prefix = "🔴";
-    const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    window.adminMessages.push({ text: `${prefix} ${msg}`, time: time }); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
-    
-    const badge = document.getElementById('admin-badge'); 
-    const notifyBadge = document.getElementById('user-notify-badge');
-    if(badge && window.adminMessages.length > 0) { badge.innerText = window.adminMessages.length; badge.classList.remove('hidden'); }
-    if(notifyBadge && window.adminMessages.length > 0) { notifyBadge.innerText = window.adminMessages.length; notifyBadge.classList.remove('hidden'); }
-};
 
+// ================= 10. ADMIN MESAJLARI (PROBLEM 2 FIX: Silinmeden Yok Olmuyor) =================
 window.openUserNotifications = function(e) { 
     if(e) e.stopPropagation(); 
     window.openAdminMessages(e); 
@@ -1846,18 +1959,16 @@ window.openUserNotifications = function(e) {
 window.openAdminMessages = function(e) {
     if(e) e.stopPropagation(); const list = document.getElementById('admin-msg-list'); list.innerHTML = "";
     
-    // Gelen Kutusu açıldığında sayacı sakla, ancak silmediği sürece arkada saysın.
-    const badge = document.getElementById('admin-badge'); if(badge) badge.classList.add('hidden'); 
-    const nBadge = document.getElementById('user-notify-badge'); if(nBadge) nBadge.classList.add('hidden');
+    // Gelen Kutusu açıldığında sayaç SAKLANMAZ! Yalnızca listelenir. 
+    // Sayacın azalması için mesajın gerçekten silinmesi gereklidir.
 
     if(window.adminMessages.length === 0) { list.innerHTML = "<p style='color:#a0aec0; text-align:center;'>Gelen kutunuz şu an boş.</p>"; } 
     else {
-        // PROBLEM 1 & 7 FIX: Hepsini Sil ve Sil butonları Event Bubbling'i önleyecek şekilde (e) ile güncellendi
         let delBtn = window.currentUser && window.currentUser.role === 'admin' ? `<div style="text-align: right; margin-bottom: 12px;"><button onclick="window.delAllAdminMsgs(event)" style="background: #ef4444; border: none; color: #fff; padding: 6px 15px; border-radius: 8px; cursor: pointer; font-family:'Poppins', sans-serif;"><i class="fas fa-trash-alt"></i> Hepsini Sil</button></div>` : ``;
         list.innerHTML = delBtn;
         [...window.adminMessages].reverse().forEach((m, index) => {
             const realIndex = window.adminMessages.length - 1 - index;
-            let singleDelBtn = window.currentUser && window.currentUser.role === 'admin' ? `<div style="text-align:right; margin-top:5px;"><button onclick="window.delAdminMsg(${realIndex}, event)" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-family:'Poppins', sans-serif; font-weight:bold;"><i class="fas fa-trash"></i> Sil</button></div>` : ``;
+            let singleDelBtn = window.currentUser && window.currentUser.role === 'admin' ? `<div style="text-align:right; margin-top:5px;"><button onclick="window.delAdminMsg(${realIndex}, event)" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-family:'Poppins', sans-serif; font-weight:bold; outline:none;"><i class="fas fa-trash"></i> Sil</button></div>` : ``;
             list.innerHTML += `<div style="background:rgba(212,175,55,0.1); padding:8px 12px; border-radius:6px; border:1px solid var(--accent-color); text-align:left; margin-bottom:8px;">
                 <div style="display:flex; justify-content:space-between;"><strong style="color:var(--accent-color);">Sistem</strong><span style="font-size:0.7rem; color:#a0aec0;">${m.time}</span></div>
                 <p style="margin:5px 0; color:#fff; font-size:0.85rem;">${m.text}</p>
@@ -1867,9 +1978,9 @@ window.openAdminMessages = function(e) {
     }
     window.openFastModal('adminMessagesModal');
 };
-// PROBLEM 1 FIX: Silme işlemlerinde e.stopPropagation() eklendi!
-window.delAdminMsg = function(idx, e) { if(e) e.stopPropagation(); window.customConfirm("Mesajı silmek istediğinize emin misiniz?", () => { window.adminMessages.splice(idx, 1); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.openAdminMessages(); }); };
-window.delAllAdminMsgs = function(e) { if(e) e.stopPropagation(); window.customConfirm("Tüm bildirimleri silmek istediğinize emin misiniz?", () => { window.adminMessages = []; localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); const badge = document.getElementById('admin-badge'); if(badge) badge.innerText = 0; const nBadge = document.getElementById('user-notify-badge'); if(nBadge) { nBadge.innerText = 0; nBadge.classList.add('hidden');} window.openAdminMessages(); }); };
+
+window.delAdminMsg = function(idx, e) { if(e) e.stopPropagation(); window.customConfirm("Mesajı silmek istediğinize emin misiniz?", () => { window.adminMessages.splice(idx, 1); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.updateNotifyBadge(); window.openAdminMessages(); }); };
+window.delAllAdminMsgs = function(e) { if(e) e.stopPropagation(); window.customConfirm("Tüm bildirimleri silmek istediğinize emin misiniz?", () => { window.adminMessages = []; localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.updateNotifyBadge(); window.openAdminMessages(); }); };
 
 window.renderOnlineUsers = function() {
     const now = Date.now();
@@ -1941,10 +2052,35 @@ window.clearAdminLogs = function() {
     });
 };
 
-// ================= 10. IN/OUT ADMIN PANEL =================
+// ================= 11. IN/OUT ADMIN PANEL =================
+window.toggleAdminAddFields = function() {
+    const type = document.getElementById('admin-add-type').value;
+    document.getElementById('admin-add-url').style.display = type === 'persons' ? 'block' : 'none';
+    document.getElementById('admin-add-emoji-wrapper').style.display = type === 'persons' ? 'none' : 'block';
+    
+    if(type === 'ticker') {
+        document.getElementById('admin-add-tr-text').style.display = 'none';
+        document.getElementById('admin-add-de-text').style.display = 'none';
+        document.getElementById('admin-add-tr-title').placeholder = "TR Özlü Söz";
+        document.getElementById('admin-add-de-title').placeholder = "DE Özlü Söz";
+    } else if (type === 'persons') {
+        document.getElementById('admin-add-tr-text').style.display = 'block';
+        document.getElementById('admin-add-de-text').style.display = 'none';
+        document.getElementById('admin-add-tr-title').placeholder = "Şahsiyet Adı";
+        document.getElementById('admin-add-tr-text').placeholder = "Şahsiyet Sözü (Alıntı)";
+    } else {
+        document.getElementById('admin-add-tr-text').style.display = 'block';
+        document.getElementById('admin-add-de-text').style.display = 'block';
+        document.getElementById('admin-add-tr-title').placeholder = "TR Başlık";
+        document.getElementById('admin-add-de-title').placeholder = "DE Başlık";
+        document.getElementById('admin-add-tr-text').placeholder = "TR İçerik";
+    }
+};
+
 window.openInOutAdminModal = function(e) {
     if(e) e.stopPropagation();
     window.openFastModal('inOutAdminModal');
+    window.renderEmojiPickers();
     window.switchAdminTab('add');
 };
 window.switchAdminTab = function(tab) {
@@ -1954,8 +2090,27 @@ window.switchAdminTab = function(tab) {
     document.getElementById('admin-tab-edit').style.color = tab === 'edit' ? 'black' : 'white';
     document.getElementById('admin-add-section').style.display = tab === 'add' ? 'block' : 'none';
     document.getElementById('admin-edit-section').style.display = tab === 'edit' ? 'block' : 'none';
+    if(tab === 'add') window.toggleAdminAddFields();
     if(tab === 'edit') window.adminLoadItemsForEdit();
 };
+
+// PROBLEM 3 FIX: Kapsamlı Emoji Havuzu
+const commonEmojis = ["✨","🖋️","📜","❤️","🌟","📖","🕊️","🕯️","🎭","🕰️","🌹","🥀","🍃","🔥","🌈","☀️","🌙","⭐","🌍","💎","🧩","💡","🔔","⚖️","🌊","🏔️","🌲","🌳","☕","🧠","🌌","🧘","🎲","🎱","🥠","🪙","🔑","🔮","🧿","🎐","🎶","🎵","🎻","👑","💍","💎","🤍","🖤","🤎","💜","💙","💚","💛","🧡","💔","💘","💝","💞","💓","💗","💖","💕","🍂","🍁","🍄","🌾","🌵","🌺","🌻","🌼","🌷","🌱","🍀","🍎","🍏","🍒","🍓","🍅","🍷","🍸","🍹","🍺","🍻","🥂","🍼","🍵","🧊","🎨","🎭","🎬","🎤","🎧","🎼","🎹","🥁","🎷","🎺","🎸","🪕","🎬","🎯","🎳","🎮","🎰","🎉","🎊","🎈","🧧","🎀","🎁","🪄","🏆","🏅","🥇","🥈","🥉","⚽","🏀","🏈","⚾","🥎","🎾","🏐","🏉","🥏","🎱","🪀","🏓","🏸","🏒","🏑","🥍","🏏","🪃","🥅","⛳","🪁","🏹","🎣","🤿","🥊","🥋","🎽","🛹","🛼","🛷","⛸️","⛷️","🎿","🏂","🏋️","🤼","🤸","⛹️","🤺","🤾","🏌️","🏇","🧘","🏄","🏊","🤽","🚣","🧗","🚵","🚴"];
+window.renderEmojiPickers = function() {
+    const pAdd = document.getElementById('emoji-picker-add'); const pEdit = document.getElementById('emoji-picker-edit');
+    [pAdd, pEdit].forEach(p => {
+        if(!p) return; p.innerHTML = "";
+        commonEmojis.forEach(em => {
+            const btn = document.createElement('button'); btn.className = "emoji-btn"; btn.innerText = em;
+            btn.onclick = () => {
+                if(p.id.includes('add')) { document.getElementById('admin-add-emoji').value = em; document.getElementById('selected-add-emoji').innerText = em; }
+                else { document.getElementById('admin-edit-emoji').value = em; document.getElementById('selected-edit-emoji').innerText = em; }
+            };
+            p.appendChild(btn);
+        });
+    });
+};
+
 window.adminAddContent = function() {
     const type = document.getElementById('admin-add-type').value;
     const trTitle = document.getElementById('admin-add-tr-title').value.trim();
@@ -1963,61 +2118,106 @@ window.adminAddContent = function() {
     const emoji = document.getElementById('admin-add-emoji').value.trim() || '✨';
     const trText = document.getElementById('admin-add-tr-text').value.trim();
     const deText = document.getElementById('admin-add-de-text').value.trim();
+    const url = document.getElementById('admin-add-url').value.trim();
     
-    if(!trTitle || !trText) { window.customAlert('Lütfen en azından Türkçe Başlık ve İçerik girin.', '⚠️'); return; }
+    if(!trTitle) { window.customAlert('Lütfen başlık/isim girin.', '⚠️'); return; }
     
-    const newItem = { id: type.substring(0,2) + '_' + Date.now(), trTitle, deTitle: deTitle || trTitle, emoji, trText, deText: deText || trText, timestamp: Date.now() };
+    let newItem = {};
+    if(type === 'persons') {
+        newItem = { id: 'per_' + Date.now(), trTitle, deTitle: deTitle || trTitle, quote: trText, url, timestamp: Date.now() };
+    } else if (type === 'ticker') {
+        newItem = { id: 'tic_' + Date.now(), tr: trTitle, de: deTitle || trTitle, timestamp: Date.now() };
+    } else {
+        if(!trText) { window.customAlert('Lütfen içerik girin.', '⚠️'); return; }
+        newItem = { id: type.substring(0,2) + '_' + Date.now(), trTitle, deTitle: deTitle || trTitle, emoji, trText, deText: deText || trText, timestamp: Date.now() };
+    }
+
     if(!window.contentDB[type]) window.contentDB[type] = [];
     window.contentDB[type].push(newItem);
-    window.contentDB[type].sort((a,b)=>a.trTitle.localeCompare(b.trTitle, 'tr')); 
+    
+    if(type !== 'ticker') window.contentDB[type].sort((a,b)=>a.trTitle.localeCompare(b.trTitle, 'tr')); 
+    
     localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
-    window.initContent(); window.generateFihrist();
+    window.initContent(); window.generateFihrist(); window.initTicker();
+    window.m_sendNotify(`Admin yeni bir içerik ekledi (${type})`, "📝");
     
     document.getElementById('admin-add-tr-title').value = ''; document.getElementById('admin-add-de-title').value = '';
-    document.getElementById('admin-add-emoji').value = ''; document.getElementById('admin-add-tr-text').value = ''; document.getElementById('admin-add-de-text').value = '';
-    
+    document.getElementById('admin-add-tr-text').value = ''; document.getElementById('admin-add-de-text').value = ''; document.getElementById('admin-add-url').value = '';
     window.customAlert('İçerik başarıyla eklendi!', '✅');
 };
+
 window.adminLoadItemsForEdit = function() {
     const type = document.getElementById('admin-edit-type').value;
     const sel = document.getElementById('admin-edit-item-select');
     sel.innerHTML = '<option value="">-- Seçiniz --</option>';
+    
+    document.getElementById('admin-edit-url').style.display = type === 'persons' ? 'block' : 'none';
+    document.getElementById('admin-edit-emoji-wrapper').style.display = type === 'persons' ? 'none' : 'block';
+    
+    if(type === 'ticker') {
+        document.getElementById('admin-edit-tr-text').style.display = 'none'; document.getElementById('admin-edit-de-text').style.display = 'none';
+        document.getElementById('admin-edit-tr-title').placeholder = "TR Özlü Söz"; document.getElementById('admin-edit-de-title').placeholder = "DE Özlü Söz";
+    } else if (type === 'persons') {
+        document.getElementById('admin-edit-tr-text').style.display = 'block'; document.getElementById('admin-edit-de-text').style.display = 'none';
+        document.getElementById('admin-edit-tr-title').placeholder = "Şahsiyet Adı"; document.getElementById('admin-edit-tr-text').placeholder = "Şahsiyet Sözü (Alıntı)";
+    } else {
+        document.getElementById('admin-edit-tr-text').style.display = 'block'; document.getElementById('admin-edit-de-text').style.display = 'block';
+        document.getElementById('admin-edit-tr-title').placeholder = "TR Başlık"; document.getElementById('admin-edit-de-title').placeholder = "DE Başlık"; document.getElementById('admin-edit-tr-text').placeholder = "TR İçerik";
+    }
+
     if(window.contentDB[type]) {
-        window.contentDB[type].sort((a,b)=>a.trTitle.localeCompare(b.trTitle, 'tr')).forEach(item => { sel.innerHTML += `<option value="${item.id}">${item.trTitle}</option>`; });
+        if(type === 'ticker') {
+            window.contentDB[type].forEach(item => { sel.innerHTML += `<option value="${item.id}">${item.tr}</option>`; });
+        } else {
+            window.contentDB[type].sort((a,b)=>a.trTitle.localeCompare(b.trTitle, 'tr')).forEach(item => { sel.innerHTML += `<option value="${item.id}">${item.trTitle}</option>`; });
+        }
     }
     document.getElementById('admin-edit-fields').style.display = 'none';
 };
+
 window.adminSelectItemForEdit = function() {
     const type = document.getElementById('admin-edit-type').value;
     const id = document.getElementById('admin-edit-item-select').value;
     if(!id) { document.getElementById('admin-edit-fields').style.display = 'none'; return; }
     const item = window.contentDB[type].find(x => x.id === id);
     if(item) {
-        document.getElementById('admin-edit-tr-title').value = item.trTitle;
-        document.getElementById('admin-edit-de-title').value = item.deTitle;
-        document.getElementById('admin-edit-emoji').value = item.emoji;
-        document.getElementById('admin-edit-tr-text').value = item.trText;
-        document.getElementById('admin-edit-de-text').value = item.deText;
+        if(type === 'ticker') {
+            document.getElementById('admin-edit-tr-title').value = item.tr; document.getElementById('admin-edit-de-title').value = item.de;
+        } else if(type === 'persons') {
+            document.getElementById('admin-edit-tr-title').value = item.trTitle; document.getElementById('admin-edit-de-title').value = item.deTitle;
+            document.getElementById('admin-edit-url').value = item.url || ''; document.getElementById('admin-edit-tr-text').value = item.quote || '';
+        } else {
+            document.getElementById('admin-edit-tr-title').value = item.trTitle; document.getElementById('admin-edit-de-title').value = item.deTitle;
+            document.getElementById('admin-edit-emoji').value = item.emoji; document.getElementById('selected-edit-emoji').innerText = item.emoji;
+            document.getElementById('admin-edit-tr-text').value = item.trText; document.getElementById('admin-edit-de-text').value = item.deText;
+        }
         document.getElementById('admin-edit-fields').style.display = 'block';
     }
 };
+
 window.adminSaveEdit = function() {
     const type = document.getElementById('admin-edit-type').value;
     const id = document.getElementById('admin-edit-item-select').value;
     const item = window.contentDB[type].find(x => x.id === id);
     if(item) {
-        item.trTitle = document.getElementById('admin-edit-tr-title').value.trim();
-        item.deTitle = document.getElementById('admin-edit-de-title').value.trim();
-        item.emoji = document.getElementById('admin-edit-emoji').value.trim() || '✨';
-        item.trText = document.getElementById('admin-edit-tr-text').value.trim();
-        item.deText = document.getElementById('admin-edit-de-text').value.trim();
-        window.contentDB[type].sort((a,b)=>a.trTitle.localeCompare(b.trTitle, 'tr')); 
+        if(type === 'ticker') {
+            item.tr = document.getElementById('admin-edit-tr-title').value.trim(); item.de = document.getElementById('admin-edit-de-title').value.trim();
+        } else if(type === 'persons') {
+            item.trTitle = document.getElementById('admin-edit-tr-title').value.trim(); item.deTitle = document.getElementById('admin-edit-de-title').value.trim();
+            item.url = document.getElementById('admin-edit-url').value.trim(); item.quote = document.getElementById('admin-edit-tr-text').value.trim();
+        } else {
+            item.trTitle = document.getElementById('admin-edit-tr-title').value.trim(); item.deTitle = document.getElementById('admin-edit-de-title').value.trim();
+            item.emoji = document.getElementById('admin-edit-emoji').value.trim() || '✨';
+            item.trText = document.getElementById('admin-edit-tr-text').value.trim(); item.deText = document.getElementById('admin-edit-de-text').value.trim();
+        }
+        if(type !== 'ticker') window.contentDB[type].sort((a,b)=>a.trTitle.localeCompare(b.trTitle, 'tr')); 
         localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
-        window.initContent(); window.generateFihrist();
+        window.initContent(); window.generateFihrist(); window.initTicker();
+        window.m_sendNotify(`Admin bir içeriği güncelledi.`, "⚙️");
         window.customAlert('İçerik başarıyla güncellendi!', '✅');
     }
 };
-// PROBLEM 1 FIX: Silme işlemi
+
 window.adminDeleteContent = function(e) {
     if(e) e.stopPropagation();
     window.customConfirm('Bu içeriği kalıcı olarak silmek istediğinize emin misiniz?', () => {
@@ -2025,13 +2225,14 @@ window.adminDeleteContent = function(e) {
         const id = document.getElementById('admin-edit-item-select').value;
         window.contentDB[type] = window.contentDB[type].filter(x => x.id !== id);
         localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
-        window.initContent(); window.generateFihrist();
+        window.initContent(); window.generateFihrist(); window.initTicker();
         window.adminLoadItemsForEdit();
+        window.m_sendNotify(`Admin bir içeriği sildi.`, "🗑️");
         window.customAlert('İçerik silindi.', '✅');
     });
 };
 
-// ================= 11. INHALTE RENDER (ŞİİR, SÖZ, KISSA, FIKRA) =================
+// ================= 12. INHALTE RENDER (PROBLEM 5 FIX: Şahsiyetler DB'den Çekiliyor) =================
 window.initContent = function() {
     const siirGrid = document.getElementById('siirler-grid'); const sozGrid = document.getElementById('sozler-grid'); 
     const hikGrid = document.getElementById('hikayeler-grid'); const fikGrid = document.getElementById('fikralar-grid');
@@ -2046,6 +2247,21 @@ window.initContent = function() {
     if(window.contentDB.quotes) window.contentDB.quotes.sort((a, b) => a.trTitle.localeCompare(b.trTitle, 'tr')).forEach(q => renderCard(q, sozGrid));
     if(window.contentDB.stories) window.contentDB.stories.sort((a, b) => a.trTitle.localeCompare(b.trTitle, 'tr')).forEach(s => renderCard(s, hikGrid));
     if (window.contentDB.jokes) window.contentDB.jokes.sort((a, b) => a.trTitle.localeCompare(b.trTitle, 'tr')).forEach(j => renderCard(j, fikGrid));
+
+    // PROBLEM 5 FIX: Persons Render
+    const trCol = document.getElementById('sahsiyetler-tr-col');
+    const deCol = document.getElementById('sahsiyetler-de-col');
+    if (trCol) trCol.innerHTML = '<h3 class="col-title">Türk Şahsiyetler</h3>';
+    if (deCol) deCol.innerHTML = '<h3 class="col-title" style="color: var(--accent-color); border-color:rgba(212,175,55,0.3);">Deutsche Persönlichkeiten</h3>';
+    
+    if(window.contentDB.persons && window.contentDB.persons.length > 0) {
+        window.contentDB.persons.forEach(per => {
+            const isDE = per.deTitle && per.deTitle !== per.trTitle;
+            const cardHtml = `<div class="card person-card" onclick="window.open('${per.url || '#'}', '_blank')"><h3>${per.trTitle}</h3><p class="quote">"${per.quote}"</p></div>`;
+            if(isDE && deCol) deCol.innerHTML += cardHtml;
+            else if(!isDE && trCol) trCol.innerHTML += cardHtml;
+        });
+    }
 };
 
 window.generateFihrist = function() {
@@ -2053,12 +2269,10 @@ window.generateFihrist = function() {
     const fHikayeler = document.getElementById('fihrist-hikayeler-list'); const fFikralar = document.getElementById('fihrist-fikralar-list');
     if (fSiirler) fSiirler.innerHTML = ''; if (fSozler) fSozler.innerHTML = ''; if (fHikayeler) fHikayeler.innerHTML = ''; if (fFikralar) fFikralar.innerHTML = '';
     
-    if(window.contentDB.poems) window.contentDB.poems.forEach(p => { if(fSiirler) fSiirler.innerHTML += `<li onclick="window.openPoemModal('${p.id}', 'poems'); window.closeAllSidebars();">${p.trTitle} <span>(${p.deTitle})</span></li>`; });
-    if(window.contentDB.quotes) window.contentDB.quotes.forEach(q => { if(fSozler) fSozler.innerHTML += `<li onclick="window.openPoemModal('${q.id}', 'quotes'); window.closeAllSidebars();">${q.trTitle} <span>(${q.deTitle})</span></li>`; });
-    if(window.contentDB.stories) window.contentDB.stories.forEach(s => { if(fHikayeler) fHikayeler.innerHTML += `<li onclick="window.openPoemModal('${s.id}', 'stories'); window.closeAllSidebars();">${s.trTitle} <span>(${s.deTitle})</span></li>`; });
-    if (window.contentDB.jokes) {
-        window.contentDB.jokes.forEach(j => { if(fFikralar) fFikralar.innerHTML += `<li onclick="window.openPoemModal('${j.id}', 'jokes'); window.closeAllSidebars();">${j.trTitle} <span>(${j.deTitle})</span></li>`; });
-    }
+    if(window.contentDB.poems) window.contentDB.poems.forEach(p => { if(fSiirler) fSiirler.innerHTML += `<li onclick="window.openPoemModal('${p.id}', 'poems'); window.closeAllSidebars();">${p.trTitle} <span class="sub-text">(${p.deTitle})</span></li>`; });
+    if(window.contentDB.quotes) window.contentDB.quotes.forEach(q => { if(fSozler) fSozler.innerHTML += `<li onclick="window.openPoemModal('${q.id}', 'quotes'); window.closeAllSidebars();">${q.trTitle} <span class="sub-text">(${q.deTitle})</span></li>`; });
+    if(window.contentDB.stories) window.contentDB.stories.forEach(s => { if(fHikayeler) fHikayeler.innerHTML += `<li onclick="window.openPoemModal('${s.id}', 'stories'); window.closeAllSidebars();">${s.trTitle} <span class="sub-text">(${s.deTitle})</span></li>`; });
+    if (window.contentDB.jokes) window.contentDB.jokes.forEach(j => { if(fFikralar) fFikralar.innerHTML += `<li onclick="window.openPoemModal('${j.id}', 'jokes'); window.closeAllSidebars();">${j.trTitle} <span class="sub-text">(${j.deTitle})</span></li>`; });
 };
 
 window.renderUserWorksSidebar = function() {
@@ -2067,7 +2281,8 @@ window.renderUserWorksSidebar = function() {
     if(window.userPoemsDB.length === 0) { list.innerHTML = "<li style='cursor:default;'>Henüz eser yok...</li>"; return; }
     
     window.userPoemsDB.forEach(p => {
-        list.innerHTML += `<li onclick="window.openUserPoemModal('${p.id}'); window.closeAllSidebars();">${p.title} <span>(${p.user} | ${p.date})</span></li>`;
+        let n = window.isItemNew(p.timestamp) ? '<span class="new-badge-mini">YENİ</span>' : '';
+        list.innerHTML += `<li onclick="window.openUserPoemModal('${p.id}'); window.closeAllSidebars();"><div>${n}${p.title}</div><span class="sub-text">(${p.user} | ${p.date})</span></li>`;
     });
 };
 
@@ -2120,19 +2335,23 @@ window.switchModalLang = function(lang) {
     window.updateHeartsUI();
 };
 
+window.currentShareData = "";
 window.shareContent = function() {
     if (!window.currentPoemData) return;
     const isDE = document.getElementById('modalLangDE')?.classList.contains('active');
     const title = isDE ? window.currentPoemData.deTitle : window.currentPoemData.trTitle;
     const text = isDE ? window.currentPoemData.deText : window.currentPoemData.trText;
-    const fullText = `${title}\n\n${text}\n\n~ ${window.currentPoemData.author}`;
-    
-    if (navigator.share) {
-        navigator.share({ title: title, text: fullText }).catch(console.error);
-    } else {
-        navigator.clipboard.writeText(fullText);
-        window.showToast("Kopyalandı / Kopiert!");
-    }
+    window.currentShareData = `*${title}*\n\n${text}\n\n~ ${window.currentPoemData.author}\n\n_Şair Misal.i_`;
+    window.openFastModal('shareModal');
+};
+
+window.copyShareText = function() {
+    navigator.clipboard.writeText(window.currentShareData);
+    window.showToast("Kopyalandı / Kopiert!");
+};
+
+window.shareToWhatsApp = function() {
+    window.open(`https://wa.me/?text=${encodeURIComponent(window.currentShareData)}`, '_blank');
 };
 
 window.updateHeartsUI = function() {
@@ -2151,9 +2370,9 @@ window.updateHeartsUI = function() {
         <div id="heart-container" style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; margin: 10px 0;">
             <div style="font-weight: bold; color: var(--accent-color); font-size: 1.4rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; width: 100%; text-align: center;">${isDE ? "Herzen & Kommentar ❤️" : "Kalple & Yorum ❤️"}</div>
             <div class="custom-live-hearts" style="display: flex; justify-content: center; gap: 40px; font-size: 3.2rem; margin-top: 15px; width: 100%;">
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 60px;"><i class="fas fa-heart" id="h1" onclick="window.ratePoem(1)" style="cursor:pointer; transition:0.3s; color:transparent; -webkit-text-stroke: 2px #4a5568;"></i><span style="font-size: 0.75rem; color: #a0aec0; font-weight: bold;">${isDE ? 'Gut' : 'İyi'}</span></div>
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 60px;"><i class="fas fa-heart" id="h2" onclick="window.ratePoem(2)" style="cursor:pointer; transition:0.3s; color:transparent; -webkit-text-stroke: 2px #4a5568;"></i><span style="font-size: 0.75rem; color: #a0aec0; font-weight: bold;">${isDE ? 'Sehr Gut' : 'Çok İyi'}</span></div>
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 60px;"><i class="fas fa-heart" id="h3" onclick="window.ratePoem(3)" style="cursor:pointer; transition:0.3s; color:transparent; -webkit-text-stroke: 2px #4a5568;"></i><span style="font-size: 0.75rem; color: #a0aec0; font-weight: bold;">${isDE ? 'Perfekt' : 'Mükemmel'}</span></div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 60px;"><i class="fas fa-heart" id="h1" onclick="window.ratePoem(1)" style="cursor:pointer; transition:0.3s; color:transparent; -webkit-text-stroke: 2px #4a5568;"></i></div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 60px;"><i class="fas fa-heart" id="h2" onclick="window.ratePoem(2)" style="cursor:pointer; transition:0.3s; color:transparent; -webkit-text-stroke: 2px #4a5568;"></i></div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 60px;"><i class="fas fa-heart" id="h3" onclick="window.ratePoem(3)" style="cursor:pointer; transition:0.3s; color:transparent; -webkit-text-stroke: 2px #4a5568;"></i></div>
             </div>
         </div>
         <div id="m-comment-area" style="width: 100%; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; margin-bottom: 10px;">
@@ -2179,8 +2398,19 @@ window.updateHeartsUI = function() {
         list.innerHTML = data.comments && data.comments.length > 0 
             ? data.comments.map((c, idx) => {
                 let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.name === c.user)) 
-                ? `<div class="action-btns" style="display:flex; gap:10px;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)" style="color:#60a5fa; cursor:pointer;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)" style="color:#ef4444; cursor:pointer;"><i class="fas fa-trash-alt"></i></button></div>` : '';
-                return `<div style="border-bottom: 1px dashed #999; padding: 5px 0; display:flex; justify-content:space-between; align-items:center;"><span style="color:#000; font-size:0.85rem; word-break:break-word; padding-right:10px;"><strong style="color:#8b6914;">${c.user}:</strong> ${c.text}</span> ${actionBtns}</div>`;
+                ? `<div class="action-btns" style="display:flex; gap:10px; margin-top:5px;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)" style="color:#60a5fa; cursor:pointer;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)" style="color:#ef4444; cursor:pointer;"><i class="fas fa-trash-alt"></i></button></div>` : '';
+                
+                return `<div style="border-bottom: 1px dashed #999; padding: 10px 0; display:flex; flex-direction:column;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <strong style="color:#8b6914; font-size:0.85rem;">${c.user}</strong>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <span class="time-info" style="font-size:0.7rem; color:#666;">${c.time || ''}</span>
+                            ${c.editTime ? `<span class="edit-info" style="font-size:0.65rem; color:#c2410c; font-style:italic;">(Edit: ${c.editTime})</span>` : ''}
+                        </div>
+                    </div>
+                    <span style="color:#000; font-size:0.85rem; word-break:break-word;">${c.text}</span>
+                    ${actionBtns}
+                </div>`;
             }).join('') 
             : `<span style="color:#555; font-style:italic; font-size:0.85rem;">${isDE ? 'Schreib den ersten Kommentar...' : 'İlk yorumu sen yap...'}</span>`;
     }
@@ -2193,24 +2423,23 @@ window.ratePoem = function(stars) {
     if (!window.poemDataStore[poemId].ratings) window.poemDataStore[poemId].ratings = {};
     
     const oldRating = window.poemDataStore[poemId].ratings[window.currentUser.username] || 0;
-    let actionMsg = "";
 
     if (oldRating === stars) {
         const newRating = stars - 1;
         if (newRating <= 0) {
             delete window.poemDataStore[poemId].ratings[window.currentUser.username];
-            actionMsg = `${window.currentUser.name}, "${window.currentPoemData.trTitle}" eserinin beğenisini geri çekti.`;
+            window.m_sendNotify(`${window.currentUser.name}, "${window.currentPoemData.trTitle}" eserinin beğenisini geri çekti.`, "💔");
         } else {
             window.poemDataStore[poemId].ratings[window.currentUser.username] = newRating;
-            actionMsg = `${window.currentUser.name}, "${window.currentPoemData.trTitle}" eserini beğendi. (${newRating}❤️)`;
+            window.m_sendNotify(`${window.currentUser.name}, "${window.currentPoemData.trTitle}" eserini beğendi. (${newRating}❤️)`, "💖");
         }
     } else {
         window.poemDataStore[poemId].ratings[window.currentUser.username] = stars;
-        actionMsg = `${window.currentUser.name}, "${window.currentPoemData.trTitle}" eserini beğendi. (${stars}❤️)`;
+        window.m_sendNotify(`${window.currentUser.name}, "${window.currentPoemData.trTitle}" eserini beğendi. (${stars}❤️)`, "💖");
     }
     
     localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-    window.updateHeartsUI(); window.m_sendNotify(actionMsg);
+    window.updateHeartsUI(); 
 };
 
 window.m_addComment = function() {
@@ -2220,17 +2449,20 @@ window.m_addComment = function() {
     
     const commentText = input.value.trim();
     if(window.badWords.some(word => commentText.toLowerCase().includes(word))) {
-        input.value = ""; window.m_sendNotify(`🚫 BAN: ${window.currentUser.name} kötü söz kullandı.`);
+        input.value = ""; window.m_sendNotify(`${window.currentUser.name} kötü söz kullandı.`, "🚫");
         window.m_logout(); window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); return;
     }
 
     const poemId = window.currentPoemData.id;
     if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
-    if (!window.poemDataStore[poemId].comments) window.poemDataStore[poemId].comments = [];
-    window.poemDataStore[poemId].comments.push({ user: window.currentUser.name, text: commentText });
+    
+    const now = new Date();
+    const timeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    
+    window.poemDataStore[poemId].comments.push({ user: window.currentUser.name, text: commentText, time: timeStr });
     localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
     
-    window.m_sendNotify(`💬 Yorum: ${window.currentUser.name} -> "${commentText}"`);
+    window.m_sendNotify(`${window.currentUser.name} bir yorum yaptı: "${commentText}"`, "💬");
     input.value = ''; window.updateHeartsUI();
 };
 
@@ -2241,14 +2473,15 @@ window.m_editComm = function(id, idx, e) {
         if(newText && newText.trim() !== "") {
             if(window.badWords.some(w => newText.toLowerCase().includes(w))) { window.customAlert("Uygunsuz kelime!", "🚫"); return; }
             window.poemDataStore[id].comments[idx].text = newText.trim();
+            const now = new Date();
+            window.poemDataStore[id].comments[idx].editTime = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
             localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
             window.updateHeartsUI();
-            window.m_sendNotify(`⚙️ Düzenlendi: ${window.currentUser.name} yorumunu değiştirdi.`);
+            window.m_sendNotify(`${window.currentUser.name} yorumunu değiştirdi.`, "⚙️");
         }
     });
 };
 
-// PROBLEM 1 FIX: Silme işleminde Event Bubbling engellendi
 window.m_delComm = function(id, idx, e) { 
     if(e) e.stopPropagation();
     window.customConfirm("Bu yorumu silmek istediğinize emin misiniz?", () => {
@@ -2256,20 +2489,149 @@ window.m_delComm = function(id, idx, e) {
         window.poemDataStore[id].comments.splice(idx, 1); 
         localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
         window.updateHeartsUI(); 
-        window.m_sendNotify(`🗑️ Yorum Silindi: ${deletedComment.user} - "${deletedComment.text}"`);
+        window.m_sendNotify(`Yorum Silindi: ${deletedComment.user} - "${deletedComment.text}"`, "🗑️");
+    });
+};
 
-        if (window.currentUser.role === 'admin' && deletedComment.user !== window.currentUser.name) {
-            let targetUserObj = Object.values(window.userDatabase).find(u => u.name === deletedComment.user);
-            if(targetUserObj) {
-                if(!targetUserObj.alerts) targetUserObj.alerts = [];
-                targetUserObj.alerts.push(`Yorumunuz sistem/yönetici tarafından uygun bulunmadığı için silinmiştir: "${deletedComment.text}"`);
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            }
+// ================= 13. BİZİM KALEMİMİZDEN (KULLANICI ESERLERİ) =================
+window.submitUserPoem = function() {
+    if (!window.currentUser) { window.m_openLogin(); return; }
+    const titleInput = document.getElementById('user-poem-title');
+    const input = document.getElementById('user-poem-input');
+    if(!input || !input.value.trim() || !titleInput || !titleInput.value.trim()) { window.customAlert("Lütfen başlık ve içerik giriniz.", "⚠️"); return; }
+    
+    const title = titleInput.value.trim(); const text = input.value.trim();
+    if(window.badWords.some(w => text.toLowerCase().includes(w) || title.toLowerCase().includes(w))) {
+        input.value = ""; titleInput.value = ""; window.m_sendNotify(`${window.currentUser.name} şiir alanında kötü söz kullandı.`, "🚫");
+        window.m_logout(); window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); return;
+    }
+
+    const timeStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    const poemId = 'up_' + Date.now();
+    window.userPoemsDB.push({ id: poemId, user: window.currentUser.name, title: title, text: text, date: timeStr, timestamp: Date.now(), comments: [] });
+    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+    window.m_sendNotify(`${window.currentUser.name} yeni bir eser ekledi: ${title}`, "📝");
+    input.value = ""; titleInput.value = ""; 
+    window.renderUserPoems(); window.renderUserWorksSidebar();
+};
+
+window.renderUserPoems = function() {
+    const list = document.getElementById('user-poems-list');
+    if(!list) return; list.innerHTML = "";
+    if(!window.userPoemsDB || window.userPoemsDB.length === 0) { list.innerHTML = "<p style='color:#a0aec0; text-align:center;'>İlk mısrayı sen yaz...</p>"; return; }
+    
+    [...window.userPoemsDB].reverse().forEach((p, idx) => {
+        const realIdx = window.userPoemsDB.length - 1 - idx;
+        let newTag = window.isItemNew(p.timestamp) ? `<span class="new-badge" style="position:relative; top:0; left:0; transform:none; display:inline-block; margin-bottom:5px;">YENİ</span><br>` : "";
+        let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.name === p.user)) 
+            ? `<div class="action-btns" style="display:flex; gap:10px; justify-content:center;"><button class="edit-btn" onclick="window.editUserPoem(${realIdx}, event)"><i class="fas fa-edit"></i> Düzenle</button><button class="del-btn" onclick="window.deleteUserPoem(${realIdx}, event)"><i class="fas fa-trash"></i> Sil</button></div>` : "";
+        
+        let commentsHtml = (p.comments && p.comments.length > 0) ? p.comments.map((c, cIdx) => {
+            let commActionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.name === c.user)) 
+            ? `<div class="action-btns" style="margin-top:5px;"><button class="edit-btn" onclick="window.editUserPoemComment(${realIdx}, ${cIdx}, event)"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.deleteUserPoemComment(${realIdx}, ${cIdx}, event)"><i class="fas fa-trash-alt"></i></button></div>` : '';
+            return `<div class="bk-comment-item" style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding: 10px 0; display:flex; flex-direction:column; text-align:left;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <strong style="color:#d4af37; font-size:0.85rem;">${c.user}</strong>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                        <span class="time-info" style="font-size:0.7rem; color:#a0aec0;">${c.time || ''}</span>
+                        ${c.editTime ? `<span class="edit-info" style="font-size:0.65rem; color:#fbbf24; font-style:italic;">(Edit: ${c.editTime})</span>` : ''}
+                    </div>
+                </div>
+                <span style="font-size:0.85rem; color:#cbd5e1; word-break:break-word;">${c.text}</span>
+                ${commActionBtns}
+            </div>`;
+        }).join('') : `<span style="color:#a0aec0; font-size:0.8rem; font-style:italic;">Henüz yorum yok...</span>`;
+
+        list.innerHTML += `
+            <div class="poem-post" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 10px; padding: 20px; margin-bottom: 15px; text-align: center;">
+                ${newTag}
+                <div class="poem-post-header" style="display: flex; justify-content:space-between; align-items: baseline; gap: 10px; border-bottom: 1px dashed rgba(212,175,55,0.2); padding-bottom: 5px; margin-bottom: 15px;">
+                    <div style="font-size:0.8rem; color:#a0aec0; text-align:left;">
+                        <span style="font-size:0.7rem;">${p.date}</span>
+                        ${p.editTime ? `<br><span style="font-size:0.65rem; color:#fbbf24; font-style:italic;">(Edit: ${p.editTime})</span>` : ''}
+                    </div>
+                </div>
+                <h4 style="color:var(--accent-color); font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:15px; text-transform:uppercase;">${p.title}</h4>
+                <div class="poem-post-body" style="white-space: pre-wrap; font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fdfbf7; margin-bottom: 15px; line-height: 1.7; text-align:center;">${p.text.replace(/\n/g, '<br>')}</div>
+                <span class="user-poem-signature">~ ${p.user}</span>
+                ${actionBtns}
+                <div class="bk-comments" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <div style="max-height: 150px; overflow-y: auto; margin-bottom: 10px; text-align:left;">${commentsHtml}</div>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="bk-comm-${realIdx}" placeholder="Yorum yaz..." style="flex-grow:1; padding:8px 12px; border-radius:5px; border:1px solid #d4af37; background:rgba(0,0,0,0.5); color:white; outline:none; font-family:'Poppins', sans-serif;" onkeypress="if(event.key==='Enter') window.addUserPoemComment(${realIdx})">
+                        <button onclick="window.addUserPoemComment(${realIdx})" style="background:var(--accent-color); border:none; padding:8px 15px; border-radius:5px; cursor:pointer; color:black;"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>`;
+    });
+};
+
+window.editUserPoem = function(idx, e) {
+    if(e) e.stopPropagation();
+    const poem = window.userPoemsDB[idx];
+    window.customDualPrompt("Eseri düzenle / Werk bearbeiten", poem.title, poem.text, (newTitle, newText) => {
+        if(newTitle && newTitle.trim() !== "" && newText && newText.trim() !== "") {
+            if(window.badWords.some(w => newText.toLowerCase().includes(w) || newTitle.toLowerCase().includes(w))) { window.customAlert("Uygunsuz kelime!", "🚫"); return; }
+            window.userPoemsDB[idx].title = newTitle.trim();
+            window.userPoemsDB[idx].text = newText.trim();
+            window.userPoemsDB[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            window.m_sendNotify(`${window.currentUser.name} eserini güncelledi.`, "⚙️");
+            window.renderUserPoems(); window.renderUserWorksSidebar();
         }
     });
 };
 
-// ================= 12. SOHBET & BİZİM KALEMİMİZDEN =================
+window.deleteUserPoem = function(idx, e) {
+    if(e) e.stopPropagation();
+    window.customConfirm("Bu eseri silmek istediğinize emin misiniz?", () => {
+        window.userPoemsDB.splice(idx, 1); 
+        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
+        window.m_sendNotify(`${window.currentUser.name} bir eseri sildi.`, "🗑️");
+        window.renderUserPoems(); window.renderUserWorksSidebar();
+    });
+};
+
+window.addUserPoemComment = function(idx) {
+    if(!window.currentUser) { window.m_openLogin(); return; }
+    const input = document.getElementById(`bk-comm-${idx}`);
+    if(!input || !input.value.trim()) return;
+    const text = input.value.trim();
+    if(window.badWords.some(w => text.toLowerCase().includes(w))) {
+        input.value = ""; window.m_sendNotify(`🚫 BAN: ${window.currentUser.name} yorumda kötü söz kullandı.`);
+        window.m_logout(); window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); return;
+    }
+    if(!window.userPoemsDB[idx].comments) window.userPoemsDB[idx].comments = [];
+    const timeStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    window.userPoemsDB[idx].comments.push({ user: window.currentUser.name, text: text, time: timeStr });
+    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+    window.m_sendNotify(`💬 Yorum: ${window.currentUser.name} (Bizim Kalemimizden)`);
+    window.renderUserPoems();
+};
+
+window.editUserPoemComment = function(pIdx, cIdx, e) {
+    if(e) e.stopPropagation();
+    const comment = window.userPoemsDB[pIdx].comments[cIdx];
+    window.customDualPrompt("Yorumu düzenle:", null, comment.text, (newTitle, newText) => {
+        if(newText && newText.trim() !== "") {
+            window.userPoemsDB[pIdx].comments[cIdx].text = newText.trim();
+            window.userPoemsDB[pIdx].comments[cIdx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            window.renderUserPoems();
+        }
+    });
+};
+
+window.deleteUserPoemComment = function(pIdx, cIdx, e) {
+    if(e) e.stopPropagation();
+    window.customConfirm("Silmek istediğinize emin misiniz?", () => {
+        window.userPoemsDB[pIdx].comments.splice(cIdx, 1); 
+        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
+        window.renderUserPoems();
+    });
+};
+
+// ================= 14. SOHBET (CHAT) =================
 window.sendChat = function() {
     const input = document.getElementById('chat-input');
     if(!input || !input.value.trim()) return;
@@ -2277,16 +2639,14 @@ window.sendChat = function() {
 
     let text = input.value.trim();
     if(window.badWords.some(w => text.toLowerCase().includes(w))) {
-        input.value = ""; window.m_sendNotify(`Ban: ${window.currentUser.name} kötü söz kullandı.`);
+        input.value = ""; window.m_sendNotify(`${window.currentUser.name} chatte kötü söz kullandı.`, "🚫");
         window.m_logout(); window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); return;
     }
 
-    const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    const dateStr = new Date().toLocaleDateString('tr-TR');
-    window.chatDB.push({ user: window.currentUser.name, role: window.currentUser.role, text: text, time: `${dateStr} ${timeStr}` });
+    const timeStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    window.chatDB.push({ user: window.currentUser.name, role: window.currentUser.role, text: text, time: timeStr });
     localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB));
-    
-    if(window.currentUser.role !== 'admin') window.m_sendNotify(`🗨️ Sohbet: ${window.currentUser.name} mesaj yazdı.`);
+    window.m_sendNotify(`${window.currentUser.name} sohbete yazdı.`, "🗨️");
     input.value = ""; window.renderChat();
 };
 
@@ -2321,6 +2681,7 @@ window.renderChat = function() {
                     <div style="font-size:0.8rem; color:#a0aec0; text-align: left;">
                         <strong style="color: var(--accent-color); font-family: 'Great Vibes', cursive; font-size: 1.3rem;">~ ${msg.user} ${crown}</strong>
                         <br><span style="font-size:0.7rem;">${msg.time}</span>
+                        ${msg.editTime ? `<br><span class="edit-info" style="font-size:0.65rem; color:#fbbf24;">(Edit: ${msg.editTime})</span>` : ''}
                     </div>
                     ${actionBtns}
                 </div>
@@ -2336,9 +2697,10 @@ window.editChatMsg = function(idx, e) {
     const msg = window.chatDB[idx];
     window.customDualPrompt("Mesajı düzenle / Nachricht bearbeiten:", null, msg.text, (newTitle, newText) => {
         if(newText && newText.trim() !== "") {
-            if(window.badWords.some(w => newText.toLowerCase().includes(w))) { window.customAlert("Uygunsuz kelime!", "🚫"); return; }
             window.chatDB[idx].text = newText.trim();
+            window.chatDB[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
             localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB));
+            window.m_sendNotify(`${window.currentUser.name} sohbet mesajını güncelledi.`, "⚙️");
             window.renderChat();
         }
     });
@@ -2347,188 +2709,25 @@ window.editChatMsg = function(idx, e) {
 window.deleteChatMsg = function(idx, e) {
     if(e) e.stopPropagation();
     window.customConfirm("Mesajı silmek istediğinize emin misiniz?", () => {
-        const deletedMsg = window.chatDB[idx];
         window.chatDB.splice(idx, 1); 
         localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); 
+        window.m_sendNotify(`${window.currentUser.name} bir sohbet mesajı sildi.`, "🗑️");
         window.renderChat(); 
-
-        if (window.currentUser.role === 'admin' && deletedMsg.user !== window.currentUser.name) {
-            let targetUserObj = Object.values(window.userDatabase).find(u => u.name === deletedMsg.user);
-            if(targetUserObj) {
-                if(!targetUserObj.alerts) targetUserObj.alerts = [];
-                targetUserObj.alerts.push(`Sohbetteki bir mesajınız sistem/yönetici tarafından silinmiştir: "${deletedMsg.text}"`);
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            }
-        }
     });
 };
 
-window.submitUserPoem = function() {
-    if (!window.currentUser) { window.m_openLogin(); return; }
-    const titleInput = document.getElementById('user-poem-title');
-    const input = document.getElementById('user-poem-input');
-    if(!input || !input.value.trim() || !titleInput || !titleInput.value.trim()) {
-        window.customAlert("Lütfen başlık ve içerik giriniz.", "⚠️"); return;
-    }
-    
-    const title = titleInput.value.trim();
-    const text = input.value.trim();
-    
-    if(window.badWords.some(w => text.toLowerCase().includes(w) || title.toLowerCase().includes(w))) {
-        input.value = ""; titleInput.value = ""; window.m_sendNotify(`🚫 BAN: ${window.currentUser.name} şiir alanında kötü söz kullandı.`);
-        window.m_logout(); window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); return;
-    }
-
-    const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    const dateStr = new Date().toLocaleDateString('tr-TR');
-    const poemId = 'up_' + Date.now();
-    window.userPoemsDB.push({ id: poemId, user: window.currentUser.name, title: title, text: text, date: `${dateStr} ${timeStr}`, timestamp: Date.now(), comments: [] });
-    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-    window.m_sendNotify(`📝 Yeni Eser: ${window.currentUser.name} - ${title}`);
-    input.value = ""; titleInput.value = ""; 
-    window.renderUserPoems();
-    window.renderUserWorksSidebar();
-};
-
-window.renderUserPoems = function() {
-    const list = document.getElementById('user-poems-list');
-    if(!list) return; list.innerHTML = "";
-    if(!window.userPoemsDB || window.userPoemsDB.length === 0) { list.innerHTML = "<p style='color:#a0aec0; text-align:center;'>İlk mısrayı sen yaz...</p>"; return; }
-    
-    [...window.userPoemsDB].reverse().forEach((p, idx) => {
-        const realIdx = window.userPoemsDB.length - 1 - idx;
-        let newTag = window.isItemNew(p.timestamp) ? `<span class="new-badge" style="position:relative; top:0; left:0; transform:none; display:inline-block; margin-bottom:5px;">YENİ</span><br>` : "";
-
-        let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.name === p.user)) 
-            ? `<div class="action-btns" style="display:flex; gap:10px; justify-content:center;"><button class="edit-btn" onclick="window.editUserPoem(${realIdx}, event)" style="color:#60a5fa; cursor:pointer;"><i class="fas fa-edit"></i> Düzenle</button><button class="del-btn" onclick="window.deleteUserPoem(${realIdx}, event)" style="color:#ef4444; cursor:pointer;"><i class="fas fa-trash"></i> Sil</button></div>` : "";
-        
-        let commentsHtml = (p.comments && p.comments.length > 0) ? p.comments.map((c, cIdx) => {
-            let commActionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.name === c.user)) 
-            ? `<div class="action-btns"><button class="edit-btn" onclick="window.editUserPoemComment(${realIdx}, ${cIdx}, event)" style="color:#60a5fa; cursor:pointer; font-size:0.75rem;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.deleteUserPoemComment(${realIdx}, ${cIdx}, event)" style="color:#ef4444; cursor:pointer; font-size:0.75rem;"><i class="fas fa-trash-alt"></i></button></div>` : '';
-            return `<div class="bk-comment-item" style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding: 5px 0; display:flex; justify-content:space-between; align-items:baseline;"><span style="word-break:break-word; padding-right:10px; font-size:0.85rem; color:#cbd5e1;"><strong style="color:#d4af37;">${c.user}:</strong> ${c.text}</span> ${commActionBtns}</div>`;
-        }).join('') : `<span style="color:#a0aec0; font-size:0.8rem; font-style:italic;">Henüz yorum yok...</span>`;
-
-        list.innerHTML += `
-            <div class="poem-post" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: center;">
-                ${newTag}
-                <div class="poem-post-header" style="display: flex; align-items: baseline; gap: 10px; border-bottom: 1px dashed rgba(212,175,55,0.2); padding-bottom: 5px; margin-bottom: 10px;">
-                    <div style="font-size:0.8rem; color:#a0aec0; text-align:left; flex-grow:1;">
-                        <strong style="color: var(--accent-color); font-family: 'Great Vibes', cursive; font-size: 1.5rem;">~ ${p.user}</strong>
-                        <br><span style="font-size:0.7rem;">${p.date}</span>
-                    </div>
-                </div>
-                <h4 style="color:var(--accent-color); font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:10px; text-transform:uppercase;">${p.title}</h4>
-                <div class="poem-post-body" style="white-space: pre-wrap; font-family: 'Playfair Display', serif; font-size: 1rem; color: #fdfbf7; margin-bottom: 15px; line-height: 1.7; text-align:center;">${p.text.replace(/\n/g, '<br>')}</div>
-                ${actionBtns}
-                <div class="bk-comments" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 10px;">
-                    <div style="max-height: 80px; overflow-y: auto; margin-bottom: 10px; text-align:left;">${commentsHtml}</div>
-                    <div style="display:flex; gap:5px;">
-                        <input type="text" id="bk-comm-${realIdx}" placeholder="Yorum yaz..." style="flex-grow:1; padding:5px 10px; border-radius:5px; border:1px solid #d4af37; background:rgba(0,0,0,0.5); color:white; outline:none; font-family:'Poppins', sans-serif;" onkeypress="if(event.key==='Enter') window.addUserPoemComment(${realIdx})">
-                        <button onclick="window.addUserPoemComment(${realIdx})" style="background:var(--accent-color); border:none; padding:5px 10px; border-radius:5px; cursor:pointer; color:black;"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
-            </div>`;
-    });
-};
-
-window.editUserPoem = function(idx, e) {
-    if(e) e.stopPropagation();
-    const poem = window.userPoemsDB[idx];
-    window.customDualPrompt("Eseri düzenle / Werk bearbeiten", poem.title, poem.text, (newTitle, newText) => {
-        if(newTitle && newTitle.trim() !== "" && newText && newText.trim() !== "") {
-            if(window.badWords.some(w => newText.toLowerCase().includes(w) || newTitle.toLowerCase().includes(w))) { window.customAlert("Uygunsuz kelime!", "🚫"); return; }
-            window.userPoemsDB[idx].title = newTitle.trim();
-            window.userPoemsDB[idx].text = newText.trim();
-            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            window.renderUserPoems();
-            window.renderUserWorksSidebar();
-        }
-    });
-};
-
-window.deleteUserPoem = function(idx, e) {
-    if(e) e.stopPropagation();
-    window.customConfirm("Bu eseri silmek istediğinize emin misiniz?", () => {
-        const deletedPoem = window.userPoemsDB[idx];
-        window.userPoemsDB.splice(idx, 1); 
-        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
-        window.renderUserPoems();
-        window.renderUserWorksSidebar();
-
-        if (window.currentUser.role === 'admin' && deletedPoem.user !== window.currentUser.name) {
-            let targetUserObj = Object.values(window.userDatabase).find(u => u.name === deletedPoem.user);
-            if(targetUserObj) {
-                if(!targetUserObj.alerts) targetUserObj.alerts = [];
-                targetUserObj.alerts.push(`"${deletedPoem.title}" adlı eseriniz sistem/yönetici tarafından uygun bulunmadığı için silinmiştir.`);
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            }
-        }
-    });
-};
-
-window.addUserPoemComment = function(idx) {
-    if(!window.currentUser) { window.m_openLogin(); return; }
-    const input = document.getElementById(`bk-comm-${idx}`);
-    if(!input || !input.value.trim()) return;
-    const text = input.value.trim();
-    if(window.badWords.some(w => text.toLowerCase().includes(w))) {
-        input.value = ""; window.m_sendNotify(`🚫 BAN: ${window.currentUser.name} yorumda kötü söz kullandı.`);
-        window.m_logout(); window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); return;
-    }
-    if(!window.userPoemsDB[idx].comments) window.userPoemsDB[idx].comments = [];
-    window.userPoemsDB[idx].comments.push({ user: window.currentUser.name, text: text });
-    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-    window.m_sendNotify(`💬 Yorum: ${window.currentUser.name} (Bizim Kalemimizden)`);
-    window.renderUserPoems();
-};
-
-window.editUserPoemComment = function(pIdx, cIdx, e) {
-    if(e) e.stopPropagation();
-    const comment = window.userPoemsDB[pIdx].comments[cIdx];
-    window.customDualPrompt("Yorumu düzenle / Kommentar bearbeiten:", null, comment.text, (newTitle, newText) => {
-        if(newText && newText.trim() !== "") {
-            if(window.badWords.some(w => newText.toLowerCase().includes(w))) { window.customAlert("Uygunsuz kelime!", "🚫"); return; }
-            window.userPoemsDB[pIdx].comments[cIdx].text = newText.trim();
-            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            window.renderUserPoems();
-        }
-    });
-};
-
-window.deleteUserPoemComment = function(pIdx, cIdx, e) {
-    if(e) e.stopPropagation();
-    window.customConfirm("Bu yorumu silmek istediğinize emin misiniz?", () => {
-        const deletedComment = window.userPoemsDB[pIdx].comments[cIdx];
-        window.userPoemsDB[pIdx].comments.splice(cIdx, 1); 
-        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
-        window.renderUserPoems();
-
-        if (window.currentUser.role === 'admin' && deletedComment.user !== window.currentUser.name) {
-            let targetUserObj = Object.values(window.userDatabase).find(u => u.name === deletedComment.user);
-            if(targetUserObj) {
-                if(!targetUserObj.alerts) targetUserObj.alerts = [];
-                targetUserObj.alerts.push(`Kullanıcı eserindeki bir yorumunuz sistem/yönetici tarafından silinmiştir: "${deletedComment.text}"`);
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            }
-        }
-    });
-};
-
-// ================= 13. SPIELE LOGIK =================
+// ================= 15. OYUNLAR =================
 window.openFalModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('falModal'); window.resetFal(); };
 window.crackFal = function() {
     const cup = document.getElementById('fal-cup'); if(cup.classList.contains('spilled')) return; cup.classList.add('spilled');
-    const forts = [{ tr: "Yakında kalbini ısıtacak bir haber alacaksın.", de: "Bald erhältst du eine Nachricht, die dein Herz erwärmt." }, { tr: "Bugün sabırlı ol, beklediğin şey kapıda.", de: "Sei heute geduldig, das, worauf du wartest, steht vor der Tür." }, { tr: "Bir dostun sana sürpriz yapabilir.", de: "Ein Freund könnte dich überraschen." }];
+    const forts = [{ tr: "Yakında kalbini ısıtacak bir haber alacaksın.", de: "Bald erhältst du eine Nachricht, die dein Herz erwärmt." }, { tr: "Bugün sabırlı ol, beklediğin şey kapıda.", de: "Sei heute geduldig, das, worauf du wartest, steht vor der Tür." }, { tr: "Bir dostun sana sürpriz yapabilir.", de: "Ein Freund könnte dich überraschen." }, { tr: "Beklenmedik bir başarı yolda.", de: "Unerwarteter Erfolg ist auf dem Weg." }, { tr: "Geçmişten gelen biri yüzünü güldürecek.", de: "Jemand aus der Vergangenheit wird dich zum Lächeln bringen." }];
     setTimeout(() => {
         const r = forts[Math.floor(Math.random() * forts.length)];
         document.getElementById('fal-text-tr').innerText = r.tr; document.getElementById('fal-text-de').innerText = r.de;
         document.getElementById('fal-result').style.display = 'block'; 
     }, 800);
 };
-window.resetFal = function() {
-    document.getElementById('fal-cup')?.classList.remove('spilled');
-    const res = document.getElementById('fal-result'); if(res) res.style.display = 'none';
-};
+window.resetFal = function() { document.getElementById('fal-cup')?.classList.remove('spilled'); document.getElementById('fal-result').style.display = 'none'; };
 
 window.openHoroscopeModal = (e) => { 
     if(e) e.stopPropagation(); window.openFastModal('horoscopeModal'); 
@@ -2538,50 +2737,26 @@ window.openHoroscopeModal = (e) => {
 };
 
 window.horoscopeTexts = [
-    { tr: "Bu ay yeniliklere açık olun.", de: "Sei diesen Monat offen für Neues." },
-    { tr: "Maddi konularda dikkatli adımlar atın.", de: "Sei vorsichtig in finanziellen Angelegenheiten." },
-    { tr: "İletişim becerileriniz ön planda olacak.", de: "Deine Kommunikationsfähigkeiten stehen im Vordergrund." },
-    { tr: "Ailenizle vakit geçirmek size iyi gelecek.", de: "Zeit mit der Familie wird dir guttun." },
-    { tr: "Yaratıcılığınız zirvede, değerlendirin.", de: "Deine Kreativität ist auf dem Höhepunkt." },
-    { tr: "Sağlığınıza dikkat etmeniz gereken bir dönem.", de: "Achte in dieser Zeit auf deine Gesundheit." },
-    { tr: "İkili ilişkilerde uyumu yakalayacaksınız.", de: "Du wirst Harmonie in Beziehungen finden." },
-    { tr: "İçsel bir dönüşüm yaşayabilirsiniz.", de: "Du könntest eine innere Transformation erleben." },
-    { tr: "Yeni ufuklara yelken açma vakti.", de: "Zeit, zu neuen Horizonten aufzubrechen." },
-    { tr: "Kariyerinizde önemli gelişmeler olabilir.", de: "Wichtige Entwicklungen in deiner Karriere sind möglich." },
-    { tr: "Sosyal çevreniz genişleyebilir.", de: "Dein sozialer Kreis könnte sich erweitern." },
-    { tr: "Sezgilerinize güvenin.", de: "Vertraue deiner Intuition." }
+    { tr: "Bu ay yeniliklere açık olun.", de: "Sei diesen Monat offen für Neues." }, { tr: "Maddi konularda dikkatli adımlar atın.", de: "Sei vorsichtig in finanziellen Angelegenheiten." }, { tr: "İletişim becerileriniz ön planda olacak.", de: "Deine Kommunikationsfähigkeiten stehen im Vordergrund." }, { tr: "Ailenizle vakit geçirmek size iyi gelecek.", de: "Zeit mit der Familie wird dir guttun." }, { tr: "Yaratıcılığınız zirvede, değerlendirin.", de: "Deine Kreativität ist auf dem Höhepunkt." }, { tr: "Sağlığınıza dikkat etmeniz gereken bir dönem.", de: "Achte in dieser Zeit auf deine Gesundheit." }, { tr: "İkili ilişkilerde uyumu yakalayacaksınız.", de: "Du wirst Harmonie in Beziehungen finden." }, { tr: "İçsel bir dönüşüm yaşayabilirsiniz.", de: "Du könntest eine innere Transformation erleben." }, { tr: "Yeni ufuklara yelken açma vakti.", de: "Zeit, zu neuen Horizonten aufzubrechen." }, { tr: "Kariyerinizde önemli gelişmeler olabilir.", de: "Wichtige Entwicklungen in deiner Karriere sind möglich." }, { tr: "Sosyal çevreniz genişleyebilir.", de: "Dein sozialer Kreis könnte sich erweitern." }, { tr: "Sezgilerinize güvenin.", de: "Vertraue deiner Intuition." }
 ];
-
 window.showHoroInfo = (id) => {
     const z = window.zodiacs.find(x => x.id === id);
     document.getElementById('zodiac-grid').style.display = "none"; document.getElementById('horoscope-result').style.display = "block";
     document.getElementById('horo-title').innerText = `${z.icon} ${z.tr} / ${z.de}`;
-    
     const monthIndex = new Date().getMonth();
     const textObj = window.horoscopeTexts[(monthIndex + z.tr.length) % 12];
-    
-    document.getElementById('horo-text-tr').innerText = textObj.tr; 
-    document.getElementById('horo-text-de').innerText = textObj.de;
+    document.getElementById('horo-text-tr').innerText = textObj.tr; document.getElementById('horo-text-de').innerText = textObj.de;
 };
 
 window.targetNumber = 0; window.guessAttempts = 0;
 window.openGuessNumberModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('guessNumberModal'); window.initGuessGame(); };
-window.initGuessGame = function() {
-    window.targetNumber = Math.floor(Math.random()*100)+1; window.guessAttempts = 0;
-    document.getElementById('guess-input').value = ""; document.getElementById('guess-input').disabled = false;
-    document.getElementById('guess-msg').innerText = "Hadi başla! / Fange an!"; document.getElementById('guess-hint').innerText = "🤔";
-    document.getElementById('guess-reset').style.display = "none";
-};
+window.initGuessGame = function() { window.targetNumber = Math.floor(Math.random()*100)+1; window.guessAttempts = 0; document.getElementById('guess-input').value = ""; document.getElementById('guess-input').disabled = false; document.getElementById('guess-msg').innerText = "Hadi başla! / Fange an!"; document.getElementById('guess-hint').innerText = "🤔"; document.getElementById('guess-reset').style.display = "none"; };
 window.checkGuess = function() {
     const val = parseInt(document.getElementById('guess-input').value); const m = document.getElementById('guess-msg'); const h = document.getElementById('guess-hint');
     if(isNaN(val) || val < 1 || val > 100) { m.innerText = "1-100 arası sayı girin."; m.style.color = "#ef4444"; return; }
     window.guessAttempts++;
-    if(val === window.targetNumber) {
-        h.innerText = "🎉"; m.innerText = `Tebrikler! ${window.guessAttempts} denemede buldun!\nIn ${window.guessAttempts} Versuchen erraten!`; m.style.color = "lime";
-        document.getElementById('guess-input').disabled = true; document.getElementById('guess-reset').style.display = "block";
-    } else {
-        h.innerText = val < window.targetNumber ? "⬆️" : "⬇️"; m.innerText = val < window.targetNumber ? "Daha büyük! / Größer!" : "Daha küçük! / Kleiner!"; m.style.color = "#fbbf24";
-    }
+    if(val === window.targetNumber) { h.innerText = "🎉"; m.innerText = `Tebrikler! ${window.guessAttempts} denemede buldun!\nIn ${window.guessAttempts} Versuchen erraten!`; m.style.color = "lime"; document.getElementById('guess-input').disabled = true; document.getElementById('guess-reset').style.display = "block"; } 
+    else { h.innerText = val < window.targetNumber ? "⬆️" : "⬇️"; m.innerText = val < window.targetNumber ? "Daha büyük! / Größer!" : "Daha küçük! / Kleiner!"; m.style.color = "#fbbf24"; }
     document.getElementById('guess-input').value = "";
 };
 
@@ -2600,23 +2775,15 @@ window.simonInput = function(color) {
     if(window.simonWait) return; const btn = document.getElementById(`simon-${color}`);
     btn.classList.add('active'); setTimeout(() => btn.classList.remove('active'), 200); window.playerSeq.push(color);
     const cur = window.playerSeq.length - 1;
-    if(window.playerSeq[cur] !== window.simonSeq[cur]) {
-        document.getElementById('simon-msg').innerText = `Oyun Bitti! / Game Over! (Skor: ${window.simonLevel - 1})`; document.getElementById('simon-msg').style.color = "#ef4444";
-        document.getElementById('simon-start-btn').style.display = 'block'; document.getElementById('simon-start-btn').innerText = "Yeniden Oyna / Nochmal"; window.simonWait = true; return;
-    }
-    if(window.playerSeq.length === window.simonSeq.length) {
-        window.simonWait = true; document.getElementById('simon-msg').innerText = "Harika! / Super! ✅"; document.getElementById('simon-msg').style.color = "lime"; setTimeout(window.nextSimonRound, 1000);
-    }
+    if(window.playerSeq[cur] !== window.simonSeq[cur]) { document.getElementById('simon-msg').innerText = `Oyun Bitti! / Game Over! (Skor: ${window.simonLevel - 1})`; document.getElementById('simon-msg').style.color = "#ef4444"; document.getElementById('simon-start-btn').style.display = 'block'; document.getElementById('simon-start-btn').innerText = "Yeniden Oyna / Nochmal"; window.simonWait = true; return; }
+    if(window.playerSeq.length === window.simonSeq.length) { window.simonWait = true; document.getElementById('simon-msg').innerText = "Harika! / Super! ✅"; document.getElementById('simon-msg').style.color = "lime"; setTimeout(window.nextSimonRound, 1000); }
 };
 
 window.openDiceModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('diceModal'); document.getElementById('dice-display').innerText="🎲"; document.getElementById('dice-display').classList.remove('rolling'); document.getElementById('dice-msg').innerText="Zarı atmak için butona bas."; document.getElementById('dice-msg').style.color="#cbd5e1"; };
 window.rollDice = function() {
     const d = document.getElementById('dice-display'); const m = document.getElementById('dice-msg');
     if(d.classList.contains('rolling')) return; d.classList.add('rolling'); m.innerText = "Zar atılıyor... / Würfelt..."; m.style.color = "var(--accent-color)";
-    setTimeout(() => {
-        d.classList.remove('rolling'); const res = Math.floor(Math.random()*6); d.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][res];
-        m.innerText = `Sonuç / Ergebnis: ${res+1}`; m.style.color = "lime";
-    }, 500);
+    setTimeout(() => { d.classList.remove('rolling'); const res = Math.floor(Math.random()*6); d.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][res]; m.innerText = `Sonuç / Ergebnis: ${res+1}`; m.style.color = "lime"; }, 500);
 };
 
 window.fcScore = 0; window.fcTime = 5.0; window.fcActive = false; window.fcTimer = null;
@@ -2624,10 +2791,7 @@ window.openFastClickModal = (e) => { if(e) e.stopPropagation(); window.openFastM
 window.startFastClick = () => { window.fcScore = 0; window.fcTime = 5.0; window.fcActive = false; clearInterval(window.fcTimer); document.getElementById('fc-score').innerText = "0"; document.getElementById('fc-time').innerText = "⏱️ 5.0"; const btn = document.getElementById('fc-btn'); btn.innerText = "BAŞLA! / START!"; btn.disabled = false; document.getElementById('fc-start').style.display = "none"; };
 window.clickFast = () => {
     const btn = document.getElementById('fc-btn');
-    if(!window.fcActive) {
-        window.fcActive = true; btn.innerText = "TIKLA! / KLICK!";
-        window.fcTimer = setInterval(() => { window.fcTime -= 0.1; if(window.fcTime <= 0) { window.fcTime = 0; window.fcActive = false; clearInterval(window.fcTimer); btn.disabled = true; btn.innerText = "SÜRE BİTTİ!"; document.getElementById('fc-start').style.display = "block"; } document.getElementById('fc-time').innerText = "⏱️ " + window.fcTime.toFixed(1); }, 100);
-    }
+    if(!window.fcActive) { window.fcActive = true; btn.innerText = "TIKLA! / KLICK!"; window.fcTimer = setInterval(() => { window.fcTime -= 0.1; if(window.fcTime <= 0) { window.fcTime = 0; window.fcActive = false; clearInterval(window.fcTimer); btn.disabled = true; btn.innerText = "SÜRE BİTTİ!"; document.getElementById('fc-start').style.display = "block"; } document.getElementById('fc-time').innerText = "⏱️ " + window.fcTime.toFixed(1); }, 100); }
     if(window.fcActive) { window.fcScore++; document.getElementById('fc-score').innerText = window.fcScore; }
 };
 
@@ -2635,25 +2799,19 @@ window.openMagicBallModal = (e) => { if(e) e.stopPropagation(); window.openFastM
 window.shakeMagicBall = () => {
     const ball = document.getElementById('magic-ball'); const a = document.getElementById('magic-answer'); const aD = document.getElementById('magic-answer-de');
     if(ball.classList.contains('magic-shaking')) return; a.innerText=""; aD.innerText=""; ball.classList.add('magic-shaking');
-    setTimeout(() => {
-        ball.classList.remove('magic-shaking');
-        const answers = [{tr:"Kesinlikle evet.",de:"Definitiv ja."}, {tr:"Kuşkusuz öyle.",de:"Ohne Zweifel."}, {tr:"İşaretler evet diyor.",de:"Die Zeichen deuten auf Ja."}, {tr:"Buna güvenme.",de:"Verlass dich nicht darauf."}, {tr:"Cevabım hayır.",de:"Meine Antwort ist nein."}];
-        const r = answers[Math.floor(Math.random()*answers.length)]; a.innerText = r.tr; aD.innerText = r.de;
-    }, 400);
+    setTimeout(() => { ball.classList.remove('magic-shaking'); const answers = [{tr:"Kesinlikle evet.",de:"Definitiv ja."}, {tr:"Kuşkusuz öyle.",de:"Ohne Zweifel."}, {tr:"İşaretler evet diyor.",de:"Die Zeichen deuten auf Ja."}, {tr:"Buna güvenme.",de:"Verlass dich nicht darauf."}, {tr:"Cevabım hayır.",de:"Meine Antwort ist nein."}]; const r = answers[Math.floor(Math.random()*answers.length)]; a.innerText = r.tr; aD.innerText = r.de; }, 400);
 };
 
 window.openCoinFlipModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('coinFlipModal'); document.getElementById('coin').innerText="?"; document.getElementById('coin-msg').innerText="Fırlatmak için tıkla / Klick zum Werfen"; };
 window.flipCoin = () => {
     const coin = document.getElementById('coin'); const msg = document.getElementById('coin-msg');
     if(coin.classList.contains('coin-spinning')) return; msg.innerText="Fırlatılıyor... / Wirft..."; msg.style.color="var(--accent-color)"; coin.innerText=""; coin.classList.add('coin-spinning');
-    setTimeout(() => {
-        coin.classList.remove('coin-spinning'); const isHeads = Math.random() > 0.5; coin.style.fontSize="3rem";
-        if(isHeads) { coin.innerText="YAZI"; msg.innerHTML="Sonuç: <strong style='color:lime;'>Yazı (Kopf)</strong>"; } else { coin.innerText="TURA"; msg.innerHTML="Sonuç: <strong style='color:lime;'>Tura (Zahl)</strong>"; }
-    }, 1200);
+    setTimeout(() => { coin.classList.remove('coin-spinning'); const isHeads = Math.random() > 0.5; coin.style.fontSize="3rem"; if(isHeads) { coin.innerText="YAZI"; msg.innerHTML="Sonuç: <strong style='color:lime;'>Yazı (Kopf)</strong>"; } else { coin.innerText="TURA"; msg.innerHTML="Sonuç: <strong style='color:lime;'>Tura (Zahl)</strong>"; } }, 1200);
 };
 
 window.openHangmanModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('hangmanModal'); window.initHangman(); };
-window.wordsTR = ["ŞİİR", "SANAT", "İLHAM", "VİCDAN", "VEFA", "UMUT"]; window.wordsDE = ["GEDICHT", "KUNST", "GEFUEHL", "HERZ", "FRIEDEN", "TREUE"];
+window.wordsTR = ["ŞİİR", "SANAT", "İLHAM", "VİCDAN", "VEFA", "UMUT", "ADALET", "HUZUR", "SEVGİ", "SADAKAT", "MERHAMET", "ÖZGÜRLÜK", "DOSTLUK", "GÜVEN", "SABIR", "GURUR", "TUTKU", "SEVDA", "AYDINLIK"]; 
+window.wordsDE = ["GEDICHT", "KUNST", "GEFUEHL", "HERZ", "FRIEDEN", "TREUE", "HOFFNUNG", "LIEBE", "FREUNDSCHAFT", "GEDULD", "FREIHEIT", "MENSCH", "GLUECK", "TRAUM", "SEELE", "STOLZ", "LEIDENSCHAFT"];
 window.hangmanLang = "TR"; window.chosenWord = ""; window.guessedLetters = []; window.lives = 6;
 window.setHangmanLang = (lang) => { window.hangmanLang = lang; document.getElementById('btn-tr').style.background = lang === "TR" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-tr').style.color = lang === "TR" ? "black" : "white"; document.getElementById('btn-de').style.background = lang === "DE" ? "var(--accent-color)" : "rgba(255,255,255,0.1)"; document.getElementById('btn-de').style.color = lang === "DE" ? "black" : "white"; window.initHangman(); };
 window.initHangman = () => { window.lives = 6; window.guessedLetters = []; document.getElementById('hangman-msg').innerText = "Bir harf seç..."; document.getElementById('hangman-msg').style.color = "#cbd5e1"; document.getElementById('hangman-reset').style.display = "none"; window.updateLivesDisplay(); const list = window.hangmanLang === "TR" ? window.wordsTR : window.wordsDE; window.chosenWord = list[Math.floor(Math.random() * list.length)]; window.renderHangmanWord(); window.generateKeyboard(); };
@@ -2701,7 +2859,7 @@ window.openCookieModal = (e) => { if(e) e.stopPropagation(); window.openFastModa
 window.crackCookie = () => { 
     const cookie = document.getElementById('fortune-cookie'); if(cookie.classList.contains('cracked')) return; 
     cookie.classList.add('cracked'); 
-    const forts = [{ tr: "Bugün yüzüne gülen bir tesadüf bekle.", de: "Erwarte heute einen glücklichen Zufall." }, { tr: "Kalbindeki güzellik, yakında karşına çıkacak.", de: "Die Schönheit in deinem Herzen wird dir bald begegnen." }];
+    const forts = [{ tr: "Bugün yüzüne gülen bir tesadüf bekle.", de: "Erwarte heute einen glücklichen Zufall." }, { tr: "Kalbindeki güzellik, yakında karşına çıkacak.", de: "Die Schönheit in deinem Herzen wird dir bald begegnen." }, { tr: "Beklenmedik bir başarı yolda.", de: "Unerwarteter Erfolg ist auf dem Weg." }, { tr: "Kendine inan, mucizeler yakındır.", de: "Glaube an dich, Wunder sind nah." }];
     setTimeout(() => { 
         cookie.style.display = "none"; const paper = document.getElementById('fortune-paper'); const rand = forts[Math.floor(Math.random() * forts.length)]; 
         paper.innerHTML = `<strong>${rand.tr}</strong><br><span style='font-size:0.95rem; color:#718096; display:block; margin-top:8px;'>${rand.de}</span>`; 
@@ -2710,12 +2868,12 @@ window.crackCookie = () => {
 };
 window.resetCookie = () => { const cookie = document.getElementById('fortune-cookie'); const paper = document.getElementById('fortune-paper'); cookie.classList.remove('cracked'); cookie.style.display = "inline-block"; cookie.style.opacity = "1"; cookie.style.transform = "scale(1) rotate(0deg)"; cookie.style.filter = "drop-shadow(0 15px 25px rgba(212,175,55,0.3))"; paper.classList.remove('show'); setTimeout(() => { paper.style.display = "none"; }, 300); document.getElementById('cookie-reset').style.display = "none"; };
 
-window.anagrams = [ { word: "ŞİİR", scrambled: "İRŞİ" }, { word: "SANAT", scrambled: "TNASA" }, { word: "İNSAN", scrambled: "NİSNA" }, { word: "HUZUR", scrambled: "RUZUH" }, { word: "SEVGİ", scrambled: "GİSEV" }, { word: "VEFA", scrambled: "AFEV" } ];
+window.anagrams = [ { word: "ŞİİR", scrambled: "İRŞİ" }, { word: "SANAT", scrambled: "TNASA" }, { word: "İNSAN", scrambled: "NİSNA" }, { word: "HUZUR", scrambled: "RUZUH" }, { word: "SEVGİ", scrambled: "GİSEV" }, { word: "VEFA", scrambled: "AFEV" }, { word: "SABIR", scrambled: "RSBAI" }, { word: "UMUT", scrambled: "TUMU" }, { word: "İKLİM", scrambled: "LİMİK" }, { word: "ZAMAN", scrambled: "MAZNA" }, { word: "HAYAL", scrambled: "YAHAL" }, { word: "AŞK", scrambled: "ŞAK" } ];
 window.currAnagram = {};
 window.openAnagramModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('anagramModal'); window.currAnagram = window.anagrams[Math.floor(Math.random() * window.anagrams.length)]; document.getElementById('anagram-word').innerText = window.currAnagram.scrambled; document.getElementById('anagram-input').value = ""; document.getElementById('anagram-msg').innerText = ""; };
 window.checkAnagram = () => { const val = document.getElementById('anagram-input').value.trim().toUpperCase(); if(val === window.currAnagram.word) { document.getElementById('anagram-msg').innerText = "Doğru! / Richtig! 🎉"; document.getElementById('anagram-msg').style.color = "lime"; } else { document.getElementById('anagram-msg').innerText = "Yanlış! / Falsch! 😢"; document.getElementById('anagram-msg').style.color = "#ef4444"; } };
 
-window.questions = [ { q: "Hangi kelime 'Empati' anlamına gelir?", opts: ["Hemhal", "Kibir", "Hasret", "Gurbet"], ans: 0 }, { q: "Alman Edebiyatının en ünlü şairi kimdir?", opts: ["Kant", "Goethe", "Nietzsche", "Heine"], ans: 1 }, { q: "'Aşk imiş her ne var alemde' kimin sözüdür?", opts: ["Yunus Emre", "Fuzûlî", "Mevlânâ", "Âşık Veysel"], ans: 1 } ];
+window.questions = [ { q: "Hangi kelime 'Empati' anlamına gelir?", opts: ["Hemhal", "Kibir", "Hasret", "Gurbet"], ans: 0 }, { q: "Alman Edebiyatının en ünlü şairi kimdir?", opts: ["Kant", "Goethe", "Nietzsche", "Heine"], ans: 1 }, { q: "'Aşk imiş her ne var alemde' kimin sözüdür?", opts: ["Yunus Emre", "Fuzûlî", "Mevlânâ", "Âşık Veysel"], ans: 1 }, { q: "İstiklal Marşı'nın şairi kimdir?", opts: ["Nazım Hikmet", "Mehmet Akif Ersoy", "Necip Fazıl", "Cahit Sıtkı"], ans: 1 }, { q: "'Düşünüyorum, öyleyse varım' kimin sözüdür?", opts: ["Platon", "Sokrates", "Descartes", "Aristoteles"], ans: 2 }, { q: "Türkiye'nin başkenti neresidir?", opts: ["İstanbul", "Ankara", "İzmir", "Bursa"], ans: 1 }, { q: "'Gülü seven dikenine katlanır' sözü neyi ifade eder?", opts: ["Bahçıvanlığı", "Fedakarlığı", "Açgözlülüğü", "Korkuyu"], ans: 1 }, { q: "Hangi şair 'Uzun ince bir yoldayım' demiştir?", opts: ["Neşet Ertaş", "Aşık Veysel", "Yunus Emre", "Karacaoğlan"], ans: 1 }, { q: "Şair Misal.i'nin doğum yeri neresidir?", opts: ["İstanbul", "Frankfurt", "Berlin", "Münih"], ans: 2 }, { q: "Hangi kelime 'Umut' anlamına gelmez?", opts: ["Beklenti", "Ümit", "Karamsarlık", "Arzu"], ans: 2 } ];
 window.currQ = 0;
 window.openQuizModal = (e) => { if(e) e.stopPropagation(); window.openFastModal('quizModal'); window.currQ = 0; window.loadQuiz(); };
 window.loadQuiz = () => { document.getElementById('quiz-msg').innerText = ""; document.getElementById('quiz-next').style.display = "none"; if(window.currQ >= window.questions.length) { document.getElementById('quiz-q').innerHTML = "<span style='color:var(--accent-color)'>Test Bitti! / Quiz beendet! 🎉</span>"; document.getElementById('quiz-options').innerHTML = ""; return; } document.getElementById('quiz-q').innerText = window.questions[window.currQ].q; let optsHtml = ""; window.questions[window.currQ].opts.forEach((o, i) => { optsHtml += `<div class="quiz-opt" onclick="window.checkQuiz(${i}, this)" style="background: rgba(212,175,55,0.1); border: 1px solid var(--accent-color); color: white; padding: 10px; margin-bottom: 10px; width: 100%; border-radius: 10px; cursor: pointer; transition: 0.3s;">${o}</div>`; }); document.getElementById('quiz-options').innerHTML = optsHtml; };
