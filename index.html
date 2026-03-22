@@ -21,7 +21,9 @@
             --nav-bg: rgba(9, 10, 15, 0.96); 
             --modal-bg: rgba(4, 6, 10, 0.88); 
             --modal-paper: #0f172a; 
-            --transition-smooth: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+            /* YENİ: Apple tarzı kusursuz akıcı animasyon eğrisi (XLarge GPU Accelerated) */
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            --bounce-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -59,13 +61,14 @@
         
         .hidden { display: none !important; }
         
-        /* === HARDWARE ACCELERATED MODAL SİSTEMİ === */
+        /* === HARDWARE ACCELERATED MODAL SİSTEMİ (GPU İLE KUSURSUZ AKICILIK) === */
+        /* Kilit nokta: pointer-events none yapılarak görünmez modalların tıklamaları engellemesi önlendi! */
         .modal { 
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
             z-index: 99999; background: var(--modal-bg); backdrop-filter: blur(8px);
             display: flex; align-items: center; justify-content: center; padding: 15px;
             opacity: 0; visibility: hidden; pointer-events: none; 
-            transition: opacity 0.25s ease, visibility 0.25s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
             will-change: opacity, visibility;
         }
         .modal.active-modal { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -75,12 +78,13 @@
             background: var(--modal-paper); color: #f8fafc; border-radius: 20px; width: 100%; 
             max-width: 500px; display: flex; flex-direction: column; position: relative; 
             border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 25px 60px rgba(0,0,0,0.8); 
-            transform: translate3d(0, 20px, 0) scale(0.97); 
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            margin: auto; overflow: hidden; pointer-events: auto;
-            will-change: transform;
+            transform: translate3d(0, 30px, 0) scale(0.95); 
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+            opacity: 0; pointer-events: none;
+            margin: auto; overflow: hidden;
+            will-change: transform, opacity;
         }
-        .modal.active-modal .modal-content { transform: translate3d(0, 0, 0) scale(1); } 
+        .modal.active-modal .modal-content { transform: translate3d(0, 0, 0) scale(1); opacity: 1; pointer-events: auto; } 
         
         #contentModal .modal-content { background: #fdfbf7; color: #1a202c; max-width: 650px; border-radius: 24px;} 
 
@@ -105,11 +109,11 @@
         .modal-title, .game-title { padding-top: 5px; padding-right: 30px; padding-left: 30px; font-family: 'Playfair Display', serif; color: var(--accent-color); margin-bottom: 15px; text-align:center;}
 
         /* ARKAPLAN EFEKTLERİ */
-        .floating-bg-icons { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -10; overflow: hidden; }
+        .floating-bg-icons { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -10; overflow: hidden; transform: translateZ(0); }
         .bg-icon { position: absolute; color: var(--accent-color); opacity: 0.03; font-size: clamp(2rem, 5vw, 4rem); animation: floatIcon 30s linear infinite; pointer-events: none; will-change: transform;}
-        @keyframes floatIcon { 0% { transform: translateY(110vh) rotate(0deg) scale(0.8); opacity: 0; } 10% { opacity: 0.04; } 90% { opacity: 0.04; } 100% { transform: translateY(-20vh) rotate(360deg) scale(1.2); opacity: 0; } }
+        @keyframes floatIcon { 0% { transform: translate3d(0, 110vh, 0) rotate(0deg) scale(0.8); opacity: 0; } 10% { opacity: 0.04; } 90% { opacity: 0.04; } 100% { transform: translate3d(0, -20vh, 0) rotate(360deg) scale(1.2); opacity: 0; } }
         
-        .construction-watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-family: 'Playfair Display', serif; font-size: clamp(3rem, 8vw, 6rem); color: rgba(212, 175, 55, 0.03); white-space: nowrap; pointer-events: none; z-index: -2; font-weight: bold; text-align: center; }
+        .construction-watermark { position: fixed; top: 50%; left: 50%; transform: translate3d(-50%, -50%, 0) rotate(-30deg); font-family: 'Playfair Display', serif; font-size: clamp(3rem, 8vw, 6rem); color: rgba(212, 175, 55, 0.03); white-space: nowrap; pointer-events: none; z-index: -2; font-weight: bold; text-align: center; }
         
         .badge-count { position: absolute; top: -5px; right: -5px; color: white; border-radius: 50%; min-width: 22px; height: 22px; font-size: 0.75rem; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid #0f172a; box-shadow: 0 4px 8px rgba(0,0,0,0.6); z-index: 100; padding: 0 4px; pointer-events: none;}
         .badge-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
@@ -117,9 +121,9 @@
         
         /* HAVA DURUMU ANİMASYONLARI */
         @keyframes spinSun { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes floatCloud { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
-        @keyframes rainDrop { 0% { transform: translateY(-5px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(15px); opacity: 0; } }
-        @keyframes fallSnow { 0% { transform: translateY(-5px) rotate(0deg); opacity: 0;} 50% {opacity: 1;} 100% { transform: translateY(15px) rotate(180deg); opacity: 0;} }
+        @keyframes floatCloud { 0%, 100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(8px,0,0); } }
+        @keyframes rainDrop { 0% { transform: translate3d(0,-5px,0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate3d(0,15px,0); opacity: 0; } }
+        @keyframes fallSnow { 0% { transform: translate3d(0,-5px,0) rotate(0deg); opacity: 0;} 50% {opacity: 1;} 100% { transform: translate3d(0,15px,0) rotate(180deg); opacity: 0;} }
         
         .anim-sun { display: inline-block; animation: spinSun 8s linear infinite; color: #fbbf24; }
         .anim-cloud { display: inline-block; animation: floatCloud 4s ease-in-out infinite; color: #e2e8f0; }
@@ -127,7 +131,7 @@
         .anim-snow { display: inline-block; animation: fallSnow 2.5s linear infinite; color: #fff; }
 
         /* MOBİL İÇİN ÖZLÜ SÖZ (TICKER) */
-        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; max-width: 100vw; height: auto; min-height: 44px; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(212,175,55,0.3); z-index: 1500; display: flex; align-items: center; justify-content: center; padding: 10px 15px; box-sizing: border-box; pointer-events: none; will-change: opacity;}
+        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; max-width: 100vw; height: auto; min-height: 44px; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(212,175,55,0.3); z-index: 1500; display: flex; align-items: center; justify-content: center; padding: 10px 15px; box-sizing: border-box; pointer-events: none; will-change: opacity; transform: translateZ(0);}
         .ticker-text { font-family: 'Playfair Display', serif; font-size: clamp(0.9rem, 3.5vw, 1.05rem); color: var(--accent-color); font-style: italic; opacity: 0; transition: opacity 0.8s ease-in-out; text-align: center; width: 100%; white-space: normal; word-break: break-word; line-height: 1.6; padding: 0 5px; display: block;}
         .ticker-text.show { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,0.4); }
 
@@ -137,6 +141,7 @@
             background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 1000; 
             border-bottom: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
             display: flex; flex-direction: column; pointer-events: auto;
+            transform: translateZ(0);
         }
 
         .header-top {
@@ -160,43 +165,43 @@
         .logo:hover { text-shadow: var(--accent-glow); }
         
         .datetime-container { display: flex; flex-direction: row; gap: 10px; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #a0aec0; align-items: center; flex-wrap: wrap;}
-        .dt-item { cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; border: 1px solid transparent; pointer-events: auto;}
+        .dt-item { cursor: pointer; transition: var(--transition-smooth); display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; border: 1px solid transparent; pointer-events: auto;}
         .dt-item:hover { color: var(--accent-color); background: rgba(212, 175, 55, 0.08); border-color: rgba(212, 175, 55, 0.2); box-shadow: var(--accent-glow);}
 
         .header-right { display: flex; align-items: center; gap: 10px; justify-content: flex-end; flex-shrink: 0; flex-wrap: wrap; }
         
         /* HEADER KULLANICI PROFİL KISMI */
-        .user-profile-group { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 5px 12px 5px 5px; border-radius: 25px; border: 1px solid rgba(212,175,55,0.2); transition: 0.3s;}
+        .user-profile-group { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 5px 12px 5px 5px; border-radius: 25px; border: 1px solid rgba(212,175,55,0.2); transition: var(--transition-smooth);}
         .user-profile-group:hover { background: rgba(212,175,55,0.1); border-color: var(--accent-color); }
         
-        .header-mini-profile { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); cursor: pointer; box-shadow: 0 0 10px rgba(212,175,55,0.4); display: none; pointer-events: auto; transition: 0.3s;}
+        .header-mini-profile { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); cursor: pointer; box-shadow: 0 0 10px rgba(212,175,55,0.4); display: none; pointer-events: auto; transition: var(--bounce-smooth);}
         .header-mini-profile:hover { transform: scale(1.1); box-shadow: var(--accent-glow); }
         body.user-mode .header-mini-profile, body.admin-mode .header-mini-profile { display: block; }
 
-        .header-user-score { font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight:bold; color: #f8fafc; cursor: pointer; transition: 0.3s; display: none; align-items: center; gap: 6px; white-space: nowrap; pointer-events: auto;}
-        .header-user-score i { color: var(--accent-color); font-size: 1.1rem; }
+        .header-user-score { font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight:bold; color: #000; background: linear-gradient(135deg, #fbbf24, #d4af37); padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer; transition: var(--transition-smooth); display: none; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 4px 10px rgba(212,175,55,0.3); pointer-events: auto;}
+        .header-user-score:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(212,175,55,0.6); }
         
         .header-user-stats, .weather-widget { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: #e2e8f0; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.2); cursor: pointer; transition: var(--transition-smooth); display: flex; align-items: center; gap: 8px; white-space: nowrap; pointer-events: auto;}
-        .header-user-stats:hover, .weather-widget:hover { background: rgba(212,175,55,0.15); border-color: var(--accent-color); color:white; transform: translateY(-2px);}
+        .header-user-stats:hover, .weather-widget:hover { background: rgba(212,175,55,0.15); border-color: var(--accent-color); color:white; transform: translate3d(0, -2px, 0);}
 
         /* DİLLER */
         .lang-dropdown { position: relative; display: inline-block; z-index: 1005; pointer-events: auto;}
-        .lang-btn-main { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: 0.3s; outline: none; }
+        .lang-btn-main { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: var(--transition-smooth); outline: none; }
         .lang-btn-main:hover { background: var(--accent-color); color: black; box-shadow: var(--accent-glow); }
         .lang-dropdown::after { content: ''; position: absolute; top: 100%; left: -10px; right: -10px; height: 20px; } 
-        .lang-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 16px; padding: 12px; gap: 8px; width: 150px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); grid-template-columns: 1fr 1fr; }
-        .lang-dropdown:hover .lang-menu, .lang-menu.show-lang { display: grid !important; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: top right; }
-        @keyframes popIn { from { opacity:0; transform: scale(0.8); } to { opacity:1; transform: scale(1); } }
-        .lang-item { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 5px; cursor: pointer; border-radius: 10px; background: rgba(255,255,255,0.02); transition: 0.2s; pointer-events: auto;}
+        .lang-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--nav-bg); border: 1px solid var(--accent-color); border-radius: 16px; padding: 12px; gap: 8px; width: 150px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); grid-template-columns: 1fr 1fr; transform-origin: top right;}
+        .lang-dropdown:hover .lang-menu, .lang-menu.show-lang { display: grid !important; animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes popIn { from { opacity:0; transform: scale(0.9); } to { opacity:1; transform: scale(1); } }
+        .lang-item { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 5px; cursor: pointer; border-radius: 10px; background: rgba(255,255,255,0.02); transition: var(--transition-smooth); pointer-events: auto;}
         .lang-item:hover { background: rgba(212,175,55,0.2); transform: scale(1.05); }
         .lang-item span.text { font-family: 'Poppins', sans-serif; font-size: 0.9rem; color: #e2e8f0; font-weight: 600; pointer-events: none;}
         
         .icon-action-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: var(--accent-color); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; transition: var(--transition-smooth); position: relative; pointer-events: auto;}
-        .icon-action-btn:hover { background: var(--accent-color); color: #000; transform: translateY(-2px); box-shadow: var(--accent-glow); }
+        .icon-action-btn:hover { background: var(--accent-color); color: #000; transform: translate3d(0, -2px, 0); box-shadow: var(--accent-glow); }
 
         .auth-view-btn { background: linear-gradient(135deg, #d4af37, #b48608); color: #000; border: none; padding: 0.5rem 1.2rem; border-radius: 10px; font-weight: 600; font-family: 'Poppins', sans-serif; font-size: 0.9rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; line-height: 1.2; transition: var(--transition-smooth); white-space: nowrap; box-shadow: 0 4px 12px rgba(212,175,55,0.3); pointer-events: auto;}
         .auth-view-btn span { font-size: 0.65rem; font-weight: 400; opacity: 0.9; pointer-events: none;}
-        .auth-view-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,175,55,0.6); filter: brightness(1.1); }
+        .auth-view-btn:hover { transform: translate3d(0, -2px, 0); box-shadow: 0 6px 18px rgba(212,175,55,0.6); filter: brightness(1.1); }
 
         .user-greeting { font-family: 'Great Vibes', cursive; font-size: 1.6rem; color: var(--accent-color); display: none; align-items: center; gap: 8px; margin-left: 8px; white-space: nowrap; text-shadow: var(--accent-glow);}
         .zodiac-badge { font-size: 1.4rem; line-height: 1; filter: drop-shadow(0 0 5px rgba(212,175,55,0.5));}
@@ -211,20 +216,19 @@
         nav button.active-nav::after { width: 70%; box-shadow: var(--accent-glow); }
         .locked-icon { display: inline-block; margin-left: 4px; font-size: 0.75rem; color: #ef4444; pointer-events: none;}
 
-        /* PAGE VIEWS (OVERLAPPING FIX: PADDING ARTIRILDI) */
-        .page-view { display: none; padding: 250px 5% 120px; min-height: calc(100vh - 60px); animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; position: relative; flex-direction: column; flex-grow: 1; align-items: center; width: 100%; pointer-events: auto;} 
-        .page-view.active-view { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* PAGE VIEWS (GPU HIZLANDIRMALI YUMUŞAK GEÇİŞ VE TIKLAMA FİXİ) */
+        .page-view { display: none; padding: 250px 5% 120px; min-height: calc(100vh - 60px); z-index: 10; position: relative; flex-direction: column; flex-grow: 1; align-items: center; width: 100%; pointer-events: none; opacity: 0; transform: translate3d(0, 15px, 0); transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform;} 
+        .page-view.active-view { display: flex; opacity: 1; transform: translate3d(0, 0, 0); pointer-events: auto; }
         
         #home-view { justify-content: center; align-items: center; text-align: center; padding-top: 160px; }
         
-        .profile-container { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 20; margin-bottom: 2rem;}
-        .profile-pic { width: clamp(140px, 22vw, 200px); height: clamp(140px, 22vw, 200px); border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-color); box-shadow: 0 0 40px rgba(212, 175, 55, 0.3); animation: floatPic 6s ease-in-out infinite; cursor: pointer; transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto;}
-        .profile-pic:hover { transform: scale(1.06) translateY(-8px); box-shadow: 0 0 60px rgba(212, 175, 55, 0.6); border-color: #fff; }
-        @keyframes floatPic { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .profile-container { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 20; margin-bottom: 2rem; pointer-events: auto;}
+        .profile-pic { width: clamp(140px, 22vw, 200px); height: clamp(140px, 22vw, 200px); border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-color); box-shadow: 0 0 40px rgba(212, 175, 55, 0.3); animation: floatPic 6s ease-in-out infinite; cursor: pointer; transition: var(--bounce-smooth); pointer-events: auto; will-change: transform;}
+        .profile-pic:hover { transform: scale(1.06) translate3d(0, -8px, 0); box-shadow: 0 0 60px rgba(212, 175, 55, 0.6); border-color: #fff; }
+        @keyframes floatPic { 0%, 100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-10px,0); } }
         
-        .home-speech-bubble-wrapper { opacity: 0; visibility: hidden; transform: translateY(12px); transition: var(--transition-smooth); cursor: pointer; z-index: 15; max-width: 300px; display: none; margin: 1.2rem auto; pointer-events: auto;}
-        .home-speech-bubble-wrapper.show { opacity: 1; visibility: visible; transform: translateY(0); display: block;}
+        .home-speech-bubble-wrapper { opacity: 0; visibility: hidden; transform: translate3d(0, 12px, 0); transition: var(--transition-smooth); cursor: pointer; z-index: 15; max-width: 300px; display: none; margin: 1.2rem auto; pointer-events: auto; will-change: opacity, transform;}
+        .home-speech-bubble-wrapper.show { opacity: 1; visibility: visible; transform: translate3d(0, 0, 0); display: block;}
         .speech-bubble { background: rgba(15, 23, 42, 0.95); color: #fdfbf7; padding: 1.2rem; border-radius: 14px; border: 1px solid var(--accent-color); font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(0.9rem, 1.2vw, 1rem); line-height: 1.5; position: relative; box-shadow: 0 12px 30px rgba(0,0,0,0.7); white-space: pre-wrap; text-align: center; backdrop-filter: blur(8px); }
         .speech-bubble::after { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border-width: 10px; border-style: solid; border-color: transparent transparent var(--accent-color) transparent; pointer-events: none;}
 
@@ -238,12 +242,13 @@
         .section-title { text-align: center; font-family: 'Great Vibes', cursive; font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 2.8rem; color: var(--accent-color); text-shadow: var(--accent-glow); line-height: 1.2; width: 100%;}
         .section-title span { font-family: 'Poppins', sans-serif; font-size: clamp(0.9rem, 1.5vw, 1.15rem); color: #a0aec0; display: block; margin-top: 6px; letter-spacing: 1px;}
         
-        /* GRIDS & CARDS */
+        /* GRIDS & CARDS (KUSURSUZ HOVER) */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.8rem; width: 100%; max-width: 1300px; margin: 0 auto; z-index: 50; position: relative; pointer-events: auto;}
-        .card { position: relative; background: var(--card-bg); padding: 2rem 1.4rem; border-radius: 18px; cursor: pointer; border: 1px solid rgba(212, 175, 55, 0.15); transition: var(--transition-smooth); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 140px; box-shadow: 0 12px 30px rgba(0,0,0,0.45); backdrop-filter: blur(8px); z-index: 100; pointer-events: auto !important; will-change: transform;}
-        .card:hover { transform: translateY(-8px); border-color: rgba(212, 175, 55, 0.6); box-shadow: 0 18px 40px rgba(0,0,0,0.7), var(--accent-glow); background: rgba(30, 41, 59, 0.85); }
+        .card { position: relative; background: var(--card-bg); padding: 2rem 1.4rem; border-radius: 18px; cursor: pointer; border: 1px solid rgba(212, 175, 55, 0.15); transition: var(--transition-smooth); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 140px; box-shadow: 0 12px 30px rgba(0,0,0,0.45); backdrop-filter: blur(8px); z-index: 100; pointer-events: auto !important; will-change: transform, box-shadow;}
+        .card:hover { transform: translate3d(0, -8px, 0); border-color: rgba(212, 175, 55, 0.6); box-shadow: 0 18px 40px rgba(0,0,0,0.7), var(--accent-glow); background: rgba(30, 41, 59, 0.85); }
+        .card * { pointer-events: none; } 
         
-        .card h3 { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 2vw, 1.3rem); margin: 0; color: #f8fafc; text-transform: uppercase; word-break: normal; overflow-wrap: break-word; line-height: 1.4; pointer-events: none; transition: 0.3s;}
+        .card h3 { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 2vw, 1.3rem); margin: 0; color: #f8fafc; text-transform: uppercase; word-break: normal; overflow-wrap: break-word; line-height: 1.4; transition: 0.3s;}
         .card:hover h3 { color: var(--accent-color); }
         .card h3.clamp-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 1.15rem; text-transform: none; }
         
@@ -251,7 +256,7 @@
         .new-badge { position: absolute; top: -10px; left: -10px; background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.5); transform: rotate(-10deg); pointer-events: none; z-index: 6;}
         .new-badge-mini { background: #ef4444; color: white; padding: 3px 6px; border-radius: 5px; font-size: 0.65rem; font-weight: bold; margin-right: 6px; display: inline-block; vertical-align: middle; pointer-events: none;}
 
-        /* PREMIUM LEADERBOARD TABLOSU & ADMİN DÜZENLEME BUTONLARI (FİX) */
+        /* PREMIUM LEADERBOARD TABLOSU & ADMİN DÜZENLEME BUTONLARI */
         .league-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; color: #e2e8f0; font-family: 'Poppins', sans-serif; font-size: 0.95rem; }
         .league-table th { padding: 15px 10px; font-weight: 600; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(212,175,55,0.3); }
         .league-table td { padding: 15px 10px; border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); vertical-align: middle; }
@@ -264,13 +269,15 @@
         .league-table .score { font-family: 'Space Mono', monospace; font-size: 1.1rem; color: var(--accent-color); font-weight: bold; text-align: center; text-shadow: 0 0 5px rgba(212,175,55,0.5); }
         .league-table td:not(.player) { text-align: center; }
 
-        /* YENİ PREMIUM ADMİN BUTTONLARI LİDER TABLOSU İÇİN */
+        /* YENİ PREMIUM ADMİN BUTTONLARI LİDER TABLOSU VE MODALLAR İÇİN */
         .admin-action-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 6px 12px; color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; outline: none; pointer-events: auto;}
         .admin-action-btn:hover { transform: translateY(-2px); }
         .admin-action-btn.edit { color: #60a5fa; border-color: rgba(96,165,250,0.4); }
         .admin-action-btn.edit:hover { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.4);}
         .admin-action-btn.del { color: #ef4444; border-color: rgba(239,68,68,0.4); }
         .admin-action-btn.del:hover { background: #ef4444; color: white; box-shadow: 0 4px 10px rgba(239,68,68,0.4);}
+        .admin-action-btn.add { color: #22c55e; border-color: rgba(34,197,94,0.4); width:100%; justify-content:center; padding:10px; margin-bottom:15px; font-size:1rem;}
+        .admin-action-btn.add:hover { background: #22c55e; color: white; box-shadow: 0 4px 10px rgba(34,197,94,0.4);}
 
         /* BİYOMETRİK GİRİŞ BUTTONU CSS */
         .bio-login-btn { background: transparent; border: 2px dashed rgba(212,175,55,0.4); border-radius: 16px; padding: 15px; color: var(--accent-color); font-size: 2.5rem; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; margin-top: 15px; outline: none; pointer-events: auto;}
@@ -281,10 +288,10 @@
         .split-container { display: flex; flex-direction: row; flex-wrap: wrap; gap: 2.5rem; width: 100%; max-width: 1300px; margin: 0 auto; align-items: flex-start; z-index: 20; position: relative; pointer-events: auto;}
         .split-col { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 18px;}
         .split-col h3.col-title { text-align: center; color: var(--accent-color); font-family: 'Playfair Display', serif; font-size: 2.2rem; border-bottom: 2px solid rgba(212,175,55,0.2); padding-bottom: 12px; margin-bottom: 12px;}
-        .person-card { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.15); justify-content: center; padding: 2rem; transition:var(--transition-smooth); text-align: center; min-height: 140px; display: flex; flex-direction: column; border-radius: 16px; margin-bottom:0; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 100; cursor: pointer; pointer-events: auto;}
+        .person-card { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.15); justify-content: center; padding: 2rem; transition:var(--transition-smooth); text-align: center; min-height: 140px; display: flex; flex-direction: column; border-radius: 16px; margin-bottom:0; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 100; cursor: pointer; pointer-events: auto; will-change: transform;}
         .person-card h3 { color: #fdfbf7; font-size: 1.25rem; margin-bottom: 12px; white-space: pre-wrap; word-wrap: break-word; width: 100%; transition: 0.3s; pointer-events: none;}
         .person-card .quote { font-family: 'Playfair Display', serif; font-style: italic; color: #cbd5e1; font-size: 1.05rem; line-height: 1.6; font-weight: 300; transition: 0.3s; pointer-events: none;}
-        .person-card:hover { transform: translateY(-5px); border-color:var(--accent-color); box-shadow: 0 15px 35px rgba(212,175,55,0.3);}
+        .person-card:hover { transform: translate3d(0, -5px, 0); border-color:var(--accent-color); box-shadow: 0 15px 35px rgba(212,175,55,0.3);}
         .person-card:hover .quote, .person-card:hover h3 { color: var(--accent-color); }
         
         /* MY PROFIL */
@@ -310,20 +317,21 @@
         .chat-input-area textarea { padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.35); background: rgba(0,0,0,0.45); color: white; outline: none; font-family: 'Poppins', sans-serif; font-size: 1rem; resize: vertical; min-height: 100px; transition: 0.3s; pointer-events: auto;}
         .chat-input-area input:focus, .chat-input-area textarea:focus { border-color: var(--accent-color); background: rgba(0,0,0,0.65); box-shadow: inset 0 0 12px rgba(212,175,55,0.2); }
         .submit-btn { background: linear-gradient(135deg, #d4af37, #b48608); border: none; border-radius: 12px; cursor: pointer; color: #000; font-size: 1.1rem; padding: 14px; font-weight: 600; width: 100%; transition: var(--transition-smooth); box-shadow: 0 5px 15px rgba(212,175,55,0.25); pointer-events: auto;}
-        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(212,175,55,0.45); filter: brightness(1.1); }
+        .submit-btn:hover { transform: translate3d(0, -3px, 0); box-shadow: 0 8px 20px rgba(212,175,55,0.45); filter: brightness(1.1); }
         
-        /* ================= YENİ: AÇILIR/KAPANIR YUVARLAK MENÜLER ================= */
+        /* ================= AÇILIR/KAPANIR YUVARLAK MENÜLER (GELİŞMİŞ EFEKT) ================= */
+        /* Burada pointer-events: none vererek KESİN TIKLAMA SORUNUNU (bug) çözüyoruz! */
         .floating-menu-wrapper { position: fixed; bottom: 22px; z-index: 900; display: flex; flex-direction: column; gap: 14px; pointer-events: none;}
         .floating-menu-wrapper.left { left: 22px; align-items: flex-start; }
         .floating-menu-wrapper.right { right: 22px; align-items: flex-end; }
         
-        .menu-toggle-btn { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #b48608); color: black; font-size: 1.5rem; border: none; cursor: pointer; box-shadow: var(--accent-glow); pointer-events: auto; transition: 0.3s; z-index: 902; display: flex; justify-content: center; align-items: center; outline: none;}
+        .menu-toggle-btn { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #b48608); color: black; font-size: 1.5rem; border: none; cursor: pointer; box-shadow: var(--accent-glow); pointer-events: auto; transition: var(--bounce-smooth); z-index: 902; display: flex; justify-content: center; align-items: center; outline: none; will-change: transform;}
         .menu-toggle-btn:hover { transform: scale(1.1); }
         .menu-toggle-btn.open { transform: rotate(45deg); background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; box-shadow: 0 0 15px rgba(239,68,68,0.6);}
         
-        .floating-menu-items { display: flex; flex-direction: column; gap: 14px; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; align-items: flex-start;}
+        .floating-menu-items { display: flex; flex-direction: column; gap: 14px; opacity: 0; visibility: hidden; transform: translate3d(0, 20px, 0); transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; align-items: flex-start; will-change: transform, opacity;}
         .floating-menu-wrapper.right .floating-menu-items { align-items: flex-end; }
-        .floating-menu-items.show { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
+        .floating-menu-items.show { opacity: 1; visibility: visible; transform: translate3d(0, 0, 0); pointer-events: auto;}
 
         .admin-only, .user-only { display: none !important; }
         body.admin-mode .admin-only { display: flex !important; }
@@ -342,15 +350,15 @@
         .btn-text { padding: 0 15px 0 30px;}
         .floating-menu-wrapper.right .btn-text { padding: 0 30px 0 15px; }
 
-        /* SIDEBARS */
-        .sidebar, .sidebar-right { position: fixed; top: 0; width: 340px; max-width: 85vw; height: 100vh; background: rgba(9, 10, 15, 0.98); backdrop-filter: blur(22px); z-index: 2000; box-shadow: 10px 0 40px rgba(0,0,0,0.85); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; pointer-events: auto; }
-        .sidebar { left: 0; transform: translateX(-100%); border-right: 1px solid rgba(212, 175, 55, 0.25); } 
-        .sidebar.open { transform: translateX(0); }
-        .sidebar-right { right: 0; transform: translateX(100%); border-left: 1px solid rgba(212, 175, 55, 0.25); } 
-        .sidebar-right.open { transform: translateX(0); }
+        /* SIDEBARS (GPU HIZLANDIRMALI) */
+        .sidebar, .sidebar-right { position: fixed; top: 0; width: 340px; max-width: 85vw; height: 100vh; background: rgba(9, 10, 15, 0.98); backdrop-filter: blur(22px); z-index: 2000; box-shadow: 10px 0 40px rgba(0,0,0,0.85); transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; pointer-events: auto; will-change: transform;}
+        .sidebar { left: 0; transform: translate3d(-100%, 0, 0); border-right: 1px solid rgba(212, 175, 55, 0.25); } 
+        .sidebar.open { transform: translate3d(0, 0, 0); }
+        .sidebar-right { right: 0; transform: translate3d(100%, 0, 0); border-left: 1px solid rgba(212, 175, 55, 0.25); } 
+        .sidebar-right.open { transform: translate3d(0, 0, 0); }
         .sidebar.wide-sidebar { width: 480px; max-width: 95vw; }
 
-        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 1999; opacity: 0; visibility: hidden; transition: 0.3s; pointer-events: none;}
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 1999; opacity: 0; visibility: hidden; transition: 0.3s ease; pointer-events: none;}
         .sidebar-overlay.show { opacity: 1; visibility: visible; pointer-events: auto;}
         
         .sidebar-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212, 175, 55, 0.2); background: rgba(255,255,255,0.02);}
@@ -388,9 +396,8 @@
         .emoji-btn { 
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); 
             font-size: 1.7rem; aspect-ratio: 1; display: flex; align-items: center; 
-            justify-content: center; cursor: pointer; transition: var(--transition-smooth); border-radius: 10px; pointer-events: auto;
-        }
-        .emoji-btn:hover { background: rgba(212,175,55,0.25); border-color: var(--accent-color); transform: scale(1.15) translateY(-3px); box-shadow: 0 5px 12px rgba(0,0,0,0.35);}
+            justify-content: center; cursor: pointer; transition: var(--transition-smooth); border-radius: 10px; pointer-events: auto;}
+        .emoji-btn:hover { background: rgba(212,175,55,0.25); border-color: var(--accent-color); transform: scale(1.15) translate3d(0, -3px, 0); box-shadow: 0 5px 12px rgba(0,0,0,0.35);}
 
         /* OYUN GÖRSELLERİ VE SKOR TABELALARI */
         .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(212,175,55,0.3); box-shadow: inset 0 0 20px rgba(0,0,0,0.6); margin-bottom: 20px; }
@@ -403,7 +410,7 @@
         /* HOROSKOP */
         .zodiac-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-top: 15px; }
         .zodiac-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.2); border-radius: 16px; padding: 18px 10px; cursor: pointer; transition: var(--transition-smooth); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.3); pointer-events: auto;}
-        .zodiac-card:hover { transform: translateY(-5px); border-color: var(--accent-color); box-shadow: 0 12px 25px rgba(212,175,55,0.4), inset 0 0 15px rgba(212,175,55,0.1); background: rgba(212,175,55,0.08); }
+        .zodiac-card:hover { transform: translate3d(0, -5px, 0); border-color: var(--accent-color); box-shadow: 0 12px 25px rgba(212,175,55,0.4), inset 0 0 15px rgba(212,175,55,0.1); background: rgba(212,175,55,0.08); }
         .zodiac-icon { font-size: 2.8rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); transition: 0.3s; }
         .zodiac-card:hover .zodiac-icon { transform: scale(1.1); filter: drop-shadow(0 0 15px var(--accent-color)); }
         .zodiac-name { color: #f8fafc; font-weight: 600; font-size: 1rem; margin-bottom: 2px; }
@@ -421,7 +428,7 @@
 
         .tictactoe-container .board { display: grid; grid-template-columns: repeat(3, 95px); gap: 12px; margin: 22px auto; justify-content: center; }
         .cell { width: 95px; height: 95px; font-size: 3.8rem; font-family: 'Space Mono', monospace; display: flex; justify-content: center; align-items: center; cursor: pointer; border-radius: 14px; background: rgba(255,255,255,0.06); border: 2px solid rgba(212,175,55,0.3); transition: var(--transition-smooth); box-shadow: 0 5px 15px rgba(0,0,0,0.25); pointer-events: auto;}
-        .cell:hover { background: rgba(212,175,55,0.12); border-color: var(--accent-color); transform: translateY(-3px);}
+        .cell:hover { background: rgba(212,175,55,0.12); border-color: var(--accent-color); transform: translate3d(0,-3px,0);}
         
         .memory-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 360px; margin: 22px auto; perspective: 1000px; }
         .mem-card { aspect-ratio: 1; font-size: 2.4rem; display:flex; justify-content:center; align-items:center; background: rgba(255,255,255,0.06); border: 2px solid rgba(212,175,55,0.3); border-radius:12px; cursor:pointer; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; box-shadow: 0 5px 15px rgba(0,0,0,0.25); pointer-events: auto;}
@@ -433,15 +440,15 @@
         .simon-btn.active { opacity: 1; box-shadow: 0 0 45px currentColor; filter: brightness(1.5); transform: scale(1.06); border-color: #fff;}
 
         .rps-btn { font-size: 2.8rem; width: 85px; height: 85px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 2px solid rgba(212,175,55,0.35); cursor: pointer; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.25); pointer-events: auto;}
-        .rps-btn:hover { background: var(--accent-color); color: black; transform: scale(1.12) translateY(-4px); box-shadow: var(--accent-glow); border-color: white;}
+        .rps-btn:hover { background: var(--accent-color); color: black; transform: scale(1.12) translate3d(0,-4px,0); box-shadow: var(--accent-glow); border-color: white;}
 
         .game-canvas { background: #0f172a; border: 3px solid var(--accent-color); border-radius: 14px; display: block; margin: 15px auto; box-shadow: 0 12px 30px rgba(0,0,0,0.45); pointer-events: auto;}
 
         /* FORM INPUTS */
         .auth-input { width: 100%; padding: 14px 18px; margin-bottom: 16px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.35); background: rgba(0,0,0,0.35); color: white; font-family: 'Poppins', sans-serif; outline: none; font-size: 1rem; transition: 0.3s; pointer-events: auto;}
         .auth-input:focus { border-color: var(--accent-color); box-shadow: inset 0 0 10px rgba(212,175,55,0.15), 0 0 15px rgba(212,175,55,0.2); background: rgba(0,0,0,0.55);}
-        .reset-btn { background: linear-gradient(135deg, #d4af37, #b48608); border: none; color: black; padding: 14px 20px; border-radius: 12px; font-size: 1.05rem; cursor: pointer; font-weight: 600; transition: var(--transition-smooth); width: 100%; margin-top: 10px; font-family: 'Poppins', sans-serif; box-shadow: 0 5px 15px rgba(212,175,55,0.25); pointer-events: auto;}
-        .reset-btn:hover { background: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212,175,55,0.45); filter: brightness(1.1); }
+        .reset-btn { background: linear-gradient(135deg, #d4af37, #b48608); border: none; color: black; padding: 14px 20px; border-radius: 12px; font-size: 1.05rem; cursor: pointer; font-weight: 600; transition: var(--transition-smooth); width: 100%; margin-top: 10px; font-family: 'Poppins', sans-serif; box-shadow: 0 5px 15px rgba(212,175,55,0.25); pointer-events: auto; will-change: transform;}
+        .reset-btn:hover { background: white; transform: translate3d(0,-2px,0); box-shadow: 0 8px 20px rgba(212,175,55,0.45); filter: brightness(1.1); }
 
         footer { text-align: center; padding: 25px; color: #94a3b8; font-size: 0.9rem; border-top: 1px solid rgba(212,175,55,0.18); background: rgba(0,0,0,0.45); backdrop-filter: blur(10px); margin-top: auto; z-index: 10; }
 
@@ -502,7 +509,9 @@
 
 </head>
 
-<body> <div id="modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:99998; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px);" onclick="window.closeTopModal('force')"></div>
+<body> <audio id="notification-sound" src="https://actions.google.com/sounds/v1/alarms/positive_ping.ogg" preload="auto"></audio>
+
+    <div id="modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:99998; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px);" onclick="window.closeTopModal('force')"></div>
     
     <div id="toast" style="position:fixed; top:20px; right:-300px; background:var(--accent-color); color:#000; padding:15px 20px; border-radius:12px; font-family:'Poppins', sans-serif; font-weight:600; box-shadow:0 10px 25px rgba(0,0,0,0.6); z-index:999999; transition:0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
         <span id="toast-msg">Mesaj</span>
@@ -1323,7 +1332,8 @@ Sind des Glückes Unterpfand:
             <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn">&times;</span></div>
             <div class="modal-body">
                 <h2 class="game-title" style="font-size: 2rem; text-shadow: var(--accent-glow);">Kayıtlı Kullanıcılar</h2>
-                <div id="admin-users-list" style="width:100%; display:flex; flex-direction:column; gap:10px; margin-top:15px;"></div>
+                <button class="admin-action-btn add" onclick="window.adminAddNewUser(event)"><i class="fas fa-user-plus"></i> Yeni Kullanıcı Ekle</button>
+                <div id="admin-users-list" style="width:100%; display:flex; flex-direction:column; gap:10px; margin-top:5px;"></div>
             </div>
         </div>
     </div>
@@ -1760,14 +1770,19 @@ function googleTranslateElementInit() {
 const BIN_ID = '69bfbe30aa77b81da9097754';
 const API_KEY = '$2a$10$bUOu57NsJpTM6O5f3TQgUOqPDBIXJG8r47FwqrQ8DXlVAoD0XPDtK';
 
+window.isSyncing = false;
+
 window.syncToCloud = async function() {
+    if (window.isSyncing) return;
+    window.isSyncing = true;
     try {
         const data = {
             users: window.userDatabase || {},
             userPoems: window.userPoemsDB || [],
             chat: window.chatDB || [],
             adminMsgs: window.adminMessages || [],
-            logs: window.adminLogs || []
+            logs: window.adminLogs || [],
+            heartsDB: window.poemDataStore || {} // YENİ: Kalpler ve Yorumlar artık Cloud'a gidiyor!
         };
         await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
             method: 'PUT',
@@ -1778,6 +1793,7 @@ window.syncToCloud = async function() {
             body: JSON.stringify(data)
         });
     } catch(e) { console.error("Cloud Sync Error", e); }
+    window.isSyncing = false;
 };
 
 window.fetchFromCloud = async function() {
@@ -1815,6 +1831,12 @@ window.fetchFromCloud = async function() {
                 window.adminLogs = r.logs;
                 localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
                 if(window.renderOnlineUsers) window.renderOnlineUsers();
+            }
+            // YENİ: Kalpleri ve Yorumları Cloud'dan Çekme
+            if(r.heartsDB && JSON.stringify(window.poemDataStore) !== JSON.stringify(r.heartsDB)) {
+                window.poemDataStore = r.heartsDB;
+                localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+                if(window.updateHeartsUI) window.updateHeartsUI();
             }
             
             if(changed && window.currentUser && window.currentUser.role === 'admin') {
@@ -1888,7 +1910,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ================= KATMANLI MODAL KAPATMA (PAYLAŞIM & DÜZENLE FİX) =================
+// ================= KATMANLI MODAL KAPATMA =================
 window.closeTopModal = function(e) {
     if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
     
@@ -1916,7 +1938,7 @@ window.closeTopModal = function(e) {
     window.closeAllModals('force');
 };
 
-// ================= MOBİL GERİ TUŞU (ZURÜCK-TASTE) =================
+// ================= MOBİL GERİ TUŞU =================
 window.history.pushState({modalOpen: false}, "", "");
 
 window.onpopstate = function(event) {
@@ -1934,19 +1956,6 @@ window.onpopstate = function(event) {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { window.closeTopModal('force'); }
 });
-
-// LİVE UPDATE (Local Fallback)
-setInterval(() => {
-    const oldContent = JSON.stringify(window.contentDB);
-    const newContentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
-    if (newContentDB) window.contentDB = newContentDB;
-    
-    if (oldContent !== JSON.stringify(window.contentDB)) {
-        if(window.initContent) window.initContent();
-        if(window.generateFihrist) window.generateFihrist();
-        if(window.initTicker) window.initTicker();
-    }
-}, 30000);
 
 // ================= 1. SİSTEM & ÇEVİRİ FIX =================
 window.translatePage = function(lang) {
@@ -1972,7 +1981,20 @@ if (!sessionStorage.getItem('misaliVisited')) {
     sessionStorage.setItem('misaliVisited', 'true');
 }
 
-// ================= 2. TAM VERİTABANI (ŞİİRLER VE SÖZLER %100 KORUMA ALTINDA) =================
+// LİVE UPDATE (Local Fallback)
+setInterval(() => {
+    const oldContent = JSON.stringify(window.contentDB);
+    const newContentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
+    if (newContentDB) window.contentDB = newContentDB;
+    
+    if (oldContent !== JSON.stringify(window.contentDB)) {
+        if(window.initContent) window.initContent();
+        if(window.generateFihrist) window.generateFihrist();
+        if(window.initTicker) window.initTicker();
+    }
+}, 30000);
+
+// ================= 2. TAM VERİTABANI =================
 
 const userPoems = [
 {id:'p1',trTitle:"AŞK",deTitle:"LIEBE",emoji:"❤️",trText:"Kalp atışımda aşk var nefesimde sen,\nGül bülbüle yâr gönlüme de sen,\nToprağa yağmur yağar yüreğime sen,\nÖyle ya canım, kanımsın diğer de yarımsın.",deText:"In meinem Herzschlag ist Liebe, in meinem Atem bist du,\nDie Rose für die Nachtigall, für mein Herz bist du,\nRegen fällt auf die Erde, auf mein Herz fällst du,\nSo ist es, mein Leben, du bist mein Blut, meine andere Hälfte bist du.", timestamp: Date.now()},
@@ -2138,7 +2160,7 @@ const baseJokes = [
     { trT:"Yorgan Gitti Kavga Bitti", deT:"Die Decke ist weg", em:"🛏️", tr:"Kış gecesi dışarıdan gelen şiddetli kavga seslerine uyanan Hoca, üşümemek için sırtına yorganını alıp kapıya çıkar. O kalabalığın arasına karıştığı an, uyanık biri yorganı sırtından çeker ve karanlıkta kaçıp gider. Kavga da o anda dağılır. Hoca titreyerek eve döner. Karısı sorar: 'Kavga ne içinmiş?' Hoca: 'Bizim yorgan içinmiş hatun, yorgan gitti, kavga bitti.'", de:"Nachts hört Hodscha Streit. Er wickelt sich in seine Decke und geht hinaus. Im Getümmel stiehlt ihm jemand die Decke, woraufhin sich die Menge auflöst. Er geht frierend zurück. Seine Frau fragt: 'Worum ging der Streit?' Hodscha: 'Anscheinend um unsere Decke. Die Decke ist weg, der Streit ist vorbei.'" },
     { trT:"Bindiği Dalı Kesmek", deT:"Den Ast absägen", em:"🌳", tr:"Hoca ormana odun kesmeye gider. Kocaman bir ağacın üstündeki kalın bir dala oturup, aynı dalı dibinden baltayla kesmeye başlar. Oradan geçen bir köylü bağırır: 'Aman Hoca, ne yapıyorsun! Bindiğin dalı kesiyorsun, şimdi düşeceksin.' Hoca dinlemez ve biraz sonra dal kırılır, yere çakılır. Hızla kalkıp köylünün yakasına yapışır: 'Düşeceğimi bildin, ne zaman öleceğimi de söyle!'", de:"Hodscha sägt den Ast ab, auf dem er sitzt. Ein Bauer warnt ihn: 'Du wirst fallen!' Hodscha ignoriert ihn, fällt und rennt wütend zum Bauern: 'Du wusstest, dass ich falle! Dann sag mir jetzt auch, wann ich sterben werde!'" },
     { trT:"Dünyanın Ortası Neresi?", deT:"Die Mitte der Welt", em:"🌍", tr:"Hoca'yı sıkıştırmak isteyen bir grup bilmiş adam etrafını sarar ve alaycı bir şekilde, 'Ey ulu Hoca, söyle bakalım dünyanın tam ortası neresidir?' derler. Hoca hiç düşünmeden elindeki değneği eşeğinin sağ ön ayağının yanına diker: 'İşte tam burasıdır! İnanmayan varsa metreyi alıp ölçsün, bir santim bile saparsa gelin yüzüme tükürün!'", de:"Einige Männer wollen Hodscha reinlegen: 'Wo ist genau die Mitte der Welt?' Hodscha zeigt mit seinem Stock auf den rechten Huf seines Esels: 'Genau hier! Wer es nicht glaubt, kann gerne nachmessen. Wenn es auch nur einen Zentimeter abweicht, sagt Bescheid!'" },
-    { trT:"Kavuk Oku", deT:"Lass den Turban lesen", em:"👳", tr:"Bir köylü elinde Arapça bir mektupla Hoca'ya gelir. Hoca mektuba bakar, bir şey anlamaz ve 'Bunu ben okuyamam' der. Adam kızar: 'Bir de o kadar büyük kavuk takıyorsun, bir mektubu bile okuyamıyorsun, utan!' Hoca sinirlenir, kavuğu başından çıkarıp adamın kafasına geçirir: 'Madem marifet kavukta, al tak da sen oku!'", de:"Ein Bauer bittet Hodscha, einen arabischen Brief zu lesen. Hodscha kann es nicht. Der Bauer schimpft: 'Du trägt so einen großen Turban und kannst nicht lesen?' Hodscha setzt dem Bauern den Turban auf: 'Wenn der Turban lesen kann, bitteschön, lies du ihn!'" },
+    { trT:"Kavuk Oku", deT:"Lass den Turban lesen", em:"👳", tr:"Bir köylü elinde Arapça bir mektupla Hoca'ya gelir. Hoca mektuba bakar, bir şey anlamaz ve 'Bunu ben okuyamam' der. Adam kızar: 'Bir de o kadar büyük kavuk takıyorsun, bir mektubu bile okuyamıyorsun, utan!' Hoca sinirlenir, kavuğu başından çıkarıp adamın kafasına geçirir: 'Madem marifet kavukta, al tak da sen oku!'", de:"Ein Bauer bittet Hodscha, einen arabischen Brief zu lesen. Hodscha kann es nicht. Der Bauer schimpft: 'Du trägst so einen großen Turban und kannst nicht lesen?' Hodscha setzt dem Bauern den Turban auf: 'Wenn der Turban lesen kann, bitteschön, lies du ihn!'" },
     { trT:"Cenazenin Neresinden Gitmeli?", deT:"Wo man bei einer Beerdigung geht", em:"⚰️", tr:"Cenaze taşıyan bir grup, yol ağzında durup Hoca'ya akıl danışır. İçlerinden biri, 'Hocam, sevap kazanmak için tabutun önünden mi yürüyelim, yoksa arkasından mı?' diye sorar. Hoca tabuta bir bakar, sonra adamlara dönüp şöyle der: 'İçinde yatmayın da, isterseniz sağından isterseniz solundan gidin, hiç fark etmez.'", de:"Leute tragen einen Sarg und fragen Hodscha: 'Sollen wir für mehr Segen vor oder hinter dem Sarg gehen?' Hodscha antwortet: 'Solange ihr nicht im Sarg liegt, ist es völlig egal, wo ihr geht.'" },
     { trT:"Eski Aylar", deT:"Die alten Monde", em:"🌕", tr:"Gökyüzüne meraklı bir adam Hoca'ya yanaşıp sorar: 'Hocam, her ay gökyüzünde kocaman bir dolunay çıkıyor, sonra küçülüp kayboluyor. Peki bu eski aylara ne oluyor, nereye gidiyorlar?' Hoca adamın cehaletine hafifçe gülümser: 'Ne olacak canım, Allah o eski ayları kırpıp kırpıp yıldız yapıyor.'", de:"Jemand fragt Hodscha: 'Was passiert eigentlich mit all den alten, runden Monden, wenn sie verschwinden?' Hodscha antwortet ganz selbstverständlich: 'Gott schneidet sie in kleine Stücke und macht Sterne daraus.'" },
     { trT:"Eşeğin Sözü", deT:"Das Wort des Esels", em:"🐴", tr:"Komşusu Hoca'nın kapısını çalar, işi olduğunu söyleyip eşeğini ister. Hoca, 'Eşek evde yok, çayıra gitti' diyerek adamı savuşturmak ister. Tam o sırada ahırdan eşeğin yüksek sesle anırması duyulur. Komşu sinirlenir: 'Ayıp değil mi Hoca, bana yalan söylüyorsun!' Hoca kızar: 'Asıl sana ayıp! Benim gibi ak sakallı hocanın sözüne inanmıyorsun da, içerideki eşeğin sözüne mi inanıyorsun?'", de:"Ein Nachbar will Hodschas Esel leihen. Hodscha lügt: 'Der Esel ist nicht da.' Plötzlich schreit der Esel laut aus dem Stall. Der Nachbar ist wütend: 'Du lügst mich an!' Hodscha: 'Schäm dich! Glaubst du den Worten eines alten Mannes oder dem Geschrei eines Esels?'" },
@@ -2227,7 +2249,7 @@ window.getZodiacSign = function(day, month) {
     return window.zodiacs[9]; 
 };
 
-// ================= RASTGELE SÖZ MODALI (YENİ) =================
+// ================= RASTGELE SÖZ MODALI =================
 window.openRandomQuoteModal = function(e) {
     if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
     if(!window.contentDB.quotes || window.contentDB.quotes.length === 0) return;
@@ -2265,7 +2287,7 @@ window.updateGameStats = function(points, result, gameName) {
 
     window.userDatabase[window.currentUser.username] = window.currentUser;
     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
 
     if (localStorage.getItem('misaliUser')) {
         localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
@@ -2304,7 +2326,6 @@ window.openLeaderboardModal = function(e) {
             let o = u.played || 0; let g = u.wins || 0; let b = u.draws || 0; let m = u.losses || 0;
             let rate = o > 0 ? Math.round((g / o) * 100) : 0;
 
-            // YENİ PREMIUM ADMİN BUTONLARI BURADA KULLANILIYOR
             let adminControls = (window.currentUser && window.currentUser.role === 'admin' && u.role !== 'admin') 
                 ? `<div style="margin-top:8px; text-align:left;">
                     <button class="admin-action-btn edit" onclick="window.editUserScore('${u.username}', event)" title="Puanı Düzenle"><i class="fas fa-edit"></i> Düzenle</button>
@@ -2342,7 +2363,7 @@ window.editUserScore = function(username, e) {
         if(!isNaN(ns)) {
             window.userDatabase[username].score = ns;
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
             window.openLeaderboardModal();
             window.showToast("Puan güncellendi.");
             window.addAdminLog(`Kullanıcı Puanını Düzenledi (${ns})`, username);
@@ -2360,7 +2381,7 @@ window.resetUserScore = function(username, e) {
             window.userDatabase[username].losses = 0;
             window.userDatabase[username].draws = 0;
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
             window.openLeaderboardModal(); 
             window.showToast("Puan sıfırlandı.");
             window.addAdminLog(`Kullanıcı Puanını Sıfırladı`, username);
@@ -2368,7 +2389,85 @@ window.resetUserScore = function(username, e) {
     });
 };
 
-// ================= BİLDİRİMLER & LOGLAR =================
+// ================= ADMİN: KULLANICI EKLEME VE SİLME (LIVE YENİ FONKSİYONLAR) =================
+window.adminAddNewUser = function(e) {
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+    window.customDualPrompt("Yeni Kullanıcı Ekle", "Kullanıcı Adı", "Şifre (Geçici)", (uName, pass) => {
+        if(uName && pass) {
+            if(window.userDatabase[uName]) { window.customAlert("Bu kullanıcı adı zaten mevcut!", "❌"); return; }
+            window.userDatabase[uName] = { 
+                username: uName, email: uName+"@misali.com", name: uName, surname: "", 
+                day: 1, month: 1, year: 2000, pass: pass, role: "user", 
+                score: 0, played: 0, wins: 0, losses: 0, draws: 0,
+                alerts: ["🔔 Admin tarafından hesabınız oluşturuldu ve onaylandı! Hoş geldiniz!"], approved: true 
+            };
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            window.syncToCloud();
+            window.addAdminLog(`Yeni Kullanıcı Ekledi: ${uName}`, window.currentUser.name);
+            window.openAdminUsersModal();
+            window.showToast("Kullanıcı başarıyla eklendi.");
+        }
+    });
+};
+
+window.deleteUser = function(username, e) {
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+    window.customConfirm(`"${window.userDatabase[username].name}" adlı kullanıcıyı tamamen silmek istiyor musunuz?`, () => {
+        delete window.userDatabase[username];
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        window.syncToCloud();
+        window.addAdminLog(`Kullanıcıyı Sildi: ${username}`, window.currentUser.name);
+        window.openAdminUsersModal();
+        window.showToast("Kullanıcı sistemden silindi.");
+    });
+};
+
+// ================= BİLDİRİMLER, SES VE LOGLAR (GERÇEK ZAMANLI) =================
+setInterval(() => {
+    const newUsersDB = JSON.parse(localStorage.getItem('misaliUsersDB')) || window.userDatabase;
+    const newMsgs = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || window.adminMessages;
+    
+    if (window.currentUser && window.currentUser.role === 'admin') {
+        if (Object.keys(newUsersDB).length !== Object.keys(window.userDatabase).length) {
+            window.userDatabase = newUsersDB;
+            if (document.getElementById('adminUsersModal') && document.getElementById('adminUsersModal').classList.contains('active-modal')) { 
+                window.openAdminUsersModal(); 
+            }
+            if(window.renderOnlineUsers) window.renderOnlineUsers();
+        }
+        if (newMsgs.length !== window.adminMessages.length) {
+            if (newMsgs.length > window.adminMessages.length) {
+                // Yeni mesaj/bildirim geldiğinde SES ÇAL (Pling)
+                const snd = document.getElementById('notification-sound');
+                if (snd) snd.play().catch(e => console.log("Ses engellendi:", e));
+            }
+            window.adminMessages = newMsgs;
+            if(window.updateNotifyBadge) window.updateNotifyBadge();
+            if (document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) { 
+                window.openAdminMessages(); 
+            }
+        }
+    } 
+    else if (window.currentUser && window.currentUser.role !== 'admin') {
+        // Kullanıcı için bildirim kontrolü
+        if (newUsersDB && newUsersDB[window.currentUser.username]) {
+            const updatedUser = newUsersDB[window.currentUser.username];
+            const currentAlerts = window.currentUser.alerts || [];
+            const newAlerts = updatedUser.alerts || [];
+            
+            if (newAlerts.length > currentAlerts.length) {
+                // Kullanıcıya yeni bir onay veya mesaj geldiğinde SES ÇAL
+                const snd = document.getElementById('notification-sound');
+                if (snd) snd.play().catch(e => {});
+                
+                window.currentUser.alerts = newAlerts;
+                window.userDatabase = newUsersDB;
+                if(window.updateNotifyBadge) window.updateNotifyBadge();
+            }
+        }
+    }
+}, 3000);
+
 window.updateNotifyBadge = function() {
     const badge = document.getElementById('user-notify-badge'); 
     const adminBadge = document.getElementById('admin-badge'); 
@@ -2397,7 +2496,7 @@ window.m_sendNotify = function(msg, emoji = "🔔", linkId = null) {
     const dateStr = now.toLocaleDateString('tr-TR');
     window.adminMessages.push({ text: `${emoji} ${msg}`, time: `${dateStr} ${timeStr}`, timestamp: now.getTime(), linkId: linkId });
     localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     if(window.updateNotifyBadge) window.updateNotifyBadge();
 };
 
@@ -2405,7 +2504,7 @@ window.addAdminLog = function(action, user = "Sistem") {
     const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
     window.adminLogs.push({ user: user, action: action, time: time }); 
     localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     if(window.currentUser && window.currentUser.role === 'admin' && document.getElementById('onlineAdminSidebar')?.classList.contains('open')) {
         if(window.renderOnlineUsers) window.renderOnlineUsers();
     }
@@ -2414,7 +2513,7 @@ window.addAdminLog = function(action, user = "Sistem") {
 window.delAdminLog = function(idx) {
     window.adminLogs.splice(idx, 1);
     localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     if(window.renderOnlineUsers) window.renderOnlineUsers();
 };
 
@@ -2477,11 +2576,11 @@ window.delUserAlert = function(idx, e) {
     window.userDatabase[window.currentUser.username] = window.currentUser;
     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
     localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     window.openUserInboxModal();
 };
 
-// ADMIN: Kayıtlı Kullanıcılar 
+// ================= ADMİN LİSTESİ VE ONAY =================
 window.openAdminUsersModal = function(e) {
     if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
     const list = document.getElementById('admin-users-list');
@@ -2493,10 +2592,14 @@ window.openAdminUsersModal = function(e) {
         let pwdInfo = window.currentUser && window.currentUser.role === 'admin' ? ` | Şifre: <span style="color:#fbbf24; font-weight:bold; letter-spacing:1px;">${u.pass}</span>` : '';
         
         let approveBtn = !u.approved && u.role !== 'admin' 
-            ? `<button onclick="window.approveUser('${u.username}', event)" style="margin-top:10px; background:#22c55e; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:bold;"><i class="fas fa-check"></i> Onayla</button>` 
+            ? `<button class="admin-action-btn" onclick="window.approveUser('${u.username}', event)" style="margin-top:10px; background:#22c55e; color:white; border-color:#22c55e;"><i class="fas fa-check"></i> Onayla</button>` 
             : '';
             
-        let msgBtn = `<button onclick="window.adminMsgUser('${u.username}', event)" style="margin-top:10px; margin-left:8px; background:#3b82f6; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:bold;"><i class="fas fa-envelope"></i> Mesaj Gönder</button>`;
+        let msgBtn = `<button class="admin-action-btn edit" onclick="window.adminMsgUser('${u.username}', event)" style="margin-top:10px; margin-left:8px;"><i class="fas fa-envelope"></i> Mesaj Gönder</button>`;
+        
+        let delBtn = u.role !== 'admin' 
+            ? `<button class="admin-action-btn del" onclick="window.deleteUser('${u.username}', event)" style="margin-top:10px; margin-left:8px;"><i class="fas fa-user-minus"></i> Sil</button>` 
+            : '';
         
         let statusText = u.approved ? `<span style="color:#22c55e; font-weight:bold;">Aktif</span>` : `<span style="color:#fbbf24; font-weight:bold; animation: blinkAnim 2s infinite;">Onay Bekliyor</span>`;
         
@@ -2505,7 +2608,7 @@ window.openAdminUsersModal = function(e) {
                 <strong style="color:var(--accent-color); font-size:1.3rem;">${u.name} ${u.surname || ''}</strong> <span style="font-size:0.95rem; color:#94a3b8;">(@${u.username})</span><br>
                 <div style="font-size:1.05rem; color:#e2e8f0; margin-top:10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">Puan: <strong style="color:var(--accent-color);">${u.score || 0}</strong> | Rol: ${u.role}${pwdInfo} <br> Durum: ${statusText}</div>
                 <div style="font-size:0.95rem; color:#94a3b8; margin-top:10px;">E-Mail: <a href="mailto:${u.email}" style="color:#60a5fa; text-decoration:none;">${u.email}</a></div>
-                <div style="margin-top: 12px;">${approveBtn}${msgBtn}</div>
+                <div style="margin-top: 12px;">${approveBtn}${msgBtn}${delBtn}</div>
             </div>`;
     }
     window.openFastModal('adminUsersModal');
@@ -2515,11 +2618,17 @@ window.approveUser = function(username, e) {
     if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
     if (window.userDatabase[username]) { 
         window.userDatabase[username].approved = true; 
-        if (!window.userDatabase[username].alerts) window.userDatabase[username].alerts = [];
+        
+        if (window.userDatabase[username].alerts) {
+            window.userDatabase[username].alerts = window.userDatabase[username].alerts.filter(msg => !msg.includes("onay bekliyor") && !msg.includes("Bestätigung"));
+        } else {
+            window.userDatabase[username].alerts = [];
+        }
+        
         window.userDatabase[username].alerts.push("🔔 Hesabınız Admin tarafından onaylandı! Artık giriş yapıp tüm özelliklere erişebilirsiniz. Hoş geldiniz!");
 
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
-        window.syncToCloud(); // CLOUD SYNC
+        window.syncToCloud(); 
         window.m_sendNotify(`${window.userDatabase[username].name} adlı kullanıcının kaydını onayladın.`, "✅"); 
         window.openAdminUsersModal(); 
     }
@@ -2532,13 +2641,12 @@ window.adminMsgUser = function(username, e) {
             if (!window.userDatabase[username].alerts) window.userDatabase[username].alerts = [];
             window.userDatabase[username].alerts.push(`🔔 Yönetimden Mesaj (Admin):\n${title ? '['+title+']\n' : ''}${text}`);
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
             window.showToast("Mesaj kullanıcıya ulaştırıldı!");
         }
     });
 };
 
-// ADMIN: Mesajlar ve Tümünü Sil
 window.openAdminMessages = function(e) {
     if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
     const list = document.getElementById('admin-msg-list');
@@ -2578,7 +2686,7 @@ window.delAdminMsg = function(idx, e) {
     if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
     window.adminMessages.splice(idx, 1);
     localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     window.updateNotifyBadge();
     window.openAdminMessages();
 };
@@ -2588,7 +2696,7 @@ window.clearAllAdminMsgs = function(e) {
     window.customConfirm("Tüm mesajları kalıcı olarak silmek istediğinize emin misiniz?", () => {
         window.adminMessages = [];
         localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
-        window.syncToCloud(); // CLOUD SYNC
+        window.syncToCloud(); 
         window.updateNotifyBadge();
         window.openAdminMessages();
         window.showToast("Tüm mesajlar silindi.");
@@ -2676,7 +2784,7 @@ window.clearAdminLogs = function() {
     window.customConfirm('Tüm logları silmek istediğinize emin misiniz?', () => { 
         window.adminLogs = []; 
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); 
-        window.syncToCloud(); // CLOUD SYNC
+        window.syncToCloud(); 
         if(window.renderOnlineUsers) window.renderOnlineUsers(); 
         window.showToast('Loglar temizlendi.'); 
     });
@@ -2746,7 +2854,7 @@ window.m_login = function() {
         
         window.addAdminLog('Girdi (Online)', window.currentUser.name); 
         window.m_sendNotify(`${window.currentUser.name} sisteme giriş yaptı.`, "🟢"); 
-        window.syncToCloud(); // CLOUD SYNC
+        window.syncToCloud(); 
         location.reload(); 
     } else { 
         window.customAlert("Hatalı bilgi / Falsche Daten", "❌"); 
@@ -2785,7 +2893,7 @@ window.m_register = function() {
     
     window.addAdminLog('Yeni Kayıt Oldu', n);
     window.m_sendNotify(`${n} (${u}) adında yeni bir kullanıcı kayıt oldu. Onayınızı bekliyor!`, "👤");
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     window.customAlert("Kayıt başarılı! Hesabınız Admin onayından sonra aktifleşecektir.", "✅"); 
     window.closeTopModal('force');
 };
@@ -2801,7 +2909,7 @@ window.m_logout = function(e) {
             if (userObj) { userObj.status = 'offline'; userObj.logoutTime = Date.now(); } 
             else { window.onlineUsersDB.push({ name: window.currentUser.name, role: window.currentUser.role, status: 'offline', logoutTime: Date.now() }); }
             localStorage.setItem('misaliOnlineUsers', JSON.stringify(window.onlineUsersDB)); 
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
         }
         localStorage.removeItem('misaliUser'); 
         sessionStorage.removeItem('misaliUser'); 
@@ -2863,7 +2971,7 @@ window.checkRemember = function() {
                 } else {
                     sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
                 }
-                window.syncToCloud(); // CLOUD SYNC
+                window.syncToCloud(); 
             }, 1000); 
         }
     } else { 
@@ -2929,7 +3037,7 @@ window.saveProfile = function() {
     
     window.addAdminLog('Profilini Güncelledi', window.currentUser.name);
     window.m_sendNotify(`${window.currentUser.name} profilini güncelledi.`, "⚙️"); 
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     window.customAlert("Profil güncellendi.", "✅"); 
     window.closeTopModal('force'); 
     location.reload();
@@ -2998,6 +3106,11 @@ window.toggleAdminAddFields = function() {
         deText.style.display = 'none';
         trTitle.placeholder = "Şahsiyet Adı"; 
         trText.placeholder = "Şahsiyet Sözü (Alıntı)";
+    } else if (type === 'userPoems') {
+        trText.style.display = 'block'; 
+        deText.style.display = 'none';
+        trTitle.placeholder = "Kullanıcı Eseri Başlık"; 
+        trText.placeholder = "Kullanıcı Eseri İçerik";
     } else {
         trText.style.display = 'block'; 
         deText.style.display = 'block';
@@ -3074,7 +3187,7 @@ window.adminAddContent = function() {
     window.initTicker();
     
     window.m_sendNotify(`Admin yeni bir içerik ekledi (${type})`, "📝");
-    window.syncToCloud(); // CLOUD SYNC
+    window.syncToCloud(); 
     
     document.getElementById('admin-add-tr-title').value = ''; 
     document.getElementById('admin-add-de-title').value = ''; 
@@ -3188,7 +3301,7 @@ window.adminSaveEdit = function() {
             item.title = document.getElementById('admin-edit-tr-title').value.trim();
             item.text = document.getElementById('admin-edit-tr-text').value.trim();
             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
             window.renderUserWorksGrid();
             window.renderUserWorksSidebar();
             window.m_sendNotify(`Admin bir kullanıcı eserini güncelledi.`, "⚙️"); 
@@ -3221,7 +3334,7 @@ window.adminSaveEdit = function() {
             window.initTicker();
             
             window.m_sendNotify(`Admin bir içeriği güncelledi.`, "⚙️"); 
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
             window.customAlert('İçerik başarıyla güncellendi!', '✅');
         }
     }
@@ -3236,7 +3349,7 @@ window.adminDeleteContent = function(e) {
         if (type === 'userPoems') {
             window.userPoemsDB = window.userPoemsDB.filter(x => x.id !== id);
             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            window.syncToCloud(); // CLOUD SYNC
+            window.syncToCloud(); 
             window.renderUserWorksGrid();
             window.renderUserWorksSidebar();
         } else {
@@ -3248,7 +3361,7 @@ window.adminDeleteContent = function(e) {
         }
         window.adminLoadItemsForEdit();
         window.m_sendNotify(`Admin bir içeriği sildi.`, "🗑️"); 
-        window.syncToCloud(); // CLOUD SYNC
+        window.syncToCloud(); 
         window.customAlert('İçerik silindi.', '✅');
     });
 };
@@ -3720,7 +3833,7 @@ window.updateHeartsUI = function() {
         list.innerHTML = data.comments && data.comments.length > 0 
             ? data.comments.map((c, idx) => {
                 let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.name === c.user)) 
-                    ? `<div class="action-btns" style="display:flex; gap:10px; margin-top:5px;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)"><i class="fas fa-trash-alt"></i></button></div>` 
+                    ? `<div class="action-btns" style="display:flex; gap:10px; margin-top:5px;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#3b82f6; cursor:pointer;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#ef4444; cursor:pointer;"><i class="fas fa-trash-alt"></i></button></div>` 
                     : '';
                 return `
                     <div style="border-bottom: 1px dashed #999; padding: 10px 0; display:flex; flex-direction:column;">
@@ -3766,7 +3879,7 @@ window.ratePoem = function(stars) {
     }
     
     localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
-    // Not: Heart-Verileri şu an sadece yerel. JSONBin'e eklemek istersen window.syncToCloud() fonksiyonunu genişletebilirsin.
+    window.syncToCloud(); 
     window.updateHeartsUI(); 
 };
 
@@ -3794,6 +3907,7 @@ window.m_addComment = function() {
     
     window.poemDataStore[poemId].comments.push({ user: window.currentUser.name, text: commentText, time: timeStr }); 
     localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+    window.syncToCloud(); 
     
     window.addAdminLog(`Yorum Yaptı: "${commentText}"`, window.currentUser.name);
     window.m_sendNotify(`${window.currentUser.name} yorum yaptı: "${commentText}"`, "💬", window.currentPoemData.type === 'userPoems' ? poemId : null); 
@@ -3816,6 +3930,7 @@ window.m_editComm = function(id, idx, e) {
             const now = new Date(); 
             window.poemDataStore[id].comments[idx].editTime = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); 
             localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+            window.syncToCloud(); 
             window.updateHeartsUI(); 
             window.addAdminLog(`Yorumunu Düzenledi`, window.currentUser.name);
             window.m_sendNotify(`${window.currentUser.name} yorumunu değiştirdi.`, "⚙️"); 
@@ -3829,169 +3944,10 @@ window.m_delComm = function(id, idx, e) {
         const deletedComment = window.poemDataStore[id].comments[idx]; 
         window.poemDataStore[id].comments.splice(idx, 1); 
         localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        window.syncToCloud(); 
         window.updateHeartsUI(); 
         window.addAdminLog(`Yorum Sildi`, window.currentUser.name);
         window.m_sendNotify(`Yorum Silindi: "${deletedComment.text}" (${deletedComment.user})`, "🗑️"); 
-    }); 
-};
-
-window.submitUserPoem = function() {
-    if (!window.currentUser) { window.m_openLogin(); return; }
-    
-    const titleInput = document.getElementById('user-poem-title'); 
-    const input = document.getElementById('user-poem-input');
-    
-    if (!input || !input.value.trim() || !titleInput || !titleInput.value.trim()) { 
-        window.customAlert("Lütfen başlık ve içerik giriniz.", "⚠️"); 
-        return; 
-    }
-    
-    const title = titleInput.value.trim(); 
-    const text = input.value.trim();
-    
-    if (window.badWords.some(w => text.toLowerCase().includes(w) || title.toLowerCase().includes(w))) { 
-        input.value = ""; 
-        titleInput.value = ""; 
-        window.addAdminLog(`Kötü söz kullandı (Eser)`, window.currentUser.name);
-        window.m_sendNotify(`${window.currentUser.name} kötü söz kullandı.`, "🚫"); 
-        window.m_logout(); 
-        window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); 
-        return; 
-    }
-    
-    const timeStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    const poemId = 'up_' + Date.now(); 
-    
-    window.userPoemsDB.push({ 
-        id: poemId, 
-        user: window.currentUser.name, 
-        title: title, 
-        text: text, 
-        date: timeStr, 
-        timestamp: Date.now(), 
-        comments: [] 
-    }); 
-    
-    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-    window.syncToCloud(); // CLOUD SYNC
-    
-    window.addAdminLog(`Yeni Eser Ekledi: ${title}`, window.currentUser.name);
-    window.m_sendNotify(`${window.currentUser.name} yeni eser ekledi: "${title}"`, "📝", poemId); 
-    input.value = ""; 
-    titleInput.value = ""; 
-    window.renderUserWorksSidebar(); 
-    window.renderUserWorksGrid();
-    window.customAlert("Eser başarıyla kaydedildi!", "✅");
-};
-
-window.sendChat = function() {
-    const input = document.getElementById('chat-input'); 
-    if (!input || !input.value.trim()) return;
-    if (!window.currentUser) { window.m_openLogin(); return; }
-    
-    let text = input.value.trim();
-    if (window.badWords.some(w => text.toLowerCase().includes(w))) { 
-        input.value = ""; 
-        window.addAdminLog(`Kötü söz kullandı (Chat)`, window.currentUser.name);
-        window.m_sendNotify(`${window.currentUser.name} chatte kötü söz kullandı.`, "🚫"); 
-        window.m_logout(); 
-        window.customAlert("Kelimelerin gücü karanlığa değil, aydınlığa hizmet etmelidir.", "🚫"); 
-        return; 
-    }
-    
-    const timeStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    
-    window.chatDB.push({ user: window.currentUser.name, role: window.currentUser.role, text: text, time: timeStr }); 
-    localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB));
-    window.syncToCloud(); // CLOUD SYNC
-    
-    window.addAdminLog(`Sohbete Yazdı`, window.currentUser.name);
-    window.m_sendNotify(`${window.currentUser.name} sohbete yazdı: "${text}"`, "🗨️"); 
-    input.value = ""; 
-    window.renderChat();
-    setTimeout(() => { const el = document.getElementById('chat-input'); if(el) el.focus(); }, 50); 
-};
-
-window.renderChat = function() {
-    const chatBox = document.getElementById('chat-box'); 
-    if (!chatBox) return;
-    
-    chatBox.innerHTML = `
-        <div class="chat-msg" style="align-self: flex-start; border-color: rgba(212,175,55,0.4); max-width: 95%; width: 100%; background: rgba(212,175,55,0.15); border-radius: 10px; padding: 15px; margin-bottom: 10px;">
-            <div style="border-bottom: 1px dashed rgba(212,175,55,0.2); padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size:0.8rem; color:#a0aec0; text-align: left;">
-                    <strong style="color: var(--accent-color); font-family: 'Great Vibes', cursive; font-size: 1.3rem;">~ Şair Misal.i 👑</strong>
-                </div>
-            </div>
-            <div style="font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #fdfbf7; line-height: 1.6; text-align: left;">
-                Hoş geldiniz! Burada hislerinizi saygı çerçevesinde paylaşabilirsiniz.
-            </div>
-        </div>`;
-        
-    if (window.chatDB && window.chatDB.length > 0) {
-        window.chatDB.forEach((msg, idx) => {
-            const msgDiv = document.createElement('div'); 
-            msgDiv.className = 'chat-msg'; 
-            const isOwnMsg = window.currentUser && window.currentUser.name === msg.user;
-            
-            msgDiv.style.alignSelf = isOwnMsg ? 'flex-end' : 'flex-start'; 
-            msgDiv.style.borderColor = (msg.role === 'admin') ? 'var(--accent-color)' : 'rgba(212,175,55,0.4)'; 
-            msgDiv.style.maxWidth = '95%'; 
-            msgDiv.style.width = '100%'; 
-            msgDiv.style.background = (msg.role === 'admin') ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.08)'; 
-            msgDiv.style.padding = '15px'; 
-            msgDiv.style.borderRadius = '10px'; 
-            msgDiv.style.marginBottom = '10px';
-            
-            let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || isOwnMsg)) 
-                ? `<div class="action-btns" style="display:flex; gap:10px;"><button class="edit-btn" onclick="window.editChatMsg(${idx}, event)"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.deleteChatMsg(${idx}, event)"><i class="fas fa-trash"></i></button></div>` 
-                : "";
-                
-            const crown = msg.role === 'admin' ? '👑' : '';
-            
-            msgDiv.innerHTML = `
-                <div style="border-bottom: 1px dashed rgba(212,175,55,0.2); padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="font-size:0.8rem; color:#a0aec0; text-align: left;">
-                        <strong style="color: var(--accent-color); font-family: 'Great Vibes', cursive; font-size: 1.3rem;">~ ${msg.user} ${crown}</strong><br>
-                        <span class="sidebar-time-text" style="margin-left:0;">${msg.time}</span>
-                        ${msg.editTime ? `<br><span class="edit-info" style="font-size:0.65rem; color:#fbbf24;">(Edit: ${msg.editTime})</span>` : ''}
-                    </div>
-                    ${actionBtns}
-                </div>
-                <div style="font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #fdfbf7; line-height: 1.6; text-align: left; word-break: break-word;">
-                    ${msg.text.replace(/\n/g, '<br>')}
-                </div>`; 
-            chatBox.appendChild(msgDiv);
-        });
-    }
-    chatBox.scrollTop = chatBox.scrollHeight;
-};
-
-window.editChatMsg = function(idx, e) { 
-    if (e && typeof e.stopPropagation === 'function') e.stopPropagation(); 
-    const msg = window.chatDB[idx]; 
-    window.customDualPrompt("Mesajı düzenle:", null, msg.text, (newTitle, newText) => { 
-        if (newText && newText.trim() !== "") { 
-            window.chatDB[idx].text = newText.trim(); 
-            window.chatDB[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); 
-            localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); 
-            window.syncToCloud(); // CLOUD SYNC
-            window.addAdminLog(`Chat Mesajını Düzenledi`, window.currentUser.name);
-            window.renderChat(); 
-        } 
-    }); 
-};
-
-window.deleteChatMsg = function(idx, e) { 
-    if (e && typeof e.stopPropagation === 'function') e.stopPropagation(); 
-    window.customConfirm("Mesajı silmek istediğinize emin misiniz?", () => { 
-        const deletedText = window.chatDB[idx].text; 
-        window.chatDB.splice(idx, 1); 
-        localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); 
-        window.syncToCloud(); // CLOUD SYNC
-        window.renderChat(); 
-        window.addAdminLog(`Chat Mesajı Sildi`, window.currentUser.name);
-        window.m_sendNotify(`${window.currentUser.name} sildi: "${deletedText}"`, "🗑️"); 
     }); 
 };
 
@@ -4208,7 +4164,7 @@ window.openEventsModal = function(e) {
     window.openFastModal('eventsModal'); 
 };
 
-// ================= 12. OYUNLAR & PUAN SİSTEMİ =================
+// ================= OYUNLAR & PUAN SİSTEMİ =================
 window.openFalModal = (e) => { 
     if (e && typeof e.stopPropagation === 'function') e.stopPropagation(); 
     window.openFastModal('falModal'); 
@@ -5532,7 +5488,6 @@ window.fetchWeather = async function() {
     try {
         const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json'); 
         const geoData = await geoRes.json(); 
-        
         const city = geoData.city || "Berlin";
         const lat = geoData.latitude || 52.52;
         const lon = geoData.longitude || 13.41;
@@ -5542,7 +5497,6 @@ window.fetchWeather = async function() {
         
         window.weatherData = { temp: Math.round(wData.current_weather.temperature), city: city, code: wData.current_weather.weathercode };
         if(wWidget) wWidget.innerHTML = `<span class="anim-sun">☀️</span> ${city}, ${window.weatherData.temp}°C`;
-        
     } catch (err) { 
         window.weatherData = { temp: '15', city: 'Berlin', code: 0 }; 
         if(wWidget) wWidget.innerHTML = `<span class="anim-sun">☀️</span> Berlin, 15°C`; 
