@@ -21,7 +21,6 @@
             --nav-bg: rgba(9, 10, 15, 0.96); 
             --modal-bg: rgba(4, 6, 10, 0.88); 
             --modal-paper: #0f172a; 
-            /* Apple tarzı kusursuz akıcı animasyon eğrisi (XLarge GPU Accelerated) */
             --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
             --bounce-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -301,7 +300,7 @@
         .admin-action-btn.add { color: #22c55e; border-color: rgba(34,197,94,0.4); width:100%; justify-content:center; padding:10px; margin-bottom:15px; font-size:1rem;}
         .admin-action-btn.add:hover { background: #22c55e; color: white; box-shadow: 0 4px 10px rgba(34,197,94,0.4);}
         /* Yeni Mesaj At Butonu (Online Menüsü) */
-        .admin-action-btn.msg { color: #f97316; border-color: rgba(249,115,22,0.4); padding: 4px 8px; font-size: 0.75rem;}
+        .admin-action-btn.msg { color: #f97316; border-color: rgba(249,115,22,0.4); padding: 4px 8px; font-size: 0.75rem; margin-left: auto; display: inline-block;}
         .admin-action-btn.msg:hover { background: #f97316; color: white; box-shadow: 0 4px 10px rgba(249,115,22,0.4);}
 
         /* BİYOMETRİK GİRİŞ BUTTONU CSS */
@@ -345,16 +344,18 @@
         .submit-btn:hover { transform: translate3d(0, -3px, 0); box-shadow: 0 8px 20px rgba(212,175,55,0.45); filter: brightness(1.1); }
         
         /* ================= AÇILIR/KAPANIR YUVARLAK MENÜLER (GELİŞMİŞ EFEKT) ================= */
-        /* Burada pointer-events: none vererek KESİN TIKLAMA SORUNUNU (bug) çözüyoruz! */
-        .floating-menu-wrapper { position: fixed; bottom: 22px; z-index: 900; display: flex; flex-direction: column; gap: 14px; pointer-events: none;}
+        /* KESİN TIKLAMA SORUNUNU (bug) ÇÖZMEK İÇİN: */
+        .floating-menu-wrapper { position: fixed; bottom: 22px; z-index: 2000; display: flex; flex-direction: column; gap: 14px; pointer-events: none;}
         .floating-menu-wrapper.left { left: 22px; align-items: flex-start; }
         .floating-menu-wrapper.right { right: 22px; align-items: flex-end; }
         
-        .menu-toggle-btn { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #b48608); color: black; font-size: 1.5rem; border: none; cursor: pointer; box-shadow: var(--accent-glow); pointer-events: auto; transition: var(--bounce-smooth); z-index: 902; display: flex; justify-content: center; align-items: center; outline: none; will-change: transform;}
+        .menu-toggle-btn { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #b48608); color: black; font-size: 1.5rem; border: none; cursor: pointer; box-shadow: var(--accent-glow); pointer-events: auto; transition: var(--bounce-smooth); z-index: 2002; display: flex; justify-content: center; align-items: center; outline: none; will-change: transform;}
         .menu-toggle-btn:hover { transform: scale(1.1); }
         .menu-toggle-btn.open { transform: rotate(45deg); background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; box-shadow: 0 0 15px rgba(239,68,68,0.6);}
         
-        .floating-menu-items { display: flex; flex-direction: column; gap: 14px; opacity: 0; visibility: hidden; transform: translate3d(0, 20px, 0); transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; align-items: flex-start; will-change: transform, opacity;}
+        /* GİZLENME VE OVERLAPPING FİXİ: max-height eklendi */
+        .floating-menu-items { display: flex; flex-direction: column; gap: 14px; opacity: 0; visibility: hidden; transform: translate3d(0, 20px, 0); transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; align-items: flex-start; will-change: transform, opacity; max-height: 65vh; overflow-y: auto; padding: 10px 0; -webkit-overflow-scrolling: touch; scrollbar-width: none;}
+        .floating-menu-items::-webkit-scrollbar { display: none; }
         .floating-menu-wrapper.right .floating-menu-items { align-items: flex-end; }
         .floating-menu-items.show { opacity: 1; visibility: visible; transform: translate3d(0, 0, 0); pointer-events: auto;}
 
@@ -362,7 +363,7 @@
         body.admin-mode .admin-only { display: flex !important; }
         body.user-mode .user-only, body.admin-mode .user-only { display: flex !important; }
 
-        .bottom-btn { position: relative; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); color: #cbd5e1; border-radius: 30px; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 0.95rem; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.55); transition: var(--transition-smooth); border: 1px solid rgba(212, 175, 55, 0.3); height: 50px; display: flex; align-items: center; padding: 0; align-self: flex-start; max-width: 50px; overflow: visible; pointer-events: auto;} 
+        .bottom-btn { position: relative; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); color: #cbd5e1; border-radius: 30px; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 0.95rem; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.55); transition: var(--transition-smooth); border: 1px solid rgba(212, 175, 55, 0.3); height: 50px; min-height: 50px; display: flex; align-items: center; padding: 0; align-self: flex-start; max-width: 50px; overflow: visible; pointer-events: auto;} 
         .floating-menu-wrapper.right .bottom-btn { align-self: flex-end; flex-direction: row-reverse; }
         .bottom-btn:hover { background: var(--accent-color); color: #000; border-color: var(--accent-color); box-shadow: var(--accent-glow); z-index: 91; max-width: 250px;}
         
@@ -696,6 +697,7 @@
             </button>
             <button class="bottom-btn right-btn" onclick="window.openAdminUsersModal(event)">
                 <span class="btn-icon"><i class="fas fa-clipboard-list"></i></span> 
+                <div class="badge-count badge-blue hidden" id="admin-users-badge">0</div>
                 <div class="btn-text-wrapper"><span class="btn-text">Kayıtlı Kullanıcılar</span></div>
             </button>
             <button class="bottom-btn right-btn" onclick="window.toggleSidebar('onlineAdminSidebar', event)">
@@ -894,7 +896,7 @@ Sind des Glückes Unterpfand:
         </div>
         <div class="sidebar-content">
             <h3 style="font-family:'Poppins', sans-serif; font-size:1.1rem; color:var(--accent-color); margin-bottom:15px;">Aktif & Çıkış Yapanlar</h3>
-            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">Not: Yöneticiler bu listede gizlidir.</p>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">Not: Yöneticiler bu listede gizlidir. Mesaj göndermek için ismin yanındaki butona tıkla.</p>
             <div id="user-only-online-list"></div>
         </div>
     </div>
@@ -910,7 +912,7 @@ Sind des Glückes Unterpfand:
             
             <div id="admin-daily-logs" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 20px; margin-top: 25px; border: 1px solid rgba(212,175,55,0.2); box-shadow: inset 0 0 15px rgba(0,0,0,0.3);">
                 <h3 style="font-family:'Poppins', sans-serif; font-size:1.1rem; color:var(--accent-color); margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>📋 Günlük Rapor</span>
+                    <span>📋 Günlük Rapor (Log)</span>
                     <button onclick="window.clearAdminLogs()" style="background: linear-gradient(135deg, #ef4444, #b91c1c); color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem; outline:none; transition:0.3s; box-shadow: 0 4px 10px rgba(239,68,68,0.4);">
                         <i class="fas fa-trash-alt"></i> Temizle
                     </button>
@@ -1807,7 +1809,7 @@ window.syncToCloud = async function() {
             chat: window.chatDB || [],
             adminMsgs: window.adminMessages || [],
             logs: window.adminLogs || [],
-            heartsDB: window.poemDataStore || {} // YENİ: Kalpler ve Yorumlar artık Cloud'a gidiyor!
+            heartsDB: window.poemDataStore || {} // Kalpler ve Yorumlar artık Cloud'a gidiyor!
         };
         await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
             method: 'PUT',
@@ -1857,7 +1859,6 @@ window.fetchFromCloud = async function() {
                 localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
                 if(window.renderOnlineUsers) window.renderOnlineUsers();
             }
-            // YENİ: Kalpleri ve Yorumları Cloud'dan Çekme
             if(r.heartsDB && JSON.stringify(window.poemDataStore) !== JSON.stringify(r.heartsDB)) {
                 window.poemDataStore = r.heartsDB;
                 localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
@@ -1873,13 +1874,12 @@ window.fetchFromCloud = async function() {
     } catch(e) { console.error("Cloud Fetch Error", e); }
 };
 
-// 15 Saniyede bir buluttan (Cloud) yeni verileri çeker
+// YENİ: HIZLI LIVE SYNC (Her 5 Saniyede Bir Çeker)
 setInterval(() => {
     window.fetchFromCloud();
-}, 15000);
+}, 5000);
 
-// İlk yüklemede buluttan verileri çek
-window.fetchFromCloud();
+window.fetchFromCloud(); // İlk yükleme
 
 // ================= YENİ: YUVARLAK MENÜ AÇMA/KAPAMA (FLOATING MENU) =================
 window.toggleFloatingMenu = function(side, e) {
@@ -1891,7 +1891,6 @@ window.toggleFloatingMenu = function(side, e) {
         btn.classList.remove('open');
         menuItems.classList.remove('show');
     } else {
-        // Açık olan diğer menüyü kapat (aynı anda ikisi açılmasın)
         document.querySelectorAll('.menu-toggle-btn').forEach(b => b.classList.remove('open'));
         document.querySelectorAll('.floating-menu-items').forEach(m => m.classList.remove('show'));
         
@@ -1900,7 +1899,6 @@ window.toggleFloatingMenu = function(side, e) {
     }
 };
 
-// Sayfanın boş bir yerine tıklayınca menüleri kapat
 document.addEventListener('click', (e) => {
     if (!e.target.closest('.floating-menu-wrapper')) {
         document.querySelectorAll('.menu-toggle-btn').forEach(b => b.classList.remove('open'));
@@ -2005,19 +2003,6 @@ if (!sessionStorage.getItem('misaliVisited')) {
     localStorage.setItem('misaliSiteVisits', siteVisits); 
     sessionStorage.setItem('misaliVisited', 'true');
 }
-
-// LİVE UPDATE (Local Fallback)
-setInterval(() => {
-    const oldContent = JSON.stringify(window.contentDB);
-    const newContentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
-    if (newContentDB) window.contentDB = newContentDB;
-    
-    if (oldContent !== JSON.stringify(window.contentDB)) {
-        if(window.initContent) window.initContent();
-        if(window.generateFihrist) window.generateFihrist();
-        if(window.initTicker) window.initTicker();
-    }
-}, 30000);
 
 // ================= 2. TAM VERİTABANI =================
 
@@ -2220,8 +2205,11 @@ const baseJokes = [
 // Orijinal Veritabanını Kurma
 window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB')) || { poems:[], quotes:[], stories:[], jokes:[], saglik:[], persons:[], ticker:[] };
 
+// Şiirlerim ve Sözlerim SADECE ve SADECE yukarıdaki orijinal verilerle ezilir
 window.contentDB.poems = userPoems;
 window.contentDB.quotes = userQuotes;
+
+// Sadece Kıssa, Fıkra ve Sağlık alanları sıfırlanıp taze 40/40/20 eklenir
 window.contentDB.stories = [];
 window.contentDB.jokes = [];
 window.contentDB.saglik = [];
@@ -2232,6 +2220,7 @@ realHealthTips.forEach((t, i) => { window.contentDB.saglik.push({ id: 'sag_' + i
 
 localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
 
+// Cloud'dan veri gelmeden önce fallback olarak local'i kullan
 window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || { 
     "misali": { username: "misali", name: "Şair", surname: "Misal.i", email: "sairmisali25@gmail.com", day: "3", month: "6", year: "1980", pass: "1234", role: "admin", score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: true } 
 };
@@ -2410,7 +2399,7 @@ window.resetUserScore = function(username, e) {
     });
 };
 
-// ================= ADMİN: KULLANICI EKLEME VE SİLME (LIVE YENİ FONKSİYONLAR) =================
+// ================= ADMİN: KULLANICI EKLEME VE SİLME =================
 window.adminAddNewUser = function(e) {
     if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
     window.customDualPrompt("Yeni Kullanıcı Ekle", "Kullanıcı Adı", "Şifre (Geçici)", (uName, pass) => {
@@ -2476,10 +2465,26 @@ setInterval(() => {
                 window.openAdminUsersModal(); 
             }
             if(window.renderOnlineUsers) window.renderOnlineUsers();
+            if(window.updateNotifyBadge) window.updateNotifyBadge();
         }
+        
+        let pendingCount = 0;
+        for(let key in newUsersDB) {
+            if(!newUsersDB[key].approved && newUsersDB[key].role !== 'admin') pendingCount++;
+        }
+        
+        const blueBadge = document.getElementById('admin-users-badge');
+        if (blueBadge) {
+            if(pendingCount > 0 && blueBadge.innerText !== pendingCount.toString()) {
+                const snd = document.getElementById('notification-sound');
+                if (snd) snd.play().catch(e => console.log("Ses engellendi:", e));
+            }
+            blueBadge.innerText = pendingCount;
+            blueBadge.classList.toggle('hidden', pendingCount === 0);
+        }
+
         if (newMsgs.length !== window.adminMessages.length) {
             if (newMsgs.length > window.adminMessages.length) {
-                // Yeni mesaj/bildirim geldiğinde SES ÇAL (Pling)
                 const snd = document.getElementById('notification-sound');
                 if (snd) snd.play().catch(e => console.log("Ses engellendi:", e));
             }
@@ -2491,14 +2496,12 @@ setInterval(() => {
         }
     } 
     else if (window.currentUser && window.currentUser.role !== 'admin') {
-        // Kullanıcı için bildirim kontrolü
         if (newUsersDB && newUsersDB[window.currentUser.username]) {
             const updatedUser = newUsersDB[window.currentUser.username];
             const currentAlerts = window.currentUser.alerts || [];
             const newAlerts = updatedUser.alerts || [];
             
             if (newAlerts.length > currentAlerts.length) {
-                // Kullanıcıya yeni bir DM veya onay geldiğinde SES ÇAL
                 const snd = document.getElementById('notification-sound');
                 if (snd) snd.play().catch(e => {});
                 
@@ -2514,9 +2517,21 @@ window.updateNotifyBadge = function() {
     const badge = document.getElementById('user-notify-badge'); 
     const adminBadge = document.getElementById('admin-badge'); 
     const count = window.adminMessages.length;
+    
     if (window.currentUser && window.currentUser.role === 'admin') {
         if (badge) { badge.innerText = count; badge.classList.toggle('hidden', count === 0); }
         if (adminBadge) { adminBadge.innerText = count; adminBadge.classList.toggle('hidden', count === 0); }
+        
+        let pendingCount = 0;
+        for(let key in window.userDatabase) {
+            if(!window.userDatabase[key].approved && window.userDatabase[key].role !== 'admin') pendingCount++;
+        }
+        const blueBadge = document.getElementById('admin-users-badge');
+        if (blueBadge) {
+            blueBadge.innerText = pendingCount;
+            blueBadge.classList.toggle('hidden', pendingCount === 0);
+        }
+        
     } else {
         if (badge) badge.classList.add('hidden'); 
         if (adminBadge) adminBadge.classList.add('hidden');
@@ -2622,7 +2637,7 @@ window.delUserAlert = function(idx, e) {
     window.openUserInboxModal();
 };
 
-// ADMIN: Kayıtlı Kullanıcılar 
+// ================= ADMİN: KAYITLI KULLANICILAR =================
 window.openAdminUsersModal = function(e) {
     if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
     const list = document.getElementById('admin-users-list');
@@ -2656,7 +2671,6 @@ window.openAdminUsersModal = function(e) {
     window.openFastModal('adminUsersModal');
 };
 
-// ================= ONAY FİX: ESKİ MESAJI SİL VE YENİSİNİ EKLE =================
 window.approveUser = function(username, e) {
     if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
     if (window.userDatabase[username]) { 
@@ -2674,6 +2688,7 @@ window.approveUser = function(username, e) {
         window.syncToCloud(); 
         window.m_sendNotify(`${window.userDatabase[username].name} adlı kullanıcının kaydını onayladın.`, "✅"); 
         window.openAdminUsersModal(); 
+        if(window.updateNotifyBadge) window.updateNotifyBadge();
     }
 };
 
@@ -2769,7 +2784,6 @@ window.renderOnlineUsers = function() {
     const countAdminText = document.getElementById('online-dot-mini-admin'); 
     if (countAdminText) { countAdminText.innerText = activeAllCount; countAdminText.classList.toggle('hidden', activeAllCount === 0); }
 
-    // DIRECT MESSAGE YENİ BUTON EKLENTİSİ
     const userList = document.getElementById('user-only-online-list');
     if (userList) {
         userList.innerHTML = "";
@@ -2857,6 +2871,8 @@ window.clearAdminLogs = function() {
         window.showToast('Loglar temizlendi.'); 
     });
 };
+
+// ================= AUTH (GİRİŞ / KAYIT / ÇIKIŞ) =================
 
 window.m_bioLogin = function(e) {
     if(e && typeof e.preventDefault === 'function') e.preventDefault();
