@@ -37,12 +37,16 @@
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
         .hidden { display: none !important; }
 
-        /* FIX: HINTERGRUND ICONS (Verhindert zerschossenes Layout) */
+        /* HINTERGRUND ICONS */
         .floating-bg-icons { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: -1; pointer-events: none; }
         .bg-icon { position: absolute; bottom: -20%; font-size: 15rem; color: rgba(244, 197, 66, 0.03); animation: floatUp linear infinite; }
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0.03; } 50% { opacity: 0.06; } 100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } }
 
-        /* INPUTS & BUTTONS (POINTER EVENTS FIX!) */
+        /* WETTER ANIMATION */
+        @keyframes gentlePulse { 0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 5px rgba(244,197,66,0.3)); } 100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 15px rgba(244,197,66,0.8)); } }
+        .weather-anim-icon { animation: gentlePulse 3s infinite alternate ease-in-out; display: inline-block; }
+
+        /* INPUTS & BUTTONS */
         input, select, textarea, button { pointer-events: auto !important; }
         
         input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
@@ -55,9 +59,7 @@
         .reset-btn.danger { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; color: white !important; box-shadow: 0 4px 15px rgba(239,68,68,0.3) !important;}
         .reset-btn.warning { background: linear-gradient(135deg, #f97316, #ea580c) !important; color: white !important; box-shadow: 0 4px 15px rgba(249,115,22,0.3) !important;}
 
-        /* ==========================================================================
-           SAYAÇLAR (ZÄHLER)
-           ========================================================================== */
+        /* SAYAÇLAR (ZÄHLER) */
         .badge-count {
             position: absolute; top: -6px; right: -6px;
             color: white; font-size: 0.75rem; font-weight: bold;
@@ -77,9 +79,16 @@
         .badge-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
         .badge-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 
-        /* ==========================================================================
-           MODALS
-           ========================================================================== */
+        /* KALENDER AKTIVER TAG */
+        .cal-day-selected {
+            background: rgba(244, 197, 66, 0.3) !important;
+            border: 2px solid var(--accent-color) !important;
+            box-shadow: 0 0 15px rgba(244, 197, 66, 0.8) !important;
+            transform: scale(1.1);
+            color: #fff !important;
+        }
+
+        /* MODALS */
         .modal { 
             display: none !important; position: fixed !important; 
             top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; 
@@ -110,9 +119,7 @@
         
         .modal-interaction-box { background: rgba(0,0,0,0.6) !important; border: 1px solid rgba(244,197,66,0.3) !important; border-radius: 16px !important; padding: 20px !important; margin-bottom: 15px !important; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5) !important; width: 100%; pointer-events: auto; }
 
-        /* ==========================================================================
-           FLOATING MENUS
-           ========================================================================== */
+        /* FLOATING MENUS */
         .floating-menu-wrapper { position: fixed; z-index: 9000; display: flex; flex-direction: column; gap: 18px; pointer-events: none; }
         .floating-menu-wrapper.left { left: 20px; bottom: 20px; align-items: flex-start; }
         .floating-menu-wrapper.right { right: 20px; bottom: 20px; align-items: flex-end; }
@@ -148,9 +155,7 @@
         .floating-menu-wrapper.right .btn-text-wrapper { justify-content: flex-end; }
         .floating-menu-wrapper.right .btn-text { padding-right: 5px; padding-left: 15px; text-align: right; }
 
-        /* ==========================================================================
-           HEADER & TICKER
-           ========================================================================== */
+        /* HEADER & TICKER */
         .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; pointer-events: auto;}
         
         .ticker-half { width: 100%; height: 30px; display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; padding: 0 10px;}
@@ -169,7 +174,8 @@
 
         header { position: fixed; top: 60px; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 8000; border-bottom: 1px solid rgba(244, 197, 66, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.8); display: flex; flex-direction: column; pointer-events: auto; }
         
-        .page-view { display: none; padding: 200px 5% 100px; min-height: 100vh; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.2s ease-out; } 
+        /* FIX: ABSTAND ERHÖHT, DAMIT HEADER NICHT ÜBERLAPPT! (Von 160 auf 240px) */
+        .page-view { display: none; padding: 240px 5% 100px; min-height: 100vh; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.2s ease-out; } 
         .page-view.active-view { display: flex; opacity: 1; }
 
         .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 4%; gap: 10px; }
@@ -262,7 +268,7 @@
         
         .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none;}
         
-        .anthem-content { font-size: 0.85rem !important; line-height: 1.6 !important; text-align: center; color: white; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px dashed rgba(244,197,66,0.3); margin-top: 15px; }
+        .anthem-content { font-size: 1.05rem !important; line-height: 1.8 !important; text-align: center; color: white; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px dashed rgba(244,197,66,0.3); margin-top: 15px; white-space: pre-wrap;}
 
         /* HOROSKOP & SPIELE GRIDS */
         .zodiac-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin-top: 15px; }
@@ -272,17 +278,16 @@
 
         canvas.game-canvas { background: #0a192f; border: 2px solid var(--accent-color); border-radius: 8px; display: block; margin: 0 auto; box-shadow: 0 0 15px rgba(244,197,66,0.3); }
 
-        /* ==========================================================================
-           FIX: RESPONSIVE DESIGN FÜR MOBILE
-           ========================================================================== */
+        /* RESPONSIVE DESIGN */
         @media (max-width: 1100px) {
+            .page-view { padding-top: 280px; }
             .header-top { justify-content: center; padding: 12px 4%; flex-wrap: wrap;} 
             .header-left, .header-right { width: 100%; justify-content: center; } 
             .datetime-container { display: none !important; } 
-            .page-view { padding-top: 250px; }
         }
 
         @media (max-width: 768px) {
+            .page-view { padding-top: 300px; }
             .hero-title { font-size: 2.5rem !important; }
             .hero-subtitle { font-size: 1.2rem !important; }
             .profile-pic { width: 140px !important; height: 140px !important; }
@@ -348,14 +353,14 @@
                     <img src="image_01d1a0.png" class="header-mini-profile clickable-header-item" id="user-avatar" onclick="if(window.openRandomQuote) window.openRandomQuote()" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
                     <div class="user-greeting" id="user-greeting">
                         <span id="header-username" class="clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('profileEditModal')">Şair Misal.i</span>
-                        <div class="zodiac-badge clickable-header-item" id="header-zodiac" onclick="if(window.openFastModal) window.openFastModal('horoscopeModal')">♊</div>
+                        <div class="zodiac-badge clickable-header-item" id="header-zodiac" onclick="if(window.openMyHoroscope) window.openMyHoroscope()">♊</div>
                         <div class="header-score-badge clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('leaderboardModal')">🏆 <span id="user-score">0 P.</span></div>
                     </div>
                     <button class="logout-btn user-only clickable-header-item" onclick="if(window.m_logout) window.m_logout()"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
                 
                 <div id="weather-widget" class="weather-widget clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('weatherModal')">
-                    <span id="wm-anim-header" class="anim-sun">☀️</span> <span id="wm-temp-header">--°C Berlin</span>
+                    <span id="wm-anim-header" class="weather-anim-icon">☀️</span> <span id="wm-temp-header">--°C Berlin</span>
                 </div>
 
                 <div class="icon-action-btn auth-visible clickable-header-item" id="user-notify-btn" onclick="if(window.openFastModal) window.openFastModal('userMessagesModal')">
@@ -697,7 +702,9 @@
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('falModal')"><div class="game-icon">☕</div><h3>Fal Bakma</h3><span>(Kaffeesatzlesen)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('memoryModal'); if(window.initMemoryGame) window.initMemoryGame()"><div class="game-icon">🧠</div><h3>Hafıza Oyunu</h3><span>(Memory)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('fastClickModal')"><div class="game-icon">⏱️</div><h3>Hızlı Tıklama</h3><span>(Reaktionstest)</span></div>
-                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('horoscopeModal')"><div class="game-icon">🌌</div><h3>Horoskop</h3><span>(Sternzeichen)</span></div>
+                
+                <div class="game-card" onclick="if(window.openHoroscopeModal) window.openHoroscopeModal(event); else { window.openFastModal('horoscopeModal'); if(window.initHoroscopeGrid) window.initHoroscopeGrid(); }"><div class="game-icon">🌌</div><h3>Horoskop</h3><span>(Sternzeichen)</span></div>
+                
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('breathModal')"><div class="game-icon">🧘</div><h3>Huzur Balonu</h3><span>(Atemübung)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('anagramModal'); if(window.initAnagram) window.initAnagram()"><div class="game-icon">🌪️</div><h3>Kelime Avı</h3><span>(Anagramm)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('hangmanModal'); if(window.setHangmanLang) window.setHangmanLang('TR')"><div class="game-icon">🔤</div><h3>Kelime Bulmaca</h3><span>(Worträtsel)</span></div>
@@ -1144,7 +1151,10 @@
         <div class="modal-content game-modal-content" style="max-width: 700px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
             <div class="modal-body">
-                <h2 class="game-title" style="font-size: 2.2rem; margin-bottom: 20px;">Gelen Kutusu (Üstat)</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px;">
+                    <h2 class="game-title" style="font-size: 2.2rem; margin: 0; text-align: left; border:none; padding:0;">Gelen Kutusu (Üstat)</h2>
+                    <button class="reset-btn danger" onclick="if(window.deleteAllAdminMessages) window.deleteAllAdminMessages()" style="width: auto; padding: 8px 15px; margin: 0; font-size: 0.9rem;"><i class="fas fa-trash-alt"></i> Hepsini Sil</button>
+                </div>
                 <div id="admin-msg-list" style="width:100%; display:flex; flex-direction:column; gap:14px;"></div>
             </div>
         </div>
@@ -1189,13 +1199,18 @@
                         <button class="reset-btn" style="width: 40px; height: 40px; border-radius: 50%; padding:0; margin:0;" onclick="if(window.nextYear) window.nextYear()"><i class="fas fa-angle-double-right"></i></button>
                     </div>
                     <div class="calendar-grid" id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; width: 100%; margin-top: 12px;"></div>
+                    
                     <div class="calendar-msg-box" id="cal-msg-box" style="margin-top: 25px; padding: 20px; border-radius: 14px; background: rgba(0,0,0,0.5); border: 1px dashed rgba(244,197,66,0.6); width: 100%; text-align: center;">
                         <div id="cal-msg-text" style="color:#e2e8f0; font-size:1.2rem; line-height: 1.6;">Tarihe tıkla...<br><span style="font-size:1rem; color:#94a3b8;">(Klick auf ein Datum)</span></div>
+                        
                         <div class="cal-note-area" id="cal-note-area" style="display:none; flex-direction:column; margin-top:20px;">
+                            <div id="cal-saved-notes" style="margin-bottom:15px; text-align:left;"></div>
+                            
                             <textarea id="cal-note-input" class="auth-input" rows="2" placeholder="Notun... (Eigene Notiz...)" onclick="event.stopPropagation()"></textarea>
                             <button class="reset-btn" onclick="if(window.saveCalNote) window.saveCalNote(event)" style="padding:12px; border-radius:12px;">Kaydet</button>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -1259,7 +1274,7 @@
     window.isSyncing = false; 
     window.lastLocalUpdate = 0;
     
-    // Ziyaretçi Sayacı (Besucherzähler)
+    // Besucherzähler
     let siteVisits = parseInt(localStorage.getItem('misaliSiteVisits') || "0");
     if (!sessionStorage.getItem('misaliVisited')) { 
         siteVisits++; 
@@ -1267,13 +1282,26 @@
         sessionStorage.setItem('misaliVisited', 'true'); 
     }
 
-    // Beschleunigte Sync-Funktion
+    // Cloud Synchronisation (Optimiert)
     window.syncToCloud = async function() {
         if (window.isSyncing || !navigator.onLine) return; 
         window.lastLocalUpdate = Date.now(); window.isSyncing = true;
         try { 
-            const data= { users: window.userDatabase||{}, userPoems: window.userPoemsDB||[], chat: window.chatDB||[], adminMsgs: window.adminMessages||[], logs: window.adminLogs||[], heartsDB: window.poemDataStore||{}, calNotes: window.calNotesDB||{}, visits: siteVisits };
-            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data) }); 
+            const data = { 
+                users: window.userDatabase||{}, 
+                userPoems: window.userPoemsDB||[], 
+                chat: window.chatDB||[], 
+                adminMsgs: window.adminMessages||[], 
+                logs: window.adminLogs||[], 
+                heartsDB: window.poemDataStore||{}, 
+                calNotes: window.calNotesDB||{}, 
+                visits: siteVisits 
+            };
+            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
+                method: 'PUT', 
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, 
+                body: JSON.stringify(data) 
+            }); 
         } catch(e) { console.error("Cloud Sync Error", e); } 
         window.isSyncing = false;
     };
@@ -1286,64 +1314,89 @@
             if(json.record) { 
                 let r = json.record; 
                 
-                // FIX: Verhindert, dass Tippen durch Cloud-Updates gelöscht wird!
+                // Prüfen, ob der User gerade schreibt (verhindert UI-Lag)
                 let activeEl = document.activeElement;
                 let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
 
-                // Fix: Garantiert, dass users ein Objekt bleibt (Behebt leere User-Liste)
                 if(r.users) { 
                     window.userDatabase = Array.isArray(r.users) ? Object.assign({}, r.users) : r.users; 
                     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
                 }
                 
                 if(r.userPoems && Array.isArray(r.userPoems)) { 
-                    window.userPoemsDB = r.userPoems; localStorage.setItem('misaliUserPoems', JSON.stringify(r.userPoems)); 
+                    window.userPoemsDB = r.userPoems; 
+                    localStorage.setItem('misaliUserPoems', JSON.stringify(r.userPoems)); 
                     if(!isTyping && window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-                    if(!isTyping && window.renderUserWorksSidebar) window.renderUserWorksSidebar(); 
-                    if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
-                    if(window.updateTopWorksTicker) window.updateTopWorksTicker(); 
+                    if(!isTyping && window.renderUserWorksSidebar) window.renderUserWorksSidebar();
+                    if(!isTyping && window.renderTopWorks) window.renderTopWorks();
+                    if(window.updateUserWorksBadge) window.updateUserWorksBadge();
+                    if(window.updateTopWorksTicker) window.updateTopWorksTicker();
                 }
                 
                 if(r.chat && Array.isArray(r.chat)) { 
-                    window.chatDB = r.chat; localStorage.setItem('misaliChatDB', JSON.stringify(r.chat)); 
+                    window.chatDB = r.chat; 
+                    localStorage.setItem('misaliChatDB', JSON.stringify(r.chat)); 
                     if(!isTyping && window.renderChat) window.renderChat(); 
                 }
                 
                 if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
-                    window.adminMessages = r.adminMsgs; localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs)); 
+                    window.adminMessages = r.adminMsgs; 
+                    localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs)); 
                     if(window.updateNotifyBadge) window.updateNotifyBadge(); 
+                    if(!isTyping && document.getElementById('adminMessagesModal').classList.contains('active-modal') && window.renderAdminMessages) window.renderAdminMessages();
+                    if(!isTyping && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
                 }
-                
-                if(r.logs && Array.isArray(r.logs)) { 
-                    window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); 
-                    if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); 
-                }
-                
-                if(r.heartsDB && typeof r.heartsDB === 'object') { 
-                    window.poemDataStore = r.heartsDB; localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
+
+                if(r.heartsDB) { 
+                    window.poemDataStore = r.heartsDB; 
+                    localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
                     if(!isTyping && document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) window.updateHeartsUI(); 
-                    if(!isTyping && window.initContent) window.initContent(); 
                 }
-                
-                // Kalender Notizen laden
-                if(r.calNotes && typeof r.calNotes === 'object') { window.calNotesDB = r.calNotes; localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); }
+                if(r.calNotes) { window.calNotesDB = r.calNotes; localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); }
+                if(r.logs) { window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
                 if(r.visits && r.visits > siteVisits) { siteVisits = r.visits; localStorage.setItem('misaliSiteVisits', siteVisits); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
             }
         } catch(e) { console.error("Cloud Fetch Error", e); }
     };
 
-    window.addEventListener('online', () => { window.syncToCloud(); window.fetchFromCloud(); });
-    setInterval(() => { window.fetchFromCloud(); }, 3000); 
+    setInterval(() => { window.fetchFromCloud(); }, 5000); 
 
+    // Initialisierung der Datenbank
     try {
-        if(!localStorage.getItem('misaliDB_Init_V141')) { 
-            localStorage.setItem('misaliDB_Init_V141', 'true'); 
+        if(!localStorage.getItem('misaliDB_Init_V148')) { 
+            localStorage.setItem('misaliDB_Init_V148', 'true'); 
         }
         
-        window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
+        window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || {};
         
+        // Notfall-Fix: Falls die Datenbank aus irgendeinem Grund als Array geladen wurde, wieder in ein Objekt verwandeln
+        if (Array.isArray(window.userDatabase)) {
+            let tempObj = {};
+            window.userDatabase.forEach((u, index) => {
+                if(u && u.username) tempObj[u.username] = u;
+                else if (u) tempObj['user_'+index] = u;
+            });
+            window.userDatabase = tempObj;
+        }
+
+        if (!window.userDatabase['misali']) {
+            window.userDatabase['misali'] = { username: "misali", name: "Şair Misal.i", email: "sairmisali25@gmail.com", pass: "1234", role: "admin", score: 100, played: 0, wins: 0, losses: 0, draws: 0, approved: true };
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        }
+
+        window.currentUser = JSON.parse(localStorage.getItem('misaliUser')) || JSON.parse(sessionStorage.getItem('misaliUser')) || null;
+        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+        window.userPoemsDB = JSON.parse(localStorage.getItem('misaliUserPoems')) || [];
+        window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB')) || []; 
+        window.adminLogs = JSON.parse(localStorage.getItem('misaliAdminLogs')) || [{ time: new Date().toLocaleTimeString('tr-TR'), action: "Sistem Yenilendi", user: "Sistem" }];
+        window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
+        window.calNotesDB = JSON.parse(localStorage.getItem('misaliCalNotes')) || {};
+        window.badWords = ["küfür", "hakaret", "aptal", "salak"];
+        
+        // Standard-Inhalte (nur laden, wenn misaliFullDB fehlt)
+        window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
         if(!window.contentDB || !window.contentDB.poems || window.contentDB.poems.length <= 1) {
-            const userPoems = [
+             const userPoems = [
                 {id:'p1',trTitle:"AŞK",deTitle:"LIEBE",emoji:"❤️",trText:"Kalp atışımda aşk var nefesimde sen,\nGül bülbüle yâr gönlüme de sen,\nToprağa yağmur yağar yüreğime sen,\nÖyle ya canım, kanımsın diğer de yarımsın.",deText:"In meinem Herzschlag ist Liebe, in meinem Atem bist du,\nDie Rose für die Nachtigall, für mein Herz bist du,\nRegen fällt auf die Erde, auf mein Herz fällst du,\nSo ist es, mein Leben, du bist mein Blut, meine andere Hälfte bist du.", timestamp: Date.now()},
                 {id:'p2',trTitle:"BEN'ZERSİZ B'AŞKA",deTitle:"EINZIGARTIG ANDERS",emoji:"💐",trText:"Anlatması zor ifadesiz sözlerim,\nİç duygularımda kifayetsizlerim,\nUyuşuk gözlerim dillerim ellerim,\nHisler başkalaşır be canbahçem.\n\nYaprağı kurudu kokusuz güllerim,\nAteş de laleler bahçesi küllerim,\nSeviyor sevmiyor papatyagillerim,\nÇiçekler başkalaşır be gönülbahçem.",deText:"Schwer zu erklären, meine ausdruckslosen Worte,\nIn meinen inneren Gefühlen bin ich unzulänglich,\nMeine tauben Augen, meine Zunge, meine Hände,\nDie Gefühle verändern sich, oh mein Lebensgarten.\n\nIhre Blätter sind vertrocknet, meine duftlosen Rosen,\nIm Feuer das Tulpenbeet, meine Asche,\nSie liebt mich, liebt mich nicht, meine Gänseblümchen,\nDie Blumen verändern sich, oh mein Herzensgarten.", timestamp: Date.now()},
                 {id:'p3',trTitle:"BESTELER",deTitle:"KOMPOSITIONEN",emoji:"🎵",trText:"Besteler oluşuverdi, sözüme kulak verince;\nSesime mikrofon gereksiz, melodiler derince;\nHicaz Hüzzam'la karışsın, çok etkilensin hissiyat;\nGönül sevda çalıyor, ne yapsın seni sevince...",deText:"Kompositionen entstanden einfach, als man meinen Worten lauschte;\nFür meine Stimme braucht es kein Mikrofon, wenn die Melodien tief sind;\nLass Hicaz sich mit Hüzzam mischen, lass die Gefühle tief berührt sein;\nDas Herz spielt Liebe, was soll es tun, wenn es dich liebt...", timestamp: Date.now()},
@@ -1412,36 +1465,10 @@
             };
             localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
         }
-        
-        let storedUsers = JSON.parse(localStorage.getItem('misaliUsersDB')) || {};
-        
-        // Notfall-Fix: Falls die Datenbank aus irgendeinem Grund als Array geladen wurde, wieder in ein Objekt verwandeln
-        if (Array.isArray(storedUsers)) {
-            let tempObj = {};
-            storedUsers.forEach((u, index) => {
-                if(u && u.username) tempObj[u.username] = u;
-                else if (u) tempObj['user_'+index] = u;
-            });
-            storedUsers = tempObj;
-        }
 
-        if (!storedUsers['misali']) {
-            storedUsers['misali'] = { username: "misali", name: "Şair Misal.i", email: "sairmisali25@gmail.com", day: "3", month: "6", year: "1980", pass: "1234", role: "admin", score: 40, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: true };
-            localStorage.setItem('misaliUsersDB', JSON.stringify(storedUsers));
-        }
-        
-        window.userDatabase = storedUsers;
-        window.currentUser = JSON.parse(localStorage.getItem('misaliUser')) || JSON.parse(sessionStorage.getItem('misaliUser')) || null;
-        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-        window.userPoemsDB = JSON.parse(localStorage.getItem('misaliUserPoems')) || [];
-        window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB')) || []; 
-        window.adminLogs = JSON.parse(localStorage.getItem('misaliAdminLogs')) || [{ time: new Date().toLocaleTimeString('tr-TR'), action: "Sistem Yenilendi (V141 Soft Reset)", user: "Sistem" }];
-        window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
-        window.calNotesDB = JSON.parse(localStorage.getItem('misaliCalNotes')) || {};
-        window.badWords = ["küfür", "hakaret", "aptal", "salak"];
-    } catch(err) { console.error("DB Error", err); }
+    } catch(err) { console.error("DB Init Error", err); }
 
-    // --- AUTH UI LOGIC ---
+    // --- LOGIN / LOGOUT LOGIK (FIXED) ---
     window.checkRemember = function() {
         if (!window.currentUser && localStorage.getItem('misaliAutoFill')) {
             let saved = JSON.parse(localStorage.getItem('misaliAutoFill'));
@@ -1477,21 +1504,29 @@
         const p = document.getElementById('m-login-pass').value.trim();
         const rem = document.getElementById('m-login-rem').checked;
         if (!u || !p) { window.customAlert('Eksik bilgi!', '⚠️'); return; }
+        
         let found = window.userDatabase[u];
-        if (!found) { for (let k in window.userDatabase) { if (window.userDatabase[k].email === u) { found = window.userDatabase[k]; break; } } }
+        if (!found) { 
+            for (let k in window.userDatabase) { 
+                if (window.userDatabase[k].email === u) { found = window.userDatabase[k]; break; } 
+            } 
+        }
+        
         if (!found || found.pass !== p) { window.customAlert('Hatalı giriş!', '❌'); return; }
+        
         window.currentUser = found;
         sessionStorage.setItem('misaliUser', JSON.stringify(found));
         if (rem) localStorage.setItem('misaliAutoFill', JSON.stringify({u: found.username, p: found.pass}));
+        
         location.reload(); 
     };
 
-    // FIX 7: LOGOUT-LOOP BEHOBEN! (Alle Keys aggressiv löschen)
+    // FIX: Logout Loop Behoben (Aggressives Löschen)
     window.m_logout = function() {
         window.customConfirm('Çıkış yapılsın mı?', () => {
             window.currentUser = null;
             sessionStorage.removeItem('misaliUser');
-            localStorage.removeItem('misaliUser'); // Sicherstellen, dass nichts Altes hängenbleibt
+            localStorage.removeItem('misaliUser'); 
             localStorage.removeItem('misaliAutoFill');
             location.reload();
         });
@@ -1566,6 +1601,7 @@
     };
 
     window.navigate = function(viewId) { 
+        window.closeAllSidebars(); // FIX: Auto-Close Sidebars on Navigate
         document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active-view')); 
         const target = document.getElementById(viewId); 
         if(target) target.classList.add('active-view'); 
@@ -1578,7 +1614,20 @@
         window.scrollTo(0,0); 
     };
 
+    // FIX: Back Button Logic (Handy Wischgeste fangen)
+    window.addEventListener('popstate', function (event) {
+        if(document.body.classList.contains('modal-open') || document.querySelector('.sidebar.open') || document.querySelector('.sidebar-right.open')) {
+            window.closeTopModal('force');
+            window.closeAllSidebars();
+            history.pushState(null, null, location.href); 
+        } else {
+            window.navigate('home-view');
+            history.pushState(null, null, location.href);
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
+        history.pushState(null, null, location.href); // Initial State for popstate
         const slider = document.getElementById('nav-container');
         if(!slider) return;
         let isDown = false; let startX; let scrollLeft;
@@ -1588,7 +1637,7 @@
         slider.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; });
     });
 
-    // --- MODAL & SIDEBAR STEUERUNG (SOFORTIGES LADEN DER DATEN) ---
+    // --- MODAL STEUERUNG ---
     window.openFastModal = function(id) { 
         window.closeAllSidebars(); 
         const m = document.getElementById(id); 
@@ -1648,7 +1697,7 @@
         if(b) { b.classList.toggle('hidden'); }
     };
     
-    // --- ALERTS, TOASTS & SHARE ---
+    // --- ALERTS & TOASTS ---
     window.showToast = function(msg) { 
         const t = document.getElementById('toast'); 
         if(t) { document.getElementById('toast-msg').innerText = msg; t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 3000); } 
@@ -1689,7 +1738,7 @@
         window.open(url, '_blank'); window.closeTopModal('force');
     };
 
-    // --- WETTER LOGIK ---
+    // --- LAUTLOSES WETTER OHNE GEOLOCATION BLOCKADE ---
     window.fetchWeather = function() {
         const city = 'Berlin'; const key = 'c7d2c3dfb8f2c6e61f22e74251ba9768';
         fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${key}&units=metric&lang=tr`)
@@ -1700,7 +1749,8 @@
                 const curEmoji = emojiMap[icon] || '☀️';
                 
                 const ht = document.getElementById('wm-temp-header'); if(ht) ht.innerText = temp + '°C ' + city;
-                const ha = document.getElementById('wm-anim-header'); if(ha) ha.innerText = curEmoji;
+                // FIX: Synchrones Wetter Icon im Header (mit selbem Text und Klasse)
+                const ha = document.getElementById('wm-anim-header'); if(ha) { ha.innerText = curEmoji; }
                 const modalCity = document.getElementById('wm-city'); if(modalCity) modalCity.innerText = city;
                 const mt = document.getElementById('wm-temp');
                 if(mt) {
@@ -1714,11 +1764,26 @@
         }).catch(() => { 
             const ht = document.getElementById('wm-temp-header'); if(ht) ht.innerText = '18°C Berlin'; 
             const modalCity = document.getElementById('wm-city'); if(modalCity) modalCity.innerText = 'Berlin';
-            const mt = document.getElementById('wm-temp'); if(mt) { mt.innerText = '18°C'; document.getElementById('wm-anim').innerHTML = `<div style="font-size:5rem;">⛅</div><div style="color:#94a3b8; margin-top:10px;">Parçalı Bulutlu</div>`; document.getElementById('wm-quote-tr').innerText = 'Güneşin tadını çıkar.'; document.getElementById('wm-quote-de').innerText = 'Genieße die Sonne.'; }
+            const mt = document.getElementById('wm-temp'); if(mt) { mt.innerText = '18°C'; document.getElementById('wm-anim').innerHTML = `<div style="font-size:5rem;" class="weather-anim-icon">⛅</div><div style="color:#94a3b8; margin-top:10px;">Parçalı Bulutlu</div>`; document.getElementById('wm-quote-tr').innerText = 'Güneşin tadını çıkar.'; document.getElementById('wm-quote-de').innerText = 'Genieße die Sonne.'; }
         });
     };
 
-    // --- LEADERBOARD LOGIK ---
+    // --- NOTIFICATION / ADMIN LOGIK ---
+    // Sende eine Systemnachricht (für Admin-Aktionen)
+    window.sendSystemMessage = function(toUser, actionText) {
+        if (!window.adminMessages) window.adminMessages = [];
+        window.adminMessages.push({
+            to: 'admin', // Geht an den Admin-Posteingang
+            from: 'Sistem',
+            msg: `Kullanıcı: ${toUser} | İşlem: ${actionText}`,
+            time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+            read: false
+        });
+        localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
+        window.updateNotifyBadge();
+    };
+
+    // --- LEADERBOARD ---
     window.renderLeaderboard = function() {
         const list = document.getElementById('leaderboard-list'); 
         if(!list) return;
@@ -1748,17 +1813,92 @@
         }).join('');
     };
 
-    // --- MARŞLAR (Hymnen) ---
+    // --- MARŞLAR (VOLLSTÄNDIG) ---
     window.switchAnthemLang = function(lang) {
         const cTR = document.getElementById('anthem-tr-content'); const cDE = document.getElementById('anthem-de-content');
         const bTR = document.getElementById('btn-anthem-tr'); const bDE = document.getElementById('btn-anthem-de');
         if(!cTR || !cDE || !bTR || !bDE) return;
         
-        const trLyrics = `Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak.\n\nÇatma, kurban olayım, çehreni ey nazlı hilal!\nKahraman ırkıma bir gül! Ne bu şiddet, bu celal?\nSana olmaz dökülen kanlarımız sonra helal...\nHakkıdır, Hakk'a tapan, milletimin istiklal!\n\nBen ezelden beridir hür yaşadım, hür yaşarım.\nHangi çılgın bana zincir vuracakmış? Şaşarım!\nKükremiş sel gibiyim, bendimi çiğner, aşarım.\nYırtarım dağları, enginlere sığmam, taşarım.\n\nGarbın afakını sarmışsa çelik zırhlı duvar,\nBenim iman dolu göğsüm gibi serhaddim var.\nUlusun, korkma! Nasıl böyle bir imanı boğar,\n'Medeniyet!' dediğin tek dişi kalmış canavar?\n\nArkadaş! Yurduma alçakları uğratma, sakın.\nSiper et gövdeni, dursun bu hayasızca akın.\nDoğacaktır sana va'dettiği günler hakk'ın...\nKim bilir, belki yarın, belki yarından da yakın.\n\nBastığın yerleri 'toprak!' diyerek geçme, tanı:\nDüşün altında binlerce kefensiz yatanı.\nSen şehit oğlusun, incitme, yazıktır, atanı:\nVerme, dünyaları alsan da, bu cennet vatanı.`;
-        const deLyrics = `Einigkeit und Recht und Freiheit\nFür das deutsche Vaterland!\nDanach lasst uns alle streben\nBrüderlich mit Herz und Hand!\nEinigkeit und Recht und Freiheit\nSind des Glückes Unterpfand;\nBlüh' im Glanze dieses Glückes,\nBlühe, deutsches Vaterland!\n\nDeutschland, Deutschland über alles,\nÜber alles in der Welt,\nWenn es stets zu Schutz und Trutze\nBrüderlich zusammenhält.\nVon der Maas bis an die Memel,\nVon der Etsch bis an den Belt,\nDeutschland, Deutschland über alles,\nÜber alles in der Welt!`;
+        const trLyrics = `Korkma, sönmez bu şafaklarda yüzen al sancak;
+Sönmeden yurdumun üstünde tüten en son ocak.
+O benim milletimin yıldızıdır, parlayacak;
+O benimdir, o benim milletimindir ancak.
 
-        cTR.innerHTML = `<h4 style="color:#f4c542; margin-bottom:10px; font-family:'Playfair Display', serif; font-size:1.4rem;">İstiklal Marşı</h4><p>${trLyrics.replace(/\n/g, '<br>')}</p>`;
-        cDE.innerHTML = `<h4 style="color:#f4c542; margin-bottom:10px; font-family:'Playfair Display', serif; font-size:1.4rem;">Deutschlandlied</h4><p>${deLyrics.replace(/\n/g, '<br>')}</p>`;
+Çatma, kurban olayım, çehreni ey nazlı hilal!
+Kahraman ırkıma bir gül! Ne bu şiddet, bu celal?
+Sana olmaz dökülen kanlarımız sonra helal...
+Hakkıdır, hakk'a tapan, milletimin istiklal!
+
+Ben ezelden beridir hür yaşadım, hür yaşarım.
+Hangi çılgın bana zincir vuracakmış? Şaşarım!
+Kükremiş sel gibiyim, bendimi çiğner, aşarım.
+Yırtarım dağları, enginlere sığmam, taşarım.
+
+Garbın afakını sarmışsa çelik zırhlı duvar,
+Benim iman dolu göğsüm gibi serhaddim var.
+Ulusun, korkma! Nasıl böyle bir imanı boğar,
+'Medeniyet!' dediğin tek dişi kalmış canavar?
+
+Arkadaş! Yurduma alçakları uğratma, sakın.
+Siper et gövdeni, dursun bu hayasızca akın.
+Doğacaktır sana va'dettiği günler hakk'ın...
+Kim bilir, belki yarın, belki yarından da yakın.
+
+Bastığın yerleri 'toprak!' diyerek geçme, tanı:
+Düşün altında binlerce kefensiz yatanı.
+Sen şehit oğlusun, incitme, yazıktır, atanı:
+Verme, dünyaları alsan da, bu cennet vatanı.
+
+Kim bu cennet vatanın uğruna olmaz ki feda?
+Şüheda fışkıracak toprağı sıksan, şüheda!
+Canı, cananı, bütün varımı alsın da hüda,
+Etmesin tek vatanımdan beni dünyada cüda.
+
+Ruhumun senden, ilahi, şudur ancak emeli:
+Değmesin mabedimin göğsüne namahrem eli.
+Bu ezanlar-ki şahadetleri dinin temeli,
+Ebedi yurdumun üstünde benim inlemeli.
+
+O zaman vecd ile bin secde eder -varsa- taşım,
+Her cerihamdan, ilahi, boşanıp kanlı yaşım,
+Fışkırır ruh-i mücerred gibi yerden na'şım;
+O zaman yükselerek arşa değer belki başım.
+
+Dalgalan sen de şafaklar gibi ey şanlı hilal!
+Olsun artık dökülen kanlarımın hepsi helal.
+Ebediyen sana yok, ırkıma yok izmihlal:
+Hakkıdır, hür yaşamış, bayrağımın hürriyet;
+Hakkıdır, hakk'a tapan, milletimin istiklal!`;
+
+        const deLyrics = `Deutschland, Deutschland über alles,
+Über alles in der Welt,
+Wenn es stets zu Schutz und Trutze
+Brüderlich zusammenhält.
+Von der Maas bis an die Memel,
+Von der Etsch bis an den Belt,
+Deutschland, Deutschland über alles,
+Über alles in der Welt!
+
+Deutsche Frauen, deutsche Treue,
+Deutscher Wein und deutscher Sang
+Sollen in der Welt behalten
+Ihren alten schönen Klang,
+Uns zu edler Tat begeistern
+Unser ganzes Leben lang.
+Deutsche Frauen, deutsche Treue,
+Deutscher Wein und deutscher Sang!
+
+Einigkeit und Recht und Freiheit
+Für das deutsche Vaterland!
+Danach lasst uns alle streben
+Brüderlich mit Herz und Hand!
+Einigkeit und Recht und Freiheit
+Sind des Glückes Unterpfand;
+Blüh' im Glanze dieses Glückes,
+Blühe, deutsches Vaterland!`;
+
+        cTR.innerHTML = `<h4 style="color:#f4c542; margin-bottom:10px; font-family:'Playfair Display', serif; font-size:1.4rem;">İstiklal Marşı</h4><p style="white-space: pre-wrap; text-align: center;">${trLyrics}</p>`;
+        cDE.innerHTML = `<h4 style="color:#f4c542; margin-bottom:10px; font-family:'Playfair Display', serif; font-size:1.4rem;">Das Lied der Deutschen</h4><p style="white-space: pre-wrap; text-align: center;">${deLyrics}</p>`;
 
         if(lang === 'TR') {
             bTR.style.background = '#f4c542'; bTR.style.color = 'black'; bDE.style.background = 'transparent'; bDE.style.color = '#cbd5e1';
@@ -1783,10 +1923,17 @@
         let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         for(let i=0; i<firstDay; i++) { grid.innerHTML += `<div></div>`; }
         for(let i=1; i<=daysInMonth; i++) {
-            let isToday = (i === calDate.getDate() && currentMonth === calDate.getMonth() && currentYear === calDate.getFullYear());
-            let bg = isToday ? 'var(--accent-color)' : 'rgba(255,255,255,0.05)'; let color = isToday ? '#000' : '#fff';
             let dateStr = `${i}.${currentMonth+1}.${currentYear}`;
-            grid.innerHTML += `<div onclick="window.selectDate('${dateStr}')" style="background:${bg}; color:${color}; padding:10px; border-radius:8px; cursor:pointer; border:1px solid rgba(244,197,66,0.3); transition:0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${i}</div>`;
+            let isToday = (i === calDate.getDate() && currentMonth === calDate.getMonth() && currentYear === calDate.getFullYear());
+            
+            // FIX: Tage mit Notizen optisch hervorheben
+            let hasNote = window.calNotesDB && window.calNotesDB[dateStr] && window.calNotesDB[dateStr].length > 0;
+            
+            let bg = isToday ? 'var(--accent-color)' : (hasNote ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.05)'); 
+            let color = isToday ? '#000' : '#fff';
+            let border = hasNote ? '1px solid #22c55e' : '1px solid rgba(244,197,66,0.3)';
+
+            grid.innerHTML += `<div id="cal-day-${i}" class="cal-day" onclick="window.selectDate('${dateStr}', this)" style="background:${bg}; color:${color}; padding:10px; border-radius:8px; cursor:pointer; border:${border}; transition:0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('cal-day-selected')) this.style.transform='scale(1)'">${i}</div>`;
         }
     };
     window.prevMonth = function() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } window.renderCalendar(); };
@@ -1794,23 +1941,74 @@
     window.prevYear = function() { currentYear--; window.renderCalendar(); };
     window.nextYear = function() { currentYear++; window.renderCalendar(); };
 
-    window.selectDate = function(dateStr) {
+    // FIX: Notizen anzeigen
+    window.renderCalNotes = function(dateStr) {
+        const notesContainer = document.getElementById('cal-saved-notes');
+        if (!notesContainer) return;
+        if (!window.calNotesDB || !window.calNotesDB[dateStr] || window.calNotesDB[dateStr].length === 0) {
+            notesContainer.innerHTML = ''; return;
+        }
+        
+        notesContainer.innerHTML = window.calNotesDB[dateStr].map((n, idx) => {
+            return `<div style="background:rgba(255,255,255,0.05); border-left:3px solid #f4c542; padding:10px; margin-bottom:8px; border-radius:4px; font-size:0.95rem; position:relative; text-align:left;">
+                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">${n.time}</div>
+                        <div style="color:#fff;">${n.text}</div>
+                        <i class="fas fa-times" style="position:absolute; top:10px; right:10px; color:#ef4444; cursor:pointer; font-size:1rem;" onclick="window.deleteCalNote('${dateStr}', ${idx}, event)"></i>
+                    </div>`;
+        }).join('');
+    };
+
+    window.selectDate = function(dateStr, el) {
+        // Alte Auswahl entfernen
+        document.querySelectorAll('.cal-day').forEach(d => { d.classList.remove('cal-day-selected'); d.style.transform='scale(1)'; });
+        // Neue Auswahl setzen
+        if(el) { el.classList.add('cal-day-selected'); }
+
         const msgText = document.getElementById('cal-msg-text');
         const noteArea = document.getElementById('cal-note-area');
         if(!msgText || !noteArea) return;
-        msgText.innerHTML = `<span style="color:#f4c542;">Seçilen Tarih:</span> ${dateStr}`;
+        
+        msgText.innerHTML = `<span style="color:#f4c542;">Seçilen Tarih:</span> <span style="font-weight:bold; color:#fff;">${dateStr}</span>`;
         noteArea.style.display = 'flex';
-        document.getElementById('cal-note-input').value = window.calNotesDB[dateStr] || '';
+        document.getElementById('cal-note-input').value = '';
         window.currentSelectedDate = dateStr;
+        window.renderCalNotes(dateStr);
     };
     
+    // FIX: Kalender Notizen speichern mit Zeitstempel
     window.saveCalNote = function(e) {
         if(e) e.stopPropagation(); if(!window.currentSelectedDate) return;
-        const note = document.getElementById('cal-note-input').value;
+        const noteInput = document.getElementById('cal-note-input');
+        const text = noteInput.value.trim();
+        if(!text) return;
+
         if (!window.calNotesDB) window.calNotesDB = {};
-        window.calNotesDB[window.currentSelectedDate] = note;
+        if (!window.calNotesDB[window.currentSelectedDate]) window.calNotesDB[window.currentSelectedDate] = [];
+        
+        let timeStr = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+        window.calNotesDB[window.currentSelectedDate].push({ text: text, time: timeStr });
+        
         localStorage.setItem('misaliCalNotes', JSON.stringify(window.calNotesDB));
-        window.showToast('Not kaydedildi!'); window.syncToCloud();
+        noteInput.value = '';
+        window.renderCalNotes(window.currentSelectedDate);
+        window.renderCalendar(); // Aktualisiere Grid für grüne Farbe
+        window.showToast('Not kaydedildi! 📝'); 
+        if(window.syncToCloud) window.syncToCloud();
+    };
+
+    // FIX: Kalender Notizen löschen
+    window.deleteCalNote = function(dateStr, idx, e) {
+        if(e) e.stopPropagation();
+        window.customConfirm('Notu silmek istediğinize emin misiniz?', () => {
+            window.calNotesDB[dateStr].splice(idx, 1);
+            if(window.calNotesDB[dateStr].length === 0) delete window.calNotesDB[dateStr];
+            localStorage.setItem('misaliCalNotes', JSON.stringify(window.calNotesDB));
+            window.renderCalNotes(dateStr);
+            window.renderCalendar(); // Aktualisiere Grid
+            window.showToast('Not silindi.');
+            if(window.syncToCloud) window.syncToCloud();
+            window.openFastModal('eventsModal'); // Hält Modal offen
+        });
     };
 
     // --- SİZİN KALEMİNİZ (WERKE SPEICHERN) ---
@@ -1821,7 +2019,7 @@
         if(!title || !text) { window.customAlert('Lütfen başlık ve içeriği doldurun.', '⚠️'); return; }
         
         const newWork = {
-            id: 'user_' + Date.now(), username: window.currentUser.username, author: window.currentUser.name,
+            id: 'user_' + Date.now(), username: window.currentUser.username, author: window.currentUser.name, name: window.currentUser.name,
             title: title, text: text, adminRating: 0, adminCategory: 'Normal', timestamp: Date.now()
         };
         
@@ -1831,7 +2029,7 @@
         window.showToast('Eseriniz kaydedildi! Teşekkürler.');
         
         window.renderUserWorksGrid(); window.renderUserWorksSidebar(); window.updateUserWorksBadge(); 
-        window.syncToCloud();
+        if(window.syncToCloud) window.syncToCloud();
         window.navigate('kullanici-eserleri-view');
     };
 
@@ -1843,7 +2041,10 @@
         box.innerHTML = window.chatDB.map(msg => {
             const isMe = window.currentUser && window.currentUser.username === msg.username;
             const align = isMe ? 'flex-end' : 'flex-start'; const bg = isMe ? 'rgba(244, 197, 66, 0.2)' : 'rgba(255,255,255,0.05)'; const border = isMe ? '1px solid #f4c542' : '1px solid rgba(255,255,255,0.1)';
+            
+            // FIX: Admin löschen von Chat-Nachrichten funktioniert ohne Modal Bug
             const delBtn = window.currentUser && window.currentUser.role === 'admin' ? `<i class="fas fa-trash" style="color:#ef4444; cursor:pointer; margin-left:10px; font-size:0.8rem;" onclick="window.deleteChatMessage('${msg.id}')"></i>` : '';
+            
             return `<div style="display:flex; flex-direction:column; align-items:${align}; width:100%; margin-bottom:10px;">
                         <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:4px;">${msg.name} <span style="font-size:0.7rem;">(${msg.time})</span> ${delBtn}</div>
                         <div style="background:${bg}; border:${border}; color:#fff; padding:10px 15px; border-radius:12px; max-width:80%; word-break:break-word;">${msg.text}</div>
@@ -1865,11 +2066,19 @@
         localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB));
         input.value = ''; window.lastLocalUpdate = Date.now(); 
         window.renderChat(); 
-        window.syncToCloud();
+        if(window.syncToCloud) window.syncToCloud();
     };
 
+    // FIX: Message-Löschung aus dem Array filtert korrekt und schließt nichts
     window.deleteChatMessage = function(id) {
-        window.customConfirm('Mesajı sil?', () => { window.chatDB = window.chatDB.filter(m => m.id !== id); localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); window.lastLocalUpdate = Date.now(); window.renderChat(); window.syncToCloud(); });
+        window.customConfirm('Mesajı sil?', () => { 
+            window.chatDB = window.chatDB.filter(m => m.id !== id); 
+            localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); 
+            window.lastLocalUpdate = Date.now(); 
+            window.renderChat(); 
+            if(window.syncToCloud) window.syncToCloud(); 
+            window.sendSystemMessage(window.currentUser.name, "Sohbet mesajı sildi."); // Benachrichtigung an Admin
+        });
     };
 
     // --- GELEN KUTUSU & ADMIN MESSAGES ---
@@ -1877,6 +2086,7 @@
         const list = document.getElementById('admin-msg-list'); if(!list) return;
         let msgs = window.adminMessages.filter(m => !m.to || m.to === 'admin');
         if(msgs.length === 0) { list.innerHTML = '<p style="text-align:center; color:#94a3b8;">Mesaj yok.</p>'; return; }
+        
         list.innerHTML = msgs.slice().reverse().map((m, i) => {
             let actualIndex = window.adminMessages.indexOf(m);
             let bg = m.read ? 'rgba(0,0,0,0.4)' : 'rgba(244,197,66,0.15)'; let border = m.read ? '1px solid rgba(255,255,255,0.1)' : '1px solid #f4c542';
@@ -1889,8 +2099,11 @@
                         </div>
                     </div>`;
         }).join('');
+        // FIX: Gelesen-Status sofort anwenden
         window.adminMessages.forEach(m => { if(!m.to || m.to === 'admin') m.read = true; });
-        localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.updateNotifyBadge(); window.syncToCloud();
+        localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
+        window.updateNotifyBadge(); 
+        if(window.syncToCloud) window.syncToCloud();
     };
 
     window.renderUserMessages = function() {
@@ -1905,16 +2118,33 @@
                         <div style="color:#fff;">${m.msg}</div>
                     </div>`;
         }).join('');
+        // FIX: Gelesen-Status sofort anwenden
         window.adminMessages.forEach(m => { if(m.to === window.currentUser.username) m.read = true; });
-        localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.updateNotifyBadge(); window.syncToCloud();
+        localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
+        window.updateNotifyBadge(); 
+        if(window.syncToCloud) window.syncToCloud();
     };
 
-    window.deleteAdminMessage = function(idx) { window.customConfirm('Mesajı sil?', () => { window.adminMessages.splice(idx, 1); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.renderAdminMessages(); window.updateNotifyBadge(); window.syncToCloud(); }); };
+    // FIX: Admin Hepsini Sil
+    window.deleteAllAdminMessages = function() {
+        window.customConfirm('Tüm mesajları silmek istediğinize emin misiniz?', () => {
+            window.adminMessages = window.adminMessages.filter(m => m.to && m.to !== 'admin');
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
+            window.lastLocalUpdate = Date.now();
+            window.renderAdminMessages();
+            window.updateNotifyBadge();
+            if(window.syncToCloud) window.syncToCloud();
+            window.showToast('Tüm mesajlar silindi.');
+            window.openFastModal('adminMessagesModal'); // Hält Modal offen
+        });
+    };
+
+    window.deleteAdminMessage = function(idx) { window.customConfirm('Mesajı sil?', () => { window.adminMessages.splice(idx, 1); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.renderAdminMessages(); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); window.openFastModal('adminMessagesModal'); }); };
     
     window.replyToMessage = function(toUser, idx) {
         window.customDualPrompt(`Yanıt: ${toUser}`, '✉️', '', (title, msg) => {
             window.adminMessages.push({ to: toUser, from: 'Admin', msg: msg, time: new Date().toLocaleTimeString('tr-TR'), read: false });
-            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.showToast('Yanıt gönderildi.'); window.syncToCloud();
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.showToast('Yanıt gönderildi.'); if(window.syncToCloud) window.syncToCloud(); window.openFastModal('adminMessagesModal');
         });
     };
 
@@ -1938,7 +2168,6 @@
         if(window.updateHeartsUI) window.updateHeartsUI();
     };
 
-    // --- ZUFALLS-SÖZ ---
     window.openRandomQuote = function() {
         if(!window.contentDB || !window.contentDB.quotes || window.contentDB.quotes.length === 0) return;
         let q = window.contentDB.quotes[Math.floor(Math.random() * window.contentDB.quotes.length)];
@@ -1947,6 +2176,41 @@
         document.getElementById('rq-de').innerText = q.deText || '';
         document.getElementById('rq-emoji').innerText = q.emoji || '✨';
         window.openFastModal('randomQuoteModal');
+    };
+
+    // --- HOROSKOP (GETRENNT) ---
+    // Das ist für den Header (Öffnet direkt das eigene Sternzeichen)
+    window.openMyHoroscope = function() {
+        if(window.currentUser && window.currentUser.day && window.currentUser.month) {
+            let z = window.getZodiacSign(window.currentUser.day, window.currentUser.month);
+            window.showHoro(z.tr, z.de);
+            window.openFastModal('horoscopeModal');
+        } else {
+            window.openFastModal('horoscopeModal');
+            window.initHoroscopeGrid();
+        }
+    };
+
+    // Das ist für die Spiele-Seite (Zeigt alle 12 Sternzeichen)
+    window.openHoroscopeModal = function(e) {
+        if(e) e.stopPropagation();
+        window.openFastModal('horoscopeModal');
+        window.initHoroscopeGrid();
+    };
+
+    window.initHoroscopeGrid = function() {
+        const grid = document.getElementById('zodiac-grid'); if(!grid) return;
+        document.getElementById('horoscope-result').style.display = 'none';
+        grid.style.display = 'grid';
+        grid.innerHTML = window.zodiacs.map(z => `<div style="background:rgba(244,197,66,0.1); border:1px solid #f4c542; border-radius:12px; padding:15px; text-align:center; cursor:pointer;" onclick="window.showHoro('${z.tr}','${z.de}')"><div style="font-size:2.5rem;">${z.icon}</div><div style="font-size:0.9rem; margin-top:5px; color:#fff;">${z.tr}</div></div>`).join('');
+    };
+    
+    window.showHoro = function(tr, de) {
+        document.getElementById('zodiac-grid').style.display = 'none';
+        document.getElementById('horoscope-result').style.display = 'block';
+        document.getElementById('horo-title').innerText = tr + ' Burcu';
+        document.getElementById('horo-text-tr').innerText = "Yıldızlar bugün senin için parlıyor. Enerjin oldukça yüksek ve yeni başlangıçlar için harika bir gün.";
+        document.getElementById('horo-text-de').innerText = "Die Sterne leuchten heute für dich. Deine Energie ist hoch und es ist ein großartiger Tag für Neuanfänge.";
     };
 
     // --- CONTENT RENDER & GRIDS ---
@@ -1993,6 +2257,7 @@
         if(!item) return;
         window.currentPoemData = { ...item, type: type };
         
+        // FIX: Richtiger Autorenname bei User-Werken
         let author = type === 'poems' || type === 'quotes' ? 'Şair Misal.i' : type === 'userPoems' ? (item.name || item.author || 'Anonim') : 'Anonim';
         if (type === 'saglik') author = 'Tavsiye / Empfehlung';
         window.currentPoemData.author = author;
@@ -2049,7 +2314,7 @@
             let html = ""; 
             topWorks.forEach((w, i) => { 
                 let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'; 
-                html += `<span class="ticker-link" onclick="window.openUserPoemModal('${w.id}')">${medal} ${w.title || w.trTitle} (${w.user || w.author})</span>`; 
+                html += `<span class="ticker-link" onclick="window.openUserPoemModal('${w.id}')">${medal} ${w.title || w.trTitle} (${w.name || w.author})</span>`; 
             }); 
             tickerInner.innerHTML = html + `<span style="margin-right:40px;"></span>`; 
         }
@@ -2104,7 +2369,7 @@
             let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
             let dObj = new Date(w.timestamp || Date.now());
             let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${medal}</span><div><div style="font-weight:bold; color:#fff;">${w.title || w.trTitle}</div><div style="font-size:0.85rem; color:#94a3b8;">${w.user || w.author} &bull; ${dStr}</div></div></div><div style="background:rgba(244,197,66,0.2); padding:4px 8px; border-radius:8px; border:1px solid #f4c542; color:#f4c542; font-weight:bold;">${w.adminRating} P</div></li>`;
+            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${medal}</span><div><div style="font-weight:bold; color:#fff;">${w.title || w.trTitle}</div><div style="font-size:0.85rem; color:#94a3b8;">${w.name || w.author} &bull; ${dStr}</div></div></div><div style="background:rgba(244,197,66,0.2); padding:4px 8px; border-radius:8px; border:1px solid #f4c542; color:#f4c542; font-weight:bold;">${w.adminRating} P</div></li>`;
         }).join('');
     };
 
@@ -2120,7 +2385,7 @@
         if(old === rating) delete window.poemDataStore[poemId].ratings[window.currentUser.username];
         else window.poemDataStore[poemId].ratings[window.currentUser.username] = rating;
         
-        window.lastLocalUpdate = Date.now(); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.syncToCloud(); window.renderUserWorksGrid();
+        window.lastLocalUpdate = Date.now(); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
     };
 
     window.m_addComment = function(e) {
@@ -2136,12 +2401,22 @@
         
         window.poemDataStore[poemId].comments.push({ username: window.currentUser.username, user: window.currentUser.name, text: text, time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) });
         
-        input.value = ''; window.lastLocalUpdate = Date.now(); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.syncToCloud(); window.renderUserWorksGrid();
+        input.value = ''; window.lastLocalUpdate = Date.now(); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
     };
 
+    // FIX: Modal bleibt beim Löschen von Kommentaren offen
     window.m_delComm = function(poemId, idx, e) {
         if(e) e.stopPropagation(); 
-        window.customConfirm('Yorumu sil?', () => { window.lastLocalUpdate = Date.now(); window.poemDataStore[poemId].comments.splice(idx, 1); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.syncToCloud(); window.renderUserWorksGrid(); });
+        window.customConfirm('Yorumu sil?', () => { 
+            window.lastLocalUpdate = Date.now(); 
+            window.poemDataStore[poemId].comments.splice(idx, 1); 
+            window.updateHeartsUI(); 
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+            if(window.syncToCloud) window.syncToCloud(); 
+            window.renderUserWorksGrid(); 
+            window.openFastModal('contentModal'); 
+            window.sendSystemMessage(window.currentUser.name, "Bir yorum sildi."); // Admin Info
+        });
     };
 
     window.m_editComm = function(poemId, idx, e) {
@@ -2153,7 +2428,8 @@
             window.lastLocalUpdate = Date.now();
             window.poemDataStore[poemId].comments[idx].text = newText;
             window.poemDataStore[poemId].comments[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-            window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.syncToCloud(); window.renderUserWorksGrid();
+            window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid(); window.openFastModal('contentModal');
+            window.sendSystemMessage(window.currentUser.name, "Bir yorum düzenledi."); // Admin Info
         });
     };
 
@@ -2168,6 +2444,9 @@
             copyrightText = `<div style="width: 100%; text-align: center; font-size: 0.95rem; color: #f4c542; border-top: 1px dashed rgba(244,197,66,0.4); padding-top: 20px; margin-top: 25px;"><strong>&copy; Telif Hakkı / Copyright</strong><br><span style="color:#94a3b8;">Bu eser Şair Misal.i'ye aittir.<br><span style="font-style: italic;">Dieses Werk gehört Şair Misal.i.</span></span></div>`;
         }
 
+        // FIX: Live-Update der Bewertung direkt unter der Unterschrift!
+        window.currentPoemData.adminRating = window.userPoemsDB.find(x => x.id === poemId)?.adminRating || window.currentPoemData.adminRating;
+        window.currentPoemData.adminCategory = window.userPoemsDB.find(x => x.id === poemId)?.adminCategory || window.currentPoemData.adminCategory;
         if (window.currentPoemData.type === 'userPoems' && window.currentPoemData.adminRating > 0) {
             let r = window.currentPoemData.adminRating; let rCat = window.currentPoemData.adminCategory || 'Normal';
             let trophies = rCat === 'Super Elite' ? '🏆🏆🏆' : rCat === 'Elite' ? '🏆🏆' : '🏆';
@@ -2225,6 +2504,7 @@
             adminRatingHTML + copyrightText;
     };
 
+    // FIX: Live Update der Bewertung
     window.saveAdminRating = function(poemId, e) {
         if(e) e.stopPropagation();
         const v = parseInt(document.getElementById('admin-rating-val').value); const c = document.getElementById('admin-rating-cat').value;
@@ -2232,11 +2512,11 @@
         let p = window.userPoemsDB.find(x => x.id === poemId);
         if(p) {
             p.adminRating = v; p.adminCategory = c; localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            window.showToast('Puan kaydedildi!'); window.updateHeartsUI(); window.renderUserWorksGrid(); window.renderTopWorks(); window.updateTopWorksTicker(); window.updateUserWorksBadge(); window.syncToCloud();
+            window.showToast('Puan kaydedildi!'); window.updateHeartsUI(); window.renderUserWorksGrid(); window.renderTopWorks(); window.updateTopWorksTicker(); window.updateUserWorksBadge(); if(window.syncToCloud) window.syncToCloud();
         }
     };
 
-    // --- BADGES UPDATE (ZÄHLER FIX) ---
+    // --- ZÄHLER (BADGES) LOGIK ---
     window.updateUserWorksBadge = function() {
         const bdg1 = document.getElementById('nav-user-works-badge'); const bdg2 = document.getElementById('fab-sizin-kaleminiz-badge'); const bdg3 = document.getElementById('topworks-badge');
         if(!window.userPoemsDB) return;
@@ -2252,7 +2532,7 @@
             list.innerHTML = pendingList.map(w => {
                 let dObj = new Date(w.timestamp || Date.now());
                 let dStr = dObj.toLocaleDateString('tr-TR') + ' - Saat: ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-                return `<div style="padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(244,197,66,0.4); border-radius:12px; cursor:pointer;" onclick="window.openUserPoemModal('${w.id}')"><div style="color:#fff; font-weight:bold; font-size:1.1rem;">${w.title}</div><div style="color:#94a3b8; font-size:0.9rem;">Yazar: ${w.author} | Tarih: ${dStr}</div></div>`;
+                return `<div style="padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(244,197,66,0.4); border-radius:12px; cursor:pointer;" onclick="window.openUserPoemModal('${w.id}')"><div style="color:#fff; font-weight:bold; font-size:1.1rem;">${w.title}</div><div style="color:#94a3b8; font-size:0.9rem;">Yazar: ${w.author || w.name} | Tarih: ${dStr}</div></div>`;
             }).join(''); 
         } 
         else if(list) { list.innerHTML = '<p style="text-align:center; color:#94a3b8;">Bekleyen eser yok.</p>'; }
@@ -2268,7 +2548,10 @@
     };
 
     window.updateNotifyBadge = function() {
-        const b1 = document.getElementById('user-notify-badge'); const b2 = document.getElementById('user-inbox-badge'); const b3 = document.getElementById('admin-badge');
+        const b1 = document.getElementById('user-notify-badge'); 
+        const b2 = document.getElementById('user-inbox-badge'); 
+        const b3 = document.getElementById('admin-badge');
+        
         if(!window.adminMessages) return;
         
         if(window.currentUser && window.currentUser.role === 'admin') {
@@ -2286,6 +2569,7 @@
         }
     };
 
+    // --- ADMIN LOGIK ---
     window.renderAdminEmojis = function() {
         const p1 = document.getElementById('emoji-picker-add'); const p2 = document.getElementById('emoji-picker-edit');
         const ems = Array.from("😀😃😄😁😆😅😂🤣🥲☺️😊😇🙂🙃😉😌😍🥰😘😗😙😚😋😛😝😜🤪🤨🧐🤓😎🥸🤩🥳😏😒😞😔😟😕🙁☹️😣😖😫😩🥺😢😭😤😠😡🤬🤯😳🥵🥶😱😨😰😥😓🤗🤔🤭🤫🤥😶😐😑😬🙄😯😦😧😮😲🥱😴🤤😪😵🤐🥴🤢🤮🤧😷🤒🤕🤑🤠😈👿👹👺🤡💩👻💀☠️👽👾🤖🎃😺😸😹😻😼😽🙀😿😾👋🤚🖐✋🖖👌🤌🤏✌️🤞🤟🤘🤙👈👉👆🖕👇☝️👍👎✊👊🤛🤜👏🙌👐🤲🤝🙏✍️💅🤳💪🦾🦿🦵🦶👂🦻👃🦼🦽🧠🫀🫁🦷🦴👀👁👅👄💋🩸❤️🔥✨🌟🕊️🥀🌹🍂💎🧿🍀🪐🌙☕🍎🍏🍐🍊🍋🍌🍉🍇🍓🍈🍒🍑🥭🍍🥥🥝🍅🍆🥑🥦🥬🥒🌶🫑🌽🥕🧄🧅🥔🍠🥐🥯🍞🥖🥨🧀🥚🍳🧈🥞🧇🥓🥩🍗🍖🦴🌭🍔🍟🍕🫓🥪🥙🧆🌮🌯🫔🥗🥘🫕🥫🍝🍜🍲🍛🍣🍱🥟🦪🍙🍚🍘🍥🥠🥮🍢🍡🍧🍨🍦🥧🧁🍰🎂🍮🍭🍬🍫🍿🍩🍪🌰🥜🍯🥛🍼☕️🍵🧃🥤🧋🍶🍺🍻🥂🍷🥃🍸🍹🧉🍾🧊🥄🍴🍽🥣🥡🥢🧂⚽️🏀🏈⚾️🥎🎾🏐🏉🥏🎱🪀🏓🏸🏒🏑🥍🏏🪃🥅⛳️🪁🏹🎣🤿🥊🥋🎽🛹🛼🛷⛸🥌🎿⛷🏂🪂🏋️‍♀️🏋️‍♂️🤼‍♀️🤼‍♂️🤸‍♀️🤸‍♂️⛹️‍♀️⛹️‍♂️🤺🤾‍♀️🤾‍♂️🏌️‍♀️🏌️‍♂️🏇🧘‍♀️🧘‍♂️🏄‍♀️🏄‍♂️🏊‍♀️🏊‍♂️🤽‍♀️🤽‍♂️🚣‍♀️🚣‍♂️🧗‍♀️🧗‍♂️🚵‍♀️🚵‍♂️🏆🥇🥈🥉🏅🎖🏵🎗🎫🎟🎪🤹‍♀️🤹‍♂️🎭🩰🎨🎬🎤🎧🎼🎹🥁🪘🎷🎺🪗🎸🪕🎻🎲♟🎯🎳🎮🎰🧩🚗🚕🚙🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚜🦯🦽🦼🛴🚲🛵🏍🛺🚨🚔🚍🚘🚖🚡🚠🚟🚃🚋🚞🚝🚄🚅🚈🚂🚆🚇🚊🚉✈️🛫🛬🛩💺🛰🚀🛸🚁🛶⛵️🚤🛥🛳⛴🚢⚓️🪝⛽️🚧🚦🚥🚏🗺🗿🗽🗼🏰🏯🏟🎡🎢🎠⛲️⛱🏖🏝🏜🌋⛰🏔🗻🏕⛺️🛖🏠🏡🏘🏚🏗🏭🏢🏬🏣🏤🏥🏦🏨🏪🏫🏩💒🏛⛪️🕌🕍🛕🕋⛩🛤🛣🗾🎑🏞🌅🌄🌠🎇🎆🌇🌆🏙🌃🌌🌉🌁⌚️📱📲💻⌨️🖥🖨🖱🖲🕹🗜💽💾💿📀📼📷📸📹🎥📽🎞📞☎️📟📠📺📻🎙🎚🎛🧭⏱⏲⏰🕰⌛️⏳📡🔋🔌💡🔦🕯🪔🧯🛢💸💵💴💶💷🪙💰💳💎⚖️🪜🧰🪛🔧🔨⚒🛠⛏🪚🔩⚙️🪤🧱⛓🧲🔫💣🧨🪓🔪🗡⚔️🛡🚬⚰️🪦⚱️🏺🔮📿🧿💈⚗️🔭🔬🕳🩹🩺💊💉🩸🧬🦠🧫🧪🌡🧹🪠🧺🧻🚽🚰🚿🛁🛀🧼🪥🪒🧽🪣🧴🛎🔑🗝🚪🪑🛋🛏🛌🧸🪆🖼🪞🪟🛍🛒🎁🎈🎏🎀🪄🪅🎊🎉🎎🏮🎐🧧✉️📩📨📧💌📥📤📦🏷🪧📪📫📬📭📮📯📜📃📄📑🧾📊📈📉🗒🗓📆📅🗑📇🗃🗳🗄📋📁📂🗂🗞📰📓📔📒📕📗📘📙📚📖🔖🧷🔗📎🖇📐📏🧮📌📍✂️🖊🖋✒️🖌🖍📝✏️🔍🔎🔏🔐🔒🔓❤️🧡💛💚💙💜🖤🤍🤎💔❣️💕💞💓💗💖💘💝");
@@ -2309,7 +2593,7 @@
             let usrs = db.filter(u => u.role !== 'admin');
             list1.innerHTML = usrs.length === 0 ? '<p style="color:#94a3b8;">Kimse yok.</p>' : usrs.map(u => {
                 let z = (u.day && u.month) ? window.getZodiacSign(u.day, u.month).icon : '✨';
-                return `<div style="padding:15px; background:rgba(0,0,0,0.4); margin-bottom:10px; border-radius:12px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid rgba(244,197,66,0.3);" onclick="if(window.customDualPrompt) window.customDualPrompt('Mesaj Gönder', '💬', '', (title, msg) => { window.adminMessages.push({to: '${u.username}', from: '${window.currentUser ? window.currentUser.name : 'Gizli'}', msg: msg, icon:'✉️', time: new Date().toLocaleTimeString('tr-TR'), read: false}); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.showToast('Mesaj gönderildi!'); window.syncToCloud(); })"><div style="font-size:2rem; pointer-events:none;">${u.emoji || '👤'}</div><div style="flex-grow:1; pointer-events:none;"><strong style="color:#fdfbf7;">${u.name}</strong><br><span style="font-size:0.85rem; color:#94a3b8;">${z} | Puan: ${u.score||0}</span></div><i class="fas fa-envelope" style="color:#f4c542; pointer-events:none;"></i></div>`;
+                return `<div style="padding:15px; background:rgba(0,0,0,0.4); margin-bottom:10px; border-radius:12px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid rgba(244,197,66,0.3);" onclick="if(window.customDualPrompt) window.customDualPrompt('Mesaj Gönder', '💬', '', (title, msg) => { window.adminMessages.push({to: '${u.username}', from: '${window.currentUser ? window.currentUser.name : 'Gizli'}', msg: msg, icon:'✉️', time: new Date().toLocaleTimeString('tr-TR'), read: false}); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.showToast('Mesaj gönderildi!'); if(window.syncToCloud) window.syncToCloud(); })"><div style="font-size:2rem; pointer-events:none;">${u.emoji || '👤'}</div><div style="flex-grow:1; pointer-events:none;"><strong style="color:#fdfbf7;">${u.name}</strong><br><span style="font-size:0.85rem; color:#94a3b8;">${z} | Puan: ${u.score||0}</span></div><i class="fas fa-envelope" style="color:#f4c542; pointer-events:none;"></i></div>`;
             }).join('');
             if(b1) b1.innerText = usrs.length > 0 ? usrs.length : '';
         }
@@ -2322,6 +2606,7 @@
         }
         
         if(adminUsersList) {
+            // FIX: Admin Users List bekommt "Nachricht" und "Löschen" Funktionen direkt
             adminUsersList.innerHTML = db.map(u => {
                 let z = (u.day && u.month) ? window.getZodiacSign(u.day, u.month).icon : '✨';
                 return `<div style="padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(244,197,66,0.3); border-radius:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -2329,9 +2614,13 @@
                         <div style="font-size:1.8rem;">${u.emoji || '👤'}</div>
                         <div style="text-align:left;"><strong style="color:${u.role==='admin'?'#f4c542':'#fff'};">${u.name} (${u.username})</strong><br><span style="color:#94a3b8; font-size:0.85rem;">Burç: ${z} | Rol: ${u.role}</span></div>
                     </div>
-                    <div style="text-align:right;">
+                    <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
                         <div style="color:#22c55e; font-weight:bold;">${u.score||0} P.</div>
-                        <div style="color:#cbd5e1; font-size:0.85rem;">Şifre: ${u.pass}</div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="reset-btn" onclick="if(window.customDualPrompt) window.customDualPrompt('Mesaj Gönder (${u.username})', '💬', '', (title, msg) => { window.adminMessages.push({to: '${u.username}', from: 'Admin', msg: msg, time: new Date().toLocaleTimeString('tr-TR'), read: false}); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.showToast('Mesaj gönderildi!'); if(window.syncToCloud) window.syncToCloud(); })" style="padding:5px 10px; font-size:0.8rem; margin:0;"><i class="fas fa-envelope"></i></button>
+                            <button class="reset-btn" onclick="window.editUserStats('${u.username}')" style="padding:5px 10px; font-size:0.8rem; margin:0;"><i class="fas fa-edit"></i></button>
+                            <button class="reset-btn danger" onclick="window.deleteUser('${u.username}')" style="padding:5px 10px; font-size:0.8rem; margin:0;"><i class="fas fa-trash"></i></button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -2371,7 +2660,7 @@
         u.losses = parseInt(document.getElementById('edit-stat-losses').value) || 0;
         window.userDatabase[username] = u; localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         if(window.currentUser && window.currentUser.username === username) { window.currentUser = u; localStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); const scoreEl = document.getElementById('user-score'); if(scoreEl) scoreEl.innerText = u.score + ' P.'; }
-        window.closeTopModal('force'); window.showToast('Puanlar güncellendi!'); window.renderOnlineUsers(); window.syncToCloud();
+        window.closeTopModal('force'); window.showToast('Puanlar güncellendi!'); window.renderOnlineUsers(); if(window.syncToCloud) window.syncToCloud();
     };
     
     window.resetUserStats = function() {
@@ -2379,8 +2668,17 @@
         window.saveUserStats();
     };
 
+    // FIX: Admin User Delete Modal offen halten & System Log schreiben
     window.deleteUser = function(username) {
-        window.customConfirm(username + ' adlı kullanıcıyı silmek istediğinize emin misiniz?', () => { window.lastLocalUpdate = Date.now(); delete window.userDatabase[username]; localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); window.renderOnlineUsers(); window.showToast('Kullanıcı silindi.'); window.syncToCloud(); });
+        window.customConfirm(username + ' adlı kullanıcıyı silmek istediğinize emin misiniz?', () => { 
+            window.lastLocalUpdate = Date.now(); 
+            delete window.userDatabase[username]; 
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
+            window.renderOnlineUsers(); 
+            window.showToast('Kullanıcı silindi.'); 
+            if(window.syncToCloud) window.syncToCloud();
+            window.openFastModal('adminUsersModal'); 
+        });
     };
 
     window.triggerAdminEdit = function(type, id) {
@@ -2407,13 +2705,13 @@
         let cb = () => {
             window.lastLocalUpdate = Date.now(); window.userPoemsDB = window.userPoemsDB.filter(x => x.id !== poemId); localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
             if(!isSilent) { window.closeAllModals('force'); window.showToast('Eser silindi.'); }
-            window.renderUserWorksGrid(); window.renderUserWorksSidebar(); window.renderTopWorks(); window.updateTopWorksTicker(); window.updateUserWorksBadge(); window.syncToCloud();
+            window.renderUserWorksGrid(); window.renderUserWorksSidebar(); window.renderTopWorks(); window.updateTopWorksTicker(); window.updateUserWorksBadge(); if(window.syncToCloud) window.syncToCloud();
         };
         if(isSilent) { cb(); } else { window.customConfirm('Eserinizi kalıcı olarak silmek istediğinize emin misiniz?', cb); }
     };
 
     window.clearAdminLogs = function() {
-        window.customConfirm('Tüm logları silmek istediğinize emin misiniz?', () => { window.lastLocalUpdate = Date.now(); window.adminLogs = [{ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: 'Loglar Temizlendi', user: 'Admin' }]; localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.renderOnlineUsers(); window.showToast('Loglar temizlendi.'); window.syncToCloud(); });
+        window.customConfirm('Tüm logları silmek istediğinize emin misiniz?', () => { window.lastLocalUpdate = Date.now(); window.adminLogs = [{ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: 'Loglar Temizlendi', user: 'Admin' }]; localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.renderOnlineUsers(); window.showToast('Loglar temizlendi.'); if(window.syncToCloud) window.syncToCloud(); });
     };
 
     window.switchAdminTab = function(tab) {
@@ -2436,7 +2734,7 @@
         if(!window.contentDB[type]) window.contentDB[type] = []; window.contentDB[type].push(newItem);
         localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
         window.adminLogs.push({ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: type + ' eklendi: ' + trTitle, user: 'Admin' });
-        localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.showToast('İçerik başarıyla eklendi!'); window.closeTopModal('force'); window.initContent(); window.initTicker(); window.syncToCloud();
+        localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.showToast('İçerik başarıyla eklendi!'); window.closeTopModal('force'); window.initContent(); window.initTicker(); if(window.syncToCloud) window.syncToCloud();
     };
     
     window.adminLoadItemsForEdit = function() {
@@ -2466,7 +2764,7 @@
             else if (type === 'userPoems') { items[idx].title = document.getElementById('admin-edit-tr-title').value; items[idx].deTitle = document.getElementById('admin-edit-de-title').value; items[idx].text = document.getElementById('admin-edit-tr-text').value; items[idx].deText = document.getElementById('admin-edit-de-text').value; }
             else { items[idx].trTitle = document.getElementById('admin-edit-tr-title').value; items[idx].deTitle = document.getElementById('admin-edit-de-title').value; items[idx].trText = document.getElementById('admin-edit-tr-text').value; items[idx].deText = document.getElementById('admin-edit-de-text').value; items[idx].emoji = document.getElementById('admin-edit-emoji').value; }
             if (type === 'userPoems') { localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); window.renderUserWorksGrid(); } else { localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB)); window.initContent(); window.initTicker(); }
-            window.showToast('İçerik güncellendi!'); window.closeTopModal('force'); window.syncToCloud();
+            window.showToast('İçerik güncellendi!'); window.closeTopModal('force'); if(window.syncToCloud) window.syncToCloud();
         }
     };
     
@@ -2476,7 +2774,7 @@
             window.lastLocalUpdate = Date.now();
             if (type === 'userPoems') { window.userPoemsDB = window.userPoemsDB.filter(x => x.id !== id); localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); window.renderUserWorksGrid(); } 
             else { window.contentDB[type] = window.contentDB[type].filter(x => x.id !== id); localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB)); window.initContent(); window.initTicker(); }
-            window.showToast('İçerik silindi.'); window.closeTopModal('force'); window.syncToCloud();
+            window.showToast('İçerik silindi.'); window.closeTopModal('force'); if(window.syncToCloud) window.syncToCloud();
         });
     };
 
@@ -2487,10 +2785,10 @@
         u.name = n; u.surname = s; u.emoji = em; u.day = d; u.month = m; u.year = y; if (p) u.pass = p;
         window.userDatabase[u.username] = u; window.currentUser = u;
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        window.closeTopModal('force'); window.showToast('Profil güncellendi!'); window.checkRemember(); window.syncToCloud();
+        window.closeTopModal('force'); window.showToast('Profil güncellendi!'); window.checkRemember(); if(window.syncToCloud) window.syncToCloud();
     };
 
-    // --- GAMES LOGIK ---
+    // --- GAMES LOGIK (MIT SOFORT-HEADER-UPDATE) ---
     window.updateGameStats = function(points, result, gameName) {
         if(!window.currentUser) return;
         window.lastLocalUpdate = Date.now(); let u = window.userDatabase[window.currentUser.username]; if(!u) return;
@@ -2498,9 +2796,15 @@
         if(result === 'win') u.wins = (u.wins || 0) + 1; else if(result === 'loss') u.losses = (u.losses || 0) + 1; else u.draws = (u.draws || 0) + 1;
         window.userDatabase[window.currentUser.username] = u; window.currentUser = u;
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        const scoreEl = document.getElementById('user-score'); if(scoreEl) scoreEl.innerText = u.score + ' P.';
+        
+        // FIX: Sofortige Punkte-Aktualisierung im Header!
+        const scoreEl = document.getElementById('user-score'); 
+        if(scoreEl) scoreEl.innerText = u.score + ' P.';
+        
         window.adminLogs.push({ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: gameName + ' Oynadı (' + (points > 0 ? '+'+points : points) + ' Puan)', user: u.name });
-        localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); window.syncToCloud(); window.renderOnlineUsers();
+        localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); 
+        if(window.syncToCloud) window.syncToCloud(); 
+        window.renderOnlineUsers();
     };
 
     window.openFalModal=function(e){if(e)e.stopPropagation();window.openFastModal('falModal');document.getElementById('fal-cup').style.display='block';document.getElementById('fal-result').style.display='none';};
@@ -2515,9 +2819,6 @@
     window.openFastClickModal=function(e){if(e)e.stopPropagation();window.openFastModal('fastClickModal');document.getElementById('fc-btn').innerText='BAŞLA!';document.getElementById('fc-start').style.display='none';document.getElementById('fc-time').innerText='5.0';document.getElementById('fc-score').innerText='0';fcActive=false;};
     window.clickFast=function(){if(!fcActive){fcActive=true;fcScore=0;fcTime=5.0;document.getElementById('fc-btn').innerText='TIKLA!';fcTimer=setInterval(()=>{fcTime-=0.1;document.getElementById('fc-time').innerText=fcTime.toFixed(1);if(fcTime<=0){clearInterval(fcTimer);fcActive=false;document.getElementById('fc-btn').innerText='SÜRE BİTTİ!';document.getElementById('fc-start').style.display='block';window.updateGameStats(fcScore,'win','Hızlı Tık');}},100);}if(fcActive){fcScore++;document.getElementById('fc-score').innerText=fcScore;}};
     window.startFastClick=function(){document.getElementById('fc-start').style.display='none';window.clickFast();};
-    
-    window.openHoroscopeModal=function(e){if(e)e.stopPropagation();window.openFastModal('horoscopeModal');const grid=document.getElementById('zodiac-grid');grid.innerHTML='';document.getElementById('horoscope-result').style.display='none';grid.style.display='grid';window.zodiacs.forEach(z=>{grid.innerHTML+=`<div style="background:rgba(0,0,0,0.5); border:1px solid #f4c542; border-radius:12px; padding:15px 5px; text-align:center; cursor:pointer;" onclick="if(window.showHoroscope) window.showHoroscope('${z.tr}', '${z.de}')"><div style="font-size:2.5rem; color:#f4c542;">${z.icon}</div><div style="color:#fff; font-size:0.9rem; margin-top:5px;">${z.tr}</div></div>`;});};
-    window.showHoroscope=function(nameTr,nameDe){document.getElementById('zodiac-grid').style.display='none';document.getElementById('horoscope-result').style.display='block';document.getElementById('horo-title').innerText=nameTr+' Burcu';document.getElementById('horo-text-tr').innerText='Bugün yıldızlar senden yana. Enerjin yüksek ve yeni başlangıçlar için harika bir gün.';document.getElementById('horo-text-de').innerText='Die Sterne sind heute auf deiner Seite. Deine Energie ist hoch und es ist ein großartiger Tag für Neuanfänge.';};
     
     window.openBreathModal=function(e){if(e)e.stopPropagation();window.openFastModal('breathModal');document.getElementById('breath-start').style.display='block';document.getElementById('breath-circle').innerText='Hazır...';document.getElementById('breath-circle').style.transform='scale(1)';};
     window.startBreath=function(){const c=document.getElementById('breath-circle');const b=document.getElementById('breath-start');b.style.display='none';const cycle=()=>{c.style.transform='scale(1.5)';c.innerText='Nefes Al...';setTimeout(()=>{c.style.transform='scale(1)';c.innerText='Nefes Ver...';},4000);};cycle();setInterval(cycle,8000);window.updateGameStats(5,'win','Nefes');};
@@ -2573,6 +2874,7 @@
     window.openDiceModal=function(e){if(e)e.stopPropagation();window.openFastModal('diceModal');};
     window.rollDice=function(){const d=document.getElementById('dice-display');d.style.transform='rotate(360deg)';d.style.transition='0.5s';setTimeout(()=>{const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];d.innerText=faces[Math.floor(Math.random()*6)];d.style.transform='rotate(0deg)';d.style.transition='0s';window.updateGameStats(5,'win','Zar');},500);};
 
+    // Canvas Games
     let snakeCtx, snakeInt;
     window.openSnakeModal=function(e){if(e)e.stopPropagation();window.openFastModal('snakeModal'); const cvs=document.getElementById('snake-game'); snakeCtx=cvs.getContext('2d'); snakeCtx.fillStyle='#0a192f'; snakeCtx.fillRect(0,0,300,300); document.getElementById('snake-score').innerText='0';};
     window.startSnake=function(){
@@ -2599,8 +2901,8 @@
         if(pongInt) clearInterval(pongInt);
         pongInt = setInterval(()=>{
             pongCtx.fillStyle='#0a192f'; pongCtx.fillRect(0,0,300,350);
-            pongCtx.fillStyle='#fff'; pongCtx.fillRect(140,330,60,10); // Player
-            pongCtx.fillRect(bx-10, 10, 60, 10); // Bot
+            pongCtx.fillStyle='#fff'; pongCtx.fillRect(140,330,60,10); 
+            pongCtx.fillRect(bx-10, 10, 60, 10); 
             pongCtx.beginPath(); pongCtx.arc(bx, by, 8, 0, Math.PI*2); pongCtx.fill();
             bx+=dx; by+=dy;
             if(bx<0 || bx>300) dx=-dx;
@@ -2635,9 +2937,9 @@
         if(brInt) clearInterval(brInt);
         brInt = setInterval(()=>{
             brCtx.fillStyle='#0a192f'; brCtx.fillRect(0,0,300,350);
-            brCtx.fillStyle='#f4c542'; brCtx.fillRect(px,330,80,10); // Paddle
-            brCtx.fillStyle='#ef4444'; for(let i=0;i<5;i++) brCtx.fillRect(i*60+10, 20, 40, 15); // Bricks
-            brCtx.fillStyle='#fff'; brCtx.beginPath(); brCtx.arc(bx, by, 6, 0, Math.PI*2); brCtx.fill(); // Ball
+            brCtx.fillStyle='#f4c542'; brCtx.fillRect(px,330,80,10); 
+            brCtx.fillStyle='#ef4444'; for(let i=0;i<5;i++) brCtx.fillRect(i*60+10, 20, 40, 15); 
+            brCtx.fillStyle='#fff'; brCtx.beginPath(); brCtx.arc(bx, by, 6, 0, Math.PI*2); brCtx.fill(); 
             bx+=dx; by+=dy;
             if(bx<0 || bx>300) dx=-dx;
             if(by<0) dy=-dy;
@@ -2679,6 +2981,6 @@
             if(window.renderChat) window.renderChat();
         }, 600);
     });
-</script>
+    </script>
 </body>
 </html>
