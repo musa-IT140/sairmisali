@@ -37,14 +37,38 @@
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
         .hidden { display: none !important; }
 
-        /* HINTERGRUND ICONS */
+        /* HINTERGRUND ICONS & WETTER ANIMATION (FIX: SYNCHRON) */
         .floating-bg-icons { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: -1; pointer-events: none; }
         .bg-icon { position: absolute; bottom: -20%; font-size: 15rem; color: rgba(244, 197, 66, 0.03); animation: floatUp linear infinite; }
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0.03; } 50% { opacity: 0.06; } 100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } }
 
-        /* WETTER ANIMATION */
         @keyframes gentlePulse { 0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 5px rgba(244,197,66,0.3)); } 100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 15px rgba(244,197,66,0.8)); } }
+        /* Beide Wetter-Icons nutzen exakt diese Klasse für den synchronen Takt */
         .weather-anim-icon { animation: gentlePulse 3s infinite alternate ease-in-out; display: inline-block; }
+
+        /* SANFTE EDLE FEDER-ANIMATION */
+        @keyframes elegantFeather {
+            0%, 100% { transform: rotate(0deg) translateY(0); }
+            25% { transform: rotate(-12deg) translateY(-2px); }
+            50% { transform: rotate(5deg) translateY(-1px); }
+            75% { transform: rotate(-6deg) translateY(-2px); }
+        }
+        .feather-anim {
+            display: inline-block;
+            transform-origin: bottom left;
+            animation: elegantFeather 4s ease-in-out infinite;
+            color: var(--accent-color);
+            filter: drop-shadow(0 0 5px rgba(244, 197, 66, 0.4));
+        }
+
+        /* BLINKENDE TEXT ANIMATION (PULSING) */
+        @keyframes pulseText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .pulsing-text {
+            animation: pulseText 2.5s ease-in-out infinite;
+        }
 
         /* INPUTS & BUTTONS */
         input, select, textarea, button { pointer-events: auto !important; }
@@ -59,15 +83,14 @@
         .reset-btn.danger { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; color: white !important; box-shadow: 0 4px 15px rgba(239,68,68,0.3) !important;}
         .reset-btn.warning { background: linear-gradient(135deg, #f97316, #ea580c) !important; color: white !important; box-shadow: 0 4px 15px rgba(249,115,22,0.3) !important;}
 
-        /* SAYAÇLAR (ZÄHLER) */
+        /* SAYAÇLAR (ZÄHLER) - Zwingend sichtbar, wenn Inhalt da ist */
         .badge-count {
             position: absolute; top: -6px; right: -6px;
             color: white; font-size: 0.75rem; font-weight: bold;
-            padding: 2px 7px; border-radius: 12px; z-index: 50;
+            padding: 2px 7px; border-radius: 12px; z-index: 999;
             box-shadow: 0 2px 5px rgba(0,0,0,0.8);
             font-family: 'Poppins', sans-serif;
-            pointer-events: none; display: flex; justify-content: center; align-items: center;
-            opacity: 1 !important; visibility: visible !important;
+            pointer-events: none; display: flex !important; justify-content: center; align-items: center;
         }
         .badge-count:empty { display: none !important; } 
         
@@ -174,7 +197,7 @@
 
         header { position: fixed; top: 60px; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 8000; border-bottom: 1px solid rgba(244, 197, 66, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.8); display: flex; flex-direction: column; pointer-events: auto; }
         
-        .page-view { display: none; padding: 240px 5% 100px; min-height: 100vh; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.2s ease-out; } 
+        .page-view { display: none; padding: 260px 5% 100px; min-height: 100vh; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.2s ease-out; } 
         .page-view.active-view { display: flex; opacity: 1; }
 
         .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 4%; gap: 10px; }
@@ -267,7 +290,7 @@
         
         .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none;}
         
-        .anthem-content { font-size: 1.05rem !important; line-height: 1.8 !important; text-align: center; color: white; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px dashed rgba(244,197,66,0.3); margin-top: 15px; white-space: pre-wrap;}
+        .anthem-content { font-family: 'Playfair Display', serif; font-size: 0.95rem !important; line-height: 1.6 !important; text-align: center; color: #f8fafc; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px dashed rgba(244,197,66,0.3); margin-top: 15px; white-space: pre-wrap;}
 
         /* HOROSKOP & SPIELE GRIDS */
         .zodiac-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin-top: 15px; }
@@ -277,22 +300,27 @@
 
         canvas.game-canvas { background: #0a192f; border: 2px solid var(--accent-color); border-radius: 8px; display: block; margin: 0 auto; box-shadow: 0 0 15px rgba(244,197,66,0.3); }
 
-        /* RESPONSIVE DESIGN */
+        /* RESPONSIVE DESIGN - FIX: MOBILER HEADER, KALENDER & UHR IMMER SICHTBAR! */
         @media (max-width: 1100px) {
-            .page-view { padding-top: 280px; }
-            .header-top { justify-content: center; padding: 12px 4%; flex-wrap: wrap;} 
-            .header-left, .header-right { width: 100%; justify-content: center; } 
-            .datetime-container { display: none !important; } 
+            .page-view { padding-top: 290px; } 
+            .header-top { justify-content: space-between; padding: 12px 4%; flex-wrap: wrap;} 
+            .header-left { width: 100%; justify-content: space-between; margin-bottom: 10px; }
+            .header-right { width: 100%; justify-content: center; } 
+            .datetime-container { display: flex !important; } 
         }
 
         @media (max-width: 768px) {
-            .page-view { padding-top: 300px; }
+            .page-view { padding-top: 310px; padding-left: 15px; padding-right: 15px; }
             .hero-title { font-size: 2.5rem !important; }
             .hero-subtitle { font-size: 1.2rem !important; }
             .profile-pic { width: 140px !important; height: 140px !important; }
             .modal-content { max-width: 95vw !important; max-height: 90vh !important; }
             .modal-body { padding: 40px 15px 20px 15px !important; }
             .zodiac-grid { grid-template-columns: repeat(3, 1fr); }
+            
+            /* Auf dem Handy bleibt die Uhr & Kalender - nur der Text wird ausgeblendet! */
+            .dt-item span { display: none; }
+            .dt-item { padding: 8px; font-size: 1.25rem; }
             
             .header-nav-bar { padding: 5px 2%; }
             nav button { padding: 8px 10px; font-size: 0.85rem; flex-shrink: 0; }
@@ -333,7 +361,7 @@
     <header id="main-header">
         <div class="header-top">
             <div class="header-left">
-                <div class="logo clickable-header-item" onclick="if(window.navigate) window.navigate('home-view')">Şair Misal.i <i class="fas fa-feather-alt"></i></div>
+                <div class="logo clickable-header-item" onclick="if(window.navigate) window.navigate('home-view')">Şair Misal.i <i class="fas fa-feather-alt feather-anim"></i></div>
                 <div class="datetime-container">
                     <div class="dt-item clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('analogClockModal')" title="Saat">
                         <i class="fas fa-clock" style="color:var(--accent-color);"></i> <span id="digi-clock">00:00:00</span>
@@ -398,42 +426,42 @@
     </header>
 <div class="floating-menu-wrapper left" id="floating-left">
         <div class="floating-menu-items" id="left-menu-items">
-            <button class="bottom-btn" onclick="if(window.openFastModal) window.openFastModal('infoModal')">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); if(window.openFastModal) window.openFastModal('infoModal')">
                 <span class="btn-icon"><i class="fas fa-info-circle"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Bilgi / Info</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.toggleSidebar) window.toggleSidebar('fihristSidebar', event)">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); if(window.toggleSidebar) window.toggleSidebar('fihristSidebar', event)">
                 <span class="btn-icon"><i class="fas fa-scroll"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Eserlerim / Werke</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.toggleSidebar) window.toggleSidebar('kissaFikraSidebar', event)">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); if(window.toggleSidebar) window.toggleSidebar('kissaFikraSidebar', event)">
                 <span class="btn-icon"><i class="fas fa-book"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Kıssa / Fıkra</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.toggleSidebar) window.toggleSidebar('topWorksSidebar', event)">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); if(window.toggleSidebar) window.toggleSidebar('topWorksSidebar', event)">
                 <span class="btn-icon"><i class="fas fa-trophy"></i></span>
                 <div class="badge-count badge-cyan" id="topworks-badge"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">En İyiler / Top Liste</span></div>
             </button>
-            <button class="bottom-btn auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.toggleSidebar('userWorksSidebar', event))">
+            <button class="bottom-btn auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); window.toggleSidebar('userWorksSidebar', event); })">
                 <span class="btn-icon"><i class="fas fa-pen-fancy"></i></span>
                 <div class="badge-count badge-yellow" id="fab-sizin-kaleminiz-badge"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Sizin Kaleminiz</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.toggleSidebar) window.toggleSidebar('anthemSidebar', event)">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); if(window.toggleSidebar) window.toggleSidebar('anthemSidebar', event)">
                 <span class="btn-icon"><i class="fas fa-music"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Marşlar / Hymnen</span></div>
             </button>
-            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => window.toggleSidebar('onlineUserSidebar', event))">
+            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); window.toggleSidebar('onlineUserSidebar', event); })">
                 <span class="btn-icon"><i class="fas fa-users"></i></span>
                 <div class="badge-count badge-green" id="online-dot-mini-user"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Online Kullanıcılar</span></div>
             </button>
-            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => window.openFastModal('profileEditModal'))">
+            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); window.openFastModal('profileEditModal'); })">
                 <span class="btn-icon"><i class="fas fa-user-cog"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Profilim / Profil</span></div>
             </button>
-            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => window.openFastModal('userMessagesModal'))">
+            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.toggleFloatingMenu) window.toggleFloatingMenu('left', event); window.openFastModal('userMessagesModal'); })">
                 <span class="btn-icon"><i class="fas fa-envelope"></i></span>
                 <div class="badge-count badge-red" id="user-inbox-badge"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Mesaj Kutusu</span></div>
@@ -444,31 +472,31 @@
 
     <div class="floating-menu-wrapper right admin-only" id="floating-right">
         <div class="floating-menu-items" id="right-menu-items">
-            <button class="bottom-btn" onclick="if(window.openFastModal) window.openFastModal('adminPendingModal')">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('right', event); if(window.openFastModal) window.openFastModal('adminPendingModal')">
                 <span class="btn-icon"><i class="fas fa-star-half-alt"></i></span>
                 <div class="badge-count badge-purple" id="admin-pending-badge"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Eserleri Puanla</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.openFastModal) window.openFastModal('inOutAdminModal')">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('right', event); if(window.openFastModal) window.openFastModal('inOutAdminModal')">
                 <span class="btn-icon"><i class="fas fa-folder-plus"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">İçerik Yönetimi</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.openFastModal) window.openFastModal('adminUsersModal')">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('right', event); if(window.openFastModal) window.openFastModal('adminUsersModal')">
                 <span class="btn-icon"><i class="fas fa-clipboard-list"></i></span>
                 <div class="badge-count badge-orange" id="admin-users-badge"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Kayıtlı Kullanıcılar</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.toggleSidebar) window.toggleSidebar('onlineAdminSidebar', event)">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('right', event); if(window.toggleSidebar) window.toggleSidebar('onlineAdminSidebar', event)">
                 <span class="btn-icon"><i class="fas fa-users-cog"></i></span>
                 <div class="badge-count badge-green" id="online-dot-mini-admin"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Online</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.toggleSidebar) window.toggleSidebar('raporAdminSidebar', event)">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('right', event); if(window.toggleSidebar) window.toggleSidebar('raporAdminSidebar', event)">
                 <span class="btn-icon"><i class="fas fa-file-invoice"></i></span>
                 <div class="badge-count badge-blue" id="rapor-dot-mini-admin"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Günlük Rapor</span></div>
             </button>
-            <button class="bottom-btn" onclick="if(window.openFastModal) window.openFastModal('adminMessagesModal')">
+            <button class="bottom-btn" onclick="if(window.toggleFloatingMenu) window.toggleFloatingMenu('right', event); if(window.openFastModal) window.openFastModal('adminMessagesModal')">
                 <span class="btn-icon"><i class="fas fa-envelope-open-text"></i></span>
                 <div class="badge-count badge-red" id="admin-badge"></div>
                 <div class="btn-text-wrapper"><span class="btn-text">Gelen Kutusu</span></div>
@@ -683,7 +711,7 @@ Blühe, deutsches Vaterland!</p>
             <div id="home-default-content" style="text-align: center;">
                 <h1 class="hero-title" style="font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); color: var(--accent-color); text-shadow: var(--accent-glow); letter-spacing: 2px; margin-bottom: 10px;">ŞAİR MİSAL.İ</h1>
                 <p class="hero-subtitle" style="color: #cbd5e1; font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 3vw, 1.8rem); font-style: italic;">Gönülden dile, dilden şiire.</p>
-                <p class="hero-info" style="color: #f4c542; margin-top: 30px; font-weight: 500; font-size: 1.1rem;">Eserlerimi Görmek İçin Menüyü Kullanın<br><span style="font-size: 0.9rem; font-weight: normal; color:#94a3b8;">(Benutze das Menü, um meine Werke zu sehen)</span></p>
+                <p class="hero-info pulsing-text" style="color: #f4c542; margin-top: 30px; font-weight: 500; font-size: 1.1rem;">Eserlerimi Görmek İçin Menüyü Kullanın<br><span style="font-size: 0.9rem; font-weight: normal; color:#94a3b8;">(Benutze das Menü, um meine Werke zu sehen)</span></p>
             </div>
         </section>
 
@@ -843,30 +871,30 @@ Blühe, deutsches Vaterland!</p>
         <section class="page-view" id="impressum-view">
             <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent-color); text-align: center; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--accent-glow);">İmpressum <br><span style="color:#94a3b8; font-size:1.2rem; font-family:'Poppins',sans-serif; text-shadow: none; letter-spacing: normal; text-transform: none;">(Künye)</span></h2>
             <div style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 20px; padding: 40px; max-width: 800px; margin: 0 auto; width: 100%;">
-                <h3 style="color: #f4c542; font-size: 1.5rem; margin-bottom: 10px;">Web Sitesi Sahibi <span style="font-size:1.1rem; color:#94a3b8; font-weight:normal;">(Webseiteninhaber)</span></h3>
-                <p style="color: #cbd5e1; font-size: 1.1rem; margin-bottom: 30px;">Şair Misal.i<br>Email: sairmisali25@gmail.com</p>
+                <h3 style="color: #f4c542; font-size: 1.35rem; margin-bottom: 10px;">Web Sitesi Sahibi <span style="font-size:0.95rem; color:#94a3b8; font-weight:normal;">(Webseiteninhaber)</span></h3>
+                <p style="color: #cbd5e1; font-size: 0.95rem; margin-bottom: 30px;">Şair Misal.i<br>Email: sairmisali25@gmail.com</p>
                 
-                <h3 style="color: #f4c542; font-size: 1.5rem; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(244,197,66,0.3);">&copy; Telif Hakkı / Urheberrecht / Copyright</h3>
-                <p style="color: #fff; font-size: 1.15rem; margin-bottom: 10px;">Bu sitedeki tüm şiir (Şiirlerim başlığı altında) ve sözler (Sözlerim başlığı altında) Şair Misal.i'ye aittir. İzinsiz kopyalanamaz veya ticari amaçla kullanılamaz.</p>
-                <p style="color: #94a3b8; font-size: 1rem; font-style: italic;">Alle Gedichte (unter Şiirlerim) und Sprüche (unter Sözlerim) gehören Şair Misal.i. Unerlaubtes Kopieren oder die kommerzielle Nutzung ist untersagt.</p>
+                <h3 style="color: #f4c542; font-size: 1.35rem; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(244,197,66,0.3);">&copy; Telif Hakkı / Urheberrecht / Copyright</h3>
+                <p style="color: #fff; font-size: 1.0rem; margin-bottom: 10px;">Bu sitedeki tüm şiir (Şiirlerim başlığı altında) ve sözler (Sözlerim başlığı altında) Şair Misal.i'ye aittir. İzinsiz kopyalanamaz veya ticari amaçla kullanılamaz.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem; font-style: italic;">Alle Gedichte (unter Şiirlerim) und Sprüche (unter Sözlerim) gehören Şair Misal.i. Unerlaubtes Kopieren oder die kommerzielle Nutzung ist untersagt.</p>
             </div>
         </section>
 
         <section class="page-view" id="cookie-view">
             <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent-color); text-align: center; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--accent-glow);">Cookies <br><span style="color:#94a3b8; font-size:1.2rem; font-family:'Poppins',sans-serif; text-shadow: none; letter-spacing: normal; text-transform: none;">(Çerezler)</span></h2>
             <div style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 20px; padding: 40px; max-width: 800px; margin: 0 auto; width: 100%;">
-                <h3 style="color: #f4c542; font-size: 1.5rem; margin-bottom: 10px;">Çerez (Cookie) Kullanımı <span style="font-size:1.1rem; color:#94a3b8; font-weight:normal;">(Cookie-Nutzung)</span></h3>
-                <p style="color: #fff; font-size: 1.15rem; margin-bottom: 10px;">Sitemiz, ziyaretçi deneyimini en iyi şekilde sunabilmek adına yalnızca temel işlevsellik için gerekli olan basit verileri kullanır. Kişisel verileriniz izinsiz olarak üçüncü şahıslarla paylaşılmaz.</p>
-                <p style="color: #94a3b8; font-size: 1rem; font-style: italic;">Unsere Website verwendet nur einfache Daten, die für die grundlegende Funktionalität erforderlich sind, um das beste Besuchererlebnis zu bieten. Ihre persönlichen Daten werden nicht ohne Erlaubnis an Dritte weitergegeben.</p>
+                <h3 style="color: #f4c542; font-size: 1.35rem; margin-bottom: 10px;">Çerez (Cookie) Kullanımı <span style="font-size:0.95rem; color:#94a3b8; font-weight:normal;">(Cookie-Nutzung)</span></h3>
+                <p style="color: #fff; font-size: 1.0rem; margin-bottom: 10px;">Sitemiz, ziyaretçi deneyimini en iyi şekilde sunabilmek adına yalnızca temel işlevsellik için gerekli olan basit verileri kullanır. Kişisel verileriniz izinsiz olarak üçüncü şahıslarla paylaşılmaz.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem; font-style: italic;">Unsere Website verwendet nur einfache Daten, die für die grundlegende Funktionalität erforderlich sind, um das beste Besuchererlebnis zu bieten. Ihre persönlichen Daten werden nicht ohne Erlaubnis an Dritte weitergegeben.</p>
             </div>
         </section>
         
         <section class="page-view" id="datenschutz-view">
             <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent-color); text-align: center; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--accent-glow);">Datenschutz <br><span style="color:#94a3b8; font-size:1.2rem; font-family:'Poppins',sans-serif; text-shadow: none; letter-spacing: normal; text-transform: none;">(Gizlilik Politikası)</span></h2>
             <div style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 20px; padding: 40px; max-width: 800px; margin: 0 auto; width: 100%;">
-                <h3 style="color: #f4c542; font-size: 1.5rem; margin-bottom: 10px;">Kişisel Verilerin Korunması <span style="font-size:1.1rem; color:#94a3b8; font-weight:normal;">(Schutz personenbezogener Daten)</span></h3>
-                <p style="color: #fff; font-size: 1.15rem; margin-bottom: 10px;">Sistemimize kayıt olurken sağladığınız bilgiler tamamen gizli tutulmaktadır. Üçüncü şahıs uygulamalar veya reklam şirketleriyle hiçbir veriniz paylaşılmaz. Yazdığınız eserler size aittir.</p>
-                <p style="color: #94a3b8; font-size: 1rem; font-style: italic;">Die bei der Registrierung angegebenen Informationen werden streng vertraulich behandelt. Es werden keine Daten an Drittanwendungen oder Werbefirmen weitergegeben. Ihre geschriebenen Werke bleiben Ihr Eigentum.</p>
+                <h3 style="color: #f4c542; font-size: 1.35rem; margin-bottom: 10px;">Kişisel Verilerin Korunması <span style="font-size:0.95rem; color:#94a3b8; font-weight:normal;">(Schutz personenbezogener Daten)</span></h3>
+                <p style="color: #fff; font-size: 1.0rem; margin-bottom: 10px;">Sistemimize kayıt olurken sağladığınız bilgiler tamamen gizli tutulmaktadır. Üçüncü şahıs uygulamalar veya reklam şirketleriyle hiçbir veriniz paylaşılmaz. Yazdığınız eserler size aittir.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem; font-style: italic;">Die bei der Registrierung angegebenen Informationen werden streng vertraulich behandelt. Es werden keine Daten an Drittanwendungen oder Werbefirmen weitergegeben. Ihre geschriebenen Werke bleiben Ihr Eigentum.</p>
             </div>
         </section>
 
@@ -1245,7 +1273,10 @@ Blühe, deutsches Vaterland!</p>
         <div class="modal-content game-modal-content" style="max-width: 700px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
             <div class="modal-body">
-                <h2 class="game-title" style="font-size: 2.2rem; margin-bottom: 20px;">Mesaj Kutusu</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px;">
+                    <h2 class="game-title" style="font-size: 2.2rem; margin: 0; text-align: left; border:none; padding:0;">Mesaj Kutusu</h2>
+                    <button class="reset-btn danger" onclick="if(window.deleteAllUserMessages) window.deleteAllUserMessages()" style="width: auto; padding: 8px 15px; margin: 0; font-size: 0.9rem;"><i class="fas fa-trash-alt"></i> Temizle</button>
+                </div>
                 <div id="user-msg-list" style="width:100%; display:flex; flex-direction:column; gap:14px;"></div>
             </div>
         </div>
@@ -1363,7 +1394,7 @@ Blühe, deutsches Vaterland!</p>
         sessionStorage.setItem('misaliVisited', 'true'); 
     }
 
-    // Cloud Synchronisation (Optimiert & Sicher)
+    // Cloud Synchronisation (Optimiert für Arrays & Live-Zähler)
     window.syncToCloud = async function() {
         if (window.isSyncing || !navigator.onLine) return; 
         window.lastLocalUpdate = Date.now(); 
@@ -1396,12 +1427,11 @@ Blühe, deutsches Vaterland!</p>
             if(json.record) { 
                 let r = json.record; 
                 
-                // Prüfen, ob der User gerade schreibt (verhindert UI-Lag beim Sync)
                 let activeEl = document.activeElement;
                 let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
 
                 if(r.users) { 
-                    window.userDatabase = Array.isArray(r.users) ? Object.assign({}, r.users) : r.users; 
+                    window.userDatabase = r.users; 
                     localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
                 }
                 
@@ -1424,9 +1454,9 @@ Blühe, deutsches Vaterland!</p>
                 if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
                     window.adminMessages = r.adminMsgs; 
                     localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs)); 
-                    if(window.updateNotifyBadge) window.updateNotifyBadge(); // FIX: Roter Zähler wird hier erzwungen!
-                    if(!isTyping && document.getElementById('adminMessagesModal').classList.contains('active-modal') && window.renderAdminMessages) window.renderAdminMessages();
-                    if(!isTyping && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
+                    if(window.updateNotifyBadge) window.updateNotifyBadge(); // MEISTER-FIX: Roter Zähler zündet sofort!
+                    if(!isTyping && document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal') && window.renderAdminMessages) window.renderAdminMessages();
+                    if(!isTyping && document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
                 }
 
                 if(r.heartsDB) { 
@@ -1435,12 +1465,13 @@ Blühe, deutsches Vaterland!</p>
                     if(!isTyping && document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) window.updateHeartsUI(); 
                 }
                 
+                // Private Notizen live synchronisieren
                 if(r.calNotes) { 
                     window.calNotesDB = r.calNotes; 
                     localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); 
-                    if(!isTyping && window.currentSelectedDate && document.getElementById('eventsModal').classList.contains('active-modal')) {
+                    if(!isTyping && window.currentSelectedDate && document.getElementById('eventsModal') && document.getElementById('eventsModal').classList.contains('active-modal')) {
                         if(window.renderCalNotes) window.renderCalNotes(window.currentSelectedDate);
-                        if(window.renderCalendar) window.renderCalendar(); // Damit der grüne Punkt auch direkt erscheint
+                        if(window.renderCalendar) window.renderCalendar();
                     }
                 }
                 
@@ -1452,11 +1483,11 @@ Blühe, deutsches Vaterland!</p>
 
     setInterval(() => { window.fetchFromCloud(); }, 5000); 
 
-    // Initialisierung der Datenbank
+    // --- MEISTER-DATENBANK INITIALISIERUNG ---
     try {
-        // FIX: Version auf V160 hochgesetzt für sauberen Start der Notizen und Zähler!
-        if(!localStorage.getItem('misaliDB_Init_V160')) { 
-            localStorage.setItem('misaliDB_Init_V160', 'true'); 
+        // HARTER RESET FÜR CACHE (V210)
+        if(!localStorage.getItem('misaliDB_Init_V210')) { 
+            localStorage.setItem('misaliDB_Init_V210', 'true'); 
         }
         
         window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || {};
@@ -1471,7 +1502,7 @@ Blühe, deutsches Vaterland!</p>
         }
 
         if (!window.userDatabase['misali']) {
-            window.userDatabase['misali'] = { username: "misali", name: "Şair Misal.i", email: "sairmisali25@gmail.com", pass: "1234", role: "admin", score: 100, played: 0, wins: 0, losses: 0, draws: 0, approved: true };
+            window.userDatabase['misali'] = { username: "misali", name: "Şair Misal.i", surname: "", email: "sairmisali25@gmail.com", pass: "1234", role: "admin", score: 100, played: 0, wins: 0, losses: 0, draws: 0, approved: true };
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         }
 
@@ -1484,7 +1515,7 @@ Blühe, deutsches Vaterland!</p>
         window.calNotesDB = JSON.parse(localStorage.getItem('misaliCalNotes')) || {};
         window.badWords = ["küfür", "hakaret", "aptal", "salak"];
         
-        // Standard-Inhalte (nur laden, wenn misaliFullDB fehlt)
+        // STANDARD INHALTE 
         window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
         if(!window.contentDB || !window.contentDB.poems || window.contentDB.poems.length <= 1) {
              const userPoems = [
@@ -1559,13 +1590,15 @@ Blühe, deutsches Vaterland!</p>
 
     } catch(err) { console.error("DB Init Error", err); }
 
-    // --- LOGIN / LOGOUT LOGIK (FIXED) ---
+    // --- LOGIN / LOGOUT LOGIK (MIT ADMIN-FREIGABE) ---
     window.checkRemember = function() {
         if (!window.currentUser && localStorage.getItem('misaliAutoFill')) {
             let saved = JSON.parse(localStorage.getItem('misaliAutoFill'));
             if (saved && saved.u && saved.p) {
                 let user = window.userDatabase[saved.u];
-                if (user && user.pass === saved.p) { window.currentUser = user; sessionStorage.setItem('misaliUser', JSON.stringify(user)); }
+                if (user && user.pass === saved.p && user.approved !== false) { 
+                    window.currentUser = user; sessionStorage.setItem('misaliUser', JSON.stringify(user)); 
+                }
             }
         }
         if (window.currentUser) {
@@ -1604,16 +1637,25 @@ Blühe, deutsches Vaterland!</p>
         }
         
         if (!found || found.pass !== p) { window.customAlert('Hatalı giriş!', '❌'); return; }
+        if (found.approved === false) { window.customAlert('Üyeliğiniz Admin onayı bekliyor. Lütfen daha sonra tekrar deneyin.', '⏳'); return; }
         
         window.currentUser = found;
         sessionStorage.setItem('misaliUser', JSON.stringify(found));
         if (rem) localStorage.setItem('misaliAutoFill', JSON.stringify({u: found.username, p: found.pass}));
         
+        // PING AN ADMIN
+        if (window.sendSystemMessage && found.role !== 'admin') {
+            window.sendSystemMessage('Admin', `Kullanıcı giriş yaptı: ${found.name} ${found.surname || ''} (${found.username})`);
+        }
         location.reload(); 
     };
 
     window.m_logout = function() {
         window.customConfirm('Çıkış yapılsın mı?', () => {
+            // PING AN ADMIN
+            if (window.sendSystemMessage && window.currentUser && window.currentUser.role !== 'admin') {
+                window.sendSystemMessage('Admin', `Kullanıcı çıkış yaptı: ${window.currentUser.name} ${window.currentUser.surname || ''} (${window.currentUser.username})`);
+            }
             window.currentUser = null;
             sessionStorage.removeItem('misaliUser');
             localStorage.removeItem('misaliUser'); 
@@ -1633,20 +1675,25 @@ Blühe, deutsches Vaterland!</p>
         const y = document.getElementById('m-reg-year').value;
         const em = document.getElementById('m-reg-emoji').value;
         
-        if (!u || !e || !p || !n) { window.customAlert('Lütfen zorunlu alanları (*) doldurun.', '⚠️'); return; }
+        if (!u || !e || !p || !n || !s) { window.customAlert('Lütfen zorunlu alanları (İsim, Soyisim vb.) doldurun.', '⚠️'); return; }
         if (window.userDatabase[u]) { window.customAlert('Bu kullanıcı adı zaten alınmış.', '❌'); return; }
         
         window.lastLocalUpdate = Date.now();
-        window.userDatabase[u] = { username: u, email: e, name: n, surname: s, day: d, month: m, year: y, emoji: em, pass: p, role: 'user', score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: true };
+        // FIX: APPROVED = FALSE (Admin muss erst bestätigen)
+        window.userDatabase[u] = { username: u, email: e, name: n, surname: s, day: d, month: m, year: y, emoji: em, pass: p, role: 'user', score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: false };
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         
-        window.adminLogs.push({ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: "Yeni Kayıt", user: u });
+        // PING AN ADMIN ÜBER NEUE REGISTRIERUNG
+        if (window.sendSystemMessage) {
+            window.sendSystemMessage('Admin', `🚨 YENİ KAYIT ONAYI BEKLİYOR: ${n} ${s} (${u})`);
+        }
+        
+        window.adminLogs.push({ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: "Yeni Kayıt: " + u, user: n });
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
         
         window.closeTopModal('force');
-        window.customAlert('Kayıt başarılı! Lütfen giriş yapın.', '✅');
+        window.customAlert('Kayıt başarılı! Ancak üyeliğiniz Admin onayından sonra aktif olacaktır.', '✅');
         window.syncToCloud();
-        setTimeout(() => window.openFastModal('m-login-modal'), 1000);
     };
     </script>
 <script>
@@ -1726,7 +1773,7 @@ Blühe, deutsches Vaterland!</p>
         slider.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; });
     });
 
-    // --- MODAL STEUERUNG ---
+    // --- MODAL & SIDEBAR STEUERUNG (ISOLIERT) ---
     window.openFastModal = function(id) { 
         window.closeAllSidebars(); 
         const m = document.getElementById(id); 
@@ -1761,8 +1808,8 @@ Blühe, deutsches Vaterland!</p>
     window.toggleFloatingMenu = function(side, e) { 
         if(e) e.stopPropagation(); 
         const btn = e.currentTarget; const menu = document.getElementById(side + '-menu-items'); 
-        if(btn.classList.contains('open')) { btn.classList.remove('open'); menu.classList.remove('show'); } 
-        else { document.querySelectorAll('.menu-toggle-btn').forEach(b => b.classList.remove('open')); document.querySelectorAll('.floating-menu-items').forEach(m => m.classList.remove('show')); btn.classList.add('open'); menu.classList.add('show'); } 
+        if(btn && btn.classList.contains('open')) { btn.classList.remove('open'); menu.classList.remove('show'); } 
+        else if (btn) { document.querySelectorAll('.menu-toggle-btn').forEach(b => b.classList.remove('open')); document.querySelectorAll('.floating-menu-items').forEach(m => m.classList.remove('show')); btn.classList.add('open'); menu.classList.add('show'); } 
     };
     
     window.toggleSidebar = function(id, e) { 
@@ -1809,11 +1856,13 @@ Blühe, deutsches Vaterland!</p>
         if(window.currentUser && window.currentUser.username) { callback(); } else { window.customAlert('Bu alanı görmek için lütfen üye olun veya giriş yapın.', '🔒'); window.openFastModal('m-login-modal'); } 
     };
 
+    // MEISTER-FIX: TEILEN-FUNKTION (INKLUSIVE LINK)
     window.copyShareText = function() {
         if(!window.currentPoemData) return;
         let title = window.currentPoemData.title || window.currentPoemData.trTitle || "";
         let text = window.currentPoemData.text || window.currentPoemData.trText || window.currentPoemData.quote || "";
-        let shareStr = `*${title}*\n\n${text}\n\n- Şair Misal.i`;
+        let authorStr = window.currentPoemData.author ? window.currentPoemData.author : (window.currentPoemData.name + (window.currentPoemData.surname ? ' ' + window.currentPoemData.surname : ''));
+        let shareStr = `*${title}*\n\n${text}\n\n- ${authorStr}\n\nDaha fazlası için: https://sairmisali.de`;
         navigator.clipboard.writeText(shareStr).then(() => { window.showToast('Metin Kopyalandı!'); window.closeTopModal('force'); }).catch(err => { window.customAlert('Kopyalama başarısız.', '❌'); });
     };
 
@@ -1821,11 +1870,13 @@ Blühe, deutsches Vaterland!</p>
         if(!window.currentPoemData) return;
         let title = window.currentPoemData.title || window.currentPoemData.trTitle || "";
         let text = window.currentPoemData.text || window.currentPoemData.trText || window.currentPoemData.quote || "";
-        let shareStr = `*${title}*\n\n${text}\n\n- Şair Misal.i`;
+        let authorStr = window.currentPoemData.author ? window.currentPoemData.author : (window.currentPoemData.name + (window.currentPoemData.surname ? ' ' + window.currentPoemData.surname : ''));
+        let shareStr = `*${title}*\n\n${text}\n\n- ${authorStr}\n\nDaha fazlası için: https://sairmisali.de`;
         let url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareStr)}`;
         window.open(url, '_blank'); window.closeTopModal('force');
     };
 
+    // --- WETTER (SYNCHRON) ---
     window.fetchWeather = function() {
         const city = 'Berlin'; const key = 'c7d2c3dfb8f2c6e61f22e74251ba9768';
         fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${key}&units=metric&lang=tr`)
@@ -1854,17 +1905,20 @@ Blühe, deutsches Vaterland!</p>
         });
     };
 
+    // MEISTER-FIX: TRACKING (SYSTEM MESSAGE LOGIK FÜR ALLES)
     window.sendSystemMessage = function(toUser, actionText) {
         if (!window.adminMessages) window.adminMessages = [];
         window.adminMessages.push({
-            to: 'admin', 
+            to: toUser === 'Admin' ? 'admin' : toUser, 
             from: 'Sistem',
-            msg: `Kullanıcı: ${toUser} | İşlem: ${actionText}`,
+            msg: actionText,
             time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
             read: false
         });
         localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
+        window.lastLocalUpdate = Date.now();
         window.updateNotifyBadge();
+        if(window.syncToCloud) window.syncToCloud();
     };
 
     window.renderLeaderboard = function() {
@@ -1881,10 +1935,11 @@ Blühe, deutsches Vaterland!</p>
             let bg = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
             let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
             let adminCol = window.currentUser && window.currentUser.role === 'admin' ? `<td class="admin-only" style="padding:15px;"><button class="reset-btn" style="padding:8px; margin:0;" onclick="window.editUserStats('${u.username}')"><i class="fas fa-edit"></i></button></td>` : '<td class="admin-only"></td>';
+            let fullName = u.name + (u.surname ? ' ' + u.surname : '');
             
             return `<tr style="background:${bg}; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <td style="padding:15px; font-weight:bold; color:#f4c542;">${medal}</td>
-                <td style="padding:15px; text-align:left; color:#fff;">${u.emoji||'👤'} ${u.name}</td>
+                <td style="padding:15px; text-align:left; color:#fff;">${u.emoji||'👤'} ${fullName}</td>
                 <td style="padding:15px; font-weight:bold; color:#22c55e;">${u.score||0}</td>
                 <td style="padding:15px; color:#cbd5e1;">${u.played||0}</td>
                 <td style="padding:15px; color:#22c55e;">${u.wins||0}</td>
@@ -1896,7 +1951,6 @@ Blühe, deutsches Vaterland!</p>
         }).join('');
     };
 
-    // --- MARŞLAR (VOLLSTÄNDIG SICHER) ---
     window.switchAnthemLang = function(lang) {
         const cTR = document.getElementById('anthem-tr-content'); const cDE = document.getElementById('anthem-de-content');
         const bTR = document.getElementById('btn-anthem-tr'); const bDE = document.getElementById('btn-anthem-de');
@@ -1911,7 +1965,7 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // --- KALENDER LOGIK (FIX: NUR EIN TAG LEUCHTET, NOTIZEN SPEICHERN SICHER) ---
+    // --- KALENDER LOGIK ---
     let calDate = new Date(); let currentMonth = calDate.getMonth(); let currentYear = calDate.getFullYear();
     const monthNamesTR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
@@ -1928,9 +1982,12 @@ Blühe, deutsches Vaterland!</p>
             let dateStr = `${i}.${currentMonth+1}.${currentYear}`;
             let isToday = (i === calDate.getDate() && currentMonth === calDate.getMonth() && currentYear === calDate.getFullYear());
             
-            let hasNote = window.calNotesDB && window.calNotesDB[dateStr] && window.calNotesDB[dateStr].length > 0;
-            let noteIndicator = hasNote ? `<span class="cal-note-indicator" style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%; position:absolute; bottom:5px; left:50%; transform:translateX(-50%);"></span>` : '';
+            let hasNote = false;
+            if(window.currentUser && window.calNotesDB && window.calNotesDB[window.currentUser.username] && window.calNotesDB[window.currentUser.username][dateStr]) {
+                hasNote = window.calNotesDB[window.currentUser.username][dateStr].length > 0;
+            }
             
+            let noteIndicator = hasNote ? `<span class="cal-note-indicator" style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%; position:absolute; bottom:5px; left:50%; transform:translateX(-50%);"></span>` : '';
             let bg = isToday ? 'var(--accent-color)' : (hasNote ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)'); 
             let color = isToday ? '#000' : '#fff';
             let border = hasNote ? '1px solid #22c55e' : '1px solid rgba(244,197,66,0.3)';
@@ -1946,11 +2003,15 @@ Blühe, deutsches Vaterland!</p>
     window.renderCalNotes = function(dateStr) {
         const notesContainer = document.getElementById('cal-saved-notes');
         if (!notesContainer) return;
-        if (!window.calNotesDB || !window.calNotesDB[dateStr] || window.calNotesDB[dateStr].length === 0) {
+        
+        if (!window.currentUser) { notesContainer.innerHTML = '<div style="color:#94a3b8; font-style:italic;">Notları görmek için giriş yapın.</div>'; return; }
+        
+        let uName = window.currentUser.username;
+        if (!window.calNotesDB || !window.calNotesDB[uName] || !window.calNotesDB[uName][dateStr] || window.calNotesDB[uName][dateStr].length === 0) {
             notesContainer.innerHTML = ''; return;
         }
         
-        notesContainer.innerHTML = window.calNotesDB[dateStr].map((n, idx) => {
+        notesContainer.innerHTML = window.calNotesDB[uName][dateStr].map((n, idx) => {
             return `<div style="background:rgba(255,255,255,0.05); border-left:3px solid #f4c542; padding:10px; margin-bottom:8px; border-radius:4px; font-size:0.95rem; position:relative; text-align:left;">
                         <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">${n.time}</div>
                         <div style="color:#fff;">${n.text}</div>
@@ -1960,6 +2021,8 @@ Blühe, deutsches Vaterland!</p>
     };
 
     window.selectDate = function(dateStr, el) {
+        if (!window.currentUser) { window.customAlert("Not kaydetmek için lütfen giriş yapın.", "🔒"); return; }
+        
         document.querySelectorAll('.cal-day').forEach(d => { 
             d.classList.remove('cal-day-selected'); 
             d.style.transform = 'scale(1)'; 
@@ -1982,43 +2045,45 @@ Blühe, deutsches Vaterland!</p>
     
     window.saveCalNote = function(e) {
         if(e) e.stopPropagation(); 
+        if(!window.currentUser) { window.showToast('Giriş yapmalısınız!'); return; }
         if(!window.currentSelectedDate) return;
         const noteInput = document.getElementById('cal-note-input');
         const text = noteInput.value.trim();
         if(!text) return;
 
         if (!window.calNotesDB) window.calNotesDB = {};
-        if (!window.calNotesDB[window.currentSelectedDate]) window.calNotesDB[window.currentSelectedDate] = [];
+        let uName = window.currentUser.username;
+        if (!window.calNotesDB[uName]) window.calNotesDB[uName] = {};
+        if (!window.calNotesDB[uName][window.currentSelectedDate]) window.calNotesDB[uName][window.currentSelectedDate] = [];
         
         let timeStr = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-        window.calNotesDB[window.currentSelectedDate].push({ text: text, time: timeStr });
+        window.calNotesDB[uName][window.currentSelectedDate].push({ text: text, time: timeStr });
         
         localStorage.setItem('misaliCalNotes', JSON.stringify(window.calNotesDB));
-        window.lastLocalUpdate = Date.now(); // FIX: Zwingt Cloud zum Warten!
+        window.lastLocalUpdate = Date.now(); 
         
         noteInput.value = '';
         window.renderCalNotes(window.currentSelectedDate);
         window.renderCalendar(); 
         
         setTimeout(() => {
-            const days = document.querySelectorAll('.cal-day');
-            days.forEach(d => { 
-                if(d.getAttribute('data-date') === window.currentSelectedDate) { 
-                    d.classList.add('cal-day-selected'); 
-                    d.style.transform='scale(1.1)'; 
-                } 
-            });
+            const dayEl = document.querySelector(`.cal-day[data-date='${window.currentSelectedDate}']`);
+            if(dayEl) { dayEl.classList.add('cal-day-selected'); dayEl.style.transform='scale(1.1)'; }
         }, 50);
 
         window.showToast('Not kaydedildi! 📝'); 
         if(window.syncToCloud) window.syncToCloud();
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        window.sendSystemMessage('Admin', `${fullName} takvime not ekledi.`);
     };
 
     window.deleteCalNote = function(dateStr, idx, e) {
         if(e) e.stopPropagation();
         window.customConfirm('Notu silmek istediğinize emin misiniz?', () => {
-            window.calNotesDB[dateStr].splice(idx, 1);
-            if(window.calNotesDB[dateStr].length === 0) delete window.calNotesDB[dateStr];
+            let uName = window.currentUser.username;
+            window.calNotesDB[uName][dateStr].splice(idx, 1);
+            if(window.calNotesDB[uName][dateStr].length === 0) delete window.calNotesDB[uName][dateStr];
+            
             localStorage.setItem('misaliCalNotes', JSON.stringify(window.calNotesDB));
             window.lastLocalUpdate = Date.now();
             
@@ -2026,18 +2091,15 @@ Blühe, deutsches Vaterland!</p>
             window.renderCalendar(); 
             
             setTimeout(() => {
-                const days = document.querySelectorAll('.cal-day');
-                days.forEach(d => { 
-                    if(d.getAttribute('data-date') === dateStr) { 
-                        d.classList.add('cal-day-selected'); 
-                        d.style.transform='scale(1.1)'; 
-                    } 
-                });
+                const dayEl = document.querySelector(`.cal-day[data-date='${dateStr}']`);
+                if(dayEl) { dayEl.classList.add('cal-day-selected'); dayEl.style.transform='scale(1.1)'; }
             }, 50);
 
             window.showToast('Not silindi.');
             if(window.syncToCloud) window.syncToCloud();
-            window.openFastModal('eventsModal'); // Sicherstellen, dass das Modal offen bleibt
+            window.openFastModal('eventsModal'); 
+            let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+            window.sendSystemMessage('Admin', `${fullName} takvimden not sildi.`);
         });
     };
 
@@ -2049,8 +2111,16 @@ Blühe, deutsches Vaterland!</p>
         if(!title || !text) { window.customAlert('Lütfen başlık ve içeriği doldurun.', '⚠️'); return; }
         
         const newWork = {
-            id: 'user_' + Date.now(), username: window.currentUser.username, author: window.currentUser.name, name: window.currentUser.name,
-            title: title, text: text, adminRating: 0, adminCategory: 'Normal', timestamp: Date.now()
+            id: 'user_' + Date.now(), 
+            username: window.currentUser.username, 
+            author: window.currentUser.name, 
+            name: window.currentUser.name,
+            surname: window.currentUser.surname || '',
+            title: title, 
+            text: text, 
+            adminRating: 0, 
+            adminCategory: 'Normal', 
+            timestamp: Date.now()
         };
         
         window.userPoemsDB.push(newWork); localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
@@ -2061,9 +2131,186 @@ Blühe, deutsches Vaterland!</p>
         window.renderUserWorksGrid(); window.renderUserWorksSidebar(); window.updateUserWorksBadge(); 
         if(window.syncToCloud) window.syncToCloud();
         window.navigate('kullanici-eserleri-view');
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        window.sendSystemMessage('Admin', `KULLANICI ESERİ: ${fullName} yeni bir eser ekledi.`);
     };
 
-    // --- CHAT LOGIK (UNDEFINED SCHUTZ & DELETE FIX) ---
+    // MEISTER-FIX: ALPHABETISCHE SORTIERUNG FÜR ALLE GRIDS (A-Z)
+    window.initContent = function() {
+        ['poems', 'quotes', 'stories', 'jokes', 'saglik'].forEach(type => {
+            const gridId = type === 'poems' ? 'siirler' : type === 'quotes' ? 'sozler' : type === 'stories' ? 'hikayeler' : type === 'jokes' ? 'fikralar' : 'saglik';
+            const grid = document.getElementById(gridId + '-grid');
+            if(grid && window.contentDB[type]) {
+                // A-Z Sortierung nach Titel
+                let sortedItems = window.contentDB[type].slice().sort((a, b) => {
+                    let tA = (a.trTitle || a.title || a.tr || '').toLowerCase();
+                    let tB = (b.trTitle || b.title || b.tr || '').toLowerCase();
+                    return tA.localeCompare(tB, 'tr');
+                });
+                
+                grid.innerHTML = sortedItems.map(item => {
+                    const isNew = window.isItemNew(item.id, item.timestamp) ? `<div class="new-badge" id="badge-${item.id}" style="position:absolute; top:-10px; left:-10px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:20; box-shadow:0 4px 10px rgba(239,68,68,0.5);">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>` : '';
+                    let authorText = (type === 'poems' || type === 'quotes') ? 'Şair Misal.i' : 'Anonim'; if (type === 'saglik') authorText = 'Tavsiye / Empfehlung';
+                    const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
+                    let heartCount = 0; if (poemData.ratings) { for(let k in poemData.ratings) { heartCount += poemData.ratings[k]; } }
+                    let commCount = poemData.comments ? poemData.comments.length : 0;
+                    
+                    let dObj = new Date(item.timestamp || Date.now());
+                    let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+                    
+                    return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}')">
+                        ${isNew}
+                        <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
+                        <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">${item.emoji || '✨'}</h3>
+                        <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif;">${item.trTitle}</h3>
+                        <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${authorText}</span>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:8px;"><i class="fas fa-clock"></i> ${dStr}</div>
+                    </div>`;
+                }).join('');
+            }
+        });
+        
+        const trCol = document.getElementById('sahsiyetler-tr-col'); const deCol = document.getElementById('sahsiyetler-de-col');
+        if(trCol && deCol && window.contentDB.persons) {
+            let sortedTrP = window.contentDB.persons.filter(p => p.id.includes('_tr_')).sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
+            let sortedDeP = window.contentDB.persons.filter(p => p.id.includes('_de_')).sort((a,b) => (a.deTitle||'').localeCompare((b.deTitle||''), 'de'));
+            
+            trCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türk Şahsiyetler</h3>' + sortedTrP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.trTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
+            deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.deTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
+        }
+        if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+        if(window.renderTopWorks) window.renderTopWorks(); 
+        if(window.updateTopWorksTicker) window.updateTopWorksTicker();
+    };
+
+    window.openPoemModal = function(id, type) {
+        let item = type === 'userPoems' ? window.userPoemsDB.find(x => x.id === id) : window.contentDB[type].find(x => x.id === id);
+        if(!item) return;
+        window.currentPoemData = { ...item, type: type };
+        
+        let author = type === 'poems' || type === 'quotes' ? 'Şair Misal.i' : type === 'userPoems' ? (item.name + (item.surname ? ' ' + item.surname : '')) : 'Anonim';
+        if (type === 'saglik') author = 'Tavsiye / Empfehlung';
+        window.currentPoemData.author = author;
+
+        document.getElementById('modalTitle').innerText = item.trTitle || item.title || item.tr || 'Başlık';
+        document.getElementById('modalText').innerText = item.trText || item.text || item.quote || item.tr || 'İçerik...';
+        
+        let hasDe = !!(item.deTitle || item.deText || item.de);
+        document.getElementById('contentModal-lang-toggle').style.display = hasDe ? 'flex' : 'none';
+        if(hasDe) window.switchModalLang('TR');
+        
+        window.updateHeartsUI();
+        window.openFastModal('contentModal');
+    };
+
+    window.openUserPoemModal = function(id) { window.openPoemModal(id, 'userPoems'); };
+
+    window.generateFihrist = function() {
+        try {
+            const createList = (type, targetId) => { 
+                const ul = document.getElementById(targetId); 
+                if(ul && window.contentDB[type]) { 
+                    let sorted = window.contentDB[type].slice().sort((a,b) => (a.trTitle || a.title || '').localeCompare((b.trTitle || b.title || ''), 'tr'));
+                    ul.innerHTML = sorted.map(item => { 
+                        const isNew = window.isItemNew(item.id, item.timestamp) ? '<span class="sidebar-badge-new">YENİ (NEU)</span>' : ''; 
+                        return `<li onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}'); window.closeAllSidebars();">${item.trTitle || item.title} ${isNew} <br><span style="font-size:0.8rem; color:#f4c542; font-style:italic;">(${item.deTitle || ''})</span></li>`; 
+                    }).join(''); 
+                } 
+            };
+            createList('poems', 'fihrist-siirler-list'); createList('quotes', 'fihrist-sozler-list'); createList('stories', 'fihrist-hikayeler-list'); createList('jokes', 'fihrist-fikralar-list');
+        } catch(err) {}
+    };
+
+    window.initTicker = function() {
+        let tickerIdx = 0; const tickerEl = document.getElementById('quote-ticker');
+        if(tickerEl && window.contentDB && window.contentDB.ticker && window.contentDB.ticker.length > 0) {
+            setInterval(() => { 
+                tickerEl.classList.remove('show'); 
+                setTimeout(() => { 
+                    const q = window.contentDB.ticker[tickerIdx]; 
+                    tickerEl.innerText = q.tr + " | " + q.de; 
+                    tickerEl.classList.add('show'); 
+                    tickerIdx = (tickerIdx + 1) % window.contentDB.ticker.length; 
+                }, 800); 
+            }, 8000);
+            const q = window.contentDB.ticker[0]; tickerEl.innerText = q.tr + " | " + q.de; tickerEl.classList.add('show'); tickerIdx = 1;
+        }
+    };
+
+    window.updateTopWorksTicker = function() {
+        const tickerInner = document.getElementById('header-top-works-inner'); if(!tickerInner) return;
+        let topWorks = window.userPoemsDB.filter(p => p.adminRating && p.adminRating > 0).sort((a,b) => b.adminRating - a.adminRating).slice(0, 3);
+        if(topWorks.length === 0) { tickerInner.innerHTML = "<span style='margin-right: 40px;'>Henüz onaylanmış eser yok...</span>"; } 
+        else { 
+            let html = ""; 
+            topWorks.forEach((w, i) => { 
+                let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'; 
+                let fullName = w.name + (w.surname ? ' ' + w.surname : '');
+                html += `<span class="ticker-link" onclick="window.openUserPoemModal('${w.id}')">${medal} ${w.title || w.trTitle} (${fullName})</span>`; 
+            }); 
+            tickerInner.innerHTML = html + `<span style="margin-right:40px;"></span>`; 
+        }
+    };
+
+    // MEISTER-FIX: ALPHABETISCHE SORTIERUNG FÜR USER WERKE
+    window.renderUserWorksGrid = function() {
+        const grid = document.getElementById('kullanici-eserleri-grid');
+        if (!grid) return;
+        if (window.userPoemsDB.length === 0) { grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-size: 1.1rem;">Henüz eser bulunmuyor. İlk eseri sen yaz!</div>'; return; }
+        
+        let sortedUserWorks = window.userPoemsDB.slice().sort((a,b) => (a.title || '').localeCompare((b.title || ''), 'tr'));
+
+        grid.innerHTML = sortedUserWorks.map(item => {
+            const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
+            let heartCount = 0; for(let k in poemData.ratings) { heartCount += poemData.ratings[k]; }
+            let commCount = poemData.comments ? poemData.comments.length : 0;
+            let ratingBadge = '';
+            if (item.adminRating > 0) {
+                let cat = item.adminCategory || 'Normal'; let trophies = cat === 'Super Elite' ? '🏆🏆🏆' : cat === 'Elite' ? '🏆🏆' : '🏆';
+                ratingBadge = `<div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #f4c542, #b48608); color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:0.85rem; box-shadow:0 4px 10px rgba(0,0,0,0.5); white-space:nowrap; z-index:10;">${trophies} ${cat} (${item.adminRating} P)</div>`;
+            } else if (window.isItemNew(item.id, item.timestamp)) {
+                ratingBadge = `<div style="position:absolute; top:-12px; left:-12px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:10; box-shadow:0 4px 10px rgba(239,68,68,0.5);">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>`;
+            }
+            
+            let dObj = new Date(item.timestamp || Date.now());
+            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            let fullName = item.name + (item.surname ? ' ' + item.surname : '');
+            
+            return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openUserPoemModal('${item.id}')">
+                ${ratingBadge}
+                <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
+                <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">✍️</h3>
+                <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif;">${item.title || item.trTitle}</h3>
+                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${fullName}</span>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:8px;"><i class="fas fa-clock"></i> ${dStr}</div>
+            </div>`;
+        }).join('');
+    };
+
+    window.renderUserWorksSidebar = function() {
+        const list = document.getElementById('fihrist-user-works-list'); if (!list) return;
+        if (!window.currentUser) { list.innerHTML = '<li style="text-align:center; padding:20px; font-style:italic;">Giriş yapmalısınız.</li>'; return; }
+        const myWorks = window.userPoemsDB.filter(x => x.username === window.currentUser.username).sort((a,b) => (a.title || '').localeCompare((b.title || ''), 'tr'));
+        list.innerHTML = myWorks.length === 0 ? '<li style="text-align:center; padding:20px; font-style:italic;">Eseriniz yok.</li>' : myWorks.map(w => {
+            let dObj = new Date(w.timestamp || Date.now());
+            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><span>${w.title || w.trTitle}</span> <span style="font-size:0.7rem; color:#64748b;">${dStr}</span></div><span style="font-size:0.8rem; color:#f4c542; font-style:italic;">(${w.adminRating > 0 ? w.adminRating + ' Puan' : 'Bekliyor'})</span></li>`;
+        }).join('');
+    };
+
+    window.renderTopWorks = function() {
+        const list = document.getElementById('top-works-list'); if (!list) return;
+        let topWorks = window.userPoemsDB.filter(p => p.adminRating && p.adminRating > 0).sort((a,b) => b.adminRating - a.adminRating);
+        list.innerHTML = topWorks.length === 0 ? '<li style="text-align:center; padding:20px; font-style:italic;">Henüz puanlanmış eser yok.</li>' : topWorks.map((w, i) => {
+            let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+            let dObj = new Date(w.timestamp || Date.now());
+            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            let fullName = w.name + (w.surname ? ' ' + w.surname : '');
+            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${medal}</span><div><div style="font-weight:bold; color:#fff;">${w.title || w.trTitle}</div><div style="font-size:0.85rem; color:#94a3b8;">${fullName} &bull; ${dStr}</div></div></div><div style="background:rgba(244,197,66,0.2); padding:4px 8px; border-radius:8px; border:1px solid #f4c542; color:#f4c542; font-weight:bold;">${w.adminRating} P</div></li>`;
+        }).join('');
+    };
+
+    // --- CHAT LOGIK (MEISTER-LÖSCHUNG & ARRAYS) ---
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); if(!box) return;
         if(!window.chatDB || window.chatDB.length === 0) { box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz!</div>'; return; }
@@ -2092,16 +2339,18 @@ Blühe, deutsches Vaterland!</p>
         if(window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
         
         const now = new Date(); const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        let uName = window.currentUser.name || window.currentUser.username || 'Misafir';
-        const msg = { id: 'msg_' + Date.now(), username: window.currentUser.username, name: uName, text: text, time: timeStr };
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        const msg = { id: 'msg_' + Date.now(), username: window.currentUser.username, name: fullName, text: text, time: timeStr };
         
         window.chatDB.push(msg); if(window.chatDB.length > 100) window.chatDB.shift();
         localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB));
         input.value = ''; window.lastLocalUpdate = Date.now(); 
         window.renderChat(); 
         if(window.syncToCloud) window.syncToCloud();
+        window.sendSystemMessage('Admin', `${fullName} sohbete yazdı.`);
     };
 
+    // FIX: SOFORTIGES LÖSCHEN IM ARRAY
     window.deleteChatMessage = function(id) {
         window.customConfirm('Mesajı sil?', () => { 
             window.chatDB = window.chatDB.filter(m => m.id !== id); 
@@ -2109,11 +2358,11 @@ Blühe, deutsches Vaterland!</p>
             window.lastLocalUpdate = Date.now(); 
             window.renderChat(); 
             if(window.syncToCloud) window.syncToCloud(); 
-            window.sendSystemMessage((window.currentUser?window.currentUser.name:"Admin"), "Sohbet mesajı sildi.");
+            window.sendSystemMessage('Admin', "Admin sohbetten bir mesaj sildi.");
         });
     };
 
-    // --- GELEN KUTUSU & ADMIN MESSAGES ---
+    // --- GETRENNTE POSTEINGÄNGE (ADMIN & USER) ---
     window.renderAdminMessages = function() {
         const list = document.getElementById('admin-msg-list'); if(!list) return;
         let msgs = window.adminMessages.filter(m => !m.to || m.to === 'admin');
@@ -2169,12 +2418,34 @@ Blühe, deutsches Vaterland!</p>
         });
     };
 
+    // FIX: USER KANN SEINE EIGENE INBOX LEEREN
+    window.deleteAllUserMessages = function() {
+        window.customConfirm('Tüm mesajlarını temizlemek istediğine emin misin?', () => {
+            if(!window.currentUser) return;
+            window.adminMessages = window.adminMessages.filter(m => m.to !== window.currentUser.username);
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
+            window.lastLocalUpdate = Date.now();
+            window.renderUserMessages();
+            window.updateNotifyBadge();
+            if(window.syncToCloud) window.syncToCloud();
+            window.showToast('Mesaj kutusu temizlendi.');
+            window.openFastModal('userMessagesModal'); 
+        });
+    };
+
     window.deleteAdminMessage = function(idx) { window.customConfirm('Mesajı sil?', () => { window.adminMessages.splice(idx, 1); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.renderAdminMessages(); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); window.openFastModal('adminMessagesModal'); }); };
     
     window.replyToMessage = function(toUser, idx) {
-        window.customDualPrompt(`Yanıt: ${toUser}`, '✉️', '', (title, msg) => {
-            window.adminMessages.push({ to: toUser, from: 'Admin', msg: msg, time: new Date().toLocaleTimeString('tr-TR'), read: false });
-            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.showToast('Yanıt gönderildi.'); if(window.syncToCloud) window.syncToCloud(); window.openFastModal('adminMessagesModal');
+        if (toUser === 'Sistem') { window.showToast('Sisteme yanıt veremezsiniz.'); return; }
+        
+        // Finde den echten Usernamen aus dem "Name Surname (username)" String, falls vorhanden.
+        let targetUsername = toUser;
+        let match = toUser.match(/\((.*?)\)/);
+        if (match && window.userDatabase[match[1]]) targetUsername = match[1];
+
+        window.customDualPrompt(`Yanıtla: ${targetUsername}`, '✉️', '', (title, msg) => {
+            window.adminMessages.push({ to: targetUsername, from: 'Admin', msg: msg, time: new Date().toLocaleTimeString('tr-TR'), read: false });
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now(); window.showToast('Yanıt gönderildi.'); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); window.openFastModal('adminMessagesModal');
         });
     };
 
@@ -2256,164 +2527,7 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('horo-text-de').innerText = data.de;
     };
 
-    window.initContent = function() {
-        ['poems', 'quotes', 'stories', 'jokes', 'saglik'].forEach(type => {
-            const gridId = type === 'poems' ? 'siirler' : type === 'quotes' ? 'sozler' : type === 'stories' ? 'hikayeler' : type === 'jokes' ? 'fikralar' : 'saglik';
-            const grid = document.getElementById(gridId + '-grid');
-            if(grid && window.contentDB[type]) {
-                grid.innerHTML = window.contentDB[type].map(item => {
-                    const isNew = window.isItemNew(item.id, item.timestamp) ? `<div class="new-badge" id="badge-${item.id}" style="position:absolute; top:-10px; left:-10px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:20; box-shadow:0 4px 10px rgba(239,68,68,0.5);">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>` : '';
-                    let authorText = (type === 'poems' || type === 'quotes') ? 'Şair Misal.i' : 'Anonim'; if (type === 'saglik') authorText = 'Tavsiye / Empfehlung';
-                    const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
-                    let heartCount = 0; if (poemData.ratings) { for(let k in poemData.ratings) { heartCount += poemData.ratings[k]; } }
-                    let commCount = poemData.comments ? poemData.comments.length : 0;
-                    
-                    let dObj = new Date(item.timestamp || Date.now());
-                    let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-                    
-                    return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}')">
-                        ${isNew}
-                        <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
-                        <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">${item.emoji || '✨'}</h3>
-                        <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif;">${item.trTitle}</h3>
-                        <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${authorText}</span>
-                        <div style="font-size:0.75rem; color:#64748b; margin-top:8px;"><i class="fas fa-clock"></i> ${dStr}</div>
-                    </div>`;
-                }).join('');
-            }
-        });
-        
-        const trCol = document.getElementById('sahsiyetler-tr-col'); const deCol = document.getElementById('sahsiyetler-de-col');
-        if(trCol && deCol && window.contentDB.persons) {
-            const trP = window.contentDB.persons.filter(p => p.id.includes('_tr_')); const deP = window.contentDB.persons.filter(p => p.id.includes('_de_'));
-            trCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türk Şahsiyetler</h3>' + trP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.trTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
-            deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + deP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.deTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
-        }
-        if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-        if(window.renderTopWorks) window.renderTopWorks(); 
-        if(window.updateTopWorksTicker) window.updateTopWorksTicker();
-    };
-
-    window.openPoemModal = function(id, type) {
-        let item = type === 'userPoems' ? window.userPoemsDB.find(x => x.id === id) : window.contentDB[type].find(x => x.id === id);
-        if(!item) return;
-        window.currentPoemData = { ...item, type: type };
-        
-        let author = type === 'poems' || type === 'quotes' ? 'Şair Misal.i' : type === 'userPoems' ? (item.name || item.author || 'Anonim') : 'Anonim';
-        if (type === 'saglik') author = 'Tavsiye / Empfehlung';
-        window.currentPoemData.author = author;
-
-        document.getElementById('modalTitle').innerText = item.trTitle || item.title || item.tr || 'Başlık';
-        document.getElementById('modalText').innerText = item.trText || item.text || item.quote || item.tr || 'İçerik...';
-        
-        let hasDe = !!(item.deTitle || item.deText || item.de);
-        document.getElementById('contentModal-lang-toggle').style.display = hasDe ? 'flex' : 'none';
-        if(hasDe) window.switchModalLang('TR');
-        
-        window.updateHeartsUI();
-        window.openFastModal('contentModal');
-    };
-
-    window.openUserPoemModal = function(id) { window.openPoemModal(id, 'userPoems'); };
-
-    window.generateFihrist = function() {
-        try {
-            const createList = (type, targetId) => { 
-                const ul = document.getElementById(targetId); 
-                if(ul && window.contentDB[type]) { 
-                    ul.innerHTML = window.contentDB[type].map(item => { 
-                        const isNew = window.isItemNew(item.id, item.timestamp) ? '<span class="sidebar-badge-new">YENİ (NEU)</span>' : ''; 
-                        return `<li onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}'); window.closeAllSidebars();">${item.trTitle} ${isNew} <br><span style="font-size:0.8rem; color:#f4c542; font-style:italic;">(${item.deTitle})</span></li>`; 
-                    }).join(''); 
-                } 
-            };
-            createList('poems', 'fihrist-siirler-list'); createList('quotes', 'fihrist-sozler-list'); createList('stories', 'fihrist-hikayeler-list'); createList('jokes', 'fihrist-fikralar-list');
-        } catch(err) {}
-    };
-
-    window.initTicker = function() {
-        let tickerIdx = 0; const tickerEl = document.getElementById('quote-ticker');
-        if(tickerEl && window.contentDB && window.contentDB.ticker && window.contentDB.ticker.length > 0) {
-            setInterval(() => { 
-                tickerEl.classList.remove('show'); 
-                setTimeout(() => { 
-                    const q = window.contentDB.ticker[tickerIdx]; 
-                    tickerEl.innerText = q.tr + " | " + q.de; 
-                    tickerEl.classList.add('show'); 
-                    tickerIdx = (tickerIdx + 1) % window.contentDB.ticker.length; 
-                }, 800); 
-            }, 8000);
-            const q = window.contentDB.ticker[0]; tickerEl.innerText = q.tr + " | " + q.de; tickerEl.classList.add('show'); tickerIdx = 1;
-        }
-    };
-
-    window.updateTopWorksTicker = function() {
-        const tickerInner = document.getElementById('header-top-works-inner'); if(!tickerInner) return;
-        let topWorks = window.userPoemsDB.filter(p => p.adminRating && p.adminRating > 0).sort((a,b) => b.adminRating - a.adminRating).slice(0, 3);
-        if(topWorks.length === 0) { tickerInner.innerHTML = "<span style='margin-right: 40px;'>Henüz onaylanmış eser yok...</span>"; } 
-        else { 
-            let html = ""; 
-            topWorks.forEach((w, i) => { 
-                let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'; 
-                html += `<span class="ticker-link" onclick="window.openUserPoemModal('${w.id}')">${medal} ${w.title || w.trTitle} (${w.name || w.author})</span>`; 
-            }); 
-            tickerInner.innerHTML = html + `<span style="margin-right:40px;"></span>`; 
-        }
-    };
-
-    window.renderUserWorksGrid = function() {
-        const grid = document.getElementById('kullanici-eserleri-grid');
-        if (!grid) return;
-        if (window.userPoemsDB.length === 0) { grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-size: 1.1rem;">Henüz eser bulunmuyor. İlk eseri sen yaz!</div>'; return; }
-        
-        grid.innerHTML = window.userPoemsDB.slice().reverse().map(item => {
-            const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
-            let heartCount = 0; for(let k in poemData.ratings) { heartCount += poemData.ratings[k]; }
-            let commCount = poemData.comments ? poemData.comments.length : 0;
-            let ratingBadge = '';
-            if (item.adminRating > 0) {
-                let cat = item.adminCategory || 'Normal'; let trophies = cat === 'Super Elite' ? '🏆🏆🏆' : cat === 'Elite' ? '🏆🏆' : '🏆';
-                ratingBadge = `<div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #f4c542, #b48608); color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:0.85rem; box-shadow:0 4px 10px rgba(0,0,0,0.5); white-space:nowrap; z-index:10;">${trophies} ${cat} (${item.adminRating} P)</div>`;
-            } else if (window.isItemNew(item.id, item.timestamp)) {
-                ratingBadge = `<div style="position:absolute; top:-12px; left:-12px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:10; box-shadow:0 4px 10px rgba(239,68,68,0.5);">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>`;
-            }
-            
-            let dObj = new Date(item.timestamp || Date.now());
-            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-            
-            return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openUserPoemModal('${item.id}')">
-                ${ratingBadge}
-                <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
-                <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">✍️</h3>
-                <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif;">${item.title || item.trTitle}</h3>
-                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${item.name || item.author || 'Anonim'}</span>
-                <div style="font-size:0.75rem; color:#64748b; margin-top:8px;"><i class="fas fa-clock"></i> ${dStr}</div>
-            </div>`;
-        }).join('');
-    };
-
-    window.renderUserWorksSidebar = function() {
-        const list = document.getElementById('fihrist-user-works-list'); if (!list) return;
-        if (!window.currentUser) { list.innerHTML = '<li style="text-align:center; padding:20px; font-style:italic;">Giriş yapmalısınız.</li>'; return; }
-        const myWorks = window.userPoemsDB.filter(x => x.username === window.currentUser.username);
-        list.innerHTML = myWorks.length === 0 ? '<li style="text-align:center; padding:20px; font-style:italic;">Eseriniz yok.</li>' : myWorks.slice().reverse().map(w => {
-            let dObj = new Date(w.timestamp || Date.now());
-            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><span>${w.title || w.trTitle}</span> <span style="font-size:0.7rem; color:#64748b;">${dStr}</span></div><span style="font-size:0.8rem; color:#f4c542; font-style:italic;">(${w.adminRating > 0 ? w.adminRating + ' Puan' : 'Bekliyor'})</span></li>`;
-        }).join('');
-    };
-
-    window.renderTopWorks = function() {
-        const list = document.getElementById('top-works-list'); if (!list) return;
-        let topWorks = window.userPoemsDB.filter(p => p.adminRating && p.adminRating > 0).sort((a,b) => b.adminRating - a.adminRating);
-        list.innerHTML = topWorks.length === 0 ? '<li style="text-align:center; padding:20px; font-style:italic;">Henüz puanlanmış eser yok.</li>' : topWorks.map((w, i) => {
-            let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
-            let dObj = new Date(w.timestamp || Date.now());
-            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${medal}</span><div><div style="font-weight:bold; color:#fff;">${w.title || w.trTitle}</div><div style="font-size:0.85rem; color:#94a3b8;">${w.name || w.author} &bull; ${dStr}</div></div></div><div style="background:rgba(244,197,66,0.2); padding:4px 8px; border-radius:8px; border:1px solid #f4c542; color:#f4c542; font-weight:bold;">${w.adminRating} P</div></li>`;
-        }).join('');
-    };
-
+    // --- INTERAKTIONEN ---
     window.ratePoem = function(rating, e) {
         if (e) e.stopPropagation(); 
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
@@ -2422,10 +2536,24 @@ Blühe, deutsches Vaterland!</p>
         if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
         
         const old = window.poemDataStore[poemId].ratings[window.currentUser.username] || 0;
-        if(old === rating) delete window.poemDataStore[poemId].ratings[window.currentUser.username];
-        else window.poemDataStore[poemId].ratings[window.currentUser.username] = rating;
+        let action = '';
+        if(old === rating) {
+            delete window.poemDataStore[poemId].ratings[window.currentUser.username];
+            action = 'kalbini geri çekti';
+        } else {
+            window.poemDataStore[poemId].ratings[window.currentUser.username] = rating;
+            action = 'kalp bıraktı ❤️';
+        }
         
         window.lastLocalUpdate = Date.now(); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
+        
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        if(action === 'kalp bıraktı ❤️') {
+            window.sendSystemMessage('Admin', `${fullName} bir esere ${action}`);
+            if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
+                window.sendSystemMessage(window.currentPoemData.username, `${fullName} eserine kalp bıraktı!`);
+            }
+        }
     };
 
     window.m_addComment = function(e) {
@@ -2439,9 +2567,15 @@ Blühe, deutsches Vaterland!</p>
         if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
         if (!window.poemDataStore[poemId].comments) window.poemDataStore[poemId].comments = [];
         
-        window.poemDataStore[poemId].comments.push({ username: window.currentUser.username, user: window.currentUser.name, text: text, time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) });
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        window.poemDataStore[poemId].comments.push({ username: window.currentUser.username, user: fullName, text: text, time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) });
         
         input.value = ''; window.lastLocalUpdate = Date.now(); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
+        
+        window.sendSystemMessage('Admin', `${fullName} bir yoruma katıldı.`);
+        if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
+            window.sendSystemMessage(window.currentPoemData.username, `${fullName} eserine yorum yaptı!`);
+        }
     };
 
     window.m_delComm = function(poemId, idx, e) {
@@ -2454,7 +2588,7 @@ Blühe, deutsches Vaterland!</p>
             if(window.syncToCloud) window.syncToCloud(); 
             window.renderUserWorksGrid(); 
             window.openFastModal('contentModal'); 
-            window.sendSystemMessage((window.currentUser?window.currentUser.name:"Admin"), "Bir yorum sildi.");
+            window.sendSystemMessage('Admin', `${window.currentUser ? window.currentUser.name : "Admin"} bir yorum sildi.`);
         });
     };
 
@@ -2468,7 +2602,7 @@ Blühe, deutsches Vaterland!</p>
             window.poemDataStore[poemId].comments[idx].text = newText;
             window.poemDataStore[poemId].comments[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
             window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid(); window.openFastModal('contentModal');
-            window.sendSystemMessage((window.currentUser?window.currentUser.name:"Admin"), "Bir yorum düzenledi.");
+            window.sendSystemMessage('Admin', `${window.currentUser ? window.currentUser.name : "Admin"} bir yorum düzenledi.`);
         });
     };
 
@@ -2550,6 +2684,7 @@ Blühe, deutsches Vaterland!</p>
         if(p) {
             p.adminRating = v; p.adminCategory = c; localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
             window.showToast('Puan kaydedildi!'); window.updateHeartsUI(); window.renderUserWorksGrid(); window.renderTopWorks(); window.updateTopWorksTicker(); window.updateUserWorksBadge(); if(window.syncToCloud) window.syncToCloud();
+            window.sendSystemMessage(p.username, `Eserin "${p.title}" Admin tarafından ${v} puan aldı!`);
         }
     };
 
@@ -2569,7 +2704,8 @@ Blühe, deutsches Vaterland!</p>
             list.innerHTML = pendingList.map(w => {
                 let dObj = new Date(w.timestamp || Date.now());
                 let dStr = dObj.toLocaleDateString('tr-TR') + ' - Saat: ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-                return `<div style="padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(244,197,66,0.4); border-radius:12px; cursor:pointer;" onclick="window.openUserPoemModal('${w.id}')"><div style="color:#fff; font-weight:bold; font-size:1.1rem;">${w.title}</div><div style="color:#94a3b8; font-size:0.9rem;">Yazar: ${w.author || w.name} | Tarih: ${dStr}</div></div>`;
+                let fullName = w.name + (w.surname ? ' ' + w.surname : '');
+                return `<div style="padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(244,197,66,0.4); border-radius:12px; cursor:pointer;" onclick="window.openUserPoemModal('${w.id}')"><div style="color:#fff; font-weight:bold; font-size:1.1rem;">${w.title}</div><div style="color:#94a3b8; font-size:0.9rem;">Yazar: ${fullName} | Tarih: ${dStr}</div></div>`;
             }).join(''); 
         } 
         else if(list) { list.innerHTML = '<p style="text-align:center; color:#94a3b8;">Bekleyen eser yok.</p>'; }
@@ -2584,7 +2720,6 @@ Blühe, deutsches Vaterland!</p>
         if(bdg2) { bdg2.innerText = myW > 0 ? myW : ''; }
     };
 
-    // FIX: Rote Zähler (Glocke & Posteingang) logik
     window.updateNotifyBadge = function() {
         const b1 = document.getElementById('user-notify-badge'); 
         const b2 = document.getElementById('user-inbox-badge'); 
@@ -2604,7 +2739,7 @@ Blühe, deutsches Vaterland!</p>
         }
 
         if(b1) {
-            let total = unreadAdmin + unreadUser;
+            let total = window.currentUser && window.currentUser.role === 'admin' ? unreadAdmin : unreadUser;
             b1.innerText = total > 0 ? total : '';
         }
         if(b2) b2.innerText = unreadUser > 0 ? unreadUser : '';
@@ -2612,6 +2747,15 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // --- ADMIN LOGIK ---
+    window.toggleUserApproval = function(username) {
+        window.userDatabase[username].approved = !window.userDatabase[username].approved;
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        window.lastLocalUpdate = Date.now();
+        window.renderOnlineUsers();
+        if(window.syncToCloud) window.syncToCloud();
+        window.sendSystemMessage('Admin', `Kullanıcı "${username}" ${window.userDatabase[username].approved ? 'onaylandı' : 'onayı iptal edildi'}.`);
+    };
+
     window.renderAdminEmojis = function() {
         const p1 = document.getElementById('emoji-picker-add'); const p2 = document.getElementById('emoji-picker-edit');
         const ems = Array.from("😀😃😄😁😆😅😂🤣🥲☺️😊😇🙂🙃😉😌😍🥰😘😗😙😚😋😛😝😜🤪🤨🧐🤓😎🥸🤩🥳😏😒😞😔😟😕🙁☹️😣😖😫😩🥺😢😭😤😠😡🤬🤯😳🥵🥶😱😨😰😥😓🤗🤔🤭🤫🤥😶😐😑😬🙄😯😦😧😮😲🥱😴🤤😪😵🤐🥴🤢🤮🤧😷🤒🤕🤑🤠😈👿👹👺🤡💩👻💀☠️👽👾🤖🎃😺😸😹😻😼😽🙀😿😾👋🤚🖐✋🖖👌🤌🤏✌️🤞🤟🤘🤙👈👉👆🖕👇☝️👍👎✊👊🤛🤜👏🙌👐🤲🤝🙏✍️💅🤳💪🦾🦿🦵🦶👂🦻👃🦼🦽🧠🫀🫁🦷🦴👀👁👅👄💋🩸❤️🔥✨🌟🕊️🥀🌹🍂💎🧿🍀🪐🌙☕🍎🍏🍐🍊🍋🍌🍉🍇🍓🍈🍒🍑🥭🍍🥥🥝🍅🍆🥑🥦🥬🥒🌶🫑🌽🥕🧄🧅🥔🍠🥐🥯🍞🥖🥨🧀🥚🍳🧈🥞🧇🥓🥩🍗🍖🦴🌭🍔🍟🍕🫓🥪🥙🧆🌮🌯🫔🥗🥘🫕🥫🍝🍜🍲🍛🍣🍱🥟🦪🍙🍚🍘🍥🥠🥮🍢🍡🍧🍨🍦🥧🧁🍰🎂🍮🍭🍬🍫🍿🍩🍪🌰🥜🍯🥛🍼☕️🍵🧃🥤🧋🍶🍺🍻🥂🍷🥃🍸🍹🧉🍾🧊🥄🍴🍽🥣🥡🥢🧂⚽️🏀🏈⚾️🥎🎾🏐🏉🥏🎱🪀🏓🏸🏒🏑🥍🏏🪃🥅⛳️🪁🏹🎣🤿🥊🥋🎽🛹🛼🛷⛸🥌🎿⛷🏂🪂🏋️‍♀️🏋️‍♂️🤼‍♀️🤼‍♂️🤸‍♀️🤸‍♂️⛹️‍♀️⛹️‍♂️🤺🤾‍♀️🤾‍♂️🏌️‍♀️🏌️‍♂️🏇🧘‍♀️🧘‍♂️🏄‍♀️🏄‍♂️🏊‍♀️🏊‍♂️🤽‍♀️🤽‍♂️🚣‍♀️🚣‍♂️🧗‍♀️🧗‍♂️🚵‍♀️🚵‍♂️🏆🥇🥈🥉🏅🎖🏵🎗🎫🎟🎪🤹‍♀️🤹‍♂️🎭🩰🎨🎬🎤🎧🎼🎹🥁🪘🎷🎺🪗🎸🪕🎻🎲♟🎯🎳🎮🎰🧩🚗🚕🚙🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚜🦯🦽🦼🛴🚲🛵🏍🛺🚨🚔🚍🚘🚖🚡🚠🚟🚃🚋🚞🚝🚄🚅🚈🚂🚆🚇🚊🚉✈️🛫🛬🛩💺🛰🚀🛸🚁🛶⛵️🚤🛥🛳⛴🚢⚓️🪝⛽️🚧🚦🚥🚏🗺🗿🗽🗼🏰🏯🏟🎡🎢🎠⛲️⛱🏖🏝🏜🌋⛰🏔🗻🏕⛺️🛖🏠🏡🏘🏚🏗🏭🏢🏬🏣🏤🏥🏦🏨🏪🏫🏩💒🏛⛪️🕌🕍🛕🕋⛩🛤🛣🗾🎑🏞🌅🌄🌠🎇🎆🌇🌆🏙🌃🌌🌉🌁⌚️📱📲💻⌨️🖥🖨🖱🖲🕹🗜💽💾💿📀📼📷📸📹🎥📽🎞📞☎️📟📠📺📻🎙🎚🎛🧭⏱⏲⏰🕰⌛️⏳📡🔋🔌💡🔦🕯🪔🧯🛢💸💵💴💶💷🪙💰💳💎⚖️🪜🧰🪛🔧🔨⚒🛠⛏🪚🔩⚙️🪤🧱⛓🧲🔫💣🧨🪓🔪🗡⚔️🛡🚬⚰️🪦⚱️🏺🔮📿🧿💈⚗️🔭🔬🕳🩹🩺💊💉🩸🧬🦠🧫🧪🌡🧹🪠🧺🧻🚽🚰🚿🛁🛀🧼🪥🪒🧽🪣🧴🛎🔑🗝🚪🪑🛋🛏🛌🧸🪆🖼🪞🪟🛍🛒🎁🎈🎏🎀🪄🪅🎊🎉🎎🏮🎐🧧✉️📩📨📧💌📥📤📦🏷🪧📪📫📬📭📮📯📜📃📄📑🧾📊📈📉🗒🗓📆📅🗑📇🗃🗳🗄📋📁📂🗂🗞📰📓📔📒📕📗📘📙📚📖🔖🧷🔗📎🖇📐📏🧮📌📍✂️🖊🖋✒️🖌🖍📝✏️🔍🔎🔏🔐🔒🔓❤️🧡💛💚💙💜🖤🤍🤎💔❣️💕💞💓💗💖💘💝");
@@ -2630,19 +2774,22 @@ Blühe, deutsches Vaterland!</p>
         const rb = document.getElementById('rapor-dot-mini-admin');
         
         let db = []; for(let k in window.userDatabase) db.push(window.userDatabase[k]);
+        db.sort((a,b) => (a.name||'').localeCompare((b.name||''), 'tr'));
         
         if(list1) {
             let usrs = db.filter(u => u.role !== 'admin');
             list1.innerHTML = usrs.length === 0 ? '<p style="color:#94a3b8;">Kimse yok.</p>' : usrs.map(u => {
                 let z = (u.day && u.month) ? window.getZodiacSign(u.day, u.month).icon : '✨';
-                return `<div style="padding:15px; background:rgba(0,0,0,0.4); margin-bottom:10px; border-radius:12px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid rgba(244,197,66,0.3);" onclick="if(window.customDualPrompt) window.customDualPrompt('Mesaj Gönder', '💬', '', (title, msg) => { window.adminMessages.push({to: '${u.username}', from: '${window.currentUser ? window.currentUser.name : 'Gizli'}', msg: msg, icon:'✉️', time: new Date().toLocaleTimeString('tr-TR'), read: false}); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.showToast('Mesaj gönderildi!'); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); })"><div style="font-size:2rem; pointer-events:none;">${u.emoji || '👤'}</div><div style="flex-grow:1; pointer-events:none;"><strong style="color:#fdfbf7;">${u.name}</strong><br><span style="font-size:0.85rem; color:#94a3b8;">${z} | Puan: ${u.score||0}</span></div><i class="fas fa-envelope" style="color:#f4c542; pointer-events:none;"></i></div>`;
+                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                return `<div style="padding:15px; background:rgba(0,0,0,0.4); margin-bottom:10px; border-radius:12px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid rgba(244,197,66,0.3);" onclick="if(window.customDualPrompt) window.customDualPrompt('Mesaj Gönder', '💬', '', (title, msg) => { window.adminMessages.push({to: '${u.username}', from: '${window.currentUser ? window.currentUser.name : 'Gizli'}', msg: msg, icon:'✉️', time: new Date().toLocaleTimeString('tr-TR'), read: false}); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.showToast('Mesaj gönderildi!'); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); })"><div style="font-size:2rem; pointer-events:none;">${u.emoji || '👤'}</div><div style="flex-grow:1; pointer-events:none;"><strong style="color:#fdfbf7;">${fullName}</strong><br><span style="font-size:0.85rem; color:#94a3b8;">${z} | Puan: ${u.score||0}</span></div><i class="fas fa-envelope" style="color:#f4c542; pointer-events:none;"></i></div>`;
             }).join('');
             if(b1) b1.innerText = usrs.length > 0 ? usrs.length : '';
         }
         if(list2) {
             list2.innerHTML = db.map(u => {
                 let z = (u.day && u.month) ? window.getZodiacSign(u.day, u.month).icon : '✨';
-                return `<div style="padding:15px; background:rgba(0,0,0,0.4); margin-bottom:10px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; border:1px solid rgba(244,197,66,0.3);"><div style="display:flex; align-items:center; gap:12px;"><div style="font-size:2rem;">${u.emoji || '👤'}</div><div><strong style="color:${u.role==='admin'?'#f4c542':'#fdfbf7'};">${u.name} (${u.username})</strong><br><span style="font-size:0.85rem; color:#94a3b8;">${z} | Şifre: ${u.pass} | Puan: ${u.score||0}</span></div></div><div style="display:flex; gap:8px;"><button class="reset-btn" onclick="window.editUserStats('${u.username}')" style="padding:8px; border-radius:8px; width:auto; margin:0;"><i class="fas fa-star"></i></button><button class="reset-btn danger" onclick="window.deleteUser('${u.username}')" style="padding:8px; border-radius:8px; width:auto; margin:0;"><i class="fas fa-trash"></i></button></div></div>`;
+                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                return `<div style="padding:15px; background:rgba(0,0,0,0.4); margin-bottom:10px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; border:1px solid rgba(244,197,66,0.3);"><div style="display:flex; align-items:center; gap:12px;"><div style="font-size:2rem;">${u.emoji || '👤'}</div><div><strong style="color:${u.role==='admin'?'#f4c542':'#fdfbf7'};">${fullName} (${u.username})</strong><br><span style="font-size:0.85rem; color:#94a3b8;">${z} | Şifre: ${u.pass} | Puan: ${u.score||0}</span></div></div><div style="display:flex; gap:8px;"><button class="reset-btn" onclick="window.editUserStats('${u.username}')" style="padding:8px; border-radius:8px; width:auto; margin:0;"><i class="fas fa-star"></i></button><button class="reset-btn danger" onclick="window.deleteUser('${u.username}')" style="padding:8px; border-radius:8px; width:auto; margin:0;"><i class="fas fa-trash"></i></button></div></div>`;
             }).join('');
             if(b2) b2.innerText = db.length > 0 ? db.length : '';
         }
@@ -2650,12 +2797,18 @@ Blühe, deutsches Vaterland!</p>
         if(adminUsersList) {
             adminUsersList.innerHTML = db.map(u => {
                 let z = (u.day && u.month) ? window.getZodiacSign(u.day, u.month).icon : '✨';
+                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                let approveBtn = u.role !== 'admin' ? (u.approved ? `<button class="reset-btn success" title="Erişimi Kapat" onclick="window.toggleUserApproval('${u.username}')" style="padding:5px 10px; font-size:0.8rem; margin:0;"><i class="fas fa-check-circle"></i> Aktif</button>` : `<button class="reset-btn danger" title="Erişimi Aç" onclick="window.toggleUserApproval('${u.username}')" style="padding:5px 10px; font-size:0.8rem; margin:0;"><i class="fas fa-times-circle"></i> Onayla</button>`) : '';
+
                 return `<div style="padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(244,197,66,0.3); border-radius:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <div style="display:flex; align-items:center; gap:12px;">
                         <div style="font-size:1.8rem;">${u.emoji || '👤'}</div>
-                        <div style="text-align:left;"><strong style="color:${u.role==='admin'?'#f4c542':'#fff'};">${u.name} (${u.username})</strong><br><span style="color:#94a3b8; font-size:0.85rem;">Burç: ${z} | Rol: ${u.role}</span></div>
+                        <div style="text-align:left;"><strong style="color:${u.role==='admin'?'#f4c542':'#fff'};">${fullName} (${u.username})</strong><br><span style="color:#94a3b8; font-size:0.85rem;">Burç: ${z} | Rol: ${u.role}</span></div>
                     </div>
                     <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+                        <div style="display:flex; gap:5px;">
+                            ${approveBtn}
+                        </div>
                         <div style="color:#22c55e; font-weight:bold;">${u.score||0} P.</div>
                         <div style="display:flex; gap:5px;">
                             <button class="reset-btn" title="Mesaj Gönder" onclick="if(window.customDualPrompt) window.customDualPrompt('Mesaj Gönder (${u.username})', '💬', '', (title, msg) => { window.adminMessages.push({to: '${u.username}', from: 'Admin', msg: msg, time: new Date().toLocaleTimeString('tr-TR'), read: false}); localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.showToast('Mesaj gönderildi!'); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); window.openFastModal('adminUsersModal'); })" style="padding:5px 10px; font-size:0.8rem; margin:0;"><i class="fas fa-envelope"></i></button>
@@ -2665,7 +2818,10 @@ Blühe, deutsches Vaterland!</p>
                     </div>
                 </div>`;
             }).join('');
-            if(b3) b3.innerText = db.length > 0 ? db.length : '';
+            
+            let unapproved = db.filter(u => u.approved === false).length;
+            if(b3) { b3.innerText = unapproved > 0 ? unapproved : ''; }
+            if(unapproved > 0) { b3.classList.add('badge-red'); b3.classList.remove('badge-orange'); } else { b3.classList.add('badge-orange'); b3.classList.remove('badge-red'); }
         }
 
         const hStats = document.getElementById('header-stats-text'); 
@@ -2780,7 +2936,7 @@ Blühe, deutsches Vaterland!</p>
     window.adminLoadItemsForEdit = function() {
         const type = document.getElementById('admin-edit-type').value; const select = document.getElementById('admin-edit-item-select'); select.innerHTML = '<option value="">-- Seçiniz --</option>'; document.getElementById('admin-edit-fields').style.display = 'none';
         let items = type === 'userPoems' ? window.userPoemsDB : window.contentDB[type] || [];
-        items.forEach(item => { select.innerHTML += `<option value="${item.id}">${item.trTitle || item.title || item.tr}</option>`; });
+        items.slice().sort((a,b) => (a.trTitle || a.title || a.tr || '').localeCompare((b.trTitle || b.title || b.tr || ''), 'tr')).forEach(item => { select.innerHTML += `<option value="${item.id}">${item.trTitle || item.title || item.tr}</option>`; });
     };
     
     window.adminSelectItemForEdit = function() {
@@ -2828,7 +2984,7 @@ Blühe, deutsches Vaterland!</p>
         window.closeTopModal('force'); window.showToast('Profil güncellendi!'); window.checkRemember(); if(window.syncToCloud) window.syncToCloud();
     };
 
-    // --- GAMES LOGIK ---
+    // --- GAMES LOGIK (KOMPLETT WIEDERHERGESTELLT) ---
     window.updateGameStats = function(points, result, gameName) {
         if(!window.currentUser) return;
         window.lastLocalUpdate = Date.now(); let u = window.userDatabase[window.currentUser.username]; if(!u) return;
@@ -2840,35 +2996,37 @@ Blühe, deutsches Vaterland!</p>
         const scoreEl = document.getElementById('user-score'); 
         if(scoreEl) scoreEl.innerText = u.score + ' P.';
         
-        window.adminLogs.push({ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: gameName + ' Oynadı (' + (points > 0 ? '+'+points : points) + ' Puan)', user: u.name });
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        window.adminLogs.push({ time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), action: gameName + ' Oynadı (' + (points > 0 ? '+'+points : points) + ' Puan)', user: fullName });
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); 
         if(window.syncToCloud) window.syncToCloud(); 
         window.renderOnlineUsers();
+        window.sendSystemMessage('Admin', `${fullName} oyun oynadı: ${gameName}`);
     };
 
-    window.openFalModal=function(e){if(e)e.stopPropagation();window.openFastModal('falModal');document.getElementById('fal-cup').style.display='block';document.getElementById('fal-result').style.display='none';};
+    window.openFalModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('falModal');document.getElementById('fal-cup').style.display='block';document.getElementById('fal-result').style.display='none';};
     window.crackFal=function(){document.getElementById('fal-cup').style.display='none';document.getElementById('fal-result').style.display='block';document.getElementById('fal-text-tr').innerText='Yakında güzel bir haber alacaksın, fincanın aydınlık.';document.getElementById('fal-text-de').innerText='Du wirst bald gute Nachrichten erhalten, deine Tasse ist hell.';window.updateGameStats(10,'win','Kahve Falı');};
     
     let memCards=[],firstCard=null,secondCard=null,lockBoard=false,memPairs=0;
-    window.openMemoryModal=function(e){if(e)e.stopPropagation();window.openFastModal('memoryModal');window.initMemoryGame();};
+    window.openMemoryModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('memoryModal');window.initMemoryGame();};
     window.initMemoryGame=function(){const emojis=['🌹','🌙','☕','🕊️','🖋️','✨','🍂','💎'];memCards=[...emojis,...emojis].sort(()=>0.5-Math.random());const board=document.getElementById('memory-board');board.innerHTML='';memPairs=0;firstCard=null;secondCard=null;lockBoard=false;document.getElementById('memory-reset').style.display='none';document.getElementById('memory-msg').innerText='Eşleri Bul!';memCards.forEach((e,i)=>{board.innerHTML+=`<div class="mem-card" style="font-size:2.5rem; display:flex; justify-content:center; align-items:center; background:rgba(0,0,0,0.5); border:1px solid #f4c542; border-radius:12px; cursor:pointer; height:80px;" data-val="${e}" onclick="if(window.flipMemCard) window.flipMemCard(this)">?</div>`;});};
     window.flipMemCard=function(el){if(lockBoard||el===firstCard||el.classList.contains('matched'))return;el.innerText=el.dataset.val;el.style.background='rgba(244,197,66,0.2)';if(!firstCard){firstCard=el;return;}secondCard=el;lockBoard=true;if(firstCard.dataset.val===secondCard.dataset.val){firstCard.classList.add('matched');secondCard.classList.add('matched');firstCard.style.background='rgba(34,197,94,0.2)';secondCard.style.background='rgba(34,197,94,0.2)';memPairs++;firstCard=null;secondCard=null;lockBoard=false;if(memPairs===8){document.getElementById('memory-msg').innerText='Tebrikler! (+50 Puan)';document.getElementById('memory-reset').style.display='block';window.updateGameStats(50,'win','Hafıza');}}else{setTimeout(()=>{firstCard.innerText='?';secondCard.innerText='?';firstCard.style.background='rgba(0,0,0,0.5)';secondCard.style.background='rgba(0,0,0,0.5)';firstCard=null;secondCard=null;lockBoard=false;},800);}};
     
     let fcTime=5.0,fcScore=0,fcTimer=null,fcActive=false;
-    window.openFastClickModal=function(e){if(e)e.stopPropagation();window.openFastModal('fastClickModal');document.getElementById('fc-btn').innerText='BAŞLA!';document.getElementById('fc-start').style.display='none';document.getElementById('fc-time').innerText='5.0';document.getElementById('fc-score').innerText='0';fcActive=false;};
+    window.openFastClickModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('fastClickModal');document.getElementById('fc-btn').innerText='BAŞLA!';document.getElementById('fc-start').style.display='none';document.getElementById('fc-time').innerText='5.0';document.getElementById('fc-score').innerText='0';fcActive=false;};
     window.clickFast=function(){if(!fcActive){fcActive=true;fcScore=0;fcTime=5.0;document.getElementById('fc-btn').innerText='TIKLA!';fcTimer=setInterval(()=>{fcTime-=0.1;document.getElementById('fc-time').innerText=fcTime.toFixed(1);if(fcTime<=0){clearInterval(fcTimer);fcActive=false;document.getElementById('fc-btn').innerText='SÜRE BİTTİ!';document.getElementById('fc-start').style.display='block';window.updateGameStats(fcScore,'win','Hızlı Tık');}},100);}if(fcActive){fcScore++;document.getElementById('fc-score').innerText=fcScore;}};
     window.startFastClick=function(){document.getElementById('fc-start').style.display='none';window.clickFast();};
     
-    window.openBreathModal=function(e){if(e)e.stopPropagation();window.openFastModal('breathModal');document.getElementById('breath-start').style.display='block';document.getElementById('breath-circle').innerText='Hazır...';document.getElementById('breath-circle').style.transform='scale(1)';};
+    window.openBreathModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('breathModal');document.getElementById('breath-start').style.display='block';document.getElementById('breath-circle').innerText='Hazır...';document.getElementById('breath-circle').style.transform='scale(1)';};
     window.startBreath=function(){const c=document.getElementById('breath-circle');const b=document.getElementById('breath-start');b.style.display='none';const cycle=()=>{c.style.transform='scale(1.5)';c.innerText='Nefes Al...';setTimeout(()=>{c.style.transform='scale(1)';c.innerText='Nefes Ver...';},4000);};cycle();setInterval(cycle,8000);window.updateGameStats(5,'win','Nefes');};
     
     let currentAnagram='';
-    window.openAnagramModal=function(e){if(e)e.stopPropagation();window.openFastModal('anagramModal');window.initAnagram();};
+    window.openAnagramModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('anagramModal');window.initAnagram();};
     window.initAnagram=function(){const words=['şair','misali','şiir','gönül','sevda','kitap','kalem','ilham','duygu','özlem','vatan','kardeş'];currentAnagram=words[Math.floor(Math.random()*words.length)];let shuffled=currentAnagram.split('').sort(()=>0.5-Math.random()).join('');document.getElementById('anagram-word').innerText=shuffled.toUpperCase();document.getElementById('anagram-msg').innerText='Bu kelime ne?';document.getElementById('anagram-input').value='';};
     window.checkAnagram=function(){let guess=document.getElementById('anagram-input').value.toLowerCase();if(guess===currentAnagram){document.getElementById('anagram-msg').innerText='Doğru! (+15 Puan)';document.getElementById('anagram-msg').style.color='#22c55e';window.updateGameStats(15,'win','Anagram');setTimeout(window.initAnagram,1500);}else{document.getElementById('anagram-msg').innerText='Yanlış, tekrar dene!';document.getElementById('anagram-msg').style.color='#ef4444';}};
     
     let hmWord='',hmGuessed=[],hmLives=6,hmLang='TR';
-    window.openHangmanModal=function(e){if(e)e.stopPropagation();window.openFastModal('hangmanModal');window.setHangmanLang('TR');};
+    window.openHangmanModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('hangmanModal');window.setHangmanLang('TR');};
     window.setHangmanLang=function(lang){hmLang=lang;document.getElementById('btn-tr').classList.toggle('active',lang==='TR');document.getElementById('btn-de').classList.toggle('active',lang==='DE');if(lang==='TR'){document.getElementById('btn-tr').style.background='#f4c542';document.getElementById('btn-tr').style.color='#000';document.getElementById('btn-de').style.background='transparent';document.getElementById('btn-de').style.color='#cbd5e1';}else{document.getElementById('btn-de').style.background='#f4c542';document.getElementById('btn-de').style.color='#000';document.getElementById('btn-tr').style.background='transparent';document.getElementById('btn-tr').style.color='#cbd5e1';}window.initHangman();};
     window.initHangman=function(){const wordsTR=['ŞAİR','MİSALİ','ŞİİR','AŞK','GÖNÜL','DOST'];const wordsDE=['DICHTER','LIEBE','HERZ','FREUND','POESIE'];let arr=hmLang==='TR'?wordsTR:wordsDE;hmWord=arr[Math.floor(Math.random()*arr.length)];hmGuessed=[];hmLives=6;document.getElementById('hangman-reset').style.display='none';document.getElementById('hangman-msg').innerText='';window.renderHangman();const kb=document.getElementById('hangman-keyboard');kb.innerHTML='';const letters=hmLang==='TR'?'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ':'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ';letters.split('').forEach(l=>{kb.innerHTML+=`<button class="reset-btn" onclick="if(window.hmGuess) window.hmGuess('${l}', this)" style="padding:10px; font-size:1.1rem; width:45px; margin:0; display:inline-block; border-radius:10px;">${l}</button>`;});};
     window.renderHangman=function(){document.getElementById('hangman-lives').innerText='❤️'.repeat(hmLives);document.getElementById('hangman-word').innerText=hmWord.split('').map(l=>hmGuessed.includes(l)?l:'_').join(' ');};
@@ -2883,46 +3041,56 @@ Blühe, deutsches Vaterland!</p>
         {q:'Garip akımının öncüsü kimdir?',a:['Orhan Veli Kanık','Attila İlhan','Sezai Karakoç'],c:0}
     ];
     let currentQ=0;
-    window.openQuizModal=function(e){if(e)e.stopPropagation();window.openFastModal('quizModal');currentQ=0;window.loadQuiz();};
+    window.openQuizModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('quizModal');currentQ=0;window.loadQuiz();};
     window.loadQuiz=function(){let q=quizQ[currentQ];document.getElementById('quiz-q').innerText=q.q;document.getElementById('quiz-msg').innerText='';document.getElementById('quiz-next').style.display='none';let opts=document.getElementById('quiz-options');opts.innerHTML='';q.a.forEach((opt,i)=>{opts.innerHTML+=`<button class="reset-btn" style="padding: 15px; border-radius:12px; width:100%; text-align:center;" onclick="window.checkQuiz(${i})">${opt}</button>`;});};
     window.checkQuiz=function(ans){if(ans===quizQ[currentQ].c){document.getElementById('quiz-msg').innerText='Doğru! (+10 Puan)';document.getElementById('quiz-msg').style.color = '#22c55e';window.updateGameStats(10,'win','Quiz');}else{document.getElementById('quiz-msg').innerText='Yanlış!';document.getElementById('quiz-msg').style.color = '#ef4444';}document.getElementById('quiz-next').style.display='block';};
     window.nextQuiz=function(){currentQ++;if(currentQ>=quizQ.length) currentQ=0;window.loadQuiz();};
 
     let simonSeq=[],simonPlayer=[],simonLevel=0;
-    window.openSimonModal=function(e){if(e)e.stopPropagation();window.openFastModal('simonModal');document.getElementById('simon-start-btn').style.display='block';document.getElementById('simon-msg').innerText='Başlamak için butona bas!';};
+    window.openSimonModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('simonModal');document.getElementById('simon-start-btn').style.display='block';document.getElementById('simon-msg').innerText='Başlamak için butona bas!';};
     window.startSimon=function(){simonSeq=[];simonPlayer=[];simonLevel=0;document.getElementById('simon-start-btn').style.display='none';window.nextSimon();};
     window.nextSimon=function(){simonPlayer=[];simonLevel++;document.getElementById('simon-msg').innerText='Seviye ' + simonLevel + ' - İzle...';const colors=['green','red','yellow','blue'];simonSeq.push(colors[Math.floor(Math.random()*4)]);let i=0;let int=setInterval(()=>{let c=document.getElementById('simon-'+simonSeq[i]);c.style.opacity='1';c.style.boxShadow='0 0 30px currentColor';setTimeout(()=>{c.style.opacity='0.35';c.style.boxShadow='none';},400);i++;if(i>=simonSeq.length){clearInterval(int);document.getElementById('simon-msg').innerText='Senin sıran!';}},800);};
     window.simonInput=function(c){if(simonPlayer.length>=simonSeq.length)return;let el=document.getElementById('simon-'+c);el.style.opacity='1';setTimeout(()=>{el.style.opacity='0.35';},200);simonPlayer.push(c);if(simonPlayer[simonPlayer.length-1]!==simonSeq[simonPlayer.length-1]){document.getElementById('simon-msg').innerText='Hata! Seviye ' + simonLevel + '\'de kaldın.';document.getElementById('simon-start-btn').style.display='block';window.updateGameStats(simonLevel*5,'loss','Simon');return;}if(simonPlayer.length===simonSeq.length){document.getElementById('simon-msg').innerText='Doğru!';setTimeout(window.nextSimon,1000);}};
     
     let targetNum=0;
-    window.openGuessNumberModal=function(e){if(e)e.stopPropagation();window.openFastModal('guessNumberModal');window.initGuessGame();};
+    window.openGuessNumberModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('guessNumberModal');window.initGuessGame();};
     window.initGuessGame=function(){targetNum=Math.floor(Math.random()*100)+1;document.getElementById('guess-hint').innerText='🤔';document.getElementById('guess-msg').innerText='1 ile 100 arası bir sayı tuttum.';document.getElementById('guess-input').value='';document.getElementById('guess-reset').style.display='none';};
     window.checkGuess=function(){let g=parseInt(document.getElementById('guess-input').value);if(isNaN(g))return;if(g>targetNum){document.getElementById('guess-hint').innerText='👇';document.getElementById('guess-msg').innerText='Daha küçük!';}else if(g<targetNum){document.getElementById('guess-hint').innerText='👆';document.getElementById('guess-msg').innerText='Daha büyük!';}else{document.getElementById('guess-hint').innerText='🎉';document.getElementById('guess-msg').innerText='Doğru Bildin! (+10 Puan)';document.getElementById('guess-reset').style.display='block';window.updateGameStats(10,'win','Sayı Tahmini');}};
     
-    window.openMagicBallModal=function(e){if(e)e.stopPropagation();window.openFastModal('magicBallModal');document.getElementById('magic-answer').innerText='';document.getElementById('magic-answer-de').innerText='';document.getElementById('magic-ball').style.transform='scale(1)';};
+    window.openMagicBallModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('magicBallModal');document.getElementById('magic-answer').innerText='';document.getElementById('magic-answer-de').innerText='';document.getElementById('magic-ball').style.transform='scale(1)';};
     window.shakeMagicBall=function(){const ball=document.getElementById('magic-ball');ball.style.transform='scale(1.2) rotate(20deg)';setTimeout(()=>ball.style.transform='scale(1) rotate(-20deg)',200);setTimeout(()=>ball.style.transform='scale(1) rotate(0)',400);const ans=[{t:'Kesinlikle Evet',d:'Definitiv Ja'},{t:'Şüphesiz',d:'Ohne Zweifel'},{t:'Buna güvenebilirsin',d:'Darauf kannst du zählen'},{t:'Belki',d:'Vielleicht'},{t:'Şimdi sorma',d:'Frag jetzt nicht'},{t:'Hayır',d:'Nein'},{t:'Hiç umut yok',d:'Keine Hoffnung'}];let r=ans[Math.floor(Math.random()*ans.length)];setTimeout(()=>{document.getElementById('magic-answer').innerText=r.t;document.getElementById('magic-answer-de').innerText=r.d;},500);};
     
-    window.openCookieModal=function(e){if(e)e.stopPropagation();window.openFastModal('cookieModal');window.resetCookie();};
+    window.openCookieModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('cookieModal');window.resetCookie();};
     window.resetCookie=function(){document.getElementById('fortune-cookie').style.display='inline-block';document.getElementById('fortune-paper').style.display='none';document.getElementById('cookie-reset').style.display='none';};
     window.crackCookie=function(){document.getElementById('fortune-cookie').style.display='none';document.getElementById('fortune-paper').style.display='block';document.getElementById('cookie-reset').style.display='block';document.getElementById('fortune-paper').innerText='Her yeni gün, yeni bir umuttur. Gülümsediğinde dünya da sana gülümser.';window.updateGameStats(5,'win','Kurabiye');};
     
-    window.openRPSModal=function(e){if(e)e.stopPropagation();window.openFastModal('rpsModal');document.getElementById('rps-s-p').innerText='0';document.getElementById('rps-s-c').innerText='0';document.getElementById('rps-player').innerText='✊';document.getElementById('rps-computer').innerText='✊';document.getElementById('rps-msg').innerText='Seçimini Yap!';};
+    window.openRPSModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('rpsModal');document.getElementById('rps-s-p').innerText='0';document.getElementById('rps-s-c').innerText='0';document.getElementById('rps-player').innerText='✊';document.getElementById('rps-computer').innerText='✊';document.getElementById('rps-msg').innerText='Seçimini Yap!';};
     window.playRPS=function(p){const opts=['🪨','📜','✂️'];let c=opts[Math.floor(Math.random()*3)];document.getElementById('rps-player').innerText=p;document.getElementById('rps-computer').innerText=c;if(p===c)document.getElementById('rps-msg').innerText='Berabere!';else if((p==='🪨'&&c==='✂️')||(p==='📜'&&c==='🪨')||(p==='✂️'&&c==='📜')){document.getElementById('rps-msg').innerText='Kazandın!';document.getElementById('rps-s-p').innerText=parseInt(document.getElementById('rps-s-p').innerText)+1;window.updateGameStats(10,'win','TKM');}else{document.getElementById('rps-msg').innerText='Kaybettin!';document.getElementById('rps-s-c').innerText=parseInt(document.getElementById('rps-s-c').innerText)+1;window.updateGameStats(-5,'loss','TKM');}};
     
     let tttBoard=[],tttActive=true;
-    window.openTicTacToeModal=function(e){if(e)e.stopPropagation();window.openFastModal('tictactoeModal');window.initTicTacToe();};
+    window.openTicTacToeModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('tictactoeModal');window.initTicTacToe();};
     window.initTicTacToe=function(){tttBoard=['','','','','','','','',''];tttActive=true;document.getElementById('ttt-msg').innerHTML='Sıra: <span style="color:#f4c542">X (Sen)</span>';document.querySelectorAll('.cell').forEach(c=>{c.innerText='';c.style.color='white';});};
-    window.tttClick=function(i){if(!tttActive||tttBoard[i]!=='')return;tttBoard[i]='X';document.querySelectorAll('.cell')[i].innerText='X';document.querySelectorAll('.cell')[i].style.color='#f4c542';if(window.checkTTTWin('X')){document.getElementById('ttt-msg').innerText='Kazandın! (+20)';tttActive=false;window.updateGameStats(20,'win','TicTacToe');return;}let empty=tttBoard.map((v,i)=>v===''?i:null).filter(v=>v!==null);if(empty.length===0){document.getElementById('ttt-msg').innerText='Berabere!';tttActive=false;return;}let c=empty[Math.floor(Math.random()*empty.length)];tttBoard[c]='O';document.querySelectorAll('.cell')[c].innerText='O';document.querySelectorAll('.cell')[c].style.color='#ef4444';if(window.checkTTTWin('O')){document.getElementById('ttt-msg').innerText='Kaybettin!';tttActive=false;window.updateGameStats(-10,'loss','TicTacToe');}};
+    window.tttClick=function(i){
+        if(!tttActive||tttBoard[i]!=='')return;
+        tttBoard[i]='X';document.querySelectorAll('.cell')[i].innerText='X';document.querySelectorAll('.cell')[i].style.color='#f4c542';
+        if(window.checkTTTWin('X')){document.getElementById('ttt-msg').innerText='Kazandın! (+20)';tttActive=false;window.updateGameStats(20,'win','TicTacToe');return;}
+        let empty=tttBoard.map((v,i)=>v===''?i:null).filter(v=>v!==null);
+        if(empty.length===0){document.getElementById('ttt-msg').innerText='Berabere!';tttActive=false;return;}
+        
+        let c=empty[Math.floor(Math.random()*empty.length)];
+        tttBoard[c]='O';document.querySelectorAll('.cell')[c].innerText='O';document.querySelectorAll('.cell')[c].style.color='#ef4444';
+        if(window.checkTTTWin('O')){document.getElementById('ttt-msg').innerText='Kaybettin!';tttActive=false;window.updateGameStats(-10,'loss','TicTacToe');}
+    };
     window.checkTTTWin=function(p){const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];return wins.some(w=>tttBoard[w[0]]===p&&tttBoard[w[1]]===p&&tttBoard[w[2]]===p);};
     
-    window.openCoinFlipModal=function(e){if(e)e.stopPropagation();window.openFastModal('coinFlipModal');};
+    window.openCoinFlipModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('coinFlipModal');};
     window.flipCoin=function(){const c=document.getElementById('coin');c.style.transform='rotateY(720deg)';c.style.transition='1s';setTimeout(()=>{c.innerText=Math.random()>0.5?'YAZI':'TURA';c.style.fontSize='2.5rem';c.style.transform='rotateY(0deg)';c.style.transition='0s';window.updateGameStats(5,'win','Yazı Tura');},1000);};
-    window.openDiceModal=function(e){if(e)e.stopPropagation();window.openFastModal('diceModal');};
+    window.openDiceModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('diceModal');};
     window.rollDice=function(){const d=document.getElementById('dice-display');d.style.transform='rotate(360deg)';d.style.transition='0.5s';setTimeout(()=>{const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];d.innerText=faces[Math.floor(Math.random()*6)];d.style.transform='rotate(0deg)';d.style.transition='0s';window.updateGameStats(5,'win','Zar');},500);};
 
     // Canvas Games
     let snakeCtx, snakeInt;
-    window.openSnakeModal=function(e){if(e)e.stopPropagation();window.openFastModal('snakeModal'); const cvs=document.getElementById('snake-game'); snakeCtx=cvs.getContext('2d'); snakeCtx.fillStyle='#0a192f'; snakeCtx.fillRect(0,0,300,300); document.getElementById('snake-score').innerText='0';};
+    window.openSnakeModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('snakeModal'); const cvs=document.getElementById('snake-game'); snakeCtx=cvs.getContext('2d'); snakeCtx.fillStyle='#0a192f'; snakeCtx.fillRect(0,0,300,300); document.getElementById('snake-score').innerText='0';};
     window.startSnake=function(){
         document.getElementById('snake-start-btn').style.display='none';
         let s=0; document.getElementById('snake-score').innerText=s;
@@ -2939,7 +3107,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     let pongCtx, pongInt;
-    window.openPongModal=function(e){if(e)e.stopPropagation();window.openFastModal('pongModal'); const cvs=document.getElementById('pong-game'); pongCtx=cvs.getContext('2d'); pongCtx.fillStyle='#0a192f'; pongCtx.fillRect(0,0,300,350); document.getElementById('pong-score-p').innerText='0'; document.getElementById('pong-score-c').innerText='0';};
+    window.openPongModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('pongModal'); const cvs=document.getElementById('pong-game'); pongCtx=cvs.getContext('2d'); pongCtx.fillStyle='#0a192f'; pongCtx.fillRect(0,0,300,350); document.getElementById('pong-score-p').innerText='0'; document.getElementById('pong-score-c').innerText='0';};
     window.startPong=function(){
         document.getElementById('pong-start-btn').style.display='none';
         let p1=0, p2=0; document.getElementById('pong-score-p').innerText=p1;
@@ -2959,7 +3127,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     let tetrisCtx, tetrisInt, ty=0, tx=100;
-    window.openTetrisModal=function(e){if(e)e.stopPropagation();window.openFastModal('tetrisModal'); const cvs=document.getElementById('tetris-game'); tetrisCtx=cvs.getContext('2d'); tetrisCtx.fillStyle='#0a192f'; tetrisCtx.fillRect(0,0,240,400); document.getElementById('tetris-score').innerText='0';};
+    window.openTetrisModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('tetrisModal'); const cvs=document.getElementById('tetris-game'); tetrisCtx=cvs.getContext('2d'); tetrisCtx.fillStyle='#0a192f'; tetrisCtx.fillRect(0,0,240,400); document.getElementById('tetris-score').innerText='0';};
     window.startTetris=function(){
         document.getElementById('tetris-start-btn').style.display='none';
         let s=0; ty=0; tx=100; document.getElementById('tetris-score').innerText=s;
@@ -2975,7 +3143,7 @@ Blühe, deutsches Vaterland!</p>
     window.tetrisRotate=function(){};
 
     let brCtx, brInt;
-    window.openBreakoutModal=function(e){if(e)e.stopPropagation();window.openFastModal('breakoutModal'); const cvs=document.getElementById('breakout-game'); brCtx=cvs.getContext('2d'); brCtx.fillStyle='#0a192f'; brCtx.fillRect(0,0,300,350); document.getElementById('breakout-score').innerText='0';};
+    window.openBreakoutModal=function(e){if(e)e.stopPropagation();window.closeAllModals();window.openFastModal('breakoutModal'); const cvs=document.getElementById('breakout-game'); brCtx=cvs.getContext('2d'); brCtx.fillStyle='#0a192f'; brCtx.fillRect(0,0,300,350); document.getElementById('breakout-score').innerText='0';};
     window.startBreakout=function(){
         document.getElementById('breakout-start-btn').style.display='none';
         let s=0; document.getElementById('breakout-score').innerText=s;
