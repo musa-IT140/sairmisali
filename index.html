@@ -23,8 +23,13 @@
         /* RESET & BASICS */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         html, body { overflow-x: hidden; width: 100%; max-width: 100vw; scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #0a192f 0%, #000000 100%); color: var(--text-color); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+        
+        /* ANTI-TAMPER BASIC CSS: Verhindert unnötiges Markieren von UI Elementen */
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #0a192f 0%, #000000 100%); color: var(--text-color); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; position: relative; -webkit-user-select: none; user-select: none; }
         body.modal-open { overflow: hidden; touch-action: none; }
+        
+        /* ERLAUBE MARKIEREN NUR WO NÖTIG (Inputs, Texte der Werke) */
+        input, textarea, .modal-text, .anthem-content, .chat-bubble { -webkit-user-select: text; user-select: text; }
         
         /* GOOGLE TRANSLATE HIDE */
         html { margin-top: 0 !important; top: 0 !important; }
@@ -48,7 +53,7 @@
 
         .wi-sm { font-size: 2rem; } .wi-md { font-size: 3.5rem; } .wi-lg { font-size: 5rem; }
 
-        /* WETTER ANIMATION - %100 SENKRON */
+        /* WETTER ANIMATION */
         @keyframes gentlePulse { 0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 5px rgba(244,197,66,0.3)); } 100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 15px rgba(244,197,66,0.8)); } }
         .weather-anim-icon { animation: gentlePulse 3s infinite alternate ease-in-out; display: inline-block; pointer-events: none;}
 
@@ -60,7 +65,7 @@
         @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .pulsing-text { animation: pulseText 2.5s ease-in-out infinite; }
 
-        /* INPUTS & BUTTONS */
+        /* INPUTS & BUTTONS (Biyometrik ve Autocomplete uyumlu) */
         input, select, textarea, button { pointer-events: auto !important; }
         
         input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
@@ -109,23 +114,32 @@
         .notif-btn.del { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
         .notif-btn.del:hover { background: #ef4444; color: white; }
 
-        /* SAYAÇLAR (ZÄHLER) - SENKRONİZE VE RENKLER DÜZELTİLDİ */
+        /* SAYAÇLAR (ZÄHLER) - SENKRONİZE VE KUGELSICHER */
         .badge-count {
             position: absolute; top: -6px; right: -6px;
             color: white; font-size: 0.75rem; font-weight: bold;
             padding: 2px 7px; border-radius: 12px; z-index: 999;
             box-shadow: 0 2px 5px rgba(0,0,0,0.8);
             font-family: 'Poppins', sans-serif;
-            pointer-events: none; display: flex !important; justify-content: center; align-items: center;
+            pointer-events: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.2s ease-in-out;
+            display: none; /* Default hidden */
         }
-        .badge-count:empty { display: none !important; } 
+        /* SICHERHEITS-CSS: Zwingt den Badge zur Anzeige, wenn er NICHT leer ist */
+        .badge-count:not(:empty) { 
+            display: flex !important; 
+            opacity: 1 !important; 
+        } 
         
         .badge-red { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; }
         .badge-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
         .badge-yellow { background: linear-gradient(135deg, #f4c542, #b48608) !important; color: #000 !important; }
         .badge-green { background: linear-gradient(135deg, #22c55e, #16a34a) !important; }
         .badge-purple { background: linear-gradient(135deg, #a855f7, #7e22ce) !important; }
-        .badge-orange { background: linear-gradient(135deg, #f97316, #ea580c) !important; color: #fff !important; }
+        
+        /* DER ORANGENE ZÄHLER - ABSOLUT PRIORISIERT */
+        .badge-orange { background: linear-gradient(135deg, #f97316, #ea580c) !important; color: #fff !important; border: 1px solid #fff !important; }
+        
         .badge-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; }
 
         /* KALENDER AKTIVER TAG */
@@ -212,13 +226,18 @@
 
         header { position: fixed; top: 60px; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 8000; border-bottom: 1px solid rgba(244, 197, 66, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.8); display: flex; flex-direction: column; pointer-events: auto; }
         
-        /* YENİ EDLE SUCHLEISTE (ARAMA ÇUBUĞU) - AUTOCOMPLETE OFF */
-        .header-search { display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(244,197,66,0.4); border-radius: 20px; padding: 2px 12px; margin: 0 15px; transition: 0.3s; pointer-events: auto; flex-grow: 1; max-width: 400px;}
-        .header-search:focus-within { border-color: #f4c542; box-shadow: 0 0 8px rgba(244,197,66,0.3); background: rgba(0,0,0,0.6); }
+        /* YENİ EDLE SUCHLEISTE (ARAMA ÇUBUĞU) - AUTOCOMPLETE OFF & SUGGESTIONS */
+        .header-search { display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(244,197,66,0.4); border-radius: 20px; padding: 2px 12px; margin: 0 15px; transition: 0.3s; pointer-events: auto; flex-grow: 1; max-width: 400px; position: relative;}
+        .header-search:focus-within { border-color: #f4c542; box-shadow: 0 0 8px rgba(244,197,66,0.3); background: rgba(0,0,0,0.6); border-radius: 20px 20px 0 0; }
         .header-search input { background: transparent !important; border: none !important; box-shadow: none !important; color: #fff !important; padding: 6px !important; width: 100%; margin: 0 !important; font-size: 0.95rem !important; }
         .header-search input::placeholder { color: #94a3b8; font-style: italic; font-size: 0.85rem;}
         .header-search button { background: transparent; border: none; color: #f4c542; cursor: pointer; padding: 5px; font-size: 1.1rem; transition: 0.2s;}
         .header-search button:hover { transform: scale(1.1); color: #fff;}
+        
+        .search-suggestions { position: absolute; top: 100%; left: 0; width: 100%; background: rgba(10, 25, 47, 0.95); border: 1px solid var(--accent-color); border-top: none; border-radius: 0 0 15px 15px; max-height: 250px; overflow-y: auto; z-index: 10000; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.8); flex-direction: column; }
+        .search-suggestion-item { padding: 10px 15px; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; text-align: left; font-size: 0.9rem;}
+        .search-suggestion-item:last-child { border-bottom: none; }
+        .search-suggestion-item:hover { background: rgba(244, 197, 66, 0.2); color: #fff; }
 
         .page-view { display: none; padding: 260px 5% 100px; min-height: 100vh; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.2s ease-out; } 
         .page-view.active-view { display: flex; opacity: 1; }
@@ -374,7 +393,7 @@
     </style>
 </head>
 
-<body>
+<body oncontextmenu="return false;" onkeydown="if((event.ctrlKey && event.shiftKey && event.keyCode == 73) || (event.keyCode == 123)) { return false; }">
     <audio id="notification-sound" src="https://actions.google.com/sounds/v1/alarms/positive_ping.ogg" preload="auto"></audio>
 
     <div id="modal-backdrop" onclick="if(window.closeTopModal) window.closeTopModal('force')"></div>
@@ -424,8 +443,9 @@
             </div>
 
             <div class="header-search">
-                <input type="text" id="global-search-input" name="search_dummy" autocomplete="off" spellcheck="false" placeholder="Eser veya yazar ara... (Suchen)" onkeypress="if(event.key === 'Enter' && window.performSearch) window.performSearch()">
+                <input type="text" id="global-search-input" name="search_dummy" autocomplete="off" spellcheck="false" placeholder="Eser veya yazar ara... (Suchen)" onkeyup="if(window.handleSearchInput) window.handleSearchInput(event)" onfocus="if(window.handleSearchInput) window.handleSearchInput(event)">
                 <button onclick="if(window.performSearch) window.performSearch()"><i class="fas fa-search"></i></button>
+                <div class="search-suggestions" id="search-suggestions-box"></div>
             </div>
 
             <div class="header-right">
@@ -927,9 +947,9 @@ Blühe, deutsches Vaterland!</p>
             <div style="max-width: 900px; margin: 0 auto; background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); height: 75vh; display: flex; flex-direction: column; width: 100%;">
                 <div id="area-chat" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; gap: 20px;">
                     <div id="chat-box" style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px inset rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
-                        </div>
+                    </div>
                     <div style="display: flex; gap: 15px; height: 60px;">
-                        <input type="text" id="chat-input" placeholder="Bir mesaj yazın... (Schreibe etwas...)" onkeypress="if(event.key === 'Enter' && window.sendChat) window.sendChat()" style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(244,197,66,0.4); color: #fff; padding: 0 20px; border-radius: 12px; font-size: 1.1rem; outline: none; margin: 0;">
+                        <input type="text" id="chat-input" autocomplete="off" spellcheck="false" placeholder="Bir mesaj yazın... (Schreibe etwas...)" onkeypress="if(event.key === 'Enter' && window.sendChat) window.sendChat()" style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(244,197,66,0.4); color: #fff; padding: 0 20px; border-radius: 12px; font-size: 1.1rem; outline: none; margin: 0;">
                         <button class="reset-btn" style="width: 70px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin: 0;" onclick="if(window.sendChat) window.sendChat()">
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -1098,10 +1118,16 @@ Blühe, deutsches Vaterland!</p>
             <div class="modal-body">
                 <h2 style="color: #f4c542; font-family: 'Playfair Display', serif; font-size: 2.4rem; text-align: center; border-bottom: 1px solid rgba(244,197,66,0.3); padding-bottom: 15px; margin-bottom: 25px; width: 100%;">Giriş Yap<br><span style="font-size:0.5em; color:#94a3b8; display:block; margin-top:5px; font-family:'Poppins',sans-serif;">(Anmelden)</span></h2>
                 <form onsubmit="event.preventDefault(); if(window.m_login) window.m_login();" style="display: flex; flex-direction: column; width: 100%;">
-                    <input type="text" id="m-login-user" name="username" class="auth-input" placeholder="Kullanıcı Adı veya Email" autocomplete="username webauthn">
+                    <input type="text" id="m-login-user" name="username" class="auth-input" placeholder="Kullanıcı Adı veya Email" autocomplete="username webauthn" required>
                     <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 15px;">
-                        <input type="password" id="m-login-pass" name="password" class="auth-input" placeholder="Şifre (Passwort)" style="width: 100%; padding-right: 45px; margin-bottom: 0;" autocomplete="current-password webauthn">
-                        <i class="fas fa-eye" onmousedown="document.getElementById('m-login-pass').type='text';" onmouseup="document.getElementById('m-login-pass').type='password';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10;"></i>
+                        <input type="password" id="m-login-pass" name="password" class="auth-input" placeholder="Şifre (Passwort)" style="width: 100%; padding-right: 45px; margin-bottom: 0;" autocomplete="current-password webauthn" required>
+                        <i class="fas fa-eye" 
+                           onmousedown="document.getElementById('m-login-pass').type='text';" 
+                           onmouseup="document.getElementById('m-login-pass').type='password';" 
+                           onmouseleave="document.getElementById('m-login-pass').type='password';"
+                           ontouchstart="document.getElementById('m-login-pass').type='text';"
+                           ontouchend="document.getElementById('m-login-pass').type='password';"
+                           style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10; user-select: none;"></i>
                     </div>
                     <label style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; color: #cbd5e1; cursor: pointer; text-align: left;">
                         <input type="checkbox" id="m-login-rem" name="remember" style="width: 20px; height: 20px; accent-color: #f4c542;"> 
@@ -1119,11 +1145,11 @@ Blühe, deutsches Vaterland!</p>
             <div class="modal-body">
                 <h2 style="color: #f4c542; font-family: 'Playfair Display', serif; font-size: 2.4rem; text-align: center; border-bottom: 1px solid rgba(244,197,66,0.3); padding-bottom: 15px; margin-bottom: 25px; width: 100%;">Kayıt Ol<br><span style="font-size:0.5em; color:#94a3b8; display:block; margin-top:5px; font-family:'Poppins',sans-serif;">(Registrieren)</span></h2>
                 <form onsubmit="event.preventDefault(); if(window.m_register) window.m_register();" style="display: flex; flex-direction: column; width: 100%;">
-                    <input type="text" id="m-reg-user" name="username" class="auth-input" placeholder="Kullanıcı Adı * (Benutzername)" autocomplete="username">
-                    <input type="email" id="m-reg-email" name="email" class="auth-input" placeholder="E-Mail * (E-Mail)" autocomplete="email">
+                    <input type="text" id="m-reg-user" name="username" class="auth-input" placeholder="Kullanıcı Adı * (Benutzername)" autocomplete="username" required minlength="3">
+                    <input type="email" id="m-reg-email" name="email" class="auth-input" placeholder="E-Mail * (E-Mail)" autocomplete="email" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Lütfen geçerli bir e-posta adresi girin. (Örn: isim@mail.com)">
                     <div style="display: flex; gap: 15px;">
-                        <input type="text" id="m-reg-name" name="given-name" class="auth-input" placeholder="İsim * (Vorname)" autocomplete="given-name">
-                        <input type="text" id="m-reg-surname" name="family-name" class="auth-input" placeholder="Soyisim * (Nachname)" autocomplete="family-name">
+                        <input type="text" id="m-reg-name" name="given-name" class="auth-input" placeholder="İsim * (Vorname)" autocomplete="given-name" required>
+                        <input type="text" id="m-reg-surname" name="family-name" class="auth-input" placeholder="Soyisim * (Nachname)" autocomplete="family-name" required>
                     </div>
                     
                     <select id="m-reg-emoji" class="auth-input" name="emoji_avatar">
@@ -1145,8 +1171,14 @@ Blühe, deutsches Vaterland!</p>
                         <input type="number" id="m-reg-year" name="bday-year" class="auth-input" placeholder="Yıl">
                     </div>
                     <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 20px;">
-                        <input type="password" id="m-reg-pass" name="new-password" class="auth-input" placeholder="Şifre * (Passwort)" style="width: 100%; padding-right: 45px; margin-bottom: 0;" autocomplete="new-password">
-                        <i class="fas fa-eye" onmousedown="document.getElementById('m-reg-pass').type='text';" onmouseup="document.getElementById('m-reg-pass').type='password';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10;"></i>
+                        <input type="password" id="m-reg-pass" name="new-password" class="auth-input" placeholder="Şifre * (Passwort)" style="width: 100%; padding-right: 45px; margin-bottom: 0;" autocomplete="new-password" required minlength="4">
+                        <i class="fas fa-eye" 
+                           onmousedown="document.getElementById('m-reg-pass').type='text';" 
+                           onmouseup="document.getElementById('m-reg-pass').type='password';" 
+                           onmouseleave="document.getElementById('m-reg-pass').type='password';"
+                           ontouchstart="document.getElementById('m-reg-pass').type='text';"
+                           ontouchend="document.getElementById('m-reg-pass').type='password';"
+                           style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10; user-select: none;"></i>
                     </div>
                     <button type="submit" class="reset-btn" style="width:100%; padding: 15px; font-size: 1.2rem; border-radius: 12px;">Kaydol <span style="font-size:0.8em; font-weight:normal;">(Registrieren)</span></button>
                 </form>
@@ -1161,7 +1193,7 @@ Blühe, deutsches Vaterland!</p>
                 <h2 style="color: #f4c542; font-family: 'Playfair Display', serif; font-size: 2.4rem; text-align: center; border-bottom: 1px solid rgba(244,197,66,0.3); padding-bottom: 15px; margin-bottom: 25px; width: 100%;">Profil Güncelle<br><span style="font-size:0.5em; color:#94a3b8; display:block; margin-top:5px; font-family:'Poppins',sans-serif;">(Profil bearbeiten)</span></h2>
                 <form onsubmit="event.preventDefault(); if(window.saveProfile) window.saveProfile();" style="display: flex; flex-direction: column; width: 100%;">
                     <div style="display: flex; gap: 15px;">
-                        <input type="text" id="edit-name" name="given-name" class="auth-input" placeholder="İsim * (Name)" autocomplete="given-name">
+                        <input type="text" id="edit-name" name="given-name" class="auth-input" placeholder="İsim * (Name)" autocomplete="given-name" required>
                         <input type="text" id="edit-surname" name="family-name" class="auth-input" placeholder="Soyisim (Nachname)" autocomplete="family-name">
                     </div>
                     <select id="edit-emoji" class="auth-input">
@@ -1183,7 +1215,13 @@ Blühe, deutsches Vaterland!</p>
                     </div>
                     <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 20px;">
                         <input type="password" id="edit-pass" name="new-password" class="auth-input" placeholder="Yeni Şifre (Neues Passwort)" style="width: 100%; padding-right: 45px; margin-bottom: 0;" autocomplete="new-password">
-                        <i class="fas fa-eye" onmousedown="document.getElementById('edit-pass').type='text';" onmouseup="document.getElementById('edit-pass').type='password';" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10;"></i>
+                        <i class="fas fa-eye" 
+                           onmousedown="document.getElementById('edit-pass').type='text';" 
+                           onmouseup="document.getElementById('edit-pass').type='password';" 
+                           onmouseleave="document.getElementById('edit-pass').type='password';"
+                           ontouchstart="document.getElementById('edit-pass').type='text';"
+                           ontouchend="document.getElementById('edit-pass').type='password';"
+                           style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; z-index: 10; user-select: none;"></i>
                     </div>
                     <button type="submit" class="reset-btn" style="width:100%; padding: 15px; font-size: 1.2rem; border-radius: 12px;">Kaydet <span style="font-size:0.8em; font-weight:normal;">(Speichern)</span></button>
                 </form>
@@ -1520,7 +1558,7 @@ Blühe, deutsches Vaterland!</p>
                 
                 if(r.chat && Array.isArray(r.chat)) { 
                     window.chatDB = r.chat; 
-                    localStorage.setItem('misaliChatDB', JSON.stringify(r.chat)); 
+                    localStorage.setItem('misaliChatDB_V1000', JSON.stringify(r.chat)); 
                     if(!isTyping && window.renderChat) window.renderChat(); 
                 }
                 
@@ -1555,19 +1593,23 @@ Blühe, deutsches Vaterland!</p>
 
     setInterval(() => { window.fetchFromCloud(); }, 5000); 
 
-    // --- DATENBANK INITIALISIERUNG (SICHER & FEHLERFREI) ---
+    // --- DATENBANK INITIALISIERUNG (SICHER & FEHLERFREI V1000) ---
     try {
-        if(!localStorage.getItem('misaliDB_Init_V800')) { 
-            localStorage.setItem('misaliDB_Init_V800', 'true'); 
+        if(!localStorage.getItem('misaliDB_Init_V1000')) { 
+            localStorage.setItem('misaliDB_Init_V1000', 'true'); 
         }
 
-        // YENİ: CHAT HARD-RESET V800 (Tüm eski, bozuk chat verisini kalıcı olarak siler ve sıfırlar)
-        if(!localStorage.getItem('misaliChatResetV800')) {
-            localStorage.setItem('misaliChatDB', '[]');
-            localStorage.setItem('misaliChatResetV800', 'true');
+        // MEGAMIGA CHAT HARD-RESET V1000 (Tüm eski chat'leri yokedip yepyeni bir sayfa açar)
+        if(!localStorage.getItem('misaliChatResetV1000')) {
+            localStorage.removeItem('misaliChatDB');
+            localStorage.removeItem('misaliChatDB_V700');
+            localStorage.removeItem('misaliChatDB_V800');
+            localStorage.removeItem('misaliChatDB_V900');
+            localStorage.setItem('misaliChatDB_V1000', '[]');
+            localStorage.setItem('misaliChatResetV1000', 'true');
             window.chatDB = [];
         } else {
-            window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB')) || []; 
+            window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V1000')) || []; 
         }
         
         window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || {};
@@ -1589,10 +1631,15 @@ Blühe, deutsches Vaterland!</p>
         window.currentUser = JSON.parse(localStorage.getItem('misaliUser')) || JSON.parse(sessionStorage.getItem('misaliUser')) || null;
         window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
         window.userPoemsDB = JSON.parse(localStorage.getItem('misaliUserPoems')) || [];
-        window.adminLogs = JSON.parse(localStorage.getItem('misaliAdminLogs')) || [{ time: new Date().toLocaleTimeString('tr-TR'), action: "Sistem Yenilendi", user: "Sistem" }];
+        window.adminLogs = JSON.parse(localStorage.getItem('misaliAdminLogs')) || [{ time: new Date().toLocaleTimeString('tr-TR'), action: "Sistem Yenilendi V1000", user: "Sistem" }];
         window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
         window.calNotesDB = JSON.parse(localStorage.getItem('misaliCalNotes')) || {};
-        window.badWords = ["küfür", "hakaret", "aptal", "salak"];
+        
+        // TR & DE SCHIMPFWORT-FILTER (BLACKLIST)
+        window.badWords = [
+            "küfür", "hakaret", "aptal", "salak", "gerizekali", "o.c", "amk", "aq", "serefsiz", "piç", "sürtük", "kaltak", 
+            "scheisse", "scheiße", "arschloch", "hurensohn", "fotze", "schlampe", "idiot", "missgeburt", "wichser", "fuck", "bitch", "bastard"
+        ];
         
         // STANDARD INHALTE EXAKT WIE IM BASIS CODE!
         window.contentDB = JSON.parse(localStorage.getItem('misaliFullDB'));
@@ -1720,8 +1767,13 @@ Blühe, deutsches Vaterland!</p>
         
         window.currentUser = found;
         sessionStorage.setItem('misaliUser', JSON.stringify(found));
-        if (rem) localStorage.setItem('misaliAutoFill', JSON.stringify({u: found.username, p: found.pass}));
-        else localStorage.removeItem('misaliAutoFill');
+        
+        // HAKEN FÜR REMEMBER ME
+        if (rem) {
+            localStorage.setItem('misaliAutoFill', JSON.stringify({u: found.username, p: found.pass}));
+        } else {
+            localStorage.removeItem('misaliAutoFill');
+        }
         
         // PING AN ADMIN (TRACKING)
         if (window.sendSystemMessage && found.role !== 'admin') {
@@ -1741,7 +1793,7 @@ Blühe, deutsches Vaterland!</p>
             window.currentUser = null;
             sessionStorage.removeItem('misaliUser');
             localStorage.removeItem('misaliUser'); 
-            localStorage.removeItem('misaliAutoFill');
+            localStorage.removeItem('misaliAutoFill'); // Löscht auch das gespeicherte Passwort beim Logout
             location.reload();
         });
     };
@@ -1757,15 +1809,20 @@ Blühe, deutsches Vaterland!</p>
         const y = document.getElementById('m-reg-year').value;
         const em = document.getElementById('m-reg-emoji').value;
         
-        if (!u || !e || !p || !n || !s) { window.customAlert('Lütfen zorunlu alanları (İsim, Soyisim vb.) doldurun.', '⚠️'); return; }
+        if (!u || !e || !p || !n || !s) { window.customAlert('Lütfen zorunlu alanları doldurun.', '⚠️'); return; }
+        
+        // E-MAIL REGEX VALIDATION (Muss ein @ und . haben)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailRegex.test(e)) { window.customAlert('Lütfen geçerli bir e-posta adresi girin (örn. isim@domain.com).', '⚠️'); return; }
+        
         if (window.userDatabase[u]) { window.customAlert('Bu kullanıcı adı zaten alınmış.', '❌'); return; }
         
         window.lastLocalUpdate = Date.now();
-        // FIX: APPROVED = FALSE (Admin muss erst bestätigen)
+        // APPROVED = FALSE (Admin muss erst bestätigen)
         window.userDatabase[u] = { username: u, email: e, name: n, surname: s, day: d, month: m, year: y, emoji: em, pass: p, role: 'user', score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: false };
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         
-        // PING AN ADMIN ÜBER NEUE REGISTRIERUNG (TRACKING)
+        // PING AN ADMIN ÜBER NEUE REGISTRIERUNG
         if (window.sendSystemMessage) {
             window.sendSystemMessage('Admin', `🚨 YENİ KAYIT: ${n} ${s} (${u}) onay bekliyor.`);
         }
@@ -1793,6 +1850,14 @@ Blühe, deutsches Vaterland!</p>
             v.push(id); localStorage.setItem('misaliViewedItems', JSON.stringify(v)); 
             if(window.initContent) window.initContent(); 
         } 
+    };
+
+    // TOLERANTE SUCHE: Macht türkische und deutsche Zeichen kompatibel
+    window.normalizeStr = function(str) {
+        if (!str) return '';
+        return str.toLowerCase()
+            .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
+            .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u');
     };
 
     window.zodiacs = [
@@ -1954,12 +2019,19 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // --- NEU: SEARCH LOGIK (MEISTER UPDATE) ---
-    window.performSearch = function() {
+    // --- NEU: INTELLIGENTE SUCHFUNKTION MIT DROPDOWN (AUTOCOMPLETE) ---
+    window.handleSearchInput = function(e) {
         const inputEl = document.getElementById('global-search-input');
-        if(!inputEl) return;
-        const query = inputEl.value.toLowerCase().trim();
-        if(!query) { window.showToast('Lütfen aramak istediğiniz kelimeyi girin.'); return; }
+        const box = document.getElementById('search-suggestions-box');
+        if(!inputEl || !box) return;
+        
+        const rawQuery = inputEl.value.trim();
+        const query = window.normalizeStr(rawQuery);
+        
+        if(query.length < 3) {
+            box.style.display = 'none';
+            return;
+        }
         
         let results = [];
         
@@ -1968,10 +2040,12 @@ Blühe, deutsches Vaterland!</p>
             if(window.contentDB && window.contentDB[type]) {
                 window.contentDB[type].forEach(item => {
                     let author = type === 'poems' || type === 'quotes' ? 'Şair Misal.i' : 'Anonim';
-                    if((item.trTitle && item.trTitle.toLowerCase().includes(query)) ||
-                       (item.deTitle && item.deTitle.toLowerCase().includes(query)) ||
-                       (author.toLowerCase().includes(query))) {
-                        results.push({item: item, type: type});
+                    let trT = window.normalizeStr(item.trTitle);
+                    let deT = window.normalizeStr(item.deTitle);
+                    let aN = window.normalizeStr(author);
+                    
+                    if(trT.includes(query) || deT.includes(query) || aN.includes(query)) {
+                        results.push({item: item, type: type, title: item.trTitle || item.deTitle});
                     }
                 });
             }
@@ -1981,24 +2055,48 @@ Blühe, deutsches Vaterland!</p>
         if(window.userPoemsDB) {
             window.userPoemsDB.forEach(item => {
                 let fullName = item.name + (item.surname ? ' ' + item.surname : '');
-                if((item.title && item.title.toLowerCase().includes(query)) ||
-                   (item.trTitle && item.trTitle.toLowerCase().includes(query)) ||
-                   (item.deTitle && item.deTitle.toLowerCase().includes(query)) ||
-                   (fullName.toLowerCase().includes(query))) {
-                    results.push({item: item, type: 'userPoems'});
+                let t1 = window.normalizeStr(item.title);
+                let t2 = window.normalizeStr(item.trTitle);
+                let t3 = window.normalizeStr(item.deTitle);
+                let aN = window.normalizeStr(fullName);
+
+                if(t1.includes(query) || t2.includes(query) || t3.includes(query) || aN.includes(query)) {
+                    results.push({item: item, type: 'userPoems', title: item.title || item.trTitle});
                 }
             });
         }
         
-        if(results.length === 1) {
-            inputEl.value = '';
-            window.openPoemModal(results[0].item.id, results[0].type);
-        } else if (results.length > 1) {
-            window.customAlert(results.length + ' eser bulundu. Lütfen aramanızı daha spesifik hale getirin (Yazar veya Eser tam adı).', '🔍');
+        if(results.length > 0) {
+            box.innerHTML = results.slice(0, 10).map(r => {
+                let icon = r.type === 'userPoems' ? '✍️' : (r.item.emoji || '✨');
+                return `<div class="search-suggestion-item" onmousedown="window.openPoemModal('${r.item.id}', '${r.type}'); document.getElementById('global-search-input').value=''; document.getElementById('search-suggestions-box').style.display='none';"><span style="margin-right:8px;">${icon}</span> <strong>${r.title}</strong></div>`;
+            }).join('');
+            box.style.display = 'flex';
         } else {
-            window.customAlert('Aramanızla eşleşen bir eser bulunamadı.', '❌');
+            box.innerHTML = `<div class="search-suggestion-item" style="color:#ef4444; text-align:center;">Eser bulunamadı...<br><span style="font-size:0.8rem;">(Nichts gefunden)</span></div>`;
+            box.style.display = 'flex';
         }
     };
+
+    window.performSearch = function() {
+        const inputEl = document.getElementById('global-search-input');
+        if(!inputEl) return;
+        const query = inputEl.value.trim();
+        if(query.length >= 3) {
+            // Trigger das Dropdown manuell, falls Enter gedrückt wurde
+            window.handleSearchInput();
+        } else {
+            window.showToast('Lütfen en az 3 harf girin. (Bitte mind. 3 Buchstaben)');
+        }
+    };
+
+    // Schließe das Dropdown, wenn man irgendwo anders hinklickt
+    document.addEventListener('click', function(e) {
+        if(e.target.id !== 'global-search-input') {
+            let box = document.getElementById('search-suggestions-box');
+            if(box) box.style.display = 'none';
+        }
+    });
 
     window.copyShareText = function() {
         if(!window.currentPoemData) return;
@@ -2069,7 +2167,6 @@ Blühe, deutsches Vaterland!</p>
         });
     };
 
-    // MEISTER-FIX: SYSTEM PING MIT EINDEUTIGER ID
     window.sendSystemMessage = function(toUser, actionText) {
         if (!window.adminMessages) window.adminMessages = [];
         window.adminMessages.push({
@@ -2498,10 +2595,10 @@ Blühe, deutsches Vaterland!</p>
         }).join('');
     };
 
-    // --- CHAT LOGIK (ID BASIERT & MODERN) ---
+    // --- CHAT LOGIK (ID BASIERT & MODERN & V1000) ---
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); if(!box) return;
-        if(!window.chatDB || window.chatDB.length === 0) { box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz!</div>'; return; }
+        if(!window.chatDB || window.chatDB.length === 0) { box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz! (Noch keine Nachricht. Schreib als Erster!)</div>'; return; }
         
         box.innerHTML = window.chatDB.map(msg => {
             const isMe = window.currentUser && window.currentUser.username === msg.username;
@@ -2528,7 +2625,13 @@ Blühe, deutsches Vaterland!</p>
         if(!window.currentUser) { window.requireAuth(() => {}); return; }
         const input = document.getElementById('chat-input'); const text = input.value.trim();
         if(!text) return;
-        if(window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
+        
+        if(window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { 
+            input.value = ''; 
+            window.m_logout(); 
+            window.customAlert('Kötü söz / Schimpfwort kullandınız! Sistemden atıldınız.', '🚫'); 
+            return; 
+        }
         
         const now = new Date(); const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
@@ -2536,7 +2639,7 @@ Blühe, deutsches Vaterland!</p>
         const msg = { id: 'chat_' + Date.now() + Math.random().toString(36).substr(2,9), username: window.currentUser.username, name: fullName, text: text, time: timeStr };
         
         window.chatDB.push(msg); if(window.chatDB.length > 100) window.chatDB.shift();
-        localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB));
+        localStorage.setItem('misaliChatDB_V1000', JSON.stringify(window.chatDB));
         input.value = ''; window.lastLocalUpdate = Date.now(); 
         window.renderChat(); 
         if(window.syncToCloud) window.syncToCloud();
@@ -2547,7 +2650,7 @@ Blühe, deutsches Vaterland!</p>
     window.deleteChatMessage = function(id) {
         window.customConfirm('Mesajı sil?', () => { 
             window.chatDB = window.chatDB.filter(m => m.id !== id); 
-            localStorage.setItem('misaliChatDB', JSON.stringify(window.chatDB)); 
+            localStorage.setItem('misaliChatDB_V1000', JSON.stringify(window.chatDB)); 
             window.lastLocalUpdate = Date.now(); 
             window.renderChat(); 
             if(window.syncToCloud) window.syncToCloud(); 
@@ -2561,7 +2664,6 @@ Blühe, deutsches Vaterland!</p>
         let msgs = window.adminMessages.filter(m => !m.to || m.to === 'admin');
         if(msgs.length === 0) { list.innerHTML = '<p style="text-align:center; color:#94a3b8; margin-top: 20px;">Mesaj yok.</p>'; return; }
         
-        // Anzeige in umgekehrter Reihenfolge (neueste zuerst), ABER Löschen per ID!
         list.innerHTML = msgs.slice().reverse().map((m) => {
             let rdCls = m.read ? 'read' : '';
             return `<div class="notif-card ${rdCls}">
@@ -2634,18 +2736,13 @@ Blühe, deutsches Vaterland!</p>
         });
     };
 
-    // BENACHRICHTIGUNG LÖSCHEN ÜBER DIE GENAUE ID
     window.deleteAdminMessage = function(id) { 
         window.customConfirm('Mesajı sil?', () => { 
             window.adminMessages = window.adminMessages.filter(m => m.id !== id);
             localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
             window.lastLocalUpdate = Date.now(); 
-            
-            if (window.currentUser && window.currentUser.role === 'admin') {
-                window.renderAdminMessages(); 
-            } else {
-                window.renderUserMessages();
-            }
+            if (window.currentUser && window.currentUser.role === 'admin') window.renderAdminMessages(); 
+            else window.renderUserMessages();
             window.updateNotifyBadge(); 
             if(window.syncToCloud) window.syncToCloud(); 
         }); 
@@ -2750,7 +2847,7 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('horo-title').innerText = window.currentGameLang === 'DE' ? (deName + ' Horoskop') : (trName + ' Burcu');
         
         let monthIndex = new Date().getMonth();
-        let pseudoRandom = (monthIndex + id.length) % 3; // Wählt jeden Monat einen konsistenten Spruch aus 3
+        let pseudoRandom = (monthIndex + id.length) % 3; 
         
         let dbTR = horoDB_TR[id] || horoDB_TR['aries'];
         let dbDE = horoDB_DE[id] || horoDB_DE['aries'];
@@ -2792,7 +2889,10 @@ Blühe, deutsches Vaterland!</p>
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
         const input = document.getElementById('m-comment-input'); const text = input.value.trim();
         if (!text) return;
-        if (window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
+        
+        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { 
+            input.value = ''; window.m_logout(); window.customAlert('Kötü söz / Schimpfwort kullandınız! Sistemden atıldınız.', '🚫'); return; 
+        }
         
         const poemId = window.currentPoemData.id;
         if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
@@ -2828,7 +2928,7 @@ Blühe, deutsches Vaterland!</p>
         const oldText = window.poemDataStore[poemId].comments[idx].text;
         window.customDualPrompt('Yorumu Düzenle', '✍️', oldText, (title, newText) => {
             if(!newText.trim()) return;
-            if (window.badWords.some(w => newText.toLowerCase().includes(w))) { window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
+            if (window.badWords && window.badWords.some(w => newText.toLowerCase().includes(w))) { window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
             window.lastLocalUpdate = Date.now();
             window.poemDataStore[poemId].comments[idx].text = newText;
             window.poemDataStore[poemId].comments[idx].editTime = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
@@ -3050,9 +3150,17 @@ Blühe, deutsches Vaterland!</p>
                 </div>`;
             }).join('');
             
+            // MEISTER FIX FÜR ORANGENE BADGE: EXAKTE BERECHNUNG UND ANZEIGE-ZWANG!
             let unapproved = db.filter(u => u.approved === false).length;
             if(b3) { 
-                b3.innerText = unapproved > 0 ? unapproved : ''; 
+                if(unapproved > 0) {
+                    b3.innerText = unapproved; 
+                    b3.style.setProperty('display', 'flex', 'important'); 
+                    b3.style.opacity = '1';
+                } else {
+                    b3.innerText = '';
+                    b3.style.setProperty('display', 'none', 'important');
+                }
             }
         }
 
@@ -3092,7 +3200,6 @@ Blühe, deutsches Vaterland!</p>
         window.closeTopModal('force'); window.showToast('Puanlar güncellendi!'); window.renderOnlineUsers(); if(window.syncToCloud) window.syncToCloud();
     };
     
-    // MEISTER-FIX: SICHERHEITSABFRAGE BEI "SIFIRLA"
     window.resetUserStats = function() {
         window.customConfirm('Kullanıcının tüm puanlarını sıfırlamak istediğinize emin misiniz?', () => {
             document.getElementById('edit-stat-score').value = 0; 
@@ -3228,7 +3335,6 @@ Blühe, deutsches Vaterland!</p>
 
     // --- GAMES LOGIK (DE/TR SEPARATE DATABASES & LOGIC) ---
     
-    // MEISTER-FIX: GAME LANGUAGE TOGGLE
     window.setGlobalGameLang = function(lang) {
         window.currentGameLang = lang;
         const btnTr = document.getElementById('game-lang-tr');
