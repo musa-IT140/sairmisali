@@ -17,7 +17,7 @@
             --accent-color: #f4c542; 
             --accent-glow: 0 0 15px rgba(244, 197, 66, 0.5); 
             --nav-bg: rgba(10, 25, 47, 0.98); 
-            --modal-bg: rgba(4, 6, 10, 0.95); 
+            --modal-bg: rgba(2, 6, 23, 1); /* Extrem dunkles Blau, 100% Deckkraft für Wetter etc. */
         }
         
         /* RESET & BASICS */
@@ -28,7 +28,7 @@
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #0a192f 0%, #000000 100%); color: var(--text-color); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; position: relative; -webkit-user-select: none; user-select: none; }
         body.modal-open { overflow: hidden; touch-action: none; }
         
-        /* ERLAUBE MARKIEREN NUR WO NÖTIG (Inputs, Texte der Werke, Chat) */
+        /* ERLAUBE MARKIEREN NUR WO NÖTIG */
         input, textarea, .modal-text, .anthem-content, .chat-bubble { -webkit-user-select: text; user-select: text; }
         
         /* GOOGLE TRANSLATE HIDE */
@@ -42,7 +42,7 @@
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
         .hidden { display: none !important; }
 
-        /* ARKA PLAN VAHŞİ UÇUŞAN İKONLAR (Golden, ~60% Transparency -> Opacity 0.6, Professional) */
+        /* ARKA PLAN VAHŞİ UÇUŞAN İKONLAR (Golden, Professional Transparency 0.6) */
         .wild-bg-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: -2; pointer-events: none; }
         .wild-icon { position: absolute; color: rgba(244, 197, 66, 0.6); filter: drop-shadow(0 0 8px rgba(244, 197, 66, 0.4)); pointer-events: none; }
         
@@ -88,7 +88,7 @@
         .reset-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a) !important; color: white !important; box-shadow: 0 4px 15px rgba(34,197,94,0.3) !important;}
         .reset-btn.biometric { background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important; color: white !important; box-shadow: 0 4px 15px rgba(139,92,246,0.3) !important;}
 
-        /* OYUNLAR İÇİN DİL BUTONLARI (TR/DE) - Z-INDEX KORREKTUR */
+        /* OYUNLAR İÇİN DİL BUTONLARI (TR/DE) */
         .game-lang-toggle { display:flex; justify-content:center; background: rgba(0,0,0,0.6); border-radius: 30px; border: 1px solid #f4c542; padding: 4px; width: 100%; margin-bottom: 30px; position: relative; z-index: 50; pointer-events: auto;}
         .game-lang-btn { margin:0; border-radius:25px; flex:1; font-size: 1rem; padding: 10px; transition: 0.3s; pointer-events: auto; cursor: pointer; font-weight: bold;}
         .game-lang-btn.active { background: #f4c542 !important; color: black !important; box-shadow: 0 0 15px rgba(244,197,66,0.6); }
@@ -136,13 +136,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.8);
             font-family: 'Poppins', sans-serif;
             pointer-events: none; justify-content: center; align-items: center;
-            display: none !important; /* Immer versteckt als Standard */
+            display: none !important; /* Standard versteckt */
         }
-        /* Wenn das JS sagt "show-badge", dann überschreibt es ALLES! */
+        
+        /* WICHTIG: Die Klasse always-show hebelt die Versteck-Logik aus (für 0) */
+        .badge-count.always-show { display: inline-flex !important; opacity: 1 !important; }
         .badge-count.show-badge { display: flex !important; opacity: 1 !important; }
         
         .header-online-status .badge-count, .header-works-status .badge-count { position: static; box-shadow: none; padding: 2px 6px; display: none !important;}
-        .header-online-status .badge-count.show-badge, .header-works-status .badge-count.show-badge { display: inline-flex !important; }
+        .header-online-status .badge-count.show-badge, .header-works-status .badge-count.show-badge, .header-works-status .badge-count.always-show { display: inline-flex !important; }
         
         .badge-red { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; }
         .badge-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
@@ -165,17 +167,21 @@
         .holiday-tr { border-left-color: #ef4444; }
         .holiday-de { border-left-color: #3b82f6; }
 
-        /* MODALS */
+        /* MODALS (Wetter-Hintergrund extrem professionell dunkel!) */
         .modal { display: none !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 100000 !important; justify-content: center; align-items: center; padding: 15px; pointer-events: none; }
         .modal.active-modal { display: flex !important; pointer-events: auto; animation: fadeIn 0.2s ease-out forwards; }
         .high-z-modal { z-index: 100010 !important; }
         #modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99998; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); pointer-events: auto; }
 
         .modal-content { background: linear-gradient(145deg, #0a192f, #000000); color: #f8fafc; border-radius: 20px; width: 100%; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; position: relative; border: 1px solid rgba(244, 197, 66, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.9); margin: 0 auto; overflow: hidden; transform: translateY(20px); opacity: 0; animation: slideUp 0.3s ease-out forwards; pointer-events: auto; }
+        
+        /* WETTER MODAL - 100% OPACITY, ELEGANT */
+        #weatherModal .modal-content { background: var(--modal-bg) !important; border: 1px solid var(--accent-color); box-shadow: 0 0 40px rgba(0,0,0,1); }
+
         @media (min-width: 600px) { .modal-content { max-width: 500px; } }
         #contentModal .modal-content { max-width: 800px; }
         #leaderboardModal .modal-content { max-width: 950px; }
-        #eventsModal .modal-content { overflow: visible !important; } /* Wichtig für die Sidebar im Modal */
+        #eventsModal .modal-content { overflow: visible !important; } 
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -417,6 +423,9 @@
             .weather-widget { padding: 4px 8px; font-size: 0.75rem; flex-shrink: 0; }
             .auth-view-btn { padding: 4px 10px; font-size: 0.75rem; flex-shrink: 0; }
             .user-profile-group { flex-shrink: 0; }
+            
+            /* Online & Works Status auf Mobile zentrieren */
+            .header-online-status, .header-works-status { justify-content: center; }
         }
     </style>
 </head>
@@ -476,7 +485,7 @@
                         <i class="fas fa-globe" style="animation: gentlePulse 2s infinite alternate;"></i> Canlı (Online): <span class="badge-count badge-green" id="header-search-online-badge" style="position:relative; margin-left:3px; top:0; right:0; display:inline-flex !important;">0</span>
                     </div>
                     <div class="header-works-status clickable-header-item" style="display: flex; align-items:center; gap:5px; color:#f4c542; font-size:0.8rem; pointer-events:auto; font-family:'Poppins', sans-serif; cursor:default;">
-                        <i class="fas fa-book-open"></i> Toplam Eser: <span class="badge-count badge-yellow" id="header-total-works-badge" style="position:relative; margin-left:3px; top:0; right:0; display:inline-flex !important; color:#000;">0</span>
+                        <i class="fas fa-book-open"></i> Toplam Eser: <span class="badge-count badge-yellow always-show" id="header-total-works-badge" style="position:relative; margin-left:3px; top:0; right:0; color:#000;">0</span>
                     </div>
                 </div>
             </div>
@@ -1971,7 +1980,8 @@ Blühe, deutsches Vaterland!</p>
             window.customAlert("Lütfen önce şifrenizle giriş yapın ve 'Beni Hatırla' kutusunu işaretleyin.", "🛡️");
         }
     };
-    </script><script>
+    </script>
+<script>
     // --- HILFSFUNKTIONEN & NAVIGATION ---
     window.isItemNew = function(id, timestamp) { 
         if (!timestamp) return false; 
@@ -1988,7 +1998,6 @@ Blühe, deutsches Vaterland!</p>
         } 
     };
 
-    // TOLERANTE SUCHE: Macht türkische ve deutsche Zeichen kompatibel
     window.normalizeStr = function(str) {
         if (!str) return '';
         return str.toLowerCase()
@@ -1996,11 +2005,14 @@ Blühe, deutsches Vaterland!</p>
             .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u');
     };
 
-    // ABSOLUTE ZÄHLER-ERZWINGUNG (Behebt das Problem unsichtbarer Badges endgültig)
+    // ABSOLUTE ZÄHLER-ERZWINGUNG (inklusive .always-show Logik für 0)
     window.forceBadge = function(elId, val, isInline = false) {
         const el = document.getElementById(elId);
         if(!el) return;
-        if(val > 0) {
+        
+        const alwaysShow = el.classList.contains('always-show');
+        
+        if(val > 0 || alwaysShow) {
             el.innerText = val;
             el.classList.add('show-badge');
             el.style.setProperty('display', isInline ? 'inline-flex' : 'flex', 'important');
@@ -2265,11 +2277,12 @@ Blühe, deutsches Vaterland!</p>
         window.open(url, '_blank'); window.closeTopModal('force');
     };
 
-    // --- WETTER (100% SYNCHRON) ---
+    // --- WETTER MIT INTELLIGENTEM FALLBACK (TAG/NACHT) ---
     window.fetchWeather = function() {
         const city = 'Berlin'; const key = 'c7d2c3dfb8f2c6e61f22e74251ba9768';
         fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${key}&units=metric&lang=tr`)
-        .then(res => res.json()).then(data => {
+        .then(res => { if(!res.ok) throw new Error("API Limit"); return res.json(); })
+        .then(data => {
             if(data && data.main) {
                 const temp = Math.round(data.main.temp); const desc = data.weather[0].description; const icon = data.weather[0].icon;
                 const emojiMap = { '01d':'☀️','01n':'🌙','02d':'⛅','02n':'☁️','03d':'☁️','03n':'☁️','04d':'☁️','04n':'☁️','09d':'🌧️','09n':'🌧️','10d':'🌦️','10n':'🌧️','11d':'⛈️','11n':'🌧️','13d':'❄️','13n':'❄️','50d':'🌫️','50n':'🌫️' };
@@ -2298,19 +2311,34 @@ Blühe, deutsches Vaterland!</p>
                 }
             } else throw new Error('API lieferte keine Daten');
         }).catch(() => { 
-            const ht = document.getElementById('wm-temp-header'); if(ht) ht.innerText = '18°C Berlin'; 
+            // INTELLIGENTER FALLBACK! Zeitbasierte Temperatur und Icons.
+            let date = new Date();
+            let h = date.getHours();
+            let isDay = h > 6 && h < 20;
+            let tempFallback = isDay ? '21' : '14';
+            let iconFallback = isDay ? '⛅' : '🌙';
+            let descFallback = isDay ? 'Parçalı Bulutlu' : 'Açık';
+            
+            const ht = document.getElementById('wm-temp-header'); if(ht) ht.innerText = tempFallback + '°C Berlin'; 
+            const ha = document.getElementById('wm-anim-header-icon'); if(ha) { ha.innerText = iconFallback; }
             const modalCity = document.getElementById('wm-city'); if(modalCity) modalCity.innerText = 'Berlin';
             const mt = document.getElementById('wm-temp'); 
             if(mt) { 
-                mt.innerText = '18°C'; 
+                mt.innerText = tempFallback + '°C'; 
                 const animContainer = document.getElementById('wm-anim');
                 if(animContainer) {
                     let iconEl = animContainer.querySelector('.weather-anim-icon');
                     if(!iconEl) {
-                        animContainer.innerHTML = `<div style="font-size:5rem;" class="weather-anim-icon">⛅</div><div class="weather-desc" style="color:#94a3b8; margin-top:10px;">Parçalı Bulutlu</div>`;
+                        animContainer.innerHTML = `<div style="font-size:5rem;" class="weather-anim-icon">${iconFallback}</div><div class="weather-desc" style="color:#94a3b8; margin-top:10px;">${descFallback}</div>`;
+                    } else {
+                        iconEl.innerText = iconFallback;
+                        animContainer.querySelector('.weather-desc').innerText = descFallback;
                     }
                 }
-                document.getElementById('wm-quote-tr').innerText = 'Güneşin tadını çıkar.'; document.getElementById('wm-quote-de').innerText = 'Genieße die Sonne.'; 
+                let quoteTR = isDay ? 'Güneşin tadını çıkar.' : 'İyi akşamlar, huzurla uyu.';
+                let quoteDE = isDay ? 'Genieße die Sonne.' : 'Guten Abend, schlaf friedlich.';
+                document.getElementById('wm-quote-tr').innerText = quoteTR; 
+                document.getElementById('wm-quote-de').innerText = quoteDE; 
             }
         });
     };
@@ -2606,7 +2634,9 @@ Blühe, deutsches Vaterland!</p>
         window.sendSystemMessage('Admin', `KULLANICI ESERİ: ${fullName} yeni bir eser ekledi.`);
     };
 
+    // SORTIERUNG (1. Kategorie, 2. Punkte, 3. Alphabet)
     const categoryWeights = { 'Super Elite': 3, 'Elite': 2, 'Normal': 1 };
+    
     window.sortContentItems = function(arr, hasCategories) {
         return arr.slice().sort((a, b) => {
             if(hasCategories) {
@@ -2736,6 +2766,7 @@ Blühe, deutsches Vaterland!</p>
         const grid = document.getElementById('kullanici-eserleri-grid');
         if (!grid) return;
         
+        // DAS NEUE "TOPLAM ESER" BADGE UPDATE - Nutzt always-show
         if(window.userPoemsDB) {
             window.forceBadge('header-total-works-badge', window.userPoemsDB.length, true);
         }
