@@ -60,9 +60,8 @@
             transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, box-shadow 0.2s, color 0.2s;
         }
         
-        /* MEGA-FIX FÜR BILMECE/BULMACA: KARTEN SIND KLICKBAR, INHALT BLOCKIERT NICHT */
         .card { cursor: pointer; transition: 0.3s; position: relative; z-index: 10; pointer-events: auto !important; }
-        .card * { pointer-events: none; } /* Verhindert, dass Text oder Icons den Klick schlucken */
+        .card * { pointer-events: none; } 
         .game-card { cursor: pointer; position: relative; z-index: 10; pointer-events: auto !important; }
         .game-card * { pointer-events: none; }
         
@@ -250,6 +249,7 @@
         .search-suggestion-item:last-child { border-bottom: none; }
         .search-suggestion-item:hover { background: rgba(244, 197, 66, 0.2); color: #fff; }
 
+        /* DEFAULT DESKTOP PADDING */
         .page-view { display: none; padding: 260px 5% 100px; min-height: 100vh; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.2s ease-out; } 
         .page-view.active-view { display: flex; opacity: 1; }
 
@@ -347,7 +347,7 @@
         .sidebar-section li { padding: 10px 12px; font-size: 0.95rem; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s ease; display: flex; flex-direction: column; gap: 3px; position: relative; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 6px; }
         .sidebar-section li:hover { color: #fff; padding-left: 20px; background: rgba(244, 197, 66, 0.2); border-left: 4px solid var(--accent-color); }
         
-        .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none;}
         
         .anthem-content { font-family: 'Playfair Display', serif; font-size: 0.95rem !important; line-height: 1.6 !important; text-align: center; color: #f8fafc; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px dashed rgba(244,197,66,0.3); margin-top: 15px; white-space: pre-wrap; }
 
@@ -359,43 +359,61 @@
 
         canvas.game-canvas { background: #0a192f; border: 2px solid var(--accent-color); border-radius: 8px; display: block; margin: 0 auto; box-shadow: 0 0 15px rgba(244,197,66,0.3); }
 
-        /* MEGA-KOMPAKTER MOBILE HEADER (REPARIERT!) */
+        /* NEUES RESPONISVES DESIGN */
+        @media (max-width: 1100px) {
+            .page-view { padding-top: 290px; } 
+            .header-top { justify-content: space-between; padding: 12px 4%; flex-wrap: wrap;} 
+            .header-left { width: 100%; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;}
+            .header-search-wrapper { max-width: 100%; margin: 5px 0; order: 3; }
+            .header-right { width: 100%; justify-content: center; } 
+            .datetime-container { display: flex !important; } 
+        }
+
+        /* MEGA-KOMPAKTER MOBILE HEADER FIX WIE GEWÜNSCHT */
         @media (max-width: 768px) {
-            .page-view { padding-top: 190px; padding-left: 10px; padding-right: 10px; } 
-            header { height: auto; top: 40px; padding-bottom: 5px;}
-            .ticker-wrap { height: 40px; }
-            .ticker-half { height: 20px; font-size: 0.75rem; }
+            .page-view { padding-top: 175px; padding-left: 10px; padding-right: 10px; } 
             
-            .header-top { flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding: 5px 2%; gap: 5px; } 
-            .header-left { width: 100%; justify-content: space-between; }
-            .logo { font-size: 1.4rem; }
-            .datetime-container { display: none !important; } /* Platz sparen */
+            header { height: auto; top: 35px; padding-bottom: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.9); }
             
-            .header-search-wrapper { width: 100%; order: 3; margin: 5px 0 0 0; }
-            .header-search input { padding: 6px 10px !important; font-size: 0.9rem !important; }
+            /* TICKER FIX FÜR MOBILE LANGE SÄTZE */
+            .ticker-wrap { height: 35px; }
+            .ticker-half { height: 17.5px; font-size: 0.7rem; }
+            .ticker-top { display: block; overflow: hidden; white-space: nowrap; width: 100%; text-align: left; }
+            .ticker-text { display: inline-block; padding-left: 100%; animation: scrollTickerMobile 20s linear infinite; opacity: 1 !important; text-shadow: none; font-size: 0.75rem; line-height: 17.5px;}
+            .ticker-text.show { animation: scrollTickerMobile 20s linear infinite; }
+            @keyframes scrollTickerMobile { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+            
+            .header-top { flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding: 4px 2%; gap: 4px; } 
+            .header-left { width: 100%; justify-content: space-between; margin:0;}
+            .logo { font-size: 1.3rem; }
+            .datetime-container { display: none !important; } 
+            
+            .header-search-wrapper { width: 100%; order: 3; margin: 4px 0 0 0; }
+            .header-search input { padding: 4px 10px !important; font-size: 0.85rem !important; }
+            .header-search button { padding: 2px 5px; font-size: 1rem; }
             
             .header-right { width: 100%; justify-content: space-between; order: 2; padding: 0; } 
             
             .user-profile-group { padding: 2px 6px; }
             #header-username { font-size: 1.1rem; }
-            .header-score-badge { padding: 2px 6px; font-size: 0.8rem; }
+            .header-score-badge { padding: 2px 6px; font-size: 0.75rem; }
             
-            .weather-widget { display: none !important; } /* Platz sparen */
+            .weather-widget { display: none !important; } 
             
-            .header-online-status, .header-works-status { font-size: 0.75rem; }
+            .header-online-status, .header-works-status { font-size: 0.7rem; margin-top: 4px;}
             .auth-view-btn { padding: 4px 8px; font-size: 0.75rem; }
-            #user-notify-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+            #user-notify-btn { width: 30px; height: 30px; font-size: 0.85rem; }
             
             .zodiac-grid { grid-template-columns: repeat(3, 1fr); }
-            .header-nav-bar { padding: 5px 2%; }
-            nav button { padding: 6px 10px; font-size: 0.85rem; flex-shrink: 0; }
+            .header-nav-bar { padding: 4px 2%; }
+            nav button { padding: 5px 8px; font-size: 0.8rem; flex-shrink: 0; gap: 4px;}
             
-            .floating-menu-wrapper { transform: scale(0.85); }
+            .floating-menu-wrapper { transform: scale(0.8); }
             .floating-menu-wrapper.left { left: 5px; bottom: 5px; }
             .floating-menu-wrapper.right { right: 5px; bottom: 5px; }
             
             /* ATASÖZLERI TOGGLE FIX FÜR MOBILE */
-            .game-lang-toggle { display: flex !important; margin-top: 10px !important; }
+            .game-lang-toggle { display: flex !important; margin: 15px auto !important; width: 90% !important; z-index: 100 !important;}
             #atasozleri-split { grid-template-columns: 1fr !important; }
         }
     </style>
@@ -441,7 +459,7 @@
                     </div>
                 </div>
                 <div class="header-user-stats admin-only clickable-header-item" id="header-user-stats" onclick="if(window.openFastModal) window.openFastModal('adminUsersModal')">
-                    <i class="fas fa-users"></i> <span id="header-stats-text">Kayıtlı: <span style="color:#f97316" id="h-kayitli">0</span> | Aktif: <span style="color:#22c55e" id="h-aktif">0</span> | Ziyaretçi: <span style="color:#ffffff" id="h-ziyaretci">0</span></span>
+                    <i class="fas fa-users"></i> <span id="header-stats-text">Kayıtlı: <span style="color:#f97316" id="h-kayitli">0</span> | Aktif: <span style="color:#22c55e" id="h-aktif">0</span> | Ziyaretçi: <span style="color:#22d3ee" id="h-ziyaretci">0</span></span>
                 </div>
             </div>
 
@@ -517,7 +535,7 @@
             </nav>
         </div>
     </header>
-    <div class="floating-menu-wrapper left" id="floating-left">
+<div class="floating-menu-wrapper left" id="floating-left">
         <div class="floating-menu-items" id="left-menu-items">
             <button class="bottom-btn" onclick="if(window.closeFloatingMenus) window.closeFloatingMenus(); if(window.openFastModal) window.openFastModal('infoModal')">
                 <span class="btn-icon"><i class="fas fa-info-circle"></i></span>
@@ -786,7 +804,7 @@ Blühe, deutsches Vaterland!</p>
             <div id="admin-logs-content"></div>
         </div>
     </div>
-    <main class="main-content" id="main-content">
+<main class="main-content" id="main-content">
         
         <section class="page-view active-view" id="home-view">
             <div class="profile-container" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px;">
@@ -1065,7 +1083,7 @@ Blühe, deutsches Vaterland!</p>
         </div>
         <div style="color: #94a3b8; font-size: 1rem;">&copy; Şair Misal.i 2026</div>
     </footer>
-    <div class="modal high-z-modal notranslate" id="custom-dialog-modal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+<div class="modal high-z-modal notranslate" id="custom-dialog-modal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 420px; text-align:center;" onclick="event.stopPropagation()">
             <div id="custom-dialog-icon" style="font-size: 3.5rem; margin-bottom: 15px; color: #f4c542; filter: drop-shadow(0 0 15px rgba(244,197,66,0.6));">❓</div>
             <h2 class="game-title" id="custom-dialog-title" style="font-size: 2rem; border:none; margin-bottom:15px;">Onay</h2>
@@ -1668,7 +1686,7 @@ Blühe, deutsches Vaterland!</p>
             </div>
         </div>
     </div>
-    <script type="text/javascript">
+<script type="text/javascript">
     document.documentElement.removeAttribute('translate');
     function googleTranslateElementInit() {
         try {
@@ -1748,7 +1766,7 @@ Blühe, deutsches Vaterland!</p>
             if(json.record) { 
                 let r = json.record; 
                 
-                // ANTI-OVERWRITE SCHUTZ: Verhindert, dass der Admin-Punkte-Reset überschrieben wird!
+                // ANTI-OVERWRITE SCHUTZ: Wenn lokales Update (Punkte) neuer ist als Cloud, lade nicht runter!
                 if (r.timestamp && r.timestamp < window.lastLocalUpdate - 2000) {
                     window.isFetching = false;
                     return; 
@@ -1782,6 +1800,7 @@ Blühe, deutsches Vaterland!</p>
                 }
                 
                 if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
+                    // INTELLIGENTES MERGE: Verhindert das automatische Löschen von Admin-Nachrichten!
                     let localIds = window.adminMessages.map(m => m.id);
                     r.adminMsgs.forEach(rm => { if(!localIds.includes(rm.id)) window.adminMessages.push(rm); });
                     localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
@@ -1817,11 +1836,61 @@ Blühe, deutsches Vaterland!</p>
 
     setInterval(() => { window.fetchFromCloud(); }, 3500); 
 
+    // --- XXL HOROSKOP DATENBANK (LANGE SÄTZE) ---
+    window.horoDB_TR = {
+        aries: [ "Bugün gökyüzü senin için inanılmaz enerjiler barındırıyor. İçindeki liderlik vasfını ortaya çıkarmanın tam zamanı. Cesur adımlar atarak uzun zamandır beklediğin projeleri hayata geçirebilirsin. Geçmişteki korkularını bir kenara bırak; yeniliklere açık olursan büyük bir maddi ve manevi kazanç kapısı aralanacak.", "Ateş elementinin verdiği güçle bugün karşına çıkan tüm engelleri yıkıp geçeceksin. Sadece sabırsızlığına dikkat etmelisin. Çevrendeki insanların hızına ayak uydurmasını beklemek yerine, onlara yol gösterici ol. Akşam saatlerinde bir dostundan alacağın sürpriz haber yüzünü güldürecek.", "Bugün romantik ilişkilerde ve ikili diyaloglarda çok daha şanslısın. Kalbini aşka kapatma. Eğer hayatında biri yoksa, beklemediğin bir ortamda ruh eşinle karşılaşma ihtimalin çok yüksek. Enerjini doğru yönlendir, yıldızlar seni destekliyor." ],
+        taurus: [ "Toprak elementinin verdiği o sağlam ve sarsılmaz duruşun, bugün sana büyük avantajlar sağlayacak. İş hayatında ya da maddi konularda uzun süredir ektiğin tohumların meyvelerini toplamaya başlıyorsun. Kararlılığın herkesin takdirini topluyor. Doğa ile iç içe olmak ruhunu dinlendirecek.", "Huzur ve güven ihtiyacının çok yüksek olduğu bir gün. Ailenle veya sevdiğin insanlarla evinde geçireceğin kaliteli zaman, tüm haftanın stresini alıp götürecek. Bugün büyük finansal risklere girmek yerine, elindekinin kıymetini bilmek sana çok daha fazla şans getirecek.", "Değer verdiğin eşyalara ve insanlara daha sıkı sarılma vakti geldi. Beklenmedik bir fırsat kapını çalabilir, ancak karar vermeden önce detaylıca düşünmelisin. İnatçılığını bir kenara bırakıp biraz esnek olursan, aşamayacağın hiçbir sorun kalmayacak." ],
+        gemini: [ "İletişim gezegeni Merkür bugün senin için çalışıyor! Zekan, pratikliğin ve hitabet yeteneğin sayesinde çözülemeyecek sandığın tüm düğümleri tek tek çözeceksin. Yeni insanlarla tanışmak, ağını genişletmek ve önemli bağlantılar kurmak için yılın en şanslı günlerinden biri.", "İçindeki çift karakterlilik bugün sana bir avantaj sağlayacak; aynı anda birden fazla işi mükemmel bir şekilde organize edebileceksin. Kararsız kaldığın konularda mantığından ziyade içgüdülerine güvenmelisin. Kısa bir yolculuk planı gündeme gelebilir.", "Zihinsel enerjinin tavan yaptığı bir gün. Yeni bir eğitime başlamak, araştırma yapmak veya yazılı bir eser üretmek için harika bir zaman. Çevrendeki insanları kelimelerinle büyüleyeceksin. Sadece dedikodulardan ve asılsız söylentilerden uzak durmaya özen göster." ],
+        cancer: [ "Duygusal derinliğinin ve empatinin en yüksek olduğu günlerden birindesin. Sevdiklerine, ailene ve yuva dediğin o sıcak ortama vakit ayırmak ruhuna ilaç gibi gelecek. Geçmişten gelen güzel anıları yâd etmek, içindeki çocuğu mutlu edecek. Kalbinin sesini dinle, o seni asla yanıltmaz.", "Su kenarında vakit geçirmek veya evinde yapacağın ufak bir dekorasyon değişikliği, tüm auranı yenileyecek. Bugün mantıklı kararlar almak yerine tamamen duygularınla hareket etmen, seni doğru insanlara ve doğru mekanlara çekecek. Şefkatin çevrene şifa saçıyor.", "İçsel huzuru bulmak için bugün biraz yalnız kalmaya ihtiyacın olabilir. Kendi kabuğuna çekilip, hayatındaki gidişatı gözden geçirmek sana yepyeni bir vizyon katacak. Akşama doğru alacağın manevi bir destek, tüm dertlerini unutturacak kapasitede." ],
+        leo: [ "Güneş'in çocukları, bugün sahne tamamen sizin! Liderlik özellikleriniz, karizmanız ve tükenmek bilmeyen yaşam enerjiniz herkesin dikkatini üzerinize çekiyor. Yaratıcılığınızı sergilemekten, fikirlerinizi yüksek sesle söylemekten asla çekinmeyin. Bugün yıldızınız parlıyor.", "Cömertliğinizin ve sıcakkanlılığınızın karşılığını göreceğiniz bir gün. Sevdiğiniz insanlara yapacağınız ufak bir sürpriz, aranızdaki bağları çelik gibi sağlamlaştıracak. Aşk hayatınızda hiç beklemediğiniz, son derece tutkulu ve heyecan verici gelişmeler yaşanabilir.", "Egonuzu bir kenara bırakıp etrafınızdakilere ışık saçtığınız sürece, bugün başaramayacağınız hiçbir iş yok. İş hayatınızda büyük bir takdir görebilir ve terfi şansı yakalayabilirsiniz. Eğlence, neşe ve coşku bugün tamamen sizin etrafınızda dönüyor." ],
+        virgo: [ "Mükemmeliyetçi ve detaycı yapınız bugün size altın değerinde fırsatlar sunacak. Kimsenin göremediği ufak hataları fark edip düzelterek, iş hayatınızda veya maddi konularda büyük bir kazanç elde edeceksiniz. Planlı ve programlı çalışmanız, üstleriniz tarafından büyük takdir toplayacak.", "Sağlığınıza ve beslenmenize dikkat etmeniz gereken bir gün. Kendinize küçük molalar verin, zihninizi dinlendirin. Temiz hava almak ve doğayla bütünleşmek stresinizi sıfırlayacaktır. Birikmiş, yarım kalmış işlerinizi bitirmek için muazzam bir enerjiye sahipsiniz.", "Sadelik ve zarafetiniz, bugün gireceğiniz her ortamda fark edilmenizi sağlayacak. Karmaşık sorunları analitik zekanızla tereyağından kıl çeker gibi çözeceksiniz. Güvendiğiniz bir dostunuzun tavsiyesi, hayatınızda yepyeni ve olumlu bir sayfa açabilir." ],
+        libra: [ "Zarafetin, adaletin ve diplomasinin burcu! Bugün denge ve uyum arayışınız en üst seviyede. Sanata, estetiğe ve güzelliğe yönelmek ruhunuzu doyuracak. İkili ilişkilerde tatlı sürprizler, romantik anlar ve derin bağlar kurmak için gökyüzü sizi destekliyor.", "Karar verirken her zaman yaptığınız gibi mantığınızı ve kalbinizi aynı teraziye koymayı çok iyi başaracaksınız. Bugün adalet duygunuz sayesinde çevrenizdeki bir anlaşmazlığı çözecek ve arabulucu rolünüzle herkesin saygısını kazanacaksınız.", "Kendinize vakit ayırmak, bakım yapmak ve kişisel imajınızı yenilemek için harika bir gün. Enerjiniz o kadar yüksek ki, etrafınızdaki insanlar sizinle vakit geçirmek için can atacak. Akşam saatlerinde alacağınız romantik bir mesaj kalbinizi hızla çarptıracak." ],
+        scorpio: [ "Sezgilerinizin, altıncı hissinizin ve tutkularınızın tavan yaptığı muazzam bir gün. İç sesinize güvenin; bugün aklınızdan geçenler bir bir karşınıza çıkabilir. Gizemli konular, derin araştırmalar ve sırların peşinden gitmek size hiç bilmediğiniz yeni kapılar aralayacak.", "Tam bir dönüşüm zamanı! Artık size hizmet etmeyen, sizi aşağı çeken eski alışkanlıklarınızı ve toksik insanları hayatınızdan çıkarıp, adeta küllerinizden yeniden doğacaksınız. Cesaretiniz ve kararlılığınız bugün aşılmaz denilen dağları bile aşmanızı sağlayacak.", "Aşk ve ikili ilişkilerde son derece tutkulu, sahiplenici ve derin bir gün sizi bekliyor. Sırrınızı paylaştığınız, ruhunuza dokunan o özel kişiyle aranızdaki bağ sarsılmaz bir seviyeye ulaşacak. Kendinizi gizlemek yerine duygularınızı özgürce ifade etmekten korkmayın." ],
+        sagittarius: [ "İçinizdeki o sınır tanımaz maceracı ruh bugün tamamen uyanıyor! Yeni ufuklar keşfetmek, seyahat planları yapmak veya yeni bir eğitime başlamak için yılın en şanslı dönemlerinden birindesiniz. İyimserliğiniz ve yüksek enerjiniz, girdiğiniz her ortamın havasını değiştirecek.", "Jüpiter'in şanslı çocukları, bugün şans faktörü tamamen sizin yanınızda. Risk almaktan, cesur adımlar atmaktan ve konfor alanınızın dışına çıkmaktan asla çekinmeyin. Farklı kültürlerden veya farklı görüşlerden insanlarla yapacağınız sohbetler ufkunuza yeni bir boyut katacak.", "Hayata olan o bitmek bilmeyen inancınız ve neşeniz, bugün etrafınızdaki herkesi size çekecek. Felsefi konular, derin düşünceler ve hayatın anlamı üzerine yapacağınız okumalar ruhunuza çok iyi gelecek. Beklemediğiniz bir yerden elinize geçecek bir para yüzünüzü güldürebilir." ],
+        capricorn: [ "Disiplin, azim ve sarsılmaz iradenizin meyvelerini toplamaya başladığınız o muhteşem güne hoş geldiniz! Uzun süredir üzerinde çalıştığınız projeler, döktüğünüz terler artık size büyük bir başarı ve maddi kazanç olarak geri dönüyor. Kariyerinizde dev bir sıçrama yaşayabilirsiniz.", "Sorumluluklarınız bugün artabilir ancak siz o güçlü omuzlarınızla her şeyin altından ustalıkla kalkacaksınız. Geleneksel değerlere, büyüklerinizin tecrübelerine ve köklerinize bugün her zamankinden daha fazla önem verin; oradan alacağınız bir öğüt hayatınızı değiştirebilir.", "Hedeflerinize giden yolda emin adımlarla ilerliyorsunuz. Sabrınız ve çalışkanlığınız sayesinde zirveye çok yaklaştınız. Bugün duygusallıktan ziyade tamamen mantığınızla ve stratejik bir şekilde hareket etmeniz, size kalıcı ve sarsılmaz zaferler kazandıracak." ],
+        aquarius: [ "Zodyak'ın en yenilikçi, en özgür ve en orijinal burcu! Bugün zihniniz adeta bir dahi gibi çalışıyor. Çevrenizdekilerin aklına bile gelmeyen vizyoner fikirlerinizle herkesi şaşırtacak ve büyük bir hayranlık uyandıracaksınız. Teknolojik yatırımlar veya yeni projeler için kusursuz bir gün.", "Sosyal çevrenizin genişlediği, kalabalık gruplar içinde parladığınız bir gün. Davetleri asla geri çevirmeyin; bugün tanışacağınız kişiler gelecekteki en büyük destekçileriniz olabilir. Özgürlüğünüze olan düşkünlüğünüz artacak, kuralların dışına çıkıp rahat bir nefes alın.", "Toplumsal konulara, insanlığa ve evrensel sorunlara olan duyarlılığınız bugün sizi harekete geçmeye zorlayacak. Bir iyilik hareketine öncülük edebilir veya çevrenizdeki insanlara ilham kaynağı olabilirsiniz. Geleceğe dair yapacağınız planların temeli bugün çok sağlam atılıyor." ],
+        pisces: [ "Hayal dünyanızın, sezgilerinizin ve sanatsal yeteneklerinizin sınır tanımadığı o büyüleyici gündesiniz. Mantıktan çok duygularınızın ve evrensel enerjinin sizi yönlendirmesine izin verin. Müzik, şiir, resim veya herhangi bir sanat dalıyla ilgilenmek ruhunuzu yıkayıp arındıracak.", "Duygusal derinliğiniz ve yüksek empatiniz, bugün etrafınızda acı çeken veya dertleşmek isteyen insanlar için muazzam bir şifa kaynağı olacak. Sizin bir tatlı sözünüz, onların dünyasını değiştirebilir. Rüyalarınıza çok dikkat edin; bilinçaltınız size çok önemli şifreler gönderiyor.", "Evrenin gizemli akışıyla tam bir uyum ve ahenk içindesiniz. Akıntıya karşı kürek çekmek yerine, kendinizi suyun o rahatlatıcı akışına bırakırsanız, hayatın size hazırladığı o büyük mucizelerle karşılaşacaksınız. Romantizm ve derin sevgi bugün kalbinizi tamamen sarıp sarmalıyor." ]
+    };
+
+    window.horoDB_DE = {
+        aries: [ "Der Himmel hält heute unglaubliche Energien für dich bereit! Es ist die perfekte Zeit, um deine angeborenen Führungsqualitäten zu entfalten. Mit mutigen Schritten kannst du lang ersehnte Projekte endlich verwirklichen. Lass die Ängste der Vergangenheit los; wenn du offen für Neues bist, wird sich eine große Tür zu finanziellem und spirituellem Reichtum öffnen.", "Mit der unbändigen Kraft deines Feuerelements wirst du heute alle Hindernisse auf deinem Weg niederreißen. Du musst nur deine Ungeduld zügeln. Anstatt zu erwarten, dass andere mit deinem rasanten Tempo mithalten, sei ihr Wegweiser. Eine überraschende Nachricht von einem Freund am Abend wird dir ein Lächeln ins Gesicht zaubern.", "Heute bist du in romantischen Beziehungen und im direkten Dialog extrem vom Glück begünstigt. Verschließe dein Herz nicht vor der Liebe. Wenn du Single bist, ist die Wahrscheinlichkeit hoch, deinem Seelenverwandten an einem völlig unerwarteten Ort zu begegnen. Lenke deine Energie weise, die Sterne unterstützen dich voll und ganz." ],
+        taurus: [ "Deine solide, unerschütterliche Haltung, die dir dein Erdelement verleiht, wird dir heute immense Vorteile bringen. Du fängst an, die süßen Früchte der Samen zu ernten, die du so lange im Berufsleben oder in finanziellen Angelegenheiten gesät hast. Deine Entschlossenheit wird von allen bewundert. Zeit in der Natur zu verbringen, wird deine Seele heilen.", "Ein Tag, an dem dein Bedürfnis nach Frieden und Sicherheit besonders hoch ist. Qualitativ hochwertige Zeit, die du mit deiner Familie oder deinen Liebsten zu Hause verbringst, wird den gesamten Stress der Woche wegspülen. Anstatt heute große finanzielle Risiken einzugehen, wird es dir viel mehr Glück bringen, das zu schätzen, was du bereits hast.", "Es ist an der Zeit, die Dinge und Menschen, die dir wichtig sind, noch fester zu umarmen. Eine unerwartete Gelegenheit könnte an deine Tür klopfen, aber du solltest gründlich nachdenken, bevor du eine Entscheidung triffst. Wenn du deine Sturheit ablegst und ein wenig flexibel bist, wird es kein Problem geben, das du nicht überwinden kannst." ],
+        gemini: [ "Merkur, der Planet der Kommunikation, arbeitet heute auf Hochtouren für dich! Dank deiner Intelligenz, deiner Praktikabilität und deiner Redekunst wirst du alle Knoten lösen, von denen du dachtest, sie seien unlösbar. Es ist einer der glücklichsten Tage des Jahres, um neue Leute kennenzulernen, dein Netzwerk zu erweitern und wichtige Kontakte zu knüpfen.", "Dein dualer Charakter wird dir heute einen echten Vorteil verschaffen; du wirst in der Lage sein, mehrere Aufgaben gleichzeitig perfekt zu organisieren. In Angelegenheiten, bei denen du unentschlossen bist, solltest du dich mehr auf deine Instinkte als auf deine Logik verlassen. Pläne für eine kurze Reise könnten plötzlich auf der Tagesordnung stehen.", "Ein Tag, an dem deine mentale Energie durch die Decke geht. Es ist eine fantastische Zeit, um eine neue Ausbildung zu beginnen, tiefgründige Recherchen anzustellen oder ein geschriebenes Werk zu produzieren. Du wirst die Menschen um dich herum mit deinen Worten faszinieren. Achte nur darauf, dich von Klatsch und haltlosen Gerüchten fernzuhalten." ],
+        cancer: [ "Du befindest dich in einem Tag, an dem deine emotionale Tiefe und dein Einfühlungsvermögen am höchsten sind. Dir Zeit für deine Liebsten, deine Familie und die warme Umgebung zu nehmen, die du dein Zuhause nennst, wird wie Medizin für deine Seele sein. Sich an schöne Erinnerungen aus der Vergangenheit zu erinnern, wird das Kind in dir glücklich machen. Höre auf dein Herz.", "Zeit am Wasser zu verbringen oder eine kleine dekorative Veränderung in deinem Zuhause vorzunehmen, wird deine gesamte Aura erneuern. Wenn du heute rein nach deinen Gefühlen handelst, anstatt logische Entscheidungen zu erzwingen, wirst du von den richtigen Menschen und den richtigen Orten angezogen. Dein Mitgefühl strahlt Heilung aus.", "Um inneren Frieden zu finden, brauchst du heute vielleicht etwas Zeit für dich allein. Sich in dein Schneckenhaus zurückzuziehen und den Lauf deines Lebens zu überdenken, wird dir eine brandneue Vision verleihen. Eine spirituelle und moralische Unterstützung, die du gegen Abend erhältst, hat die Kraft, dich alle Sorgen vergessen zu lassen." ],
+        leo: [ "Kinder der Sonne, die Bühne gehört heute ganz euch! Eure angeborenen Führungsqualitäten, euer unverkennbares Charisma und eure unerschöpfliche Lebensenergie ziehen die Aufmerksamkeit aller auf sich. Zögert nicht, eure Kreativität zu zeigen und eure Ideen laut auszusprechen. Euer Stern leuchtet heute strahlend hell.", "Ein Tag, an dem ihr für eure Großzügigkeit und Herzlichkeit belohnt werdet. Eine kleine Überraschung, die ihr euren Liebsten bereitet, wird die Bindungen zwischen euch stahlhart machen. In eurem Liebesleben können unerwartete, äußerst leidenschaftliche und extrem aufregende Entwicklungen stattfinden.", "Solange ihr euer Ego beiseitelegt und Licht auf die Menschen um euch herum strahlt, gibt es heute keine Aufgabe, die ihr nicht bewältigen könnt. Ihr könnt große Anerkennung in eurem Berufsleben erfahren und die Chance auf eine Beförderung erhalten. Spaß, Freude und Begeisterung drehen sich heute komplett um euch." ],
+        virgo: [ "Die Liebe zum Detail wird dir heute großen finanziellen Erfolg bringen. Indem du die kleinen Fehler bemerkst und korrigierst, die sonst niemand sieht, wirst du im Geschäftsleben oder in finanziellen Angelegenheiten große Gewinne erzielen. Deine geplante und exakte Arbeit wird von deinen Vorgesetzten hoch geschätzt.", "Ein Tag, an dem du besonders auf deine Gesundheit und Ernährung achten musst. Gönne dir kleine Pausen, um deinen Geist auszuruhen. Frische Luft zu schnappen und dich mit der Natur zu verbinden, wird dein Stresslevel auf null setzen. Du hast eine immense Energie, um angesammelte, unerledigte Aufgaben endlich abzuschließen.", "Deine Schlichtheit und Eleganz werden sicherstellen, dass du heute in jeder Umgebung positiv auffällst. Komplexe Probleme wirst du mit deiner analytischen Intelligenz mühelos lösen, als würdest du ein Haar aus der Butter ziehen. Der Rat eines vertrauenswürdigen Freundes kann ein völlig neues und positives Kapitel in deinem Leben aufschlagen." ],
+        libra: [ "Das Zeichen der Eleganz, der Gerechtigkeit und der Diplomatie! Heute ist dein Streben nach Balance und Harmonie auf dem absoluten Höhepunkt. Dich der Kunst, der Ästhetik und der Schönheit zuzuwenden, wird deine Seele nähren. Der Himmel unterstützt dich dabei, süße Überraschungen, romantische Momente und tiefe Bindungen zu schaffen.", "Du wirst es hervorragend meistern, deine Logik und dein Herz auf dieselbe Waagschale zu legen, wenn du Entscheidungen triffst. Dank deines ausgeprägten Gerechtigkeitssinns wirst du heute einen Konflikt in deinem Umfeld lösen und mit deiner Rolle als Vermittler den Respekt aller gewinnen.", "Ein fantastischer Tag, um sich Zeit für sich selbst zu nehmen, sich zu pflegen und das persönliche Image zu erneuern. Deine Energie ist so hoch, dass die Menschen in deiner Umgebung es kaum erwarten können, Zeit mit dir zu verbringen. Eine romantische Nachricht am Abend wird dein Herz schneller schlagen lassen." ],
+        scorpio: [ "Ein fantastischer Tag, an dem deine Intuition, dein sechster Sinn und deine Leidenschaften ihren absoluten Höhepunkt erreichen. Vertraue deiner inneren Stimme; Dinge, die dir heute durch den Kopf gehen, könnten sich eins zu eins manifestieren. Geheimnisvolle Themen und tiefgründige Forschungen werden dir neue Türen öffnen.", "Zeit für eine komplette Transformation! Du wirst alte Gewohnheiten und toxische Menschen, die dir nicht mehr dienen und dich nach unten ziehen, aus deinem Leben verbannen und wie ein Phönix aus der Asche aufsteigen. Dein Mut und deine Entschlossenheit werden es dir heute ermöglichen, selbst die höchsten Berge zu überwinden.", "Ein extrem leidenschaftlicher, besitzergreifender und tiefgründiger Tag erwartet dich in der Liebe und in zweisamkeit. Die Bindung zu der besonderen Person, mit der du dein Geheimnis teilst und die deine Seele berührt, wird ein unerschütterliches Niveau erreichen. Hab keine Angst, deine Gefühle frei auszudrücken." ],
+        sagittarius: [ "Dein grenzenloser Abenteuergeist erwacht heute vollständig! Du befindest dich in einer der glücklichsten Zeiten des Jahres, um neue Horizonte zu entdecken, Reisepläne zu schmieden oder eine neue Ausbildung zu beginnen. Dein Optimismus und deine hohe Energie werden die Atmosphäre in jeder Umgebung verändern.", "Glückskinder des Jupiter, der Glücksfaktor ist heute komplett auf eurer Seite. Scheut euch nicht, Risiken einzugehen, mutige Schritte zu unternehmen und eure Komfortzone zu verlassen. Gespräche, die ihr mit Menschen aus anderen Kulturen oder mit anderen Ansichten führt, werden eurem Horizont eine neue Dimension verleihen.", "Dein unendlicher Glaube an das Leben und deine Freude werden heute jeden um dich herum anziehen. Philosophische Themen, tiefe Gedanken und das Lesen über den Sinn des Lebens werden deiner Seele extrem guttun. Geld, das unerwartet in deine Hände gelangt, könnte dir ein Lächeln ins Gesicht zaubern." ],
+        capricorn: [ "Willkommen an dem großartigen Tag, an dem du anfängst, die Früchte deiner Disziplin, deiner Ausdauer und deines unerschütterlichen Willens zu ernten! Die Projekte, an denen du so lange gearbeitet hast, und der Schweiß, den du vergossen hast, kehren nun als großer Erfolg zu dir zurück. Du könntest einen gigantischen Sprung in deiner Karriere erleben.", "Deine Verantwortlichkeiten könnten heute steigen, aber du wirst mit deinen starken Schultern alles meisterhaft bewältigen. Lege heute mehr Wert auf traditionelle Werte, die Erfahrung deiner Ältesten und deine Wurzeln; ein Ratschlag, den du von dort erhältst, könnte dein Leben grundlegend verändern.", "Du gehst mit festen Schritten auf dem Weg zu deinen Zielen. Dank deiner Geduld und harten Arbeit bist du dem Gipfel sehr nah. Wenn du heute rein strategisch und mit deiner Logik handelst, anstatt dich von Emotionen leiten zu lassen, wird dir das dauerhafte und unerschütterliche Siege einbringen." ],
+        aquarius: [ "Das innovativste, freieste und originellste Zeichen des Tierkreises! Heute arbeitet dein Verstand wie der eines echten Genies. Du wirst alle überraschen und große Bewunderung mit deinen visionären Ideen wecken, an die niemand sonst in deinem Umfeld gedacht hat. Ein makelloser Tag für technologische Investitionen oder neue Projekte.", "Ein Tag, an dem sich dein soziales Umfeld erweitert und du in großen Menschenmengen glänzt. Lehne niemals Einladungen ab; die Personen, die du heute triffst, könnten in Zukunft deine größten Unterstützer sein. Deine Vorliebe für Freiheit wird steigen, tritt aus den starren Regeln heraus und atme tief durch.", "Deine Sensibilität für soziale Themen, die Menschheit und universelle Probleme wird dich heute zwingen, Maßnahmen zu ergreifen. Du könntest eine Wohltätigkeitsbewegung anführen oder eine Quelle der Inspiration für die Menschen um dich herum sein. Das Fundament für deine Zukunftspläne wird heute sehr solide gelegt." ],
+        pisces: [ "Du befindest dich an jenem faszinierenden Tag, an dem deine Vorstellungskraft, deine Intuition und deine künstlerischen Talente absolut keine Grenzen kennen. Lass dich eher von deinen Gefühlen und der universellen Energie leiten als von reiner Logik. Sich mit Musik, Poesie oder Malerei zu beschäftigen, wird deine Seele reinigen.", "Deine emotionale Tiefe und dein extrem hohes Einfühlungsvermögen werden heute eine enorme Quelle der Heilung für Menschen um dich herum sein, die leiden oder sich anvertrauen wollen. Dein süßes Wort kann ihre Welt verändern. Achte sehr auf deine Träume; dein Unterbewusstsein sendet dir sehr wichtige Codes.", "Du bist in perfekter Harmonie mit dem geheimnisvollen Fluss des Universums. Anstatt gegen den Strom zu rudern, solltest du dich dem entspannenden Fluss des Wassers hingeben, dann wirst du auf die großen Wunder stoßen, die das Leben für dich vorbereitet hat. Romantik und tiefe Liebe umhüllen heute dein Herz vollständig." ]
+    };
+
+    const realHealthTips = [
+        { trT: 'Su Tüketiminin Hayati Önemi', deT: 'Die lebenswichtige Bedeutung von Wasser', em: '💧', tr: 'Vücudumuzun %60\'ından fazlası sudur. Günde en az 2-2.5 litre su içmek sadece susuzluğu gidermekle kalmaz, hayati organların düzgün çalışmasını, hücrelerin yenilenmesini ve beynin odaklanma kapasitesinin artmasını sağlar. Su, vücuttaki toksinlerin böbrekler yoluyla atılmasına yardımcı olur, cilde doğal bir nem ve parlaklık kazandırır, aynı zamanda metabolizmayı hızlandırarak kilo kontrolüne destek olur.', de: 'Mehr als 60% unseres Körpers bestehen aus Wasser. Das Trinken von mindestens 2-2,5 Litern Wasser pro Tag stillt nicht nur den Durst, sondern stellt auch sicher, dass lebenswichtige Organe richtig funktionieren, Zellen sich regenerieren und die Konzentrationsfähigkeit des Gehirns steigt.' },
+        { trT: 'Kaliteli ve Derin Bir Uyku', deT: 'Qualitativer und tiefer Schlaf', em: '🛌', tr: 'Sağlıklı bir yaşamın, güçlü bir bağışıklık sisteminin ve psikolojik dengenin en büyük temel taşı kaliteli bir uykudur. Yetişkin bir insanın günde ortalama 7-8 saat kesintisiz uyuması gerekir. Uyku sırasında vücut kendini fiziksel olarak tamir ederken, beyin gün içindeki karmaşık bilgileri işler ve hafızaya kaydeder.', de: 'Der größte Grundstein für ein gesundes Leben, ein starkes Immunsystem und psychologisches Gleichgewicht ist hochwertiger Schlaf. Ein durchschnittlicher Erwachsener sollte 7-8 Stunden ununterbrochen schlafen. Während des Schlafs repariert sich der Körper physisch selbst, während das Gehirn komplexe Informationen des Tages verarbeitet.' },
+        { trT: 'Doğada Yürüyüş ve Ruhsal Şifa', deT: 'Spaziergang in der Natur und seelische Heilung', em: '🌲', tr: 'Sadece fiziksel değil, zihinsel sağlığınız için de doğada yapılan tempolu yürüyüşlerin mucizevi ve bilimsel olarak kanıtlanmış bir etkisi vardır. Haftada en az 3 gün, 45 dakikalık açık hava yürüyüşleri yapmak stres hormonu olan kortizol seviyesini ciddi oranda düşürür.', de: 'Zügige Spaziergänge in der Natur haben eine wundersame und wissenschaftlich bewiesene Wirkung nicht nur auf Ihre körperliche, sondern auch auf Ihre geistige Gesundheit. Mindestens 3 Tage in der Woche für 45 Minuten an der frischen Luft zu spazieren, senkt den Cortisolspiegel (Stresshormon) deutlich.' },
+        { trT: 'Dijital Detoks ve Zihin Molası', deT: 'Digital Detox und geistige Pause', em: '📱', tr: 'Sürekli ekrana bakmak, bitmek bilmeyen bildirimler ve sosyal medyadaki kusursuz hayat illüzyonları, modern çağın en büyük stres kaynağıdır. Zihninizi korumak için haftanın belirli saatlerini veya pazar gününün bir kısmını "dijital detoks" ilan edin.', de: 'Ständiges Starren auf Bildschirme, endlose Benachrichtigungen und die Illusion perfekter Leben in den sozialen Medien sind die größten Stressquellen der Moderne. Um Ihren Geist zu schützen, sollten Sie bestimmte Stunden der Woche oder einen Teil des Sonntags zum "Digital Detox" erklären.'},
+        { trT: 'Şekerden Uzak Durmak', deT: 'Vermeidung von Zucker', em: '🍬', tr: 'İşlenmiş şeker tüketimi, vücutta iltihaplanmayı artırır, bağışıklık sistemini zayıflatır ve erken yaşlanmaya neden olur. Doğal meyveler tüketerek tatlı ihtiyacınızı karşılayın.', de: 'Der Konsum von verarbeitetem Zucker erhöht Entzündungen im Körper, schwächt das Immunsystem und führt zu vorzeitiger Alterung. Stillen Sie Ihren Bedarf nach Süßem durch natürliche Früchte.'}
+    ];
+
+    window.quizDB = [
+        {q:'İstiklal Marşı\'nın şairi kimdir?',a:['Mehmet Akif Ersoy','Cemal Süreya','Necip Fazıl', 'Nazım Hikmet'],c:0, qDE:'Wer ist der Dichter der türkischen Nationalhymne?', aDE:['Mehmet Akif Ersoy','Cemal Süreya','Necip Fazıl', 'Nazım Hikmet']},
+        {q:'Fuzuli hangi dönemin şairidir?',a:['Halk','Divan','Tanzimat','Cumhuriyet'],c:1, qDE:'Zu welcher Epoche gehört der Dichter Fuzuli?', aDE:['Volksdichtung','Divan (Osmanisch)','Tanzimat','Republik']},
+        {q:'"Aşk imiş her ne var alemde" sözü kime aittir?',a:['Yunus Emre','Mevlânâ','Fuzûlî','Karacaoğlan'],c:2, qDE:'Von wem stammt das Zitat "Liebe ist alles, was im Universum existiert"?', aDE:['Yunus Emre','Rumi','Fuzûlî','Karacaoğlan']},
+        {q:'"Göğe Bakma Durağı" şiirini kim yazmıştır?',a:['Turgut Uyar','Orhan Veli','Edip Cansever','Cemal Süreya'],c:0, qDE:'Wer ist ein berühmter Vertreter der "Zweiten Neuen" (İkinci Yeni) Poesie?', aDE:['Turgut Uyar','Goethe','Schiller','Brecht']},
+        {q:'Almanya\'nın ünlü şairi "Faust" eserinin yazarı kimdir?',a:['Goethe','Schiller','Brecht','Heine'],c:0, qDE:'Wer ist der Autor des weltberühmten Werks "Faust"?', aDE:['Johann Wolfgang von Goethe','Friedrich Schiller','Bertolt Brecht','Heinrich Heine']},
+        {q:'Aşağıdakilerden hangisi bir Goethe eseridir?', a:['Genç Werther\'in Acıları', 'Dönüşüm', 'Suç ve Ceza', 'Sefiller'], c:0, qDE:'Welches der folgenden Werke stammt von Goethe?', aDE:['Die Leiden des jungen Werthers', 'Die Verwandlung', 'Schuld und Sühne', 'Les Misérables']},
+        {q:'"Ne olursan ol, yine gel" felsefesi kimindir?', a:['Hacı Bektaş Veli', 'Mevlânâ Celâleddîn-i Rûmî', 'Yunus Emre', 'Şems-i Tebrizi'], c:1, qDE:'Wessen Philosophie ist "Komm, wer immer du bist"?', aDE:['Hacı Bektaş Veli', 'Rumi (Mevlana)', 'Yunus Emre', 'Schopenhauer']},
+        {q:'Dünyanın en uzun destanı hangisidir?', a:['İlyada', 'Odysseia', 'Manas', 'Gılgamış'], c:2, qDE:'Welches ist das längste Epos der Welt?', aDE:['Ilias', 'Odyssee', 'Manas-Epos', 'Gilgamesch']},
+        {q:'Hangi yazar "Kürk Mantolu Madonna" eserini yazmıştır?', a:['Sabahattin Ali', 'Oğuz Atay', 'Reşat Nuri Güntekin', 'Yaşar Kemal'], c:0, qDE:'Wer schrieb den Roman "Die Madonna im Pelzmantel"?', aDE:['Sabahattin Ali', 'Oğuz Atay', 'Reşat Nuri Güntekin', 'Franz Kafka']},
+        {q:'Alman edebiyatında "Sturm und Drang" ne anlama gelir?', a:['Barış ve Sevgi', 'Fırtına ve Coşku', 'Savaş ve Gözyaşı', 'Akıl ve Mantık'], c:1, qDE:'Was bedeutet "Sturm und Drang" in der Literaturgeschichte?', aDE:['Frieden und Liebe', 'Sturm und Drang (Gefühlsbetont)', 'Krieg und Tränen', 'Vernunft und Logik']}
+    ];
+
     // =========================================================================================
-    // MEGA DATENBANKEN: BİLMECELER, BULMACALAR, ATASÖZLERİ & TICKER
+    // DIE NEUE MEGA DATENBANK: EXAKT 30 BILMECELER & 30 BULMACALAR
     // =========================================================================================
-    
-    // EXAKT 30 BILMECELER
     const baseBilmeceler = [
         { trT: "Dilsiz Kaval", deT: "Dein Name", em: "🪈", tr: "Ağzı var dili yok, nefesi var canı yok. Nedir bu?||Kaval / Flüt", de: "Was gehört dir, aber andere benutzen es häufiger als du?||Dein Name." },
         { trT: "Gece Feneri", deT: "Die Landkarte", em: "⭐", tr: "Gündüz fener, gece yanar. Nedir bu?||Yıldız", de: "Ich habe Städte, aber keine Häuser. Berge, aber keine Bäume. Wasser, aber keine Fische. Was bin ich?||Eine Landkarte." },
@@ -1855,7 +1924,6 @@ Blühe, deutsches Vaterland!</p>
         { trT: "Yatak", deT: "Das Bett", em: "🛏️", tr: "Dört ayağı var yürüyemez. Her gece seni bekler, kendisi uyuyamaz.||Yatak", de: "Ich habe vier Beine, aber laufe nicht. Ich warte jede Nacht auf dich. Was bin ich?||Ein Bett." }
     ];
 
-    // EXAKT 30 BULMACALAR
     const baseBulmacalar = [
         { trT: "Kurt/Kuzu/Ot", deT: "Wolf/Ziege/Kohl", em: "🐺", tr: "Bir kurt, bir kuzu ve bir ot balyası nehrin karşısına geçecek. Kayıkta sadece adam ve biri için yer var. Kurt kuzuyu, kuzu otu yemeden nasıl geçerler?||Önce kuzuyu geçirir. Geri döner kurdu alır, karşıya bırakıp kuzuyu geri getirir. Kuzuyu bırakıp otu alır karşıya geçirir. En son tekrar geri dönüp kuzuyu alır.", de: "Ein Wolf, eine Ziege und ein Kohlkopf sollen über einen Fluss. Das Boot fasst nur den Bauer und ein weiteres Ding. Wie kommen sie rüber, ohne dass der Wolf die Ziege oder die Ziege den Kohl frisst?||Er bringt die Ziege rüber. Fährt zurück, holt den Wolf, lässt ihn drüben und nimmt die Ziege wieder mit zurück. Er lässt die Ziege da, nimmt den Kohl mit zum Wolf. Fährt nochmal zurück und holt als letztes die Ziege." },
         { trT: "İki Baba, İki Oğul", deT: "Zwei Väter, zwei Söhne", em: "🎣", tr: "İki baba ve iki oğul balık tutmaya giderler. Toplam 3 balık tutarlar ve hepsi tam olarak birer tam balık alır. Bu nasıl mümkün olabilir?||Gidenler; Büyükbaba, Baba ve Oğuldur. Toplam 3 kişi oldukları için hepsi birer balık alır.", de: "Zwei Väter und zwei Söhne gehen angeln. Sie fangen insgesamt 3 Fische und jeder bekommt genau einen. Wie ist das möglich?||Es sind Großvater, Vater und Sohn (Das sind zusammen zwei Väter und zwei Söhne, aber nur 3 Personen)." },
@@ -2158,7 +2226,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // ONLINE USER, ADMIN LISTEN & FARBIGE HEADER STATS (NUR ZAHLEN)
+    // ONLINE USER, ADMIN LISTEN & FARBIGE HEADER STATS (NUR ZAHLEN SIND FARBIG)
     // ==========================================================================
     window.renderOnlineUsers = function() {
         try {
@@ -2267,7 +2335,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // MEGA-UPDATE: GÜNLÜK RAPOR İÇERİĞİ RENDER FONKSİYONU
+    // MEGA-UPDATE: GÜNLÜK RAPOR İÇERİĞİ (Tagesbericht Fix!)
     // ==========================================================================
     window.renderAdminLogs = function() {
         const box = document.getElementById('admin-logs-content');
@@ -2289,7 +2357,7 @@ Blühe, deutsches Vaterland!</p>
             window.adminLogs = [];
             localStorage.setItem('misaliAdminLogs', '[]');
             window.renderAdminLogs();
-            window.renderOnlineUsers();
+            window.renderOnlineUsers(); // Update badge
             if(window.syncToCloud) window.syncToCloud();
             window.showToast('Rapor temizlendi.');
         });
@@ -2534,7 +2602,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // STERNZEICHEN & HOROSKOP
+    // STERNZEICHEN & HOROSKOP (LANGE TEXTE)
     // ==========================================================================
     window.zodiacs = [
         {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]}, {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]}, 
@@ -2629,6 +2697,10 @@ Blühe, deutsches Vaterland!</p>
         slider.addEventListener('mouseleave', () => { isDown = false; slider.style.cursor = 'grab'; });
         slider.addEventListener('mouseup', () => { isDown = false; slider.style.cursor = 'grab'; });
         slider.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; });
+        
+        window.addEventListener('resize', () => { 
+            if(document.getElementById('atasozleri-tr-col')) window.setAtasozleriLang(window.atasozleriLang); 
+        });
     });
 
     window.openFastModal = function(id) { 
@@ -2664,6 +2736,7 @@ Blühe, deutsches Vaterland!</p>
                 // NEW GAMES RESETS
                 if(id === 'hazineModal' && window.initHazine) window.initHazine();
                 if(id === 'mathModal' && window.initMath) window.initMath();
+                if(id === 'milyonerModal' && window.initMilyoner) window.initMilyoner();
             } 
         } catch(e) { console.error("Modal error:", e); }
     };
@@ -3181,10 +3254,10 @@ Blühe, deutsches Vaterland!</p>
                         return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}')">
                             ${isNew}
                             <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
-                            <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">${item.emoji || '✨'}</h3>
-                            <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif;">${item.trTitle}</h3>
-                            <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${authorText}</span>
-                            <div style="font-size:0.75rem; color:#64748b; margin-top:8px;"><i class="fas fa-clock"></i> ${dStr}</div>
+                            <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">${item.emoji || '✨'}</h3>
+                            <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.trTitle}</h3>
+                            <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem; pointer-events:none;">${authorText}</span>
+                            <div style="font-size:0.75rem; color:#64748b; margin-top:8px; pointer-events:none;"><i class="fas fa-clock"></i> ${dStr}</div>
                         </div>`;
                     }).join('');
                 }
@@ -3199,7 +3272,7 @@ Blühe, deutsches Vaterland!</p>
                 deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.deTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
             }
 
-            // RENDERING: ATASÖZLERI (GETRENNT NACH TR UND DE WIE GEWÜNSCHT!)
+            // RENDERING: ATASÖZLERI (MOBILE SWITCH FIXED!)
             const ataTrCol = document.getElementById('atasozleri-tr-col'); const ataDeCol = document.getElementById('atasozleri-de-col');
             if(ataTrCol && ataDeCol && window.contentDB.atasozleri && Array.isArray(window.contentDB.atasozleri)) {
                 let sortedAtaTR = window.contentDB.atasozleri.filter(a => a.trTitle).sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
@@ -3314,10 +3387,10 @@ Blühe, deutsches Vaterland!</p>
             return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openUserPoemModal('${item.id}')">
                 ${ratingBadge}
                 <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
-                <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">✍️</h3>
-                <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif;">${item.title || item.trTitle}</h3>
-                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${fullName}</span>
-                <div style="font-size:0.75rem; color:#64748b; margin-top:8px;"><i class="fas fa-clock"></i> ${dStr}</div>
+                <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">✍️</h3>
+                <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.title || item.trTitle}</h3>
+                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem; pointer-events:none;">${fullName}</span>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:8px; pointer-events:none;"><i class="fas fa-clock"></i> ${dStr}</div>
             </div>`;
         }).join('');
     };
@@ -3460,7 +3533,7 @@ Blühe, deutsches Vaterland!</p>
             action = 'kalbini geri çekti';
         } else {
             window.poemDataStore[poemId].ratings[window.currentUser.username] = rating;
-            action = `${rating} kalp bıraktı ❤️`; // EXAKTE ZAHLEN-ANGABE WIE GEWÜNSCHT!
+            action = `${rating} kalp bıraktı ❤️`; // Exakte Anzahl der Herzen!
         }
         
         window.lastLocalUpdate = Date.now() + 5000; window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
@@ -3595,7 +3668,7 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // --- BILMECE / BULMACA RENDER LOGIK ---
+    // --- BILMECE / BULMACA RENDER LOGIK (Klick-Fix & ID-Übergabe) ---
     window.setBilmeceLang = function(lang) {
         window.bilmeceLang = lang || 'TR';
         const bTr = document.getElementById('bilmece-lang-tr'); const bDe = document.getElementById('bilmece-lang-de');
@@ -3616,9 +3689,10 @@ Blühe, deutsches Vaterland!</p>
             let text = window.bilmeceLang === 'DE' ? item.deText : item.trText; let title = window.bilmeceLang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
             if(q && q.trim() !== '') {
                 let lbl = title || (window.bilmeceLang === 'DE' ? 'Rätsel' : 'Bilmece'); let em = item.emoji || '🤔';
+                // WICHTIG: window.openPuzzleModal erwartet die ID und den Typ 'bilmeceler'
                 html += `<div class="card" style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:16px; padding:30px; cursor:pointer; transition:0.3s; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.5);" onclick="window.openPuzzleModal('${item.id}', 'bilmeceler')">
-                            <h3 style="font-size:3.5rem; margin-bottom:10px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));">${em}</h3>
-                            <h3 class="clamp-text" style="color:#fdfbf7; font-family:'Playfair Display', serif;">${lbl}</h3>
+                            <h3 style="font-size:3.5rem; margin-bottom:10px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6)); pointer-events:none;">${em}</h3>
+                            <h3 class="clamp-text" style="color:#fdfbf7; font-family:'Playfair Display', serif; pointer-events:none;">${lbl}</h3>
                          </div>`;
             }
         });
@@ -3645,9 +3719,10 @@ Blühe, deutsches Vaterland!</p>
             let text = window.bulmacaLang === 'DE' ? item.deText : item.trText; let title = window.bulmacaLang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
             if(q && q.trim() !== '') {
                 let lbl = title || (window.bulmacaLang === 'DE' ? 'Puzzle' : 'Bulmaca'); let em = item.emoji || '🤔';
+                // WICHTIG: window.openPuzzleModal erwartet die ID und den Typ 'bulmacalar'
                 html += `<div class="card" style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:16px; padding:30px; cursor:pointer; transition:0.3s; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.5);" onclick="window.openPuzzleModal('${item.id}', 'bulmacalar')">
-                            <h3 style="font-size:3.5rem; margin-bottom:10px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));">${em}</h3>
-                            <h3 class="clamp-text" style="color:#fdfbf7; font-family:'Playfair Display', serif;">${lbl}</h3>
+                            <h3 style="font-size:3.5rem; margin-bottom:10px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6)); pointer-events:none;">${em}</h3>
+                            <h3 class="clamp-text" style="color:#fdfbf7; font-family:'Playfair Display', serif; pointer-events:none;">${lbl}</h3>
                          </div>`;
             }
         });
@@ -3661,7 +3736,15 @@ Blühe, deutsches Vaterland!</p>
             if(window.atasozleriLang === 'TR') { bTr.classList.replace('inactive','active'); bDe.classList.replace('active','inactive'); } 
             else { bDe.classList.replace('inactive','active'); bTr.classList.replace('active','inactive'); }
         }
-        if(window.initContent) window.initContent(); 
+        
+        // MOBILE TOGGLE LOGIK FÜR ATASÖZLERİ
+        if (window.innerWidth <= 900) {
+            document.getElementById('atasozleri-tr-col').style.display = window.atasozleriLang === 'TR' ? 'flex' : 'none';
+            document.getElementById('atasozleri-de-col').style.display = window.atasozleriLang === 'DE' ? 'flex' : 'none';
+        } else {
+            document.getElementById('atasozleri-tr-col').style.display = 'flex';
+            document.getElementById('atasozleri-de-col').style.display = 'flex';
+        }
     };
 
     window.openPuzzleModal = function(id, type) {
@@ -3735,7 +3818,7 @@ Blühe, deutsches Vaterland!</p>
     window.renderHangman=function(){document.getElementById('hangman-lives').innerText='❤️'.repeat(window.hmLives);document.getElementById('hangman-word').innerText=window.hmWord.split('').map(l=>window.hmGuessed.includes(l)?l:'_').join(' ');};
     window.hmGuess=function(l,btn){btn.disabled=true;btn.style.opacity=0.3;if(window.hmWord.includes(l)){window.hmGuessed.push(l);window.renderHangman();if(!document.getElementById('hangman-word').innerText.includes('_')){document.getElementById('hangman-msg').innerText=window.hmLang==='DE'?'Gewonnen! (+15 Punkte)':'Kazandın! (+15 Puan)';document.getElementById('hangman-msg').style.color='#22c55e';document.getElementById('hangman-reset').style.display='block';window.updateGameStats(15,'win','Adam Asmaca');}}else{window.hmLives--;window.renderHangman();if(window.hmLives<=0){document.getElementById('hangman-msg').innerText=(window.hmLang==='DE'?'Verloren! Wort: ':'Kaybettin! Kelime: ') + window.hmWord;document.getElementById('hangman-msg').style.color='#ef4444';document.getElementById('hangman-reset').style.display='block';window.updateGameStats(-5,'loss','Adam Asmaca');}}};
 
-    // ŞİİRSEL QUİZ WIEDERHERGESTELLT
+    // ŞİİRSEL QUİZ REPARIERT!
     window.loadQuiz=function(){
         if (!window.quizDB || window.quizDB.length === 0) return;
         let q=window.quizDB[window.currentQ];
@@ -3813,7 +3896,18 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('math-reset').style.display = 'block';
     };
 
-    window.initMilyoner = function() { window.currentMilQ = 0; window.loadMilyoner(); };
+    // MİLYONER REPARIERT INKLUSIVE JOKER!
+    window.initMilyoner = function() { 
+        window.currentMilQ = 0; 
+        window.milyonerJokers = { fifty: true, phone: true };
+        
+        let jokerDivs = document.getElementById('milyonerModal').querySelectorAll('.modal-body > div:first-of-type > div');
+        if(jokerDivs.length >= 2) {
+            jokerDivs[0].onclick = window.useFiftyJoker; jokerDivs[0].id = 'mil-joker-fifty';
+            jokerDivs[1].onclick = window.usePhoneJoker; jokerDivs[1].id = 'mil-joker-phone';
+        }
+        window.loadMilyoner(); 
+    };
     window.loadMilyoner = function() {
         if (!window.quizDB || window.quizDB.length === 0) return;
         if(window.currentMilQ >= window.quizDB.length) window.currentMilQ = 0;
@@ -3821,14 +3915,55 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('milyoner-q').innerText = window.currentGameLang === 'DE' ? q.qDE : q.q;
         document.getElementById('milyoner-msg').innerText = '';
         document.getElementById('milyoner-next').style.display = 'none';
+        
+        let fiftyBtn = document.getElementById('mil-joker-fifty');
+        let phoneBtn = document.getElementById('mil-joker-phone');
+        if(fiftyBtn) { fiftyBtn.style.opacity = window.milyonerJokers.fifty ? '1' : '0.3'; fiftyBtn.style.pointerEvents = window.milyonerJokers.fifty ? 'auto' : 'none'; }
+        if(phoneBtn) { phoneBtn.style.opacity = window.milyonerJokers.phone ? '1' : '0.3'; phoneBtn.style.pointerEvents = window.milyonerJokers.phone ? 'auto' : 'none'; }
+
         let opts = document.getElementById('milyoner-options'); opts.innerHTML = '';
         let ansArr = window.currentGameLang === 'DE' ? q.aDE : q.a;
-        ansArr.forEach((opt, i) => { opts.innerHTML += `<button class="reset-btn" style="padding: 15px; border-radius:12px; margin:0;" onclick="window.checkMilyoner(${i})">${['A','B','C','D'][i]}: ${opt}</button>`; });
+        ansArr.forEach((opt, i) => { 
+            opts.innerHTML += `<button class="reset-btn" id="mil-opt-${i}" style="padding: 15px; border-radius:12px; margin:0;" onclick="window.checkMilyoner(${i})">${['A','B','C','D'][i]}: ${opt}</button>`; 
+        });
+    };
+    window.useFiftyJoker = function() {
+        if(!window.milyonerJokers.fifty) return;
+        window.milyonerJokers.fifty = false;
+        document.getElementById('mil-joker-fifty').style.opacity = '0.3';
+        document.getElementById('mil-joker-fifty').style.pointerEvents = 'none';
+        let q = window.quizDB[window.currentMilQ];
+        let wrongAnswers = [0,1,2,3].filter(i => i !== q.c);
+        wrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 2); // Pick 2 wrong answers to hide
+        wrongAnswers.forEach(i => { let btn = document.getElementById('mil-opt-' + i); if(btn) btn.style.visibility = 'hidden'; });
+    };
+    window.usePhoneJoker = function() {
+        if(!window.milyonerJokers.phone) return;
+        window.milyonerJokers.phone = false;
+        document.getElementById('mil-joker-phone').style.opacity = '0.3';
+        document.getElementById('mil-joker-phone').style.pointerEvents = 'none';
+        let q = window.quizDB[window.currentMilQ];
+        let msg = window.currentGameLang === 'DE' ? `Ich bin mir zu 80% sicher, dass es Antwort ${['A','B','C','D'][q.c]} ist!` : `Bence %80 ihtimalle cevap ${['A','B','C','D'][q.c]} şıkkı!`;
+        window.customAlert(msg, '📞');
     };
     window.checkMilyoner = function(ans) {
         let q = window.quizDB[window.currentMilQ];
-        if(ans === q.c) { document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Richtig! (+15 P.)' : 'Doğru! (+15 Puan)'; document.getElementById('milyoner-msg').style.color = '#22c55e'; window.updateGameStats(15, 'win', 'Milyoner'); } 
-        else { document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Leider falsch! (-3 P.)' : 'Maalesef yanlış! (-3 Puan)'; document.getElementById('milyoner-msg').style.color = '#ef4444'; window.updateGameStats(-3, 'loss', 'Milyoner'); }
+        let opts = document.getElementById('milyoner-options').querySelectorAll('button');
+        opts.forEach(b => b.style.pointerEvents = 'none'); // Block clicks after answer
+        
+        if(ans === q.c) { 
+            document.getElementById('mil-opt-'+ans).style.background = '#22c55e';
+            document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Richtig! (+15 P.)' : 'Doğru! (+15 Puan)'; 
+            document.getElementById('milyoner-msg').style.color = '#22c55e'; 
+            window.updateGameStats(15, 'win', 'Milyoner'); 
+        } 
+        else { 
+            document.getElementById('mil-opt-'+ans).style.background = '#ef4444';
+            document.getElementById('mil-opt-'+q.c).style.background = '#22c55e'; // Show correct answer
+            document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Leider falsch! (-3 P.)' : 'Maalesef yanlış! (-3 Puan)'; 
+            document.getElementById('milyoner-msg').style.color = '#ef4444'; 
+            window.updateGameStats(-3, 'loss', 'Milyoner'); 
+        }
         document.getElementById('milyoner-next').style.display = 'block';
     };
     window.nextMilyoner = function() { window.currentMilQ++; window.loadMilyoner(); };
