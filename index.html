@@ -55,12 +55,18 @@
         .pulsing-text { animation: pulseText 2.5s ease-in-out infinite; }
 
         /* BUTTONS & INTERACTIVE ELEMENTS - SAUBER & KLICKBAR! */
-        button, .clickable-header-item, .bottom-btn, .icon-action-btn, .game-lang-btn, .mem-card, .cell, .cal-day, .holiday-toggle-btn, li, .card, .search-suggestion-item { 
+        button, .clickable-header-item, .bottom-btn, .icon-action-btn, .game-lang-btn, .mem-card, .cell, .cal-day, .holiday-toggle-btn, li, .search-suggestion-item { 
             cursor: pointer; touch-action: manipulation; 
             transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, box-shadow 0.2s, color 0.2s;
         }
         
-        .reset-btn:active, .bottom-btn:active, .icon-action-btn:active, .game-lang-btn:active, nav button:active, .clickable-header-item:active, .card:active {
+        /* MEGA-FIX FÜR BILMECE/BULMACA: KARTEN SIND KLICKBAR, INHALT BLOCKIERT NICHT */
+        .card { cursor: pointer; transition: 0.3s; position: relative; z-index: 10; pointer-events: auto !important; }
+        .card * { pointer-events: none; } /* Verhindert, dass Text oder Icons den Klick schlucken */
+        .game-card { cursor: pointer; position: relative; z-index: 10; pointer-events: auto !important; }
+        .game-card * { pointer-events: none; }
+        
+        .reset-btn:active, .bottom-btn:active, .icon-action-btn:active, .game-lang-btn:active, nav button:active, .clickable-header-item:active, .card:active, .game-card:active {
             transform: scale(0.95); filter: brightness(0.85);
         }
 
@@ -81,8 +87,8 @@
         .reset-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
         .reset-btn.biometric { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
 
-        /* SPIELE DİL (TR/DE) */
-        .game-lang-toggle { display:flex; justify-content:center; background: rgba(0,0,0,0.6); border-radius: 30px; border: 1px solid #f4c542; padding: 4px; width: 100%; margin-bottom: 30px; }
+        /* SPIELE DİL (TR/DE) - SICHERSTELLEN, DASS ES AUF MOBILE SICHTBAR IST */
+        .game-lang-toggle { display:flex !important; justify-content:center; background: rgba(0,0,0,0.6); border-radius: 30px; border: 1px solid #f4c542; padding: 4px; width: 100%; margin-bottom: 30px; position: relative; z-index: 50; }
         .game-lang-btn { margin:0; border-radius:25px; flex:1; font-size: 1rem; padding: 10px; font-weight: bold;}
         .game-lang-btn.active { background: #f4c542; color: black; box-shadow: 0 0 15px rgba(244,197,66,0.6); }
         .game-lang-btn.inactive { background: transparent; color: #cbd5e1; box-shadow: none; border: none; }
@@ -295,7 +301,7 @@
         .header-nav-bar::-webkit-scrollbar { display: none; }
         nav { display: flex; gap: 12px; margin: 0 auto; } 
         nav button { background: none; border: none; color: #a0aec0; padding: 6px 12px; font-size: 0.95rem; font-family: 'Poppins', sans-serif; font-weight: 500; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 6px; transition: 0.2s; position: relative; overflow: visible !important; }
-        nav button i { color: var(--accent-color); pointer-events: none;}
+        nav button i { color: var(--accent-color); pointer-events: none;} 
         nav button:hover { color: white; background: rgba(255,255,255,0.08); }
         nav button.active-nav { color: var(--accent-color); background: rgba(244, 197, 66, 0.15); font-weight: 600; }
         
@@ -341,7 +347,7 @@
         .sidebar-section li { padding: 10px 12px; font-size: 0.95rem; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s ease; display: flex; flex-direction: column; gap: 3px; position: relative; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 6px; }
         .sidebar-section li:hover { color: #fff; padding-left: 20px; background: rgba(244, 197, 66, 0.2); border-left: 4px solid var(--accent-color); }
         
-        .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none;}
+        .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         
         .anthem-content { font-family: 'Playfair Display', serif; font-size: 0.95rem !important; line-height: 1.6 !important; text-align: center; color: #f8fafc; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px dashed rgba(244,197,66,0.3); margin-top: 15px; white-space: pre-wrap; }
 
@@ -353,61 +359,44 @@
 
         canvas.game-canvas { background: #0a192f; border: 2px solid var(--accent-color); border-radius: 8px; display: block; margin: 0 auto; box-shadow: 0 0 15px rgba(244,197,66,0.3); }
 
-        /* NEUES RESPONISVES DESIGN */
-        @media (max-width: 1100px) {
-            .page-view { padding-top: 290px; } 
-            .header-top { justify-content: space-between; padding: 12px 4%; flex-wrap: wrap;} 
-            .header-left { width: 100%; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;}
-            .header-search-wrapper { max-width: 100%; margin: 5px 0; order: 3; }
-            .header-right { width: 100%; justify-content: center; } 
-            .datetime-container { display: flex !important; } 
-        }
-
+        /* MEGA-KOMPAKTER MOBILE HEADER (REPARIERT!) */
         @media (max-width: 768px) {
-            .page-view { padding-top: 360px; padding-left: 15px; padding-right: 15px; }
+            .page-view { padding-top: 190px; padding-left: 10px; padding-right: 10px; } 
+            header { height: auto; top: 40px; padding-bottom: 5px;}
+            .ticker-wrap { height: 40px; }
+            .ticker-half { height: 20px; font-size: 0.75rem; }
             
-            .hero-title { font-size: 2.5rem !important; }
-            .hero-subtitle { font-size: 1.2rem !important; }
-            .profile-pic { width: 140px !important; height: 140px !important; }
-            .modal-content { max-width: 95vw !important; max-height: 90vh !important; }
-            .modal-body { padding: 40px 15px 20px 15px !important; }
+            .header-top { flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding: 5px 2%; gap: 5px; } 
+            .header-left { width: 100%; justify-content: space-between; }
+            .logo { font-size: 1.4rem; }
+            .datetime-container { display: none !important; } /* Platz sparen */
+            
+            .header-search-wrapper { width: 100%; order: 3; margin: 5px 0 0 0; }
+            .header-search input { padding: 6px 10px !important; font-size: 0.9rem !important; }
+            
+            .header-right { width: 100%; justify-content: space-between; order: 2; padding: 0; } 
+            
+            .user-profile-group { padding: 2px 6px; }
+            #header-username { font-size: 1.1rem; }
+            .header-score-badge { padding: 2px 6px; font-size: 0.8rem; }
+            
+            .weather-widget { display: none !important; } /* Platz sparen */
+            
+            .header-online-status, .header-works-status { font-size: 0.75rem; }
+            .auth-view-btn { padding: 4px 8px; font-size: 0.75rem; }
+            #user-notify-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+            
             .zodiac-grid { grid-template-columns: repeat(3, 1fr); }
-            
-            .dt-item span { display: none; }
-            .dt-item { padding: 8px; font-size: 1.25rem; }
-            
             .header-nav-bar { padding: 5px 2%; }
-            nav button { padding: 8px 10px; font-size: 0.85rem; flex-shrink: 0; }
-            
-            .ticker-wrap { height: auto; }
-            .ticker-half { height: 25px; font-size: 0.8rem; }
-            .scrolling-ticker { font-size: 0.8rem; animation-duration: 20s; }
+            nav button { padding: 6px 10px; font-size: 0.85rem; flex-shrink: 0; }
             
             .floating-menu-wrapper { transform: scale(0.85); }
             .floating-menu-wrapper.left { left: 5px; bottom: 5px; }
             .floating-menu-wrapper.right { right: 5px; bottom: 5px; }
             
-            header { padding-bottom: 10px; }
-            .header-top { display: flex; flex-direction: column; gap: 12px; padding: 10px 4%; align-items: stretch;}
-            
-            .header-left { width: 100%; display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 0; }
-            .logo-and-time { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: nowrap; }
-            .logo { font-size: 1.5rem; }
-            
-            .header-search-wrapper { width: 100%; margin: 0; order: 2; z-index: 10; }
-            .header-search input { width: 100%; }
-            .header-user-stats { display: none !important; } 
-            
-            .header-right { width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 5px; flex-wrap: nowrap; order: 3; padding-top: 5px;}
-            
-            .header-online-status, .header-works-status { justify-content: center; font-size: 0.75rem; }
-            
-            .weather-widget { padding: 4px 8px; font-size: 0.75rem; flex-shrink: 0; }
-            .auth-view-btn { padding: 4px 10px; font-size: 0.75rem; flex-shrink: 0; }
-            .user-profile-group { flex-shrink: 0; padding: 2px 8px 2px 2px; }
-            
-            #header-username { font-size: 1.2rem; }
-            .header-score-badge { padding: 2px 6px; font-size: 0.75rem; }
+            /* ATASÖZLERI TOGGLE FIX FÜR MOBILE */
+            .game-lang-toggle { display: flex !important; margin-top: 10px !important; }
+            #atasozleri-split { grid-template-columns: 1fr !important; }
         }
     </style>
 </head>
@@ -528,7 +517,7 @@
             </nav>
         </div>
     </header>
-<div class="floating-menu-wrapper left" id="floating-left">
+    <div class="floating-menu-wrapper left" id="floating-left">
         <div class="floating-menu-items" id="left-menu-items">
             <button class="bottom-btn" onclick="if(window.closeFloatingMenus) window.closeFloatingMenus(); if(window.openFastModal) window.openFastModal('infoModal')">
                 <span class="btn-icon"><i class="fas fa-info-circle"></i></span>
@@ -797,7 +786,7 @@ Blühe, deutsches Vaterland!</p>
             <div id="admin-logs-content"></div>
         </div>
     </div>
-<main class="main-content" id="main-content">
+    <main class="main-content" id="main-content">
         
         <section class="page-view active-view" id="home-view">
             <div class="profile-container" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px;">
@@ -858,8 +847,13 @@ Blühe, deutsches Vaterland!</p>
             </div>
         </section>
 
-        <section class="page-view" id="atasozleri-view">
-            <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent-color); text-align: center; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--accent-glow);">Atasözleri <br><span style="color:#94a3b8; font-size:1.2rem; font-family:'Poppins',sans-serif; text-shadow: none; letter-spacing: normal; text-transform: none;">(Sprichwörter & Zitate)</span></h2>
+        <section class="page-view notranslate" id="atasozleri-view">
+            <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent-color); text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--accent-glow);">Atasözleri</h2>
+            
+            <div class="game-lang-toggle" style="max-width: 400px; margin: 0 auto 30px; position: relative; z-index: 50;">
+                <button id="atasozleri-lang-tr" class="reset-btn game-lang-btn active" onclick="if(window.setAtasozleriLang) window.setAtasozleriLang('TR')">🇹🇷 Türkçe</button>
+                <button id="atasozleri-lang-de" class="reset-btn game-lang-btn inactive" onclick="if(window.setAtasozleriLang) window.setAtasozleriLang('DE')">🇩🇪 Deutsch</button>
+            </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1400px; margin: 0 auto; width: 100%; position: relative; z-index: 5;" id="atasozleri-split">
                 <style>
@@ -947,7 +941,7 @@ Blühe, deutsches Vaterland!</p>
                 <style>
                     .game-card { background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative;}
                     .game-card:hover { background: rgba(244, 197, 66, 0.15); border-color: #f4c542; box-shadow: 0 10px 25px rgba(244,197,66,0.5); transform: translateY(-5px); }
-                    /* Das hier schützt davor, dass Texte den Klick abfangen */
+                    /* KLICK-BLOCKADE FÜR INNERE ELEMENTE ENTFERNT (Jetzt klickt die ganze Karte) */
                     .game-card * { pointer-events: none; }
                     .gt-title-tr, .gt-title-de { color: #f4c542; font-size: 1.3rem; margin-bottom: 5px; font-family: 'Playfair Display', serif; }
                     .gt-title-de { display: none; }
@@ -967,6 +961,7 @@ Blühe, deutsches Vaterland!</p>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('magicBallModal')"><div class="game-icon">🎱</div><h3 class="gt-title-tr">Sihirli 8 Topu</h3><h3 class="gt-title-de">Magische Kugel</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Gelecek</span><span class="gt-btn-de">Zukunft</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('cookieModal'); if(window.resetCookie) window.resetCookie()"><div class="game-icon">🥠</div><h3 class="gt-title-tr">Şans Kurabiyesi</h3><h3 class="gt-title-de">Glückskeks</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('quizModal'); if(window.loadQuiz) {window.currentQ=0; window.loadQuiz(); }"><div class="game-icon">💡</div><h3 class="gt-title-tr">Şiirsel Quiz</h3><h3 class="gt-title-de">Poetisches Quiz</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Bilgi</span><span class="gt-btn-de">Wissen</span>)</span></div>
+                
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('rpsModal')"><div class="game-icon">✌️</div><h3 class="gt-title-tr">Taş Kağıt Makas</h3><h3 class="gt-title-de">Schere Stein Papier</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('tictactoeModal'); if(window.initTicTacToe) window.initTicTacToe()"><div class="game-icon">⭕❌</div><h3 class="gt-title-tr">Tic Tac Toe</h3><h3 class="gt-title-de">KI / Künstliche Intelligenz</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Strateji</span><span class="gt-btn-de">Strategie</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('coinFlipModal')"><div class="game-icon">🪙</div><h3 class="gt-title-tr">Yazı Tura</h3><h3 class="gt-title-de">Kopf oder Zahl</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
@@ -976,9 +971,10 @@ Blühe, deutsches Vaterland!</p>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('tetrisModal')"><div class="game-icon">🧱</div><h3 class="gt-title-tr">Blok</h3><h3 class="gt-title-de">Tetris</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Klasik</span><span class="gt-btn-de">Klassiker</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('breakoutModal')"><div class="game-icon">🏏</div><h3 class="gt-title-tr">Tuğla Kırma</h3><h3 class="gt-title-de">Breakout</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Klasik / Refleks</span><span class="gt-btn-de">Klassiker / Reflex</span>)</span></div>
 
-                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('kizmaModal'); if(window.initKizma) window.initKizma()"><div class="game-icon">♟️</div><h3 class="gt-title-tr">Kızma Birader</h3><h3 class="gt-title-de">Mensch ärgere Dich nicht</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Strateji</span><span class="gt-btn-de">Strategie</span>)</span></div>
+                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('hazineModal'); if(window.initHazine) window.initHazine()"><div class="game-icon">🏴‍☠️</div><h3 class="gt-title-tr">Hazine Avı</h3><h3 class="gt-title-de">Schatzsuche</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
+                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('mathModal'); if(window.initMath) window.initMath()"><div class="game-icon">🧮</div><h3 class="gt-title-tr">Matematik Dehası</h3><h3 class="gt-title-de">Mathe-Genie</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Zeka</span><span class="gt-btn-de">Intelligenz</span>)</span></div>
+                
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('milyonerModal'); if(window.initMilyoner) window.initMilyoner()"><div class="game-icon">💰</div><h3 class="gt-title-tr">Kim Milyoner Olmak İster</h3><h3 class="gt-title-de">Wer wird Millionär</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Bilgi</span><span class="gt-btn-de">Wissen</span>)</span></div>
-                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('carkifelekModal'); if(window.initCarkifelek) window.initCarkifelek()"><div class="game-icon">🎡</div><h3 class="gt-title-tr">Çarkıfelek</h3><h3 class="gt-title-de">Glücksrad</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans & Kelime</span><span class="gt-btn-de">Glück & Wort</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('jokerModal'); if(window.initJoker) window.initJoker()"><div class="game-icon">🃏</div><h3 class="gt-title-tr">Joker</h3><h3 class="gt-title-de">Joker</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
 
             </div>
@@ -1069,7 +1065,7 @@ Blühe, deutsches Vaterland!</p>
         </div>
         <div style="color: #94a3b8; font-size: 1rem;">&copy; Şair Misal.i 2026</div>
     </footer>
-<div class="modal high-z-modal notranslate" id="custom-dialog-modal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+    <div class="modal high-z-modal notranslate" id="custom-dialog-modal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 420px; text-align:center;" onclick="event.stopPropagation()">
             <div id="custom-dialog-icon" style="font-size: 3.5rem; margin-bottom: 15px; color: #f4c542; filter: drop-shadow(0 0 15px rgba(244,197,66,0.6));">❓</div>
             <h2 class="game-title" id="custom-dialog-title" style="font-size: 2rem; border:none; margin-bottom:15px;">Onay</h2>
@@ -1611,15 +1607,30 @@ Blühe, deutsches Vaterland!</p>
     
     <div class="modal notranslate" id="breakoutModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title gt-title-tr">Tuğla Kırma</h2><h2 class="game-title gt-title-de">Breakout</h2><div class="game-header" style="display: flex; justify-content: center; width: 100%; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 18px; margin-bottom: 20px;"><div class="game-score-box" style="display: flex; flex-direction: column; align-items: center; width: 100%;"><span class="game-score-label" style="color: #94a3b8; font-size: 0.9rem;" id="breakout-lbl">SKOR</span><span class="game-score-val" id="breakout-score" style="color: #f4c542; font-size: 2.2rem; font-weight: bold;">0</span></div></div><canvas id="breakout-game" class="game-canvas" width="300" height="350"></canvas><button class="reset-btn" id="breakout-start-btn" onclick="if(window.startBreakout) window.startBreakout()" style="padding: 12px; border-radius: 12px; width: 100%; margin-top: 15px;"><span class="gt-btn-tr" style="display:inline-block;">Başla</span><span class="gt-btn-de">Starte</span></button></div></div></div>
 
-    <div class="modal notranslate" id="kizmaModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+    <div class="modal notranslate" id="hazineModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
             <div class="modal-body">
-                <h2 class="game-title gt-title-tr">Kızma Birader</h2><h2 class="game-title gt-title-de">Mensch ärgere Dich nicht</h2>
-                <div style="font-size: 6rem; text-align: center; margin: 20px 0; color: #f4c542; filter: drop-shadow(0 0 15px rgba(244,197,66,0.6));">♟️</div>
-                <p style="text-align:center; color:#cbd5e1; font-size:1.2rem; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid #f4c542;" class="gt-title-tr">Şansını dene ve zar at!</p>
-                <p style="text-align:center; color:#cbd5e1; font-size:1.2rem; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid #f4c542;" class="gt-title-de">Versuche dein Glück und würfle!</p>
-                </div>
+                <h2 class="game-title gt-title-tr">Hazine Avı</h2><h2 class="game-title gt-title-de">Schatzsuche</h2>
+                <p id="hazine-msg" style="text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:15px;"><span class="gt-btn-tr" style="display:inline-block;">3 sandıktan birinde hazine var!</span><span class="gt-btn-de">In einer von 3 Truhen ist der Schatz!</span></p>
+                <div id="hazine-grid" style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;">
+                    </div>
+                <button class="reset-btn" id="hazine-reset" onclick="if(window.initHazine) window.initHazine()" style="display:none; padding:12px; border-radius:12px;"><span class="gt-btn-tr" style="display:inline-block;">Tekrar Oyna</span><span class="gt-btn-de">Nochmal spielen</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="mathModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title gt-title-tr">Matematik Dehası</h2><h2 class="game-title gt-title-de">Mathe-Genie</h2>
+                <div id="math-equation" style="font-size:3rem; color:#f4c542; font-family:'Space Mono', monospace; text-align:center; margin:20px 0;">5 + 5 = ?</div>
+                <input type="number" id="math-input" class="auth-input" style="text-align:center; font-size:1.5rem; padding:15px;" placeholder="Cevap / Antwort" onkeypress="if(event.key === 'Enter' && window.checkMath) window.checkMath()">
+                <button class="reset-btn" onclick="if(window.checkMath) window.checkMath()" id="math-btn" style="padding:12px; border-radius:12px;"><span class="gt-btn-tr" style="display:inline-block;">Cevapla</span><span class="gt-btn-de">Antworten</span></button>
+                <p id="math-msg" style="text-align:center; color:#cbd5e1; font-size:1.2rem; font-weight:bold; margin-top:15px;"></p>
+                <button class="reset-btn" id="math-reset" onclick="if(window.initMath) window.initMath()" style="display:none; padding:12px; border-radius:12px; margin-top:10px;"><span class="gt-btn-tr" style="display:inline-block;">Yeni Soru</span><span class="gt-btn-de">Neue Frage</span></button>
+            </div>
         </div>
     </div>
 
@@ -1642,23 +1653,6 @@ Blühe, deutsches Vaterland!</p>
         </div>
     </div>
 
-    <div class="modal notranslate" id="carkifelekModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
-        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
-            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
-            <div class="modal-body">
-                <h2 class="game-title gt-title-tr">Çarkıfelek</h2><h2 class="game-title gt-title-de">Glücksrad</h2>
-                <div style="position: relative; width: 250px; height: 250px; margin: 20px auto;">
-                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 2rem; color: #ef4444; z-index: 10;">🔽</div>
-                    <div id="cark-wheel" style="font-size: 12rem; text-align: center; transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1); line-height: 1;">🎡</div>
-                </div>
-                <h3 id="cark-result" style="text-align:center; color:#f4c542; font-size:1.8rem; margin-bottom:15px; font-family: 'Playfair Display', serif; height: 35px;"></h3>
-                <button class="reset-btn" onclick="if(window.spinCark) window.spinCark()" id="cark-btn" style="padding: 12px; border-radius: 12px;">
-                    <span class="gt-btn-tr" style="display:inline-block;">Çarkı Çevir</span><span class="gt-btn-de">Drehen</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div class="modal notranslate" id="jokerModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
@@ -1674,7 +1668,7 @@ Blühe, deutsches Vaterland!</p>
             </div>
         </div>
     </div>
-<script type="text/javascript">
+    <script type="text/javascript">
     document.documentElement.removeAttribute('translate');
     function googleTranslateElementInit() {
         try {
@@ -1717,7 +1711,7 @@ Blühe, deutsches Vaterland!</p>
     window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
-        window.lastLocalUpdate = Date.now(); // SETZE ZEITSTEMPEL, UM ÜBERSCHREIBEN ZU VERHINDERN
+        window.lastLocalUpdate = Date.now(); 
         
         try { 
             const data = { 
@@ -1754,7 +1748,7 @@ Blühe, deutsches Vaterland!</p>
             if(json.record) { 
                 let r = json.record; 
                 
-                // ANTI-OVERWRITE SCHUTZ: Wenn lokales Update (Punkte) neuer ist als Cloud, lade nicht runter!
+                // ANTI-OVERWRITE SCHUTZ: Verhindert, dass der Admin-Punkte-Reset überschrieben wird!
                 if (r.timestamp && r.timestamp < window.lastLocalUpdate - 2000) {
                     window.isFetching = false;
                     return; 
@@ -1788,7 +1782,6 @@ Blühe, deutsches Vaterland!</p>
                 }
                 
                 if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
-                    // INTELLIGENTES MERGE: Verhindert das automatische Löschen von Admin-Nachrichten!
                     let localIds = window.adminMessages.map(m => m.id);
                     r.adminMsgs.forEach(rm => { if(!localIds.includes(rm.id)) window.adminMessages.push(rm); });
                     localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
@@ -1822,57 +1815,13 @@ Blühe, deutsches Vaterland!</p>
         window.isFetching = false;
     };
 
-    setInterval(() => { window.fetchFromCloud(); }, 3500); // Live Echtzeit Intervall
-
-    // --- XXL HOROSKOP DATENBANK ---
-    window.horoDB_TR = {
-        aries: [ "Bugün gökyüzü senin için inanılmaz enerjiler barındırıyor. İçindeki liderlik vasfını ortaya çıkarmanın tam zamanı. Cesur adımlar atarak uzun zamandır beklediğin projeleri hayata geçirebilirsin. Geçmişteki korkularını bir kenara bırak; yeniliklere açık olursan büyük bir maddi ve manevi kazanç kapısı aralanacak.", "Ateş elementinin verdiği güçle bugün karşına çıkan tüm engelleri yıkıp geçeceksin. Sadece sabırsızlığına dikkat etmelisin. Çevrendeki insanların hızına ayak uydurmasını beklemek yerine, onlara yol gösterici ol. Akşam saatlerinde bir dostundan alacağın sürpriz haber yüzünü güldürecek.", "Bugün romantik ilişkilerde ve ikili diyaloglarda çok daha şanslısın. Kalbini aşka kapatma. Eğer hayatında biri yoksa, beklemediğin bir ortamda ruh eşinle karşılaşma ihtimalin çok yüksek. Enerjini doğru yönlendir, yıldızlar seni destekliyor." ],
-        taurus: [ "Toprak elementinin verdiği o sağlam ve sarsılmaz duruşun, bugün sana büyük avantajlar sağlayacak. İş hayatında ya da maddi konularda uzun süredir ektiğin tohumların meyvelerini toplamaya başlıyorsun. Kararlılığın herkesin takdirini topluyor. Doğa ile iç içe olmak ruhunu dinlendirecek.", "Huzur ve güven ihtiyacının çok yüksek olduğu bir gün. Ailenle veya sevdiğin insanlarla evinde geçireceğin kaliteli zaman, tüm haftanın stresini alıp götürecek. Bugün büyük finansal risklere girmek yerine, elindekinin kıymetini bilmek sana çok daha fazla şans getirecek.", "Değer verdiğin eşyalara ve insanlara daha sıkı sarılma vakti geldi. Beklenmedik bir fırsat kapını çalabilir, ancak karar vermeden önce detaylıca düşünmelisin. İnatçılığını bir kenara bırakıp biraz esnek olursan, aşamayacağın hiçbir sorun kalmayacak." ],
-        gemini: [ "İletişim gezegeni Merkür bugün senin için çalışıyor! Zekan, pratikliğin ve hitabet yeteneğin sayesinde çözülemeyecek sandığın tüm düğümleri tek tek çözeceksin. Yeni insanlarla tanışmak, ağını genişletmek ve önemli bağlantılar kurmak için yılın en şanslı günlerinden biri.", "İçindeki çift karakterlilik bugün sana bir avantaj sağlayacak; aynı anda birden fazla işi mükemmel bir şekilde organize edebileceksin. Kararsız kaldığın konularda mantığından ziyade içgüdülerine güvenmelisin. Kısa bir yolculuk planı gündeme gelebilir.", "Zihinsel enerjinin tavan yaptığı bir gün. Yeni bir eğitime başlamak, araştırma yapmak veya yazılı bir eser üretmek için harika bir zaman. Çevrendeki insanları kelimelerinle büyüleyeceksin. Sadece dedikodulardan ve asılsız söylentilerden uzak durmaya özen göster." ],
-        cancer: [ "Duygusal derinliğinin ve empatinin en yüksek olduğu günlerden birindesin. Sevdiklerine, ailene ve yuva dediğin o sıcak ortama vakit ayırmak ruhuna ilaç gibi gelecek. Geçmişten gelen güzel anıları yâd etmek, içindeki çocuğu mutlu edecek. Kalbinin sesini dinle, o seni asla yanıltmaz.", "Su kenarında vakit geçirmek veya evinde yapacağın ufak bir dekorasyon değişikliği, tüm auranı yenileyecek. Bugün mantıklı kararlar almak yerine tamamen duygularınla hareket etmen, seni doğru insanlara ve doğru mekanlara çekecek. Şefkatin çevrene şifa saçıyor.", "İçsel huzuru bulmak için bugün biraz yalnız kalmaya ihtiyacın olabilir. Kendi kabuğuna çekilip, hayatındaki gidişatı gözden geçirmek sana yepyeni bir vizyon katacak. Akşama doğru alacağın manevi bir destek, tüm dertlerini unutturacak kapasitede." ],
-        leo: [ "Güneş'in çocukları, bugün sahne tamamen sizin! Liderlik özellikleriniz, karizmanız ve tükenmek bilmeyen yaşam enerjiniz herkesin dikkatini üzerinize çekiyor. Yaratıcılığınızı sergilemekten, fikirlerinizi yüksek sesle söylemekten asla çekinmeyin. Bugün yıldızınız parlıyor.", "Cömertliğinizin ve sıcakkanlılığınızın karşılığını göreceğiniz bir gün. Sevdiğiniz insanlara yapacağınız ufak bir sürpriz, aranızdaki bağları çelik gibi sağlamlaştıracak. Aşk hayatınızda hiç beklemediğiniz, son derece tutkulu ve heyecan verici gelişmeler yaşanabilir.", "Egonuzu bir kenara bırakıp etrafınızdakilere ışık saçtığınız sürece, bugün başaramayacağınız hiçbir iş yok. İş hayatınızda büyük bir takdir görebilir ve terfi şansı yakalayabilirsiniz. Eğlence, neşe ve coşku bugün tamamen sizin etrafınızda dönüyor." ],
-        virgo: [ "Mükemmeliyetçi ve detaycı yapınız bugün size altın değerinde fırsatlar sunacak. Kimsenin göremediği ufak hataları fark edip düzelterek, iş hayatınızda veya maddi konularda büyük bir kazanç elde edeceksiniz. Planlı ve programlı çalışmanız, üstleriniz tarafından büyük takdir toplayacak.", "Sağlığınıza ve beslenmenize dikkat etmeniz gereken bir gün. Kendinize küçük molalar verin, zihninizi dinlendirin. Temiz hava almak ve doğayla bütünleşmek stresinizi sıfırlayacaktır. Birikmiş, yarım kalmış işlerinizi bitirmek için muazzam bir enerjiye sahipsiniz.", "Sadelik ve zarafetiniz, bugün gireceğiniz her ortamda fark edilmenizi sağlayacak. Karmaşık sorunları analitik zekanızla tereyağından kıl çeker gibi çözeceksiniz. Güvendiğiniz bir dostunuzun tavsiyesi, hayatınızda yepyeni ve olumlu bir sayfa açabilir." ],
-        libra: [ "Zarafetin, adaletin ve diplomasinin burcu! Bugün denge ve uyum arayışınız en üst seviyede. Sanata, estetiğe ve güzelliğe yönelmek ruhunuzu doyuracak. İkili ilişkilerde tatlı sürprizler, romantik anlar ve derin bağlar kurmak için gökyüzü sizi destekliyor.", "Karar verirken her zaman yaptığınız gibi mantığınızı ve kalbinizi aynı teraziye koymayı çok iyi başaracaksınız. Bugün adalet duygunuz sayesinde çevrenizdeki bir anlaşmazlığı çözecek ve arabulucu rolünüzle herkesin saygısını kazanacaksınız.", "Kendinize vakit ayırmak, bakım yapmak ve kişisel imajınızı yenilemek için harika bir gün. Enerjiniz o kadar yüksek ki, etrafınızdaki insanlar sizinle vakit geçirmek için can atacak. Akşam saatlerinde alacağınız romantik bir mesaj kalbinizi hızla çarptıracak." ],
-        scorpio: [ "Sezgilerinizin, altıncı hissinizin ve tutkularınızın tavan yaptığı muazzam bir gün. İç sesinize güvenin; bugün aklınızdan geçenler bir bir karşınıza çıkabilir. Gizemli konular, derin araştırmalar ve sırların peşinden gitmek size hiç bilmediğiniz yeni kapılar aralayacak.", "Tam bir dönüşüm zamanı! Artık size hizmet etmeyen, sizi aşağı çeken eski alışkanlıklarınızı ve toksik insanları hayatınızdan çıkarıp, adeta küllerinizden yeniden doğacaksınız. Cesaretiniz ve kararlılığınız bugün aşılmaz denilen dağları bile aşmanızı sağlayacak.", "Aşk ve ikili ilişkilerde son derece tutkulu, sahiplenici ve derin bir gün sizi bekliyor. Sırrınızı paylaştığınız, ruhunuza dokunan o özel kişiyle aranızdaki bağ sarsılmaz bir seviyeye ulaşacak. Kendinizi gizlemek yerine duygularınızı özgürce ifade etmekten korkmayın." ],
-        sagittarius: [ "İçinizdeki o sınır tanımaz maceracı ruh bugün tamamen uyanıyor! Yeni ufuklar keşfetmek, seyahat planları yapmak veya yeni bir eğitime başlamak için yılın en şanslı dönemlerinden birindesiniz. İyimserliğiniz ve yüksek enerjiniz, girdiğiniz her ortamın havasını değiştirecek.", "Jüpiter'in şanslı çocukları, bugün şans faktörü tamamen sizin yanınızda. Risk almaktan, cesur adımlar atmaktan ve konfor alanınızın dışına çıkmaktan asla çekinmeyin. Farklı kültürlerden veya farklı görüşlerden insanlarla yapacağınız sohbetler ufkunuza yeni bir boyut katacak.", "Hayata olan o bitmek bilmeyen inancınız ve neşeniz, bugün etrafınızdaki herkesi size çekecek. Felsefi konular, derin düşünceler ve hayatın anlamı üzerine yapacağınız okumalar ruhunuza çok iyi gelecek. Beklemediğiniz bir yerden elinize geçecek bir para yüzünüzü güldürebilir." ],
-        capricorn: [ "Disiplin, azim ve sarsılmaz iradenizin meyvelerini toplamaya başladığınız o muhteşem güne hoş geldiniz! Uzun süredir üzerinde çalıştığınız projeler, döktüğünüz terler artık size büyük bir başarı ve maddi kazanç olarak geri dönüyor. Kariyerinizde dev bir sıçrama yaşayabilirsiniz.", "Sorumluluklarınız bugün artabilir ancak siz o güçlü omuzlarınızla her şeyin altından ustalıkla kalkacaksınız. Geleneksel değerlere, büyüklerinizin tecrübelerine ve köklerinize bugün her zamankinden daha fazla önem verin; oradan alacağınız bir öğüt hayatınızı değiştirebilir.", "Hedeflerinize giden yolda emin adımlarla ilerliyorsunuz. Sabrınız ve çalışkanlığınız sayesinde zirveye çok yaklaştınız. Bugün duygusallıktan ziyade tamamen mantığınızla ve stratejik bir şekilde hareket etmeniz, size kalıcı ve sarsılmaz zaferler kazandıracak." ],
-        aquarius: [ "Zodyak'ın en yenilikçi, en özgür ve en orijinal burcu! Bugün zihniniz adeta bir dahi gibi çalışıyor. Çevrenizdekilerin aklına bile gelmeyen vizyoner fikirlerinizle herkesi şaşırtacak ve büyük bir hayranlık uyandıracaksınız. Teknolojik yatırımlar veya yeni projeler için kusursuz bir gün.", "Sosyal çevrenizin genişlediği, kalabalık gruplar içinde parladığınız bir gün. Davetleri asla geri çevirmeyin; bugün tanışacağınız kişiler gelecekteki en büyük destekçileriniz olabilir. Özgürlüğünüze olan düşkünlüğünüz artacak, kuralların dışına çıkıp rahat bir nefes alın.", "Toplumsal konulara, insanlığa ve evrensel sorunlara olan duyarlılığınız bugün sizi harekete geçmeye zorlayacak. Bir iyilik hareketine öncülük edebilir veya çevrenizdeki insanlara ilham kaynağı olabilirsiniz. Geleceğe dair yapacağınız planların temeli bugün çok sağlam atılıyor." ],
-        pisces: [ "Hayal dünyanızın, sezgilerinizin ve sanatsal yeteneklerinizin sınır tanımadığı o büyüleyici gündesiniz. Mantıktan çok duygularınızın ve evrensel enerjinin sizi yönlendirmesine izin verin. Müzik, şiir, resim veya herhangi bir sanat dalıyla ilgilenmek ruhunuzu yıkayıp arındıracak.", "Duygusal derinliğiniz ve yüksek empatiniz, bugün etrafınızda acı çeken veya dertleşmek isteyen insanlar için muazzam bir şifa kaynağı olacak. Sizin bir tatlı sözünüz, onların dünyasını değiştirebilir. Rüyalarınıza çok dikkat edin; bilinçaltınız size çok önemli şifreler gönderiyor.", "Evrenin gizemli akışıyla tam bir uyum ve ahenk içindesiniz. Akıntıya karşı kürek çekmek yerine, kendinizi suyun o rahatlatıcı akışına bırakırsanız, hayatın size hazırladığı o büyük mucizelerle karşılaşacaksınız. Romantizm ve derin sevgi bugün kalbinizi tamamen sarıp sarmalıyor." ]
-    };
-
-    window.horoDB_DE = {
-        aries: [ "Der Himmel hält heute unglaubliche Energien für dich bereit! Es ist die perfekte Zeit, um deine angeborenen Führungsqualitäten zu entfalten. Mit mutigen Schritten kannst du lang ersehnte Projekte endlich verwirklichen. Lass die Ängste der Vergangenheit los; wenn du offen für Neues bist, wird sich eine große Tür zu finanziellem und spirituellem Reichtum öffnen.", "Mit der unbändigen Kraft deines Feuerelements wirst du heute alle Hindernisse auf deinem Weg niederreißen. Du musst nur deine Ungeduld zügeln. Anstatt zu erwarten, dass andere mit deinem rasanten Tempo mithalten, sei ihr Wegweiser. Eine überraschende Nachricht von einem Freund am Abend wird dir ein Lächeln ins Gesicht zaubern.", "Heute bist du in romantischen Beziehungen und im direkten Dialog extrem vom Glück begünstigt. Verschließe dein Herz nicht vor der Liebe. Wenn du Single bist, ist die Wahrscheinlichkeit hoch, deinem Seelenverwandten an einem völlig unerwarteten Ort zu begegnen. Lenke deine Energie weise, die Sterne unterstützen dich voll und ganz." ],
-        taurus: [ "Deine solide, unerschütterliche Haltung, die dir dein Erdelement verleiht, wird dir heute immense Vorteile bringen. Du fängst an, die süßen Früchte der Samen zu ernten, die du so lange im Berufsleben oder in finanziellen Angelegenheiten gesät hast. Deine Entschlossenheit wird von allen bewundert. Zeit in der Natur zu verbringen, wird deine Seele heilen.", "Ein Tag, an dem dein Bedürfnis nach Frieden und Sicherheit besonders hoch ist. Qualitativ hochwertige Zeit, die du mit deiner Familie oder deinen Liebsten zu Hause verbringst, wird den gesamten Stress der Woche wegspülen. Anstatt heute große finanzielle Risiken einzugehen, wird es dir viel mehr Glück bringen, das zu schätzen, was du bereits hast.", "Es ist an der Zeit, die Dinge und Menschen, die dir wichtig sind, noch fester zu umarmen. Eine unerwartete Gelegenheit könnte an deine Tür klopfen, aber du solltest gründlich nachdenken, bevor du eine Entscheidung triffst. Wenn du deine Sturheit ablegst und ein wenig flexibel bist, wird es kein Problem geben, das du nicht überwinden kannst." ],
-        gemini: [ "Merkur, der Planet der Kommunikation, arbeitet heute auf Hochtouren für dich! Dank deiner Intelligenz, deiner Praktikabilität und deiner Redekunst wirst du alle Knoten lösen, von denen du dachtest, sie seien unlösbar. Es ist einer der glücklichsten Tage des Jahres, um neue Leute kennenzulernen, dein Netzwerk zu erweitern und wichtige Kontakte zu knüpfen.", "Dein dualer Charakter wird dir heute einen echten Vorteil verschaffen; du wirst in der Lage sein, mehrere Aufgaben gleichzeitig perfekt zu organisieren. In Angelegenheiten, bei denen du unentschlossen bist, solltest du dich mehr auf deine Instinkte als auf deine Logik verlassen. Pläne für eine kurze Reise könnten plötzlich auf der Tagesordnung stehen.", "Ein Tag, an dem deine mentale Energie durch die Decke geht. Es ist eine fantastische Zeit, um eine neue Ausbildung zu beginnen, tiefgründige Recherchen anzustellen oder ein geschriebenes Werk zu produzieren. Du wirst die Menschen um dich herum mit deinen Worten faszinieren. Achte nur darauf, dich von Klatsch und haltlosen Gerüchten fernzuhalten." ],
-        cancer: [ "Du befindest dich in einem Tag, an dem deine emotionale Tiefe und dein Einfühlungsvermögen am höchsten sind. Dir Zeit für deine Liebsten, deine Familie und die warme Umgebung zu nehmen, die du dein Zuhause nennst, wird wie Medizin für deine Seele sein. Sich an schöne Erinnerungen aus der Vergangenheit zu erinnern, wird das Kind in dir glücklich machen. Höre auf dein Herz.", "Zeit am Wasser zu verbringen oder eine kleine dekorative Veränderung in deinem Zuhause vorzunehmen, wird deine gesamte Aura erneuern. Wenn du heute rein nach deinen Gefühlen handelst, anstatt logische Entscheidungen zu erzwingen, wirst du von den richtigen Menschen und den richtigen Orten angezogen. Dein Mitgefühl strahlt Heilung aus.", "Um inneren Frieden zu finden, brauchst du heute vielleicht etwas Zeit für dich allein. Sich in dein Schneckenhaus zurückzuziehen und den Lauf deines Lebens zu überdenken, wird dir eine brandneue Vision verleihen. Eine spirituelle und moralische Unterstützung, die du gegen Abend erhältst, hat die Kraft, dich alle Sorgen vergessen zu lassen." ],
-        leo: [ "Kinder der Sonne, die Bühne gehört heute ganz euch! Eure angeborenen Führungsqualitäten, euer unverkennbares Charisma und eure unerschöpfliche Lebensenergie ziehen die Aufmerksamkeit aller auf sich. Zögert nicht, eure Kreativität zu zeigen und eure Ideen laut auszusprechen. Euer Stern leuchtet heute strahlend hell.", "Ein Tag, an dem ihr für eure Großzügigkeit und Herzlichkeit belohnt werdet. Eine kleine Überraschung, die ihr euren Liebsten bereitet, wird die Bindungen zwischen euch stahlhart machen. In eurem Liebesleben können unerwartete, äußerst leidenschaftliche und extrem aufregende Entwicklungen stattfinden.", "Solange ihr euer Ego beiseitelegt und Licht auf die Menschen um euch herum strahlt, gibt es heute keine Aufgabe, die ihr nicht bewältigen könnt. Ihr könnt große Anerkennung in eurem Berufsleben erfahren und die Chance auf eine Beförderung erhalten. Spaß, Freude und Begeisterung drehen sich heute komplett um euch." ],
-        virgo: [ "Die Liebe zum Detail wird dir heute großen finanziellen Erfolg bringen. Indem du die kleinen Fehler bemerkst und korrigierst, die sonst niemand sieht, wirst du im Geschäftsleben oder in finanziellen Angelegenheiten große Gewinne erzielen. Deine geplante und exakte Arbeit wird von deinen Vorgesetzten hoch geschätzt.", "Ein Tag, an dem du besonders auf deine Gesundheit und Ernährung achten musst. Gönne dir kleine Pausen, um deinen Geist auszuruhen. Frische Luft zu schnappen und dich mit der Natur zu verbinden, wird dein Stresslevel auf null setzen. Du hast eine immense Energie, um angesammelte, unerledigte Aufgaben endlich abzuschließen.", "Deine Schlichtheit und Eleganz werden sicherstellen, dass du heute in jeder Umgebung positiv auffällst. Komplexe Probleme wirst du mit deiner analytischen Intelligenz mühelos lösen, als würdest du ein Haar aus der Butter ziehen. Der Rat eines vertrauenswürdigen Freundes kann ein völlig neues und positives Kapitel in deinem Leben aufschlagen." ],
-        libra: [ "Das Zeichen der Eleganz, der Gerechtigkeit und der Diplomatie! Heute ist dein Streben nach Balance und Harmonie auf dem absoluten Höhepunkt. Dich der Kunst, der Ästhetik und der Schönheit zuzuwenden, wird deine Seele nähren. Der Himmel unterstützt dich dabei, süße Überraschungen, romantische Momente und tiefe Bindungen zu schaffen.", "Du wirst es hervorragend meistern, deine Logik und dein Herz auf dieselbe Waagschale zu legen, wenn du Entscheidungen triffst. Dank deines ausgeprägten Gerechtigkeitssinns wirst du heute einen Konflikt in deinem Umfeld lösen und mit deiner Rolle als Vermittler den Respekt aller gewinnen.", "Ein fantastischer Tag, um sich Zeit für sich selbst zu nehmen, sich zu pflegen und das persönliche Image zu erneuern. Deine Energie ist so hoch, dass die Menschen in deiner Umgebung es kaum erwarten können, Zeit mit dir zu verbringen. Eine romantische Nachricht am Abend wird dein Herz schneller schlagen lassen." ],
-        scorpio: [ "Ein fantastischer Tag, an dem deine Intuition, dein sechster Sinn und deine Leidenschaften ihren absoluten Höhepunkt erreichen. Vertraue deiner inneren Stimme; Dinge, die dir heute durch den Kopf gehen, könnten sich eins zu eins manifestieren. Geheimnisvolle Themen und tiefgründige Forschungen werden dir neue Türen öffnen.", "Zeit für eine komplette Transformation! Du wirst alte Gewohnheiten und toxische Menschen, die dir nicht mehr dienen und dich nach unten ziehen, aus deinem Leben verbannen und wie ein Phönix aus der Asche aufsteigen. Dein Mut und deine Entschlossenheit werden es dir heute ermöglichen, selbst die höchsten Berge zu überwinden.", "Ein extrem leidenschaftlicher, besitzergreifender und tiefgründiger Tag erwartet dich in der Liebe und in zweisamkeit. Die Bindung zu der besonderen Person, mit der du dein Geheimnis teilst und die deine Seele berührt, wird ein unerschütterliches Niveau erreichen. Hab keine Angst, deine Gefühle frei auszudrücken." ],
-        sagittarius: [ "Dein grenzenloser Abenteuergeist erwacht heute vollständig! Du befindest dich in einer der glücklichsten Zeiten des Jahres, um neue Horizonte zu entdecken, Reisepläne zu schmieden oder eine neue Ausbildung zu beginnen. Dein Optimismus und deine hohe Energie werden die Atmosphäre in jeder Umgebung verändern.", "Glückskinder des Jupiter, der Glücksfaktor ist heute komplett auf eurer Seite. Scheut euch nicht, Risiken einzugehen, mutige Schritte zu unternehmen und eure Komfortzone zu verlassen. Gespräche, die ihr mit Menschen aus anderen Kulturen oder mit anderen Ansichten führt, werden eurem Horizont eine neue Dimension verleihen.", "Dein unendlicher Glaube an das Leben und deine Freude werden heute jeden um dich herum anziehen. Philosophische Themen, tiefe Gedanken und das Lesen über den Sinn des Lebens werden deiner Seele extrem guttun. Geld, das unerwartet in deine Hände gelangt, könnte dir ein Lächeln ins Gesicht zaubern." ],
-        capricorn: [ "Willkommen an dem großartigen Tag, an dem du anfängst, die Früchte deiner Disziplin, deiner Ausdauer und deines unerschütterlichen Willens zu ernten! Die Projekte, an denen du so lange gearbeitet hast, und der Schweiß, den du vergossen hast, kehren nun als großer Erfolg zu dir zurück. Du könntest einen gigantischen Sprung in deiner Karriere erleben.", "Deine Verantwortlichkeiten könnten heute steigen, aber du wirst mit deinen starken Schultern alles meisterhaft bewältigen. Lege heute mehr Wert auf traditionelle Werte, die Erfahrung deiner Ältesten und deine Wurzeln; ein Ratschlag, den du von dort erhältst, könnte dein Leben grundlegend verändern.", "Du gehst mit festen Schritten auf dem Weg zu deinen Zielen. Dank deiner Geduld und harten Arbeit bist du dem Gipfel sehr nah. Wenn du heute rein strategisch und mit deiner Logik handelst, anstatt dich von Emotionen leiten zu lassen, wird dir das dauerhafte und unerschütterliche Siege einbringen." ],
-        aquarius: [ "Das innovativste, freieste und originellste Zeichen des Tierkreises! Heute arbeitet dein Verstand wie der eines echten Genies. Du wirst alle überraschen und große Bewunderung mit deinen visionären Ideen wecken, an die niemand sonst in deinem Umfeld gedacht hat. Ein makelloser Tag für technologische Investitionen oder neue Projekte.", "Ein Tag, an dem sich dein soziales Umfeld erweitert und du in großen Menschenmengen glänzt. Lehne niemals Einladungen ab; die Personen, die du heute triffst, könnten in Zukunft deine größten Unterstützer sein. Deine Vorliebe für Freiheit wird steigen, tritt aus den starren Regeln heraus und atme tief durch.", "Deine Sensibilität für soziale Themen, die Menschheit und universelle Probleme wird dich heute zwingen, Maßnahmen zu ergreifen. Du könntest eine Wohltätigkeitsbewegung anführen oder eine Quelle der Inspiration für die Menschen um dich herum sein. Das Fundament für deine Zukunftspläne wird heute sehr solide gelegt." ],
-        pisces: [ "Du befindest dich an jenem faszinierenden Tag, an dem deine Vorstellungskraft, deine Intuition und deine künstlerischen Talente absolut keine Grenzen kennen. Lass dich eher von deinen Gefühlen und der universellen Energie leiten als von reiner Logik. Sich mit Musik, Poesie oder Malerei zu beschäftigen, wird deine Seele reinigen.", "Deine emotionale Tiefe und dein extrem hohes Einfühlungsvermögen werden heute eine enorme Quelle der Heilung für Menschen um dich herum sein, die leiden oder sich anvertrauen wollen. Dein süßes Wort kann ihre Welt verändern. Achte sehr auf deine Träume; dein Unterbewusstsein sendet dir sehr wichtige Codes.", "Du bist in perfekter Harmonie mit dem geheimnisvollen Fluss des Universums. Anstatt gegen den Strom zu rudern, solltest du dich dem entspannenden Fluss des Wassers hingeben, dann wirst du auf die großen Wunder stoßen, die das Leben für dich vorbereitet hat. Romantik und tiefe Liebe umhüllen heute dein Herz vollständig." ]
-    };
-
-    const realHealthTips = [
-        { trT: 'Su Tüketiminin Hayati Önemi', deT: 'Die lebenswichtige Bedeutung von Wasser', em: '💧', tr: 'Vücudumuzun %60\'ından fazlası sudur. Günde en az 2-2.5 litre su içmek sadece susuzluğu gidermekle kalmaz, hayati organların düzgün çalışmasını, hücrelerin yenilenmesini ve beynin odaklanma kapasitesinin artmasını sağlar. Su, vücuttaki toksinlerin böbrekler yoluyla atılmasına yardımcı olur, cilde doğal bir nem ve parlaklık kazandırır, aynı zamanda metabolizmayı hızlandırarak kilo kontrolüne destek olur.', de: 'Mehr als 60% unseres Körpers bestehen aus Wasser. Das Trinken von mindestens 2-2,5 Litern Wasser pro Tag stillt nicht nur den Durst, sondern stellt auch sicher, dass lebenswichtige Organe richtig funktionieren, Zellen sich regenerieren und die Konzentrationsfähigkeit des Gehirns steigt.' },
-        { trT: 'Kaliteli ve Derin Bir Uyku', deT: 'Qualitativer und tiefer Schlaf', em: '🛌', tr: 'Sağlıklı bir yaşamın, güçlü bir bağışıklık sisteminin ve psikolojik dengenin en büyük temel taşı kaliteli bir uykudur. Yetişkin bir insanın günde ortalama 7-8 saat kesintisiz uyuması gerekir. Uyku sırasında vücut kendini fiziksel olarak tamir ederken, beyin gün içindeki karmaşık bilgileri işler ve hafızaya kaydeder.', de: 'Der größte Grundstein für ein gesundes Leben, ein starkes Immunsystem und psychologisches Gleichgewicht ist hochwertiger Schlaf. Ein durchschnittlicher Erwachsener sollte 7-8 Stunden ununterbrochen schlafen. Während des Schlafs repariert sich der Körper physisch selbst, während das Gehirn komplexe Informationen des Tages verarbeitet.' },
-        { trT: 'Doğada Yürüyüş ve Ruhsal Şifa', deT: 'Spaziergang in der Natur und seelische Heilung', em: '🌲', tr: 'Sadece fiziksel değil, zihinsel sağlığınız için de doğada yapılan tempolu yürüyüşlerin mucizevi ve bilimsel olarak kanıtlanmış bir etkisi vardır. Haftada en az 3 gün, 45 dakikalık açık hava yürüyüşleri yapmak stres hormonu olan kortizol seviyesini ciddi oranda düşürür.', de: 'Zügige Spaziergänge in der Natur haben eine wundersame und wissenschaftlich bewiesene Wirkung nicht nur auf Ihre körperliche, sondern auch auf Ihre geistige Gesundheit. Mindestens 3 Tage in der Woche für 45 Minuten an der frischen Luft zu spazieren, senkt den Cortisolspiegel (Stresshormon) deutlich.' },
-        { trT: 'Dijital Detoks ve Zihin Molası', deT: 'Digital Detox und geistige Pause', em: '📱', tr: 'Sürekli ekrana bakmak, bitmek bilmeyen bildirimler ve sosyal medyadaki kusursuz hayat illüzyonları, modern çağın en büyük stres kaynağıdır. Zihninizi korumak için haftanın belirli saatlerini veya pazar gününün bir kısmını "dijital detoks" ilan edin.', de: 'Ständiges Starren auf Bildschirme, endlose Benachrichtigungen und die Illusion perfekter Leben in den sozialen Medien sind die größten Stressquellen der Moderne. Um Ihren Geist zu schützen, sollten Sie bestimmte Stunden der Woche oder einen Teil des Sonntags zum "Digital Detox" erklären.'}
-    ];
-
-    window.quizDB = [
-        {q:'İstiklal Marşı\'nın şairi kimdir?',a:['Mehmet Akif Ersoy','Cemal Süreya','Necip Fazıl', 'Nazım Hikmet'],c:0, qDE:'Wer ist der Dichter der türkischen Nationalhymne?', aDE:['Mehmet Akif Ersoy','Cemal Süreya','Necip Fazıl', 'Nazım Hikmet']},
-        {q:'Fuzuli hangi dönemin şairidir?',a:['Halk','Divan','Tanzimat','Cumhuriyet'],c:1, qDE:'Zu welcher Epoche gehört der Dichter Fuzuli?', aDE:['Volksdichtung','Divan (Osmanisch)','Tanzimat','Republik']},
-        {q:'"Aşk imiş her ne var alemde" sözü kime aittir?',a:['Yunus Emre','Mevlânâ','Fuzûlî','Karacaoğlan'],c:2, qDE:'Von wem stammt das Zitat "Liebe ist alles, was im Universum existiert"?', aDE:['Yunus Emre','Rumi','Fuzûlî','Karacaoğlan']},
-        {q:'"Göğe Bakma Durağı" şiirini kim yazmıştır?',a:['Turgut Uyar','Orhan Veli','Edip Cansever','Cemal Süreya'],c:0, qDE:'Wer ist ein berühmter Vertreter der "Zweiten Neuen" (İkinci Yeni) Poesie?', aDE:['Turgut Uyar','Goethe','Schiller','Brecht']},
-        {q:'Almanya\'nın ünlü şairi "Faust" eserinin yazarı kimdir?',a:['Goethe','Schiller','Brecht','Heine'],c:0, qDE:'Wer ist der Autor des weltberühmten Werks "Faust"?', aDE:['Johann Wolfgang von Goethe','Friedrich Schiller','Bertolt Brecht','Heinrich Heine']}
-    ];
+    setInterval(() => { window.fetchFromCloud(); }, 3500); 
 
     // =========================================================================================
-    // DIE NEUE MEGA DATENBANK: EXAKT 30 BILMECELER & 30 BULMACALAR
+    // MEGA DATENBANKEN: BİLMECELER, BULMACALAR, ATASÖZLERİ & TICKER
     // =========================================================================================
+    
+    // EXAKT 30 BILMECELER
     const baseBilmeceler = [
         { trT: "Dilsiz Kaval", deT: "Dein Name", em: "🪈", tr: "Ağzı var dili yok, nefesi var canı yok. Nedir bu?||Kaval / Flüt", de: "Was gehört dir, aber andere benutzen es häufiger als du?||Dein Name." },
         { trT: "Gece Feneri", deT: "Die Landkarte", em: "⭐", tr: "Gündüz fener, gece yanar. Nedir bu?||Yıldız", de: "Ich habe Städte, aber keine Häuser. Berge, aber keine Bäume. Wasser, aber keine Fische. Was bin ich?||Eine Landkarte." },
@@ -1906,6 +1855,7 @@ Blühe, deutsches Vaterland!</p>
         { trT: "Yatak", deT: "Das Bett", em: "🛏️", tr: "Dört ayağı var yürüyemez. Her gece seni bekler, kendisi uyuyamaz.||Yatak", de: "Ich habe vier Beine, aber laufe nicht. Ich warte jede Nacht auf dich. Was bin ich?||Ein Bett." }
     ];
 
+    // EXAKT 30 BULMACALAR
     const baseBulmacalar = [
         { trT: "Kurt/Kuzu/Ot", deT: "Wolf/Ziege/Kohl", em: "🐺", tr: "Bir kurt, bir kuzu ve bir ot balyası nehrin karşısına geçecek. Kayıkta sadece adam ve biri için yer var. Kurt kuzuyu, kuzu otu yemeden nasıl geçerler?||Önce kuzuyu geçirir. Geri döner kurdu alır, karşıya bırakıp kuzuyu geri getirir. Kuzuyu bırakıp otu alır karşıya geçirir. En son tekrar geri dönüp kuzuyu alır.", de: "Ein Wolf, eine Ziege und ein Kohlkopf sollen über einen Fluss. Das Boot fasst nur den Bauer und ein weiteres Ding. Wie kommen sie rüber, ohne dass der Wolf die Ziege oder die Ziege den Kohl frisst?||Er bringt die Ziege rüber. Fährt zurück, holt den Wolf, lässt ihn drüben und nimmt die Ziege wieder mit zurück. Er lässt die Ziege da, nimmt den Kohl mit zum Wolf. Fährt nochmal zurück und holt als letztes die Ziege." },
         { trT: "İki Baba, İki Oğul", deT: "Zwei Väter, zwei Söhne", em: "🎣", tr: "İki baba ve iki oğul balık tutmaya giderler. Toplam 3 balık tutarlar ve hepsi tam olarak birer tam balık alır. Bu nasıl mümkün olabilir?||Gidenler; Büyükbaba, Baba ve Oğuldur. Toplam 3 kişi oldukları için hepsi birer balık alır.", de: "Zwei Väter und zwei Söhne gehen angeln. Sie fangen insgesamt 3 Fische und jeder bekommt genau einen. Wie ist das möglich?||Es sind Großvater, Vater und Sohn (Das sind zusammen zwei Väter und zwei Söhne, aber nur 3 Personen)." },
@@ -1943,22 +1893,27 @@ Blühe, deutsches Vaterland!</p>
     window.bulmacalarDB = baseBulmacalar.map((b, i) => ({ id: 'bul_' + i, trTitle: b.trT, deTitle: b.deT, emoji: b.em, trText: b.tr, deText: b.de, timestamp: Date.now() }));
 
     // =========================================================================================
-    // NEU: ATASÖZLERİ (SPRICHWÖRTER & ZITATE) MEGA-DATENBANK GETRENNT (TR/DE)
+    // ERWEITERTE ATASÖZLERİ MEGA-DATENBANK - GETRENNT (NUR TR oder NUR DE)
     // =========================================================================================
     const baseAtasozleri = [
+        // TÜRKISCHE SPRICHWÖRTER (NUR TR)
         { trT: "Yurtta Sulh, Cihanda Sulh", em: "🕊️", author: "Mustafa Kemal Atatürk", tr: "Yurtta sulh, cihanda sulh." },
         { trT: "Hayatta En Hakiki Mürşit", em: "📚", author: "Mustafa Kemal Atatürk", tr: "Hayatta en hakiki mürşit ilimdir, fendir." },
         { trT: "Egemenlik", em: "⚖️", author: "Mustafa Kemal Atatürk", tr: "Egemenlik, kayıtsız şartsız milletindir." },
         { trT: "Ne Olursan Ol", em: "🤲", author: "Mevlânâ Celâleddîn-i Rûmî", tr: "Ne olursan ol, yine gel. Bizim dergâhımız ümitsizlik dergâhı değildir." },
         { trT: "Gönül Gözü", em: "👁️", author: "Mevlânâ Celâleddîn-i Rûmî", tr: "Gözden ırak olan, gönülden de ırak olur." },
         { trT: "Sevgi", em: "❤️", author: "Yunus Emre", tr: "Sevelim, sevilelim, dünya kimseye kalmaz." },
-        { trT: "Söz Gümüşse", em: "🥈", author: "Anonim (Türk Atasözü)", tr: "Söz gümüşse sükut altındır." },
-        { trT: "Damla Damla", em: "💧", author: "Anonim (Türk Atasözü)", tr: "Damlaya damlaya göl olur." },
-        { trT: "Ağaç Yaşken", em: "🌱", author: "Anonim (Türk Atasözü)", tr: "Ağaç yaşken eğilir." },
+        { trT: "Ağaç Yaşken Eğilir", em: "🌱", author: "Anonim (Türk Atasözü)", tr: "Eğitim ve alışkanlıklar küçük yaşta kazanılır." },
+        { trT: "Damlaya Damlaya Göl Olur", em: "💧", author: "Anonim (Türk Atasözü)", tr: "Küçük birikimler zamanla büyük kazançlara dönüşür." },
+        { trT: "Sakla Samanı Gelir Zamanı", em: "🌾", author: "Anonim (Türk Atasözü)", tr: "Gereksiz görünen bir şey bile gün gelir işe yarar." },
         { trT: "Tatlı Dil", em: "🐍", author: "Anonim (Türk Atasözü)", tr: "Tatlı dil yılanı deliğinden çıkarır." },
+        { trT: "İşleyen Demir Işıldar", em: "⚔️", author: "Anonim (Türk Atasözü)", tr: "Çalışan ve üreten insan her zaman canlılığını korur." },
+        { trT: "Meyveli Ağacı Taşlarlar", em: "🌳", author: "Anonim (Türk Atasözü)", tr: "Başarılı olan, üreten insanlar daima eleştirilir ve kıskanılır." },
+        { trT: "Zararın Neresinden Dönülse Kârdır", em: "🔄", author: "Anonim (Türk Atasözü)", tr: "Yanlış bir yoldan ne kadar erken dönülürse o kadar iyidir." },
+        { trT: "Söz Gümüşse Sükut Altındır", em: "🥈", author: "Anonim (Türk Atasözü)", tr: "Konuşmak değerli olabilir ama yerinde susmak çok daha kıymetlidir." },
+        { trT: "Görünen Köy Kılavuz İstemez", em: "🏘️", author: "Anonim (Türk Atasözü)", tr: "Açıkça belli olan bir durumu açıklamaya gerek yoktur." },
         
-        { deT: "Frieden in der Heimat, Frieden in der Welt", em: "🕊️", author: "Mustafa Kemal Atatürk", de: "Frieden in der Heimat, Frieden in der Welt." },
-        { deT: "Der wahrste Wegweiser", em: "📚", author: "Mustafa Kemal Atatürk", de: "Der wahrste Wegweiser im Leben ist die Wissenschaft." },
+        // DEUTSCHE SPRICHWÖRTER (NUR DE)
         { deT: "Mehr Licht", em: "🕯️", author: "Johann Wolfgang von Goethe", de: "Mehr Licht!" },
         { deT: "Das Verhalten", em: "🎭", author: "Johann Wolfgang von Goethe", de: "Das Verhalten ist ein Spiegel, in dem jeder sein Gesicht zeigt." },
         { deT: "Fantasie", em: "🧠", author: "Albert Einstein", de: "Fantasie ist wichtiger als Wissen, denn Wissen ist begrenzt." },
@@ -1966,11 +1921,17 @@ Blühe, deutsches Vaterland!</p>
         { deT: "Menschlichkeit", em: "🤝", author: "Friedrich Schiller", de: "Der Zeitgeist mag sich ändern, aber die Menschlichkeit bleibt." },
         { deT: "Schwierigkeiten", em: "⛰️", author: "Friedrich Nietzsche", de: "Was mich nicht umbringt, macht mich stärker." },
         { deT: "Die Dunkelheit", em: "🌌", author: "Immanuel Kant", de: "Besser eine Kerze anzünden, als die Dunkelheit verfluchen." },
-        { deT: "Morgenstund", em: "🌅", author: "Anonim (Alman Atasözü)", de: "Morgenstund hat Gold im Mund." },
-        { deT: "Arbeit", em: "🛠️", author: "Anonim (Alman Atasözü)", de: "Ohne Fleiß kein Preis." }
+        { deT: "Morgenstund", em: "🌅", author: "Anonim (Deutsches Sprichwort)", de: "Morgenstund hat Gold im Mund." },
+        { deT: "Arbeit und Fleiß", em: "🛠️", author: "Anonim (Deutsches Sprichwort)", de: "Ohne Fleiß kein Preis." },
+        { deT: "Kurze Beine", em: "🤥", author: "Anonim (Deutsches Sprichwort)", de: "Lügen haben kurze Beine." },
+        { deT: "Die Würze", em: "🧂", author: "Anonim (Deutsches Sprichwort)", de: "In der Kürze liegt die Würze." },
+        { deT: "Der Meister", em: "🏆", author: "Anonim (Deutsches Sprichwort)", de: "Übung macht den Meister." },
+        { deT: "Der Apfel", em: "🍎", author: "Anonim (Deutsches Sprichwort)", de: "Der Apfel fällt nicht weit vom Stamm." },
+        { deT: "Das blinde Huhn", em: "🐔", author: "Anonim (Deutsches Sprichwort)", de: "Ein blindes Huhn findet auch mal ein Korn." },
+        { deT: "Der Wert", em: "🪙", author: "Anonim (Deutsches Sprichwort)", de: "Wer den Pfennig nicht ehrt, ist des Talers nicht wert." }
     ];
 
-    // ERWEITERTER TICKER (150+ Zitate Base)
+    // ERWEITERTER TICKER (Massiv erweitert)
     const baseTicker = [
         { tr: "Hayatta en hakiki mürşit ilimdir. (Mustafa Kemal Atatürk)", de: "Der wahrste Wegweiser im Leben ist die Wissenschaft. (Mustafa Kemal Atatürk)", timestamp: Date.now() },
         { tr: "Yurtta sulh, cihanda sulh. (Mustafa Kemal Atatürk)", de: "Frieden in der Heimat, Frieden in der Welt. (Mustafa Kemal Atatürk)", timestamp: Date.now() },
@@ -1983,7 +1944,10 @@ Blühe, deutsches Vaterland!</p>
         { tr: "Kendini bil. (Sokrates)", de: "Erkenne dich selbst. (Sokrates)", timestamp: Date.now() },
         { tr: "Sevelim, sevilelim, dünya kimseye kalmaz. (Yunus Emre)", de: "Lass uns lieben, die Welt bleibt niemandem. (Yunus Emre)", timestamp: Date.now() },
         { tr: "Söz gümüşse sükut altındır. (Atasözü)", de: "Reden ist Silber, Schweigen ist Gold. (Sprichwort)", timestamp: Date.now() },
-        { tr: "Sabır acıdır, ama meyvesi tatlıdır. (Jean-Jacques Rousseau)", de: "Geduld ist bitter, aber ihre Frucht ist süß. (Jean-Jacques Rousseau)", timestamp: Date.now() }
+        { tr: "Sabır acıdır, ama meyvesi tatlıdır. (Jean-Jacques Rousseau)", de: "Geduld ist bitter, aber ihre Frucht ist süß. (Jean-Jacques Rousseau)", timestamp: Date.now() },
+        { tr: "Ağaç yaşken eğilir. (Atasözü)", de: "Was Hänschen nicht lernt, lernt Hans nimmermehr. (Sprichwort)", timestamp: Date.now() },
+        { tr: "Zaman en iyi ilaçtır. (Ovidius)", de: "Die Zeit heilt alle Wunden. (Ovid)", timestamp: Date.now() },
+        { tr: "Düşünüyorum, öyleyse varım. (Rene Descartes)", de: "Ich denke, also bin ich. (Rene Descartes)", timestamp: Date.now() }
     ];
 
     // INIT DB - MEGA ABSTURZSCHUTZ
@@ -2325,7 +2289,7 @@ Blühe, deutsches Vaterland!</p>
             window.adminLogs = [];
             localStorage.setItem('misaliAdminLogs', '[]');
             window.renderAdminLogs();
-            window.renderOnlineUsers(); // Update badge
+            window.renderOnlineUsers();
             if(window.syncToCloud) window.syncToCloud();
             window.showToast('Rapor temizlendi.');
         });
@@ -2364,14 +2328,14 @@ Blühe, deutsches Vaterland!</p>
             window.userDatabase[un] = u;
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
             
-            if (un === window.currentUser.username) {
+            if (window.currentUser && un === window.currentUser.username) {
                 window.currentUser = u;
                 sessionStorage.setItem('misaliUser', JSON.stringify(u));
                 const hs = document.getElementById('user-score'); if(hs) hs.innerText = u.score + ' P.';
             }
             
             // ECHTZEIT-SYNC ERZWINGEN! VERHINDERT ÜBERSCHREIBEN DURCH ALTE CLOUD-DATEN
-            window.lastLocalUpdate = Date.now() + 5000; // Fake future timestamp to block incoming fetch
+            window.lastLocalUpdate = Date.now() + 5000; 
             if(window.syncToCloud) window.syncToCloud();
             
             window.showToast('Puan güncellendi!');
@@ -2418,7 +2382,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // MEGA-UPDATE: İÇERİK YÖNETİMİ (ADMIN CONTENT ADD/EDIT/DELETE) VOLLSTÄNDIG!
+    // İÇERİK YÖNETİMİ (ADMIN CONTENT ADD/EDIT/DELETE)
     // ==========================================================================
     window.toggleAdminAddFields = function() {
         let type = document.getElementById('admin-add-type').value;
@@ -2490,7 +2454,7 @@ Blühe, deutsches Vaterland!</p>
         if(!items || items.length === 0) return;
 
         items.forEach(item => {
-            let label = item.trTitle || item.title || item.tr || item.trText || 'İsimsiz';
+            let label = item.trTitle || item.title || item.tr || item.trText || item.deTitle || 'İsimsiz';
             if(label.length > 40) label = label.substring(0, 40) + '...';
             select.innerHTML += `<option value="${item.id}">${label}</option>`;
         });
@@ -2570,7 +2534,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // STERNZEICHEN & HOROSKOP (LANGE TEXTE)
+    // STERNZEICHEN & HOROSKOP
     // ==========================================================================
     window.zodiacs = [
         {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]}, {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]}, 
@@ -2685,7 +2649,7 @@ Blühe, deutsches Vaterland!</p>
                 if(id === 'adminUsersModal' && window.renderOnlineUsers) window.renderOnlineUsers(); 
                 if(id === 'weatherModal' && window.fetchWeather) window.fetchWeather();
 
-                // GAME RESETS (Verhindert Fehler bei alten Spielen)
+                // GAME RESETS
                 if(id === 'falModal') { let fc = document.getElementById('fal-cup'); if(fc) fc.style.display='block'; let fr = document.getElementById('fal-result'); if(fr) fr.style.display='none'; }
                 if(id === 'fastClickModal') { window.fcActive=false; let st=document.getElementById('fc-start'); if(st) st.style.display='block'; let btn=document.getElementById('fc-btn'); if(btn) btn.style.display='none'; let sc=document.getElementById('fc-score'); if(sc) sc.innerText='0'; let ti=document.getElementById('fc-time'); if(ti) ti.innerText='5.0'; }
                 if(id === 'breathModal') { let st=document.getElementById('breath-start'); if(st) st.style.display='block'; let c=document.getElementById('breath-circle'); if(c) c.style.transform='scale(1)'; }
@@ -2696,6 +2660,10 @@ Blühe, deutsches Vaterland!</p>
                 if(id === 'pongModal') { let st=document.getElementById('pong-start-btn'); if(st) st.style.display='block'; let cvs=document.getElementById('pong-game'); if(cvs){ window.pongCtx=cvs.getContext('2d'); window.pongCtx.fillStyle='#0a192f'; window.pongCtx.fillRect(0,0,300,350); } let sp=document.getElementById('pong-score-p'); if(sp) sp.innerText='0'; let sc=document.getElementById('pong-score-c'); if(sc) sc.innerText='0'; }
                 if(id === 'tetrisModal') { let st=document.getElementById('tetris-start-btn'); if(st) st.style.display='block'; let cvs=document.getElementById('tetris-game'); if(cvs){ window.tetrisCtx=cvs.getContext('2d'); window.tetrisCtx.fillStyle='#0a192f'; window.tetrisCtx.fillRect(0,0,240,400); } let sc=document.getElementById('tetris-score'); if(sc) sc.innerText='0'; }
                 if(id === 'breakoutModal') { let st=document.getElementById('breakout-start-btn'); if(st) st.style.display='block'; let cvs=document.getElementById('breakout-game'); if(cvs){ window.brCtx=cvs.getContext('2d'); window.brCtx.fillStyle='#0a192f'; window.brCtx.fillRect(0,0,300,350); } let sc=document.getElementById('breakout-score'); if(sc) sc.innerText='0'; }
+                
+                // NEW GAMES RESETS
+                if(id === 'hazineModal' && window.initHazine) window.initHazine();
+                if(id === 'mathModal' && window.initMath) window.initMath();
             } 
         } catch(e) { console.error("Modal error:", e); }
     };
@@ -3231,15 +3199,15 @@ Blühe, deutsches Vaterland!</p>
                 deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.deTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
             }
 
-            // RENDERING: ATASÖZLERI
+            // RENDERING: ATASÖZLERI (GETRENNT NACH TR UND DE WIE GEWÜNSCHT!)
             const ataTrCol = document.getElementById('atasozleri-tr-col'); const ataDeCol = document.getElementById('atasozleri-de-col');
             if(ataTrCol && ataDeCol && window.contentDB.atasozleri && Array.isArray(window.contentDB.atasozleri)) {
-                let sortedAta = window.contentDB.atasozleri.slice().sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
-                let sortedAtaDe = window.contentDB.atasozleri.slice().sort((a,b) => (a.deTitle||'').localeCompare((b.deTitle||''), 'de'));
+                let sortedAtaTR = window.contentDB.atasozleri.filter(a => a.trTitle).sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
+                let sortedAtaDE = window.contentDB.atasozleri.filter(a => a.deTitle).sort((a,b) => (a.deTitle||'').localeCompare((b.deTitle||''), 'de'));
 
-                ataTrCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türkçe (TR)</h3>' + sortedAta.filter(a => a.trTitle).map(a => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 5px 15px rgba(0,0,0,0.5); cursor:pointer;" onclick="window.openPoemModal('${a.id}', 'atasozleri')"><h3 style="color:#fdfbf7; margin-bottom:10px; font-family:'Playfair Display', serif;">${a.emoji||'💬'} ${a.trTitle}</h3><div style="color:#f4c542; font-size:0.85rem; margin-top:10px; text-align:right; font-weight:bold;">- ${a.author || 'Anonim'}</div></div>`).join('');
+                ataTrCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türkçe (TR)</h3>' + sortedAtaTR.map(a => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 5px 15px rgba(0,0,0,0.5); cursor:pointer;" onclick="window.openPoemModal('${a.id}', 'atasozleri')"><h3 style="color:#fdfbf7; margin-bottom:10px; font-family:'Playfair Display', serif; pointer-events:none;">${a.emoji||'💬'} ${a.trTitle}</h3><div style="color:#f4c542; font-size:0.85rem; margin-top:10px; text-align:right; font-weight:bold; pointer-events:none;">- ${a.author || 'Anonim'}</div></div>`).join('');
                 
-                ataDeCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsch (DE)</h3>' + sortedAtaDe.filter(a => a.deTitle).map(a => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 5px 15px rgba(0,0,0,0.5); cursor:pointer;" onclick="window.openPoemModal('${a.id}', 'atasozleri')"><h3 style="color:#fdfbf7; margin-bottom:10px; font-family:'Playfair Display', serif;">${a.emoji||'💬'} ${a.deTitle}</h3><div style="color:#f4c542; font-size:0.85rem; margin-top:10px; text-align:right; font-weight:bold;">- ${a.author || 'Anonim'}</div></div>`).join('');
+                ataDeCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsch (DE)</h3>' + sortedAtaDE.map(a => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 5px 15px rgba(0,0,0,0.5); cursor:pointer;" onclick="window.openPoemModal('${a.id}', 'atasozleri')"><h3 style="color:#fdfbf7; margin-bottom:10px; font-family:'Playfair Display', serif; pointer-events:none;">${a.emoji||'💬'} ${a.deTitle}</h3><div style="color:#f4c542; font-size:0.85rem; margin-top:10px; text-align:right; font-weight:bold; pointer-events:none;">- ${a.author || 'Anonim'}</div></div>`).join('');
             }
 
             if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
@@ -3258,12 +3226,16 @@ Blühe, deutsches Vaterland!</p>
         if (type === 'atasozleri') author = item.author || 'Anonim';
         window.currentPoemData.author = author;
 
-        document.getElementById('modalTitle').innerText = item.trTitle || item.title || item.tr || 'Başlık';
-        document.getElementById('modalText').innerText = item.trText || item.text || item.quote || item.tr || 'İçerik...';
+        document.getElementById('modalTitle').innerText = item.trTitle || item.title || item.deTitle || item.tr || 'Başlık';
+        document.getElementById('modalText').innerText = item.trText || item.text || item.deText || item.quote || item.tr || 'İçerik...';
         
         let hasDe = !!(item.deTitle || item.deText || item.de);
-        document.getElementById('contentModal-lang-toggle').style.display = hasDe ? 'flex' : 'none';
-        if(hasDe) window.switchModalLang('TR');
+        let hasTr = !!(item.trTitle || item.trText || item.tr);
+        
+        document.getElementById('contentModal-lang-toggle').style.display = (hasDe && hasTr) ? 'flex' : 'none';
+        
+        if(hasTr) window.switchModalLang('TR');
+        else if (hasDe) window.switchModalLang('DE');
         
         window.updateHeartsUI(); window.openFastModal('contentModal');
     };
@@ -3488,7 +3460,7 @@ Blühe, deutsches Vaterland!</p>
             action = 'kalbini geri çekti';
         } else {
             window.poemDataStore[poemId].ratings[window.currentUser.username] = rating;
-            action = `${rating} kalp bıraktı ❤️`; // Exakte Anzahl!
+            action = `${rating} kalp bıraktı ❤️`; // EXAKTE ZAHLEN-ANGABE WIE GEWÜNSCHT!
         }
         
         window.lastLocalUpdate = Date.now() + 5000; window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
@@ -3692,24 +3664,21 @@ Blühe, deutsches Vaterland!</p>
         if(window.initContent) window.initContent(); 
     };
 
-    window.openBilmeceModal = function(idx) {
-        const source = (window.contentDB && window.contentDB.bilmeceler && window.contentDB.bilmeceler.length > 0) ? window.contentDB.bilmeceler : window.bilmecelerDB;
-        let filtered = source.filter(item => window.bilmeceLang === 'DE' ? item.deTitle : item.trTitle);
-        let sorted = filtered.slice().sort((a,b) => (window.bilmeceLang === 'DE' ? (a.deTitle||'') : (a.trTitle||'')).localeCompare((window.bilmeceLang === 'DE' ? (b.deTitle||'') : (b.trTitle||'')), window.bilmeceLang === 'DE' ? 'de' : 'tr'));
-        let item = sorted[idx]; if(!item) return;
-        window.currentBilmeceItem = item; window.currentPuzzleType = 'bilmeceler';
-        let text = window.bilmeceLang === 'DE' ? item.deText : item.trText; let title = window.bilmeceLang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
-        document.getElementById('bilmece-icon').innerText = item.emoji || '🤔'; document.getElementById('bilmece-title').innerText = title || (window.bilmeceLang === 'DE' ? 'Rätsel' : 'Bilmece'); document.getElementById('bilmece-text').innerText = q; document.getElementById('bilmece-answer-box').style.display = 'none'; document.getElementById('bilmece-show-btn').style.display = 'block'; window.openFastModal('bilmeceModal');
-    };
-
-    window.openBulmacaModal = function(idx) {
-        const source = (window.contentDB && window.contentDB.bulmacalar && window.contentDB.bulmacalar.length > 0) ? window.contentDB.bulmacalar : window.bulmacalarDB;
-        let filtered = source.filter(item => window.bulmacaLang === 'DE' ? item.deTitle : item.trTitle);
-        let sorted = filtered.slice().sort((a,b) => (window.bulmacaLang === 'DE' ? (a.deTitle||'') : (a.trTitle||'')).localeCompare((window.bulmacaLang === 'DE' ? (b.deTitle||'') : (b.trTitle||'')), window.bulmacaLang === 'DE' ? 'de' : 'tr'));
-        let item = sorted[idx]; if(!item) return;
-        window.currentBilmeceItem = item; window.currentPuzzleType = 'bulmacalar';
-        let text = window.bulmacaLang === 'DE' ? item.deText : item.trText; let title = window.bulmacaLang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
-        document.getElementById('bilmece-icon').innerText = item.emoji || '🤔'; document.getElementById('bilmece-title').innerText = title || (window.bulmacaLang === 'DE' ? 'Puzzle' : 'Bulmaca'); document.getElementById('bilmece-text').innerText = q; document.getElementById('bilmece-answer-box').style.display = 'none'; document.getElementById('bilmece-show-btn').style.display = 'block'; window.openFastModal('bilmeceModal');
+    window.openPuzzleModal = function(id, type) {
+        const source = (window.contentDB && window.contentDB[type] && window.contentDB[type].length > 0) ? window.contentDB[type] : (type === 'bilmeceler' ? window.bilmecelerDB : window.bulmacalarDB);
+        let item = source.find(x => x.id === id); if(!item) return;
+        window.currentBilmeceItem = item; window.currentPuzzleType = type;
+        
+        let isBilmece = type === 'bilmeceler';
+        let lang = isBilmece ? window.bilmeceLang : window.bulmacaLang;
+        
+        let text = lang === 'DE' ? item.deText : item.trText; let title = lang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
+        document.getElementById('bilmece-icon').innerText = item.emoji || '🤔'; 
+        document.getElementById('bilmece-title').innerText = title || (lang === 'DE' ? (isBilmece ? 'Rätsel' : 'Puzzle') : (isBilmece ? 'Bilmece' : 'Bulmaca')); 
+        document.getElementById('bilmece-text').innerText = q; 
+        document.getElementById('bilmece-answer-box').style.display = 'none'; 
+        document.getElementById('bilmece-show-btn').style.display = 'block'; 
+        window.openFastModal('bilmeceModal');
     };
 
     window.showBilmeceAnswer = function() {
@@ -3719,14 +3688,14 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('bilmece-answer-text').innerText = a; document.getElementById('bilmece-show-btn').style.display = 'none'; document.getElementById('bilmece-answer-box').style.display = 'block'; window.updateGameStats(5, 'win', isBilmece ? 'Bilmece' : 'Bulmaca');
     };
 
-    // --- GAMES LOGIK (FAIRE PUNKTE & ECHTZEIT) ---
+    // --- GAMES LOGIK (FAIRE PUNKTE & NEUE SPIELE) ---
     window.setGlobalGameLang = function(lang) {
         window.currentGameLang = lang; const btnTr = document.getElementById('game-lang-tr'); const btnDe = document.getElementById('game-lang-de');
         if(btnTr && btnDe) {
             if(lang === 'TR') { btnTr.classList.replace('inactive', 'active'); btnDe.classList.replace('active', 'inactive'); document.querySelectorAll('.gt-title-tr').forEach(el => el.style.display = 'block'); document.querySelectorAll('.gt-title-de').forEach(el => el.style.display = 'none'); document.querySelectorAll('.gt-btn-tr').forEach(el => el.style.display = 'inline-block'); document.querySelectorAll('.gt-btn-de').forEach(el => el.style.display = 'none'); } 
             else { btnDe.classList.replace('inactive', 'active'); btnTr.classList.replace('active', 'inactive'); document.querySelectorAll('.gt-title-tr').forEach(el => el.style.display = 'none'); document.querySelectorAll('.gt-title-de').forEach(el => el.style.display = 'block'); document.querySelectorAll('.gt-btn-tr').forEach(el => el.style.display = 'none'); document.querySelectorAll('.gt-btn-de').forEach(el => el.style.display = 'inline-block'); }
         }
-        if(window.setHangmanLang) window.setHangmanLang(lang); if(window.initAnagram && document.getElementById('anagramModal').classList.contains('active-modal')) window.initAnagram(); if(window.initMilyoner && document.getElementById('milyonerModal').classList.contains('active-modal')) window.initMilyoner();
+        if(window.setHangmanLang) window.setHangmanLang(lang); if(window.initAnagram && document.getElementById('anagramModal').classList.contains('active-modal')) window.initAnagram(); if(window.loadMilyoner && document.getElementById('milyonerModal').classList.contains('active-modal')) window.loadMilyoner(); if(window.loadQuiz && document.getElementById('quizModal').classList.contains('active-modal')) window.loadQuiz();
     };
 
     window.updateGameStats = function(points, result, gameName) {
@@ -3751,22 +3720,99 @@ Blühe, deutsches Vaterland!</p>
     window.fcTime=5.0; window.fcScore=0; window.fcTimer=null; window.fcActive=false;
     window.currentAnagram=''; window.hmWord=''; window.hmGuessed=[]; window.hmLives=6; window.hmLang='TR';
     window.simonSeq=[]; window.simonPlayer=[]; window.simonLevel=0; window.targetNum=0;
-    window.tttBoard=['','','','','','','','','']; window.tttActive=true; window.snakeCtx=null; window.snakeInt=null; window.pongCtx=null; window.pongInt=null; window.tetrisCtx=null; window.tetrisInt=null; window.ty=0; window.tx=100; window.brCtx=null; window.brInt=null; window.currentMilQ = 0;
+    window.tttBoard=['','','','','','','','','']; window.tttActive=true; window.snakeCtx=null; window.snakeInt=null; window.pongCtx=null; window.pongInt=null; window.tetrisCtx=null; window.tetrisInt=null; window.ty=0; window.tx=100; window.brCtx=null; window.brInt=null; window.currentMilQ = 0; window.currentQ = 0;
 
-    window.crackFal=function(){ let fc=document.getElementById('fal-cup'); if(fc) fc.style.display='none'; let fr=document.getElementById('fal-result'); if(fr) fr.style.display='block'; let txt = window.currentGameLang === 'DE' ? 'Du wirst bald gute Nachrichten erhalten, deine Tasse ist hell.' : 'Yakında güzel bir haber alacaksın, fincanın aydınlık.'; document.getElementById('fal-text').innerText = txt; window.updateGameStats(10,'win','Kahve Falı'); };
+    window.crackFal=function(){ let fc=document.getElementById('fal-cup'); if(fc) fc.style.display='none'; let fr=document.getElementById('fal-result'); if(fr) fr.style.display='block'; let txt = window.currentGameLang === 'DE' ? 'Du wirst bald gute Nachrichten erhalten, deine Tasse ist hell.' : 'Yakında güzel bir haber alacaksın, fincanın aydınlık.'; document.getElementById('fal-text').innerText = txt; window.updateGameStats(3,'win','Kahve Falı'); };
     window.initMemoryGame=function(){const emojis=['🌹','🌙','☕','🕊️','🖋️','✨','🍂','💎'];window.memCards=[...emojis,...emojis].sort(()=>0.5-Math.random());const board=document.getElementById('memory-board');board.innerHTML='';window.memPairs=0;window.firstCard=null;window.secondCard=null;window.lockBoard=false;document.getElementById('memory-reset').style.display='none';document.getElementById('memory-msg').innerHTML=window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">Finde die Paare!</span>' : '<span class="gt-btn-tr" style="display:inline-block;">Eşleri Bul!</span>';window.memCards.forEach((e,i)=>{board.innerHTML+=`<div class="mem-card" style="font-size:2.5rem; display:flex; justify-content:center; align-items:center; background:rgba(0,0,0,0.5); border:1px solid #f4c542; border-radius:12px; cursor:pointer; height:80px;" data-val="${e}" onclick="if(window.flipMemCard) window.flipMemCard(this)">?</div>`;});};
-    window.flipMemCard=function(el){if(window.lockBoard||el===window.firstCard||el.classList.contains('matched'))return;el.innerText=el.dataset.val;el.style.background='rgba(244,197,66,0.2)';if(!window.firstCard){window.firstCard=el;return;}window.secondCard=el;window.lockBoard=true;if(window.firstCard.dataset.val===window.secondCard.dataset.val){window.firstCard.classList.add('matched');window.secondCard.classList.add('matched');window.firstCard.style.background='rgba(34,197,94,0.3)';window.secondCard.style.background='rgba(34,197,94,0.3)';window.memPairs++;window.firstCard=null;window.secondCard=null;window.lockBoard=false;if(window.memPairs===8){document.getElementById('memory-msg').innerHTML=window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">Glückwunsch! (+25 P.)</span>' : '<span class="gt-btn-tr" style="display:inline-block;">Tebrikler! (+25 Puan)</span>';document.getElementById('memory-reset').style.display='block';window.updateGameStats(25,'win','Hafıza');}}else{setTimeout(()=>{window.firstCard.innerText='?';window.secondCard.innerText='?';window.firstCard.style.background='rgba(0,0,0,0.5)';window.secondCard.style.background='rgba(0,0,0,0.5)';window.firstCard=null;window.secondCard=null;window.lockBoard=false;},800);}};
-    window.clickFast=function(){ if(!window.fcActive){ window.fcActive=true;window.fcScore=0;window.fcTime=5.0; const btn = document.getElementById('fc-btn'); btn.innerHTML = window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">KLICK!</span>':'<span class="gt-btn-tr" style="display:inline-block;">TIKLA!</span>'; window.fcTimer=setInterval(()=>{ window.fcTime-=0.1; document.getElementById('fc-time').innerText=window.fcTime.toFixed(1); if(window.fcTime<=0){ clearInterval(window.fcTimer);window.fcActive=false; btn.innerHTML = window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">ZEIT ABGELAUFEN!</span>':'<span class="gt-btn-tr" style="display:inline-block;">SÜRE BİTTİ!</span>'; btn.style.display='none'; document.getElementById('fc-start').style.display='block'; window.updateGameStats(Math.floor(window.fcScore/2),'win','Hızlı Tık'); } },100); } if(window.fcActive){window.fcScore++;document.getElementById('fc-score').innerText=window.fcScore;} };
+    window.flipMemCard=function(el){if(window.lockBoard||el===window.firstCard||el.classList.contains('matched'))return;el.innerText=el.dataset.val;el.style.background='rgba(244,197,66,0.2)';if(!window.firstCard){window.firstCard=el;return;}window.secondCard=el;window.lockBoard=true;if(window.firstCard.dataset.val===window.secondCard.dataset.val){window.firstCard.classList.add('matched');window.secondCard.classList.add('matched');window.firstCard.style.background='rgba(34,197,94,0.3)';window.secondCard.style.background='rgba(34,197,94,0.3)';window.memPairs++;window.firstCard=null;window.secondCard=null;window.lockBoard=false;if(window.memPairs===8){document.getElementById('memory-msg').innerHTML=window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">Glückwunsch! (+15 P.)</span>' : '<span class="gt-btn-tr" style="display:inline-block;">Tebrikler! (+15 Puan)</span>';document.getElementById('memory-reset').style.display='block';window.updateGameStats(15,'win','Hafıza');}}else{setTimeout(()=>{window.firstCard.innerText='?';window.secondCard.innerText='?';window.firstCard.style.background='rgba(0,0,0,0.5)';window.secondCard.style.background='rgba(0,0,0,0.5)';window.firstCard=null;window.secondCard=null;window.lockBoard=false;},800);}};
+    window.clickFast=function(){ if(!window.fcActive){ window.fcActive=true;window.fcScore=0;window.fcTime=5.0; const btn = document.getElementById('fc-btn'); btn.innerHTML = window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">KLICK!</span>':'<span class="gt-btn-tr" style="display:inline-block;">TIKLA!</span>'; window.fcTimer=setInterval(()=>{ window.fcTime-=0.1; document.getElementById('fc-time').innerText=window.fcTime.toFixed(1); if(window.fcTime<=0){ clearInterval(window.fcTimer);window.fcActive=false; btn.innerHTML = window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">ZEIT ABGELAUFEN!</span>':'<span class="gt-btn-tr" style="display:inline-block;">SÜRE BİTTİ!</span>'; btn.style.display='none'; document.getElementById('fc-start').style.display='block'; window.updateGameStats(Math.floor(window.fcScore/4),'win','Hızlı Tık'); } },100); } if(window.fcActive){window.fcScore++;document.getElementById('fc-score').innerText=window.fcScore;} };
     window.startFastClick=function(){document.getElementById('fc-start').style.display='none';document.getElementById('fc-btn').style.display='block';window.clickFast();};
-    window.startBreath=function(){const c=document.getElementById('breath-circle');const b=document.getElementById('breath-start');b.style.display='none';const cycle=()=>{c.style.transform='scale(1.5)';c.innerHTML=window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">Einatmen...</span>':'<span class="gt-btn-tr" style="display:inline-block;">Nefes Al...</span>';setTimeout(()=>{c.style.transform='scale(1)';c.innerHTML=window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">Ausatmen...</span>':'<span class="gt-btn-tr" style="display:inline-block;">Nefes Ver...</span>';},4000);};cycle();setInterval(cycle,8000);window.updateGameStats(5,'win','Nefes');};
+    window.startBreath=function(){const c=document.getElementById('breath-circle');const b=document.getElementById('breath-start');b.style.display='none';const cycle=()=>{c.style.transform='scale(1.5)';c.innerHTML=window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">Einatmen...</span>':'<span class="gt-btn-tr" style="display:inline-block;">Nefes Al...</span>';setTimeout(()=>{c.style.transform='scale(1)';c.innerHTML=window.currentGameLang === 'DE'?'<span class="gt-btn-de" style="display:inline-block;">Ausatmen...</span>':'<span class="gt-btn-tr" style="display:inline-block;">Nefes Ver...</span>';},4000);};cycle();setInterval(cycle,8000);window.updateGameStats(3,'win','Nefes');};
     window.initAnagram=function(){ const wordsTR=['şair','misali','şiir','gönül','sevda','kitap','kalem','ilham','duygu','özlem','vatan','kardeş']; const wordsDE=['stern', 'liebe', 'herz', 'traum', 'feder', 'poesie', 'wunder', 'frieden']; let words = window.currentGameLang === 'DE' ? wordsDE : wordsTR; window.currentAnagram=words[Math.floor(Math.random()*words.length)]; let shuffled=window.currentAnagram.split('').sort(()=>0.5-Math.random()).join(''); document.getElementById('anagram-word').innerText=shuffled.toUpperCase(); document.getElementById('anagram-msg').innerText=window.currentGameLang === 'DE'?'Welches Wort ist das?':'Bu kelime ne?'; document.getElementById('anagram-input').value=''; };
-    window.checkAnagram=function(){let guess=window.normalizeStr(document.getElementById('anagram-input').value);let target=window.normalizeStr(window.currentAnagram);if(guess===target){document.getElementById('anagram-msg').innerText=window.currentGameLang==='DE'?'Richtig! (+15 Punkte)':'Doğru! (+15 Puan)';document.getElementById('anagram-msg').style.color='#22c55e';window.updateGameStats(15,'win','Anagram');setTimeout(window.initAnagram,1500);}else{document.getElementById('anagram-msg').innerText=window.currentGameLang==='DE'?'Falsch, versuche es erneut!':'Yanlış, tekrar dene!';document.getElementById('anagram-msg').style.color='#ef4444';}};
+    window.checkAnagram=function(){let guess=window.normalizeStr(document.getElementById('anagram-input').value);let target=window.normalizeStr(window.currentAnagram);if(guess===target){document.getElementById('anagram-msg').innerText=window.currentGameLang==='DE'?'Richtig! (+10 Punkte)':'Doğru! (+10 Puan)';document.getElementById('anagram-msg').style.color='#22c55e';window.updateGameStats(10,'win','Anagram');setTimeout(window.initAnagram,1500);}else{document.getElementById('anagram-msg').innerText=window.currentGameLang==='DE'?'Falsch, versuche es erneut!':'Yanlış, tekrar dene!';document.getElementById('anagram-msg').style.color='#ef4444';}};
     window.setHangmanLang = function(lang) { window.hmLang = lang; if(document.getElementById('hangmanModal').classList.contains('active-modal')) window.initHangman(); };
     window.initHangman=function(){const wordsTR=['ŞAİR','MİSALİ','ŞİİR','AŞK','GÖNÜL','DOST','İSTİKLAL','VATAN','HASRET'];const wordsDE=['LEIDENSCHAFT', 'GEFUEHL', 'HOFFNUNG', 'SCHICKSAL', 'DICHTER', 'WAHRHEIT', 'TRAUM', 'SEHNSUCHT'];let arr=window.hmLang==='TR'?wordsTR:wordsDE;window.hmWord=arr[Math.floor(Math.random()*arr.length)];window.hmGuessed=[];window.hmLives=6;document.getElementById('hangman-reset').style.display='none';document.getElementById('hangman-msg').innerText='';window.renderHangman();const kb=document.getElementById('hangman-keyboard');kb.innerHTML='';const letters=window.hmLang==='TR'?'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ':'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ';letters.split('').forEach(l=>{kb.innerHTML+=`<button class="reset-btn" onclick="if(window.hmGuess) window.hmGuess('${l}', this)" style="padding:10px; font-size:1.1rem; width:45px; margin:0; display:inline-block; border-radius:10px;">${l}</button>`;});};
     window.renderHangman=function(){document.getElementById('hangman-lives').innerText='❤️'.repeat(window.hmLives);document.getElementById('hangman-word').innerText=window.hmWord.split('').map(l=>window.hmGuessed.includes(l)?l:'_').join(' ');};
     window.hmGuess=function(l,btn){btn.disabled=true;btn.style.opacity=0.3;if(window.hmWord.includes(l)){window.hmGuessed.push(l);window.renderHangman();if(!document.getElementById('hangman-word').innerText.includes('_')){document.getElementById('hangman-msg').innerText=window.hmLang==='DE'?'Gewonnen! (+15 Punkte)':'Kazandın! (+15 Puan)';document.getElementById('hangman-msg').style.color='#22c55e';document.getElementById('hangman-reset').style.display='block';window.updateGameStats(15,'win','Adam Asmaca');}}else{window.hmLives--;window.renderHangman();if(window.hmLives<=0){document.getElementById('hangman-msg').innerText=(window.hmLang==='DE'?'Verloren! Wort: ':'Kaybettin! Kelime: ') + window.hmWord;document.getElementById('hangman-msg').style.color='#ef4444';document.getElementById('hangman-reset').style.display='block';window.updateGameStats(-5,'loss','Adam Asmaca');}}};
 
-    // DIE NEUEN SPIELE - FAIRE PUNKTE & LOGIK
+    // ŞİİRSEL QUİZ WIEDERHERGESTELLT
+    window.loadQuiz=function(){
+        if (!window.quizDB || window.quizDB.length === 0) return;
+        let q=window.quizDB[window.currentQ];
+        document.getElementById('quiz-q').innerText=window.currentGameLang === 'DE' ? q.qDE : q.q;
+        document.getElementById('quiz-msg').innerText='';
+        document.getElementById('quiz-next').style.display='none';
+        let opts=document.getElementById('quiz-options');opts.innerHTML='';
+        let ansArr = window.currentGameLang === 'DE' ? q.aDE : q.a;
+        ansArr.forEach((opt,i)=>{opts.innerHTML+=`<button class="reset-btn" style="padding: 15px; border-radius:12px; width:100%; text-align:center;" onclick="window.checkQuiz(${i})">${opt}</button>`;});
+    };
+    window.checkQuiz=function(ans){if(ans===window.quizDB[window.currentQ].c){document.getElementById('quiz-msg').innerText=window.currentGameLang==='DE'?'Richtig! (+10 P.)':'Doğru! (+10 Puan)';document.getElementById('quiz-msg').style.color = '#22c55e';window.updateGameStats(10,'win','Quiz');}else{document.getElementById('quiz-msg').innerText=window.currentGameLang==='DE'?'Falsch! (-2 P.)':'Yanlış! (-2 Puan)';document.getElementById('quiz-msg').style.color = '#ef4444';window.updateGameStats(-2,'loss','Quiz');}document.getElementById('quiz-next').style.display='block';};
+    window.nextQuiz=function(){window.currentQ++;if(window.currentQ>=window.quizDB.length) window.currentQ=0;window.loadQuiz();};
+
+    // DIE 2 NEUEN, SINNVOLLEN SPIELE: HAZİNE AVI & MATEMATİK DEHASI
+    window.initHazine = function() {
+        window.hazineTreasure = Math.floor(Math.random() * 3);
+        window.hazineActive = true;
+        let grid = document.getElementById('hazine-grid');
+        if(grid) {
+            grid.innerHTML = [0,1,2].map(i => `<div onclick="window.checkHazine(${i})" id="chest-${i}" style="font-size:4rem; cursor:pointer; transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🧰</div>`).join('');
+        }
+        let msg = document.getElementById('hazine-msg');
+        if(msg) msg.innerHTML = window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">In einer von 3 Truhen ist der Schatz!</span>' : '<span class="gt-btn-tr" style="display:inline-block;">3 sandıktan birinde hazine var!</span>';
+        document.getElementById('hazine-reset').style.display = 'none';
+    };
+    window.checkHazine = function(idx) {
+        if(!window.hazineActive) return;
+        window.hazineActive = false;
+        for(let i=0; i<3; i++) {
+            let el = document.getElementById('chest-'+i);
+            if(i === window.hazineTreasure) el.innerText = '💎';
+            else el.innerText = '🕸️';
+            el.style.pointerEvents = 'none';
+        }
+        let msg = document.getElementById('hazine-msg');
+        if(idx === window.hazineTreasure) {
+            msg.innerHTML = window.currentGameLang === 'DE' ? 'Du hast den Schatz gefunden! (+15 P.)' : 'Hazineyi buldun! (+15 Puan)';
+            msg.style.color = '#22c55e';
+            window.updateGameStats(15, 'win', 'Hazine Avı');
+        } else {
+            msg.innerHTML = window.currentGameLang === 'DE' ? 'Leider leer! (-3 P.)' : 'Maalesef boş! (-3 Puan)';
+            msg.style.color = '#ef4444';
+            window.updateGameStats(-3, 'loss', 'Hazine Avı');
+        }
+        document.getElementById('hazine-reset').style.display = 'block';
+    };
+
+    window.initMath = function() {
+        let ops = ['+', '-'];
+        let op = ops[Math.floor(Math.random()*2)];
+        let n1 = Math.floor(Math.random() * 50) + 1;
+        let n2 = Math.floor(Math.random() * 50) + 1;
+        if(op === '-' && n2 > n1) { let temp=n1; n1=n2; n2=temp; }
+        window.mathTarget = op === '+' ? (n1 + n2) : (n1 - n2);
+        document.getElementById('math-equation').innerText = `${n1} ${op} ${n2} = ?`;
+        document.getElementById('math-input').value = '';
+        document.getElementById('math-msg').innerText = '';
+        document.getElementById('math-reset').style.display = 'none';
+        document.getElementById('math-btn').style.display = 'inline-block';
+    };
+    window.checkMath = function() {
+        let guess = parseInt(document.getElementById('math-input').value);
+        if(isNaN(guess)) return;
+        let msg = document.getElementById('math-msg');
+        document.getElementById('math-btn').style.display = 'none';
+        if(guess === window.mathTarget) {
+            msg.innerText = window.currentGameLang === 'DE' ? 'Richtig! (+10 P.)' : 'Doğru! (+10 Puan)';
+            msg.style.color = '#22c55e';
+            window.updateGameStats(10, 'win', 'Matematik Dehası');
+        } else {
+            msg.innerText = window.currentGameLang === 'DE' ? `Falsch! Antwort: ${window.mathTarget} (-2 P.)` : `Yanlış! Cevap: ${window.mathTarget} (-2 Puan)`;
+            msg.style.color = '#ef4444';
+            window.updateGameStats(-2, 'loss', 'Matematik Dehası');
+        }
+        document.getElementById('math-reset').style.display = 'block';
+    };
+
     window.initMilyoner = function() { window.currentMilQ = 0; window.loadMilyoner(); };
     window.loadMilyoner = function() {
         if (!window.quizDB || window.quizDB.length === 0) return;
@@ -3781,51 +3827,21 @@ Blühe, deutsches Vaterland!</p>
     };
     window.checkMilyoner = function(ans) {
         let q = window.quizDB[window.currentMilQ];
-        if(ans === q.c) { document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Richtig! (+10 P.)' : 'Doğru! (+10 Puan)'; document.getElementById('milyoner-msg').style.color = '#22c55e'; window.updateGameStats(10, 'win', 'Milyoner'); } 
-        else { document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Leider falsch! (-5 P.)' : 'Maalesef yanlış! (-5 Puan)'; document.getElementById('milyoner-msg').style.color = '#ef4444'; window.updateGameStats(-5, 'loss', 'Milyoner'); }
+        if(ans === q.c) { document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Richtig! (+15 P.)' : 'Doğru! (+15 Puan)'; document.getElementById('milyoner-msg').style.color = '#22c55e'; window.updateGameStats(15, 'win', 'Milyoner'); } 
+        else { document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Leider falsch! (-3 P.)' : 'Maalesef yanlış! (-3 Puan)'; document.getElementById('milyoner-msg').style.color = '#ef4444'; window.updateGameStats(-3, 'loss', 'Milyoner'); }
         document.getElementById('milyoner-next').style.display = 'block';
     };
     window.nextMilyoner = function() { window.currentMilQ++; window.loadMilyoner(); };
-
-    window.initCarkifelek = function() { document.getElementById('cark-wheel').style.transform = 'rotate(0deg)'; document.getElementById('cark-wheel').style.transition = '0s'; document.getElementById('cark-result').innerText = ''; };
-    window.spinCark = function() {
-        const wheel = document.getElementById('cark-wheel'); const res = document.getElementById('cark-result');
-        res.innerText = window.currentGameLang === 'DE' ? 'Dreht sich...' : 'Çark dönüyor...';
-        const degrees = Math.floor(Math.random() * 3600) + 1800; 
-        wheel.style.transition = 'transform 4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; wheel.style.transform = `rotate(${degrees}deg)`;
-        setTimeout(() => {
-            const outcomes = [ { tr: '20 Puan!', de: '20 Punkte!', p: 20 }, { tr: 'İflas! (-5 Puan)', de: 'Bankrott! (-5 P.)', p: -5 }, { tr: '30 Puan!', de: '30 Punkte!', p: 30 }, { tr: 'Pas! (0 Puan)', de: 'Aussetzen! (0 P.)', p: 0 }, { tr: '10 Puan!', de: '10 Punkte!', p: 10 }, { tr: '5 Puan!', de: '5 Punkte!', p: 5 } ];
-            let outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
-            res.innerText = window.currentGameLang === 'DE' ? outcome.de : outcome.tr;
-            if(outcome.p > 0) window.updateGameStats(outcome.p, 'win', 'Çarkıfelek'); else if(outcome.p < 0) window.updateGameStats(outcome.p, 'loss', 'Çarkıfelek');
-        }, 4000);
-    };
 
     window.initJoker = function() { document.getElementById('joker-card').innerText = '🃏'; document.getElementById('joker-card').style.transform = 'scale(1) rotateY(0deg)'; document.getElementById('joker-msg').innerHTML = window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">Klicke, um eine Karte zu ziehen!</span>' : '<span class="gt-btn-tr" style="display:inline-block;">Kartı seçmek için tıkla!</span>'; document.getElementById('joker-reset').style.display = 'none'; };
     window.drawJoker = function() {
         const card = document.getElementById('joker-card'); card.style.transform = 'scale(1.2) rotateY(90deg)';
         setTimeout(() => {
-            const isJoker = Math.random() > 0.7; 
-            if(isJoker) { card.innerText = '🤡'; document.getElementById('joker-msg').innerText = window.currentGameLang === 'DE' ? 'JOKER! Du hast +15 Punkte gewonnen!' : 'JOKER! +15 Puan kazandın!'; window.updateGameStats(15, 'win', 'Joker'); } 
-            else { card.innerText = ['♠️','♣️','♥️','♦️'][Math.floor(Math.random()*4)]; document.getElementById('joker-msg').innerText = window.currentGameLang === 'DE' ? 'Leider kein Joker. (-3 P.)' : 'Maalesef Joker değil. (-3 P.)'; window.updateGameStats(-3, 'loss', 'Joker'); }
+            const isJoker = Math.random() > 0.8; 
+            if(isJoker) { card.innerText = '🤡'; document.getElementById('joker-msg').innerText = window.currentGameLang === 'DE' ? 'JOKER! Du hast +20 Punkte gewonnen!' : 'JOKER! +20 Puan kazandın!'; window.updateGameStats(20, 'win', 'Joker'); } 
+            else { card.innerText = ['♠️','♣️','♥️','♦️'][Math.floor(Math.random()*4)]; document.getElementById('joker-msg').innerText = window.currentGameLang === 'DE' ? 'Leider kein Joker. (-1 P.)' : 'Maalesef Joker değil. (-1 P.)'; window.updateGameStats(-1, 'loss', 'Joker'); }
             card.style.transform = 'scale(1) rotateY(0deg)'; document.getElementById('joker-reset').style.display = 'block';
         }, 250);
-    };
-
-    window.initKizma = function() {
-        const btn = document.querySelector('#kizmaModal .reset-btn');
-        if(!btn) {
-            document.querySelector('#kizmaModal .modal-body').innerHTML += `<button class="reset-btn" onclick="window.rollKizma()" style="padding: 12px; border-radius: 12px; margin-top: 15px;"><span class="gt-btn-tr" style="display:inline-block;">Zar At ve İlerle!</span><span class="gt-btn-de" style="display:none;">Würfeln und vorrücken!</span></button>`;
-        }
-        document.querySelector('#kizmaModal .gt-title-tr').nextElementSibling.nextElementSibling.innerHTML = window.currentGameLang === 'DE' ? "Wirf den Würfel und sammle Punkte!" : "Zar at ve puan topla!";
-    };
-    window.rollKizma = function() {
-        const dice = Math.floor(Math.random() * 6) + 1;
-        let points = dice; // ECHTER WÜRFELWERT = PUNKTE
-        let msgTR = `Zar attın: 🎲 ${dice}! (+${points} Puan)`;
-        let msgDE = `Du hast eine 🎲 ${dice} gewürfelt! (+${points} Punkte)`;
-        document.querySelector('#kizmaModal .gt-title-tr').nextElementSibling.nextElementSibling.innerHTML = window.currentGameLang === 'DE' ? msgDE : msgTR;
-        window.updateGameStats(points, 'win', 'Kızma Birader');
     };
 
     window.startSimon=function(){window.simonSeq=[];window.simonPlayer=[];window.simonLevel=0;document.getElementById('simon-start-btn').style.display='none';window.nextSimon();};
@@ -3833,9 +3849,9 @@ Blühe, deutsches Vaterland!</p>
     window.simonInput=function(c){if(window.simonPlayer.length>=window.simonSeq.length)return;let el=document.getElementById('simon-'+c);el.style.opacity='1';setTimeout(()=>{el.style.opacity='0.35';},200);window.simonPlayer.push(c);if(window.simonPlayer[window.simonPlayer.length-1]!==window.simonSeq[window.simonPlayer.length-1]){document.getElementById('simon-msg').innerText=(window.currentGameLang==='DE'?'Fehler! Du bist bis Level ':'Hata! Seviye ') + window.simonLevel + (window.currentGameLang==='DE'?' gekommen.':'\'de kaldın.');document.getElementById('simon-start-btn').style.display='block';window.updateGameStats(window.simonLevel*2,'loss','Simon');return;}if(window.simonPlayer.length===window.simonSeq.length){document.getElementById('simon-msg').innerText=window.currentGameLang==='DE'?'Richtig!':'Doğru!';setTimeout(window.nextSimon,1000);}};
     window.initGuessGame=function(){window.targetNum=Math.floor(Math.random()*100)+1;document.getElementById('guess-hint').innerText='🤔';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Ich habe eine Zahl zwischen 1 und 100.':'1 ile 100 arası bir sayı tuttum.';document.getElementById('guess-input').value='';document.getElementById('guess-reset').style.display='none';};
     window.checkGuess=function(){let g=parseInt(document.getElementById('guess-input').value);if(isNaN(g))return;if(g>window.targetNum){document.getElementById('guess-hint').innerText='👇';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Kleiner!':'Daha küçük!';}else if(g<window.targetNum){document.getElementById('guess-hint').innerText='👆';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Größer!':'Daha büyük!';}else{document.getElementById('guess-hint').innerText='🎉';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Richtig geraten! (+10 P.)':'Doğru Bildin! (+10 Puan)';document.getElementById('guess-reset').style.display='block';window.updateGameStats(10,'win','Sayı Tahmini');}};
-    window.shakeMagicBall=function(){const ball=document.getElementById('magic-ball');ball.style.transform='scale(1.2) rotate(20deg)';setTimeout(()=>ball.style.transform='scale(1) rotate(-20deg)',200);setTimeout(()=>ball.style.transform='scale(1) rotate(0)',400);const ans=[{t:'Kesinlikle Evet',d:'Definitiv Ja'},{t:'Şüphesiz',d:'Ohne Zweifel'},{t:'Buna güvenebilirsin',d:'Darauf kannst du zählen'},{t:'Belki',d:'Vielleicht'},{t:'Şimdi sorma',d:'Frag jetzt nicht'},{t:'Hayır',d:'Nein'},{t:'Hiç umut yok',d:'Keine Hoffnung'}];let r=ans[Math.floor(Math.random()*ans.length)];setTimeout(()=>{document.getElementById('magic-answer').innerText=window.currentGameLang==='DE'?r.d:r.t;},500);};
+    window.shakeMagicBall=function(){const ball=document.getElementById('magic-ball');ball.style.transform='scale(1.2) rotate(20deg)';setTimeout(()=>ball.style.transform='scale(1) rotate(-20deg)',200);setTimeout(()=>ball.style.transform='scale(1) rotate(0)',400);const ans=[{t:'Kesinlikle Evet',d:'Definitiv Ja'},{t:'Şüphesiz',d:'Ohne Zweifel'},{t:'Buna güvenebilirsin',d:'Darauf kannst du zählen'},{t:'Belki',d:'Vielleicht'},{t:'Şimdi sorma',d:'Frag jetzt nicht'},{t:'Hayır',d:'Nein'},{t:'Hiç umut yok',d:'Keine Hoffnung'}];let r=ans[Math.floor(Math.random()*ans.length)];setTimeout(()=>{document.getElementById('magic-answer').innerText=window.currentGameLang==='DE'?r.d:r.t;},500);window.updateGameStats(1,'win','Sihirli Top');};
     window.resetCookie=function(){document.getElementById('fortune-cookie').style.display='inline-block';document.getElementById('fortune-paper').style.display='none';document.getElementById('cookie-reset').style.display='none';};
-    window.crackCookie=function(){document.getElementById('fortune-cookie').style.display='none';document.getElementById('fortune-paper').style.display='block';document.getElementById('cookie-reset').style.display='block';document.getElementById('fortune-paper').innerText=window.currentGameLang==='DE'?'Jeder neue Tag ist eine neue Hoffnung.':'Her yeni gün, yeni bir umuttur.';window.updateGameStats(5,'win','Kurabiye');};
+    window.crackCookie=function(){document.getElementById('fortune-cookie').style.display='none';document.getElementById('fortune-paper').style.display='block';document.getElementById('cookie-reset').style.display='block';document.getElementById('fortune-paper').innerText=window.currentGameLang==='DE'?'Jeder neue Tag ist eine neue Hoffnung.':'Her yeni gün, yeni bir umuttur.';window.updateGameStats(3,'win','Kurabiye');};
     window.playRPS=function(p){const opts=['🪨','📜','✂️'];let c=opts[Math.floor(Math.random()*3)];document.getElementById('rps-player').innerText=p;document.getElementById('rps-computer').innerText=c;if(p===c)document.getElementById('rps-msg').innerText=window.currentGameLang==='DE'?'Unentschieden!':'Berabere!';else if((p==='🪨'&&c==='✂️')||(p==='📜'&&c==='🪨')||(p==='✂️'&&c==='📜')){document.getElementById('rps-msg').innerText=window.currentGameLang==='DE'?'Gewonnen! (+5)':'Kazandın! (+5)';document.getElementById('rps-s-p').innerText=parseInt(document.getElementById('rps-s-p').innerText)+1;window.updateGameStats(5,'win','TKM');}else{document.getElementById('rps-msg').innerText=window.currentGameLang==='DE'?'Verloren! (-2)':'Kaybettin! (-2)';document.getElementById('rps-s-c').innerText=parseInt(document.getElementById('rps-s-c').innerText)+1;window.updateGameStats(-2,'loss','TKM');}};
     window.initTicTacToe=function(){window.tttBoard=['','','','','','','','',''];window.tttActive=true;document.getElementById('ttt-turn').innerText=window.currentGameLang==='DE'?'X (Du)':'X (Sen)';document.querySelectorAll('.cell').forEach(c=>{c.innerText='';c.style.color='white';});};
     window.tttClick=function(i){
