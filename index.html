@@ -216,28 +216,39 @@
         .floating-menu-wrapper.right .btn-text-wrapper { justify-content: flex-end; }
         .floating-menu-wrapper.right .btn-text { padding-right: 5px; padding-left: 15px; text-align: right; }
 
-        /* HEADER & TICKER */
-        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; }
+        /* YENİ TICKER ANİMASYONU (Glow Effect & Tam Ekran Çıkışı) */
+        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; overflow: hidden; }
         
-        .ticker-half { width: 100%; height: 30px; display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; padding: 0 10px;}
-        .ticker-top { border-bottom: 1px dashed rgba(244, 197, 66, 0.3); }
-        .ticker-bottom { border-bottom: 1px solid rgba(244, 197, 66, 0.4); background: rgba(10, 25, 47, 0.5); }
+        .ticker-half { width: 100%; height: 30px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .ticker-top { border-bottom: 1px dashed rgba(244, 197, 66, 0.3); overflow: hidden; }
+        .ticker-bottom { border-bottom: 1px solid rgba(244, 197, 66, 0.4); background: rgba(10, 25, 47, 0.5); overflow: hidden; }
         
-        .ticker-text { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--accent-color); font-style: italic; opacity: 0; transition: opacity 0.5s ease-in-out; text-align: center; width: 100%; }
-        .ticker-text.show { opacity: 1; text-shadow: 0 0 8px rgba(244, 197, 66, 0.5); }
+        .ticker-text { 
+            font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--accent-color); font-style: italic; 
+            white-space: nowrap; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+        }
+        .ticker-text.show { animation: slideAndGlow 10s linear forwards; }
         
-        .scrolling-ticker { display: inline-block; padding-left: 100%; animation: scrollTicker 25s linear infinite; color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.9rem; }
+        @keyframes slideAndGlow {
+            0% { left: 100%; transform: translate(0, -50%); text-shadow: none; color: #f4c542; }
+            45% { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+            50% { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 15px rgba(255, 255, 255, 0.9); color: #fff; }
+            55% { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+            100% { left: 0; transform: translate(-100%, -50%); text-shadow: none; color: #f4c542; }
+        }
+        
+        .scrolling-ticker { display: inline-block; padding-left: 100%; animation: scrollTicker 25s linear infinite; color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.9rem; white-space: nowrap;}
         .scrolling-ticker:hover { animation-play-state: paused; } 
         @keyframes scrollTicker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         
         /* BOLD WEISS für Top Works Ticker */
-        .ticker-link { color: #ffffff !important; font-weight: bold !important; cursor: pointer; text-decoration: none; margin-right: 50px; transition: 0.2s; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .ticker-link { color: #ffffff !important; font-weight: 800 !important; cursor: pointer; text-decoration: none; margin-right: 50px; transition: 0.2s; text-shadow: 0 0 5px rgba(255,255,255,0.4); }
         .ticker-link:hover { color: #f4c542 !important; text-shadow: 0 0 8px #f4c542; }
 
         header { position: fixed; top: 60px; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 8000; border-bottom: 1px solid rgba(244, 197, 66, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.8); display: flex; flex-direction: column; transition: 0.3s; }
         
-        /* EDLE SUCHLEISTE (ARAMA ÇUBUĞU) */
-        .header-search-wrapper { display: flex; flex-direction: column; flex-grow: 1; max-width: 450px; margin: 0 15px; position: relative; }
+        /* EDLE SUCHLEISTE (ARAMA ÇUBUĞU) - KOMPAKT */
+        .header-search-wrapper { display: flex; flex-direction: column; flex-grow: 1; max-width: 350px; margin: 0 15px; position: relative; }
         .header-search { display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(244,197,66,0.4); border-radius: 20px; padding: 2px 12px; transition: 0.3s; width: 100%; position: relative; z-index: 10;}
         .header-search:focus-within { border-color: #f4c542; box-shadow: 0 0 8px rgba(244,197,66,0.3); background: rgba(0,0,0,0.6); border-radius: 20px 20px 0 0; }
         .header-search input { background: transparent !important; border: none !important; box-shadow: none !important; color: #fff !important; padding: 6px !important; width: 100%; margin: 0 !important; font-size: 0.95rem !important; }
@@ -370,19 +381,24 @@
             .datetime-container { display: flex !important; } 
         }
 
-        /* MEGA-KOMPAKTER MOBILE HEADER FIX (GELÖST: OVERLAPPING & TICKER) */
+        /* MEGA-KOMPAKTER MOBILE HEADER FIX (GELÖST: OVERLAPPING, TICKER & HIZALAMA) */
         @media (max-width: 768px) {
             .page-view { padding-top: 220px !important; padding-left: 10px; padding-right: 10px; } 
             
             header { height: auto; top: 35px; padding-bottom: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.9); }
             
-            /* TICKER FIX FÜR MOBILE (LANGSAMER, GANZER TEXT) */
+            /* TICKER FIX FÜR MOBILE (LANGSAMER, WARTET AUF EXIT) */
             .ticker-wrap { height: 35px; }
-            .ticker-half { height: 17.5px; font-size: 0.75rem; }
-            .ticker-top { display: block; overflow: hidden; white-space: nowrap; width: 100%; text-align: left; }
-            .ticker-text { display: inline-block; padding-left: 100%; animation: scrollTickerMobile 40s linear infinite !important; opacity: 1 !important; text-shadow: none; font-size: 0.75rem; line-height: 17.5px;}
-            .ticker-text.show { animation: scrollTickerMobile 40s linear infinite !important; }
-            @keyframes scrollTickerMobile { 0% { transform: translateX(0); } 100% { transform: translateX(-150%); } }
+            .ticker-half { height: 17.5px; font-size: 0.75rem; overflow: hidden; position: relative;}
+            .ticker-top { display: block; width: 100%; }
+            .ticker-text.show { animation: scrollTickerMobile 40s linear forwards !important; }
+            @keyframes scrollTickerMobile { 
+                0% { left: 100%; transform: translate(0, -50%); text-shadow: none; color: #f4c542;} 
+                45% { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542;}
+                50% { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 15px rgba(255, 255, 255, 0.9); color: #fff;}
+                55% { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542;}
+                100% { left: 0; transform: translate(-100%, -50%); text-shadow: none; color: #f4c542;} 
+            }
             
             .header-top { flex-direction: column; align-items: center; justify-content: center; padding: 6px 2%; gap: 6px; } 
             .header-left { width: 100%; justify-content: center; align-items: center; margin:0; flex-direction: column; gap: 5px;}
@@ -390,9 +406,9 @@
             .logo { font-size: 1.4rem; }
             .datetime-container { display: none !important; } 
             
-            .header-search-wrapper { width: 100%; order: 3; margin: 2px 0; }
-            .header-search input { padding: 5px 10px !important; font-size: 0.9rem !important; }
-            .header-search button { padding: 3px 6px; font-size: 1rem; }
+            .header-search-wrapper { width: 100%; max-width: 250px; order: 3; margin: 2px auto; }
+            .header-search input { padding: 4px 8px !important; font-size: 0.85rem !important; }
+            .header-search button { padding: 3px 6px; font-size: 0.9rem; }
             
             .header-right { width: 100%; justify-content: center; order: 2; padding: 0; gap: 10px; } 
             
@@ -410,9 +426,10 @@
             .header-nav-bar { padding: 5px 2%; }
             nav button { padding: 6px 10px; font-size: 0.85rem; flex-shrink: 0; gap: 4px;}
             
+            /* FLOATING MENUS YATAY HIZALAMA FIX */
             .floating-menu-wrapper { transform: scale(0.8); }
-            .floating-menu-wrapper.left { left: 5px; bottom: 5px; }
-            .floating-menu-wrapper.right { right: 5px; bottom: 5px; }
+            .floating-menu-wrapper.left { left: 10px; bottom: 10px; }
+            .floating-menu-wrapper.right { right: 10px; bottom: 10px; }
             
             /* NEUE STATS FARBEN FÜR MOBILE (UND DESKTOP OBEN) */
             #h-kayitli { color: #f97316 !important; }
@@ -881,6 +898,10 @@ Blühe, deutsches Vaterland!</p>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1400px; margin: 0 auto; width: 100%; position: relative; z-index: 5;" id="atasozleri-split">
+                <style>
+                    /* Damit der Switch auf dem Handy klappt, deaktivieren wir das Grid bei kleinen Displays */
+                    @media (max-width: 900px) { #atasozleri-split { grid-template-columns: 1fr !important; } }
+                </style>
                 <div id="atasozleri-tr-col" style="display: flex; flex-direction: column; gap: 20px;"></div>
                 <div id="atasozleri-de-col" style="display: flex; flex-direction: column; gap: 20px;"></div>
             </div>
@@ -988,11 +1009,15 @@ Blühe, deutsches Vaterland!</p>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('coinFlipModal')"><div class="game-icon">🪙</div><h3 class="gt-title-tr">Yazı Tura</h3><h3 class="gt-title-de">Kopf oder Zahl</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('diceModal')"><div class="game-icon">🎲</div><h3 class="gt-title-tr">Zar At</h3><h3 class="gt-title-de">Würfeln</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
 
+                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('colorHuntModal'); if(window.initColorHunt) window.initColorHunt()"><div class="game-icon">🎯</div><h3 class="gt-title-tr">Renk Avı</h3><h3 class="gt-title-de">Farbjagd</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Refleks</span><span class="gt-btn-de">Reflex</span>)</span></div>
+
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('moleModal'); if(window.initMole) window.initMole()"><div class="game-icon">🔨</div><h3 class="gt-title-tr">Köstebek Vur</h3><h3 class="gt-title-de">Whack-a-Mole</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Refleks</span><span class="gt-btn-de">Reflex</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('oddOneModal'); if(window.initOddOne) window.initOddOne()"><div class="game-icon">🧐</div><h3 class="gt-title-tr">Farkı Bul</h3><h3 class="gt-title-de">Odd One Out</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Dikkat</span><span class="gt-btn-de">Fokus</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('safeModal'); if(window.initSafe) window.initSafe()"><div class="game-icon">🔓</div><h3 class="gt-title-tr">Kasa Hırsızı</h3><h3 class="gt-title-de">Safe Cracker</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Hafıza & Şans</span><span class="gt-btn-de">Gedächtnis & Glück</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('stopTimeModal'); if(window.initStopTime) window.initStopTime()"><div class="game-icon">⏱️</div><h3 class="gt-title-tr">Zamanı Durdur</h3><h3 class="gt-title-de">Stop the Time</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Zamanlama</span><span class="gt-btn-de">Timing</span>)</span></div>
 
+                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('hazineModal'); if(window.initHazine) window.initHazine()"><div class="game-icon">🏴‍☠️</div><h3 class="gt-title-tr">Hazine Avı</h3><h3 class="gt-title-de">Schatzsuche</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Şans</span><span class="gt-btn-de">Glück</span>)</span></div>
+                <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('mathModal'); if(window.initMath) window.initMath()"><div class="game-icon">🧮</div><h3 class="gt-title-tr">Matematik Dehası</h3><h3 class="gt-title-de">Mathe-Genie</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Zeka</span><span class="gt-btn-de">Intelligenz</span>)</span></div>
                 <div class="game-card" onclick="if(window.openFastModal) window.openFastModal('milyonerModal'); if(window.initMilyoner) window.initMilyoner()"><div class="game-icon">💰</div><h3 class="gt-title-tr">Kim Milyoner Olmak İster</h3><h3 class="gt-title-de">Wer wird Millionär</h3><span>(<span class="gt-btn-tr" style="display:inline-block;">Bilgi</span><span class="gt-btn-de">Wissen</span>)</span></div>
 
             </div>
@@ -1392,7 +1417,8 @@ Blühe, deutsches Vaterland!</p>
                         <option value="ticker">Özlü Söz (Ticker)</option>
                         <option value="bilmeceler">Bilmeceler (Rätsel)</option>
                         <option value="bulmacalar">Bulmacalar (Puzzles)</option>
-                        <option value="atasozleri">Atasözleri (Sprichwörter)</option> </select>
+                        <option value="atasozleri">Atasözleri (Sprichwörter)</option>
+                    </select>
                     
                     <input type="text" id="admin-add-url" class="auth-input" placeholder="Wikipedia URL (Sadece Şahsiyetler için)" style="display:none; width: 100%; box-sizing: border-box;">
                     <input type="text" id="admin-add-tr-title" class="auth-input" placeholder="TR Başlık / Titel (TR) veya Şahsiyet Adı" style="width: 100%; box-sizing: border-box;">
@@ -1424,7 +1450,8 @@ Blühe, deutsches Vaterland!</p>
                         <option value="ticker">Özlü Söz (Ticker)</option>
                         <option value="bilmeceler">Bilmeceler (Rätsel)</option>
                         <option value="bulmacalar">Bulmacalar (Puzzles)</option>
-                        <option value="atasozleri">Atasözleri (Sprichwörter)</option> <option value="userPoems">Kullanıcı Eserleri (User Werke)</option>
+                        <option value="atasozleri">Atasözleri (Sprichwörter)</option>
+                        <option value="userPoems">Kullanıcı Eserleri (User Werke)</option>
                     </select>
                     <select id="admin-edit-item-select" class="auth-input" onchange="if(window.adminSelectItemForEdit) window.adminSelectItemForEdit()" style="width: 100%; box-sizing: border-box;"><option value="">-- Seçiniz --</option></select>
                     
@@ -1677,6 +1704,24 @@ Blühe, deutsches Vaterland!</p>
                 <div id="stop-time-display" style="font-size: 5rem; font-family:'Space Mono', monospace; color:#f4c542; text-align:center; margin:20px 0; font-weight:bold;">0.00</div>
                 <p id="stop-time-msg" style="text-align:center; color:#22c55e; font-size:1.2rem; font-weight:bold; margin-bottom:15px; min-height:25px;"></p>
                 <button class="reset-btn" id="stop-time-btn" onclick="if(window.actionStopTime) window.actionStopTime()" style="padding:15px; border-radius:12px; font-size:1.5rem;"><span class="gt-btn-tr" style="display:inline-block;">BAŞLA</span><span class="gt-btn-de">START</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="colorHuntModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title gt-title-tr">Renk Avı</h2><h2 class="game-title gt-title-de">Farbjagd</h2>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.2rem; margin-bottom:15px; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 10px;">
+                    <div style="color:#f4c542; font-weight:bold;"><span id="color-time-lbl">SÜRE</span>: <span id="color-time">10.0</span>s</div>
+                    <div style="color:#22c55e; font-weight:bold;"><span id="color-score-lbl">SKOR</span>: <span id="color-score">0</span></div>
+                </div>
+                <p id="color-target-text" style="font-size: 1.4rem; color: #fff; margin-bottom: 15px; font-weight: bold;"></p>
+                <div id="color-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; margin-bottom: 20px;">
+                    </div>
+                <p id="color-msg" style="text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:15px;"><span class="gt-btn-tr" style="display:inline-block;">Yazılı olan renge tıkla!</span><span class="gt-btn-de">Klicke auf die geschriebene Farbe!</span></p>
+                <button class="reset-btn" id="color-start-btn" onclick="if(window.startColorHunt) window.startColorHunt()" style="padding:12px; border-radius:12px;"><span class="gt-btn-tr" style="display:inline-block;">Başla</span><span class="gt-btn-de">Start</span></button>
             </div>
         </div>
     </div>
@@ -2044,6 +2089,11 @@ Blühe, deutsches Vaterland!</p>
         { trT: "Zararın Neresinden Dönülse Kârdır", em: "🔄", author: "Anonim (Türk Atasözü)", tr: "Yanlış bir yoldan ne kadar erken dönülürse o kadar iyidir." },
         { trT: "Söz Gümüşse Sükut Altındır", em: "🥈", author: "Anonim (Türk Atasözü)", tr: "Konuşmak değerli olabilir ama yerinde susmak çok daha kıymetlidir." },
         { trT: "Görünen Köy Kılavuz İstemez", em: "🏘️", author: "Anonim (Türk Atasözü)", tr: "Açıkça belli olan bir durumu açıklamaya gerek yoktur." },
+        { trT: "Güneş balçıkla sıvanmaz", em: "☀️", author: "Anonim (Türk Atasözü)", tr: "Gerçekler hiçbir zaman yalan veya inkarla gizlenemez." },
+        { trT: "Zahmetsiz rahmet olmaz", em: "🌧️", author: "Anonim (Türk Atasözü)", tr: "Emek vermeden, yorulmadan güzel sonuçlara ulaşılamaz." },
+        { trT: "Rüzgar eken fırtına biçer", em: "🌪️", author: "Anonim (Türk Atasözü)", tr: "Kötülük yapan, kötülüğün çok daha büyüğü ile karşılaşır." },
+        { trT: "Her yiğidin bir yoğurt yiyişi vardır", em: "🥣", author: "Anonim (Türk Atasözü)", tr: "Herkesin iş yapma yöntemi ve tarzı birbirinden farklıdır." },
+        { trT: "Sabreden derviş muradına ermiş", em: "🧘", author: "Anonim (Türk Atasözü)", tr: "Sabırlı olan kişi eninde sonunda hedefine ve isteğine ulaşır." },
         
         // --- NUR DEUTSCH (DE) ---
         { deT: "Mehr Licht", em: "🕯️", author: "Johann Wolfgang von Goethe", de: "Mehr Licht!" },
@@ -2061,7 +2111,12 @@ Blühe, deutsches Vaterland!</p>
         { deT: "Der Meister", em: "🏆", author: "Anonim (Deutsches Sprichwort)", de: "Übung macht den Meister." },
         { deT: "Der Apfel", em: "🍎", author: "Anonim (Deutsches Sprichwort)", de: "Der Apfel fällt nicht weit vom Stamm." },
         { deT: "Das blinde Huhn", em: "🐔", author: "Anonim (Deutsches Sprichwort)", de: "Ein blindes Huhn findet auch mal ein Korn." },
-        { deT: "Der Wert", em: "🪙", author: "Anonim (Deutsches Sprichwort)", de: "Wer den Pfennig nicht ehrt, ist des Talers nicht wert." }
+        { deT: "Der Wert", em: "🪙", author: "Anonim (Deutsches Sprichwort)", de: "Wer den Pfennig nicht ehrt, ist des Talers nicht wert." },
+        { deT: "Glashaus", em: "🪟", author: "Anonim (Deutsches Sprichwort)", de: "Wer im Glashaus sitzt, sollte nicht mit Steinen werfen." },
+        { deT: "Früher Vogel", em: "🪱", author: "Anonim (Deutsches Sprichwort)", de: "Der frühe Vogel fängt den Wurm." },
+        { deT: "Aus Schaden klug", em: "🩹", author: "Anonim (Deutsches Sprichwort)", de: "Aus Schaden wird man klug." },
+        { deT: "Reden und Schweigen", em: "🤐", author: "Anonim (Deutsches Sprichwort)", de: "Reden ist Silber, Schweigen ist Gold." },
+        { deT: "Ende gut", em: "🎉", author: "Anonim (Deutsches Sprichwort)", de: "Ende gut, alles gut." }
     ];
 
     // ERWEITERTER TICKER (Massiv erweitert)
@@ -2429,7 +2484,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // ECHTZEIT PUNKTE BEARBEITEN (ADMIN) - SYNCHRON FIX + FORCE OVERWRITE
+    // ECHTZEIT PUNKTE BEARBEITEN (ADMIN)
     // ==========================================================================
     window.editUserStats = function(username) {
         try {
@@ -2690,7 +2745,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     // ==========================================================================
-    // STERNZEICHEN & HOROSKOP (LANGE TEXTE)
+    // STERNZEICHEN & HOROSKOP
     // ==========================================================================
     window.zodiacs = [
         {id:'aries', icon:'♈', tr:'Koç', de:'Widder', start:[3,21], end:[4,20]}, {id:'taurus', icon:'♉', tr:'Boğa', de:'Stier', start:[4,21], end:[5,20]}, 
@@ -2816,9 +2871,9 @@ Blühe, deutsches Vaterland!</p>
                 if(id === 'magicBallModal') { let ans=document.getElementById('magic-answer'); if(ans) ans.innerText=''; let b=document.getElementById('magic-ball'); if(b) b.style.transform='scale(1)'; }
                 if(id === 'cookieModal' && window.resetCookie) window.resetCookie();
                 if(id === 'rpsModal') { let sp=document.getElementById('rps-s-p'); if(sp) sp.innerText='0'; let sc=document.getElementById('rps-s-c'); if(sc) sc.innerText='0'; let p=document.getElementById('rps-player'); if(p) p.innerText='✊'; let c=document.getElementById('rps-computer'); if(c) c.innerText='✊'; }
-                if(id === 'tictactoeModal' && window.initTicTacToe) window.initTicTacToe();
                 
-                // DIE 4 NEUEN SPIELE RESETS + HAZINE/MATH/MILYONER
+                // DIE 5 NEUEN SPIELE RESETS
+                if(id === 'colorHuntModal' && window.initColorHunt) window.initColorHunt();
                 if(id === 'moleModal' && window.initMole) window.initMole();
                 if(id === 'oddOneModal' && window.initOddOne) window.initOddOne();
                 if(id === 'safeModal' && window.initSafe) window.initSafe();
@@ -2884,9 +2939,11 @@ Blühe, deutsches Vaterland!</p>
         if(t) { document.getElementById('toast-msg').innerText = msg; t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 3000); } 
     };
     
-    // ANGEPASSTE ALERTS FÜR SAUBERES SCHLIEßEN
+    // ANGEPASSTE ALERTS FÜR SAUBERES SCHLIEßEN (Damit das Milyoner-Spiel nicht beendet wird!)
     window.customAlert = function(msg, icon) { 
-        document.getElementById('custom-dialog-icon').innerText = icon || 'ℹ️'; document.getElementById('custom-dialog-title').innerText = 'Bilgi'; document.getElementById('custom-dialog-msg').innerText = msg; 
+        document.getElementById('custom-dialog-icon').innerText = icon || 'ℹ️'; 
+        document.getElementById('custom-dialog-title').innerText = 'Bilgi'; 
+        document.getElementById('custom-dialog-msg').innerText = msg; 
         document.getElementById('custom-dialog-cancel').style.display = 'none'; 
         document.getElementById('custom-dialog-ok').onclick = () => {
             document.getElementById('custom-dialog-modal').classList.remove('active-modal');
@@ -2895,17 +2952,32 @@ Blühe, deutsches Vaterland!</p>
     };
     
     window.customConfirm = function(msg, callback) { 
-        document.getElementById('custom-dialog-icon').innerText = '❓'; document.getElementById('custom-dialog-title').innerText = 'Onay'; document.getElementById('custom-dialog-msg').innerText = msg; 
+        document.getElementById('custom-dialog-icon').innerText = '❓'; 
+        document.getElementById('custom-dialog-title').innerText = 'Onay'; 
+        document.getElementById('custom-dialog-msg').innerText = msg; 
         document.getElementById('custom-dialog-cancel').style.display = 'flex'; 
-        document.getElementById('custom-dialog-ok').onclick = () => { document.getElementById('custom-dialog-modal').classList.remove('active-modal'); callback(); }; 
-        document.getElementById('custom-dialog-cancel').onclick = () => { document.getElementById('custom-dialog-modal').classList.remove('active-modal'); }; 
+        document.getElementById('custom-dialog-ok').onclick = () => { 
+            document.getElementById('custom-dialog-modal').classList.remove('active-modal'); 
+            callback(); 
+        }; 
+        document.getElementById('custom-dialog-cancel').onclick = () => { 
+            document.getElementById('custom-dialog-modal').classList.remove('active-modal'); 
+        }; 
         document.getElementById('custom-dialog-modal').classList.add('active-modal');
     };
     
     window.customDualPrompt = function(title, icon, defaultText, callback) { 
-        document.getElementById('custom-input-title').innerText = title; document.getElementById('custom-input-icon').innerText = icon || '✍️'; document.getElementById('custom-input-field').value = defaultText || ''; 
-        document.getElementById('custom-input-ok').onclick = () => { const val = document.getElementById('custom-input-field').value; document.getElementById('custom-input-modal').classList.remove('active-modal'); callback(title, val); }; 
-        document.getElementById('custom-input-cancel').onclick = () => document.getElementById('custom-input-modal').classList.remove('active-modal'); 
+        document.getElementById('custom-input-title').innerText = title; 
+        document.getElementById('custom-input-icon').innerText = icon || '✍️'; 
+        document.getElementById('custom-input-field').value = defaultText || ''; 
+        document.getElementById('custom-input-ok').onclick = () => { 
+            const val = document.getElementById('custom-input-field').value; 
+            document.getElementById('custom-input-modal').classList.remove('active-modal'); 
+            callback(title, val); 
+        }; 
+        document.getElementById('custom-input-cancel').onclick = () => {
+            document.getElementById('custom-input-modal').classList.remove('active-modal');
+        } 
         document.getElementById('custom-input-modal').classList.add('active-modal');
     };
     
@@ -3372,7 +3444,7 @@ Blühe, deutsches Vaterland!</p>
                 deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.deTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
             }
 
-            // RENDERING: ATASÖZLERI (MOBILE SWITCH FIXED! - Streng getrennt TR / DE)
+            // RENDERING: ATASÖZLERI (STRENG GETRENNT TR/DE)
             const ataTrCol = document.getElementById('atasozleri-tr-col'); const ataDeCol = document.getElementById('atasozleri-de-col');
             if(ataTrCol && ataDeCol && window.contentDB.atasozleri && Array.isArray(window.contentDB.atasozleri)) {
                 let sortedAtaTR = window.contentDB.atasozleri.filter(a => a.trTitle).sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
@@ -3920,7 +3992,7 @@ Blühe, deutsches Vaterland!</p>
     window.renderHangman=function(){document.getElementById('hangman-lives').innerText='❤️'.repeat(window.hmLives);document.getElementById('hangman-word').innerText=window.hmWord.split('').map(l=>window.hmGuessed.includes(l)?l:'_').join(' ');};
     window.hmGuess=function(l,btn){btn.disabled=true;btn.style.opacity=0.3;if(window.hmWord.includes(l)){window.hmGuessed.push(l);window.renderHangman();if(!document.getElementById('hangman-word').innerText.includes('_')){document.getElementById('hangman-msg').innerText=window.hmLang==='DE'?'Gewonnen! (+15 Punkte)':'Kazandın! (+15 Puan)';document.getElementById('hangman-msg').style.color='#22c55e';document.getElementById('hangman-reset').style.display='block';window.updateGameStats(15,'win','Adam Asmaca');}}else{window.hmLives--;window.renderHangman();if(window.hmLives<=0){document.getElementById('hangman-msg').innerText=(window.hmLang==='DE'?'Verloren! Wort: ':'Kaybettin! Kelime: ') + window.hmWord;document.getElementById('hangman-msg').style.color='#ef4444';document.getElementById('hangman-reset').style.display='block';window.updateGameStats(-5,'loss','Adam Asmaca');}}};
 
-    // ŞİİRSEL QUİZ REPARIERT!
+    // ŞİİRSEL QUİZ
     window.loadQuiz=function(){
         if (!window.quizDB || window.quizDB.length === 0) return;
         let q=window.quizDB[window.currentQ];
@@ -3934,8 +4006,82 @@ Blühe, deutsches Vaterland!</p>
     window.checkQuiz=function(ans){if(ans===window.quizDB[window.currentQ].c){document.getElementById('quiz-msg').innerText=window.currentGameLang==='DE'?'Richtig! (+10 P.)':'Doğru! (+10 Puan)';document.getElementById('quiz-msg').style.color = '#22c55e';window.updateGameStats(10,'win','Quiz');}else{document.getElementById('quiz-msg').innerText=window.currentGameLang==='DE'?'Falsch! (-2 P.)':'Yanlış! (-2 Puan)';document.getElementById('quiz-msg').style.color = '#ef4444';window.updateGameStats(-2,'loss','Quiz');}document.getElementById('quiz-next').style.display='block';};
     window.nextQuiz=function(){window.currentQ++;if(window.currentQ>=window.quizDB.length) window.currentQ=0;window.loadQuiz();};
 
-    // DIE 4 NEUEN SPIELE
-    // 1. Köstebek Vur (Whack-a-Mole)
+    // DIE 5 NEUEN SPIELE
+    // 1. Renk Avı (Farbjagd)
+    window.colorHuntColors = [
+        {nameTR: 'KIRMIZI', nameDE: 'ROT', hex: '#ef4444'},
+        {nameTR: 'MAVİ', nameDE: 'BLAU', hex: '#3b82f6'},
+        {nameTR: 'YEŞİL', nameDE: 'GRÜN', hex: '#22c55e'},
+        {nameTR: 'SARI', nameDE: 'GELB', hex: '#f4c542'}
+    ];
+    window.initColorHunt = function() {
+        window.chActive = false;
+        document.getElementById('color-start-btn').style.display = 'inline-block';
+        document.getElementById('color-target-text').innerText = '';
+        document.getElementById('color-score').innerText = '0';
+        document.getElementById('color-time').innerText = '15.0';
+        document.getElementById('color-grid').innerHTML = '';
+    };
+    window.startColorHunt = function() {
+        window.chActive = true;
+        window.chScore = 0;
+        window.chTime = 15.0;
+        document.getElementById('color-start-btn').style.display = 'none';
+        
+        window.chTimer = setInterval(() => {
+            window.chTime -= 0.1;
+            document.getElementById('color-time').innerText = window.chTime.toFixed(1);
+            if(window.chTime <= 0) {
+                clearInterval(window.chTimer);
+                window.chActive = false;
+                let points = Math.floor(window.chScore / 2);
+                let m = document.getElementById('color-msg');
+                m.innerHTML = window.currentGameLang === 'DE' ? `Zeit um! (+${points} P.)` : `Süre Bitti! (+${points} P.)`;
+                m.style.color = '#f4c542';
+                let btn = document.getElementById('color-start-btn');
+                btn.style.display = 'inline-block';
+                btn.innerHTML = window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">Neustart</span>' : '<span class="gt-btn-tr" style="display:inline-block;">Tekrar Oyna</span>';
+                if(points > 0) window.updateGameStats(points, 'win', 'Renk Avı');
+            }
+        }, 100);
+        window.nextColorHunt();
+    };
+    window.nextColorHunt = function() {
+        if(!window.chActive) return;
+        let targetTextObj = window.colorHuntColors[Math.floor(Math.random()*4)];
+        let targetColorObj = window.colorHuntColors[Math.floor(Math.random()*4)];
+        
+        window.chTargetHex = targetTextObj.hex; 
+        
+        let el = document.getElementById('color-target-text');
+        el.innerText = window.currentGameLang === 'DE' ? targetTextObj.nameDE : targetTextObj.nameTR;
+        el.style.color = targetColorObj.hex;
+        
+        let shuffled = [...window.colorHuntColors].sort(() => 0.5 - Math.random());
+        let grid = document.getElementById('color-grid');
+        grid.innerHTML = shuffled.map(c => `<div onclick="window.checkColorHunt('${c.hex}')" style="background:${c.hex}; height:90px; border-radius:12px; cursor:pointer; border:2px solid rgba(255,255,255,0.2); box-shadow:0 4px 10px rgba(0,0,0,0.5);"></div>`).join('');
+    };
+    window.checkColorHunt = function(hex) {
+        if(!window.chActive) return;
+        if(hex === window.chTargetHex) {
+            window.chScore++;
+            document.getElementById('color-score').innerText = window.chScore;
+            window.nextColorHunt();
+        } else {
+            window.chTime -= 2.0; 
+            let m = document.getElementById('color-msg');
+            m.innerHTML = window.currentGameLang === 'DE' ? '-2 Sekunden!' : '-2 Saniye!';
+            m.style.color = '#ef4444';
+            setTimeout(()=> { 
+                if(window.chActive) {
+                    m.innerHTML = window.currentGameLang === 'DE' ? '<span class="gt-btn-de" style="display:inline-block;">Klicke auf die geschriebene Farbe!</span>' : '<span class="gt-btn-tr" style="display:inline-block;">Yazılı olan renge tıkla!</span>'; 
+                    m.style.color = '#cbd5e1'; 
+                }
+            }, 800);
+        }
+    };
+
+    // 2. Köstebek Vur (Whack-a-Mole)
     window.initMole = function() {
         window.moleActive = false; window.moleScore = 0; window.moleTime = 15;
         document.getElementById('mole-score').innerText = '0';
@@ -3974,7 +4120,7 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // 2. Farkı Bul (Odd One Out)
+    // 3. Farkı Bul (Odd One Out)
     window.initOddOne = function() {
         window.oddActive = false; window.oddLevel = 1; window.oddScore = 0;
         document.getElementById('odd-level').innerText = '1'; document.getElementById('odd-score').innerText = '0';
@@ -4018,7 +4164,7 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // 3. Kasa Hırsızı (Safe Cracker)
+    // 4. Kasa Hırsızı (Safe Cracker)
     window.initSafe = function() {
         window.safeActive = true;
         window.safeTarget = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
@@ -4049,7 +4195,7 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // 4. Zamanı Durdur (Stop the Time)
+    // 5. Zamanı Durdur (Stop the Time)
     window.initStopTime = function() {
         window.stActive = false; window.stTimer = null; window.stTime = 0.00;
         document.getElementById('stop-time-display').innerText = '0.00';
@@ -4086,7 +4232,7 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 
-    // DIE ANDEREN NEUEN SPIELE (HAZİNE AVI & MATEMATİK DEHASI)
+    // HAZİNE AVI & MATEMATİK DEHASI
     window.initHazine = function() {
         window.hazineTreasure = Math.floor(Math.random() * 3);
         window.hazineActive = true;
@@ -4150,7 +4296,7 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('math-reset').style.display = 'block';
     };
 
-    // MİLYONER REPARIERT INKLUSIVE JOKER!
+    // MİLYONER JOKERS LOGIK FIX
     window.initMilyoner = function() { 
         window.currentMilQ = 0; 
         window.milyonerJokers = { fifty: true, phone: true };
@@ -4188,7 +4334,7 @@ Blühe, deutsches Vaterland!</p>
         document.getElementById('mil-joker-fifty').style.pointerEvents = 'none';
         let q = window.quizDB[window.currentMilQ];
         let wrongAnswers = [0,1,2,3].filter(i => i !== q.c);
-        wrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 2); // Pick 2 wrong answers to hide
+        wrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 2); 
         wrongAnswers.forEach(i => { let btn = document.getElementById('mil-opt-' + i); if(btn) btn.style.visibility = 'hidden'; });
     };
     window.usePhoneJoker = function() {
@@ -4213,7 +4359,7 @@ Blühe, deutsches Vaterland!</p>
         } 
         else { 
             document.getElementById('mil-opt-'+ans).style.background = '#ef4444';
-            document.getElementById('mil-opt-'+q.c).style.background = '#22c55e'; // Show correct answer
+            document.getElementById('mil-opt-'+q.c).style.background = '#22c55e'; 
             document.getElementById('milyoner-msg').innerText = window.currentGameLang === 'DE' ? 'Leider falsch! (-3 P.)' : 'Maalesef yanlış! (-3 Puan)'; 
             document.getElementById('milyoner-msg').style.color = '#ef4444'; 
             window.updateGameStats(-3, 'loss', 'Milyoner'); 
@@ -4222,35 +4368,6 @@ Blühe, deutsches Vaterland!</p>
     };
     window.nextMilyoner = function() { window.currentMilQ++; window.loadMilyoner(); };
 
-    window.startSimon=function(){window.simonSeq=[];window.simonPlayer=[];window.simonLevel=0;document.getElementById('simon-start-btn').style.display='none';window.nextSimon();};
-    window.nextSimon=function(){window.simonPlayer=[];window.simonLevel++;document.getElementById('simon-msg').innerText=(window.currentGameLang==='DE'?'Level ':'Seviye ') + window.simonLevel + (window.currentGameLang==='DE'?' - Beobachte...':' - İzle...');const colors=['green','red','yellow','blue'];window.simonSeq.push(colors[Math.floor(Math.random()*4)]);let i=0;let int=setInterval(()=>{let c=document.getElementById('simon-'+window.simonSeq[i]);c.style.opacity='1';c.style.boxShadow='0 0 30px currentColor';setTimeout(()=>{c.style.opacity='0.35';c.style.boxShadow='none';},400);i++;if(i>=window.simonSeq.length){clearInterval(int);document.getElementById('simon-msg').innerText=window.currentGameLang==='DE'?'Du bist dran!':'Senin sıran!';}},800);};
-    window.simonInput=function(c){if(window.simonPlayer.length>=window.simonSeq.length)return;let el=document.getElementById('simon-'+c);el.style.opacity='1';setTimeout(()=>{el.style.opacity='0.35';},200);window.simonPlayer.push(c);if(window.simonPlayer[window.simonPlayer.length-1]!==window.simonSeq[window.simonPlayer.length-1]){document.getElementById('simon-msg').innerText=(window.currentGameLang==='DE'?'Fehler! Du bist bis Level ':'Hata! Seviye ') + window.simonLevel + (window.currentGameLang==='DE'?' gekommen.':'\'de kaldın.');document.getElementById('simon-start-btn').style.display='block';window.updateGameStats(window.simonLevel*2,'loss','Simon');return;}if(window.simonPlayer.length===window.simonSeq.length){document.getElementById('simon-msg').innerText=window.currentGameLang==='DE'?'Richtig!':'Doğru!';setTimeout(window.nextSimon,1000);}};
-    window.initGuessGame=function(){window.targetNum=Math.floor(Math.random()*100)+1;document.getElementById('guess-hint').innerText='🤔';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Ich habe eine Zahl zwischen 1 und 100.':'1 ile 100 arası bir sayı tuttum.';document.getElementById('guess-input').value='';document.getElementById('guess-reset').style.display='none';};
-    window.checkGuess=function(){let g=parseInt(document.getElementById('guess-input').value);if(isNaN(g))return;if(g>window.targetNum){document.getElementById('guess-hint').innerText='👇';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Kleiner!':'Daha küçük!';}else if(g<window.targetNum){document.getElementById('guess-hint').innerText='👆';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Größer!':'Daha büyük!';}else{document.getElementById('guess-hint').innerText='🎉';document.getElementById('guess-msg').innerText=window.currentGameLang==='DE'?'Richtig geraten! (+10 P.)':'Doğru Bildin! (+10 Puan)';document.getElementById('guess-reset').style.display='block';window.updateGameStats(10,'win','Sayı Tahmini');}};
-    window.shakeMagicBall=function(){const ball=document.getElementById('magic-ball');ball.style.transform='scale(1.2) rotate(20deg)';setTimeout(()=>ball.style.transform='scale(1) rotate(-20deg)',200);setTimeout(()=>ball.style.transform='scale(1) rotate(0)',400);const ans=[{t:'Kesinlikle Evet',d:'Definitiv Ja'},{t:'Şüphesiz',d:'Ohne Zweifel'},{t:'Buna güvenebilirsin',d:'Darauf kannst du zählen'},{t:'Belki',d:'Vielleicht'},{t:'Şimdi sorma',d:'Frag jetzt nicht'},{t:'Hayır',d:'Nein'},{t:'Hiç umut yok',d:'Keine Hoffnung'}];let r=ans[Math.floor(Math.random()*ans.length)];setTimeout(()=>{document.getElementById('magic-answer').innerText=window.currentGameLang==='DE'?r.d:r.t;},500);window.updateGameStats(1,'win','Sihirli Top');};
-    window.resetCookie=function(){document.getElementById('fortune-cookie').style.display='inline-block';document.getElementById('fortune-paper').style.display='none';document.getElementById('cookie-reset').style.display='none';};
-    window.crackCookie=function(){document.getElementById('fortune-cookie').style.display='none';document.getElementById('fortune-paper').style.display='block';document.getElementById('cookie-reset').style.display='block';document.getElementById('fortune-paper').innerText=window.currentGameLang==='DE'?'Jeder neue Tag ist eine neue Hoffnung.':'Her yeni gün, yeni bir umuttur.';window.updateGameStats(3,'win','Kurabiye');};
-    window.playRPS=function(p){const opts=['🪨','📜','✂️'];let c=opts[Math.floor(Math.random()*3)];document.getElementById('rps-player').innerText=p;document.getElementById('rps-computer').innerText=c;if(p===c)document.getElementById('rps-msg').innerText=window.currentGameLang==='DE'?'Unentschieden!':'Berabere!';else if((p==='🪨'&&c==='✂️')||(p==='📜'&&c==='🪨')||(p==='✂️'&&c==='📜')){document.getElementById('rps-msg').innerText=window.currentGameLang==='DE'?'Gewonnen! (+5)':'Kazandın! (+5)';document.getElementById('rps-s-p').innerText=parseInt(document.getElementById('rps-s-p').innerText)+1;window.updateGameStats(5,'win','TKM');}else{document.getElementById('rps-msg').innerText=window.currentGameLang==='DE'?'Verloren! (-2)':'Kaybettin! (-2)';document.getElementById('rps-s-c').innerText=parseInt(document.getElementById('rps-s-c').innerText)+1;window.updateGameStats(-2,'loss','TKM');}};
-    window.initTicTacToe=function(){window.tttBoard=['','','','','','','','',''];window.tttActive=true;document.getElementById('ttt-turn').innerText=window.currentGameLang==='DE'?'X (Du)':'X (Sen)';document.querySelectorAll('.cell').forEach(c=>{c.innerText='';c.style.color='white';});};
-    window.tttClick=function(i){
-        if(!window.tttActive||window.tttBoard[i]!=='')return;
-        window.tttBoard[i]='X';document.querySelectorAll('.cell')[i].innerText='X';document.querySelectorAll('.cell')[i].style.color='#f4c542';
-        if(window.checkTTTWin('X')){document.getElementById('ttt-turn').innerText=window.currentGameLang==='DE'?'Gewonnen! (+15)':'Kazandın! (+15)';window.tttActive=false;window.updateGameStats(15,'win','TicTacToe');return;}
-        let empty=window.tttBoard.map((v,i)=>v===''?i:null).filter(v=>v!==null);
-        if(empty.length===0){document.getElementById('ttt-turn').innerText=window.currentGameLang==='DE'?'Unentschieden!':'Berabere!';window.tttActive=false;return;}
-        
-        let move = -1; const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        for(let w of wins) { let vals = [window.tttBoard[w[0]], window.tttBoard[w[1]], window.tttBoard[w[2]]]; if(vals.filter(v=>v==='O').length===2 && vals.includes('')) move = w[vals.indexOf('')]; }
-        if(move === -1) { for(let w of wins) { let vals = [window.tttBoard[w[0]], window.tttBoard[w[1]], window.tttBoard[w[2]]]; if(vals.filter(v=>v==='X').length===2 && vals.includes('')) move = w[vals.indexOf('')]; } }
-        if(move === -1 && window.tttBoard[4] === '') move = 4;
-        if(move === -1) move = empty[Math.floor(Math.random()*empty.length)];
-        
-        window.tttBoard[move]='O';document.querySelectorAll('.cell')[move].innerText='O';document.querySelectorAll('.cell')[move].style.color='#ef4444';
-        if(window.checkTTTWin('O')){document.getElementById('ttt-turn').innerText=window.currentGameLang==='DE'?'Verloren! (-5)':'Kaybettin! (-5)';window.tttActive=false;window.updateGameStats(-5,'loss','TicTacToe');}
-    };
-    window.checkTTTWin=function(p){const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];return wins.some(w=>window.tttBoard[w[0]]===p&&window.tttBoard[w[1]]===p&&window.tttBoard[w[2]]===p);};
-    window.flipCoin=function(){const c=document.getElementById('coin');c.style.transform='rotateY(720deg)';c.style.transition='1s';setTimeout(()=>{c.innerText=Math.random()>0.5?(window.currentGameLang==='DE'?'KOPF':'YAZI'):(window.currentGameLang==='DE'?'ZAHL':'TURA');c.style.fontSize='2.2rem';c.style.transform='rotateY(0deg)';c.style.transition='0s';window.updateGameStats(3,'win','Yazı Tura');},1000);};
-    window.rollDice=function(){const d=document.getElementById('dice-display');d.style.transform='rotate(360deg)';d.style.transition='0.5s';setTimeout(()=>{const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];d.innerText=faces[Math.floor(Math.random()*6)];d.style.transform='rotate(0deg)';d.style.transition='0s';window.updateGameStats(3,'win','Zar');},500);};
 
     // --- SYSTEM INITIALISIERUNG ---
     document.addEventListener('DOMContentLoaded', () => {
