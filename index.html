@@ -122,12 +122,12 @@
         .notif-btn.del:hover { background: #ef4444; color: white; }
 
         /* ==================================================================
-           ZÄHLER (SAYACLAR) FIX - ORIGINAL & SICHTBAR
+           ZÄHLER (SAYACLAR) FIX - KESIN ÇÖZÜM
            ================================================================== */
         .badge-count {
             position: absolute; top: -6px; right: -6px;
             color: white; font-size: 0.75rem; font-weight: bold;
-            padding: 2px 7px; border-radius: 12px; z-index: 99999; /* ULTRA HIGH Z-INDEX FÜR ROTEN ZÄHLER */
+            padding: 2px 7px; border-radius: 12px; z-index: 99999 !important; /* MEGA Z-INDEX EKLENDI */
             box-shadow: 0 2px 5px rgba(0,0,0,0.8);
             font-family: 'Poppins', sans-serif;
             display: none; justify-content: center; align-items: center;
@@ -387,6 +387,9 @@
             /* DEUTLICH MEHR PADDING OBEN (290px), DAMIT NICHTS ÜBERLAPPT! */
             .page-view { padding-top: 290px !important; padding-left: 10px; padding-right: 10px; } 
             
+            /* IMZA BOYUTU FIX! (Resim 2 & 7) */
+            .modal-signature { font-size: 1.8rem !important; margin-top: 10px; line-height: 1.2; }
+
             header { height: auto; top: 35px; padding-bottom: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.9); }
             
             /* TICKER FIX FÜR MOBILE (LANGSAMER, WARTET AUF EXIT) */
@@ -412,7 +415,7 @@
             .datetime-container { display: none !important; } 
             
             .header-search-wrapper { width: 100%; max-width: 280px; order: 3; margin: 2px auto; }
-            /* PLACEHOLDER SCHRIFT FÜR MOBILE KLEINER (2pt kleiner) */
+            /* PLACEHOLDER SCHRIFT FÜR MOBILE KLEINER (2pt kleiner) (Resim 1) */
             .header-search input::placeholder { font-size: 0.75rem !important; }
             .header-search input { padding: 4px 8px !important; font-size: 0.85rem !important; }
             .header-search button { padding: 3px 6px; font-size: 0.9rem; }
@@ -436,7 +439,7 @@
             .header-nav-bar { padding: 5px 2%; }
             nav button { padding: 6px 10px; font-size: 0.85rem; flex-shrink: 0; gap: 4px;}
             
-            /* FLOATING MENUS YATAY HIZALAMA FIX (Exakt gleiche Höhe auf Mobile!) */
+            /* FLOATING MENUS YATAY HIZALAMA FIX (Exakt gleiche Höhe auf Mobile!) (Resim 1) */
             .floating-menu-wrapper { transform: scale(0.8); }
             .floating-menu-wrapper.left { left: 10px !important; bottom: 25px !important; }
             .floating-menu-wrapper.right { right: 10px !important; bottom: 25px !important; }
@@ -448,7 +451,7 @@
             
             /* ATASÖZLERI TOGGLE FIX FÜR MOBILE */
             .game-lang-toggle { display: flex !important; margin: 15px auto !important; width: 90% !important; z-index: 100 !important;}
-            /* ÖNEMLI SAHSIYETLER UND ATASÖZLERI UNTEREINANDER AUF MOBILE! */
+            /* ÖNEMLI SAHSIYETLER UND ATASÖZLERI UNTEREINANDER AUF MOBILE! (Resim 5) */
             #atasozleri-split, #sahsiyetler-split { grid-template-columns: 1fr !important; gap: 20px !important; }
         }
     </style>
@@ -1482,7 +1485,8 @@ Blühe, deutsches Vaterland!</p>
                         <option value="ticker">Özlü Söz (Ticker)</option>
                         <option value="bilmeceler">Bilmeceler (Rätsel)</option>
                         <option value="bulmacalar">Bulmacalar (Puzzles)</option>
-                        <option value="atasozleri">Atasözleri (TR / DE)</option> <option value="userPoems">Kullanıcı Eserleri (User Werke)</option>
+                        <option value="atasozleri">Atasözleri (TR / DE)</option>
+                        <option value="userPoems">Kullanıcı Eserleri (User Werke)</option>
                     </select>
                     <select id="admin-edit-item-select" class="auth-input" onchange="if(window.adminSelectItemForEdit) window.adminSelectItemForEdit()" style="width: 100%; box-sizing: border-box;"><option value="">-- Seçiniz --</option></select>
                     
@@ -2981,7 +2985,7 @@ Blühe, deutsches Vaterland!</p>
                 if(id === 'rpsModal') { let sp=document.getElementById('rps-s-p'); if(sp) sp.innerText='0'; let sc=document.getElementById('rps-s-c'); if(sc) sc.innerText='0'; let p=document.getElementById('rps-player'); if(p) p.innerText='✊'; let c=document.getElementById('rps-computer'); if(c) c.innerText='✊'; }
                 if(id === 'tictactoeModal' && window.initTicTacToe) window.initTicTacToe();
                 
-                // DIE NEUEN SPIELE RESETS
+                // DIE 4 NEUEN SPIELE RESETS
                 if(id === 'balloonModal' && window.initBalloon) window.initBalloon();
                 if(id === 'tfModal' && window.initTF) window.initTF();
                 if(id === 'minesweeperModal' && window.initMinesweeper) window.initMinesweeper();
@@ -3783,7 +3787,6 @@ Blühe, deutsches Vaterland!</p>
         window.openFastModal('randomQuoteModal');
     };
 
-    // MEGA-UPDATE: EXAKTE HERZEN-ANZAHL-BENACHRICHTIGUNG
     window.ratePoem = function(rating, e) {
         if (e) e.stopPropagation(); 
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
@@ -3948,7 +3951,6 @@ Blühe, deutsches Vaterland!</p>
     window.renderAtasozleri = function() {
         const container = document.getElementById('atasozleri-grid'); if(!container) return;
         let source = (window.contentDB && window.contentDB.atasozleri) ? window.contentDB.atasozleri : [];
-        // Strenge Trennung!
         let filtered = source.filter(item => window.atasozleriLang === 'DE' ? item.deTitle : item.trTitle);
         let sorted = window.sortContentItems(filtered, false);
         
@@ -4226,7 +4228,7 @@ Blühe, deutsches Vaterland!</p>
         { qTR: "Güneş doğudan batar.", qDE: "Die Sonne geht im Osten unter.", a: false }, 
         { qTR: "Türkiye'nin başkenti Ankara'dır.", qDE: "Die Hauptstadt der Türkei ist Ankara.", a: true }, 
         { qTR: "Dünyanın en büyük okyanusu Pasifik'tir.", qDE: "Der Pazifik ist der größte Ozean.", a: true }, 
-        { qTR: "Karpuz bir sebzedir.", qDE: "Eine Wassermelone ist ein Gemüse.", a: true }, // botanik olarak meyvesi olan bir sebzedir (kabakgiller).
+        { qTR: "Karpuz bir sebzedir.", qDE: "Eine Wassermelone ist ein Gemüse.", a: true }, 
         { qTR: "İnsan vücudunun %60'ı sudur.", qDE: "Der menschliche Körper besteht zu 60% aus Wasser.", a: true },
         { qTR: "Berlin, Almanya'nın en küçük şehridir.", qDE: "Berlin ist die kleinste Stadt Deutschlands.", a: false }
     ];
