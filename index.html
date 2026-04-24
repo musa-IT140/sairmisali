@@ -63,6 +63,16 @@
         @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .pulsing-text { animation: pulseText 2.5s ease-in-out infinite; }
         
+        /* 3 VERSCHIEDENE USERNAME/AUTHOR ANIMATIONEN */
+        @keyframes pulseAdmin { 0% { text-shadow: 0 0 4px rgba(34, 211, 238, 0.4); } 100% { text-shadow: 0 0 12px rgba(34, 211, 238, 0.8); } }
+        .author-anim-admin { color: #22d3ee; font-weight: 600; animation: pulseAdmin 2s infinite alternate ease-in-out; display: inline-block; transition: 0.3s; }
+        
+        @keyframes pulseUser { 0% { text-shadow: 0 0 4px rgba(167, 139, 250, 0.4); } 100% { text-shadow: 0 0 12px rgba(167, 139, 250, 0.8); } }
+        .author-anim-user { color: #a78bfa; font-weight: 600; animation: pulseUser 2s infinite alternate ease-in-out; display: inline-block; transition: 0.3s; }
+        
+        @keyframes pulseAuthor { 0% { text-shadow: 0 0 4px rgba(244, 197, 66, 0.4); } 100% { text-shadow: 0 0 12px rgba(244, 197, 66, 0.8); } }
+        .author-anim-author { color: #f4c542; font-weight: 600; animation: pulseAuthor 2s infinite alternate ease-in-out; display: inline-block; transition: 0.3s; }
+
         /* SANFTE ZODIAC ANIMATION */
         @keyframes zodiacBreathe { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px var(--accent-color)); } 50% { transform: scale(1.15); filter: drop-shadow(0 0 8px var(--accent-color)); } }
 
@@ -97,6 +107,26 @@
         .reset-btn.warning { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
         .reset-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
         .reset-btn.biometric { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
+
+        /* GUEST PROMO BANNER (LOGGED OUT) */
+        .guest-promo-banner {
+            background: linear-gradient(135deg, rgba(10, 25, 47, 0.9), rgba(20, 40, 70, 0.9));
+            border: 2px dashed rgba(244, 197, 66, 0.6);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            margin: 50px auto 20px auto;
+            max-width: 850px;
+            width: 90%;
+            box-shadow: 0 0 20px rgba(244,197,66,0.2);
+            animation: promoGlow 3s infinite alternate ease-in-out;
+            position: relative;
+            z-index: 10;
+        }
+        @keyframes promoGlow {
+            0% { box-shadow: 0 0 15px rgba(244,197,66,0.2); border-color: rgba(244,197,66,0.4); }
+            100% { box-shadow: 0 0 35px rgba(244,197,66,0.6); border-color: rgba(244,197,66,0.9); }
+        }
 
         /* SPIELE DİL (TR/DE) */
         .game-lang-toggle { display:flex !important; justify-content:center; background: rgba(0,0,0,0.6); border-radius: 30px; border: 1px solid #f4c542; padding: 4px; width: 100%; margin-bottom: 30px; position: relative; z-index: 50; }
@@ -202,7 +232,6 @@
         .modal-body { padding: 60px 25px 25px 25px; overflow-y: auto; max-height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; scrollbar-width: none; }
         .modal-body::-webkit-scrollbar { display: none; }
         
-        /* HIER IST DER FIX FÜR DEN TITEL IM RANDOM QUOTE (FLEX COLUMN)! */
         .modal-title, .game-title { font-family: 'Playfair Display', serif; color: var(--accent-color); margin-bottom: 15px; text-align:center; width: 100%; line-height: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center;}
         .game-title .de-sub, .modal-title .de-sub { display: block; font-size: 0.45em; margin-top: 5px; margin-left: 0; font-family: 'Poppins', sans-serif; color: #94a3b8; letter-spacing: normal;}
 
@@ -345,18 +374,20 @@
         nav button:hover { color: white; background: rgba(255,255,255,0.08); }
         nav button.active-nav { color: var(--accent-color); background: rgba(244, 197, 66, 0.15); font-weight: 600; }
         
-        .locked-icon { display: inline-block; margin-left: 4px; color: #ef4444; font-size: 0.8rem; }
-        body.user-mode .locked-icon, body.admin-mode .locked-icon { display: none !important; }
+        /* SCHLOSS SYMBOL KOMPLETT ENTFERNT DA UNSICHTBAR! */
 
         /* SICHERHEITS-STEUERUNG */
         .auth-visible { display: none !important; }
         body.user-mode .auth-visible, body.admin-mode .auth-visible { display: flex !important; }
         
-        .admin-only, .user-only { display: none !important; }
+        .admin-only { display: none !important; }
         body.admin-mode div.admin-only, body.admin-mode button.admin-only, body.admin-mode span.admin-only { display: flex !important; }
         body.admin-mode td.admin-only, body.admin-mode th.admin-only { display: table-cell !important; }
         
+        /* USER-ONLY (Gäste sehen diese Buttons GAR NICHT MEHR!) */
+        .user-only { display: none !important; }
         body.user-mode .user-only, body.admin-mode .user-only { display: flex !important; }
+        
         body.admin-mode .modal.admin-only { display: none !important; }
         body.admin-mode .modal.admin-only.active-modal { display: flex !important; }
         
@@ -384,7 +415,8 @@
         .sidebar-section h3 { font-family: 'Great Vibes', cursive; color: var(--accent-color); font-size: 2rem; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; align-items: center; flex-wrap: wrap;}
         .sidebar-section ul { list-style: none; }
         
-        .sidebar-section li { padding: 10px 12px; font-size: 0.95rem; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s ease; display: flex; flex-direction: column; gap: 3px; position: relative; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 6px; }
+        /* FIX FÜR ABGESCHNITTENE BUCHSTABEN IN DER SIDEBAR! */
+        .sidebar-section li { padding: 10px 12px 12px 12px; font-size: 0.95rem; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s ease; display: flex; flex-direction: column; gap: 3px; position: relative; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 6px; line-height: 1.4; overflow: hidden;}
         .sidebar-section li:hover { color: #fff; padding-left: 20px; background: rgba(244, 197, 66, 0.2); border-left: 4px solid var(--accent-color); }
         
         .sidebar-badge-new { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; padding: 2px 6px; font-size: 0.65rem; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none;}
@@ -418,12 +450,12 @@
             .msg-modal-header button { width: 100% !important; max-width: 250px; margin: 0 auto !important; }
             
             /* KACHEL-VERKLEINERUNG FÜR MOBILE (WIE GEWÜNSCHT!) */
-            .card { padding: 15px 10px !important; }
-            .card h3 { font-size: 2.5rem !important; margin-bottom: 5px !important; }
-            .card .clamp-text { font-size: 1.1rem !important; }
-            .game-card { padding: 15px 10px !important; }
-            .game-card .game-icon { font-size: 2.5rem !important; margin-bottom: 8px !important; }
-            .game-card .bilingual-title { font-size: 1.05rem !important; }
+            .card { padding: 12px 8px !important; border-radius: 12px !important; }
+            .card h3 { font-size: 1.5rem !important; margin-bottom: 3px !important; }
+            .card .clamp-text { font-size: 0.95rem !important; }
+            .game-card { padding: 12px 8px !important; border-radius: 12px !important; }
+            .game-card .game-icon { font-size: 2rem !important; margin-bottom: 5px !important; }
+            .game-card .bilingual-title { font-size: 0.95rem !important; line-height: 1.1; }
 
             .modal-signature { font-size: 1.8rem !important; margin-top: 10px; line-height: 1.2; }
 
@@ -605,21 +637,21 @@
                 
                 <button onclick="if(window.navigate) window.navigate('atasozleri-view')"><i class="fas fa-comment-dots"></i> Atasözleri</button>
                 
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('saglik-view'))"><i class="fas fa-heartbeat"></i> Sağlık <span class="locked-icon">🔒</span></button>
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('hikayeler-view'))"><i class="fas fa-book-open"></i> Kıssalar <span class="locked-icon">🔒</span></button>
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('fikralar-view'))"><i class="fas fa-smile"></i> Fıkralar <span class="locked-icon">🔒</span></button>
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('oyunlar-view'))"><i class="fas fa-gamepad"></i> Eğlence Köşesi <span class="locked-icon">🔒</span></button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('saglik-view')"><i class="fas fa-heartbeat"></i> Sağlık</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('hikayeler-view')"><i class="fas fa-book-open"></i> Kıssalar</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('fikralar-view')"><i class="fas fa-smile"></i> Fıkralar</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('oyunlar-view')"><i class="fas fa-gamepad"></i> Eğlence Köşesi</button>
                 
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('bilmece-view'))"><i class="fas fa-question"></i> Bilmeceler <span class="locked-icon">🔒</span></button>
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('bulmaca-view'))"><i class="fas fa-puzzle-piece"></i> Bulmacalar <span class="locked-icon">🔒</span></button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('bilmece-view')"><i class="fas fa-question"></i> Bilmeceler</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('bulmaca-view')"><i class="fas fa-puzzle-piece"></i> Bulmacalar</button>
 
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('sizin-kaleminiz-view'))"><i class="fas fa-pen-fancy"></i> Sizin Kaleminiz <span class="locked-icon">🔒</span></button>
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('kullanici-eserleri-view'))" style="position: relative;">
-                    <i class="fas fa-users"></i> Kullanıcı Eserleri <span class="locked-icon">🔒</span>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('sizin-kaleminiz-view')"><i class="fas fa-pen-fancy"></i> Sizin Kaleminiz</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('kullanici-eserleri-view')" style="position: relative;">
+                    <i class="fas fa-users"></i> Kullanıcı Eserleri
                     <span class="badge-count badge-yellow always-show" id="nav-user-works-badge">0</span>
                 </button>
-                <button class="auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => window.navigate('sohbet-view'))"><i class="fas fa-comments"></i> Chat <span class="locked-icon">🔒</span></button>
-                <button onclick="if(window.navigate) window.navigate('hakkimda-view')"><i class="fas fa-user-circle"></i> My Profil</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('sohbet-view')"><i class="fas fa-comments"></i> Chat</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('hakkimda-view')"><i class="fas fa-user-circle"></i> My Profil</button>
             </nav>
         </div>
     </header>
@@ -642,7 +674,8 @@
                 <div class="badge-count badge-cyan always-show" id="topworks-badge">0</div>
                 <div class="btn-text-wrapper"><span class="btn-text">En İyiler <span class="de-sub">(Top Liste)</span></span></div>
             </button>
-            <button class="bottom-btn auth-lock" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.toggleSidebar('userWorksSidebar', event); })">
+            
+            <button class="bottom-btn user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.toggleSidebar('userWorksSidebar', event); })">
                 <span class="btn-icon"><i class="fas fa-pen-fancy"></i></span>
                 <div class="badge-count badge-yellow always-show" id="fab-sizin-kaleminiz-badge" style="color: #000;">0</div>
                 <div class="btn-text-wrapper"><span class="btn-text">Sizin Kaleminiz <span class="de-sub">(Eigene Verse)</span></span></div>
@@ -651,16 +684,16 @@
                 <span class="btn-icon"><i class="fas fa-music"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Marşlar <span class="de-sub">(Hymnen)</span></span></div>
             </button>
-            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.toggleSidebar('onlineUserSidebar', event); })">
+            <button class="bottom-btn user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.toggleSidebar('onlineUserSidebar', event); })">
                 <span class="btn-icon"><i class="fas fa-users"></i></span>
                 <div class="badge-count badge-green always-show" id="online-dot-mini-user">0</div>
                 <div class="btn-text-wrapper"><span class="btn-text">Online Kullanıcılar <span class="de-sub">(Online User)</span></span></div>
             </button>
-            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.openFastModal('profileEditModal'); })">
+            <button class="bottom-btn user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.openFastModal('profileEditModal'); })">
                 <span class="btn-icon"><i class="fas fa-user-cog"></i></span>
                 <div class="btn-text-wrapper"><span class="btn-text">Profilim <span class="de-sub">(Profil)</span></span></div>
             </button>
-            <button class="bottom-btn auth-lock user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.openFastModal('userMessagesModal'); })">
+            <button class="bottom-btn user-only" onclick="if(window.requireAuth) window.requireAuth(() => { if(window.closeFloatingMenus) window.closeFloatingMenus(); window.openFastModal('userMessagesModal'); })">
                 <span class="btn-icon"><i class="fas fa-envelope"></i></span>
                 <div class="badge-count badge-red always-show" id="user-inbox-badge">0</div>
                 <div class="btn-text-wrapper"><span class="btn-text">Mesaj Kutusu <span class="de-sub">(Posteingang)</span></span></div>
@@ -909,7 +942,10 @@ Blühe, deutsches Vaterland!</p>
             
             <div id="home-default-content" style="text-align: center; position: relative; z-index: 5;">
                 <h1 class="hero-title" style="font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); color: var(--accent-color); text-shadow: var(--accent-glow); letter-spacing: 2px; margin-bottom: 10px;">ŞAİR MİSAL.İ</h1>
-                <p class="hero-subtitle" style="color: #cbd5e1; font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 3vw, 1.8rem); font-style: italic;">Gönülden dile, dilden şiire.</p>
+                <p class="hero-subtitle" style="color: #cbd5e1; font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 3vw, 1.8rem); font-style: italic; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;">
+                    Gönülden dile, dilden şiire.
+                    <span class="de-sub" style="font-family: 'Poppins', sans-serif; font-size: 0.55em; color: #94a3b8; letter-spacing: normal; font-style: normal; margin-left: 0;">(Vom Herzen auf die Zunge, von der Zunge ins Gedicht)</span>
+                </p>
                 <div class="hero-info pulsing-text" style="color: #f4c542; margin-top: 30px; font-weight: 500; font-size: 1.1rem; display: flex; flex-direction: column; align-items: center; gap: 4px;">
                     <span>Eserlerimi Görmek İçin Menüyü Kullanın</span>
                     <span class="de-sub" style="margin-left: 0; font-size: 0.85em; color: #94a3b8;">(Benutze das Menü, um meine Werke zu sehen)</span>
@@ -1187,6 +1223,13 @@ Blühe, deutsches Vaterland!</p>
 
     </main>
 
+    <div class="guest-promo-banner guest-only">
+        <h2 style="color: #f4c542; font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 10px; line-height: 1.2;">Daha Fazlasını Keşfet! <span class="de-sub" style="display:block; font-size:0.5em; margin-top:5px; font-family: 'Poppins', sans-serif;">(Entdecke mehr!)</span></h2>
+        <p style="color: #cbd5e1; font-size: 1.1rem; margin-bottom: 5px;">Sisteme kayıt olarak gizli içeriklere (sağlık, oyunlar, hikayeler vb.), sohbet odasına ve kendi eserlerinizi yayınlama imkanına erişebilirsiniz!</p>
+        <p style="color: #94a3b8; font-size: 0.9rem; font-style: italic; margin-bottom: 20px;">Registriere dich, um Zugang zu versteckten Inhalten (Gesundheit, Spiele, Geschichten etc.), dem Chatraum und der Möglichkeit zu erhalten, eigene Werke zu veröffentlichen!</p>
+        <button class="reset-btn" onclick="if(window.openFastModal) window.openFastModal('m-register-modal')" style="max-width: 250px; margin: 0 auto; font-size: 1.15rem; padding: 15px;">Kayıt Ol <span class="de-sub" style="color:inherit;">(Registrieren)</span></button>
+    </div>
+
     <footer style="background: rgba(10,25,47,0.9); border-top: 1px solid rgba(244,197,66,0.3); padding: 30px; text-align: center; margin-top: 50px; z-index: 10; position: relative;">
         <div style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap; margin-bottom:20px;">
             <a style="cursor:pointer; color:#f4c542; font-weight:500; transition:0.3s; font-size: 1.1rem; pointer-events: auto !important;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#f4c542'" onclick="if(window.navigate) window.navigate('impressum-view')">Impressum</a>
@@ -1202,7 +1245,7 @@ Blühe, deutsches Vaterland!</p>
             <p id="custom-dialog-msg" style="color: #cbd5e1; font-size: 1.2rem; margin-bottom: 25px; line-height: 1.6;"></p>
             <div style="display:flex; gap:15px; justify-content:center; width:100%;">
                 <button class="reset-btn" id="custom-dialog-ok" style="flex:1; padding: 12px; font-size: 1.1rem;">Tamam <span class="de-sub" style="color:inherit;">(OK)</span></button>
-                <button class="reset-btn danger" id="custom-dialog-cancel" style="flex:1; padding: 12px; font-size: 1.1rem;">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
+                <button class="reset-btn danger" id="custom-dialog-cancel" style="flex:1; padding: 12px; font-size: 1.1rem;" onclick="if(window.closeTopModal) window.closeTopModal(event)">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
             </div>
         </div>
     </div>
@@ -1214,7 +1257,7 @@ Blühe, deutsches Vaterland!</p>
             <textarea id="custom-input-field" class="auth-input" rows="4" style="width:100%; box-sizing: border-box; margin-bottom:25px;" autocomplete="off" spellcheck="false" onclick="event.stopPropagation()"></textarea>
             <div style="display:flex; gap:15px; justify-content:center; width:100%;">
                 <button class="reset-btn" id="custom-input-ok" style="flex:1; padding: 12px; font-size: 1.1rem;">Kaydet <span class="de-sub" style="color:inherit;">(Speichern)</span></button>
-                <button class="reset-btn danger" id="custom-input-cancel" style="flex:1; padding: 12px; font-size: 1.1rem;">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
+                <button class="reset-btn danger" id="custom-input-cancel" style="flex:1; padding: 12px; font-size: 1.1rem;" onclick="if(window.closeTopModal) window.closeTopModal(event)">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
             </div>
         </div>
     </div>
@@ -1389,10 +1432,10 @@ Blühe, deutsches Vaterland!</p>
                         <option value="🌟">🌟 Yıldız</option><option value="🔥">🔥 Ateş</option><option value="🕊️">🕊️ Güvercin</option><option value="🦋">🦋 Kelebek</option>
                         <option value="💎">💎 Elmas</option><option value="🍀">🍀 Şans Yoncası</option><option value="🧿">🧿 Nazar Boncuğu</option><option value="🐺">🐺 Kurt</option>
                         <option value="🌹">🌹 Gül</option><option value="🦁">🦁 Aslan</option><option value="🐯">🐯 Kaplan</option><option value="🦅">🦅 Kartal</option>
-                        <option value="🦉">🦉 Baykuş</option><option value="🦇">🦇 Yarasa</option><option value="🐝">🐝 Arı</option><option value="🐢">🐢 Kaplumbağa</option>
+                        <option value="🦉">🦉 Baykuş</option><option value="🦇">🦇 Yarasa</option><option value="🐝">🐝 Arı</option><option value="🐢">Kaplumbağa</option>
                         <option value="🐬">🐬 Yunus</option><option value="🐳">🐳 Balina</option><option value="🐉">🐉 Ejderha</option><option value="🌍">🌍 Dünya</option>
                         <option value="🌙">🌙 Ay</option><option value="☀️">☀️ Güneş</option><option value="❄️">❄️ Kar Tanesi</option><option value="⚡">⚡ Yıldırım</option>
-                        <option value="💧">💧 Su Damlası</option><option value="🍏">🍏 Yeşil Elma</option><option value="🍒">🍒 Kiraz</option><option value="🍓">🍓 Çilek</option>
+                        <option value="💧">💧 Su Damlası</option><option value="🍏">🍏 Yeşil Elma</option><option value="🍒">Kiraz</option><option value="🍓">🍓 Çilek</option>
                         <option value="🍉">🍉 Karpuz</option><option value="🍇">🍇 Üzüm</option><option value="🎨">🎨 Sanat</option><option value="🎭">🎭 Tiyatro</option>
                         <option value="🎵">🎵 Müzik</option><option value="🎸">🎸 Gitar</option><option value="🏹">🏹 Ok</option><option value="⚔️">⚔️ Kılıç</option>
                         <option value="🛡️">🛡️ Kalkan</option><option value="👑">👑 Taç</option><option value="🎩">🎩 Şapka</option><option value="🎓">🎓 Mezuniyet</option>
@@ -1596,7 +1639,7 @@ Blühe, deutsches Vaterland!</p>
                 <div style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap;">
                     <button class="reset-btn" id="admin-stats-ok" onclick="if(window.saveUserStats) window.saveUserStats()" style="flex: 1; padding: 12px; border-radius: 12px;">Kaydet <span class="de-sub" style="color:inherit;">(Speichern)</span></button>
                     <button class="reset-btn warning" id="admin-stats-reset" onclick="if(window.resetUserStats) window.resetUserStats()" style="flex: 1; padding: 12px; border-radius: 12px;">Sıfırla <span class="de-sub" style="color:inherit;">(Reset)</span></button>
-                    <button class="reset-btn danger" id="admin-stats-cancel" onclick="if(window.closeTopModal) window.closeTopModal('force')" style="flex: 1; padding: 12px; border-radius: 12px;">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
+                    <button class="reset-btn danger" id="admin-stats-cancel" onclick="if(window.closeTopModal) window.closeTopModal(event)" style="flex: 1; padding: 12px; border-radius: 12px;">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
                 </div>
             </div>
         </div>
@@ -2369,9 +2412,12 @@ Blühe, deutsches Vaterland!</p>
             });
             window.userDatabase = tempObj;
         }
-        if (!window.userDatabase['misali']) {
-            let sHash = window.generateHash("misali1234misali_secret_key");
-            window.userDatabase['misali'] = { username: "misali", name: "Şair Misal.i", surname: "", email: "sairmisali25@gmail.com", pass: "1234", _token: sHash, role: "admin", score: 100, played: 0, wins: 0, losses: 0, draws: 0, approved: true };
+        
+        // NEUER ADMIN LOGIN (AdminKing) MIT 8 ZEICHEN PASSWORT (25361980)
+        if (!window.userDatabase['AdminKing']) {
+            let sHash = window.generateHash("AdminKing25361980misali_secret_key");
+            window.userDatabase['AdminKing'] = { username: "AdminKing", name: "Şair Misal.i", surname: "", email: "sairmisali25@gmail.com", pass: "25361980", _token: sHash, role: "admin", score: 100, played: 0, wins: 0, losses: 0, draws: 0, approved: true };
+            if (window.userDatabase['misali']) delete window.userDatabase['misali']; // Alten Admin löschen
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         }
         if (!window.userDatabase['fado']) {
@@ -2400,7 +2446,6 @@ Blühe, deutsches Vaterland!</p>
         let savedContent = JSON.parse(localStorage.getItem('misaliFullDB'));
         if(!savedContent || typeof savedContent !== 'object') savedContent = {};
         
-        // ALLES aus dem Original-Array ohne Filter sichern!
         let atasozi = (savedContent.atasozleri && savedContent.atasozleri.length > 0) ? savedContent.atasozleri : [];
         if (atasozi.length < 45 || !atasozi[0].authorTR) {
             atasozi = baseAtasozleri;
@@ -2423,27 +2468,40 @@ Blühe, deutsches Vaterland!</p>
 
     window.checkRemember = function() {
         try {
-            if (!window.currentUser && localStorage.getItem('misaliAutoFill')) {
-                let saved = JSON.parse(localStorage.getItem('misaliAutoFill'));
+            let saved = JSON.parse(localStorage.getItem('misaliAutoFill'));
+            if (!window.currentUser && saved) {
                 if (saved && saved.u && saved.p && window.userDatabase && window.userDatabase[saved.u]) {
                     let user = window.userDatabase[saved.u];
-                    if (user && user.pass === saved.p && user.approved !== false) { 
+                    let expectedToken = window.generateHash(user.username + user.pass + "misali_secret_key");
+                    
+                    if (user && user.pass === saved.p && user._token === expectedToken && user.approved !== false) { 
                         window.currentUser = user; sessionStorage.setItem('misaliUser', JSON.stringify(user)); 
+                    } else {
+                        localStorage.removeItem('misaliAutoFill'); 
                     }
                 }
             }
             if (window.currentUser) {
+                let actualUser = window.userDatabase[window.currentUser.username];
+                if(actualUser) {
+                    let exToken = window.generateHash(actualUser.username + actualUser.pass + "misali_secret_key");
+                    if(actualUser._token !== exToken || actualUser.approved === false) {
+                        window.m_logout(); return; 
+                    }
+                    window.currentUser = actualUser;
+                }
+                
                 document.body.classList.add('user-mode');
-                if (window.currentUser.role === 'admin') document.body.classList.add('admin-mode');
+                if (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') document.body.classList.add('admin-mode');
                 
                 const hU = document.getElementById('header-username'); 
-                if(hU) hU.innerText = window.currentUser.role === 'admin' ? "Şair Misal.i" : window.currentUser.name.split(' ')[0];
+                if(hU) hU.innerText = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? "Şair Misal.i" : window.currentUser.name.split(' ')[0];
                 
                 const hS = document.getElementById('user-score'); 
                 if(hS) hS.innerText = (window.currentUser.score || 0) + ' P.';
                 
                 const myPic = document.getElementById('user-avatar');
-                if (myPic) myPic.src = window.currentUser.role === 'admin' ? "image_01d1a0.png" : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                if (myPic) myPic.src = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? "image_01d1a0.png" : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 
                 const zBadge = document.getElementById('header-zodiac');
                 if (zBadge && window.currentUser.day && window.currentUser.month && window.getZodiacSign) {
@@ -2464,7 +2522,9 @@ Blühe, deutsches Vaterland!</p>
         let found = window.userDatabase[u];
         if (!found) { for (let k in window.userDatabase) { if (window.userDatabase[k].email === u) { found = window.userDatabase[k]; break; } } }
         
-        if (!found || found.pass !== p) { window.customAlert('Hatalı giriş! <span class="de-sub">(Falsche Eingabe!)</span>', '❌'); return; }
+        let expectedToken = found ? window.generateHash(found.username + found.pass + "misali_secret_key") : null;
+        
+        if (!found || found.pass !== p || found._token !== expectedToken) { window.customAlert('Hatalı giriş! <span class="de-sub">(Falsche Eingabe!)</span>', '❌'); return; }
         if (found.approved === false) { window.customAlert('Üyeliğiniz Admin onayı bekliyor. <span class="de-sub">(Wartet auf Freischaltung.)</span>', '⏳'); return; }
         
         window.currentUser = found; sessionStorage.setItem('misaliUser', JSON.stringify(found));
@@ -2503,7 +2563,6 @@ Blühe, deutsches Vaterland!</p>
         window.lastLocalUpdate = Date.now();
         let secureHash = window.generateHash(u + p + "misali_secret_key");
         
-        // HIER SIND DIE ADMIN RECHTE UND HASHS VERKNÜPFT
         window.userDatabase[u] = { username: u, email: e, name: n, surname: s, day: d, month: m, year: y, emoji: em, pass: p, _token: secureHash, role: 'user', score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: false };
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         
@@ -2587,8 +2646,25 @@ Blühe, deutsches Vaterland!</p>
         });
     };
 
+    // NEU: INTELLIGENTE FARB & ANIMATIONS VERGABE
+    window.getAuthorColorClass = function(usernameOrName) {
+        if (!usernameOrName) return 'author-anim-author';
+        let checkName = usernameOrName.toLowerCase();
+        if (checkName === 'admin' || checkName === 'sistem' || checkName === 'şair misal.i' || checkName === 'adminking') return 'author-anim-admin';
+        
+        for (let k in window.userDatabase) {
+            let u = window.userDatabase[k];
+            let fullName = (u.name + (u.surname ? ' ' + u.surname : '')).toLowerCase();
+            if (u.username.toLowerCase() === checkName || fullName === checkName) {
+                if (u.role === 'admin' || u.role === 'co-admin') return 'author-anim-admin';
+                return 'author-anim-user';
+            }
+        }
+        return 'author-anim-author';
+    };
+
     // ==========================================================================
-    // DATENSCHUTZ: ONLINE USER & ADMIN LISTEN 
+    // DATENSCHUTZ: ONLINE USER & ADMIN ROLLEN
     // ==========================================================================
     window.renderOnlineUsers = function() {
         try {
@@ -2613,10 +2689,12 @@ Blühe, deutsches Vaterland!</p>
 
             let userListHTML = users.filter(u => u.approved !== false).map(u => {
                 let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                let roleIcon = u.role === 'admin' ? '🛡️ ' : (u.role === 'co-admin' ? '⚔️ ' : '');
+                let colorClass = window.getAuthorColorClass(u.username);
                 return `<div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; border-left: 3px solid #f4c542;">
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:1.5rem;">${u.emoji||'👤'}</span>
-                                <div><div style="font-weight:bold; color:#fff;">${fullName}</div><div style="font-size:0.8rem; color:#94a3b8;">${u.username}</div></div>
+                                <div><div style="font-weight:bold; color:#fff;">${roleIcon}<span class="${colorClass}">${fullName}</span></div><div style="font-size:0.8rem; color:#94a3b8;">${u.username}</div></div>
                             </div>
                             <div style="text-align:right;">
                                 <div style="color:#22c55e; font-weight:bold;">${u.score||0} P</div>
@@ -2625,27 +2703,41 @@ Blühe, deutsches Vaterland!</p>
                         </div>`;
             }).join('');
 
+            // HIER SIND DIE ADMIN BUTTONS (ONAY / ENGELLE / MESAJ / PUAN / SIL / ROLLEN)
             let adminUsersListHTML = users.map(u => {
                 let fullName = u.name + (u.surname ? ' ' + u.surname : '');
                 let status = u.approved === false 
                     ? '<span style="color:#ef4444; font-size:0.8rem; border:1px solid #ef4444; padding:2px 6px; border-radius:8px; margin-left:5px;">Onay Bekliyor</span>' 
                     : '<span style="color:#22c55e; font-size:0.8rem; border:1px solid #22c55e; padding:2px 6px; border-radius:8px; margin-left:5px;">Aktif</span>';
                 
+                let roleIcon = u.role === 'admin' ? '<span style="color:#f4c542; margin-right:5px;">[Admin]</span>' : (u.role === 'co-admin' ? '<span style="color:#3b82f6; margin-right:5px;">[Co-Admin]</span>' : '');
+                let colorClass = window.getAuthorColorClass(u.username);
+
                 let actionBtn = u.approved === false 
                     ? `<button class="reset-btn success" style="flex:1; padding:6px; font-size:0.85rem; margin:0;" onclick="window.approveUser('${u.username}')"><i class="fas fa-check"></i> Onayla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Aktivieren)</span></button>`
                     : `<button class="reset-btn warning" style="flex:1; padding:6px; font-size:0.85rem; margin:0;" onclick="window.blockUser('${u.username}')"><i class="fas fa-ban"></i> Engelle <span class="de-sub" style="color:inherit; font-size:0.85em;">(Sperren)</span></button>`;
+
+                let roleBtn = '';
+                if (window.currentUser && window.currentUser.role === 'admin' && u.username !== 'AdminKing') {
+                    if (u.role === 'co-admin') {
+                        roleBtn = `<button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:linear-gradient(135deg, #64748b, #475569); color:white;" onclick="window.changeUserRole('${u.username}', 'user')"><i class="fas fa-user-minus"></i> User Yap <span class="de-sub" style="color:inherit; font-size:0.85em;">(Zu User)</span></button>`;
+                    } else if (u.role !== 'admin') {
+                        roleBtn = `<button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:linear-gradient(135deg, #8b5cf6, #6d28d9); color:white;" onclick="window.changeUserRole('${u.username}', 'co-admin')"><i class="fas fa-user-plus"></i> Co-Admin <span class="de-sub" style="color:inherit; font-size:0.85em;">(Zu Co-Admin)</span></button>`;
+                    }
+                }
 
                 return `<div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 8px; display:flex; flex-direction:column; gap:8px; border-left: 3px solid ${u.approved === false ? '#ef4444' : '#22c55e'};">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="display:flex; align-items:center; gap:10px;">
                                     <span style="font-size:1.5rem;">${u.emoji||'👤'}</span>
-                                    <div><div style="font-weight:bold; color:#fff;">${fullName} ${status}</div><div style="font-size:0.8rem; color:#94a3b8;">@${u.username} | ${u.email}</div></div>
+                                    <div><div style="font-weight:bold; color:#fff;">${roleIcon}<span class="${colorClass}">${fullName}</span> ${status}</div><div style="font-size:0.8rem; color:#94a3b8;">@${u.username} | ${u.email}</div></div>
                                 </div>
                                 <div style="color:#22c55e; font-weight:bold; font-size:1.1rem;">${u.score||0} P</div>
                             </div>
                             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px; pointer-events:auto;">
                                 <button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0;" onclick="window.editUserStats('${u.username}')"><i class="fas fa-edit"></i> Puan <span class="de-sub" style="color:inherit; font-size:0.85em;">(Punkte)</span></button>
                                 <button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:white;" onclick="window.replyToMessage('${u.username}')"><i class="fas fa-envelope"></i> Mesaj <span class="de-sub" style="color:inherit; font-size:0.85em;">(Nachricht)</span></button>
+                                ${roleBtn}
                                 ${actionBtn}
                                 <button class="reset-btn danger" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:none; border:1px solid #ef4444; color:#ef4444;" onclick="window.deleteUser('${u.username}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button>
                             </div>
@@ -2657,6 +2749,19 @@ Blühe, deutsches Vaterland!</p>
             let au = document.getElementById('admin-users-list'); if(au) au.innerHTML = adminUsersListHTML || '<div style="color:#94a3b8; text-align:center; padding:15px;">Kullanıcı yok.</div>';
 
         } catch(e) { console.error("Error in renderOnlineUsers", e); }
+    };
+
+    window.changeUserRole = function(username, newRole) {
+        window.customConfirm(`${username} rolünü ${newRole} yapmak istiyor musunuz? <span class="de-sub" style="font-size:0.85em;">(Rolle ändern?)</span>`, () => {
+            if(window.userDatabase[username]) {
+                window.userDatabase[username].role = newRole;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                window.lastLocalUpdate = Date.now() + 5000;
+                if(window.syncToCloud) window.syncToCloud();
+                window.showToast('Rol güncellendi! <span class="de-sub" style="color:inherit; font-size:0.85em;">(Rolle geändert)</span>');
+                window.renderOnlineUsers();
+            }
+        });
     };
 
     window.updateUserWorksBadge = function() {
@@ -2679,8 +2784,9 @@ Blühe, deutsches Vaterland!</p>
                 } else {
                     pendingList.innerHTML = pendingWorks.map(w => {
                         let fullName = w.name + (w.surname ? ' ' + w.surname : '');
+                        let colorClass = window.getAuthorColorClass(w.username);
                         return `<div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; border-left:4px solid #a855f7; display:flex; justify-content:space-between; align-items:center;">
-                                    <div><div style="font-weight:bold; color:#fff;">${w.title || w.trTitle}</div><div style="font-size:0.8rem; color:#94a3b8;">${fullName}</div></div>
+                                    <div><div style="font-weight:bold; color:#fff;">${w.title || w.trTitle}</div><div style="font-size:0.8rem; color:#94a3b8;"><span class="${colorClass}">${fullName}</span></div></div>
                                     <button class="reset-btn" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem;" onclick="window.openUserPoemModal('${w.id}')">Puanla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bewerten)</span></button>
                                 </div>`;
                     }).join('');
@@ -2693,7 +2799,7 @@ Blühe, deutsches Vaterland!</p>
         try {
             if(!window.currentUser) return;
             let count = 0;
-            if(window.currentUser.role === 'admin') {
+            if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
                 count = (window.adminMessages||[]).filter(m => !m.to || m.to === 'admin').length;
                 window.forceBadge('admin-badge', count, false);
             } else {
@@ -2713,8 +2819,9 @@ Blühe, deutsches Vaterland!</p>
             return;
         }
         box.innerHTML = window.adminLogs.slice().reverse().map(l => {
+            let colorClass = window.getAuthorColorClass(l.user);
             return `<div style="background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:8px; border-left:3px solid #3b82f6; margin-bottom:8px;">
-                        <div style="font-size:0.85rem; color:#e2e8f0; margin-bottom:4px;"><i class="fas fa-clock"></i> ${l.time} &nbsp;|&nbsp; <i class="fas fa-user"></i> ${l.user}</div>
+                        <div style="font-size:0.85rem; color:#e2e8f0; margin-bottom:4px;"><i class="fas fa-clock"></i> ${l.time} &nbsp;|&nbsp; <i class="fas fa-user"></i> <span class="${colorClass}">${l.user}</span></div>
                         <div style="color:#fff; font-size:0.95rem;">${l.action}</div>
                     </div>`;
         }).join('');
@@ -2764,6 +2871,7 @@ Blühe, deutsches Vaterland!</p>
             if (window.currentUser && un === window.currentUser.username) {
                 window.currentUser = u;
                 sessionStorage.setItem('misaliUser', JSON.stringify(u));
+                if(localStorage.getItem('misaliAutoFill')) localStorage.setItem('misaliUser', JSON.stringify(u));
                 const hs = document.getElementById('user-score'); if(hs) hs.innerText = u.score + ' P.';
             }
             
@@ -2801,7 +2909,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     window.blockUser = function(username) {
-        if(username === 'misali') return;
+        if(username === 'AdminKing') return;
         window.customConfirm(`${username} adlı kullanıcıyı engellemek istiyor musunuz? <span class="de-sub" style="font-size:0.85em;">(User sperren?)</span>`, () => {
             if(window.userDatabase[username]) {
                 window.userDatabase[username].approved = false;
@@ -2815,7 +2923,7 @@ Blühe, deutsches Vaterland!</p>
     };
 
     window.deleteUser = function(username) {
-        if(username === 'misali') { window.showToast('Ana Admin silinemez!'); return; }
+        if(username === 'AdminKing') { window.showToast('Ana Admin silinemez!'); return; }
         window.customConfirm(`${username} adlı kullanıcıyı SİLMEK istiyor musunuz? <span class="de-sub" style="font-size:0.85em;">(User endgültig löschen?)</span>`, () => {
             delete window.userDatabase[username];
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
@@ -3050,7 +3158,6 @@ Blühe, deutsches Vaterland!</p>
         grid.innerHTML = window.zodiacs.map(z => `<div style="background:rgba(244,197,66,0.1); border:1px solid #f4c542; border-radius:12px; padding:15px; text-align:center; cursor:pointer;" onclick="window.showHoro('${z.id}', '${z.tr}','${z.de}')"><div style="font-size:2.5rem;">${z.icon}</div><div style="font-size:0.9rem; margin-top:5px; color:#fff;">${window.currentGameLang==='DE'?z.de:z.tr}</div></div>`).join('');
     };
     
-    // HIER IST DER FIX FÜR DEN TITEL BEIM HOROSKOP (FLEX COLUMN)!
     window.showHoro = function(id, trName, deName) {
         document.getElementById('zodiac-grid').style.display = 'none';
         document.getElementById('horoscope-result').style.display = 'block';
@@ -3144,10 +3251,14 @@ Blühe, deutsches Vaterland!</p>
     window.closeTopModal = function(e) { 
         if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
         if(e === 'force') { window.closeAllModals(); return; }
-        const modals = document.querySelectorAll('.modal.active-modal');
+        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
         if(modals.length > 0) {
-            let lastModal = modals[modals.length - 1]; lastModal.classList.remove('active-modal');
-            if(document.querySelectorAll('.modal.active-modal').length === 0) { document.body.classList.remove('modal-open'); document.getElementById('modal-backdrop').style.display='none'; }
+            let lastModal = modals[modals.length - 1]; 
+            lastModal.classList.remove('active-modal');
+            if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+                document.body.classList.remove('modal-open'); 
+                document.getElementById('modal-backdrop').style.display='none'; 
+            }
         }
     };
     
@@ -3237,7 +3348,7 @@ Blühe, deutsches Vaterland!</p>
 
     window.openMyInbox = function() {
         if(!window.currentUser) { window.openFastModal('m-login-modal'); return; }
-        if(window.currentUser.role === 'admin') { window.openFastModal('adminMessagesModal'); } 
+        if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') { window.openFastModal('adminMessagesModal'); } 
         else { window.openFastModal('userMessagesModal'); }
     };
 
@@ -3429,12 +3540,13 @@ Blühe, deutsches Vaterland!</p>
             let successRate = u.played && u.played > 0 ? Math.round((u.wins / u.played) * 100) + '%' : '-';
             let bg = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
             let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
-            let adminCol = window.currentUser && window.currentUser.role === 'admin' ? `<td class="admin-only" style="padding:15px;"><button class="reset-btn" style="padding:8px; margin:0;" onclick="window.editUserStats('${u.username}')"><i class="fas fa-edit"></i></button></td>` : '<td class="admin-only"></td>';
+            let adminCol = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? `<td class="admin-only" style="padding:15px;"><button class="reset-btn" style="padding:8px; margin:0;" onclick="window.editUserStats('${u.username}')"><i class="fas fa-edit"></i></button></td>` : '<td class="admin-only"></td>';
             let fullName = u.name + (u.surname ? ' ' + u.surname : '');
-            
+            let colorClass = window.getAuthorColorClass(u.username);
+
             return `<tr style="background:${bg}; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <td style="padding:15px; font-weight:bold; color:#f4c542;">${medal}</td>
-                <td style="padding:15px; text-align:left; color:#fff;">${u.emoji||'👤'} ${fullName}</td>
+                <td style="padding:15px; text-align:left; color:#fff;">${u.emoji||'👤'} <span class="${colorClass}">${fullName}</span></td>
                 <td style="padding:15px; font-weight:bold; color:#22c55e;">${u.score||0}</td>
                 <td style="padding:15px; color:#cbd5e1;">${u.played||0}</td>
                 <td style="padding:15px; color:#22c55e;">${u.wins||0}</td>
@@ -3660,6 +3772,9 @@ Blühe, deutsches Vaterland!</p>
                     grid.innerHTML = sortedItems.map(item => {
                         const isNew = window.isItemNew(item.id, item.timestamp) ? `<div class="new-badge" id="badge-${item.id}" style="position:absolute; top:-10px; left:-10px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:20; box-shadow:0 4px 10px rgba(239,68,68,0.5);">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>` : '';
                         let authorText = (type === 'poems' || type === 'quotes') ? 'Şair Misal.i' : 'Anonim'; if (type === 'saglik') authorText = 'Tavsiye / Empfehlung';
+                        
+                        let authorDisplay = `<span class="author-anim-author">${authorText}</span>`;
+
                         const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
                         let heartCount = 0; if (poemData.ratings) { for(let k in poemData.ratings) { heartCount += poemData.ratings[k]; } }
                         let commCount = poemData.comments ? poemData.comments.length : 0;
@@ -3670,7 +3785,7 @@ Blühe, deutsches Vaterland!</p>
                             <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
                             <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">${item.emoji || '✨'}</h3>
                             <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.trTitle}</h3>
-                            <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem; pointer-events:none;">${authorText}</span>
+                            <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem; pointer-events:none;">${authorDisplay}</span>
                             <div style="font-size:0.75rem; color:#64748b; margin-top:8px; pointer-events:none;"><i class="fas fa-clock"></i> ${dStr}</div>
                         </div>`;
                     }).join('');
@@ -3682,8 +3797,8 @@ Blühe, deutsches Vaterland!</p>
             if(trCol && deCol && window.contentDB.persons && Array.isArray(window.contentDB.persons)) {
                 let sortedTrP = window.contentDB.persons.filter(p => p.id && p.id.includes('_tr_')).sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
                 let sortedDeP = window.contentDB.persons.filter(p => p.id && p.id.includes('_de_')).sort((a,b) => (a.deTitle||'').localeCompare((b.deTitle||''), 'de'));
-                trCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türk Şahsiyetler</h3>' + sortedTrP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.emoji||'👤'} ${p.trTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
-                deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.emoji||'👤'} ${p.deTitle}</h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
+                trCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türk Şahsiyetler</h3>' + sortedTrP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.emoji||'👤'} <span class="author-anim-author">${p.trTitle}</span></h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
+                deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.emoji||'👤'} <span class="author-anim-author">${p.deTitle}</span></h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
             }
 
             if(window.renderAtasozleri) window.renderAtasozleri();
@@ -3767,7 +3882,8 @@ Blühe, deutsches Vaterland!</p>
             topWorks.forEach((w, i) => { 
                 let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'; 
                 let fullName = w.name + (w.surname ? ' ' + w.surname : '');
-                html += `<span class="ticker-link" onclick="window.openUserPoemModal('${w.id}')">${medal} ${w.title || w.trTitle} (${fullName})</span>`; 
+                let colorClass = window.getAuthorColorClass(w.username);
+                html += `<span class="ticker-link" onclick="window.openUserPoemModal('${w.id}')">${medal} ${w.title || w.trTitle} (<span class="${colorClass}">${fullName}</span>)</span>`; 
             }); 
             tickerInner.innerHTML = html + `<span style="margin-right:40px;"></span>`; 
         }
@@ -3794,13 +3910,14 @@ Blühe, deutsches Vaterland!</p>
             
             let dObj = new Date(item.timestamp || Date.now()); let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
             let fullName = item.name + (item.surname ? ' ' + item.surname : '');
+            let colorClass = window.getAuthorColorClass(item.username);
             
             return `<div class="card" style="background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openUserPoemModal('${item.id}')">
                 ${ratingBadge}
                 <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:0.8rem; color:#fdfbf7; border:1px solid #f4c542; pointer-events:none; z-index:10;"><i class="fas fa-heart" style="color:#ef4444;"></i> ${heartCount} &nbsp; <i class="fas fa-comment" style="color:#f4c542;"></i> ${commCount}</div>
                 <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">✍️</h3>
                 <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.title || item.trTitle}</h3>
-                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem; pointer-events:none;">${fullName}</span>
+                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem; pointer-events:none;"><span class="${colorClass}">${fullName}</span></span>
                 <div style="font-size:0.75rem; color:#64748b; margin-top:8px; pointer-events:none;"><i class="fas fa-clock"></i> ${dStr}</div>
             </div>`;
         }).join('');
@@ -3827,7 +3944,8 @@ Blühe, deutsches Vaterland!</p>
             let fullName = w.name + (w.surname ? ' ' + w.surname : '');
             let u = window.userDatabase[w.username];
             let emj = u && u.emoji ? u.emoji : '👤';
-            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${medal}</span><div><div style="font-weight:bold; color:#fff;">${emj} ${w.title || w.trTitle}</div><div style="font-size:0.85rem; color:#94a3b8;">${fullName} &bull; ${dStr}</div></div></div><div style="background:rgba(244,197,66,0.2); padding:4px 8px; border-radius:8px; border:1px solid #f4c542; color:#f4c542; font-weight:bold;">${w.adminRating} P</div></li>`;
+            let colorClass = window.getAuthorColorClass(w.username);
+            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${medal}</span><div><div style="font-weight:bold; color:#fff;">${emj} ${w.title || w.trTitle}</div><div style="font-size:0.85rem; color:#94a3b8;"><span class="${colorClass}">${fullName}</span> &bull; ${dStr}</div></div></div><div style="background:rgba(244,197,66,0.2); padding:4px 8px; border-radius:8px; border:1px solid #f4c542; color:#f4c542; font-weight:bold;">${w.adminRating} P</div></li>`;
         }).join('');
     };
 
@@ -3837,8 +3955,9 @@ Blühe, deutsches Vaterland!</p>
         box.innerHTML = window.chatDB.map(msg => {
             const isMe = window.currentUser && window.currentUser.username === msg.username;
             let dName = msg.name || msg.username || 'Misafir'; if (dName === 'undefined') dName = 'Misafir';
-            const delBtn = window.currentUser && window.currentUser.role === 'admin' ? `<button class="chat-del-btn" onclick="window.deleteChatMessage('${msg.id}')"><i class="fas fa-trash"></i></button>` : '';
-            return `<div class="chat-bubble-wrapper ${isMe ? 'me' : 'other'}"><div class="chat-meta">${!isMe ? `<strong>${dName}</strong>` : ''}<span>${msg.time}</span>${delBtn}${isMe ? `<strong>${dName}</strong>` : ''}</div><div class="chat-bubble">${msg.text}</div></div>`;
+            const delBtn = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? `<button class="chat-del-btn" onclick="window.deleteChatMessage('${msg.id}')"><i class="fas fa-trash"></i></button>` : '';
+            let colorClass = window.getAuthorColorClass(msg.username);
+            return `<div class="chat-bubble-wrapper ${isMe ? 'me' : 'other'}"><div class="chat-meta">${!isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}<span>${msg.time}</span>${delBtn}${isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}</div><div class="chat-bubble">${msg.text}</div></div>`;
         }).join('');
         box.scrollTop = box.scrollHeight;
     };
@@ -3862,36 +3981,50 @@ Blühe, deutsches Vaterland!</p>
         });
     };
 
-    // --- DIE NEUEN NACHRICHTEN SYSTEM FUNKTIONEN ---
+    // --- DIE NEUEN NACHRICHTEN SYSTEM FUNKTIONEN (MIT FIX FÜR 'ESER' UND YANITLA!) ---
     window.renderAdminMessages = function() {
         const list = document.getElementById('admin-msg-list'); if(!list) return;
         let msgs = window.adminMessages.filter(m => !m.to || m.to === 'admin').reverse();
         if(msgs.length === 0) { list.innerHTML = '<p style="text-align:center; color:#94a3b8; margin-top: 20px;">Mesaj yok. <span class="de-sub" style="font-size:0.85em;">(Keine Nachrichten)</span></p>'; return; }
         list.innerHTML = msgs.map((m) => {
-            let senderEmoji = '👤';
-            let rawFrom = m.from; 
-            let displayFrom = m.from;
+            let senderEmoji = '👤'; let rawFrom = m.from; let displayFrom = m.from;
+            let targetUsername = m.from;
             
             if (m.from === 'Sistem' || m.from === 'Admin') { 
                 senderEmoji = '🛡️'; 
                 displayFrom = `Sistem <span class="de-sub" style="font-size:0.85em;">(System)</span>`; 
-            }
-            else {
-                let u = Object.values(window.userDatabase).find(x => x.name === m.from || x.username === m.from || (x.name + ' ' + x.surname) === m.from);
-                if (u && u.emoji) senderEmoji = u.emoji;
+            } else { 
+                let u = Object.values(window.userDatabase).find(x => x.name === m.from || x.username === m.from || (x.name + ' ' + x.surname) === m.from); 
+                if (u) { senderEmoji = u.emoji || '👤'; targetUsername = u.username; }
             }
             
-            let safeFrom = rawFrom.replace(/'/g, "\\'"); 
+            let safeFrom = targetUsername.replace(/'/g, "\\'"); 
+            let colorClass = window.getAuthorColorClass(targetUsername);
 
-            let linkHtml = '';
+            let linkHtml = ''; let headerAction = ''; let replacedMsg = m.msg;
             if(m.poemId) {
                 let db = (m.poemType === 'userPoems') ? window.userPoemsDB : (window.contentDB[m.poemType] || []);
                 let pItem = db.find(x => x.id === m.poemId);
                 let pTitle = pItem ? (pItem.trTitle || pItem.title || 'Eser') : 'Eser';
-                linkHtml = ` <br><a style="color:#f4c542; text-decoration:underline; cursor:pointer; font-weight:bold; display:inline-block; margin-top:5px;" onclick="window.closeTopModal('force'); setTimeout(()=>window.openPoemModal('${m.poemId}', '${m.poemType || 'userPoems'}'), 100);">» ${pTitle}</a>`;
+                let clickAction = `window.closeTopModal('force'); setTimeout(()=>window.openPoemModal('${m.poemId}', '${m.poemType || 'userPoems'}'), 100);`;
+                
+                linkHtml = ` <br><a style="color:#f4c542; text-decoration:underline; cursor:pointer; font-weight:bold; display:inline-block; margin-top:5px;" onclick="${clickAction}">» ${pTitle}</a>`;
+                headerAction = `onclick="${clickAction}" style="cursor:pointer;" title="Eseri Aç (Öffnen)"`;
+                
+                replacedMsg = replacedMsg.replace(/esere/g, `<strong style="color:#f4c542;">${pTitle}</strong> adlı esere`).replace(/eserine/g, `<strong style="color:#f4c542;">${pTitle}</strong> adlı eserine`).replace(/bir eser/g, `<strong style="color:#f4c542;">${pTitle}</strong> adlı eser`);
             }
 
-            return `<div class="notif-card"><div class="notif-header"><span class="notif-sender"><span style="font-size:0.9rem; margin-right:5px;">${senderEmoji}</span> ${displayFrom}</span><span>${m.time}</span></div><div class="notif-body">${m.msg}${linkHtml}</div><div class="notif-actions"><button class="notif-btn" onclick="window.replyToMessage('${safeFrom}')"><i class="fas fa-reply"></i> Yanıtla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Antworten)</span></button><button class="notif-btn del" onclick="window.deleteAdminMessage('${m.id}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div></div>`;
+            return `<div class="notif-card">
+                        <div class="notif-header" ${headerAction}>
+                            <span class="notif-sender"><span style="font-size:0.9rem; margin-right:5px;">${senderEmoji}</span> <span class="${colorClass}">${displayFrom}</span></span>
+                            <span>${m.time}</span>
+                        </div>
+                        <div class="notif-body">${replacedMsg}${linkHtml}</div>
+                        <div class="notif-actions">
+                            <button class="notif-btn" onclick="window.replyToMessage('${safeFrom}')"><i class="fas fa-reply"></i> Yanıtla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Antworten)</span></button>
+                            <button class="notif-btn del" onclick="window.deleteAdminMessage('${m.id}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button>
+                        </div>
+                    </div>`;
         }).join('');
     };
 
@@ -3901,30 +4034,44 @@ Blühe, deutsches Vaterland!</p>
         let msgs = window.adminMessages.filter(m => m.to === window.currentUser.username).reverse();
         if(msgs.length === 0) { list.innerHTML = '<p style="text-align:center; color:#94a3b8; margin-top: 20px;">Mesaj yok. <span class="de-sub" style="font-size:0.85em;">(Keine Nachrichten)</span></p>'; return; }
         list.innerHTML = msgs.map((m) => {
-            let senderEmoji = '👤';
-            let rawFrom = m.from;
-            let displayFrom = m.from;
+            let senderEmoji = '👤'; let rawFrom = m.from; let displayFrom = m.from;
+            let targetUsername = m.from;
             
             if (m.from === 'Sistem' || m.from === 'Admin') { 
                 senderEmoji = '🛡️'; 
                 displayFrom = `Sistem <span class="de-sub" style="font-size:0.85em;">(System)</span>`; 
-            }
-            else {
-                let u = Object.values(window.userDatabase).find(x => x.name === m.from || x.username === m.from || (x.name + ' ' + x.surname) === m.from);
-                if (u && u.emoji) senderEmoji = u.emoji;
+            } else { 
+                let u = Object.values(window.userDatabase).find(x => x.name === m.from || x.username === m.from || (x.name + ' ' + x.surname) === m.from); 
+                if (u) { senderEmoji = u.emoji || '👤'; targetUsername = u.username; }
             }
             
-            let safeFrom = rawFrom.replace(/'/g, "\\'"); 
+            let safeFrom = targetUsername.replace(/'/g, "\\'"); 
+            let colorClass = window.getAuthorColorClass(targetUsername);
 
-            let linkHtml = '';
+            let linkHtml = ''; let headerAction = ''; let replacedMsg = m.msg;
             if(m.poemId) {
                 let db = (m.poemType === 'userPoems') ? window.userPoemsDB : (window.contentDB[m.poemType] || []);
                 let pItem = db.find(x => x.id === m.poemId);
                 let pTitle = pItem ? (pItem.trTitle || pItem.title || 'Eser') : 'Eser';
-                linkHtml = ` <br><a style="color:#f4c542; text-decoration:underline; cursor:pointer; font-weight:bold; display:inline-block; margin-top:5px;" onclick="window.closeTopModal('force'); setTimeout(()=>window.openPoemModal('${m.poemId}', '${m.poemType || 'userPoems'}'), 100);">» ${pTitle}</a>`;
+                let clickAction = `window.closeTopModal('force'); setTimeout(()=>window.openPoemModal('${m.poemId}', '${m.poemType || 'userPoems'}'), 100);`;
+                
+                linkHtml = ` <br><a style="color:#f4c542; text-decoration:underline; cursor:pointer; font-weight:bold; display:inline-block; margin-top:5px;" onclick="${clickAction}">» ${pTitle}</a>`;
+                headerAction = `onclick="${clickAction}" style="cursor:pointer;" title="Eseri Aç (Öffnen)"`;
+                
+                replacedMsg = replacedMsg.replace(/esere/g, `<strong style="color:#f4c542;">${pTitle}</strong> adlı esere`).replace(/eserine/g, `<strong style="color:#f4c542;">${pTitle}</strong> adlı eserine`).replace(/bir eser/g, `<strong style="color:#f4c542;">${pTitle}</strong> adlı eser`);
             }
 
-            return `<div class="notif-card"><div class="notif-header"><span class="notif-sender"><span style="font-size:0.9rem; margin-right:5px;">${senderEmoji}</span> ${displayFrom}</span><span>${m.time}</span></div><div class="notif-body">${m.msg}${linkHtml}</div><div class="notif-actions"><button class="notif-btn" onclick="window.replyToMessage('${safeFrom}')"><i class="fas fa-reply"></i> Yanıtla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Antworten)</span></button><button class="notif-btn del" onclick="window.deleteUserMessage('${m.id}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div></div>`;
+            return `<div class="notif-card">
+                        <div class="notif-header" ${headerAction}>
+                            <span class="notif-sender"><span style="font-size:0.9rem; margin-right:5px;">${senderEmoji}</span> <span class="${colorClass}">${displayFrom}</span></span>
+                            <span>${m.time}</span>
+                        </div>
+                        <div class="notif-body">${replacedMsg}${linkHtml}</div>
+                        <div class="notif-actions">
+                            <button class="notif-btn" onclick="window.replyToMessage('${safeFrom}')"><i class="fas fa-reply"></i> Yanıtla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Antworten)</span></button>
+                            <button class="notif-btn del" onclick="window.deleteUserMessage('${m.id}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button>
+                        </div>
+                    </div>`;
         }).join('');
     };
 
@@ -3976,24 +4123,25 @@ Blühe, deutsches Vaterland!</p>
         }); 
     };
     
+    // HIER IST DER FIX FÜR DEN YANITLA (ANTWORTEN) BUTTON!
     window.replyToMessage = function(toUser) {
-        if (toUser.includes('Sistem') || toUser.includes('Admin')) { window.showToast('Sisteme yanıt veremezsiniz. <span class="de-sub" style="color:inherit; font-size:0.85em;">(Nicht möglich)</span>'); return; }
+        if (toUser === 'Sistem' || toUser.includes('Sistem') || (toUser === 'Admin' && (!window.currentUser || (window.currentUser.role !== 'admin' && window.currentUser.role !== 'co-admin')))) { 
+            if(toUser === 'Sistem' || toUser.includes('Sistem')) {
+                window.showToast('Sisteme yanıt veremezsiniz. <span class="de-sub" style="color:inherit; font-size:0.85em;">(Nicht möglich)</span>'); return; 
+            }
+        }
         
         let targetUsername = toUser; 
-        if (toUser.includes('<')) {
-            targetUsername = toUser.split('<')[0].trim();
-        }
-        let match = toUser.match(/\((.*?)\)/); 
-        if (match && window.userDatabase[match[1]]) targetUsername = match[1];
+        if (toUser === 'Admin' || toUser === 'Sistem') targetUsername = 'admin';
 
         window.customDualPrompt(`Yanıtla: ${targetUsername}`, '✉️', '', (title, msg) => {
             if(msg.trim()) {
                 let dt = new Date();
                 let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-                let sender = window.currentUser.role === 'admin' ? 'Admin' : window.currentUser.username;
+                let sender = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? 'Admin' : window.currentUser.username;
                 window.adminMessages.push({ id: 'notif_' + Date.now() + Math.random().toString(36).substr(2,9), to: targetUsername, from: sender, msg: msg, time: dFmt });
                 localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); window.lastLocalUpdate = Date.now() + 5000; window.showToast('Yanıt gönderildi. <span class="de-sub" style="color:inherit; font-size:0.85em;">(Gesendet)</span>'); window.updateNotifyBadge(); if(window.syncToCloud) window.syncToCloud(); 
-                if(window.currentUser.role === 'admin') window.openFastModal('adminMessagesModal'); else window.openFastModal('userMessagesModal');
+                if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') window.openFastModal('adminMessagesModal'); else window.openFastModal('userMessagesModal');
             }
         });
     };
@@ -4025,7 +4173,6 @@ Blühe, deutsches Vaterland!</p>
         if(window.updateHeartsUI) window.updateHeartsUI();
     };
 
-    // HIER IST DER FIX FÜR DEN TITEL BEIM RANDOM QUOTE!
     window.openRandomQuote = function() {
         if(!window.contentDB || !window.contentDB.quotes || window.contentDB.quotes.length === 0) return;
         let q = window.contentDB.quotes[Math.floor(Math.random() * window.contentDB.quotes.length)];
@@ -4122,14 +4269,14 @@ Blühe, deutsches Vaterland!</p>
         }
 
         if (window.currentPoemData.type === 'userPoems' && window.currentUser) {
-            if (window.currentUser.role === 'admin') {
+            if (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
                 adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('userPoems', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button></div>`;
                 let currentRating = window.currentPoemData.adminRating || 0; let currentCat = window.currentPoemData.adminCategory || 'Normal'; let currentCatDisplay = currentRating === 0 ? 'Puan Bekliyor' : currentCat;
                 adminRatingHTML = `<div class="modal-interaction-box" style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px;"><strong style="color:#f4c542; font-size:1.2rem;">🏆 Admin Değerlendirmesi</strong><div style="color:#fdfbf7; font-size:1.05rem;">Mevcut: <strong style="font-size:1.2rem; color:#f4c542;">${currentRating} Puan</strong> (${currentCatDisplay})</div><div style="display:flex; gap:12px; width:100%; align-items:center; justify-content:center; flex-wrap:wrap; margin-top: 5px;"><select id="admin-rating-cat" class="auth-input" style="width:auto; margin:0; padding:10px; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;"><option value="Super Elite" ${currentCat === 'Super Elite' ? 'selected' : ''}>🏆🏆🏆 Super Elite</option><option value="Elite" ${currentCat === 'Elite' ? 'selected' : ''}>🏆🏆 Elite</option><option value="Normal" ${currentCat === 'Normal' ? 'selected' : ''}>🏆 Normal</option></select><input type="number" id="admin-rating-val" min="0" max="100" value="${currentRating}" class="auth-input" style="width:90px; text-align:center; margin:0; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;" placeholder="Puan"></div><div style="display:flex; gap:12px; width:100%; justify-content:center; margin-top:5px;"><button class="reset-btn" style="width:auto; margin:0; padding:10px 25px; font-size:1rem;" onclick="window.saveAdminRating('${poemId}', event)">Kaydet <span class="de-sub" style="color:inherit; font-size:0.85em;">(Speichern)</span></button><button class="reset-btn danger" style="width:auto; margin:0; padding:10px 25px; font-size:1rem;" onclick="window.deleteAdminRating('${poemId}', event)">Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div></div>`;
             } else if (window.currentUser.username === window.currentPoemData.username) {
                 adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border:none; padding: 10px 20px; width:auto;" onclick="window.userEditWork('${poemId}')"><i class="fas fa-edit"></i> Düzenle <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button><button class="reset-btn danger" style="width:auto; padding: 10px 20px;" onclick="window.userDeleteWork('${poemId}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div>`;
             }
-        } else if (window.currentUser && window.currentUser.role === 'admin') {
+        } else if (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin')) {
             adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('${window.currentPoemData.type}', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten/Löschen)</span></button></div>`;
         }
 
@@ -4144,17 +4291,17 @@ Blühe, deutsches Vaterland!</p>
         }
 
         let commentsHTML = data.comments && data.comments.length > 0 ? data.comments.map((c, idx) => {
-            let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.username === c.username)) ? `<div class="action-btns" style="display:flex; gap:12px; margin-top:8px;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#3b82f6; cursor:pointer; font-size:1.15rem; padding:0;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-size:1.15rem; padding:0;"><i class="fas fa-trash-alt"></i></button></div>` : '';
-            return `<div style="border-bottom: 1px dashed rgba(244,197,66,0.3); padding: 15px 0; display:flex; flex-direction:column;"><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><strong style="color:#f4c542; font-size:1.1rem;">${c.user}</strong><div style="display:flex; flex-direction:column; align-items:flex-end;"><span class="time-info" style="font-size:0.8rem; color:#64748b;">${c.time || ''}</span>${c.editTime ? `<span class="edit-info" style="font-size:0.75rem; color:#f4c542; font-style:italic;">(Edit: ${c.editTime})</span>` : ''}</div></div><span style="color:#e2e8f0; font-size:1.1rem; word-break:break-word; line-height:1.6;">${c.text}</span>${actionBtns}</div>`;
+            let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin' || window.currentUser.username === c.username)) ? `<div class="action-btns" style="display:flex; gap:12px; margin-top:8px;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#3b82f6; cursor:pointer; font-size:1.15rem; padding:0;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-size:1.15rem; padding:0;"><i class="fas fa-trash-alt"></i></button></div>` : '';
+            let colorClass = window.getAuthorColorClass(c.username);
+            return `<div style="border-bottom: 1px dashed rgba(244,197,66,0.3); padding: 15px 0; display:flex; flex-direction:column;"><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><strong style="color:#f4c542; font-size:1.1rem;"><span class="${colorClass}">${c.user}</span></strong><div style="display:flex; flex-direction:column; align-items:flex-end;"><span class="time-info" style="font-size:0.8rem; color:#64748b;">${c.time || ''}</span>${c.editTime ? `<span class="edit-info" style="font-size:0.75rem; color:#f4c542; font-style:italic;">(Edit: ${c.editTime})</span>` : ''}</div></div><span style="color:#e2e8f0; font-size:1.1rem; word-break:break-word; line-height:1.6;">${c.text}</span>${actionBtns}</div>`;
         }).join('') : `<span style="color:#94a3b8; font-style:italic; font-size:1.05rem; pointer-events:none; display:block; text-align:center; padding:20px 0;">${langIsDe ? 'Schreibe den ersten Kommentar...' : 'İlk yorumu sen yap... <span class="de-sub" style="font-size:0.85em;">(Schreibe Kommentar...)</span>'}</span>`;
 
-        // HIER IST DER FIX FÜR DEN PLACEHOLDER (KEIN HTML MEHR DRIN!)
         container.innerHTML = 
             adminOrOwnerEdit +
             `<div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 25px;">
                 <button class="reset-btn" onclick="window.openFastModal('shareModal')" style="width:auto; margin:0; padding: 10px 20px; font-size: 1rem; border-radius:12px;"><i class="fas fa-share-alt" style="margin-right:5px;"></i> Paylaş <span class="de-sub" style="color:inherit; font-size:0.85em;">(Teilen)</span></button>
                 <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                    <span class="modal-signature" style="font-family: 'Great Vibes', cursive; font-size: 2.8rem; color: #f4c542; transform: rotate(-5deg); margin-bottom: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.8); pointer-events:none;">~ ${window.currentPoemData.author}</span>
+                    <span class="modal-signature" style="font-family: 'Great Vibes', cursive; font-size: 2.8rem; color: #f4c542; transform: rotate(-5deg); margin-bottom: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.8); pointer-events:none;">~ <span class="author-anim-author">${window.currentPoemData.author}</span></span>
                     ${cuteRatingHTML}
                 </div>
             </div>
@@ -4209,7 +4356,7 @@ Blühe, deutsches Vaterland!</p>
             let author = window.atasozleriLang === 'DE' ? (a.authorDE || 'Unbekannt') : (a.authorTR || 'Anonim');
             return `<div class="card" style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; box-shadow:0 5px 15px rgba(0,0,0,0.5); cursor:pointer;" onclick="window.openPoemModal('${a.id}', 'atasozleri')">
                         <h3 style="color:#fdfbf7; margin-bottom:10px; font-family:'Playfair Display', serif; pointer-events:none;">${a.emoji||'💬'} ${title}</h3>
-                        <div style="color:#f4c542; font-size:0.85rem; margin-top:10px; text-align:right; font-weight:bold; pointer-events:none;">- ${author}</div>
+                        <div style="color:#f4c542; font-size:0.85rem; margin-top:10px; text-align:right; font-weight:bold; pointer-events:none;">- <span class="author-anim-author">${author}</span></div>
                     </div>`;
         }).join('');
     };
@@ -4306,24 +4453,43 @@ Blühe, deutsches Vaterland!</p>
         if(window.setHangmanLang) window.setHangmanLang(lang); if(window.initAnagram && document.getElementById('anagramModal').classList.contains('active-modal')) window.initAnagram(); if(window.loadMilyoner && document.getElementById('milyonerModal').classList.contains('active-modal')) window.loadMilyoner(); if(window.loadQuiz && document.getElementById('quizModal').classList.contains('active-modal')) window.loadQuiz();
     };
 
+    // HIER IST DIE ZENTRALE PUNKTE-SYNCHRONISATIONS LOGIK
     window.updateGameStats = function(points, result, gameName) {
         if(!window.currentUser) return;
         window.lastLocalUpdate = Date.now() + 5000; 
-        let u = window.userDatabase[window.currentUser.username]; if(!u) return;
-        u.score = (u.score || 0) + points; u.played = (u.played || 0) + 1;
-        if(result === 'win') u.wins = (u.wins || 0) + 1; else if(result === 'loss') u.losses = (u.losses || 0) + 1; else u.draws = (u.draws || 0) + 1;
-        window.userDatabase[window.currentUser.username] = u; window.currentUser = u;
-        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
         
-        const scoreEl = document.getElementById('user-score'); if(scoreEl) scoreEl.innerText = u.score + ' P.';
+        let u = window.userDatabase[window.currentUser.username]; 
+        if(!u) return;
+        
+        u.score = (u.score || 0) + points; 
+        u.played = (u.played || 0) + 1;
+        
+        if(result === 'win') u.wins = (u.wins || 0) + 1; 
+        else if(result === 'loss') u.losses = (u.losses || 0) + 1; 
+        else u.draws = (u.draws || 0) + 1;
+        
+        window.userDatabase[window.currentUser.username] = u; 
+        window.currentUser = u;
+        
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
+        sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+        if (localStorage.getItem('misaliAutoFill')) {
+            localStorage.setItem('misaliAutoFill', JSON.stringify({u: u.username, p: u.pass}));
+        }
+        
+        const scoreEl = document.getElementById('user-score'); 
+        if(scoreEl) scoreEl.innerText = u.score + ' P.';
         
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
         let dt = new Date();
         let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
         window.adminLogs.push({ time: dFmt, action: gameName + ' Oynadı (' + (points > 0 ? '+'+points : points) + ' Puan)', user: fullName });
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); 
-        if(window.renderOnlineUsers) window.renderOnlineUsers(); if(window.renderLeaderboard && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
-        if(window.syncToCloud) window.syncToCloud(); window.sendSystemMessage('Admin', `OYUN: ${fullName} oyun oynadı: ${gameName}`);
+        
+        if(window.renderOnlineUsers) window.renderOnlineUsers(); 
+        if(window.renderLeaderboard && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
+        if(window.syncToCloud) window.syncToCloud(); 
+        window.sendSystemMessage('Admin', `OYUN: ${fullName} oyun oynadı: ${gameName}`);
     };
 
     window.memCards=[]; window.firstCard=null; window.secondCard=null; window.lockBoard=false; window.memPairs=0;
@@ -4924,7 +5090,7 @@ Blühe, deutsches Vaterland!</p>
         if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } 
     };
 
-    // ==========================================================================
+   // ==========================================================================
     // 500+ EMOJIS FÜR DAS ADMIN PANEL
     // ==========================================================================
     window.renderAdminEmojis = function() {
