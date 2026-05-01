@@ -1306,8 +1306,628 @@
             background: #000000 !important;
         }
 
+        /* ==================================================================
+           SUCH-DROPDOWN Z-INDEX FIX & PROFILBILD ANIMATIONEN (V3)
+           ================================================================== */
+        
+        /* 1. DIE ABSOLUTE Z-INDEX HERRSCHAFT: Obere Leiste schlägt untere Leiste! */
+        .header-top {
+            position: relative !important;
+            z-index: 99999999 !important; /* Hebt alles (inkl. Dropdown) über die Menüleiste unten! */
+        }
+        
+        .header-nav-bar {
+            position: relative !important;
+            z-index: 10 !important; /* Ordnet die Nav-Leiste samt gelbem Zähler strikt unter! */
+        }
+
+        .header-search {
+            position: relative !important;
+            z-index: 99999999 !important; 
+        }
+        
+        .search-suggestions {
+            position: absolute !important;
+            z-index: 99999999 !important;
+            background: #030712 !important; /* Dein tiefes Nachtblau */
+            border: 1px solid var(--accent-color) !important;
+        }
+
+        /* 2. ANIMATION 1: Startseite (Ana Sayfa) - Die schnelle Spirale */
+        @keyframes spiralSpinIn {
+            0% { 
+                transform: scale(0) rotate(-1080deg); 
+                opacity: 0; 
+                filter: blur(10px) drop-shadow(0 0 0 rgba(244,197,66,0));
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1; 
+                filter: blur(0) drop-shadow(0 10px 25px rgba(244,197,66,0.3));
+            }
+        }
+        
+        #home-profile-pic {
+            animation: spiralSpinIn 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+        }
+
+        /* 3. ANIMATION 2: My Profil - Epischer 3D-Flip & Glow */
+        @keyframes epic3DFlip {
+            0% { 
+                transform: perspective(1000px) rotateY(90deg) scale(0.5); 
+                opacity: 0; 
+                filter: drop-shadow(0 0 0 rgba(34, 211, 238, 0)); 
+            }
+            50% { 
+                transform: perspective(1000px) rotateY(-15deg) scale(1.05); 
+                opacity: 1; 
+                /* Kurzes, cooles Cyan-Leuchten in der Mitte der Animation */
+                filter: drop-shadow(0 0 25px rgba(34, 211, 238, 0.7)); 
+            }
+            100% { 
+                transform: perspective(1000px) rotateY(0deg) scale(1); 
+                opacity: 1; 
+                filter: drop-shadow(0 10px 25px rgba(244,197,66,0.3)); 
+            }
+        }
+
+        .bio-pic {
+            /* Das cubic-bezier am Ende sorgt für einen "Bouncy"-Effekt (leichtes Federn) */
+            animation: epic3DFlip 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+            transform-style: preserve-3d !important;
+        }
+
+        /* ==================================================================
+           3 GEILE BUCHSTABEN-ANIMATIONEN (VERLANGSAMT & OPTIMIERT)
+           ================================================================== */
+        
+        /* 1. ANA SAYFA: Elastic Pop-Up (Entspannter) */
+        .letter-home {
+            opacity: 0;
+            transform: translateY(40px) scale(0.5);
+            animation: elasticPop 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+        }
+        @keyframes elasticPop {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* 2. MY PROFIL: 3D Domino Flip (Deutlicher Buchstabe für Buchstabe) */
+        .letter-profile {
+            opacity: 0;
+            transform: perspective(400px) rotateX(-90deg);
+            transform-origin: bottom;
+            animation: dominoFlip 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+        }
+        @keyframes dominoFlip {
+            to { opacity: 1; transform: perspective(400px) rotateX(0deg); }
+        }
+
+        /* 3. HEADER: Smooth Glow-Slide (Langsamer & Eleganter) */
+        .letter-header {
+            opacity: 0;
+            transform: translateX(-15px);
+            filter: drop-shadow(0 0 0 rgba(244,197,66,0));
+            animation: glowSlide 0.8s ease-out forwards !important;
+        }
+        @keyframes glowSlide {
+            50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(244,197,66,0.8)); }
+            100% { opacity: 1; transform: translateX(0); filter: drop-shadow(0 0 2px rgba(244,197,66,0.3)); }
+        }
+
+        /* ==================================================================
+           PROFESSIONELLES DESIGN FÜR UHR & KALENDER
+           ================================================================== */
+        .datetime-container { 
+            display: flex; 
+            gap: 10px; 
+            /* HIER: Space Mono durch Poppins ersetzt für einen viel edleren Look */
+            font-family: 'Poppins', sans-serif !important; 
+            font-size: 0.9rem !important; 
+            font-weight: 500 !important;
+            letter-spacing: 0.5px !important;
+            color: #cbd5e1 !important; 
+        }
+        
+        #digi-clock, #digi-date {
+            /* WICHTIG: Verhindert das nervige "Wackeln" der Uhrzeit, wenn sich die Zahlen ändern! */
+            font-variant-numeric: tabular-nums !important; 
+        }
+
+        /* ==================================================================
+           KOMPAKTES DESIGN (Alles etwas kleiner & aufgeräumter)
+           ================================================================== */
+        /* Karten & Game-Karten schrumpfen */
+        .card, .game-card { padding: 18px 15px !important; }
+        .card h3 { font-size: 1.15rem !important; margin-bottom: 5px !important; }
+        .card .clamp-text { font-size: 0.85rem !important; }
+        .card .card-sub { font-size: 0.8rem !important; }
+        .card div { font-size: 0.7rem !important; }
+
+        .game-card .game-icon { font-size: 2.4rem !important; margin-bottom: 8px !important; }
+        .game-card .bilingual-title { font-size: 0.95rem !important; }
+        .game-card span { font-size: 0.8rem !important; }
+
+        /* Globale Texte & Modal-Texte kompakter */
+        #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
+            font-size: 0.85rem !important;
+            line-height: 1.5 !important;
+        }
+        #hakkimda-view h3 { font-size: 1.45rem !important; }
+
+
+        /* ==================================================================
+           HEADER MINI-PROFILBILD ANIMATION (Auffällig & Edel)
+           ================================================================== */
+        @keyframes miniProfilePulse {
+            0% { transform: scale(1) rotate(0deg); box-shadow: 0 0 5px rgba(244,197,66,0.4); border-color: rgba(244,197,66,0.5); }
+            50% { transform: scale(1.15) rotate(5deg); box-shadow: 0 0 15px rgba(244,197,66,1); border-color: rgba(244,197,66,1); }
+            100% { transform: scale(1) rotate(0deg); box-shadow: 0 0 5px rgba(244,197,66,0.4); border-color: rgba(244,197,66,0.5); }
+        }
+        .header-mini-profile {
+            animation: miniProfilePulse 3.5s infinite ease-in-out !important;
+            transition: transform 0.2s !important;
+        }
+        .header-mini-profile:hover {
+            animation: none !important;
+            transform: scale(1.25) rotate(-10deg) !important;
+        }
+
+
+        /* ==================================================================
+           BUCHSTABEN ANIMATIONEN FIX (Sichtbar, Weich & mit "both")
+           ================================================================== */
+        .letter-home {
+            display: inline-block;
+            animation: elasticPop 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
+        }
+        @keyframes elasticPop {
+            0% { opacity: 0; transform: translateY(40px) scale(0.5); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .letter-profile {
+            display: inline-block;
+            transform-origin: bottom;
+            /* "both" zwingt den Browser, den Buchstaben bis zum Start unsichtbar zu halten! */
+            animation: dominoFlip 1s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
+        }
+        @keyframes dominoFlip {
+            0% { opacity: 0; transform: perspective(400px) rotateX(-90deg); }
+            100% { opacity: 1; transform: perspective(400px) rotateX(0deg); }
+        }
+
+        .letter-header {
+            display: inline-block;
+            animation: glowSlide 0.8s ease-out both !important;
+        }
+        @keyframes glowSlide {
+            0% { opacity: 0; transform: translateX(-15px); filter: drop-shadow(0 0 0 rgba(244,197,66,0)); }
+            50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(244,197,66,0.8)); }
+            100% { opacity: 1; transform: translateX(0); filter: drop-shadow(0 0 2px rgba(244,197,66,0.3)); }
+        }
+
+        /* ==================================================================
+           FEINSCHLIFF: TEXTGRÖSSEN (+0.2rem) & DEZENTES PROFILBILD-PULSIEREN
+           ================================================================== */
+        
+        /* 1. Karten & Game-Karten Texte vergrößern */
+        .card h3 { font-size: 1.35rem !important; margin-bottom: 6px !important; }
+        .card .clamp-text { font-size: 1.05rem !important; }
+        .card .card-sub { font-size: 1.0rem !important; }
+        .card div { font-size: 0.9rem !important; }
+
+        .game-card .bilingual-title { font-size: 1.15rem !important; }
+        .game-card span { font-size: 1.0rem !important; }
+
+        /* 2. Globale Texte & Modal-Texte vergrößern */
+        #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
+            font-size: 1.05rem !important;
+            line-height: 1.6 !important;
+        }
+        #hakkimda-view h3 { font-size: 1.65rem !important; }
+
+
+       /* ==================================================================
+           HEADER MINI-PROFILBILD ANIMATION (Gestochen scharf & Radar-Glow)
+           ================================================================== */
+        /* Wir animieren nur den Schatten nach außen, das Bild bleibt starr und scharf! */
+        @keyframes miniProfileRadar {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(244, 197, 66, 0.7); 
+                border-color: rgba(244, 197, 66, 0.5);
+            }
+            70% { 
+                box-shadow: 0 0 0 8px rgba(244, 197, 66, 0); /* Zieht einen Lichtring nach außen, der verblasst */
+                border-color: rgba(244, 197, 66, 1);
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(244, 197, 66, 0); 
+                border-color: rgba(244, 197, 66, 0.5);
+            }
+        }
+        
+        .header-mini-profile {
+            /* Kein ständiges Skalieren mehr = 100% scharfes Bild! */
+            animation: miniProfileRadar 2.5s infinite !important;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important;
+            will-change: transform, box-shadow;
+        }
+        
+        .header-mini-profile:hover {
+            animation: none !important;
+            /* Nur beim aktiven Draufklicken/Hovern springt es kurz hervor und steht dann ruhig */
+            transform: scale(1.1) !important;
+            box-shadow: 0 0 15px rgba(244, 197, 66, 0.9) !important;
+            border-color: #fff !important;
+        }
+
+        /* ==================================================================
+           DESKTOP FIX: Profil-Bereich im Header vergrößern (+0.2rem)
+           ================================================================== */
+        @media (min-width: 769px) {
+            #header-username { 
+                font-size: 1.35rem !important; /* Vorher 1.15rem */
+            }
+            .zodiac-badge { 
+                font-size: 1.4rem !important; /* Vorher 1.2rem */
+            }
+            .header-score-badge { 
+                font-size: 1.1rem !important; /* Vorher 0.9rem */
+                padding: 4px 10px !important; 
+            }
+            .logout-btn { 
+                font-size: 1.1rem !important; 
+                padding: 6px 12px !important; 
+            }
+            .header-mini-profile { 
+                width: 44px !important; /* +4px entspricht ca. +0.2rem */
+                height: 44px !important; 
+            }
+        }
+
+        /* ==================================================================
+           MOBILE FIX: Karten & Texte kompakter machen (-0.2rem)
+           ================================================================== */
+        @media (max-width: 768px) {
+            /* Karteninhalte schrumpfen */
+            .card h3 { font-size: 1.15rem !important; } 
+            .card .clamp-text { font-size: 0.85rem !important; } 
+            .card .card-sub { font-size: 0.8rem !important; } 
+            .card div { font-size: 0.7rem !important; } 
+
+            /* Game-Karten schrumpfen */
+            .game-card .bilingual-title { font-size: 0.95rem !important; } 
+            .game-card span { font-size: 0.8rem !important; } 
+
+            /* Info-Texte & Modals schrumpfen */
+            #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
+                font-size: 0.85rem !important; 
+                line-height: 1.5 !important;
+            }
+            #hakkimda-view h3 { font-size: 1.45rem !important; } 
+        }
+
+        /* ==================================================================
+           DESKTOP FIX: Glocke absolut positionieren (Freistehend über Wetter)
+           ================================================================== */
+        @media (min-width: 769px) {
+            #user-notify-btn {
+                position: absolute !important;
+                top: 8px !important; /* Exakt auf einer Linie mit dem Ticker/Admin-Stats */
+                right: 2% !important; /* Ganz an den rechten Rand gepinnt */
+                margin: 0 !important;
+                z-index: 9999999 !important; /* Nichts kann sie mehr überlappen */
+            }
+            
+            /* Falls du als Admin eingeloggt bist, schieben wir die Stats etwas nach links, 
+               damit sie nicht in die Glocke krachen */
+            .header-user-stats {
+                right: 70px !important; 
+            }
+        }
+
+        /* ==================================================================
+           MOBILE FIX: Like-Herzen minimal verkleinern (-0.1rem)
+           ================================================================== */
+        @media (max-width: 768px) {
+            /* Überschreibt den harten Inline-Style (3.5rem) aus dem JavaScript */
+            .custom-live-hearts i.fa-heart {
+                font-size: 3.4rem !important; 
+            }
+            
+            /* Optional: Den Abstand zwischen den 3 Herzen minimal verkleinern, 
+               damit sie auf kleinen Handy-Displays noch besser nebeneinander passen */
+            .custom-live-hearts {
+                gap: 25px !important; /* Vorher 40px */
+            }
+        }
+
+        /* ==================================================================
+           DESKTOP FIX: Suche schmaler & Glocke zentrieren
+           ================================================================== */
+        @media (min-width: 769px) {
+            /* 1. Suche auf dem großen Desktop schmaler machen (von 360px auf 260px) */
+            .header-top {
+                grid-template-columns: 1fr 260px 1fr !important; 
+            }
+            .header-search-wrapper {
+                flex: 0 1 260px !important;
+                max-width: 260px !important;
+            }
+
+            /* 2. Glocke vertikal zentrieren (nach unten schieben) */
+            #user-notify-btn {
+                top: 45px !important; /* Vorher 8px. Falls zu tief/hoch, ändere die Zahl leicht (z.B. 40px oder 50px) */
+            }
+        }
+
+        /* 3. Anpassung für Laptops (kleinere Bildschirme) */
+        @media (min-width: 769px) and (max-width: 1350px) {
+            .header-top {
+                grid-template-columns: 1fr 220px 1fr !important; /* Hier noch etwas schmaler (220px) */
+            }
+            .header-search-wrapper {
+                flex: 0 1 220px !important;
+                max-width: 220px !important;
+            }
+            
+            #user-notify-btn {
+                top: 35px !important; /* Laptop-Header ist etwas flacher, daher etwas weniger Abstand von oben */
+            }
+        }
+
+        /* ==================================================================
+           DESKTOP & LAPTOP FIX: Zähler-Reihe aus dem Stau befreien!
+           ================================================================== */
+        @media (min-width: 769px) {
+            .header-stats-row {
+                position: absolute !important;
+                right: 85px !important; /* Platziert die Zähler rechts, sicher neben der Glocke */
+                top: 55px !important; /* Zieht sie etwas nach unten, weg von der Suche & Profil */
+                width: auto !important;
+                margin-top: 0 !important;
+                
+                /* Optischer Bonus: Ein edler Hintergrund, damit es wie ein Widget wirkt */
+                background: rgba(10, 25, 47, 0.85) !important; 
+                padding: 6px 15px !important;
+                border-radius: 12px !important;
+                border: 1px solid rgba(244, 197, 66, 0.2) !important;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+            }
+        }
+        
+        /* Für Laptops (kleinere Bildschirme) noch etwas feintunen */
+        @media (min-width: 769px) and (max-width: 1350px) {
+            .header-stats-row {
+                right: 75px !important;
+                top: 45px !important;
+                transform: scale(0.9) !important; /* Macht das Widget etwas kompakter für Laptops */
+                transform-origin: right center !important;
+            }
+        }
+
+        /* ==================================================================
+           DESKTOP & LAPTOP OVERLAP FIX (Suche, Wetter & Zähler aufräumen)
+           ================================================================== */
+        @media (min-width: 769px) {
+            
+            /* 1. SUCHE: Nach rechts rücken & rechte Spalte vor Überlappung schützen */
+            .header-top {
+                /* Wir geben der rechten Spalte (Wetter/Profil) 1.3-fachen Platz, damit sie nicht in die Suche kracht */
+                grid-template-columns: 1fr 240px 1.3fr !important; 
+                gap: 20px !important;
+            }
+            .header-search-wrapper {
+                max-width: 240px !important;
+                margin-left: 30px !important; /* Schiebt die Suche wie gewünscht etwas nach rechts */
+            }
+
+            /* 2. ZÄHLER-REIHE: Verkleinern & unter die Admin-Stats packen */
+            .header-stats-row {
+                position: absolute !important;
+                top: 40px !important;  /* Schiebt sie exakt UNTER "Kayıtlı | Aktif | Ziyaretçi" */
+                right: 8% !important;  /* Bündig mit den Admin-Stats darüber */
+                margin: 0 !important;
+                background: rgba(10, 25, 47, 0.9) !important;
+                padding: 4px 12px !important;
+                border-radius: 8px !important;
+                border: 1px solid rgba(244, 197, 66, 0.3) !important;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
+                gap: 12px !important;
+                width: auto !important;
+                justify-content: flex-end !important;
+            }
+
+            /* Schriften um ca. 0.1rem verkleinern (wie gewünscht) */
+            .header-online-status, 
+            .header-works-status, 
+            .header-saved-status {
+                font-size: 0.65rem !important; /* Vorher ca 0.75rem */
+            }
+
+            /* Badges (die kleinen Kreise mit Zahlen) passend dazu verkleinern */
+            .header-stats-row .badge-count {
+                font-size: 0.65rem !important;
+                padding: 1px 5px !important;
+            }
+        }
+
+        /* 3. LAPTOP-FEINJUSTIERUNG: Wenn der Bildschirm noch etwas kleiner wird */
+        @media (min-width: 769px) and (max-width: 1350px) {
+            .header-top {
+                grid-template-columns: 1fr 200px 1.3fr !important;
+            }
+            .header-search-wrapper {
+                max-width: 200px !important;
+                margin-left: 10px !important;
+            }
+            .header-stats-row {
+                top: 36px !important; /* Laptop-Header ist etwas flacher */
+                right: 5% !important;
+            }
+        }
+
+        /* ==================================================================
+           ULTIMATIVER HEADER-REPAIR (Kein Overlap zwischen Suche & Stats)
+           ================================================================== */
+       @media (min-width: 769px) {
+            /* 1. Grundstruktur des Headers */
+            .header-top {
+                display: grid !important;
+                /* Spalte 1: Logo | Spalte 2: Mitte (Profil/Wetter) | Spalte 3: Rechts-Block */
+                grid-template-columns: auto 1fr 380px !important;
+                align-items: center !important;
+                padding: 10px 2% !important;
+                gap: 15px !important;
+                position: relative !important;
+            }
+
+            /* 2. Linke & Mittlere Sektion */
+            .header-left { margin: 0 !important; }
+            .header-right { 
+                justify-content: center !important; 
+                margin: 0 !important;
+                gap: 15px !important;
+            }
+
+            /* 3. RECHTE SEKTION (Der neue flexible Sammel-Container) */
+            /* Wir erstellen eine Box für alles, was rechts vom Wetter liegt */
+            /* RECHTS: Der "Sammel-Anker" für alle Statistiken und die Suche */
+            .header-search-wrapper {
+                grid-column: 3 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important; /* Nutzt die vollen 380px */
+                gap: 6px !important;
+                margin: 0 !important;
+                max-width: 380px !important;
+            }
+
+            /* 4. Admin-Stats (Kayıtlı/Aktif) - Absolute Position entfernen! */
+            /* Admin-Stats (Kayıtlı/Aktif) - Jetzt fest im Block integriert */
+            .header-user-stats {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: rgba(255, 255, 255, 0.05) !important;
+                padding: 4px 10px !important;
+                border-radius: 8px !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            /* 5. Das Suchfeld selbst */
+            .header-search {
+                width: 100% !important;
+                margin: 0 !important;
+                z-index: 100 !important;
+            }
+
+            /* 6. Untere Zähler (Canlı/Eser) */
+            /* Untere Zähler (Canlı/Eser) - Jetzt ordentlich darunter */
+            .header-stats-row {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: flex !important;
+                justify-content: space-evenly !important; /* Gleichmäßige Verteilung */
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .header-online-status, .header-works-status, .header-saved-status {
+                font-size: 0.65rem !important; /* 0.1rem kleiner wie gewünscht */
+                white-space: nowrap !important;
+            }
+
+            /* 7. Die Glocke (Sicherer Abstand rechts) */
+           /* Die Glocke - Fest am rechten Rand verankert */
+            #user-notify-btn {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                margin: 0 0 0 10px !important;
+                transform: none !important;
+                flex-shrink: 0 !important;
+            }
+        }
+
+
+        /* Texte minimal kleiner für Laptop-Sicherheit */
+            .header-online-status, .header-works-status, .header-saved-status {
+                font-size: 0.68rem !important;
+                white-space: nowrap !important;
+            }
+        
+        /* Spezial-Anpassung für Laptop (Unter 1300px Breite) */
+        @media (min-width: 769px) and (max-width: 1300px) {
+            .header-top {
+                grid-template-columns: auto 1fr 130px !important; /* Schmalerer Rechtsblock */
+            }
+            .header-search-wrapper {
+                max-width: 180px !important;
+            }
+            /* Namen und Stats verkleinern, damit sie nicht ausbrechen */
+            #header-username { font-size: 1.1rem !important; }
+            #header-stats-text { font-size: 0.55rem !important; }
+            .header-stats-row { transform: scale(0.95) !important; }
+        }
+
+        /* ==================================================================
+           LAPTOP FEINJUSTIERUNG (Damit es bei mittleren Bildschirmen passt)
+           ================================================================== */
+        @media (min-width: 769px) and (max-width: 1350px) {
+            .header-search-wrapper {
+                flex: 0 0 200px !important;
+                max-width: 200px !important;
+                margin: 0 50px 0 0 !important; /* Etwas weniger Abstand zur Glocke */
+            }
+            .header-top {
+                gap: 10px !important;
+            }
+            #user-notify-btn {
+                top: 25px !important; /* Auf Laptops etwas höher */
+            }
+        }
+
     </style>
     <script>
+
+        /* BUCHSTABEN-ANIMATION MOTOR (GEFIXT & VERLANGSAMT) */
+        window.animateLetters = function() {
+            const targets = [
+                { sel: '.hero-title', cls: 'letter-home', delay: 0.10 }, 
+                { sel: '#hakkimda-view .author-anim-admin', cls: 'letter-profile', delay: 0.18 }, /* Schön langsam Buchstabe für Buchstabe */
+                { sel: '#header-username', cls: 'letter-header', delay: 0.08 } 
+            ];
+
+            targets.forEach(t => {
+                const el = document.querySelector(t.sel);
+                if (el && (!el.dataset.splitted || el.children.length === 0)) {
+                    const text = el.innerText;
+                    el.innerText = ''; // Leert den Text, um Platz für die Einzelbuchstaben zu machen
+                    el.dataset.splitted = 'true'; 
+                    
+                    [...text].forEach((char, i) => {
+                        const span = document.createElement('span');
+                        span.innerText = char === ' ' ? '\u00A0' : char; 
+                        
+                        // Das fehlerhafte span.style.opacity = '0' ist hier entfernt,
+                        // da unser neues CSS mit "both" das jetzt professionell übernimmt!
+                        
+                        span.style.animationDelay = `${i * t.delay}s`; 
+                        span.classList.add(t.cls);
+                        el.appendChild(span);
+                    });
+                }
+            });
+        };
 
         function adjustHeaderSpace() {
             const header = document.getElementById('main-header');
@@ -1322,8 +1942,14 @@
         }
         window.addEventListener('load', adjustHeaderSpace);
         window.addEventListener('resize', adjustHeaderSpace);
-        setTimeout(adjustHeaderSpace, 500);
-        setTimeout(adjustHeaderSpace, 1500); // Yedekleme için tekrar tetikle
+        setTimeout(() => {
+            try { if(window.initContent) window.initContent(); } catch(e){}
+            // ... deine anderen Befehle ...
+            
+            /* HIER AUSLÖSER EINFÜGEN: */
+            try { if(window.animateLetters) window.animateLetters(); } catch(e){}
+            
+        }, 200);
     </script>
 </head>
 
@@ -4628,18 +5254,29 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     window.navigate = function(viewId) { 
-        window.closeAllSidebars(); document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active-view')); 
-        const target = document.getElementById(viewId); if(target) target.classList.add('active-view'); 
-        document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active-nav')); 
-        const btn = Array.from(document.querySelectorAll('#main-nav button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId)); if(btn) btn.classList.add('active-nav'); 
-        localStorage.setItem('misaliActivePage', viewId); window.scrollTo(0,0); 
-        
-        if(viewId === 'bilmece-view') { if(!window.bilmeceLang) window.setBilmeceLang(window.currentGameLang || 'TR'); else window.renderBilmeces(); }
-        if(viewId === 'bulmaca-view') { if(!window.bulmacaLang) window.setBulmacaLang(window.currentGameLang || 'TR'); else window.renderBulmacalar(); }
-        if(viewId === 'atasozleri-view') { if(!window.atasozleriLang) window.setAtasozleriLang(window.currentGameLang || 'TR'); else { if(window.renderAtasozleri) window.renderAtasozleri(); } }
-        
-        window.scrollTo(0,0); 
-    };
+            window.closeAllSidebars(); document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active-view')); 
+            const target = document.getElementById(viewId); if(target) target.classList.add('active-view'); 
+            document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active-nav')); 
+            const btn = Array.from(document.querySelectorAll('#main-nav button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId)); if(btn) btn.classList.add('active-nav'); 
+            localStorage.setItem('misaliActivePage', viewId); window.scrollTo(0,0); 
+            
+            if(viewId === 'bilmece-view') { if(!window.bilmeceLang) window.setBilmeceLang(window.currentGameLang || 'TR'); else window.renderBilmeces(); }
+            if(viewId === 'bulmaca-view') { if(!window.bulmacaLang) window.setBulmacaLang(window.currentGameLang || 'TR'); else window.renderBulmacalar(); }
+            if(viewId === 'atasozleri-view') { if(!window.atasozleriLang) window.setAtasozleriLang(window.currentGameLang || 'TR'); else { if(window.renderAtasozleri) window.renderAtasozleri(); } }
+            
+            // =========================================================
+            // HIER IST DER FIX: ANIMATIONEN BEIM SEITENWECHSEL NEU LADEN!
+            // =========================================================
+            if(target) {
+                target.querySelectorAll('.letter-home, .letter-profile, .bio-pic, #home-profile-pic').forEach(el => {
+                    el.style.animation = 'none'; // Stoppt die alte Hintergrund-Animation
+                    void el.offsetWidth; // Zwingt den Browser zum Neuladen (Reflow-Trick)
+                    el.style.animation = ''; // Startet die Animation genau jetzt, wenn du hinschaust!
+                });
+            }
+            
+            window.scrollTo(0,0); 
+        };
 
     window.addEventListener('popstate', function (event) {
         if(document.body.classList.contains('modal-open') || document.querySelector('.sidebar.open') || document.querySelector('.sidebar-right.open')) {
