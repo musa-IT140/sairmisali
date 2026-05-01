@@ -23,7 +23,7 @@
         /* RESET & BASICS */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         html { width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #0a192f 0%, #000000 100%); color: var(--text-color); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; position: relative; width: 100vw; max-width: 100vw; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #0a192f 0%, #000000 100%); background-attachment: fixed; color: var(--text-color); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; position: relative; width: 100vw; max-width: 100vw; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         body.modal-open { overflow: hidden; }
         
         /* GOOGLE TRANSLATE HIDE */
@@ -197,13 +197,13 @@
 
         .cal-day-selected { background: rgba(244, 197, 66, 0.3) !important; border: 2px solid var(--accent-color) !important; box-shadow: 0 0 15px rgba(244, 197, 66, 0.8) !important; transform: scale(1.1); color: #fff !important; }
         
-        /* 1. Zwingt das Modal dazu, die Sidebar außerhalb NICHT abzuschneiden, hält sie aber fest im Modal! */
+        /* Zwingt das Modal dazu, die Sidebar außerhalb NICHT abzuschneiden, hält sie aber fest im Modal! */
         #events-modal-content {
             overflow: visible !important;
-            position: relative !important; /* WICHTIG: Dies hält den Button im Modal gefangen! */
+            position: relative !important; 
         }
 
-        /* 2. Sidebar parkt sicher AUßERHALB des rechten Randes (etwas schmaler) */
+        /* Sidebar parkt sicher AUßERHALB des rechten Randes (etwas schmaler) */
         .cal-holiday-sidebar {
             position: absolute; top: 0; right: -250px; width: 250px; height: 100%;
             background: rgba(10,25,47,0.98); border: 1px solid rgba(244,197,66,0.5);
@@ -213,13 +213,52 @@
         }
         .cal-holiday-sidebar.open { transform: translateX(0); opacity: 1; visibility: visible; z-index: 50;}
         
-        /* 3. Der Button bleibt IMMER an der Nahtstelle stehen! (Springt nicht in die Mitte) */
+        /* 1. Button GANZ HART verstecken, wenn Modal nicht aktiv ist */
         .holiday-toggle-btn {
-            position: absolute; top: 50%; right: -15px; transform: translateY(-50%);
-            background: linear-gradient(135deg, #f4c542, #b48608); color: #000; border: none;
-            padding: 15px 12px; border-radius: 8px; cursor: pointer; z-index: 55;
-            box-shadow: 0 0 10px rgba(0,0,0,0.6); transition: 0.3s; font-size: 1.3rem;
+            display: none !important;
         }
+        
+        /* 2. Nur anzeigen, wenn das Kalender-Modal (.active-modal) aufgerufen wird! */
+        #eventsModal.active-modal .holiday-toggle-btn { 
+            display: block !important; 
+            position: absolute; top: 50%; right: -12px; transform: translateY(-50%);
+            background: linear-gradient(135deg, #f4c542, #b48608); color: #000; border: none;
+            padding: 12px 10px; border-radius: 8px; cursor: pointer; z-index: 55;
+            box-shadow: 0 0 10px rgba(0,0,0,0.6); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.2rem;
+        }
+        
+        /* 3. Button verkleinert sich elegant, wenn die Sidebar öffnet! */
+        #eventsModal.active-modal .holiday-toggle-btn.open { 
+            padding: 8px 6px; 
+            font-size: 0.85rem; 
+            right: -8px; 
+            border-radius: 6px;
+            opacity: 0.85; 
+        }
+
+       /* Kompakte Items mit farblichem senkrechten Balken links + Hover-Effekt */
+        /* Zwingt den Klick durch und macht den farbigen Rahmen sichtbar */
+        .holiday-item { 
+            font-size: 0.8rem; 
+            padding: 8px 12px; 
+            background: rgba(0,0,0,0.6); 
+            border-radius: 0 8px 8px 0; 
+            margin-bottom: 8px; 
+            text-align: left; 
+            line-height: 1.4; 
+            font-family: 'Poppins', sans-serif;
+            border-left: 4px solid transparent; 
+            cursor: pointer !important; 
+            pointer-events: auto !important; /* WICHTIG: Erlaubt das Klicken! */
+            position: relative;
+            z-index: 100;
+            transition: 0.2s ease-out; 
+        }
+        .holiday-item:hover {
+            background: rgba(255,255,255,0.15) !important;
+            transform: translateX(4px); 
+        }
+
         /* NUR anzeigen, wenn das Kalender-Modal aktiv ist */
         #eventsModal.active-modal .holiday-toggle-btn {
          display: block !important;
@@ -237,6 +276,45 @@
             .cal-holiday-sidebar.open { transform: translateX(0); }
             .holiday-toggle-btn { right: 0; border-radius: 12px 0 0 12px; z-index: 65;}
             .holiday-toggle-btn.open { right: 85%; border-radius: 0 12px 12px 0; }
+
+            /* --- INHALTSBOXEN ZENTRIEREN & VERKLEINERN --- */
+            #hakkimda-view > div,
+            #sizin-kaleminiz-view > div,
+            #sohbet-view > div,
+            #kullanici-eserleri-view > div:first-of-type,
+            #sahsiyetler-split,
+            #impressum-view > div,
+            #cookie-view > div,
+            #datenschutz-view > div {
+                max-width: 320px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 100% !important;
+                box-sizing: border-box;
+                padding: 20px 15px !important;
+            }
+
+            /* Chat-Fenster in der Höhe anpassen */
+            #sohbet-view > div { height: 65vh !important; }
+            
+            /* Profilbilder etwas kleiner für mehr Harmonie */
+            .bio-pic, #home-profile-pic { width: 150px !important; height: 150px !important; }
+
+            /* --- SCHRIFTEN & INHALTE KLEINER MACHEN --- */
+            #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
+                font-size: 0.85rem !important;
+                line-height: 1.6 !important;
+            }
+            #hakkimda-view h3 { font-size: 1.6rem !important; }
+            
+            /* Önemli Şahsiyetler kompakter machen */
+            #sahsiyetler-split > div > div { padding: 15px !important; margin-bottom: 10px !important; }
+            #sahsiyetler-split h3 { font-size: 1.2rem !important; margin-bottom: 5px !important; }
+            #sahsiyetler-split .author-anim-author { font-size: 1.2rem !important; }
+            
+            /* Formular-Boxen (Sizin Kaleminiz) anpassen */
+            .lang-frame { padding: 20px 15px 10px 15px !important; }
+            .lang-frame-title { font-size: 0.95rem !important; }
         }
 
         /* MODALS */
@@ -473,10 +551,14 @@
         /* MEGA-KOMPAKTER MOBILE HEADER FIX */
         @media (max-width: 768px) {
             /* HIER IST DER FIX FÜR DEN ABSTAND AUF MOBILE! 180px statt 380px */
-            .page-view { padding-top: 180px !important; padding-left: 10px; padding-right: 10px; } 
+            /* 1. OVERLAP FIX: !important entfernt, damit JS die Höhe berechnen kann! Unten viel Platz für Floating Buttons gelassen */
+            .page-view { padding-top: 200px; padding-left: 10px; padding-right: 10px; padding-bottom: 120px !important; } 
+            
             .header-top { flex-direction: column; align-items: center; justify-content: center; padding: 5px 2%; gap: 5px; } 
             .header-left { width: 100%; justify-content: center; align-items: center; margin:0; flex-direction: column; gap: 2px;}
-            .header-stats-row { display: flex; justify-content: center; gap: 6px; margin-top: 6px; width: 100%; flex-wrap: wrap !important; white-space: normal; }
+            
+            /* 2. STATS FIX: flex-wrap erlaubt den Umbruch, gap verkleinert */
+            .header-stats-row { display: flex; justify-content: center; gap: 5px; margin-top: 6px; width: 100%; flex-wrap: wrap !important; }
             .header-online-status, .header-works-status, .header-saved-status { font-size: 0.65rem; margin-top: 0; white-space: nowrap; display: flex; align-items: center; flex-direction: row;}
             
             /* PLACEHOLDER FIX FÜR MOBILE */
@@ -489,14 +571,32 @@
             .msg-modal-header button { width: 100% !important; max-width: 250px; margin: 0 auto !important; }
             
             /* KACHEL-VERKLEINERUNG FÜR MOBILE */
-            .card { padding: 12px 8px !important; border-radius: 12px !important; }
-            .card h3 { font-size: 1.5rem !important; margin-bottom: 3px !important; }
-            .card .clamp-text { font-size: 0.95rem !important; }
-            .game-card { padding: 12px 8px !important; border-radius: 12px !important; }
-            .game-card .game-icon { font-size: 2rem !important; margin-bottom: 5px !important; }
-            .game-card .bilingual-title { font-size: 0.95rem !important; line-height: 1.1; }
+            /* 3. KARTEN-LAYOUT FIX: Zwingt alles in EINE mittige Spalte mit Abstand zu den Rändern */
+            [id$="-grid"] { 
+                grid-template-columns: 1fr !important; 
+                padding: 0 15px !important; 
+                gap: 15px !important;
+            }
 
-            .modal-signature { font-size: 1.8rem !important; margin-top: 10px; line-height: 1.2; }
+            /* 4. KARTEN KOMPAKTER & ZENTRIERT */
+            .card, .game-card { 
+                padding: 15px 12px !important; 
+                border-radius: 12px !important; 
+                width: 100% !important;
+                max-width: 320px !important; /* Verhindert, dass sie zu breit werden */
+                margin: 0 auto !important; /* Zentriert die Karten perfekt */
+            }
+
+            /* 5. SCHRIFTGRÖSSEN REDUZIEREN (Karten & Modals) */
+            .card h3 { font-size: 1.4rem !important; margin-bottom: 5px !important; }
+            .card .clamp-text { font-size: 0.9rem !important; }
+            .game-card .game-icon { font-size: 1.8rem !important; margin-bottom: 5px !important; }
+            .game-card .bilingual-title { font-size: 0.9rem !important; line-height: 1.2; }
+
+            .modal-title, .game-title { font-size: 1.6rem !important; margin-bottom: 10px !important; }
+            .modal-text, .anthem-content { font-size: 0.95rem !important; line-height: 1.5 !important; text-align: left; }
+            #m-comment-list span { font-size: 0.85rem !important; }
+            .modal-signature { font-size: 1.6rem !important; margin-top: 10px; line-height: 1.2; }
 
             header { height: auto; top: 35px; padding-bottom: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.9); }
             
@@ -1297,7 +1397,7 @@ Blühe, deutsches Vaterland!</p>
         </div>
     </div>
 
-    <footer style="background: rgba(10,25,47,0.9); border-top: 1px solid rgba(244,197,66,0.3); padding: 30px; text-align: center; margin-top: 50px; z-index: 10; position: relative;">
+    <footer style="background: #0a192f; border-top: 1px solid rgba(244,197,66,0.3); padding: 30px; text-align: center; margin-top: 50px; z-index: 10; position: relative;">
         <div style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap; margin-bottom:20px;">
             <a style="cursor:pointer; color:#f4c542; font-weight:500; transition:0.3s; font-size: 1.1rem; pointer-events: auto !important;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#f4c542'" onclick="if(window.navigate) window.navigate('impressum-view')">Impressum</a>
             <a style="cursor:pointer; color:#f4c542; font-weight:500; transition:0.3s; font-size: 1.1rem; pointer-events: auto !important;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#f4c542'" onclick="if(window.navigate) window.navigate('cookie-view')">Cookies</a>
@@ -1882,12 +1982,22 @@ Blühe, deutsches Vaterland!</p>
         </div>
     </div>
 
+    <!-- Doğru mu Yanlış mı Modal -->
     <div class="modal notranslate" id="tfModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
             <div class="modal-body">
                 <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Doğru mu Yanlış mı <span class="de-sub">(Wahr/Falsch)</span></h2>
-                <div style="width:100%; text-align:center; font-size:1.1rem; color:#f4c542; margin-bottom:10px;">SKOR <span class="de-sub" style="color:inherit;">(Punkte)</span>: <span id="tf-score">0</span></div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:15px;">
+                    <select id="tf-diff" class="auth-input" style="width:auto; margin:0; padding:8px 12px; font-size:0.9rem; border-radius:8px;">
+                        <option value="1">🟢 Kolay (Leicht)</option>
+                        <option value="2" selected>🟡 Orta (Mittel)</option>
+                        <option value="3">🔴 Zor (Schwer)</option>
+                    </select>
+                    <div style="color:#22c55e; font-weight:bold; font-size:1.1rem;">SKOR: <span id="tf-score">0</span></div>
+                </div>
+
                 <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid #3b82f6; min-height: 100px; display:flex; align-items:center; justify-content:center; margin-bottom: 20px;">
                     <p id="tf-question" style="font-size: 1.2rem; color: #fff; text-align: center; margin:0;"></p>
                 </div>
@@ -1895,7 +2005,7 @@ Blühe, deutsches Vaterland!</p>
                     <button class="reset-btn success" id="tf-btn-true" onclick="if(window.checkTF) window.checkTF(true)" style="flex:1; padding:15px; font-size:1.2rem; display:none;"><i class="fas fa-check"></i> Doğru <span class="de-sub" style="color:inherit;">(Wahr)</span></button>
                     <button class="reset-btn danger" id="tf-btn-false" onclick="if(window.checkTF) window.checkTF(false)" style="flex:1; padding:15px; font-size:1.2rem; display:none;"><i class="fas fa-times"></i> Yanlış <span class="de-sub" style="color:inherit;">(Falsch)</span></button>
                 </div>
-                <button class="reset-btn" id="tf-start-btn" onclick="if(window.startTF) window.startTF()" style="margin-top:15px; width:100%;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+                <button class="reset-btn" id="tf-start-btn" onclick="if(window.startTF) window.startTF()" style="width:100%;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
             </div>
         </div>
     </div>
@@ -1934,7 +2044,22 @@ Blühe, deutsches Vaterland!</p>
 
     <div class="modal notranslate" id="horoscopeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Horoskop <span class="de-sub">(Sternzeichen)</span></h2><div class="zodiac-grid" id="zodiac-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; margin-top: 15px;"></div><div id="horoscope-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.5); padding:25px; border-radius:16px; border-left:4px solid #f4c542; width: 100%;"><h3 id="horo-title" style="color:#f4c542; margin-bottom:15px; font-size: 1.8rem; font-family: 'Playfair Display', serif;"></h3><p id="horo-text" style="color:#fff; margin-bottom:15px; line-height:1.6; font-size: 1.1rem;"></p><button class="reset-btn" onclick="document.getElementById('horoscope-result').style.display='none'; document.getElementById('zodiac-grid').style.display='grid';" style="margin-top: 20px; padding: 10px; border-radius: 10px;" id="horo-back-btn">Geri <span class="de-sub" style="color:inherit;">(Zurück)</span></button></div></div></div></div>
 
-    <div class="modal notranslate" id="breathModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Huzur Balonu <span class="de-sub">(Atemübung)</span></h2><div id="breath-circle" style="width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #f4c542 0%, rgba(244,197,66,0.2) 80%, transparent 100%); display: flex; justify-content: center; align-items: center; margin: 50px auto; font-family: 'Playfair Display', serif; font-weight: bold; font-size: 1.4rem; color: #000; box-shadow: 0 0 50px #f4c542; transition: all 4s ease-in-out;">Hazır... <span class="de-sub" style="color:inherit;">(Bereit)</span></div><button class="reset-btn" onclick="if(window.startBreath) window.startBreath()" id="breath-start" style="padding: 12px; border-radius: 12px; width: 100%;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button></div></div></div>
+    <!-- Huzur Balonu Modal (Optik repariert) -->
+    <div class="modal notranslate" id="breathModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Huzur Balonu <span class="de-sub">(Atemübung)</span></h2>
+                
+                <div id="breath-container" style="position:relative; width: 250px; height: 250px; margin: 30px auto; display: flex; justify-content: center; align-items: center;">
+                    <div id="breath-circle" style="position:absolute; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #f4c542 0%, rgba(244,197,66,0.4) 80%, transparent 100%); box-shadow: 0 0 30px #f4c542; transition: all 4s ease-in-out;"></div>
+                    <div id="breath-text" style="position:relative; z-index:10; font-family: 'Playfair Display', serif; font-weight: bold; font-size: 1.4rem; color: #fff; text-shadow: 0 0 5px #000; text-align:center;">Hazır... <br><span class="de-sub" style="color:#fff; font-size:0.6em;">(Bereit)</span></div>
+                </div>
+
+                <button class="reset-btn" onclick="if(window.startBreath) window.startBreath()" id="breath-start" style="padding: 12px; border-radius: 12px; width: 100%;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
 
     <div class="modal notranslate" id="falModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Kahve Falı <span class="de-sub">(Kaffeesatzlesen)</span></h2><div id="fal-cup" class="fal-cup" onclick="if(window.crackFal) window.crackFal()" style="font-size: 8rem; cursor: pointer; text-align: center;">☕</div><div id="fal-result" style="display:none; margin-top:20px; width:100%; text-align:center;"><p id="fal-text" style="font-size:1.2rem; color:#fff; line-height:1.6;"></p></div></div></div></div>
 
@@ -1980,17 +2105,24 @@ Blühe, deutsches Vaterland!</p>
         </div>
     </div>
 
+    <!-- Köstebek Vur Modal -->
     <div class="modal notranslate" id="moleModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
             <div class="modal-body">
                 <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Köstebek Vur <span class="de-sub">(Whack-a-Mole)</span></h2>
+                
+                <select id="mole-diff" class="auth-input" style="width:100%; margin-bottom:15px; padding:8px; border-radius:8px;">
+                    <option value="1">🟢 Kolay (Leicht - Yavaş/Langsam)</option>
+                    <option value="2" selected>🟡 Orta (Mittel - Normal)</option>
+                    <option value="3">🔴 Zor (Schwer - Hızlı/Schnell)</option>
+                </select>
+
                 <div style="display:flex; justify-content:space-between; width:100%; font-size:1.4rem; margin-bottom:15px;">
-                    <div style="color:#f4c542; font-weight:bold;">SÜRE <span class="de-sub" style="color:inherit;">(Zeit)</span>: <span id="mole-time">15</span>s</div>
-                    <div style="color:#22c55e; font-weight:bold;">SKOR <span class="de-sub" style="color:inherit;">(Punkte)</span>: <span id="mole-score">0</span></div>
+                    <div style="color:#f4c542; font-weight:bold;">SÜRE: <span id="mole-time">15</span>s</div>
+                    <div style="color:#22c55e; font-weight:bold;">SKOR: <span id="mole-score">0</span></div>
                 </div>
-                <div id="mole-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:15px; width:100%; margin-bottom:20px;">
-                </div>
+                <div id="mole-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:15px; width:100%; margin-bottom:20px;"></div>
                 <button class="reset-btn" id="mole-start-btn" onclick="if(window.startMole) window.startMole()" style="padding:12px; border-radius:12px;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
             </div>
         </div>
@@ -2054,23 +2186,31 @@ Blühe, deutsches Vaterland!</p>
 
     <div class="modal notranslate" id="rpsModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Taş Kağıt Makas <span class="de-sub">(Schere Stein Papier)</span></h2><div class="game-header" style="display: flex; justify-content: space-between; width: 100%; background: rgba(0,0,0,0.6); padding: 15px 25px; border-radius: 18px; margin-bottom: 25px;"><div class="game-score-box" style="display: flex; flex-direction: column; align-items: center;"><span class="game-score-label" style="color: #94a3b8; font-size: 0.9rem;" id="rps-p-lbl">SEN</span><span class="game-score-val" id="rps-s-p" style="color: #f4c542; font-size: 2.2rem; font-weight: bold;">0</span></div><span class="game-vs" style="font-size: 1.4rem; color: #64748b; font-weight: bold;">VS</span><div class="game-score-box" style="display: flex; flex-direction: column; align-items: center;"><span class="game-score-label" style="color: #94a3b8; font-size: 0.9rem;" id="rps-b-lbl">BOT</span><span class="game-score-val enemy" id="rps-s-c" style="color: #ef4444; font-size: 2.2rem; font-weight: bold;">0</span></div></div><div class="rps-arena" style="width:100%; display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 20px;"><span id="rps-player" style="font-size: 4rem;">✊</span><span style="font-size:1.8rem; color:#64748b; font-weight: bold;">VS</span><span id="rps-computer" style="font-size: 4rem; transform: scaleX(-1);">✊</span></div><div id="rps-msg" style="margin: 20px 0; color:#f4c542; font-size: 1.4rem; font-weight: 600; text-align: center;">Seçimini Yap! <span class="de-sub" style="color:inherit;">(Wähle!)</span></div><div style="display:flex; justify-content:center; gap:20px;"><button class="reset-btn" onclick="if(window.playRPS) window.playRPS('🪨')" style="font-size: 2rem; padding: 15px; border-radius: 50%; width: 70px; height: 70px;">🪨</button><button class="reset-btn" onclick="if(window.playRPS) window.playRPS('📜')" style="font-size: 2rem; padding: 15px; border-radius: 50%; width: 70px; height: 70px;">📜</button><button class="reset-btn" onclick="if(window.playRPS) window.playRPS('✂️')" style="font-size: 2rem; padding: 15px; border-radius: 50%; width: 70px; height: 70px;">✂️</button></div></div></div></div>
 
+    <!-- Tic Tac Toe Modal -->
     <div class="modal notranslate" id="tictactoeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
         <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
             <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
             <div class="modal-body">
                 <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Tic Tac Toe <span class="de-sub">(Gegen KI)</span></h2>
-                <div class="tictactoe-container">
+                
+                <select id="ttt-diff" class="auth-input" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px;" onchange="if(window.initTicTacToe) window.initTicTacToe()">
+                    <option value="1">🟢 Kolay (Leicht - Rastgele/Zufall)</option>
+                    <option value="2" selected>🟡 Orta (Mittel - Düşünen/Denkend)</option>
+                    <option value="3">🔴 Zor (Schwer - Yenilmez/Unschlagbar)</option>
+                </select>
+
+                <div class="tictactoe-container" style="width: 100%;">
                     <div id="ttt-msg" style="margin-bottom: 15px; color:#fff; font-size: 1.2rem; text-align: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 10px; border: 1px solid #f4c542;">Sıra <span class="de-sub" style="color:#94a3b8;">(Zug)</span>: <span style="color:#f4c542; font-weight:bold;" id="ttt-turn">X (Sen)</span></div>
                     <div class="board" id="ttt-board" style="display: grid; grid-template-columns: repeat(3, 80px); gap: 10px; justify-content: center;">
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(0)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(1)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(2)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(3)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(4)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(5)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(6)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(7)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
-                        <div class="cell" onclick="if(window.tttClick) window.tttClick(8)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(0)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(1)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(2)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(3)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(4)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(5)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(6)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(7)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(8)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
                     </div>
                     <button class="reset-btn" onclick="if(window.initTicTacToe) window.initTicTacToe()" style="padding: 12px; border-radius: 12px; margin-top: 20px; width: 100%;" id="ttt-reset">Sıfırla <span class="de-sub" style="color:inherit;">(Neustart)</span></button>
                 </div>
@@ -2343,22 +2483,21 @@ Blühe, deutsches Vaterland!</p>
         foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
         
         if(foundHolidays.length === 0) { 
-            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.85rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine in diesem Monat)</span></div>'; 
+            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; 
             return; 
         }
         
         list.innerHTML = foundHolidays.map(h => {
             let html = '';
-            let dateStr = `<strong style="font-size:1rem;">${h.day}.${currentMonthStr}.</strong><br>`;
+            let fullDateStr = `${h.day}.${currentMonthStr}.${currentYear}`;
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem; color:#fdfbf7;">${h.day}.${currentMonthStr}.</strong><br>`;
             
-            // Türkische Feiertage (Rot)
-            if(h.tr) html += `<div class="holiday-item" style="border-left-color: #ef4444;">${dateStr}<span style="color:#fff;">🇹🇷 ${h.tr}</span></div>`;
-            // Deutsche Feiertage (Blau)
-            if(h.de) html += `<div class="holiday-item" style="border-left-color: #3b82f6;">${dateStr}<span style="color:#fff;">🇩🇪 ${h.de}</span></div>`;
-            // Türkische Schulferien (Orange + Hintergrund)
-            if(h.trFerien) html += `<div class="holiday-item" style="border-left-color: #f97316; background: rgba(249, 115, 22, 0.15);">${dateStr}<span style="color:#fbd38d;">🏫 ${h.trFerien}</span></div>`;
-            // Deutsche Schulferien (Lila + Hintergrund)
-            if(h.deFerien) html += `<div class="holiday-item" style="border-left-color: #a855f7; background: rgba(168, 85, 247, 0.15);">${dateStr}<span style="color:#e9d8fd;">🎒 ${h.deFerien}</span></div>`;
+            // Inline-Styles erzwingen die Farbe unübersehbar!
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left: 4px solid #ef4444 !important;"><span style="color:#ef4444;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left: 4px solid #3b82f6 !important;"><span style="color:#3b82f6;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left: 4px solid #f97316 !important; background: rgba(249, 115, 22, 0.15);"><span style="color:#fbd38d;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem; color:#f97316;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left: 4px solid #a855f7 !important; background: rgba(168, 85, 247, 0.15);"><span style="color:#e9d8fd;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem; color:#a855f7;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
             
             return html;
         }).join('');
@@ -4317,35 +4456,30 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let key = mStr + "-" + dStr;
             let hol = window.holidaysDB ? window.holidaysDB[key] : null;
             
-            let eventText = '';
-            let dot = '';
+            let eventText = ''; let dot = '';
             
             if(hol) {
-                // Kleinerer Leuchtpunkt
                 dot = `<div style="position:absolute; top:3px; right:3px; width:5px; height:5px; background:#f4c542; border-radius:50%; box-shadow:0 0 5px #f4c542;"></div>`;
-                
                 let strings = [];
                 if(hol.tr) strings.push(`<span style="color:#ef4444; display:block; margin-bottom:1px;">${hol.tr}</span>`);
                 if(hol.de) strings.push(`<span style="color:#3b82f6; display:block; margin-bottom:1px;">${hol.de}</span>`);
                 if(hol.trFerien) strings.push(`<span style="color:#f97316; display:block; margin-bottom:1px;">${hol.trFerien}</span>`);
                 if(hol.deFerien) strings.push(`<span style="color:#a855f7; display:block; margin-bottom:1px;">${hol.deFerien}</span>`);
-                
-                // Noch kompaktere Schriftart für die Termine
                 eventText = `<div style="width:100%; font-size:0.48rem; line-height:1.1; font-family:'Poppins', sans-serif; text-align:center; padding: 1px;">${strings.join('')}</div>`;
             }
 
-            // Min-Height von 80px auf 65px reduziert, Font-Size angepasst
             let fullDateStr = `${dStr}.${mStr}.${currentYear}`;
-            html += `<div class="${dayClass}" onclick="window.selectDate('${fullDateStr}', this)" style="position:relative; min-height:65px; display:flex; flex-direction:column; align-items:center; padding-top:4px; border-radius:8px;">
+            // HIER WURDE data-date HINZUGEFÜGT:
+            html += `<div class="${dayClass}" data-date="${fullDateStr}" onclick="window.selectDate('${fullDateStr}')" style="position:relative; min-height:65px; display:flex; flex-direction:column; align-items:center; padding-top:4px; border-radius:8px; cursor:pointer;">
                         ${dot}
                         <div style="font-weight:bold; font-size:0.95rem; z-index:2; margin-bottom:1px;">${d}</div>
                         ${eventText}
                      </div>`;
         }
-        
         grid.innerHTML = html;
         if(window.renderHolidays) window.renderHolidays();
     };
+
     window.prevMonth = function() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } window.renderCalendar(); };
     window.nextMonth = function() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } window.renderCalendar(); };
     window.prevYear = function() { currentYear--; window.renderCalendar(); };
@@ -4370,13 +4504,20 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
-    window.selectDate = function(dateStr, el) {
-        if (!window.currentUser) { window.customAlert('Not kaydetmek için lütfen giriş yapın. <span class="de-sub" style="font-size:0.85em;">(Bitte einloggen)</span>', "🔒"); return; }
+    window.selectDate = function(dateStr) {
+        // Markierungen restlos löschen
         document.querySelectorAll('.cal-day').forEach(d => { d.classList.remove('cal-day-selected'); d.style.transform = 'scale(1)'; });
-        if(el) { el.classList.add('cal-day-selected'); el.style.transform = 'scale(1.1)'; }
+        
+        // Neues Datum zielsicher markieren
+        let targetEl = document.querySelector(`.cal-day[data-date='${dateStr}']`);
+        if(targetEl) { 
+            targetEl.classList.add('cal-day-selected'); 
+            targetEl.style.transform = 'scale(1.1)'; 
+        }
 
-        const msgText = document.getElementById('cal-msg-text'); const noteArea = document.getElementById('cal-note-area');
-        if(!msgText || !noteArea) return;
+        const msgText = document.getElementById('cal-msg-text'); 
+        const noteArea = document.getElementById('cal-note-area');
+        if(!msgText) return;
         
         let dParts = dateStr.split('.'); let holiKey = dParts[1].padStart(2, '0') + '-' + dParts[0].padStart(2, '0'); let holiStr = '';
         
@@ -4384,15 +4525,23 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let h = window.holidaysDB[holiKey];
             if(h.tr) holiStr += `<div style="color:#ef4444; font-size:1rem; margin-top:5px; font-weight:bold;">🇹🇷 ${h.tr}</div>`;
             if(h.de) holiStr += `<div style="color:#3b82f6; font-size:1rem; margin-top:2px; font-weight:bold;">🇩🇪 ${h.de}</div>`;
-            
-            // Wenn es Schulferien sind, zeige auch den gesamten Zeitraum an!
-            if(h.trFerien) holiStr += `<div style="color:#f97316; font-size:0.95rem; margin-top:8px; font-weight:bold; background:rgba(249,115,22,0.1); padding:4px; border-radius:6px;">🏫 ${h.trFerien}<br><span style="font-size:0.85rem; font-weight:normal; color:#fbd38d;">Kapsadığı Süre: ${h.period || ''}</span></div>`;
-            if(h.deFerien) holiStr += `<div style="color:#a855f7; font-size:0.95rem; margin-top:8px; font-weight:bold; background:rgba(168,85,247,0.1); padding:4px; border-radius:6px;">🎒 ${h.deFerien}<br><span style="font-size:0.85rem; font-weight:normal; color:#e9d8fd;">Zeitraum: ${h.period || ''}</span></div>`;
+            if(h.trFerien) holiStr += `<div style="color:#f97316; font-size:0.95rem; margin-top:8px; font-weight:bold; background:rgba(249,115,22,0.15); padding:4px; border-radius:6px;">🏫 ${h.trFerien}<br><span style="font-size:0.85rem; font-weight:normal; color:#fbd38d;">Kapsadığı Süre: ${h.period || ''}</span></div>`;
+            if(h.deFerien) holiStr += `<div style="color:#a855f7; font-size:0.95rem; margin-top:8px; font-weight:bold; background:rgba(168,85,247,0.15); padding:4px; border-radius:6px;">🎒 ${h.deFerien}<br><span style="font-size:0.85rem; font-weight:normal; color:#e9d8fd;">Zeitraum: ${h.period || ''}</span></div>`;
         }
 
         msgText.innerHTML = `<span style="color:#f4c542;">Seçilen Tarih:</span> <span style="font-weight:bold; color:#fff;">${dateStr}</span>${holiStr}`;
-        noteArea.style.display = 'flex'; document.getElementById('cal-note-input').value = '';
-        window.currentSelectedDate = dateStr; window.renderCalNotes(dateStr); 
+        
+        // Notizen nur anzeigen, wenn man eingeloggt ist
+        if (noteArea) {
+            if (window.currentUser) {
+                noteArea.style.display = 'flex'; 
+                document.getElementById('cal-note-input').value = '';
+                window.currentSelectedDate = dateStr; 
+                if(window.renderCalNotes) window.renderCalNotes(dateStr); 
+            } else {
+                noteArea.style.display = 'none';
+            }
+        }
     };
     
     window.saveCalNote = function(e) {
@@ -5211,6 +5360,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         document.getElementById('balloon-area').innerHTML = ''; 
         document.getElementById('balloon-start-btn').style.display = 'inline-block';
     };
+
     window.startBalloon = function() {
         window.balActive = true; window.balScore = 0; window.balTime = 15; 
         document.getElementById('balloon-start-btn').style.display = 'none';
@@ -5229,21 +5379,50 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if(!window.balActive) return;
             let b = document.createElement('div'); 
             b.innerText = ['🎈','🔴','🔵','🟡','🟣'][Math.floor(Math.random()*5)];
-            b.style.position = 'absolute'; b.style.left = Math.random()*80 + '%'; b.style.bottom = '-30px'; 
-            b.style.fontSize = '2.5rem'; b.style.cursor = 'pointer'; b.style.transition = 'top 2.5s linear';
-            b.onclick = function(e) { 
-                e.stopPropagation();
-                if(window.balActive) { 
+            b.style.position = 'absolute'; 
+            b.style.left = Math.random()*85 + '%'; 
+            b.style.bottom = '-50px'; /* FIX: Startet sauber am unteren Rand */
+            b.style.fontSize = '3rem'; 
+            b.style.cursor = 'crosshair'; 
+            b.style.transition = 'bottom 2.5s linear'; /* FIX: Animiert "bottom" statt "top" */
+            b.style.userSelect = 'none'; /* Verhindert das versehentliche Markieren beim wilden Klicken */
+            b.style.zIndex = '10';
+            
+            b.onmousedown = function(e) { 
+                e.stopPropagation(); e.preventDefault();
+                if(window.balActive && this.innerText !== '💥') { 
                     window.balScore++; document.getElementById('balloon-score').innerText = window.balScore; 
-                    this.remove(); 
+                    this.innerText = '💥';
+                    this.style.transition = 'none'; // Stoppt den Ballon bei Treffer
+                    setTimeout(() => { if(this.parentElement) this.remove(); }, 150);
                 } 
             };
+            
             document.getElementById('balloon-area').appendChild(b);
-            setTimeout(() => { b.style.top = '-50px'; }, 50);
-            setTimeout(() => { if(b.parentElement) b.remove(); }, 2500);
-        }, 500);
+            
+            // Erzwingt ein Neuzeichnen im Browser, damit die CSS-Transition sofort triggert
+            void b.offsetWidth;
+            
+            setTimeout(() => { b.style.bottom = '110%'; }, 50); // Fliegt sanft nach oben aus dem Bild
+            setTimeout(() => { if(b.parentElement) b.remove(); }, 2500); // Räumt den DOM auf
+        }, 450); // Spawnt etwas schneller für mehr Action!
     };
 
+    // 1. NEUE DATENBANK: Doğru mu Yanlış mı (True/False)
+    window.tfQuestions = [
+        { qTR: "Türkiye'nin başkenti İstanbul'dur.", qDE: "Die Hauptstadt der Türkei ist Istanbul.", a: false, diff: 1 },
+        { qTR: "Su 100 derecede kaynar.", qDE: "Wasser kocht bei 100 Grad Celsius.", a: true, diff: 1 },
+        { qTR: "Ay, Dünya'nın uydusudur.", qDE: "Der Mond ist ein Satellit der Erde.", a: true, diff: 1 },
+        { qTR: "Örümceklerin 6 bacağı vardır.", qDE: "Spinnen haben 6 Beine.", a: false, diff: 2 },
+        { qTR: "İnsan vücudundaki en büyük organ deridir.", qDE: "Das größte Organ des menschlichen Körpers ist die Haut.", a: true, diff: 2 },
+        { qTR: "Işık sesten daha hızlı yayılır.", qDE: "Licht reist schneller als Schall.", a: true, diff: 2 },
+        { qTR: "Ahtapotların 3 kalbi vardır.", qDE: "Oktopusse haben 3 Herzen.", a: true, diff: 3 },
+        { qTR: "Venüs, Güneş sistemindeki en sıcak gezegendir.", qDE: "Venus ist der heißeste Planet im Sonnensystem.", a: true, diff: 3 },
+        { qTR: "Köpekbalıklarının kemikleri vardır.", qDE: "Haie haben Knochen.", a: false, diff: 3 },
+        { qTR: "Dünyanın en uzun nehri Nil nehridir.", qDE: "Der längste Fluss der Welt ist der Nil.", a: true, diff: 2 }
+    ];
+
+    // 2. LOGIK FIX: Doğru mu Yanlış mı
     window.initTF = function() {
         window.tfActive = false; window.tfScore = 0; 
         document.getElementById('tf-score').innerText = '0'; 
@@ -5251,31 +5430,177 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         document.getElementById('tf-btn-true').style.display = 'none'; 
         document.getElementById('tf-btn-false').style.display = 'none'; 
         document.getElementById('tf-start-btn').style.display = 'inline-block';
+        document.getElementById('tf-diff').disabled = false;
     };
     window.startTF = function() {
         window.tfActive = true; window.tfScore = 0; document.getElementById('tf-score').innerText = '0'; 
         document.getElementById('tf-start-btn').style.display = 'none'; 
         document.getElementById('tf-btn-true').style.display = 'flex'; 
         document.getElementById('tf-btn-false').style.display = 'flex'; 
+        document.getElementById('tf-diff').disabled = true; // Sperrt den Schwierigkeitsgrad während des Spiels
         window.nextTF();
     };
     window.nextTF = function() {
-        window.currentTF = window.tfQuestions[Math.floor(Math.random() * window.tfQuestions.length)];
+        let diff = parseInt(document.getElementById('tf-diff').value) || 2;
+        let pool = window.tfQuestions.filter(q => q.diff === diff);
+        if(pool.length === 0) pool = window.tfQuestions;
+        window.currentTF = pool[Math.floor(Math.random() * pool.length)];
         document.getElementById('tf-question').innerText = window.currentGameLang === 'DE' ? window.currentTF.qDE : window.currentTF.qTR;
     };
     window.checkTF = function(ans) {
         if(!window.tfActive) return;
+        let diff = parseInt(document.getElementById('tf-diff').value) || 2;
+        let pointsWin = diff === 1 ? 5 : (diff === 2 ? 10 : 15);
+        let pointsLoss = diff === 1 ? -2 : (diff === 2 ? -4 : -6);
+
         if(ans === window.currentTF.a) { 
-            window.tfScore += 5; document.getElementById('tf-score').innerText = window.tfScore; window.nextTF(); 
+            window.tfScore += pointsWin; document.getElementById('tf-score').innerText = window.tfScore; window.nextTF(); 
         } else { 
             window.tfActive = false;
-            let pts = Math.floor(window.tfScore / 5);
-            window.customAlert(window.currentGameLang === 'DE' ? `Falsch! Punkte: ${pts}` : `Yanlış cevap! Puan: ${pts} <span class="de-sub" style="font-size:0.85em;">(Falsch!)</span>`, '❌'); 
+            window.customAlert(window.currentGameLang === 'DE' ? `Falsch! Punkte: ${window.tfScore}` : `Yanlış cevap! Puan: ${window.tfScore} <span class="de-sub">(Falsch!)</span>`, '❌'); 
             document.getElementById('tf-start-btn').style.display = 'inline-block'; 
             document.getElementById('tf-btn-true').style.display = 'none'; 
             document.getElementById('tf-btn-false').style.display = 'none'; 
-            if(pts > 0) window.updateGameStats(pts, 'win', 'Doğru/Yanlış'); 
+            document.getElementById('tf-diff').disabled = false;
+            if(window.tfScore > 0) window.updateGameStats(window.tfScore, 'win', 'Doğru/Yanlış'); 
         }
+    };
+
+    // 3. LOGIK FIX: Tic Tac Toe (Mit KI-Anpassung)
+    window.initTicTacToe = function() {
+        window.tttBoard = ['','','','','','','','','']; window.tttActive = true;
+        document.getElementById('ttt-turn').innerHTML = window.currentGameLang === 'DE' ? 'X (Du)' : 'X (Sen)';
+        document.querySelectorAll('.ttt-cell').forEach(c => { c.innerText = ''; c.style.color = 'white'; });
+    };
+    window.tttClick = function(i) {
+        if(!window.tttActive || window.tttBoard[i] !== '') return;
+        
+        window.tttBoard[i] = 'X';
+        document.querySelectorAll('.ttt-cell')[i].innerText = 'X';
+        document.querySelectorAll('.ttt-cell')[i].style.color = '#f4c542';
+        
+        let diff = parseInt(document.getElementById('ttt-diff').value) || 2;
+        let pts = diff === 1 ? 5 : (diff === 2 ? 10 : 20);
+        let lossPts = diff === 1 ? -2 : (diff === 2 ? -4 : -8);
+
+        if(window.checkTTTWin('X')) {
+            document.getElementById('ttt-turn').innerHTML = window.currentGameLang === 'DE' ? `Gewonnen! (+${pts})` : `Kazandın! (+${pts}) <span class="de-sub">(Gewonnen!)</span>`;
+            window.tttActive = false; window.updateGameStats(pts, 'win', 'TicTacToe'); return;
+        }
+        
+        let empty = window.tttBoard.map((v, idx) => v === '' ? idx : null).filter(v => v !== null);
+        if(empty.length === 0) {
+            document.getElementById('ttt-turn').innerHTML = window.currentGameLang === 'DE' ? 'Unentschieden!' : 'Berabere! <span class="de-sub">(Unentschieden!)</span>';
+            window.tttActive = false; return;
+        }
+
+        let move = -1;
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        
+        // Mittel & Schwer: KI versucht zu gewinnen oder zu blockieren
+        if (diff >= 2) {
+            for(let w of wins) { let vals = [window.tttBoard[w[0]], window.tttBoard[w[1]], window.tttBoard[w[2]]]; if(vals.filter(v=>v==='O').length===2 && vals.includes('')) { move = w[vals.indexOf('')]; break; } }
+            if(move === -1) { for(let w of wins) { let vals = [window.tttBoard[w[0]], window.tttBoard[w[1]], window.tttBoard[w[2]]]; if(vals.filter(v=>v==='X').length===2 && vals.includes('')) { move = w[vals.indexOf('')]; break; } } }
+        }
+        
+        // Schwer: KI nimmt bevorzugt die Mitte oder Ecken
+        if (diff === 3 && move === -1) {
+            if(window.tttBoard[4] === '') move = 4;
+            else {
+                let corners = [0,2,6,8].filter(c => window.tttBoard[c] === '');
+                if(corners.length > 0) move = corners[Math.floor(Math.random() * corners.length)];
+            }
+        }
+
+        // Leicht oder Fallback: Zufälliger Zug
+        if(move === -1) move = empty[Math.floor(Math.random()*empty.length)];
+        
+        window.tttBoard[move] = 'O';
+        document.querySelectorAll('.ttt-cell')[move].innerText = 'O';
+        document.querySelectorAll('.ttt-cell')[move].style.color = '#ef4444';
+
+        if(window.checkTTTWin('O')) {
+            document.getElementById('ttt-turn').innerHTML = window.currentGameLang === 'DE' ? `Verloren! (${lossPts})` : `Kaybettin! (${lossPts}) <span class="de-sub">(Verloren!)</span>`;
+            window.tttActive = false; window.updateGameStats(lossPts, 'loss', 'TicTacToe');
+        }
+    };
+    window.checkTTTWin = function(p) {
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        return wins.some(w => window.tttBoard[w[0]]===p && window.tttBoard[w[1]]===p && window.tttBoard[w[2]]===p);
+    };
+
+    // 4. LOGIK FIX: Köstebek Vur (Whack-a-Mole - Fehlte komplett!)
+    window.startMole = function() {
+        window.moleActive = true; window.moleScore = 0; window.moleTime = 15;
+        let diff = parseInt(document.getElementById('mole-diff').value) || 2;
+        
+        // Geschwindigkeit je nach Schwierigkeit (Millisekunden)
+        let speed = diff === 1 ? 1000 : (diff === 2 ? 700 : 450);
+        let ptsMultiplier = diff === 1 ? 1 : (diff === 2 ? 2 : 4);
+        
+        document.getElementById('mole-score').innerText = '0';
+        document.getElementById('mole-start-btn').style.display = 'none';
+        document.getElementById('mole-diff').disabled = true;
+        
+        // Grid aufbauen
+        let grid = document.getElementById('mole-grid');
+        grid.innerHTML = [0,1,2,3,4,5,6,7,8].map(i => `<div id="mole-hole-${i}" style="background:rgba(0,0,0,0.5); border:2px solid #8b5cf6; border-radius:50%; aspect-ratio:1; display:flex; justify-content:center; align-items:center; font-size:3rem; cursor:pointer;" onmousedown="window.hitMole(${i})"></div>`).join('');
+        
+        window.moleTimer = setInterval(() => {
+            window.moleTime--; document.getElementById('mole-time').innerText = window.moleTime;
+            if(window.moleTime <= 0) {
+                clearInterval(window.moleTimer); clearInterval(window.moleSpawner); window.moleActive = false;
+                let finalPts = window.moleScore * ptsMultiplier;
+                window.customAlert(window.currentGameLang === 'DE' ? `Zeit um! Punkte: ${finalPts}` : `Süre bitti! Puan: ${finalPts} <span class="de-sub">(Zeit um!)</span>`, '🔨');
+                if(finalPts > 0) window.updateGameStats(finalPts, 'win', 'Köstebek Vur');
+                document.getElementById('mole-start-btn').style.display = 'inline-block';
+                document.getElementById('mole-diff').disabled = false;
+                grid.innerHTML = '';
+            }
+        }, 1000);
+        
+        window.moleSpawner = setInterval(() => {
+            if(!window.moleActive) return;
+            for(let i=0; i<9; i++) document.getElementById('mole-hole-'+i).innerText = '';
+            let r = Math.floor(Math.random() * 9);
+            document.getElementById('mole-hole-'+r).innerText = '🦫';
+        }, speed);
+    };
+    window.hitMole = function(i) {
+        if(!window.moleActive) return;
+        let hole = document.getElementById('mole-hole-'+i);
+        if(hole.innerText === '🦫') {
+            window.moleScore++; document.getElementById('mole-score').innerText = window.moleScore;
+            hole.innerText = '💥'; 
+            setTimeout(() => { if(hole.innerText === '💥') hole.innerText = ''; }, 300);
+        }
+    };
+
+    // 5. LOGIK FIX: Huzur Balonu (Visuelle Reparatur)
+    window.startBreath = function() {
+        const c = document.getElementById('breath-circle');
+        const t = document.getElementById('breath-text');
+        const b = document.getElementById('breath-start');
+        b.style.display = 'none';
+        
+        const cycle = () => {
+            c.style.transform = 'scale(2.5)'; // Nur der Hintergrund wird skaliert!
+            t.innerHTML = window.currentGameLang === 'DE' ? 'Einatmen...' : 'Nefes Al... <br><span class="de-sub" style="color:#fff; font-size:0.6em;">(Einatmen...)</span>';
+            setTimeout(() => {
+                c.style.transform = 'scale(1)';
+                t.innerHTML = window.currentGameLang === 'DE' ? 'Ausatmen...' : 'Nefes Ver... <br><span class="de-sub" style="color:#fff; font-size:0.6em;">(Ausatmen...)</span>';
+            }, 4000);
+        };
+        cycle();
+        window.breathInterval = setInterval(cycle, 8000);
+        window.updateGameStats(3, 'win', 'Nefes');
+        
+        // Nach 16 Sekunden (2 Zyklen) stoppen, damit es nicht ewig läuft
+        setTimeout(() => {
+            clearInterval(window.breathInterval);
+            t.innerHTML = window.currentGameLang === 'DE' ? 'Fertig!' : 'Bitti! <br><span class="de-sub" style="color:#fff; font-size:0.6em;">(Fertig)</span>';
+            b.style.display = 'block';
+        }, 16000);
     };
 
     window.initMinesweeper = function() {
