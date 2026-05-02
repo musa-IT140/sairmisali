@@ -3958,14 +3958,26 @@ Blühe, deutsches Vaterland!</p>
         
         window.isFetching = true;
         try { 
-            // 🚀 LÖSUNG: Ein kleiner Trick (?req=...) zwingt die Cloud, immer die absolut neuste Version zu schicken!
             const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?req=${Date.now()}`, { headers: { 'X-Master-Key': API_KEY } }); 
+            
+            // 🚀 LÖSUNG: Prüft sofort, ob dein JSONBin-Limit explodiert ist!
+            if (!res.ok) {
+                if (res.status === 429 || res.status === 403 || res.status === 401) {
+                    if (!window.apiLimitWarned) {
+                        window.customAlert("Cloud Limiti Doldu! (JSONBin API Limit erreicht). Lütfen JSONBin.io hesabınızı kontrol edin.", "⚠️");
+                        window.apiLimitWarned = true;
+                    }
+                }
+                window.isFetching = false;
+                return;
+            }
+
             const json = await res.json();
             
             if(json.record) { 
                 let r = json.record; 
                 
-                // 🚀 LÖSUNG RACE-CONDITION: Wenn die Cloud älter oder gleich alt wie dein Handy ist, blockt er das Herunterladen ab!
+                // ANTI-OVERWRITE SCHUTZ
                 if (!force && r.timestamp && r.timestamp <= window.lastLocalUpdate) {
                     window.isFetching = false;
                     return; 
@@ -4049,12 +4061,11 @@ Blühe, deutsches Vaterland!</p>
             }
         } catch(e) { console.error("Cloud Fetch Error", e); } 
         finally {
-            // 🚀 LÖSUNG: Gibt den Download am Ende immer sicher wieder frei!
             window.isFetching = false;
         }
     };
 
-    setInterval(() => { window.fetchFromCloud(); }, 3500); 
+    setInterval(() => { window.fetchFromCloud(); }, 15000); 
 
     // --- FEIERTAGE (HOLIDAYS) DATENBANK ---
     window.holidaysDB = {
@@ -4691,84 +4702,89 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     window.m_login = async function() {
-        const u = document.getElementById('m-login-user').value.trim();
-        const p = document.getElementById('m-login-pass').value.trim();
-        const rem = document.getElementById('m-login-rem').checked;
-        if (!u || !p) { window.customAlert('Eksik bilgi! <span class="de-sub">(Fehlende Eingabe!)</span>', '⚠️'); return; }
-        
-        // 🚀 LÖSUNG FÜR DEN FREISCHALTUNGS-FEHLER:
-        // Zwingt die Seite, VOR dem Einloggen die allerneuesten Daten aus der Cloud zu holen!
-        window.showToast("Bilgiler güncelleniyor... <span class='de-sub'>(Daten werden synchronisiert...)</span>");
-        await window.fetchFromCloud(true);
-        
-        let found = window.userDatabase[u];
-        if (!found) { for (let k in window.userDatabase) { if (window.userDatabase[k].email === u) { found = window.userDatabase[k]; break; } } }
-        
-        let expectedToken = found ? window.generateHash(found.username + found.pass + "misali_secret_key") : null;
-        
-        if (!found || found.pass !== p || found._token !== expectedToken) { window.customAlert('Hatalı giriş! <span class="de-sub">(Falsche Eingabe!)</span>', '❌'); return; }
-        if (found.approved === false) { window.customAlert('Üyeliğiniz Admin onayı bekliyor. <span class="de-sub">(Wartet auf Freischaltung.)</span>', '⏳'); return; }
-        
-        window.currentUser = found; 
-        sessionStorage.setItem('misaliUser', JSON.stringify(found));
-        
-        if (rem) { 
-            localStorage.setItem('misaliUser', JSON.stringify(found)); 
-            localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); 
+        try {
+            const u = document.getElementById('m-login-user').value.trim();
+            const p = document.getElementById('m-login-pass').value.trim();
+            const rem = document.getElementById('m-login-rem').checked;
+            if (!u || !p) { window.customAlert('Eksik bilgi! <span class="de-sub">(Fehlende Eingabe!)</span>', '⚠️'); return; }
             
-            // BIOMETRIK REGISTRIERUNG
-            if(!localStorage.getItem('misaliBioKey_' + found.username)) {
-                window.customConfirm('Gelecek sefer Biometrik (Parmak İzi / Yüz Tanıma) ile giriş yapmak ister misiniz? <span class="de-sub">(Biometrie für nächsten Login aktivieren?)</span>', async () => {
-                    if (window.PublicKeyCredential) {
-                        try {
-                            const createOpts = {
-                                challenge: window.crypto.getRandomValues(new Uint8Array(32)),
-                                rp: { name: "Şair Misal.i" },
-                                user: {
-                                    id: window.crypto.getRandomValues(new Uint8Array(16)),
-                                    name: found.username,
-                                    displayName: found.name
-                                },
-                                pubKeyCredParams: [{alg: -7, type: "public-key"}, {alg: -257, type: "public-key"}],
-                                // 🚀 LÖSUNG FÜR WENIGER FENSTER: Zwingt Windows, sofort den internen Scanner (Laptop) zu nutzen!
-                                authenticatorSelection: { 
-                                    authenticatorAttachment: "platform",
-                                    userVerification: "preferred" 
-                                },
-                                timeout: 60000
-                            };
-                            
-                            // HIER ÖFFNET SICH DER SCANNER ZUM SPEICHERN!
-                            const cred = await navigator.credentials.create({ publicKey: createOpts });
-                            
-                            localStorage.setItem('misaliBioKey_' + found.username, window.bufferToBase64(cred.rawId));
-                            localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
-                            window.showToast('Biometrik kayıt başarılı! <span class="de-sub">(Registriert!)</span>');
-                            setTimeout(() => window.finishLogin(found), 1000);
-                        } catch(err) {
-                            console.error("Biometric Create Error:", err);
+            window.showToast("Bilgiler güncelleniyor... <span class='de-sub'>(Daten werden synchronisiert...)</span>");
+            
+            // Versucht die Cloud zu erreichen (aber wenn sie blockiert ist, geht's trotzdem weiter!)
+            try { await window.fetchFromCloud(true); } catch(e) {}
+            
+            let found = window.userDatabase[u];
+            if (!found) { for (let k in window.userDatabase) { if (window.userDatabase[k].email === u) { found = window.userDatabase[k]; break; } } }
+            
+            let expectedToken = found ? window.generateHash(found.username + found.pass + "misali_secret_key") : null;
+            
+            if (!found || found.pass !== p || found._token !== expectedToken) { window.customAlert('Hatalı giriş! <span class="de-sub">(Falsche Eingabe!)</span>', '❌'); return; }
+            
+            // NOTFALL-ZUGANG FÜR ADMIN: Admin darf immer rein, auch wenn die Cloud hängt!
+            if (found.role !== 'admin' && found.role !== 'co-admin' && found.approved === false) { window.customAlert('Üyeliğiniz Admin onayı bekliyor. <span class="de-sub">(Wartet auf Freischaltung.)</span>', '⏳'); return; }
+            
+            window.currentUser = found; 
+            sessionStorage.setItem('misaliUser', JSON.stringify(found));
+            
+            if (rem) { 
+                localStorage.setItem('misaliUser', JSON.stringify(found)); 
+                localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); 
+                
+                // BIOMETRIK REGISTRIERUNG
+                if(!localStorage.getItem('misaliBioKey_' + found.username)) {
+                    window.customConfirm('Gelecek sefer Biometrik (Parmak İzi / Yüz Tanıma) ile giriş yapmak ister misiniz? <span class="de-sub">(Biometrie für nächsten Login aktivieren?)</span>', async () => {
+                        if (window.PublicKeyCredential) {
+                            try {
+                                const createOpts = {
+                                    challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+                                    rp: { name: "Şair Misal.i" },
+                                    user: {
+                                        id: window.crypto.getRandomValues(new Uint8Array(16)),
+                                        name: found.username,
+                                        displayName: found.name
+                                    },
+                                    pubKeyCredParams: [{alg: -7, type: "public-key"}, {alg: -257, type: "public-key"}],
+                                    authenticatorSelection: { 
+                                        authenticatorAttachment: "platform",
+                                        userVerification: "preferred" 
+                                    },
+                                    timeout: 60000
+                                };
+                                
+                                const cred = await navigator.credentials.create({ publicKey: createOpts });
+                                
+                                localStorage.setItem('misaliBioKey_' + found.username, window.bufferToBase64(cred.rawId));
+                                localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                                window.showToast('Biometrik kayıt başarılı! <span class="de-sub">(Registriert!)</span>');
+                                setTimeout(() => window.finishLogin(found), 1000);
+                            } catch(err) {
+                                console.error("Biometric Create Error:", err);
+                                localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                                window.finishLogin(found);
+                            }
+                        } else {
                             localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
                             window.finishLogin(found);
                         }
-                    } else {
+                    });
+                    
+                    document.getElementById('custom-dialog-cancel').onclick = () => {
                         localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                        document.getElementById('custom-dialog-modal').classList.remove('active-modal');
                         window.finishLogin(found);
-                    }
-                });
-                
-                document.getElementById('custom-dialog-cancel').onclick = () => {
-                    localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
-                    document.getElementById('custom-dialog-modal').classList.remove('active-modal');
-                    window.finishLogin(found);
-                };
-                return;
+                    };
+                    return;
+                }
+            } else { 
+                localStorage.removeItem('misaliUser'); 
+                localStorage.removeItem('misaliAutoFill'); 
             }
-        } else { 
-            localStorage.removeItem('misaliUser'); 
-            localStorage.removeItem('misaliAutoFill'); 
+            
+            window.finishLogin(found);
+        } catch (err) {
+            console.error("Login Crash:", err);
+            window.customAlert("Systemfehler beim Login!", "❌");
         }
-        
-        window.finishLogin(found);
     };
 
     window.m_logout = function() {
