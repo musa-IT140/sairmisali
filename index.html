@@ -962,27 +962,29 @@
             body.user-mode:not(.admin-mode) #header-username { font-size: 1.4rem !important; }
         }
 
+        /* ==================================================================
+           VIP-USER LAYOUT: Separate Box & Lila Unterschrift (Admin bleibt unberührt)
+           ================================================================== */
+        .user-profile-group.user-left-mode {
+            background: rgba(0,0,0,0.5) !important;
+            border: 1px solid rgba(167, 139, 250, 0.4) !important; /* Eleganter lilaner Rahmen */
+            padding: 8px 20px !important;
+            margin: 15px auto 5px auto !important; /* Schöner, entfernter Abstand zum Logo! */
+            justify-content: center !important;
+            width: max-content !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
+            border-radius: 25px !important;
+        }
         .user-profile-group.user-left-mode #header-username {
-            font-family: 'Playfair Display', serif !important;
-            font-size: 1.8rem !important;
-            letter-spacing: 1px !important;
-            color: var(--accent-color) !important;
-            text-shadow: 0 0 15px rgba(244, 197, 66, 0.5) !important;
-        }
-        .user-profile-group.user-left-mode .header-mini-profile {
-            width: 45px !important;
-            height: 45px !important;
-            border: 2px solid var(--accent-color) !important;
-            box-shadow: 0 0 10px rgba(244,197,66,0.3) !important;
-        }
-        .user-profile-group.user-left-mode .logout-btn {
-            background: transparent !important;
-            border: 1px solid rgba(239, 68, 68, 0.4) !important;
-            padding: 6px !important;
+            color: #a78bfa !important; /* Lila User-Farbe */
+            text-shadow: 0 0 10px rgba(167, 139, 250, 0.6) !important;
+            font-family: 'Great Vibes', cursive !important; /* Unterschriften-Style! */
+            font-size: 2.2rem !important; 
+            padding-top: 5px !important;
+            pointer-events: none;
         }
         @media (max-width: 768px) {
-            .user-profile-group.user-left-mode #header-username { font-size: 1.4rem !important; }
-            .user-profile-group.user-left-mode .header-mini-profile { width: 35px !important; height: 35px !important; }
+            .user-profile-group.user-left-mode #header-username { font-size: 1.8rem !important; }
         }
         
         /* MEGA-KOMPAKTER MOBILE HEADER FIX */
@@ -4926,42 +4928,61 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             }
 
             // ==========================================
-            // LÖSUNG: AVATAR & LOGO DYNAMIK
+            // LÖSUNG: AVATAR & LOGO DYNAMIK (Getrenntes Layout!)
             // ==========================================
             const profileGrp = document.querySelector('.user-profile-group');
+            const headerRight = document.querySelector('.header-right');
+            const headerLeft = document.querySelector('.header-left');
             const logoContainer = document.querySelector('.logo');
             const avatar = document.getElementById('user-avatar');
             const greeting = document.getElementById('user-greeting');
 
-            // 1. Reset: Alles zurück auf Anfang (verhindert doppelte Federn oder falsche Bilder)
-            if(profileGrp) profileGrp.classList.remove('user-left-mode');
-            if(logoContainer) logoContainer.innerHTML = `Şair Misal.i <i class="fas fa-feather-alt feather-anim" style="margin-left:8px;"></i>`; 
-            if(avatar && profileGrp && !profileGrp.contains(avatar)) profileGrp.insertBefore(avatar, greeting); 
-            let uf = document.getElementById('user-feather'); if(uf) uf.remove(); 
+            // 1. Reset: Alles zurück an seinen Ursprungsort, um Doppelungen zu vermeiden
+            if(profileGrp) {
+                profileGrp.classList.remove('user-left-mode');
+                profileGrp.style.marginTop = "0";
+                if(headerRight && !headerRight.contains(profileGrp)) headerRight.insertBefore(profileGrp, headerRight.firstChild);
+            }
+            if(logoContainer) {
+                logoContainer.style.display = 'flex';
+                logoContainer.innerHTML = `Şair Misal.i <i class="fas fa-feather-alt feather-anim" style="margin-left:8px;"></i>`; 
+            }
+            if(avatar && profileGrp && !profileGrp.contains(avatar)) {
+                avatar.style.marginRight = "0";
+                profileGrp.insertBefore(avatar, greeting); 
+            }
 
-            // 2. Ansicht je nach Rolle aufbauen
             if (window.currentUser) {
                 document.body.classList.add('user-mode');
                 const isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
                 
                 if (isAdmin) {
-                    // ADMIN-MODUS: Avatar bleibt im Rahmen!
+                    // ADMIN-MODUS: Layout bleibt komplett unangetastet (Rechts)!
                     document.body.classList.add('admin-mode');
                     if(avatar) { 
                         avatar.src = "image_01d1a0.png"; 
-                        avatar.style.marginRight = "0"; 
+                        avatar.style.display = "block";
                     }
                 } else {
-                    // USER-MODUS: Avatar verlässt den Rahmen und wandert zum Logo!
+                    // USER-MODUS (z.B. Fatma): 
                     document.body.classList.remove('admin-mode');
+                    
+                    // a) Das Bild verlässt die User-Box und wird zum Şair Misal.i Logo!
                     if(avatar && logoContainer) {
-                        avatar.src = window.currentUser.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                        avatar.style.marginRight = "12px"; // Abstand zum Text "Şair Misal.i"
+                        avatar.src = "image_01d1a0.png"; // Zwingt IMMER das Admin-Bild!
+                        avatar.style.display = "block";
+                        avatar.style.marginRight = "15px";
                         logoContainer.insertBefore(avatar, logoContainer.firstChild);
+                    }
+                    
+                    // b) Die User-Box wandert nach links unter das Datum (Separat & Entfernt!)
+                    if(headerLeft && profileGrp) { 
+                        headerLeft.appendChild(profileGrp);
+                        profileGrp.classList.add('user-left-mode'); 
                     }
                 }
                 
-                // Name setzen (Admin = Şair Misal.i | User = Echter Name)
+                // Name setzen (Admin = Şair Misal.i | User = Echter Name in Lila)
                 const hU = document.getElementById('header-username'); 
                 if(hU) hU.innerText = isAdmin ? "Şair Misal.i" : window.currentUser.name;
                 
@@ -4976,6 +4997,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 }
             } else {
                 document.body.classList.remove('user-mode', 'admin-mode');
+                if(avatar) avatar.style.display = 'none';
             }
         } catch(e) { console.error("checkRemember error:", e); }
     };
