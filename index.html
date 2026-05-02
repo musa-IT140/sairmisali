@@ -2691,7 +2691,10 @@
                     <i class="fas fa-users"></i> Kullanıcı Eserleri
                     <span class="badge-count badge-yellow always-show" id="nav-user-works-badge" style="position:absolute; top:-2px; right:-2px;">0</span>
                 </button>
-                <button class="user-only" onclick="if(window.navigate) window.navigate('sohbet-view')"><i class="fas fa-comments"></i> Chat</button>
+                <button class="user-only" onclick="if(window.navigate) window.navigate('sohbet-view')" style="position: relative;">
+                    <i class="fas fa-comments"></i> Chat
+                    <span class="badge-count badge-blue always-show" id="nav-chat-badge" style="display:none; position:absolute; top:-6px; right:-6px; background:linear-gradient(135deg, #1e3a8a, #1d4ed8);">0</span>
+                </button>  
                 <button class="user-only" onclick="if(window.navigate) window.navigate('hakkimda-view')"><i class="fas fa-user-circle"></i> My Profil</button>
             </nav>
         </div>
@@ -6155,7 +6158,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if(viewId === 'bilmece-view') { if(!window.bilmeceLang) window.setBilmeceLang(window.currentGameLang || 'TR'); else window.renderBilmeces(); }
             if(viewId === 'bulmaca-view') { if(!window.bulmacaLang) window.setBulmacaLang(window.currentGameLang || 'TR'); else window.renderBulmacalar(); }
             if(viewId === 'atasozleri-view') { if(!window.atasozleriLang) window.setAtasozleriLang(window.currentGameLang || 'TR'); else { if(window.renderAtasozleri) window.renderAtasozleri(); } }
-            
+            if(viewId === 'sohbet-view' && window.updateChatBadge) setTimeout(() => { window.updateChatBadge(); }, 100);
             // =========================================================
             // HIER IST DER FIX: ANIMATIONEN BEIM SEITENWECHSEL NEU LADEN!
             // =========================================================
@@ -7003,12 +7006,26 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     window.renderUserWorksSidebar = function() {
         const list = document.getElementById('fihrist-user-works-list'); if (!list) return;
         if (!window.currentUser) { list.innerHTML = '<li style="text-align:center; padding:20px; font-style:italic;">Giriş yapmalısınız.</li>'; return; }
-        const myWorks = window.sortContentItems(window.userPoemsDB.filter(x => x.username === window.currentUser.username), true);
-        let emj = window.currentUser.emoji || '👤';
-        list.innerHTML = myWorks.length === 0 ? '<li style="text-align:center; padding:20px; font-style:italic;">Eseriniz yok.</li>' : myWorks.map(w => {
+        
+        // LÖSUNG: Der Filter wurde entfernt! Es zeigt jetzt ALLE Werke aus der Datenbank an!
+        const allWorks = window.sortContentItems(window.userPoemsDB, true);
+        
+        list.innerHTML = allWorks.length === 0 ? '<li style="text-align:center; padding:20px; font-style:italic;">Eser yok.</li>' : allWorks.map(w => {
             let dObj = new Date(w.timestamp || Date.now()); let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
             let catInfo = w.adminRating > 0 ? `${w.adminRating} Puan - ${w.adminCategory || 'Normal'}` : 'Bekliyor';
-            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><span>${emj} ${w.title || w.trTitle}</span> <span style="font-size:0.7rem; color:#64748b;">${dStr}</span></div><span style="font-size:0.8rem; color:#f4c542; font-style:italic;">(${catInfo})</span></li>`;
+            
+            let u = window.userDatabase[w.username]; 
+            let emj = u && u.emoji ? u.emoji : '👤';
+            let fullName = w.name + (w.surname ? ' ' + w.surname : '');
+            let colorClass = window.getAuthorColorClass(w.username);
+            
+            return `<li onclick="window.openUserPoemModal('${w.id}'); window.closeAllSidebars();">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span>${emj} ${w.title || w.trTitle} <br><span class="${colorClass}" style="font-size:0.75rem; opacity:0.8;">- ${fullName}</span></span> 
+                            <span style="font-size:0.7rem; color:#64748b;">${dStr}</span>
+                        </div>
+                        <span style="font-size:0.8rem; color:#f4c542; font-style:italic;">(${catInfo})</span>
+                    </li>`;
         }).join('');
     };
 
@@ -7026,6 +7043,27 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
+    window.updateChatBadge = function() {
+        if(!window.currentUser || !window.chatDB) return;
+        
+        // Holt die Anzahl der bereits gelesenen Nachrichten aus dem Speicher
+        let readCount = parseInt(localStorage.getItem('misaliReadChatCount_' + window.currentUser.username)) || 0;
+        let currentCount = window.chatDB.length;
+        
+        let isChatActive = document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view');
+        
+        // Wenn man im Chat ist, gelten alle als gelesen!
+        if (isChatActive) {
+            readCount = currentCount;
+            localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, readCount);
+        }
+        
+        let unread = currentCount - readCount;
+        if (unread < 0) { unread = 0; localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, currentCount); }
+        
+        window.forceBadge('nav-chat-badge', unread, false);
+    };
+
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); if(!box) return;
         if(!window.chatDB || window.chatDB.length === 0) { box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz! <span class="de-sub" style="font-size:0.85em;">(Schreibe als Erster!)</span></div>'; return; }
@@ -7037,6 +7075,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             return `<div class="chat-bubble-wrapper ${isMe ? 'me' : 'other'}"><div class="chat-meta">${!isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}<span>${msg.time}</span>${delBtn}${isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}</div><div class="chat-bubble">${msg.text}</div></div>`;
         }).join('');
         box.scrollTop = box.scrollHeight;
+    if(window.updateChatBadge) window.updateChatBadge();
     };
 
     window.sendChat = function() {
@@ -7203,9 +7242,28 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
         if (window.currentPoemData.type === 'userPoems' && window.currentUser) {
             if (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
-                adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%; flex-wrap: wrap;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('userPoems', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button></div>`;
+                adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('userPoems', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button></div>`;
+                
                 let currentRating = window.currentPoemData.adminRating || 0; let currentCat = window.currentPoemData.adminCategory || 'Normal'; let currentCatDisplay = currentRating === 0 ? 'Puan Bekliyor' : currentCat;
-                adminRatingHTML = `<div class="modal-interaction-box" style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px;"><strong style="color:#f4c542; font-size:1.2rem;">🏆 Admin Değerlendirmesi</strong><div style="color:#fdfbf7; font-size:1.05rem;">Mevcut: <strong style="font-size:1.2rem; color:#f4c542;">${currentRating} Puan</strong> (${currentCatDisplay})</div><div style="display:flex; gap:12px; width:100%; align-items:center; justify-content:center; flex-wrap:wrap; margin-top: 5px;"><select id="admin-rating-cat" class="auth-input" style="width:auto; margin:0; padding:10px; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;"><option value="Super Elite" ${currentCat === 'Super Elite' ? 'selected' : ''}>🏆🏆🏆 Super Elite</option><option value="Elite" ${currentCat === 'Elite' ? 'selected' : ''}>🏆🏆 Elite</option><option value="Normal" ${currentCat === 'Normal' ? 'selected' : ''}>🏆 Normal</option></select><input type="number" id="admin-rating-val" min="0" max="100" value="${currentRating}" class="auth-input" style="width:90px; text-align:center; margin:0; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;" placeholder="Puan"></div><div style="display:flex; gap:12px; width:100%; justify-content:center; margin-top:5px;"><button class="reset-btn" style="width:auto; margin:0; padding:10px 25px; font-size:1rem;" onclick="window.saveAdminRating('${poemId}', event)">Kaydet <span class="de-sub" style="color:inherit; font-size:0.85em;">(Speichern)</span></button><button class="reset-btn danger" style="width:auto; margin:0; padding:10px 25px; font-size:1rem;" onclick="window.deleteAdminRating('${poemId}', event)">Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div></div>`;
+                
+                // LÖSUNG ÜBERLAPPUNG: Buttons haben jetzt flex-wrap und weniger fettes Padding!
+                adminRatingHTML = `
+                <div class="modal-interaction-box" style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px;">
+                    <strong style="color:#f4c542; font-size:1.2rem;">🏆 Admin Değerlendirmesi</strong>
+                    <div style="color:#fdfbf7; font-size:1.05rem;">Mevcut: <strong style="font-size:1.2rem; color:#f4c542;">${currentRating} Puan</strong> (${currentCatDisplay})</div>
+                    <div style="display:flex; gap:12px; width:100%; align-items:center; justify-content:center; flex-wrap:wrap; margin-top: 5px;">
+                        <select id="admin-rating-cat" class="auth-input" style="width:auto; margin:0; padding:10px; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;">
+                            <option value="Super Elite" ${currentCat === 'Super Elite' ? 'selected' : ''}>🏆🏆🏆 Super Elite</option>
+                            <option value="Elite" ${currentCat === 'Elite' ? 'selected' : ''}>🏆🏆 Elite</option>
+                            <option value="Normal" ${currentCat === 'Normal' ? 'selected' : ''}>🏆 Normal</option>
+                        </select>
+                        <input type="number" id="admin-rating-val" min="0" max="100" value="${currentRating}" class="auth-input" style="width:90px; text-align:center; margin:0; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;" placeholder="Puan">
+                    </div>
+                    <div style="display:flex; gap:12px; width:100%; justify-content:center; margin-top:5px; flex-wrap:wrap;">
+                        <button class="reset-btn" style="flex:1; margin:0; padding:12px 10px; font-size:0.95rem; white-space:nowrap;" onclick="window.saveAdminRating('${poemId}', event)">Kaydet <span class="de-sub" style="color:inherit; font-size:0.85em;">(Speichern)</span></button>
+                        <button class="reset-btn danger" style="flex:1; margin:0; padding:12px 10px; font-size:0.95rem; white-space:nowrap;" onclick="window.deleteAdminRating('${poemId}', event)">Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button>
+                    </div>
+                </div>`;
             } else if (window.currentUser.username === window.currentPoemData.username) {
                 adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%; flex-wrap: wrap;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border:none; padding: 10px 20px; width:auto;" onclick="window.userEditWork('${poemId}')"><i class="fas fa-edit"></i> Düzenle <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button><button class="reset-btn danger" style="width:auto; padding: 10px 20px;" onclick="window.userDeleteWork('${poemId}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div>`;
             }
