@@ -467,10 +467,15 @@
         .user-greeting { display: none; align-items: center; gap: 6px; margin-left: 4px; }
         body.user-mode .user-greeting, body.admin-mode .user-greeting { display: flex; }
         
-        /* ADMIN FARBE ANGEWANDT: HIER */
+        /* DYNAMISCHE FARBEN FÜR DEN HEADER-NAMEN */
         #header-username { cursor: pointer; transition: 0.2s; font-family: 'Great Vibes', cursive; font-size: 1.6rem; letter-spacing: 1px; color: var(--accent-color); text-shadow: 0 1px 3px rgba(0,0,0,0.8); padding-top: 3px; position: relative; z-index: 1000;}
+        
+        /* LÖSUNG: Wenn ein User eingeloggt ist, leuchtet Şair Misal.i leicht Lila */
+        body.user-mode:not(.admin-mode) #header-username { color: #a78bfa; text-shadow: 0 0 8px rgba(167, 139, 250, 0.5); }
+        body.user-mode:not(.admin-mode) #header-username:hover { color: #fff; text-shadow: 0 0 15px rgba(167, 139, 250, 0.8); }
+
+        /* Wenn der Admin eingeloggt ist, leuchtet es stark Cyan */
         body.admin-mode #header-username { color: #22d3ee; text-shadow: 0 0 8px rgba(34, 211, 238, 0.5); }
-        #header-username:hover { color: #fff; text-shadow: var(--accent-glow); }
         body.admin-mode #header-username:hover { color: #fff; text-shadow: 0 0 15px rgba(34, 211, 238, 0.8); }
         
         .zodiac-badge { font-size: 1.2rem; cursor: pointer; transition: 0.2s; font-family: sans-serif; position: relative; z-index: 1000; animation: zodiacBreathe 4s infinite ease-in-out;}
@@ -2357,14 +2362,17 @@
             </div>
 
             <div class="header-right">
-                <div class="user-profile-group user-only">
-                    <img src="image_01d1a0.png" class="header-mini-profile clickable-header-item" id="user-avatar" onclick="if(window.openRandomQuote) window.openRandomQuote()" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                    <div class="user-greeting" id="user-greeting">
+                <div class="user-profile-group auth-visible">
+                    <!-- LÖSUNG: Dein Profilbild ist jetzt immer da, wenn jemand eingeloggt ist (Admin oder User) -->
+                    <img src="image_01d1a0.png" class="header-mini-profile clickable-header-item" id="user-avatar" onclick="if(window.openRandomQuote) window.openRandomQuote()" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'" style="display: block;">
+                    
+                    <div class="user-greeting" id="user-greeting" style="display: flex;">
+                        <!-- LÖSUNG: Der Name bleibt Şair Misal.i, aber er ist für User klickbar für ihr EIGENES Profil! -->
                         <span id="header-username" class="clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('profileEditModal')">Şair Misal.i</span>
                         <div class="zodiac-badge clickable-header-item" id="header-zodiac" onclick="if(window.openMyHoroscope) window.openMyHoroscope()">♊</div>
-                        <div class="header-score-badge clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('leaderboardModal')">🏆 <span id="user-score">0 P.</span></div>
+                        <div class="header-score-badge clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('leaderboardModal')" style="display: flex;">🏆 <span id="user-score">0 P.</span></div>
                     </div>
-                    <button class="logout-btn user-only clickable-header-item" onclick="if(window.m_logout) window.m_logout()"><i class="fas fa-sign-out-alt"></i></button>
+                    <button class="logout-btn auth-visible clickable-header-item" onclick="if(window.m_logout) window.m_logout()" style="display: flex;"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
                 
                 <div id="weather-widget" class="weather-widget clickable-header-item" onclick="if(window.openFastModal) window.openFastModal('weatherModal')">
@@ -4659,19 +4667,22 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 if (rInput) rInput.checked = true;
             }
 
-            // 3. Header und UI updaten
+           // 3. Header und UI updaten
             if (window.currentUser) {
                 document.body.classList.add('user-mode');
                 if (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') document.body.classList.add('admin-mode');
                 
+                // LÖSUNG: Der Name bleibt IMMER Şair Misal.i, egal wer eingeloggt ist.
                 const hU = document.getElementById('header-username'); 
-                if(hU) hU.innerText = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? "Şair Misal.i" : window.currentUser.name.split(' ')[0];
+                if(hU) hU.innerText = "Şair Misal.i";
                 
+                // Der Score zeigt die ECHTEN Punkte des eingeloggten Users
                 const hS = document.getElementById('user-score'); 
                 if(hS) hS.innerText = (window.currentUser.score || 0) + ' P.';
                 
+                // LÖSUNG: Das Bild bleibt IMMER dein Bild (image_01d1a0.png), egal wer eingeloggt ist.
                 const myPic = document.getElementById('user-avatar');
-                if (myPic) myPic.src = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? "image_01d1a0.png" : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                if (myPic) myPic.src = "image_01d1a0.png";
                 
                 const zBadge = document.getElementById('header-zodiac');
                 if (zBadge && window.currentUser.day && window.currentUser.month && window.getZodiacSign) {
@@ -4904,11 +4915,15 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         } catch(e) { console.error("Badge error:", e); }
     };
 
+    // LÖSUNG: Variable definieren, damit das Skript nicht mehr abstürzt!
+    window.categoryWeights = { 'Super Elite': 3, 'Elite': 2, 'Normal': 1 };
+
     window.sortContentItems = function(arr, hasCategories) {
         if (!arr || !Array.isArray(arr)) return []; 
         return arr.slice().sort((a, b) => {
             if(hasCategories) {
-                let catA = categoryWeights[a.adminCategory] || 0; let catB = categoryWeights[b.adminCategory] || 0;
+                let catA = window.categoryWeights[a.adminCategory] || 0; 
+                let catB = window.categoryWeights[b.adminCategory] || 0;
                 if (catA !== catB) return catB - catA; 
                 if ((b.adminRating || 0) !== (a.adminRating || 0)) return (b.adminRating || 0) - (a.adminRating || 0); 
             }
@@ -5101,8 +5116,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         try {
             let users = Object.values(window.userDatabase || {});
             let totalUsers = users.length;
+            
+            // LÖSUNG: Der Fake-Rechner ist raus. Er zeigt jetzt die ECHTE Zahl an!
             let activeUsers = users.filter(u => u.approved !== false).length;
-            let onlineCount = activeUsers > 0 ? Math.floor(activeUsers / 3) + 1 : 1; 
+            let onlineCount = activeUsers; 
 
             window.forceBadge('header-search-online-badge', onlineCount, true);
             window.forceBadge('online-dot-mini-user', onlineCount, false);
