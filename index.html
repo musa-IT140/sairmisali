@@ -3864,7 +3864,8 @@ Blühe, deutsches Vaterland!</p>
     
     window.isUploading = false; 
     window.isFetching = false;
-    window.lastLocalUpdate = Date.now();
+    // LÖSUNG ZEITSTEMPEL: Neue Geräte laden jetzt sofort die Cloud herunter!
+    window.lastLocalUpdate = parseInt(localStorage.getItem('misaliLastUpdate')) || 0;
     
     window.currentGameLang = 'TR';
     window.bilmeceLang = 'TR'; 
@@ -3910,6 +3911,7 @@ Blühe, deutsches Vaterland!</p>
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
         window.lastLocalUpdate = Date.now(); 
+        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString()); // Zeitstempel sichern
         
         try { 
             const data = { 
@@ -3922,7 +3924,8 @@ Blühe, deutsches Vaterland!</p>
                 heartsDB: window.poemDataStore || {}, 
                 calNotes: window.calNotesDB || {}, 
                 visits: window.siteVisits || 0,
-                savedItems: window.savedItemsDB || {} // Aklımda Kayıtları
+                savedItems: window.savedItemsDB || {},
+                contentDB: window.contentDB || {} // 🚀 LÖSUNG: Admin-Inhalte fliegen jetzt in die Cloud!
             };
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
                 method: 'PUT', 
@@ -3936,8 +3939,8 @@ Blühe, deutsches Vaterland!</p>
         window.isUploading = false;
     };
 
-    window.fetchFromCloud = async function() {
-        if (!navigator.onLine || window.isUploading || window.isFetching) return; 
+    window.fetchFromCloud = async function(force = false) {
+        if (!navigator.onLine || window.isUploading || (window.isFetching && !force)) return; 
         
         window.isFetching = true;
         try { 
@@ -3948,13 +3951,31 @@ Blühe, deutsches Vaterland!</p>
                 let r = json.record; 
                 
                 // ANTI-OVERWRITE SCHUTZ
-                if (r.timestamp && r.timestamp < window.lastLocalUpdate - 2000) {
+                if (!force && r.timestamp && r.timestamp < window.lastLocalUpdate - 2000) {
                     window.isFetching = false;
                     return; 
                 }
 
+                // Zeitstempel aktualisieren, damit wir nicht ständig neu laden
+                if (r.timestamp) {
+                    window.lastLocalUpdate = r.timestamp;
+                    localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
+                }
+
                 let activeEl = document.activeElement;
                 let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+                // 🚀 LÖSUNG: Zieht die Admin-Inhalte aus der Cloud auf das neue Handy!
+                if(r.contentDB && Object.keys(r.contentDB).length > 0) {
+                    window.contentDB = r.contentDB;
+                    localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
+                    
+                    // Arrays updaten
+                    if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
+                    if(r.contentDB.bulmacalar) window.bulmacalarDB = r.contentDB.bulmacalar;
+                    
+                    if(!isTyping && window.initContent) window.initContent();
+                }
 
                 if(r.users && Object.keys(r.users).length > 0) { 
                     window.userDatabase = r.users; 
@@ -4656,11 +4677,16 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         location.reload(); 
     };
 
-    window.m_login = function() {
+    window.m_login = async function() {
         const u = document.getElementById('m-login-user').value.trim();
         const p = document.getElementById('m-login-pass').value.trim();
         const rem = document.getElementById('m-login-rem').checked;
         if (!u || !p) { window.customAlert('Eksik bilgi! <span class="de-sub">(Fehlende Eingabe!)</span>', '⚠️'); return; }
+        
+        // 🚀 LÖSUNG FÜR DEN FREISCHALTUNGS-FEHLER:
+        // Zwingt die Seite, VOR dem Einloggen die allerneuesten Daten aus der Cloud zu holen!
+        window.showToast("Bilgiler güncelleniyor... <span class='de-sub'>(Daten werden synchronisiert...)</span>");
+        await window.fetchFromCloud(true);
         
         let found = window.userDatabase[u];
         if (!found) { for (let k in window.userDatabase) { if (window.userDatabase[k].email === u) { found = window.userDatabase[k]; break; } } }
@@ -4674,67 +4700,62 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         sessionStorage.setItem('misaliUser', JSON.stringify(found));
         
         if (rem) { 
-                        localStorage.setItem('misaliUser', JSON.stringify(found)); 
-                        localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); 
-                        
-                        // BIOMETRIK REGISTRIERUNG
-                        if(!localStorage.getItem('misaliBioKey_' + found.username)) {
-                            window.customConfirm('Gelecek sefer Biometrik (Parmak İzi / Yüz Tanıma) ile giriş yapmak ister misiniz? <span class="de-sub">(Biometrie für nächsten Login aktivieren?)</span>', async () => {
-                                if (window.PublicKeyCredential) {
-                                    try {
-                                        const createOpts = {
-                                            challenge: window.crypto.getRandomValues(new Uint8Array(32)),
-                                            rp: { name: "Şair Misal.i" },
-                                            user: {
-                                                id: window.crypto.getRandomValues(new Uint8Array(16)),
-                                                name: found.username,
-                                                displayName: found.name
-                                            },
-                                            pubKeyCredParams: [
-                                                {alg: -7, type: "public-key"}, 
-                                                {alg: -257, type: "public-key"}
-                                            ],
-                                            authenticatorSelection: { 
-                                                authenticatorAttachment: "platform",
-                                                userVerification: "preferred" 
-                                            },
-                                            timeout: 60000
-                                        };
-                                        
-                                        // HIER ÖFFNET SICH DER SCANNER ZUM SPEICHERN!
-                                        const cred = await navigator.credentials.create({ publicKey: createOpts });
-                                        
-                                        localStorage.setItem('misaliBioKey_' + found.username, window.bufferToBase64(cred.rawId));
-                                        window.showToast('Biometrik kayıt başarılı! <span class="de-sub">(Registriert!)</span>');
-                                        setTimeout(() => window.finishLogin(found), 1000);
-                                        
-                                    } catch(err) {
-                                        // DER SPION: Zeigt uns den wahren Fehler an, statt stumm zu scheitern!
-                                        window.customAlert("Windows Hello Hata: <br><br><b style='color:#ef4444;'>" + err.name + "</b><br>" + err.message + "<br><br><span class='de-sub'>(Hinweis: Auf file:/// funktioniert WebAuthn nie!)</span>", "❌");
-                                        console.error("Biometric Create Error:", err);
-                                        
-                                        document.getElementById('custom-dialog-ok').onclick = () => {
-                                            document.getElementById('custom-dialog-modal').classList.remove('active-modal');
-                                            window.finishLogin(found);
-                                        };
-                                    }
-                                } else {
-                                    window.finishLogin(found);
-                                }
-                            });
-                            
-                            document.getElementById('custom-dialog-cancel').onclick = () => {
-                                document.getElementById('custom-dialog-modal').classList.remove('active-modal');
-                                window.finishLogin(found);
+            localStorage.setItem('misaliUser', JSON.stringify(found)); 
+            localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); 
+            
+            // BIOMETRIK REGISTRIERUNG
+            if(!localStorage.getItem('misaliBioKey_' + found.username)) {
+                window.customConfirm('Gelecek sefer Biometrik (Parmak İzi / Yüz Tanıma) ile giriş yapmak ister misiniz? <span class="de-sub">(Biometrie für nächsten Login aktivieren?)</span>', async () => {
+                    if (window.PublicKeyCredential) {
+                        try {
+                            const createOpts = {
+                                challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+                                rp: { name: "Şair Misal.i" },
+                                user: {
+                                    id: window.crypto.getRandomValues(new Uint8Array(16)),
+                                    name: found.username,
+                                    displayName: found.name
+                                },
+                                pubKeyCredParams: [{alg: -7, type: "public-key"}, {alg: -257, type: "public-key"}],
+                                // 🚀 LÖSUNG FÜR WENIGER FENSTER: Zwingt Windows, sofort den internen Scanner (Laptop) zu nutzen!
+                                authenticatorSelection: { 
+                                    authenticatorAttachment: "platform",
+                                    userVerification: "preferred" 
+                                },
+                                timeout: 60000
                             };
-                            return;
+                            
+                            // HIER ÖFFNET SICH DER SCANNER ZUM SPEICHERN!
+                            const cred = await navigator.credentials.create({ publicKey: createOpts });
+                            
+                            localStorage.setItem('misaliBioKey_' + found.username, window.bufferToBase64(cred.rawId));
+                            localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                            window.showToast('Biometrik kayıt başarılı! <span class="de-sub">(Registriert!)</span>');
+                            setTimeout(() => window.finishLogin(found), 1000);
+                        } catch(err) {
+                            console.error("Biometric Create Error:", err);
+                            localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                            window.finishLogin(found);
                         }
-                    } else { 
-                        localStorage.removeItem('misaliUser'); 
-                        localStorage.removeItem('misaliAutoFill'); 
+                    } else {
+                        localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                        window.finishLogin(found);
                     }
-                    
+                });
+                
+                document.getElementById('custom-dialog-cancel').onclick = () => {
+                    localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                    document.getElementById('custom-dialog-modal').classList.remove('active-modal');
                     window.finishLogin(found);
+                };
+                return;
+            }
+        } else { 
+            localStorage.removeItem('misaliUser'); 
+            localStorage.removeItem('misaliAutoFill'); 
+        }
+        
+        window.finishLogin(found);
     };
 
     window.m_logout = function() {
@@ -4799,8 +4820,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 allowCredentials: [{
                     id: window.base64ToBuffer(bioKeyStr),
                     type: 'public-key'
+                    // LÖSUNG: 'transports' entfernt, damit der Browser sich nicht verzettelt
                 }],
-                userVerification: "required",
+                userVerification: "preferred", // LÖSUNG: Verhindert aggressive PIN-Abfragen
                 timeout: 60000
             };
             
@@ -4817,7 +4839,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             
         } catch(err) {
             console.error("Biometric Get Error:", err);
-            window.showToast("Biometrik doğrulama iptal edildi veya başarısız. <span class='de-sub'>(Abgebrochen oder fehlgeschlagen.)</span>");
+            window.showToast("Biometrik doğrulama iptal edildi. <span class='de-sub'>(Abgebrochen.)</span>");
         }
     };
                 
