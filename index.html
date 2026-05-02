@@ -3923,7 +3923,7 @@ Blühe, deutsches Vaterland!</p>
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
         window.lastLocalUpdate = Date.now(); 
-        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString()); // Zeitstempel sichern
+        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         
         try { 
             const data = { 
@@ -3937,7 +3937,7 @@ Blühe, deutsches Vaterland!</p>
                 calNotes: window.calNotesDB || {}, 
                 visits: window.siteVisits || 0,
                 savedItems: window.savedItemsDB || {},
-                contentDB: window.contentDB || {} // 🚀 LÖSUNG: Admin-Inhalte (Gedichte etc.) fliegen jetzt mit in die Cloud!
+                contentDB: window.contentDB || {} 
             };
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
                 method: 'PUT', 
@@ -3947,8 +3947,10 @@ Blühe, deutsches Vaterland!</p>
             if(window.renderOnlineUsers) window.renderOnlineUsers();
             if(window.renderLeaderboard && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
         } catch(e) { console.error("Cloud Sync Error", e); } 
-        
-        window.isUploading = false;
+        finally {
+            // 🚀 LÖSUNG: Gibt den Upload-Schalter immer sicher wieder frei!
+            window.isUploading = false;
+        }
     };
 
     window.fetchFromCloud = async function(force = false) {
@@ -3956,19 +3958,19 @@ Blühe, deutsches Vaterland!</p>
         
         window.isFetching = true;
         try { 
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } }); 
+            // 🚀 LÖSUNG: Ein kleiner Trick (?req=...) zwingt die Cloud, immer die absolut neuste Version zu schicken!
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?req=${Date.now()}`, { headers: { 'X-Master-Key': API_KEY } }); 
             const json = await res.json();
             
             if(json.record) { 
                 let r = json.record; 
                 
-                // ANTI-OVERWRITE SCHUTZ
-                if (!force && r.timestamp && r.timestamp < window.lastLocalUpdate - 2000) {
+                // 🚀 LÖSUNG RACE-CONDITION: Wenn die Cloud älter oder gleich alt wie dein Handy ist, blockt er das Herunterladen ab!
+                if (!force && r.timestamp && r.timestamp <= window.lastLocalUpdate) {
                     window.isFetching = false;
                     return; 
                 }
 
-                // Zeitstempel aktualisieren, damit wir nicht ständig neu laden
                 if (r.timestamp) {
                     window.lastLocalUpdate = r.timestamp;
                     localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
@@ -3977,13 +3979,11 @@ Blühe, deutsches Vaterland!</p>
                 let activeEl = document.activeElement;
                 let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
 
-                // 🚀 LÖSUNG: Zieht die Admin-Inhalte aus der Cloud auf das neue Handy!
                 if(r.contentDB && Object.keys(r.contentDB).length > 0) {
                     window.contentDB = r.contentDB;
                     localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
                     if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
                     if(r.contentDB.bulmacalar) window.bulmacalarDB = r.contentDB.bulmacalar;
-                    
                     if(!isTyping && window.initContent) window.initContent();
                 }
 
@@ -4047,8 +4047,11 @@ Blühe, deutsches Vaterland!</p>
                 if(r.logs && r.logs.length > 0) { window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
                 if(r.visits && r.visits > window.siteVisits) { window.siteVisits = r.visits; localStorage.setItem('misaliSiteVisits', window.siteVisits); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
             }
-        } catch(e) { console.error("Cloud Fetch Error", e); }
-        window.isFetching = false;
+        } catch(e) { console.error("Cloud Fetch Error", e); } 
+        finally {
+            // 🚀 LÖSUNG: Gibt den Download am Ende immer sicher wieder frei!
+            window.isFetching = false;
+        }
     };
 
     setInterval(() => { window.fetchFromCloud(); }, 3500); 
@@ -4916,6 +4919,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         
         for (let k in window.userDatabase) {
             let u = window.userDatabase[k];
+            // 🚀 LÖSUNG: Wenn ein User in der Cloud kaputt/unvollständig ist, ignoriere ihn einfach!
+            if (!u || !u.username || !u.name) continue; 
+            
             let fullName = (u.name + (u.surname ? ' ' + u.surname : '')).toLowerCase();
             if (u.username.toLowerCase() === checkName || fullName === checkName) {
                 if (u.role === 'admin' || u.role === 'co-admin') return 'author-anim-admin';
@@ -6576,7 +6582,14 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                         let commCount = poemData.comments ? poemData.comments.length : 0;
                         let dObj = new Date(item.timestamp || Date.now()); let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
                         
-                        let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(item.id);
+                        // 🚀 LÖSUNG: Crash-Schutz für kaputte Lesezeichen-Speicher!
+                        let isSaved = false;
+                        try {
+                            if (uName && window.savedItemsDB && window.savedItemsDB[uName] && Array.isArray(window.savedItemsDB[uName])) {
+                                isSaved = window.savedItemsDB[uName].includes(item.id);
+                            }
+                        } catch(err) {}
+
                         let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${item.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
 
                         return `<div class="card ${borderClass}" style="background: rgba(10,25,47,0.8); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}')">
