@@ -3864,7 +3864,7 @@ Blühe, deutsches Vaterland!</p>
     
     window.isUploading = false; 
     window.isFetching = false;
-    // LÖSUNG ZEITSTEMPEL: Neue Geräte laden jetzt sofort die Cloud herunter!
+    // LÖSUNG ZEITSTEMPEL: Holt den echten Speicherpunkt, nicht "jetzt"!
     window.lastLocalUpdate = parseInt(localStorage.getItem('misaliLastUpdate')) || 0;
     
     window.currentGameLang = 'TR';
@@ -3906,6 +3906,18 @@ Blühe, deutsches Vaterland!</p>
         return buf;
     };
 
+    // INIT DB - DATENSCHUTZKONFORM & CLOUD-FIRST
+    try {
+        if(!localStorage.getItem('misaliChatResetV0_Done')) {
+            localStorage.setItem('misaliChatDB_V0', '[]');
+            localStorage.setItem('misaliChatResetV0_Done', 'true');
+            window.chatDB = [];
+            // LÖSUNG UPLOAD-FALLE: Das syncToCloud() wurde hier gelöscht, damit leere Handys die Cloud nicht überschreiben!
+        } else {
+            window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || []; 
+        }
+    } catch(e) { window.chatDB = []; }
+
     // ECHTZEIT CLOUD SYNCHRONISATION (Mit Schutzlogik)
     window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
@@ -3925,7 +3937,7 @@ Blühe, deutsches Vaterland!</p>
                 calNotes: window.calNotesDB || {}, 
                 visits: window.siteVisits || 0,
                 savedItems: window.savedItemsDB || {},
-                contentDB: window.contentDB || {} // 🚀 LÖSUNG: Admin-Inhalte fliegen jetzt in die Cloud!
+                contentDB: window.contentDB || {} // 🚀 LÖSUNG: Admin-Inhalte (Gedichte etc.) fliegen jetzt mit in die Cloud!
             };
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
                 method: 'PUT', 
@@ -3969,8 +3981,6 @@ Blühe, deutsches Vaterland!</p>
                 if(r.contentDB && Object.keys(r.contentDB).length > 0) {
                     window.contentDB = r.contentDB;
                     localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
-                    
-                    // Arrays updaten
                     if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
                     if(r.contentDB.bulmacalar) window.bulmacalarDB = r.contentDB.bulmacalar;
                     
