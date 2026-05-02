@@ -4982,9 +4982,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     }
                 }
                 
-                // Name setzen (Admin = Şair Misal.i | User = Echter Name in Lila)
+                // Name setzen (Admin = Şair Misal.i | User = Voller Name in Lila)
                 const hU = document.getElementById('header-username'); 
-                if(hU) hU.innerText = isAdmin ? "Şair Misal.i" : window.currentUser.name;
+                if(hU) hU.innerText = isAdmin ? "Şair Misal.i" : window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
                 
                 // Punkte setzen
                 const hS = document.getElementById('user-score'); 
@@ -5456,14 +5456,15 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let ha = document.getElementById('h-aktif'); if(ha) ha.innerText = onlineCount;
             let hz = document.getElementById('h-ziyaretci'); if(hz) hz.innerText = visits;
 
-            let userListHTML = users.filter(u => u.approved !== false).map(u => {
+           let userListHTML = users.filter(u => u.approved !== false).map(u => {
                 let fullName = u.name + (u.surname ? ' ' + u.surname : '');
                 let roleIcon = u.role === 'admin' ? '🛡️ ' : (u.role === 'co-admin' ? '⚔️ ' : '');
                 let colorClass = window.getAuthorColorClass(u.username);
+                // LÖSUNG: Die Zeile mit dem "Username" wurde komplett gelöscht!
                 return `<div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; border-left: 3px solid #f4c542;">
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:1.5rem;">${u.emoji||'👤'}</span>
-                                <div><div style="font-weight:bold; color:#fff;">${roleIcon}<span class="${colorClass}">${fullName}</span></div><div style="font-size:0.8rem; color:#94a3b8;">${u.username}</div></div>
+                                <div><div style="font-weight:bold; color:#fff;">${roleIcon}<span class="${colorClass}">${fullName}</span></div></div>
                             </div>
                             <div style="text-align:right;">
                                 <div style="color:#22c55e; font-weight:bold;">${u.score||0} P</div>
@@ -7057,10 +7058,23 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); if(window.syncToCloud) window.syncToCloud(); window.sendSystemMessage('Admin', `SOHBET: ${fullName} sohbete yazdı.`);
     };
 
-    window.deleteChatMessage = function(id) {
-        window.customConfirm('Mesajı sil? <span class="de-sub" style="font-size:0.85em;">(Nachricht löschen?)</span>', () => { 
-            window.chatDB = window.chatDB.filter(m => m.id !== id); localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
-            window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); if(window.syncToCloud) window.syncToCloud(); window.sendSystemMessage('Admin', "Admin sohbetten bir mesaj sildi.");
+    window.deleteChatMessage = async function(id) {
+        window.customConfirm('Mesajı sil? <span class="de-sub" style="font-size:0.85em;">(Nachricht löschen?)</span>', async () => { 
+            // 1. Lokal löschen
+            window.chatDB = window.chatDB.filter(m => m.id !== id); 
+            localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
+            window.renderChat(); 
+            
+            // 2. LÖSUNG: Direkt und kugelsicher in Firebase löschen, um Überschneidungen zu vermeiden!
+            try {
+                if (typeof database !== 'undefined') {
+                    await database.ref('misaliData/chat_v0').set(window.chatDB);
+                } else {
+                    if(window.syncToCloud) window.syncToCloud(); 
+                }
+            } catch(e) { console.error("Chat delete sync error:", e); }
+            
+            window.showToast("Mesaj silindi. <span class='de-sub'>(Gelöscht)</span>");
         });
     };
 
@@ -7213,7 +7227,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let actionBtns = (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin' || window.currentUser.username === c.username)) ? `<div class="action-btns" style="display:flex; gap:12px; margin-top:8px; pointer-events:auto !important;"><button class="edit-btn" onclick="window.m_editComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#3b82f6; cursor:pointer; font-size:1.15rem; padding:0; pointer-events:auto !important;"><i class="fas fa-edit"></i></button><button class="del-btn" onclick="window.m_delComm('${poemId}', ${idx}, event)" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-size:1.15rem; padding:0; pointer-events:auto !important;"><i class="fas fa-trash-alt"></i></button></div>` : '';
             let colorClass = window.getAuthorColorClass(c.username);
             return `<div style="border-bottom: 1px dashed rgba(244,197,66,0.3); padding: 15px 0; display:flex; flex-direction:column;"><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><strong style="color:#f4c542; font-size:1.1rem;"><span class="${colorClass}">${c.user}</span></strong><div style="display:flex; flex-direction:column; align-items:flex-end;"><span class="time-info" style="font-size:0.8rem; color:#64748b;">${c.time || ''}</span>${c.editTime ? `<span class="edit-info" style="font-size:0.75rem; color:#f4c542; font-style:italic;">(Edit: ${c.editTime})</span>` : ''}</div></div><span style="color:#e2e8f0; font-size:1.1rem; word-break:break-word; line-height:1.6;">${c.text}</span>${actionBtns}</div>`;
-        }).join('') : `<span style="color:#94a3b8; font-style:italic; font-size:1.05rem; pointer-events:none; display:block; text-align:center; padding:20px 0;">${langIsDe ? 'Schreibe den ersten Kommentar...' : 'İlk yorumu sen yap... <span class="de-sub" style="font-size:0.85em;">(Schreibe Kommentar...)</span>'}</span>`;
+        }).join('') : `<span style="color:#94a3b8; font-style:italic; font-size:1.05rem; pointer-events:none; display:block; text-align:center; padding:20px 0;">${langIsDe ? 'Schreibe den ersten Kommentar...' : 'İlk yorumu sen yap...<br><span class="de-sub" style="font-size:0.75em; display:inline-block; margin-top:5px;">(Schreibe Kommentar...)</span>'}</span>`;
 
         let currentAuthor = window.currentPoemData.author;
         if(langIsDe && window.currentPoemData.authorDE) currentAuthor = window.currentPoemData.authorDE;
