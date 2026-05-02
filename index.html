@@ -3857,14 +3857,31 @@ Blühe, deutsches Vaterland!</p>
     </script>
     <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
+    <!-- FIREBASE LIVE-DATENBANK SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
-    // GLOBALE VARIABLEN & CLOUD
-    const BIN_ID = '69bfbe30aa77b81da9097754';
-    const API_KEY = '$2a$10$bUOu57NsJpTM6O5f3TQgUOqPDBIXJG8r47FwqrQ8DXlVAoD0XPDtK';
+// ==================================================================
+    // 🚀 NEUER MOTOR: FIREBASE REALTIME DATABASE
+    // ==================================================================
+    const firebaseConfig = {
+        // 👇 HIER FÜGST DU DEINEN KOPIERTEN CODE EIN 👇
+        // apiKey: "AIzaSy...",
+        // authDomain: "...",
+        // databaseURL: "...",
+        // projectId: "...",
+        // storageBucket: "...",
+        // messagingSenderId: "...",
+        // appId: "..."
+    };
     
+    // Firebase starten
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const database = firebase.database();
+
     window.isUploading = false; 
     window.isFetching = false;
-    // LÖSUNG ZEITSTEMPEL: Holt den echten Speicherpunkt, nicht "jetzt"!
     window.lastLocalUpdate = parseInt(localStorage.getItem('misaliLastUpdate')) || 0;
     
     window.currentGameLang = 'TR';
@@ -3872,7 +3889,7 @@ Blühe, deutsches Vaterland!</p>
     window.bulmacaLang = 'TR'; 
     window.atasozleriLang = 'TR'; 
 
-    // ULTRASICHERHEIT: Prüfsummen-Generator (Anti-Tamper & Manipulation)
+    // ULTRASICHERHEIT: Prüfsummen-Generator
     window.generateHash = function(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -3893,32 +3910,23 @@ Blühe, deutsches Vaterland!</p>
         }
     } catch(e) { console.error("Visits error", e); }
 
-    // ==================================================================
-    // BIOMETRIK HELPER (Konvertiert Fingerabdruck-Daten für LocalStorage)
-    // ==================================================================
-    window.bufferToBase64 = function(buf) {
-        return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
-    };
+    // BIOMETRIK HELPER
+    window.bufferToBase64 = function(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); };
     window.base64ToBuffer = function(b64) {
-        let bin = atob(b64);
-        let buf = new Uint8Array(bin.length);
-        for(let i=0; i<bin.length; i++) buf[i] = bin.charCodeAt(i);
-        return buf;
+        let bin = atob(b64); let buf = new Uint8Array(bin.length);
+        for(let i=0; i<bin.length; i++) buf[i] = bin.charCodeAt(i); return buf;
     };
 
-    // INIT DB - DATENSCHUTZKONFORM & CLOUD-FIRST
+    // INIT DB
     try {
         if(!localStorage.getItem('misaliChatResetV0_Done')) {
             localStorage.setItem('misaliChatDB_V0', '[]');
             localStorage.setItem('misaliChatResetV0_Done', 'true');
             window.chatDB = [];
-            // LÖSUNG UPLOAD-FALLE: Das syncToCloud() wurde hier gelöscht, damit leere Handys die Cloud nicht überschreiben!
-        } else {
-            window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || []; 
-        }
+        } else { window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || []; }
     } catch(e) { window.chatDB = []; }
 
-    // ECHTZEIT CLOUD SYNCHRONISATION (Mit Schutzlogik)
+    // 🚀 FIREBASE UPLOAD
     window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
@@ -3939,133 +3947,112 @@ Blühe, deutsches Vaterland!</p>
                 savedItems: window.savedItemsDB || {},
                 contentDB: window.contentDB || {} 
             };
-            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
-                method: 'PUT', 
-                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, 
-                body: JSON.stringify(data) 
-            }); 
+            await database.ref('misaliData').set(data);
+            
             if(window.renderOnlineUsers) window.renderOnlineUsers();
             if(window.renderLeaderboard && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
-        } catch(e) { console.error("Cloud Sync Error", e); } 
-        finally {
-            // 🚀 LÖSUNG: Gibt den Upload-Schalter immer sicher wieder frei!
-            window.isUploading = false;
-        }
+        } catch(e) { console.error("Firebase Sync Error", e); } 
+        finally { window.isUploading = false; }
     };
 
-    window.fetchFromCloud = async function(force = false) {
-        if (!navigator.onLine || window.isUploading || (window.isFetching && !force)) return; 
+    // 🚀 DIE ZENTRALE DATEN-VERARBEITUNG
+    window.processCloudData = function(r, force = false) {
+        if (!r) return;
+        if (!force && r.timestamp && r.timestamp <= window.lastLocalUpdate) return;
         
-        window.isFetching = true;
-        try { 
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?req=${Date.now()}`, { headers: { 'X-Master-Key': API_KEY } }); 
-            
-            // 🚀 LÖSUNG: Prüft sofort, ob dein JSONBin-Limit explodiert ist!
-            if (!res.ok) {
-                if (res.status === 429 || res.status === 403 || res.status === 401) {
-                    if (!window.apiLimitWarned) {
-                        window.customAlert("Cloud Limiti Doldu! (JSONBin API Limit erreicht). Lütfen JSONBin.io hesabınızı kontrol edin.", "⚠️");
-                        window.apiLimitWarned = true;
-                    }
-                }
-                window.isFetching = false;
-                return;
-            }
-
-            const json = await res.json();
-            
-            if(json.record) { 
-                let r = json.record; 
-                
-                // ANTI-OVERWRITE SCHUTZ
-                if (!force && r.timestamp && r.timestamp <= window.lastLocalUpdate) {
-                    window.isFetching = false;
-                    return; 
-                }
-
-                if (r.timestamp) {
-                    window.lastLocalUpdate = r.timestamp;
-                    localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
-                }
-
-                let activeEl = document.activeElement;
-                let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-
-                if(r.contentDB && Object.keys(r.contentDB).length > 0) {
-                    window.contentDB = r.contentDB;
-                    localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
-                    if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
-                    if(r.contentDB.bulmacalar) window.bulmacalarDB = r.contentDB.bulmacalar;
-                    if(!isTyping && window.initContent) window.initContent();
-                }
-
-                if(r.users && Object.keys(r.users).length > 0) { 
-                    window.userDatabase = r.users; 
-                    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-                    if(window.checkRemember && !window.currentUser) window.checkRemember(); 
-                    if(window.renderOnlineUsers) window.renderOnlineUsers(); 
-                    if(!isTyping && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal') && window.renderLeaderboard) window.renderLeaderboard();
-                }
-                
-                if(r.userPoems && Array.isArray(r.userPoems)) { 
-                    window.userPoemsDB = r.userPoems; 
-                    localStorage.setItem('misaliUserPoems', JSON.stringify(r.userPoems)); 
-                    if(!isTyping && window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-                    if(!isTyping && window.renderUserWorksSidebar) window.renderUserWorksSidebar();
-                    if(!isTyping && window.renderTopWorks) window.renderTopWorks();
-                    if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
-                    if(window.updateTopWorksTicker) window.updateTopWorksTicker();
-                }
-                
-                if(r.chat_v0 && Array.isArray(r.chat_v0)) { 
-                    window.chatDB = r.chat_v0; 
-                    localStorage.setItem('misaliChatDB_V0', JSON.stringify(r.chat_v0)); 
-                    if(!isTyping && window.renderChat) window.renderChat(); 
-                }
-                
-                if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
-                    let localIds = window.adminMessages.map(m => m.id);
-                    r.adminMsgs.forEach(rm => { if(!localIds.includes(rm.id)) window.adminMessages.push(rm); });
-                    localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
-                    if(window.updateNotifyBadge) window.updateNotifyBadge(); 
-                    if(!isTyping && document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal') && window.renderAdminMessages) window.renderAdminMessages();
-                    if(!isTyping && document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
-                }
-
-                if(r.heartsDB) { 
-                    if(!isTyping) {
-                        window.poemDataStore = r.heartsDB; 
-                        localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
-                        if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) window.updateHeartsUI(); 
-                        if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-                    }
-                }
-                
-                if(r.calNotes) { 
-                    window.calNotesDB = r.calNotes; 
-                    localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); 
-                    if(!isTyping && window.currentSelectedDate && document.getElementById('eventsModal') && document.getElementById('eventsModal').classList.contains('active-modal')) {
-                        if(window.renderCalNotes) window.renderCalNotes(window.currentSelectedDate);
-                        if(window.renderCalendar) window.renderCalendar();
-                    }
-                }
-
-                if(r.savedItems) {
-                    window.savedItemsDB = r.savedItems;
-                    localStorage.setItem('misaliSavedItems', JSON.stringify(r.savedItems));
-                    if(window.updateSavedBadge) window.updateSavedBadge();
-                }
-                
-                if(r.logs && r.logs.length > 0) { window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
-                if(r.visits && r.visits > window.siteVisits) { window.siteVisits = r.visits; localStorage.setItem('misaliSiteVisits', window.siteVisits); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
-            }
-        } catch(e) { console.error("Cloud Fetch Error", e); } 
-        finally {
-            window.isFetching = false;
+        if (r.timestamp) {
+            window.lastLocalUpdate = r.timestamp;
+            localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         }
+
+        let activeEl = document.activeElement;
+        let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+        if(r.contentDB && Object.keys(r.contentDB).length > 0) {
+            window.contentDB = r.contentDB;
+            localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
+            if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
+            if(r.contentDB.bulmacalar) window.bulmacalarDB = r.contentDB.bulmacalar;
+            if(!isTyping && window.initContent) window.initContent();
+        }
+
+        if(r.users && Object.keys(r.users).length > 0) { 
+            window.userDatabase = r.users; 
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            if(window.checkRemember && !window.currentUser) window.checkRemember(); 
+            if(window.renderOnlineUsers) window.renderOnlineUsers(); 
+            if(!isTyping && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal') && window.renderLeaderboard) window.renderLeaderboard();
+        }
+        
+        if(r.userPoems && Array.isArray(r.userPoems)) { 
+            window.userPoemsDB = r.userPoems; 
+            localStorage.setItem('misaliUserPoems', JSON.stringify(r.userPoems)); 
+            if(!isTyping && window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            if(!isTyping && window.renderUserWorksSidebar) window.renderUserWorksSidebar();
+            if(!isTyping && window.renderTopWorks) window.renderTopWorks();
+            if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+            if(window.updateTopWorksTicker) window.updateTopWorksTicker();
+        }
+        
+        if(r.chat_v0 && Array.isArray(r.chat_v0)) { 
+            window.chatDB = r.chat_v0; 
+            localStorage.setItem('misaliChatDB_V0', JSON.stringify(r.chat_v0)); 
+            if(!isTyping && window.renderChat) window.renderChat(); 
+        }
+        
+        if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
+            let localIds = window.adminMessages.map(m => m.id);
+            r.adminMsgs.forEach(rm => { if(!localIds.includes(rm.id)) window.adminMessages.push(rm); });
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
+            if(window.updateNotifyBadge) window.updateNotifyBadge(); 
+            if(!isTyping && document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal') && window.renderAdminMessages) window.renderAdminMessages();
+            if(!isTyping && document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
+        }
+
+        if(r.heartsDB) { 
+            if(!isTyping) {
+                window.poemDataStore = r.heartsDB; 
+                localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
+                if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) window.updateHeartsUI(); 
+                if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            }
+        }
+        
+        if(r.calNotes) { 
+            window.calNotesDB = r.calNotes; 
+            localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); 
+            if(!isTyping && window.currentSelectedDate && document.getElementById('eventsModal') && document.getElementById('eventsModal').classList.contains('active-modal')) {
+                if(window.renderCalNotes) window.renderCalNotes(window.currentSelectedDate);
+                if(window.renderCalendar) window.renderCalendar();
+            }
+        }
+
+        if(r.savedItems) {
+            window.savedItemsDB = r.savedItems;
+            localStorage.setItem('misaliSavedItems', JSON.stringify(r.savedItems));
+            if(window.updateSavedBadge) window.updateSavedBadge();
+        }
+        
+        if(r.logs && r.logs.length > 0) { window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
+        if(r.visits && r.visits > window.siteVisits) { window.siteVisits = r.visits; localStorage.setItem('misaliSiteVisits', window.siteVisits); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
     };
 
-    setInterval(() => { window.fetchFromCloud(); }, 15000); 
+    // 🚀 DER LIVE-LAUSCHER: Ersetzt die alte Abfrage und lauscht in Echtzeit!
+    database.ref('misaliData').on('value', (snapshot) => {
+        if(window.isUploading) return; 
+        const data = snapshot.val();
+        if(data) window.processCloudData(data, false);
+    });
+
+    // Manuelles Laden (z.B. für Login-Check)
+    window.fetchFromCloud = async function(force = false) {
+        if (!navigator.onLine || window.isUploading) return; 
+        try {
+            const snapshot = await database.ref('misaliData').once('value');
+            const data = snapshot.val();
+            if(data) window.processCloudData(data, force);
+        } catch(e) { console.error("Firebase Fetch Error", e); }
+    };
 
     // --- FEIERTAGE (HOLIDAYS) DATENBANK ---
     window.holidaysDB = {
