@@ -951,13 +951,17 @@
             .page-view { padding-top: 260px; } 
         }
 
-        /* LÖSUNG FÜR FATMA (Normaler User Header rutscht nach links) */
-        .user-profile-group.user-left-mode {
-            background: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
+        /* LÖSUNG FÜR NORMALE USER: Name in lila Unterschrift (Admin bleibt unangetastet) */
+        body.user-mode:not(.admin-mode) #header-username {
+            color: #a78bfa !important;
+            text-shadow: 0 0 8px rgba(167, 139, 250, 0.5) !important;
+            font-family: 'Great Vibes', cursive !important;
+            font-size: 1.8rem !important; /* Etwas größer, da es eine Unterschrift ist */
         }
+        @media (max-width: 768px) {
+            body.user-mode:not(.admin-mode) #header-username { font-size: 1.4rem !important; }
+        }
+
         .user-profile-group.user-left-mode #header-username {
             font-family: 'Playfair Display', serif !important;
             font-size: 1.8rem !important;
@@ -4921,41 +4925,57 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 if (uInput) uInput.value = saved.u || ''; if (pInput) pInput.value = saved.p || ''; if (rInput) rInput.checked = true;
             }
 
+            // ==========================================
+            // LÖSUNG: AVATAR & LOGO DYNAMIK
+            // ==========================================
             const profileGrp = document.querySelector('.user-profile-group');
-            const headerRight = document.querySelector('.header-right');
-            const headerLeft = document.querySelector('.header-left');
-            const logo = document.querySelector('.logo');
+            const logoContainer = document.querySelector('.logo');
+            const avatar = document.getElementById('user-avatar');
+            const greeting = document.getElementById('user-greeting');
 
+            // 1. Reset: Alles zurück auf Anfang (verhindert doppelte Federn oder falsche Bilder)
+            if(profileGrp) profileGrp.classList.remove('user-left-mode');
+            if(logoContainer) logoContainer.innerHTML = `Şair Misal.i <i class="fas fa-feather-alt feather-anim" style="margin-left:8px;"></i>`; 
+            if(avatar && profileGrp && !profileGrp.contains(avatar)) profileGrp.insertBefore(avatar, greeting); 
+            let uf = document.getElementById('user-feather'); if(uf) uf.remove(); 
+
+            // 2. Ansicht je nach Rolle aufbauen
             if (window.currentUser) {
                 document.body.classList.add('user-mode');
                 const isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
                 
                 if (isAdmin) {
+                    // ADMIN-MODUS: Avatar bleibt im Rahmen!
                     document.body.classList.add('admin-mode');
-                    // ADMIN: Profil bleibt rechts, Logo links bleibt!
-                    if(profileGrp && headerRight) { headerRight.insertBefore(profileGrp, headerRight.firstChild); profileGrp.classList.remove('user-left-mode'); }
-                    if(logo) { logo.style.display = 'flex'; logo.innerHTML = `Şair Misal.i <i class="fas fa-feather-alt feather-anim" style="margin-left:8px;"></i>`; }
-                    const hU = document.getElementById('header-username'); if(hU) hU.innerHTML = "Şair Misal.i";
+                    if(avatar) { 
+                        avatar.src = "image_01d1a0.png"; 
+                        avatar.style.marginRight = "0"; 
+                    }
                 } else {
+                    // USER-MODUS: Avatar verlässt den Rahmen und wandert zum Logo!
                     document.body.classList.remove('admin-mode');
-                    // FATMA (USER): Profil rückt nach links, Sair Misali Text verschwindet!
-                    if(profileGrp && headerLeft) { headerLeft.insertBefore(profileGrp, headerLeft.firstChild); profileGrp.classList.add('user-left-mode'); }
-                    if(logo) logo.style.display = 'none'; 
-                    // Feder wird direkt neben den Namen gepackt!
-                    const hU = document.getElementById('header-username'); 
-                    if(hU) hU.innerHTML = window.currentUser.name + ` <i class="fas fa-feather-alt feather-anim" style="color:var(--accent-color); margin-left:8px; font-size: 1.1rem;"></i>`;
+                    if(avatar && logoContainer) {
+                        avatar.src = window.currentUser.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                        avatar.style.marginRight = "12px"; // Abstand zum Text "Şair Misal.i"
+                        logoContainer.insertBefore(avatar, logoContainer.firstChild);
+                    }
                 }
                 
-                const hS = document.getElementById('user-score'); if(hS) hS.innerText = (window.currentUser.score || 0) + ' P.';
-                const myPic = document.getElementById('user-avatar');
-                if (myPic) { myPic.src = isAdmin ? "image_01d1a0.png" : (window.currentUser.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"); }
+                // Name setzen (Admin = Şair Misal.i | User = Echter Name)
+                const hU = document.getElementById('header-username'); 
+                if(hU) hU.innerText = isAdmin ? "Şair Misal.i" : window.currentUser.name;
                 
+                // Punkte setzen
+                const hS = document.getElementById('user-score'); 
+                if(hS) hS.innerText = (window.currentUser.score || 0) + ' P.';
+                
+                // Sternzeichen setzen
                 const zBadge = document.getElementById('header-zodiac');
-                if (zBadge && window.currentUser.day && window.currentUser.month && window.getZodiacSign) { zBadge.innerText = window.getZodiacSign(window.currentUser.day, window.currentUser.month).icon; }
+                if (zBadge && window.currentUser.day && window.currentUser.month && window.getZodiacSign) { 
+                    zBadge.innerText = window.getZodiacSign(window.currentUser.day, window.currentUser.month).icon; 
+                }
             } else {
                 document.body.classList.remove('user-mode', 'admin-mode');
-                if(profileGrp && headerRight) { headerRight.insertBefore(profileGrp, headerRight.firstChild); profileGrp.classList.remove('user-left-mode'); }
-                if(logo) { logo.style.display = 'flex'; logo.innerHTML = `Şair Misal.i <i class="fas fa-feather-alt feather-anim" style="margin-left:8px;"></i>`; }
             }
         } catch(e) { console.error("checkRemember error:", e); }
     };
