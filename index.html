@@ -3892,6 +3892,19 @@ Blühe, deutsches Vaterland!</p>
         }
     } catch(e) { console.error("Visits error", e); }
 
+    // ==================================================================
+    // BIOMETRIK HELPER (Konvertiert Fingerabdruck-Daten für LocalStorage)
+    // ==================================================================
+    window.bufferToBase64 = function(buf) {
+        return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
+    };
+    window.base64ToBuffer = function(b64) {
+        let bin = atob(b64);
+        let buf = new Uint8Array(bin.length);
+        for(let i=0; i<bin.length; i++) buf[i] = bin.charCodeAt(i);
+        return buf;
+    };
+
     // ECHTZEIT CLOUD SYNCHRONISATION (Mit Schutzlogik)
     window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
@@ -4417,7 +4430,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         { id: 'per_de_10', deTitle: "Ludwig van Beethoven", quote: "Musik ist höhere Offenbarung als alle Weisheit und Philosophie.", url: "https://de.wikipedia.org/wiki/Ludwig_van_Beethoven", emoji: "🎼", timestamp: Date.now() }
     ];
 
-    // INIT DB - MEGA ABSTURZSCHUTZ UND CACHE-BREAKER
+    // ==================================================================
+    // INIT DB - DATENSCHUTZKONFORM & CLOUD-FIRST
+    // ==================================================================
     try {
         if(!localStorage.getItem('misaliChatResetV0_Done')) {
             localStorage.setItem('misaliChatDB_V0', '[]');
@@ -4431,7 +4446,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     } catch(e) { window.chatDB = []; }
         
     try {
+        // Lade zuerst die bestehende Datenbank (wo alle Cloud-User drin sind)
         window.userDatabase = JSON.parse(localStorage.getItem('misaliUsersDB')) || {};
+        
+        // Bereinigung für alte Array-Strukturen
         if (Array.isArray(window.userDatabase)) {
             let tempObj = {};
             window.userDatabase.forEach((u, index) => {
@@ -4441,39 +4459,30 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             window.userDatabase = tempObj;
         }
         
+        // 1. STAMM-USER: AdminKing (Zwingend & Unzerstörbar)
         if (!window.userDatabase['AdminKing']) {
             let sHash = window.generateHash("AdminKing25361980misali_secret_key");
             window.userDatabase['AdminKing'] = { username: "AdminKing", name: "Şair Misal.i", surname: "", email: "sairmisali25@gmail.com", pass: "25361980", _token: sHash, role: "admin", score: 100, played: 0, wins: 0, losses: 0, draws: 0, approved: true };
             if (window.userDatabase['misali']) delete window.userDatabase['misali']; 
-            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         }
+
+        // 2. STAMM-USER: fado (Test-Account)
         if (!window.userDatabase['fado']) {
             let sHash = window.generateHash("fadofado123misali_secret_key");
             window.userDatabase['fado'] = { username: "fado", name: "Fado", surname: "Test", email: "fado@test.com", pass: "fado123", _token: sHash, role: "user", score: 0, played: 0, wins: 0, losses: 0, draws: 0, emoji: "🐺", approved: true };
-            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         }
 
-        // YUSUF UNZERSTÖRBAR MACHEN
-            if (!window.userDatabase['yusuf']) {
-                let sHash = window.generateHash("yusufyusuf123misali_secret_key"); // WICHTIG: "username" + "passwort" + "misali_secret_key"
-                window.userDatabase['yusuf'] = { 
-                    username: "yusuf", 
-                    name: "Yusuf", 
-                    surname: "", 
-                    email: "yusuf@mail.com", // Kann er später anpassen
-                    pass: "yusuf123",        // Sein Start-Passwort (mindestens 8 Zeichen!)
-                    _token: sHash, 
-                    role: "user", 
-                    score: 0, played: 0, wins: 0, losses: 0, draws: 0, 
-                    emoji: "🦁",             // Start-Emoji
-                    approved: true           // Er ist direkt freigeschaltet!
-                };
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-                
-                // Zwingt die Cloud, Yusuf sofort wieder abzuspeichern
-                window.lastLocalUpdate = Date.now();
-                if(window.syncToCloud) window.syncToCloud();
-            }
+        // 3. STAMM-USER: yusuf
+        if (!window.userDatabase['yusuf']) {
+            let sHash = window.generateHash("yusufyusuf123misali_secret_key");
+            window.userDatabase['yusuf'] = { 
+                username: "yusuf", name: "Yusuf", surname: "", email: "yusuf@mail.com", pass: "yusuf123", 
+                _token: sHash, role: "user", score: 0, played: 0, wins: 0, losses: 0, draws: 0, emoji: "🦁", approved: true 
+            };
+        }
+
+        // Einmaliges Sichern der Datenbank (inkl. alter Cloud-User und der 3 Stamm-User)
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
 
     } catch(e) { window.userDatabase = {}; }
 
@@ -4665,28 +4674,67 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         sessionStorage.setItem('misaliUser', JSON.stringify(found));
         
         if (rem) { 
-            localStorage.setItem('misaliUser', JSON.stringify(found)); // Persistente Sitzung speichern
-            localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); // Login-Daten speichern
-            
-            if(!localStorage.getItem('misaliBiometricPrompted_' + found.username)) {
-                window.customConfirm('Gelecek sefer Biometrik (Parmak İzi / Yüz Tanıma) ile giriş yapmak ister misiniz? <span class="de-sub">(Biometrie für nächsten Login aktivieren?)</span>', () => {
-                    localStorage.setItem('misaliBiometric_' + found.username, 'true');
-                    localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
+                        localStorage.setItem('misaliUser', JSON.stringify(found)); 
+                        localStorage.setItem('misaliAutoFill', JSON.stringify({u: u, p: p})); 
+                        
+                        // BIOMETRIK REGISTRIERUNG
+                        if(!localStorage.getItem('misaliBioKey_' + found.username)) {
+                            window.customConfirm('Gelecek sefer Biometrik (Parmak İzi / Yüz Tanıma) ile giriş yapmak ister misiniz? <span class="de-sub">(Biometrie für nächsten Login aktivieren?)</span>', async () => {
+                                if (window.PublicKeyCredential) {
+                                    try {
+                                        const createOpts = {
+                                            challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+                                            rp: { name: "Şair Misal.i" },
+                                            user: {
+                                                id: window.crypto.getRandomValues(new Uint8Array(16)),
+                                                name: found.username,
+                                                displayName: found.name
+                                            },
+                                            pubKeyCredParams: [
+                                                {alg: -7, type: "public-key"}, 
+                                                {alg: -257, type: "public-key"}
+                                            ],
+                                            authenticatorSelection: { 
+                                                authenticatorAttachment: "platform",
+                                                userVerification: "preferred" 
+                                            },
+                                            timeout: 60000
+                                        };
+                                        
+                                        // HIER ÖFFNET SICH DER SCANNER ZUM SPEICHERN!
+                                        const cred = await navigator.credentials.create({ publicKey: createOpts });
+                                        
+                                        localStorage.setItem('misaliBioKey_' + found.username, window.bufferToBase64(cred.rawId));
+                                        window.showToast('Biometrik kayıt başarılı! <span class="de-sub">(Registriert!)</span>');
+                                        setTimeout(() => window.finishLogin(found), 1000);
+                                        
+                                    } catch(err) {
+                                        // DER SPION: Zeigt uns den wahren Fehler an, statt stumm zu scheitern!
+                                        window.customAlert("Windows Hello Hata: <br><br><b style='color:#ef4444;'>" + err.name + "</b><br>" + err.message + "<br><br><span class='de-sub'>(Hinweis: Auf file:/// funktioniert WebAuthn nie!)</span>", "❌");
+                                        console.error("Biometric Create Error:", err);
+                                        
+                                        document.getElementById('custom-dialog-ok').onclick = () => {
+                                            document.getElementById('custom-dialog-modal').classList.remove('active-modal');
+                                            window.finishLogin(found);
+                                        };
+                                    }
+                                } else {
+                                    window.finishLogin(found);
+                                }
+                            });
+                            
+                            document.getElementById('custom-dialog-cancel').onclick = () => {
+                                document.getElementById('custom-dialog-modal').classList.remove('active-modal');
+                                window.finishLogin(found);
+                            };
+                            return;
+                        }
+                    } else { 
+                        localStorage.removeItem('misaliUser'); 
+                        localStorage.removeItem('misaliAutoFill'); 
+                    }
+                    
                     window.finishLogin(found);
-                });
-                document.getElementById('custom-dialog-cancel').onclick = () => {
-                    localStorage.setItem('misaliBiometricPrompted_' + found.username, 'true');
-                    document.getElementById('custom-dialog-modal').classList.remove('active-modal');
-                    window.finishLogin(found);
-                };
-                return;
-            }
-        } else { 
-            localStorage.removeItem('misaliUser'); 
-            localStorage.removeItem('misaliAutoFill'); 
-        }
-        
-        window.finishLogin(found);
     };
 
     window.m_logout = function() {
@@ -4733,57 +4781,46 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
     window.biometricLogin = async function() {
         let saved = JSON.parse(localStorage.getItem('misaliAutoFill'));
-        if (saved && saved.u && saved.p) {
-            let found = window.userDatabase[saved.u];
-            if (!found) { for (let k in window.userDatabase) { if (window.userDatabase[k].email === saved.u) { found = window.userDatabase[k]; break; } } }
-            
-            if (found) {
-                // Echte System-Biometrie (TouchID, FaceID, Windows Hello) aufrufen
-                if (window.PublicKeyCredential) {
-                    try {
-                        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-                        if (available) {
-                            const challenge = new Uint8Array(32);
-                            window.crypto.getRandomValues(challenge);
-                            
-                            // Triggert den nativen Fingerabdruck/Face-ID Scanner des Geräts
-                            await navigator.credentials.get({
-                                publicKey: {
-                                    challenge: challenge,
-                                    userVerification: "required",
-                                    timeout: 60000
-                                }
-                            });
-                            
-                            // Wenn Scan erfolgreich war, loggen wir ein:
-                            document.getElementById('m-login-user').value = saved.u;
-                            document.getElementById('m-login-pass').value = saved.p;
-                            document.getElementById('m-login-rem').checked = true;
-                            window.m_login();
-                            return;
-                        }
-                    } catch(err) {
-                        window.showToast("Biometrik işlem iptal edildi. <span class='de-sub'>(Abgebrochen)</span>");
-                        return; // Bricht ab, wenn der User den Scan wegdrückt
-                    }
-                }
-                
-                // Fallback, falls der Browser/das Gerät kein WebAuthn unterstützt
-                window.showToast("Biometrik veri doğrulanıyor... <span class='de-sub'>(Prüfe...)</span>");
-                setTimeout(() => {
-                    document.getElementById('m-login-user').value = saved.u;
-                    document.getElementById('m-login-pass').value = saved.p;
-                    document.getElementById('m-login-rem').checked = true;
-                    window.m_login();
-                }, 1500);
+        
+        if (!saved || !saved.u || !saved.p) {
+            window.customAlert("Lütfen önce şifrenizle giriş yapın ve 'Beni Hatırla' kutusunu işaretleyin. <span class='de-sub'>(Zuerst normal einloggen und Häkchen setzen.)</span>", "🛡️");
+            return;
+        }
 
-            } else {
-                window.customAlert("Lütfen önce şifrenizle giriş yapın ve 'Beni Hatırla' kutusunu işaretleyin. <span class='de-sub'>(Zuerst normal einloggen.)</span>", "🛡️");
-            }
-        } else { 
-            window.customAlert("Lütfen önce şifrenizle giriş yapın ve 'Beni Hatırla' kutusunu işaretleyin. <span class='de-sub'>(Zuerst normal einloggen.)</span>", "🛡️"); 
+        let bioKeyStr = localStorage.getItem('misaliBioKey_' + saved.u);
+        if (!bioKeyStr || !window.PublicKeyCredential) {
+            window.customAlert("Bu cihazda biometrik kaydınız bulunamadı. Lütfen normal giriş yapın. <span class='de-sub'>(Kein Fingerabdruck für dieses Gerät gespeichert.)</span>", "🛡️");
+            return;
+        }
+
+        try {
+            const reqOpts = {
+                challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+                allowCredentials: [{
+                    id: window.base64ToBuffer(bioKeyStr),
+                    type: 'public-key'
+                }],
+                userVerification: "required",
+                timeout: 60000
+            };
+            
+            // HIER ÖFFNET SICH DER SCANNER ZUM EINLOGGEN!
+            await navigator.credentials.get({ publicKey: reqOpts });
+            
+            // Wenn der Code bis hier kommt, war der Fingerabdruck erfolgreich!
+            document.getElementById('m-login-user').value = saved.u;
+            document.getElementById('m-login-pass').value = saved.p;
+            document.getElementById('m-login-rem').checked = true;
+            
+            // Führt den Login direkt aus
+            window.m_login();
+            
+        } catch(err) {
+            console.error("Biometric Get Error:", err);
+            window.showToast("Biometrik doğrulama iptal edildi veya başarısız. <span class='de-sub'>(Abgebrochen oder fehlgeschlagen.)</span>");
         }
     };
+                
 
     window.isItemNew = function(id, timestamp) { 
         if (!timestamp) return false; 
