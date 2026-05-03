@@ -2923,19 +2923,23 @@
         }
 
         /* ==================================================================
-           iOS PERFORMANCE & BLACK SCREEN FIX
+           iOS BLACK SCREEN & KEYBOARD BUG FIX (100% Saftey)
            ================================================================== */
         #modal-backdrop {
-            background: rgba(0,0,0,0.9) !important;
-            /* LÖSUNG: Blur entfernt! Das hat iOS Safari zum Abstürzen gebracht */
+            background: rgba(0,0,0,0.85) !important;
             backdrop-filter: none !important; 
             -webkit-backdrop-filter: none !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 99998 !important;
         }
+        
         body.modal-open {
-            /* Verhindert das Scrollen im Hintergrund sicher auf allen Handys */
-            overflow: hidden !important;
-            position: fixed;
-            width: 100%;
+            /* LÖSUNG: 'position: fixed' und 'width: 100%' SIND WEG! Das hat iOS abstürzen lassen. */
+            overflow: hidden !important; 
         }
 
     </style>
@@ -6766,13 +6770,27 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
     window.openFastModal = function(id) { 
         try {
+            // LÖSUNG iOS KEYBOARD: Zwingt jede offene Handy-Tastatur sofort zum Schließen, bevor das Modal den Bildschirm übernimmt!
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                document.activeElement.blur();
+            }
+
             window.closeAllSidebars(); 
-            document.querySelectorAll('.modal.active-modal').forEach(m => { if (m.id !== id) m.classList.remove('active-modal'); });
+            // Schließt alle anderen Fenster absolut gnadenlos, bevor das neue öffnet
+            document.querySelectorAll('.modal.active-modal').forEach(m => { 
+                if (m.id !== id) m.classList.remove('active-modal'); 
+            });
+            
             const m = document.getElementById(id); 
             if(m) { 
                 document.body.classList.add('modal-open'); 
-                let bd = document.getElementById('modal-backdrop'); if(bd) bd.style.display='block'; 
+                let bd = document.getElementById('modal-backdrop'); 
+                if(bd) {
+                    bd.style.display = 'block'; 
+                    bd.style.zIndex = '99998'; // Z-Index hart erzwingen
+                }
                 m.classList.add('active-modal'); 
+                m.style.zIndex = '100000'; // Modal absolut nach vorne zwingen
                 
                 // LÖSUNG VIP-EMOJIS: Grid frisch laden
                 if(id === 'm-register-modal') {
@@ -6832,8 +6850,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
-        document.body.style.position = ''; // Löst den iOS Scroll-Lock
-        document.getElementById('modal-backdrop').style.display='none'; 
+        document.body.style.position = ''; // Notfall-Reset für iOS
+        let bd = document.getElementById('modal-backdrop');
+        if(bd) bd.style.display='none'; 
     };
     
     window.closeTopModal = function(e) { 
@@ -6846,11 +6865,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             lastModal.classList.remove('active-modal');
         }
         
-        // LÖSUNG BLACK SCREEN: Harte, zielsichere Prüfung, ob wirklich ALLES zu ist!
+        // ULTIMATIVE KONTROLLE: Sind WIRKLICH alle zu? Dann weg mit dem schwarzen Hintergrund!
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
-            document.body.style.position = ''; // Löst den iOS Scroll-Lock
-            document.getElementById('modal-backdrop').style.display='none'; 
+            document.body.style.position = ''; // Notfall-Reset für iOS
+            let bd = document.getElementById('modal-backdrop');
+            if(bd) bd.style.display='none'; 
         }
     };
     
