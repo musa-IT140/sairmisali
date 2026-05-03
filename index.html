@@ -388,6 +388,52 @@
         .floating-menu-wrapper.right .btn-text-wrapper { justify-content: flex-end; }
         .floating-menu-wrapper.right .btn-text { padding-right: 5px; padding-left: 15px; }
 
+        /* YENİ TICKER ANİMASYONU & FIX FÜR ÜBERLAPPENDE SCHRIFTEN */
+        .ticker-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .ticker-half { width: 100%; height: 30px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden !important; }
+        .ticker-top { border-bottom: 1px dashed rgba(244, 197, 66, 0.3); }
+        .ticker-bottom { border-bottom: 1px solid rgba(244, 197, 66, 0.4); background: rgba(10, 25, 47, 0.5); }
+        
+        /* NEUER, OPTIMIERTER TICKER CSS FIX */
+.ticker-text {
+    font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent-color); font-style: italic;
+    white-space: nowrap;
+    position: absolute;
+    /* ALT: left: 100%; top: 50%; transform: translateY(-50%); */
+    /* NEU: Startposition außerhalb rechts mittels transform */
+    top: 0;
+    left: 0;
+    transform: translateX(100vw);
+    line-height: 30px;
+    will-change: transform; /* Sagt iOS: Bereite die GPU vor */
+}
+
+/* Neue performante Animation */
+.ticker-text.show {
+    animation: slideAndGlowPerformant 24s linear forwards;
+}
+
+@keyframes slideAndGlowPerformant {
+    0%   { transform: translateX(100vw); text-shadow: none; color: #f4c542; opacity: 0; }
+    5%   { opacity: 1; }
+    /* Mitte: Zentriert. Da wir nicht genau wissen wie lang der Text ist,
+       ist echtes Zentrieren mit translateX schwierig ohne JS.
+       Ein guter Kompromiss für CSS-only Performance: */
+    45%  { transform: translateX(25vw); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+    50%  { transform: translateX(25vw); text-shadow: 0 0 15px #fff; color: #fff; }
+    55%  { transform: translateX(25vw); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+    95%  { opacity: 1; }
+    100% { transform: translateX(-100%); text-shadow: none; color: #f4c542; opacity: 0; }
+}
+        
+        .scrolling-ticker { display: inline-block; padding-left: 100%; animation: scrollTicker 30s linear infinite; color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.9rem; white-space: nowrap;}
+        .scrolling-ticker:hover { animation-play-state: paused; } 
+        @keyframes scrollTicker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        
+        .ticker-link { color: #ffffff !important; font-weight: 900 !important; cursor: pointer; text-decoration: none; margin-right: 50px; transition: 0.2s; text-shadow: 0 0 5px rgba(255,255,255,0.4); }
+        .ticker-link:hover { color: #f4c542 !important; text-shadow: 0 0 8px #f4c542; }
+
         header { position: fixed; top: 60px; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 8000; border-bottom: 1px solid rgba(244, 197, 66, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.8); display: flex; flex-direction: column; transition: 0.3s; }
         
         /* EDLE SUCHLEISTE */
@@ -718,6 +764,18 @@
             #header-weather-widget { padding: 2px 6px !important; font-size: 0.8rem !important; }
             #user-notify-btn { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; }
         }
+
+        /* ==================================================================
+           MOBILE HEADER (STRIKT NUR FÜR HANDYS - MAX 768px)
+           ================================================================== */
+        @media (max-width: 768px) {
+            .ticker-wrap { height: 35px !important; }
+            .ticker-half { height: 17.5px !important; font-size: 0.75rem !important; overflow: hidden; position: relative;}
+            .ticker-top { display: block; width: 100%; }
+            header { top: 35px !important; padding-bottom: 5px !important; height: auto !important; box-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;}
+            
+            .header-top { flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 5px 2% !important; gap: 5px !important; } 
+            .header-left { width: 100% !important; flex-direction: column !important; align-items: center !important; gap: 2px !important; margin: 0 !important; }
             
             /* FIX: Mobile Zähler strikt nebeneinander */
             .header-stats-row { display: flex !important; flex-direction: row !important; justify-content: center !important; gap: 12px !important; margin-top: 6px !important; width: 100% !important; flex-wrap: nowrap !important; overflow-x: auto !important; scrollbar-width: none; white-space: nowrap !important; padding: 0 5px !important;}
@@ -787,6 +845,17 @@
             .lang-frame { padding: 20px 15px 10px 15px !important; }
             .lang-frame-title { font-size: 0.85rem !important; }
             .modal-signature { font-size: 1.5rem !important; margin-top: 10px; line-height: 1.2; }
+            
+            .ticker-text.show { animation: scrollTickerMobile 24s linear forwards !important; }
+            @keyframes scrollTickerMobile { 
+                0%   { left: 100%; transform: translate(0, -50%); text-shadow: none; color: #f4c542; opacity: 0;} 
+                5%   { opacity: 1; }
+                45%  { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542;}
+                50%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 20px #fff; color: #fff;}
+                55%  { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542;}
+                95%  { opacity: 1; }
+                100% { left: 0; transform: translate(-150%, -50%); text-shadow: none; color: #f4c542; opacity: 0;} 
+            }
             
             #events-modal-content { overflow: hidden !important; }
             .cal-holiday-sidebar { right: 0; transform: translateX(100%); border-left: 1px solid rgba(244,197,66,0.5); border-radius: 20px 0 0 20px; width: 85%; border-right: none; z-index: 60; background: rgba(10,25,47,0.99); }
@@ -880,6 +949,11 @@
             /* Mobile Glocke (Kompakt, aber gut klickbar) */
             #user-notify-btn { width: 32px !important; height: 32px !important; font-size: 1.1rem !important; margin: 0 !important; }
 
+        /* 3. TICKER ABSTAND (Garantiert kein Überlappen mehr!) */
+        .ticker-wrap { height: 60px !important; }
+        .ticker-half { height: 30px !important; overflow: hidden !important; }
+        .ticker-text { line-height: 30px !important; }
+        .scrolling-ticker { line-height: 30px !important; }
 
         /* NEUES RESPONISVES DESIGN */
         @media (min-width: 769px) {
@@ -1053,6 +1127,21 @@
             .modal-signature { font-size: 1.5rem !important; margin-top: 10px; line-height: 1.2; }
 
             header { height: auto; top: 35px; padding-bottom: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+            
+            /* Ticker Mobile Anpassung */
+            .ticker-wrap { height: 35px; }
+            .ticker-half { height: 17.5px; font-size: 0.75rem; overflow: hidden; position: relative;}
+            .ticker-top { display: block; width: 100%; }
+            .ticker-text.show { animation: scrollTickerMobile 24s linear forwards !important; }
+            @keyframes scrollTickerMobile { 
+                0%   { left: 100%; transform: translate(0, -50%); text-shadow: none; color: #f4c542; opacity: 0;} 
+                5%   { opacity: 1; }
+                45%  { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542;}
+                50%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 20px #fff; color: #fff;}
+                55%  { text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542;}
+                95%  { opacity: 1; }
+                100% { left: 0; transform: translate(-150%, -50%); text-shadow: none; color: #f4c542; opacity: 0;} 
+            }
             
             /* Sidebar Kalender Fix Mobile */
             #events-modal-content { overflow: hidden !important; }
@@ -2962,59 +3051,87 @@
             }
         }
 
-            /* 2. PLACEHOLDER TEXT (Perfekt lesbar, nicht abgeschnitten) */
+        /* ==================================================================
+           100% KUGELSICHERER PLACEHOLDER-ZENTRIERUNGS-FIX (iOS & Android)
+           ================================================================== */
+        @media (max-width: 768px) {
+            /* 1. Die Inputs selbst: Flexbox weg, feste Höhe & Standard-Padding! */
+            input#chat-input,
+            input#m-comment-input,
+            input.auth-input,
+            input.edel-comment-input {
+                height: 48px !important;
+                display: block !important; /* WICHTIG: Kein Flexbox auf Inputs! Das crasht Safari. */
+                padding: 0 15px !important;
+                line-height: normal !important; 
+            }
+
+            /* 2. Der Placeholder: Einzeilig, klein, exakt mittig & abgeschnitten, falls zu lang */
             input#chat-input::placeholder,
             input#m-comment-input::placeholder,
             input.auth-input::placeholder,
-            input.edel-comment-input::placeholder {
-                font-size: 0.75rem !important;
-                position: relative !important;
-                top: 0 !important;
-                transform: none !important;
-                line-height: normal !important;
-                white-space: nowrap !important;
+            input.edel-comment-input::placeholder,
+            /* Spezielle Engine-Prefixes für iOS und alte Androids */
+            input#chat-input::-webkit-input-placeholder,
+            input#m-comment-input::-webkit-input-placeholder,
+            input.auth-input::-webkit-input-placeholder,
+            input.edel-comment-input::-webkit-input-placeholder {
+                font-size: 0.60rem !important; 
+                line-height: 48px !important; /* WICHTIG: Gleiche Höhe wie das Input = Absolute Mitte! */
+                vertical-align: middle !important;
+                white-space: nowrap !important; /* Inputs können keine 2 Zeilen! */
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-            }
-            input#chat-input, input#m-comment-input {
-                padding: 12px 15px !important;
-                height: 48px !important; 
+                color: rgba(148, 163, 184, 0.8) !important;
+                position: static !important;
+                transform: none !important;
             }
         }
 
         /* ==================================================================
-           SPEZIAL-FIX NUR FÜR iOS SAFARI MOBIL (Blackscreen & Font Size)
+           100% iOS MOBILE FORMATIERUNG & BLACKSCREEN KILLER
            ================================================================== */
+        /* Überschreibt alte Befehle und macht das Backdrop sicher für iOS */
+        #modal-backdrop {
+            display: block !important; /* Zwingt es permanent ins DOM */
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out !important;
+            background: rgba(0,0,0,0.85) !important;
+        }
+        #modal-backdrop.show-backdrop {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* iOS EXKLUSIV: Schriften kompakter machen für Apple-Geräte */
         @supports (-webkit-touch-callout: none) {
-            /* TÖTET DEN iOS BLACKSCREEN (Keine Transition auf Display:none Elemente) */
-            #modal-backdrop {
-                opacity: 1 !important;
-                visibility: visible !important;
-                background: rgba(0,0,0,0.92) !important;
-                transition: none !important; 
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
-            }
-
-            /* BALANCIERT DIE KARTEN-SCHRIFT (Nicht zu groß, nicht zu klein) */
             @media (max-width: 768px) {
-                .card h3 { font-size: 1.15rem !important; margin-bottom: 5px !important; }
-                .card .clamp-text { font-size: 0.9rem !important; line-height: 1.4 !important; }
-                .card .card-sub { font-size: 0.8rem !important; }
+                .card h3 { font-size: 1.05rem !important; margin-bottom: 4px !important; letter-spacing: -0.2px; }
+                .card .clamp-text { font-size: 0.85rem !important; letter-spacing: -0.2px; line-height: 1.4 !important; }
                 
-                .game-card .bilingual-title { font-size: 0.85rem !important; }
-                .game-card .game-icon { font-size: 1.6rem !important; }
-
-                /* Text-Bereiche und Modals */
                 #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
-                    font-size: 0.9rem !important;
-                    line-height: 1.5 !important;
+                    font-size: 0.82rem !important; 
+                    line-height: 1.45 !important;
+                    letter-spacing: -0.1px;
                 }
-                #hakkimda-view h3 { font-size: 1.5rem !important; }
+                
+                .game-card .bilingual-title { font-size: 0.88rem !important; letter-spacing: -0.3px; }
+                .modal-title, .game-title { font-size: 1.4rem !important; letter-spacing: -0.5px; }
+                .chat-bubble { font-size: 0.88rem !important; line-height: 1.4 !important; }
+                .notif-body { font-size: 0.85rem !important; line-height: 1.4 !important; }
+                
+                /* Zwingt den Placeholder Text in den Inputs noch ein Stück kleiner */
+                input::placeholder, textarea::placeholder {
+                    font-size: 0.7rem !important;
+                    letter-spacing: -0.4px !important;
+                }
             }
         }
 
-/* ==================================================================
+        /* ==================================================================
            SAUBERER TICKER-FIX V5 (Blockaden entfernt!)
            ================================================================== */
         .ticker-wrap { 
@@ -3110,7 +3227,42 @@
             .ticker-text { font-size: 0.8rem !important; line-height: 20px !important; }
             .scrolling-ticker { font-size: 0.75rem !important; line-height: 20px !important; }
             header#main-header { top: 40px !important; } 
-        }        }
+        }
+
+        /* ==================================================================
+           SIDEBAR & TICKER ÜBERLAPPUNGS-FIX (Z-Index Anpassung)
+           ================================================================== */
+        .ticker-wrap {
+            z-index: 9900 !important; /* Ticker bleibt vorne, aber unter der Sidebar! */
+        }
+        
+        .sidebar, .sidebar-right {
+            z-index: 100005 !important; /* Sidebar ist der absolute Boss und liegt über allem */
+        }
+        
+        .sidebar-overlay {
+            z-index: 100004 !important; /* Die dunkle Hintergrund-Ebene direkt hinter der Sidebar */
+        }
+
+        /* ==================================================================
+           SCROLLBAR DESIGN (Edel & Dunkel für alle Container)
+           ================================================================== */
+        /* Für Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #f4c542 rgba(0,0,0,0.4);
+        }
+
+        /* Für Chrome, Safari, Edge */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; } 
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+
+        /* Explizit für die Sidebars erzwingen */
+        .sidebar-content::-webkit-scrollbar { width: 6px; }
+        .sidebar-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
 
     </style>
     <script>
@@ -3398,7 +3550,10 @@
             </div>
             
             <div id="anthem-tr-content" class="notranslate anthem-content" style="display: block;">
-                <h4 style="color:#f4c542; margin-bottom:10px; font-family:'Playfair Display', serif; font-size:1.4rem;">İstiklal Marşı</h4>
+                <h4 style="color:#f4c542; margin-bottom:2px; font-family:'Playfair Display', serif; font-size:1.4rem;">İstiklal Marşı</h4>
+                <div style="color:#94a3b8; font-size:0.85rem; font-style:italic; margin-bottom:15px; font-family:'Poppins', sans-serif;">
+                    ✍️ Mehmet Âkif Ersoy (1921)
+                </div>
                 <p style="white-space: pre-wrap; text-align: center;">Korkma, sönmez bu şafaklarda yüzen al sancak;
 Sönmeden yurdumun üstünde tüten en son ocak.
 O benim milletimin yıldızıdır, parlayacak;
@@ -3452,7 +3607,10 @@ Hakkıdır, hakk'a tapan, milletimin istiklal!</p>
             </div>
             
             <div id="anthem-de-content" class="notranslate anthem-content" style="display: none;">
-                <h4 style="color:#f4c542; margin-bottom:10px; font-family:'Playfair Display', serif; font-size:1.4rem;">Das Lied der Deutschen</h4>
+                <h4 style="color:#f4c542; margin-bottom:2px; font-family:'Playfair Display', serif; font-size:1.4rem;">Das Lied der Deutschen</h4>
+                <div style="color:#94a3b8; font-size:0.85rem; font-style:italic; margin-bottom:15px; font-family:'Poppins', sans-serif;">
+                    ✍️ August Heinrich Hoffmann von Fallersleben (1841)
+                </div>
                 <p style="white-space: pre-wrap; text-align: center;">Deutschland, Deutschland über alles,
 Über alles in der Welt,
 Wenn es stets zu Schutz und Trutze
@@ -4453,6 +4611,299 @@ Blühe, deutsches Vaterland!</p>
                 </div>
             </div>
             
+            <div id="holidaySidebar" class="cal-holiday-sidebar">
+                <h3 style="color:#f4c542; margin-bottom:15px; font-size:1.1rem; border-bottom:1px solid rgba(244,197,66,0.3); padding-bottom:5px;">Feiertage <span class="de-sub">(Tatiller)</span></h3>
+                <div id="holiday-list-content"></div>
+            </div>
+            <button id="holidayToggleBtn" class="holiday-toggle-btn" onclick="if(window.toggleHolidaySidebar) window.toggleHolidaySidebar(event)">
+                <i class="fas fa-glass-cheers"></i>
+            </button>
+        </div>
+    </div>
+            
+<div class="modal notranslate" id="balloonModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Balon Patlatma <span class="de-sub">(Balloon Pop)</span></h2>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.2rem; margin-bottom:15px;">
+                    <div style="color:#f4c542; font-weight:bold;">SÜRE <span class="de-sub" style="color:inherit;">(Zeit)</span>: <span id="balloon-time">15</span>s</div>
+                    <div style="color:#22c55e; font-weight:bold;">SKOR <span class="de-sub" style="color:inherit;">(Punkte)</span>: <span id="balloon-score">0</span></div>
+                </div>
+                <div id="balloon-area" style="position:relative; width:100%; height:250px; background:rgba(0,0,0,0.4); border:1px solid rgba(244,197,66,0.3); border-radius:12px; overflow:hidden; margin-bottom:15px;"></div>
+                <button class="reset-btn" id="balloon-start-btn" onclick="if(window.startBalloon) window.startBalloon()" style="padding:12px; border-radius:12px;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doğru mu Yanlış mı Modal -->
+    <div class="modal notranslate" id="tfModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Doğru mu Yanlış mı <span class="de-sub">(Wahr/Falsch)</span></h2>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:15px;">
+                    <select id="tf-diff" class="auth-input" style="width:auto; margin:0; padding:8px 12px; font-size:0.9rem; border-radius:8px;">
+                        <option value="1">🟢 Kolay (Leicht)</option>
+                        <option value="2" selected>🟡 Orta (Mittel)</option>
+                        <option value="3">🔴 Zor (Schwer)</option>
+                    </select>
+                    <div style="color:#22c55e; font-weight:bold; font-size:1.1rem;">SKOR: <span id="tf-score">0</span></div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid #3b82f6; min-height: 100px; display:flex; align-items:center; justify-content:center; margin-bottom: 20px;">
+                    <p id="tf-question" style="font-size: 1.2rem; color: #fff; text-align: center; margin:0;"></p>
+                </div>
+                <div style="display:flex; gap:15px; width:100%;">
+                    <button class="reset-btn success" id="tf-btn-true" onclick="if(window.checkTF) window.checkTF(true)" style="flex:1; padding:15px; font-size:1.2rem; display:none;"><i class="fas fa-check"></i> Doğru <span class="de-sub" style="color:inherit;">(Wahr)</span></button>
+                    <button class="reset-btn danger" id="tf-btn-false" onclick="if(window.checkTF) window.checkTF(false)" style="flex:1; padding:15px; font-size:1.2rem; display:none;"><i class="fas fa-times"></i> Yanlış <span class="de-sub" style="color:inherit;">(Falsch)</span></button>
+                </div>
+                <button class="reset-btn" id="tf-start-btn" onclick="if(window.startTF) window.startTF()" style="width:100%;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="oddOneModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Farkı Bul <span class="de-sub">(Odd One Out)</span></h2>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.2rem; margin-bottom:15px;">
+                    <div style="color:#f4c542; font-weight:bold;">SEVİYE <span class="de-sub" style="color:inherit;">(Level)</span>: <span id="odd-level">1</span></div>
+                    <div style="color:#22c55e; font-weight:bold;">SKOR <span class="de-sub" style="color:inherit;">(Punkte)</span>: <span id="odd-score">0</span></div>
+                </div>
+                <p id="odd-msg" style="color:#cbd5e1; text-align:center; margin-bottom:15px;">Farklı olanı bul! <span class="de-sub" style="color:#94a3b8;">(Unterschied finden!)</span></p>
+                <div id="odd-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; width:100%; margin-bottom:20px;"></div>
+                <button class="reset-btn" id="odd-start-btn" onclick="if(window.startOddOne) window.startOddOne()" style="padding:12px; border-radius:12px;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="memoryModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Hafıza Oyunu <span class="de-sub">(Memory)</span></h2><div class="memory-board" id="memory-board"></div><div id="memory-msg" style="margin-top:20px; font-size:1.2rem; color:#f4c542; font-weight: 600; text-align: center;">Eşleri Bul! <span class="de-sub" style="color:#94a3b8;">(Paare finden!)</span></div><button class="reset-btn" onclick="if(window.initMemoryGame) window.initMemoryGame()" style="display: none; padding: 12px; margin-top: 15px; border-radius: 12px;" id="memory-reset">Yeniden Oyna <span class="de-sub" style="color:inherit;">(Nochmal spielen)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="hazineModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Hazine Avı <span class="de-sub">(Schatzsuche)</span></h2>
+                <p id="hazine-msg" style="text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:15px;">3 sandıktan birinde hazine var! <span class="de-sub" style="color:#94a3b8;">(Finde den Schatz!)</span></p>
+                <div id="hazine-grid" style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;"></div>
+                <button class="reset-btn" id="hazine-reset" onclick="if(window.initHazine) window.initHazine()" style="display:none; padding:12px; border-radius:12px;">Tekrar Oyna <span class="de-sub" style="color:inherit;">(Nochmal spielen)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="fastClickModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Hızlı Tıklama <span class="de-sub">(Reaktionstest)</span></h2><div style="display:flex; justify-content:space-between; width:100%; font-size:1.4rem; margin-bottom:20px;"><div style="color:#f4c542; font-weight:bold;"><span id="fc-time-lbl">SÜRE</span>: <span id="fc-time">5.0</span>s</div><div style="color:#22c55e; font-weight:bold;"><span id="fc-score-lbl">SKOR</span>: <span id="fc-score">0</span></div></div><button class="reset-btn" onclick="if(window.clickFast) window.clickFast()" id="fc-btn" style="height:150px; font-size:2rem; border-radius:20px; box-shadow:0 10px 30px rgba(244,197,66,0.5);">BAŞLA! <span class="de-sub" style="color:inherit;">(START!)</span></button><button class="reset-btn" onclick="if(window.startFastClick) window.startFastClick()" id="fc-start" style="display:none; padding:12px; margin-top:15px; border-radius:12px;">Tekrar Oyna <span class="de-sub" style="color:inherit;">(Nochmal spielen)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="horoscopeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Horoskop <span class="de-sub">(Sternzeichen)</span></h2><div class="zodiac-grid" id="zodiac-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; margin-top: 15px;"></div><div id="horoscope-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.5); padding:25px; border-radius:16px; border-left:4px solid #f4c542; width: 100%;"><h3 id="horo-title" style="color:#f4c542; margin-bottom:15px; font-size: 1.8rem; font-family: 'Playfair Display', serif;"></h3><p id="horo-text" style="color:#fff; margin-bottom:15px; line-height:1.6; font-size: 1.1rem;"></p><button class="reset-btn" onclick="document.getElementById('horoscope-result').style.display='none'; document.getElementById('zodiac-grid').style.display='grid';" style="margin-top: 20px; padding: 10px; border-radius: 10px;" id="horo-back-btn">Geri <span class="de-sub" style="color:inherit;">(Zurück)</span></button></div></div></div></div>
+
+    <!-- Huzur Balonu Modal (Optik repariert) -->
+    <div class="modal notranslate" id="breathModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Huzur Balonu <span class="de-sub">(Atemübung)</span></h2>
+                
+                <div id="breath-container" style="position:relative; width: 250px; height: 250px; margin: 30px auto; display: flex; justify-content: center; align-items: center;">
+                    <div id="breath-circle" style="position:absolute; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #f4c542 0%, rgba(244,197,66,0.4) 80%, transparent 100%); box-shadow: 0 0 30px #f4c542; transition: all 4s ease-in-out;"></div>
+                    <div id="breath-text" style="position:relative; z-index:10; font-family: 'Playfair Display', serif; font-weight: bold; font-size: 1.4rem; color: #fff; text-shadow: 0 0 5px #000; text-align:center;">Hazır... <br><span class="de-sub" style="color:#fff; font-size:0.6em;">(Bereit)</span></div>
+                </div>
+
+                <button class="reset-btn" onclick="if(window.startBreath) window.startBreath()" id="breath-start" style="padding: 12px; border-radius: 12px; width: 100%;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="falModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Kahve Falı <span class="de-sub">(Kaffeesatzlesen)</span></h2><div id="fal-cup" class="fal-cup" onclick="if(window.crackFal) window.crackFal()" style="font-size: 8rem; cursor: pointer; text-align: center;">☕</div><div id="fal-result" style="display:none; margin-top:20px; width:100%; text-align:center;"><p id="fal-text" style="font-size:1.2rem; color:#fff; line-height:1.6;"></p></div></div></div></div>
+
+    <div class="modal notranslate" id="safeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Kasa Hırsızı <span class="de-sub">(Safe Cracker)</span></h2>
+                <div style="font-size: 5rem; text-align:center; margin-bottom:15px;" id="safe-icon">🔐</div>
+                <p style="color:#cbd5e1; text-align:center; margin-bottom:20px;">3 haneli şifreyi çöz! <span class="de-sub" style="color:#94a3b8;">(Knacke den Code!)</span></p>
+                <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                    <input type="number" id="safe-1" class="auth-input" style="width:60px; font-size:2rem; text-align:center; padding:10px;" min="0" max="9">
+                    <input type="number" id="safe-2" class="auth-input" style="width:60px; font-size:2rem; text-align:center; padding:10px;" min="0" max="9">
+                    <input type="number" id="safe-3" class="auth-input" style="width:60px; font-size:2rem; text-align:center; padding:10px;" min="0" max="9">
+                </div>
+                <p id="safe-msg" style="color:#f4c542; font-weight:bold; text-align:center; margin-bottom:15px; font-size:1.1rem;"></p>
+                <button class="reset-btn" id="safe-btn" onclick="if(window.checkSafe) window.checkSafe()" style="padding:12px; border-radius:12px;">Dene <span class="de-sub" style="color:inherit;">(Versuchen)</span></button>
+                <button class="reset-btn" id="safe-reset-btn" onclick="if(window.initSafe) window.initSafe()" style="display:none; padding:12px; border-radius:12px; margin-top:10px;">Yeni Kasa <span class="de-sub" style="color:inherit;">(Neuer Safe)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="anagramModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Kelime Avı <span class="de-sub">(Anagramm)</span></h2><div id="anagram-word" style="font-size: 2.5rem; letter-spacing: 5px; margin: 20px 0; color: #f4c542; font-weight: bold; text-align: center;"></div><input type="text" id="anagram-input" class="auth-input" placeholder="Kelime / Wort" style="text-align: center; font-size: 1.2rem; padding: 12px;" onkeypress="if(event.key === 'Enter' && window.checkAnagram) window.checkAnagram()"><button class="reset-btn" onclick="if(window.checkAnagram) window.checkAnagram()" style="padding: 12px; border-radius: 12px; margin-bottom: 15px;">Tahmin Et <span class="de-sub" style="color:inherit;">(Raten)</span></button><p id="anagram-msg" style="color: #cbd5e1; font-size: 1.2rem; font-weight: bold; text-align: center;"></p></div></div></div>
+
+    <div class="modal notranslate" id="hangmanModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Kelime Bulmaca <span class="de-sub">(Worträtsel)</span></h2><div id="hangman-lives" style="font-size: 1.5rem; text-align: center; margin-bottom: 10px; color: #ef4444; letter-spacing: 5px;"></div><div id="hangman-word" style="font-size: 2.5rem; letter-spacing: 10px; margin: 20px 0; color: #fff; font-weight: bold; text-align: center; font-family: 'Space Mono', monospace;"></div><div id="hangman-keyboard" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px;"></div><p id="hangman-msg" style="font-size: 1.3rem; font-weight: bold; text-align: center;"></p><button class="reset-btn" id="hangman-reset" onclick="if(window.initHangman) window.initHangman()" style="display:none; padding: 12px; border-radius: 12px; margin-top: 15px;">Yeni Oyun <span class="de-sub" style="color:inherit;">(Neues Spiel)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="milyonerModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 600px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Kim Milyoner Olmak İster <span class="de-sub">(Millionär)</span></h2>
+                <div style="width: 100%; display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                    <div id="mil-joker-fifty" style="background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 12px; border: 1px solid #3b82f6; color: #3b82f6; font-weight: bold; cursor: pointer; transition:0.2s;">50:50</div>
+                    <div id="mil-joker-phone" style="background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 12px; border: 1px solid #f4c542; color: #f4c542; font-weight: bold; cursor: pointer; transition:0.2s;">📞</div>
+                </div>
+                <p id="milyoner-q" style="font-size:1.3rem; margin-bottom:25px; text-align:center; color:#fff; font-family: 'Playfair Display', serif; padding: 20px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(15, 23, 42, 0.8)); border-radius: 12px; border: 1px solid #3b82f6; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);"></p>
+                <div id="milyoner-options" style="width:100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+                <p id="milyoner-msg" style="margin-top:15px; font-size: 1.2rem; font-weight: 600; text-align: center;"></p>
+                <button class="reset-btn" onclick="if(window.nextMilyoner) window.nextMilyoner()" style="display:none; padding: 12px; border-radius: 12px; margin-top: 15px;" id="milyoner-next">
+                    Sonraki Soru <span class="de-sub" style="color:inherit;">(Nächste Frage)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Köstebek Vur Modal -->
+    <div class="modal notranslate" id="moleModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Köstebek Vur <span class="de-sub">(Whack-a-Mole)</span></h2>
+                
+                <select id="mole-diff" class="auth-input" style="width:100%; margin-bottom:15px; padding:8px; border-radius:8px;">
+                    <option value="1">🟢 Kolay (Leicht - Yavaş/Langsam)</option>
+                    <option value="2" selected>🟡 Orta (Mittel - Normal)</option>
+                    <option value="3">🔴 Zor (Schwer - Hızlı/Schnell)</option>
+                </select>
+
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.4rem; margin-bottom:15px;">
+                    <div style="color:#f4c542; font-weight:bold;">SÜRE: <span id="mole-time">15</span>s</div>
+                    <div style="color:#22c55e; font-weight:bold;">SKOR: <span id="mole-score">0</span></div>
+                </div>
+                <div id="mole-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:15px; width:100%; margin-bottom:20px;"></div>
+                <button class="reset-btn" id="mole-start-btn" onclick="if(window.startMole) window.startMole()" style="padding:12px; border-radius:12px;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="mathModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Matematik Dehası <span class="de-sub">(Mathe-Genie)</span></h2>
+                <div id="math-equation" style="font-size:3rem; color:#f4c542; font-family:'Space Mono', monospace; text-align:center; margin:20px 0;">5 + 5 = ?</div>
+                <input type="number" id="math-input" class="auth-input" style="text-align:center; font-size:1.5rem; padding:15px;" placeholder="Cevap / Antwort" onkeypress="if(event.key === 'Enter' && window.checkMath) window.checkMath()">
+                <button class="reset-btn" onclick="if(window.checkMath) window.checkMath()" id="math-btn" style="padding:12px; border-radius:12px;">Cevapla <span class="de-sub" style="color:inherit;">(Antworten)</span></button>
+                <p id="math-msg" style="text-align:center; color:#cbd5e1; font-size:1.2rem; font-weight:bold; margin-top:15px;"></p>
+                <button class="reset-btn" id="math-reset" onclick="if(window.initMath) window.initMath()" style="display:none; padding:12px; border-radius:12px; margin-top:10px;">Yeni Soru <span class="de-sub" style="color:inherit;">(Neue Frage)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="minesweeperModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Mayın Tarlası <span class="de-sub">(Minesweeper)</span></h2>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.2rem; margin-bottom:15px;">
+                    <div style="color:#f4c542; font-weight:bold;">PUAN <span class="de-sub" style="color:inherit;">(Punkte)</span>: <span id="ms-score">0</span></div>
+                </div>
+                <div id="ms-grid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; width:100%; max-width:300px; margin:0 auto 20px;"></div>
+                <p id="ms-msg" style="text-align:center; color:#cbd5e1; font-size:1.1rem; font-weight:bold;"></p>
+                <button class="reset-btn" id="ms-start-btn" onclick="if(window.startMinesweeper) window.startMinesweeper()" style="padding:12px; border-radius:12px;">Yeni Oyun <span class="de-sub" style="color:inherit;">(Neues Spiel)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="colorHuntModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Renk Avı <span class="de-sub">(Farbjagd)</span></h2>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.2rem; margin-bottom:15px; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 10px;">
+                    <div style="color:#f4c542; font-weight:bold;"><span id="color-time-lbl">SÜRE</span>: <span id="color-time">10.0</span>s</div>
+                    <div style="color:#22c55e; font-weight:bold;"><span id="color-score-lbl">SKOR</span>: <span id="color-score">0</span></div>
+                </div>
+                <p id="color-target-text" style="font-size: 1.4rem; color: #fff; margin-bottom: 15px; font-weight: bold;"></p>
+                <div id="color-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; margin-bottom: 20px;"></div>
+                <p id="color-msg" style="text-align:center; color:#cbd5e1; font-size:1.1rem; margin-bottom:15px;">Yazılı olan renge tıkla! <span class="de-sub" style="color:#94a3b8;">(Klicke auf die Farbe!)</span></p>
+                <button class="reset-btn" id="color-start-btn" onclick="if(window.startColorHunt) window.startColorHunt()" style="padding:12px; border-radius:12px;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="simonModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Renk Hafızası <span class="de-sub">(Simon Says)</span></h2><div id="simon-msg" style="font-size: 1.2rem; color:#f4c542; font-weight: 600; text-align: center;">Başlamak için butona bas! <span class="de-sub" style="color:#94a3b8;">(Start drücken!)</span></div><div class="simon-board" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 260px; margin: 30px auto;"><div class="simon-btn" id="simon-green" onclick="if(window.simonInput) window.simonInput('green')" style="background:#22c55e; aspect-ratio: 1; border-radius: 50%; cursor: pointer; opacity: 0.35; border: 5px solid rgba(255,255,255,0.15);"></div><div class="simon-btn" id="simon-red" onclick="if(window.simonInput) window.simonInput('red')" style="background:#ef4444; aspect-ratio: 1; border-radius: 50%; cursor: pointer; opacity: 0.35; border: 5px solid rgba(255,255,255,0.15);"></div><div class="simon-btn" id="simon-yellow" onclick="if(window.simonInput) window.simonInput('yellow')" style="background:#eab308; aspect-ratio: 1; border-radius: 50%; cursor: pointer; opacity: 0.35; border: 5px solid rgba(255,255,255,0.15);"></div><div class="simon-btn" id="simon-blue" onclick="if(window.simonInput) window.simonInput('blue')" style="background:#3b82f6; aspect-ratio: 1; border-radius: 50%; cursor: pointer; opacity: 0.35; border: 5px solid rgba(255,255,255,0.15);"></div></div><button class="reset-btn" id="simon-start-btn" onclick="if(window.startSimon) window.startSimon()" style="padding: 12px; border-radius: 12px;">Başla <span class="de-sub" style="color:inherit;">(Start)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="guessNumberModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Sayı Tahmini <span class="de-sub">(Zahlen raten)</span></h2><div id="guess-hint" style="font-size:5rem; margin-bottom:15px; text-align: center;">🤔</div><input type="number" id="guess-input" class="auth-input" placeholder="Sayı / Zahl" style="text-align:center; font-size:1.5rem; padding: 15px;" onkeypress="if(event.key === 'Enter' && window.checkGuess) window.checkGuess()"><button class="reset-btn" onclick="if(window.checkGuess) window.checkGuess()" style="margin-bottom:15px; padding: 12px; border-radius: 12px;" id="guess-btn">Tahmin Et <span class="de-sub" style="color:inherit;">(Raten)</span></button><p id="guess-msg" style="color:#cbd5e1; font-size: 1.2rem; font-weight: 600; text-align: center;"></p><button class="reset-btn" id="guess-reset" onclick="if(window.initGuessGame) window.initGuessGame()" style="display:none; padding: 12px; border-radius: 12px; margin-top: 10px;">Yeni Oyun <span class="de-sub" style="color:inherit;">(Neues Spiel)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="magicBallModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Sihirli 8 Topu <span class="de-sub">(Magische Kugel)</span></h2><div id="magic-ball" style="font-size: 8rem; text-align: center; margin: 30px 0; cursor: pointer; transition: transform 0.5s; display: inline-block;" onclick="if(window.shakeMagicBall) window.shakeMagicBall()">🎱</div><p id="magic-answer" style="text-align:center; color:#f4c542; font-size:1.5rem; font-weight:bold; min-height: 40px; margin-bottom: 15px;"></p><p style="text-align:center; color:#cbd5e1; font-size:1.1rem; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px;">Sallamak için topa tıkla! <span class="de-sub" style="color:#94a3b8;">(Klicke auf die Kugel!)</span></p></div></div></div>
+
+    <div class="modal notranslate" id="cookieModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Şans Kurabiyesi <span class="de-sub">(Glückskeks)</span></h2><div id="fortune-cookie" style="font-size: 8rem; text-align: center; margin: 30px 0; cursor: pointer; transition: transform 0.3s; display: inline-block;" onclick="if(window.crackCookie) window.crackCookie()" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🥠</div><div id="fortune-paper" style="display:none; background: #fef3c7; color: #000; padding: 20px; font-family: 'Space Mono', monospace; font-size: 1.2rem; text-align: center; border-radius: 5px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-left: 5px solid #f4c542; border-right: 5px solid #f4c542;"></div><p style="text-align:center; color:#cbd5e1; font-size:1.1rem;">Kurabiyeyi kırmak için tıkla! <span class="de-sub" style="color:#94a3b8;">(Klicke zum Öffnen!)</span></p><button class="reset-btn" id="cookie-reset" onclick="if(window.resetCookie) window.resetCookie()" style="display: none; padding: 12px; border-radius: 12px; margin-top: 15px;">Yeni Kurabiye <span class="de-sub" style="color:inherit;">(Neuer Keks)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="quizModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 600px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Şiirsel Quiz <span class="de-sub">(Poetisches Quiz)</span></h2><p id="quiz-q" style="font-size:1.3rem; margin-bottom:25px; text-align:center; color:#fff; font-family: 'Playfair Display', serif;"></p><div id="quiz-options" style="width:100%; display: flex; flex-direction: column; gap: 10px;"></div><p id="quiz-msg" style="margin-top:15px; font-size: 1.2rem; font-weight: 600; text-align: center;"></p><button class="reset-btn" onclick="if(window.nextQuiz) window.nextQuiz()" style="display:none; padding: 12px; border-radius: 12px; margin-top: 15px;" id="quiz-next">Sonraki Soru <span class="de-sub" style="color:inherit;">(Nächste Frage)</span></button></div></div></div>
+
+    <div class="modal notranslate" id="rpsModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 500px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Taş Kağıt Makas <span class="de-sub">(Schere Stein Papier)</span></h2><div class="game-header" style="display: flex; justify-content: space-between; width: 100%; background: rgba(0,0,0,0.6); padding: 15px 25px; border-radius: 18px; margin-bottom: 25px;"><div class="game-score-box" style="display: flex; flex-direction: column; align-items: center;"><span class="game-score-label" style="color: #94a3b8; font-size: 0.9rem;" id="rps-p-lbl">SEN</span><span class="game-score-val" id="rps-s-p" style="color: #f4c542; font-size: 2.2rem; font-weight: bold;">0</span></div><span class="game-vs" style="font-size: 1.4rem; color: #64748b; font-weight: bold;">VS</span><div class="game-score-box" style="display: flex; flex-direction: column; align-items: center;"><span class="game-score-label" style="color: #94a3b8; font-size: 0.9rem;" id="rps-b-lbl">BOT</span><span class="game-score-val enemy" id="rps-s-c" style="color: #ef4444; font-size: 2.2rem; font-weight: bold;">0</span></div></div><div class="rps-arena" style="width:100%; display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 20px;"><span id="rps-player" style="font-size: 4rem;">✊</span><span style="font-size:1.8rem; color:#64748b; font-weight: bold;">VS</span><span id="rps-computer" style="font-size: 4rem; transform: scaleX(-1);">✊</span></div><div id="rps-msg" style="margin: 20px 0; color:#f4c542; font-size: 1.4rem; font-weight: 600; text-align: center;">Seçimini Yap! <span class="de-sub" style="color:inherit;">(Wähle!)</span></div><div style="display:flex; justify-content:center; gap:20px;"><button class="reset-btn" onclick="if(window.playRPS) window.playRPS('🪨')" style="font-size: 2rem; padding: 15px; border-radius: 50%; width: 70px; height: 70px;">🪨</button><button class="reset-btn" onclick="if(window.playRPS) window.playRPS('📜')" style="font-size: 2rem; padding: 15px; border-radius: 50%; width: 70px; height: 70px;">📜</button><button class="reset-btn" onclick="if(window.playRPS) window.playRPS('✂️')" style="font-size: 2rem; padding: 15px; border-radius: 50%; width: 70px; height: 70px;">✂️</button></div></div></div></div>
+
+    <!-- Tic Tac Toe Modal -->
+    <div class="modal notranslate" id="tictactoeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Tic Tac Toe <span class="de-sub">(Gegen KI)</span></h2>
+                
+                <select id="ttt-diff" class="auth-input" style="width:100%; margin-bottom:15px; padding:10px; border-radius:10px;" onchange="if(window.initTicTacToe) window.initTicTacToe()">
+                    <option value="1">🟢 Kolay (Leicht - Rastgele/Zufall)</option>
+                    <option value="2" selected>🟡 Orta (Mittel - Düşünen/Denkend)</option>
+                    <option value="3">🔴 Zor (Schwer - Yenilmez/Unschlagbar)</option>
+                </select>
+
+                <div class="tictactoe-container" style="width: 100%;">
+                    <div id="ttt-msg" style="margin-bottom: 15px; color:#fff; font-size: 1.2rem; text-align: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 10px; border: 1px solid #f4c542;">Sıra <span class="de-sub" style="color:#94a3b8;">(Zug)</span>: <span style="color:#f4c542; font-weight:bold;" id="ttt-turn">X (Sen)</span></div>
+                    <div class="board" id="ttt-board" style="display: grid; grid-template-columns: repeat(3, 80px); gap: 10px; justify-content: center;">
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(0)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(1)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(2)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(3)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(4)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(5)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(6)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(7)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                        <div class="cell ttt-cell" onclick="if(window.tttClick) window.tttClick(8)" style="width: 80px; height: 80px; font-size: 3rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid #f4c542; border-radius: 10px; cursor: pointer;"></div>
+                    </div>
+                    <button class="reset-btn" onclick="if(window.initTicTacToe) window.initTicTacToe()" style="padding: 12px; border-radius: 12px; margin-top: 20px; width: 100%;" id="ttt-reset">Sıfırla <span class="de-sub" style="color:inherit;">(Neustart)</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="alienModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Uzaylı İstilası <span class="de-sub">(Alien Invasion)</span></h2>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:1.2rem; margin-bottom:15px;">
+                    <div style="color:#f4c542; font-weight:bold;">SÜRE <span class="de-sub" style="color:inherit;">(Zeit)</span>: <span id="alien-time">20</span>s</div>
+                    <div style="color:#22c55e; font-weight:bold;">SKOR <span class="de-sub" style="color:inherit;">(Punkte)</span>: <span id="alien-score">0</span></div>
+                </div>
+                <div id="alien-area" style="position:relative; width:100%; height:250px; background:rgba(0,0,0,0.6); border:2px solid #a855f7; border-radius:12px; overflow:hidden; margin-bottom:15px; cursor:crosshair;"></div>
+                <button class="reset-btn" id="alien-start-btn" onclick="if(window.startAlien) window.startAlien()" style="padding:12px; border-radius:12px; background:linear-gradient(135deg, #a855f7, #7e22ce); color:white;">Savaşa Başla <span class="de-sub" style="color:inherit;">(Angriff starten)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="coinFlipModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Yazı Tura <span class="de-sub">(Kopf oder Zahl)</span></h2><div id="coin" style="font-size: 5rem; margin: 30px auto; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 30%, #f4c542, #b48608); border-radius: 50%; border: 6px solid #fff; color: #fff; font-weight: bold; cursor: pointer;" onclick="if(window.flipCoin) window.flipCoin()">?</div><div id="coin-msg" style="margin-top: 20px; color:#cbd5e1; font-size: 1.2rem; text-align: center;">Fırlatmak için tıkla <span class="de-sub" style="color:#94a3b8;">(Klicke zum Werfen)</span></div><button class="reset-btn" onclick="if(window.flipCoin) window.flipCoin()" style="padding: 12px; border-radius: 12px; margin-top: 15px;" id="coin-btn">Fırlat <span class="de-sub" style="color:inherit;">(Werfen)</span></button></div></div></div>
+    
+    <div class="modal notranslate" id="stopTimeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Zamanı Durdur <span class="de-sub">(Stop the Time)</span></h2>
+                <p style="color:#cbd5e1; text-align:center; margin-bottom:15px;">Tam 5.00'da durdur! <span class="de-sub" style="color:#94a3b8;">(Exakt bei 5.00 stoppen!)</span></p>
+                <div id="stop-time-display" style="font-size: 5rem; font-family:'Space Mono', monospace; color:#f4c542; text-align:center; margin:20px 0; font-weight:bold;">0.00</div>
+                <p id="stop-time-msg" style="text-align:center; color:#22c55e; font-size:1.2rem; font-weight:bold; margin-bottom:15px; min-height:25px;"></p>
+                <button class="reset-btn" id="stop-time-btn" onclick="if(window.actionStopTime) window.actionStopTime()" style="padding:15px; border-radius:12px; font-size:1.5rem;">BAŞLA <span class="de-sub" style="color:inherit;">(START)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal notranslate" id="diceModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Zar At <span class="de-sub">(Würfeln)</span></h2><div class="dice-container" id="dice-display" style="font-size: 8rem; display: flex; justify-content: center; margin: 20px 0; color: #f4c542;">🎲</div><div id="dice-msg" style="color:#cbd5e1; font-size: 1.1rem; text-align: center; margin-bottom: 15px;">Zarı atmak için butona bas. <span class="de-sub" style="color:#94a3b8;">(Drücke den Button.)</span></div><button class="reset-btn" onclick="if(window.rollDice) window.rollDice()" style="padding: 12px; border-radius: 12px;" id="dice-btn">Zar At <span class="de-sub" style="color:inherit;">(Würfeln)</span></button></div></div></div>
+
     <script type="text/javascript">
     document.documentElement.removeAttribute('translate');
     function googleTranslateElementInit() {
@@ -4539,51 +4990,63 @@ Blühe, deutsches Vaterland!</p>
         } else { window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || []; }
     } catch(e) { window.chatDB = []; }
 
-    // ==================================================================
-    // 1. DER FIREBASE ZEIT-PARADOXON & ÜBERSCHREIB-KILLER
-    // ==================================================================
-    window.syncToCloud = async function() {
+    // 🚀 FIREBASE UPLOAD
+window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
-        
-        // LÖSUNG: Exakte Jetzt-Zeit! Keine +5000 Millisekunden mehr!
         window.lastLocalUpdate = Date.now(); 
         localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         
         try { 
-            // LÖSUNG: Wir nutzen .update() statt .set()! So überschreibt ein User 
-            // niemals die Daten des Admins, wenn seine lokale Liste noch leer ist.
-            const updates = {};
-            updates['timestamp'] = window.lastLocalUpdate;
-            if(window.userDatabase && Object.keys(window.userDatabase).length > 0) updates['users'] = window.userDatabase;
-            if(window.userPoemsDB && window.userPoemsDB.length > 0) updates['userPoems'] = window.userPoemsDB;
-            if(window.chatDB && window.chatDB.length > 0) updates['chat_v0'] = window.chatDB;
-            if(window.adminMessages && window.adminMessages.length > 0) updates['adminMsgs'] = window.adminMessages;
-            if(window.adminLogs && window.adminLogs.length > 0) updates['logs'] = window.adminLogs;
-            if(window.poemDataStore && Object.keys(window.poemDataStore).length > 0) updates['heartsDB'] = window.poemDataStore;
-            if(window.calNotesDB && Object.keys(window.calNotesDB).length > 0) updates['calNotes'] = window.calNotesDB;
-            if(window.savedItemsDB && Object.keys(window.savedItemsDB).length > 0) updates['savedItems'] = window.savedItemsDB;
+            const data = { 
+                timestamp: window.lastLocalUpdate,
+                users: window.userDatabase || {}, 
+                userPoems: window.userPoemsDB || [], 
+                chat_v0: window.chatDB || [], 
+                adminMsgs: window.adminMessages || [], 
+                logs: window.adminLogs || [], 
+                heartsDB: window.poemDataStore || {}, 
+                calNotes: window.calNotesDB || {}, 
+                visits: window.siteVisits || 0,
+                savedItems: window.savedItemsDB || {},
+                contentDB: window.contentDB || {} 
+            };
             
-            await database.ref('misaliData').update(updates);
+            // Update in Firebase setzen
+            await database.ref('misaliData').set(data);
+            console.log("Cloud Sync erfolgreich!");
+            
+            // UI aktualisieren, falls sich etwas geändert hat, das lokal sichtbar sein soll
+            if(window.renderOnlineUsers) window.renderOnlineUsers();
+            if(window.renderLeaderboard && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
         } catch(e) { 
-            console.error("Sync Error", e); 
-        } finally { 
-            setTimeout(() => { window.isUploading = false; }, 300); 
-        }
+            console.error("Firebase Sync Error", e); 
+            // Hier könntest du einen Toast für den Admin einbauen
+            if (window.currentUser && window.currentUser.role === 'admin') {
+                window.showToast('Senkronizasyon Hatası! <span class="de-sub">(Sync-Fehler!)</span>');
+            }
+        } 
+        finally { window.isUploading = false; }
     };
 
-    window.processCloudData = function(r, force = false) {
-        if (!r) return;
+// ==================================================================
+// ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
+// ==================================================================
+window.processCloudData = function(r, force = false) {
+    if (!r) return;
+    
+    // LÖSUNG LIVE-SYNC: Wir schützen unsere frischen lokalen Daten!
+    if (r.timestamp) {
+        // Wenn die Daten aus der Cloud ÄLTER sind als unsere letzte lokale Aktion, 
+        // ignorieren wir sie (außer force=true). Das verhindert das Verschwinden!
+        if (!force && r.timestamp < window.lastLocalUpdate) return; 
         
-        // Ignoriere Echos des eigenen Uploads
-        if (window.isUploading && !force) return;
+        window.lastLocalUpdate = r.timestamp;
+        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
+    }
 
-        if (r.timestamp) {
-            window.lastLocalUpdate = r.timestamp;
-            localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
-        }
-
-        if(r.contentDB && Object.keys(r.contentDB).length > 0) {
+    // LÖSUNG LIVE-SYNC: ContentDB sicher updaten
+    if(r.contentDB && Object.keys(r.contentDB).length > 0) {
             window.contentDB = r.contentDB;
             localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
             if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
@@ -4606,6 +5069,7 @@ Blühe, deutsches Vaterland!</p>
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
+        // LÖSUNG CHAT SYNC: Arrays sicher umwandeln, falls Firebase sie als Objekte sendet!
         if(r.chat_v0) { 
             window.chatDB = Array.isArray(r.chat_v0) ? r.chat_v0 : Object.values(r.chat_v0);
             localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
@@ -4615,6 +5079,7 @@ Blühe, deutsches Vaterland!</p>
             if(window.updateChatBadge) window.updateChatBadge();
         }
         
+        // ADMIN MESSAGES SYNC FIX
         if(r.adminMsgs) { 
             window.adminMessages = Array.isArray(r.adminMsgs) ? r.adminMsgs : Object.values(r.adminMsgs);
             localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
@@ -4623,6 +5088,18 @@ Blühe, deutsches Vaterland!</p>
             if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
         }
 
+        // USER POEMS SYNC FIX
+        if(r.userPoems) { 
+            window.userPoemsDB = Array.isArray(r.userPoems) ? r.userPoems : Object.values(r.userPoems);
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
+            if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            if(window.renderUserWorksSidebar) window.renderUserWorksSidebar();
+            if(window.renderTopWorks) window.renderTopWorks();
+            if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+            if(window.updateTopWorksTicker) window.updateTopWorksTicker();
+        }
+
+        // HERZEN & KOMMENTARE SYNC: Rendert das Modal sofort live!
         if(r.heartsDB) { 
             window.poemDataStore = r.heartsDB; 
             localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
@@ -6627,12 +7104,17 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }
     });
 
-// 3. iOS BLACKSCREEN KILLER MODAL SYSTEM
-    window.closeAllModals = function(force=false) { 
+window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('position');
+        document.body.style.removeProperty('height');
+        
         let bd = document.getElementById('modal-backdrop');
-        if(bd) bd.style.display = 'none'; // HARTER iOS FIX!
+        if(bd) { 
+            bd.classList.remove('show-backdrop'); // iOS Fix: Nur Klasse entfernen, KEIN display: none!
+        }
     };
     
     window.closeTopModal = function(e) { 
@@ -6640,19 +7122,29 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         if(e === 'force') { window.closeAllModals(); return; }
         
         const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
-        if(modals.length > 0) modals[modals.length - 1].classList.remove('active-modal');
+        if(modals.length > 0) {
+            let lastModal = modals[modals.length - 1]; 
+            lastModal.classList.remove('active-modal');
+        }
         
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('position');
+            document.body.style.removeProperty('height');
+            
             let bd = document.getElementById('modal-backdrop');
-            if(bd) bd.style.display = 'none'; // HARTER iOS FIX!
+            if(bd) { 
+                bd.classList.remove('show-backdrop'); // iOS Fix!
+            }
         }
     };
 
     window.openFastModal = function(id) { 
         try {
             if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-                document.activeElement.blur();
+                let el = document.activeElement;
+                setTimeout(() => { el.blur(); }, 50);
             }
             window.closeAllSidebars(); 
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
@@ -6663,7 +7155,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 document.body.classList.add('modal-open'); 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.style.display = 'block'; // HARTER iOS FIX!
+                    bd.classList.add('show-backdrop'); // iOS Fix: Direkt Klasse feuern, KEIN display: block!
                     bd.style.zIndex = '99998'; 
                 }
                 m.classList.add('active-modal'); 
@@ -7561,6 +8053,48 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
+    // 3. UNGELESENE NACHRICHTEN ZÄHLER (Mit Neon-Alarm & Vibration!)
+    window.updateChatBadge = function() {
+        if(!window.currentUser || !window.chatDB) return;
+        
+        // Zählt nur Nachrichten, die AN DICH geschickt wurden
+        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username);
+        let currentCount = myMessages.length;
+        
+        let readCount = parseInt(localStorage.getItem('misaliReadChatCount_' + window.currentUser.username)) || 0;
+        let isChatActive = document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view');
+        
+        if (isChatActive) {
+            readCount = currentCount; // Alle als gelesen markieren, wenn man den Chat öffnet
+            localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, readCount);
+        }
+        
+        let unread = currentCount - readCount;
+        if (unread < 0) { unread = 0; localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, currentCount); }
+        
+        // LÖSUNG: Wir merken uns den ALTEN Wert, bevor wir updaten
+        let badgeEl = document.getElementById('nav-chat-badge');
+        let oldUnread = badgeEl ? (parseInt(badgeEl.innerText) || 0) : 0;
+        
+        window.forceBadge('nav-chat-badge', unread, false);
+
+        // ALARM AUSLÖSEN: Wenn die ungelesenen Nachrichten plötzlich mehr werden!
+        if (unread > oldUnread && unread > 0) {
+            let chatBtn = badgeEl.parentElement;
+            
+            // Setzt die Animation zurück und feuert sie hart ab!
+            chatBtn.classList.remove('chat-alert-anim');
+            void chatBtn.offsetWidth; // Zwingt den Browser zur sofortigen Aktualisierung (Reflow)
+            chatBtn.classList.add('chat-alert-anim');
+            
+            // BONUS: Spielt den dezenten Benachrichtigungssound ab! (Da du das <audio> Tag schon hast)
+            try { 
+                let snd = document.getElementById('notification-sound');
+                if(snd) { snd.currentTime = 0; snd.play(); }
+            } catch(e) {}
+        }
+    };
+
 // 1. CHAT RENDER (Tödlicher Syntax-Fehler behoben!)
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); 
@@ -7712,37 +8246,26 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         if (partner !== 'AdminKing') { window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`); }
     };
 
-    // 2. CHAT ZÄHLER FIX (Damit auch beim User Updates sofort gezählt werden)
+    // 3. UNGELESENE NACHRICHTEN ZÄHLER (Nur eigene Nachrichten)
     window.updateChatBadge = function() {
         if(!window.currentUser || !window.chatDB) return;
         
-        // Zählt Nachrichten an den User ODER (wenn Admin) alle Nachrichten an Admin/ALL
-        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username || (window.currentUser.role === 'admin' && m.toUser === 'ALL'));
+        // Zählt nur Nachrichten, die AN DICH geschickt wurden
+        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username);
         let currentCount = myMessages.length;
         
         let readCount = parseInt(localStorage.getItem('misaliReadChatCount_' + window.currentUser.username)) || 0;
         let isChatActive = document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view');
         
         if (isChatActive) {
-            readCount = currentCount; 
+            readCount = currentCount; // Alle als gelesen markieren, wenn man den Chat öffnet
             localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, readCount);
         }
         
         let unread = currentCount - readCount;
         if (unread < 0) { unread = 0; localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, currentCount); }
         
-        let badgeEl = document.getElementById('nav-chat-badge');
-        let oldUnread = badgeEl ? (parseInt(badgeEl.innerText) || 0) : 0;
-        
         window.forceBadge('nav-chat-badge', unread, false);
-
-        if (unread > oldUnread && unread > 0 && badgeEl) {
-            let chatBtn = badgeEl.parentElement;
-            chatBtn.classList.remove('chat-alert-anim');
-            void chatBtn.offsetWidth; 
-            chatBtn.classList.add('chat-alert-anim');
-            try { let snd = document.getElementById('notification-sound'); if(snd) { snd.currentTime = 0; snd.play(); } } catch(e) {}
-        }
     };
 
     window.deleteChatMessage = async function(id) {
