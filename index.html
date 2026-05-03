@@ -2942,6 +2942,37 @@
             overflow: hidden !important; 
         }
 
+        /* ==================================================================
+           UI FIX: PLACEHOLDER GRÖSSE OPTIMIEREN (Inhaltskarten)
+           ================================================================== */
+        /* Betrifft alle Input-Felder */
+        ::placeholder {
+            font-size: 0.85rem !important;
+            color: #64748b !important;
+            opacity: 0.8 !important;
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Betrifft speziell die Textareas (Inhalte der Gedichte/Geschichten) */
+        .card-edit-textarea::placeholder,
+        #m-comment-input::placeholder {
+            font-size: 0.9rem !important;
+        }
+
+        /* ==================================================================
+           UI FIX: PLACEHOLDER GRÖSSE OPTIMIEREN (Inhaltskarten & Kommentare)
+           ================================================================== */
+        .auth-input::placeholder,
+        #chat-input::placeholder,
+        #m-comment-input::placeholder,
+        textarea::placeholder {
+            font-size: 0.9rem !important;
+            color: rgba(148, 163, 184, 0.8) !important;
+            font-family: 'Poppins', sans-serif !important;
+            line-height: 1.4 !important;
+            white-space: normal !important;
+        }
+
     </style>
     <script>
 
@@ -4752,13 +4783,16 @@ Blühe, deutsches Vaterland!</p>
             if(!isTyping && document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
         }
 
+        // LÖSUNG LIVE-SYNC: !isTyping wurde entfernt. Herzen und Kommentare kommen jetzt IMMER sofort an!
         if(r.heartsDB) { 
-            if(!isTyping) {
-                window.poemDataStore = r.heartsDB; 
-                localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
-                if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) window.updateHeartsUI(); 
-                if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            window.poemDataStore = r.heartsDB; 
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
+            
+            // Sofortiges Rendern auf allen Geräten
+            if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) {
+                window.updateHeartsUI(); 
             }
+            if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
         }
         
         if(r.calNotes) { 
@@ -7840,14 +7874,15 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     });
 
     // 2. NACHRICHT SENDEN (Privat an Empfänger)
-    window.sendChat = function() {
+   window.sendChat = function() {
         if(!window.currentUser) { window.requireAuth(() => {}); return; }
         
         const selectEl = document.getElementById('chat-partner-select');
         const partner = selectEl ? selectEl.value : '';
         
+        // LÖSUNG: Verhindert, dass der Admin ins "Nichts" schreibt!
         if(!partner || partner === 'ALL') {
-            window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️');
+            window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt aus dem Dropdown)</span>', '⚠️');
             return;
         }
 
@@ -7865,16 +7900,20 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             id: 'chat_' + Date.now() + Math.random().toString(36).substr(2,9), 
             username: window.currentUser.username, 
             name: fullName, 
-            toUser: partner, // NEU: Empfänger wird gespeichert!
+            toUser: partner, 
             text: text, 
             time: timeStr 
         };
         
         window.chatDB.push(msg); 
         localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB));
-        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); 
+        input.value = ''; 
         
+        // LÖSUNG CHAT SYNC: Rendert lokal sofort und erzwingt den Firebase-Upload!
+        window.renderChat(); 
+        window.lastLocalUpdate = Date.now() + 5000; 
         if(window.syncToCloud) window.syncToCloud(); 
+        
         if (partner !== 'AdminKing') {
             window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`);
         }
@@ -7982,30 +8021,108 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }
     };
 
+    // ==================================================================
+    // SNAP-SYNC: SCHREIB- UND LÖSCHFUNKTIONEN (Live & Robust Fix)
+    // ==================================================================
+
+    // 1. KOMMENTAR HINZUFÜGEN
     window.m_addComment = function(e) {
-        if (e) e.stopPropagation();
-        if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
-        const input = document.getElementById('m-comment-input'); const text = input.value.trim();
-        if (!text) return;
-        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz / Schimpfwort kullandınız! Sistemden atıldınız.', '🚫'); return; }
+        if(e && e.preventDefault) e.preventDefault();
+        if(!window.currentUser || !window.currentPoemData || !window.currentPoemId) return;
+
+        let input = document.getElementById('m-comment-input');
+        if(!input) return;
+        let text = input.value.trim();
+        if(!text) return;
+
+        let db = window.poemDB || {};
+        let poem = db[window.currentPoemId];
+        if(!poem) { poem = { hearts: {}, comments: [] }; }
+        if(!poem.comments) poem.comments = [];
+
+        let newComm = {
+            username: window.currentUser.username,
+            user: window.currentUser.name,
+            text: text,
+            time: window.getMisaliTime(),
+            editTime: null
+        };
+
+        poem.comments.push(newComm);
+        db[window.currentPoemId] = poem;
         
-        const poemId = window.currentPoemData.id;
-        if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
-        if (!window.poemDataStore[poemId].comments) window.poemDataStore[poemId].comments = [];
-        
-        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        window.poemDataStore[poemId].comments.push({ username: window.currentUser.username, user: fullName, text: text, time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) });
-        
-        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.updateHeartsUI(); window.renderUserWorksGrid(); if(window.syncToCloud) window.syncToCloud(); 
-        window.sendSystemMessage('Admin', `${fullName} bir yoruma katıldı.`, poemId, window.currentPoemData.type);
-        if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) { window.sendSystemMessage(window.currentPoemData.username, `${fullName} eserine yorum yaptı!`, poemId, window.currentPoemData.type); }
+        // Lokales Backup
+        localStorage.setItem('misaliPoemDB_V0', JSON.stringify(db));
+        window.poemDB = db;
+
+        // Triggert SOFORT das Rendering & den Cloud-Save
+        window.updateHeartsUI(); 
+        input.value = '';
+        if(window.updateCloudData) window.updateCloudData('comment_added', newComm); 
     };
 
+    // 2. KOMMENTAR LÖSCHEN
     window.m_delComm = function(poemId, idx, e) {
         if(e) e.stopPropagation(); 
         window.customConfirm('Yorumu sil? <span class="de-sub" style="font-size:0.85em;">(Kommentar löschen?)</span>', () => { 
-            window.lastLocalUpdate = Date.now() + 5000; window.poemDataStore[poemId].comments.splice(idx, 1); window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid(); window.openFastModal('contentModal'); window.sendSystemMessage('Admin', `${window.currentUser ? window.currentUser.name : "Admin"} bir yorum sildi.`);
+            window.poemDataStore[poemId].comments.splice(idx, 1); 
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+            
+            // LÖSUNG: Nur die UI updaten, Modal NICHT neu öffnen!
+            window.updateHeartsUI(); 
+            window.renderUserWorksGrid(); 
+            
+            window.lastLocalUpdate = Date.now() + 5000; 
+            if(window.syncToCloud) window.syncToCloud(); 
+            window.showToast("Yorum silindi. <span class='de-sub'>(Gelöscht)</span>");
         });
+    };
+
+    // 3. HERZEN VERGEBEN (Bewertung)
+    window.m_setPoemRating = function(poemId, type) {
+        if(!window.currentUser) { alert(window.langIsDe ? "Bitte einloggen!" : "Lütfen giriş yapın!"); return; }
+        if(!window.m_ratings || !window.m_ratings[type]) return;
+
+        let db = window.poemDB || {};
+        let poem = db[poemId];
+        if(!poem) { poem = { hearts: {}, comments: [] }; }
+        if(!poem.hearts) poem.hearts = {};
+
+        // Verhindert das Ändern der eigenen Bewertung
+        if(poem.hearts[window.currentUser.username]) return; 
+
+        poem.hearts[window.currentUser.username] = type;
+        db[poemId] = poem;
+
+        // Lokales Backup
+        localStorage.setItem('misaliPoemDB_V0', JSON.stringify(db));
+        window.poemDB = db;
+
+        // Triggert SOFORT das Rendering & den Cloud-Save
+        window.updateHeartsUI(); 
+        if(window.updateCloudData) window.updateCloudData('heart_added', { poemId: poemId, type: type, user: window.currentUser.username }); 
+    };
+
+    // 4. INHALT LÖSCHEN (z.B. Gedicht)
+    window.deletePoem = function(id) {
+        if(!window.checkAuth('admin')) return;
+        let confirmText = window.langIsDe ? 'Bist du sicher?' : 'Silmek istediğine emin misin?';
+        if (!confirm(confirmText)) return;
+
+        let db = window.textDatabase || [];
+        // Sucht & Entfernt den Inhalt lokal
+        let index = db.findIndex(t => t.id === id);
+        if (index !== -1) {
+            let delText = db[index];
+            db.splice(index, 1);
+            localStorage.setItem('misaliTextDB_V0', JSON.stringify(db));
+            window.textDatabase = db;
+
+            // UI aufräumen & Cloud-Save
+            window.openView('main-view');
+            window.populateContent('poem_card_container');
+            if(window.updateCloudData) window.updateCloudData('text_deleted', delText);
+        }
     };
 
     window.m_editComm = function(poemId, idx, e) {
