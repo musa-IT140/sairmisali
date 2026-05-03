@@ -3076,7 +3076,7 @@
             input#m-comment-input::-webkit-input-placeholder,
             input.auth-input::-webkit-input-placeholder,
             input.edel-comment-input::-webkit-input-placeholder {
-                font-size: 0.65rem !important; 
+                font-size: 0.60rem !important; 
                 line-height: 48px !important; /* WICHTIG: Gleiche Höhe wie das Input = Absolute Mitte! */
                 vertical-align: middle !important;
                 white-space: nowrap !important; /* Inputs können keine 2 Zeilen! */
@@ -3085,6 +3085,49 @@
                 color: rgba(148, 163, 184, 0.8) !important;
                 position: static !important;
                 transform: none !important;
+            }
+        }
+
+        /* ==================================================================
+           100% iOS MOBILE FORMATIERUNG & BLACKSCREEN KILLER
+           ================================================================== */
+        /* Überschreibt alte Befehle und macht das Backdrop sicher für iOS */
+        #modal-backdrop {
+            display: block !important; /* Zwingt es permanent ins DOM */
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out !important;
+            background: rgba(0,0,0,0.85) !important;
+        }
+        #modal-backdrop.show-backdrop {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* iOS EXKLUSIV: Schriften kompakter machen für Apple-Geräte */
+        @supports (-webkit-touch-callout: none) {
+            @media (max-width: 768px) {
+                .card h3 { font-size: 1.05rem !important; margin-bottom: 4px !important; letter-spacing: -0.2px; }
+                .card .clamp-text { font-size: 0.85rem !important; letter-spacing: -0.2px; line-height: 1.4 !important; }
+                
+                #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
+                    font-size: 0.82rem !important; 
+                    line-height: 1.45 !important;
+                    letter-spacing: -0.1px;
+                }
+                
+                .game-card .bilingual-title { font-size: 0.88rem !important; letter-spacing: -0.3px; }
+                .modal-title, .game-title { font-size: 1.4rem !important; letter-spacing: -0.5px; }
+                .chat-bubble { font-size: 0.88rem !important; line-height: 1.4 !important; }
+                .notif-body { font-size: 0.85rem !important; line-height: 1.4 !important; }
+                
+                /* Zwingt den Placeholder Text in den Inputs noch ein Stück kleiner */
+                input::placeholder, textarea::placeholder {
+                    font-size: 0.7rem !important;
+                    letter-spacing: -0.4px !important;
+                }
             }
         }
 
@@ -4848,17 +4891,23 @@ window.syncToCloud = async function() {
     };
 
 // ==================================================================
-    // ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
-    // ==================================================================
-    window.processCloudData = function(r, force = false) {
-        if (!r) return;
-        if (r.timestamp) {
-            window.lastLocalUpdate = r.timestamp;
-            localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
-        }
+// ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
+// ==================================================================
+window.processCloudData = function(r, force = false) {
+    if (!r) return;
+    
+    // LÖSUNG LIVE-SYNC: Wir schützen unsere frischen lokalen Daten!
+    if (r.timestamp) {
+        // Wenn die Daten aus der Cloud ÄLTER sind als unsere letzte lokale Aktion, 
+        // ignorieren wir sie (außer force=true). Das verhindert das Verschwinden!
+        if (!force && r.timestamp < window.lastLocalUpdate) return; 
+        
+        window.lastLocalUpdate = r.timestamp;
+        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
+    }
 
-        // LÖSUNG LIVE-SYNC: Wir überschreiben IMMER, ohne Wenn und Aber!
-        if(r.contentDB && Object.keys(r.contentDB).length > 0) {
+    // LÖSUNG LIVE-SYNC: ContentDB sicher updaten
+    if(r.contentDB && Object.keys(r.contentDB).length > 0) {
             window.contentDB = r.contentDB;
             localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
             if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
@@ -4930,13 +4979,6 @@ window.syncToCloud = async function() {
     window.addEventListener('storage', function(e) {
         if(window.fetchFromCloud) window.fetchFromCloud(true);
     });
-
-    // AUTO-POLLER: Zieht alle 3 Sekunden automatisch die neuesten Daten aus dem Netz (Sicherheitsnetz!)
-    setInterval(() => {
-        if (window.fetchFromCloud && navigator.onLine && !window.isUploading) {
-            window.fetchFromCloud(true);
-        }
-    }, 3000);
 
     // 🚀 DER LIVE-LAUSCHER: Ersetzt die alte Abfrage und lauscht in Echtzeit!
     database.ref('misaliData').on('value', (snapshot) => {
@@ -6925,16 +6967,14 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
 window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
-        
         document.body.classList.remove('modal-open'); 
         document.body.style.removeProperty('overflow');
         document.body.style.removeProperty('position');
         document.body.style.removeProperty('height');
         
         let bd = document.getElementById('modal-backdrop');
-        if(bd) {
-            bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
-            setTimeout(() => { bd.style.display = 'none'; }, 300); // Dann erst unsichtbar machen
+        if(bd) { 
+            bd.classList.remove('show-backdrop'); // iOS Fix: Nur Klasse entfernen, KEIN display: none!
         }
     };
     
@@ -6955,37 +6995,32 @@ window.closeAllModals = function(force=false) {
             document.body.style.removeProperty('height');
             
             let bd = document.getElementById('modal-backdrop');
-            if(bd) {
-                bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
-                setTimeout(() => { bd.style.display = 'none'; }, 300);
+            if(bd) { 
+                bd.classList.remove('show-backdrop'); // iOS Fix!
             }
         }
     };
 
     window.openFastModal = function(id) { 
         try {
-            // LÖSUNG iOS FREEZE: Timeout eingebaut, damit die Handy-Tastatur nicht mit der Modal-Animation kollidiert!
             if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
                 let el = document.activeElement;
                 setTimeout(() => { el.blur(); }, 50);
             }
-            
             window.closeAllSidebars(); 
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
                 if (m.id !== id) m.classList.remove('active-modal'); 
             });
-            
             const m = document.getElementById(id); 
             if(m) { 
                 document.body.classList.add('modal-open'); 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.style.display = 'block'; // Zuerst Display Block
-                    setTimeout(() => { bd.classList.add('show-backdrop'); }, 10); // Dann CSS-Animation feuern
+                    bd.classList.add('show-backdrop'); // iOS Fix: Direkt Klasse feuern, KEIN display: block!
                     bd.style.zIndex = '99998'; 
                 }
                 m.classList.add('active-modal'); 
-                m.style.zIndex = '100000'; 
+                m.style.zIndex = '100000';
                 
                 if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
                 if(id === 'profileEditModal' && window.currentUser) {
