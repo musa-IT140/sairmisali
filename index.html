@@ -3033,6 +3033,24 @@
     }
 }
 
+    /* ==================================================================
+           PLACEHOLDER FIX (Für IOS & Android Kommentare)
+           ================================================================== */
+        @media (max-width: 768px) {
+            #m-comment-input::placeholder,
+            .edel-comment-input::placeholder {
+                font-size: 0.6rem !important; /* Klein genug für alle Displays */
+                line-height: 1.2 !important;
+                white-space: normal !important; /* Erlaubt zweizeiligen Text! */
+                word-wrap: break-word !important;
+                overflow: visible !important;
+                opacity: 0.8 !important;
+            }
+            .edel-comment-input {
+                padding: 10px 12px !important;
+            }
+        }
+
     </style>
     <script>
 
@@ -6927,9 +6945,12 @@ window.openFastModal = function(id) {
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
-        document.body.style.touchAction = ''; 
+        // LÖSUNG iOS FREEZE: Zwingt den Browser hart zum Entsperren!
+        document.body.style.overflow = 'auto'; 
+        document.body.style.position = 'static'; 
+        document.body.style.height = 'auto';
         let bd = document.getElementById('modal-backdrop');
-        if(bd) { bd.classList.remove('show-backdrop'); } // <-- iOS FIX
+        if(bd) bd.style.display='none'; 
     };
     
     window.closeTopModal = function(e) { 
@@ -6944,9 +6965,12 @@ window.openFastModal = function(id) {
         
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
-            document.body.style.touchAction = ''; 
+            // LÖSUNG iOS FREEZE: Zwingt den Browser hart zum Entsperren!
+            document.body.style.overflow = 'auto'; 
+            document.body.style.position = 'static';
+            document.body.style.height = 'auto';
             let bd = document.getElementById('modal-backdrop');
-            if(bd) bd.classList.remove('show-backdrop'); // <-- iOS FIX
+            if(bd) bd.style.display='none'; 
         }
     };
     
@@ -7921,19 +7945,11 @@ window.openFastModal = function(id) {
         
         const selectEl = document.getElementById('chat-partner-select');
         const partner = selectEl ? selectEl.value : '';
-        
-        // LÖSUNG: Verhindert, dass der Admin ins "Nichts" schreibt!
-        if(!partner || partner === 'ALL') {
-            window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt aus dem Dropdown)</span>', '⚠️');
-            return;
-        }
+        if(!partner || partner === 'ALL') { window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); return; }
 
         const input = document.getElementById('chat-input'); const text = input.value.trim();
         if(!text) return;
-        
-        if(window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { 
-            input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız! Sistemden atıldınız.', '🚫'); return; 
-        }
+        if(window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
         
         const now = new Date(); const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
@@ -7949,16 +7965,12 @@ window.openFastModal = function(id) {
         
         window.chatDB.push(msg); 
         localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB));
-        input.value = ''; 
+        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); 
         
-        // LÖSUNG CHAT SYNC: Rendert lokal sofort und erzwingt den Firebase-Upload!
-        window.renderChat(); 
-        window.lastLocalUpdate = Date.now() + 5000; 
+        // 🚀 FIREBASE SYNC: Schickt die Nachricht sofort an die Cloud!
         if(window.syncToCloud) window.syncToCloud(); 
         
-        if (partner !== 'AdminKing') {
-            window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`);
-        }
+        if (partner !== 'AdminKing') { window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`); }
     };
 
     // 3. UNGELESENE NACHRICHTEN ZÄHLER (Nur eigene Nachrichten)
@@ -8070,58 +8082,40 @@ window.openFastModal = function(id) {
     // 1. KOMMENTAR HINZUFÜGEN
     // LÖSUNG KOMMENTARE: Schreibt jetzt direkt in window.poemDataStore und löst den Cloud-Sync aus!
     window.m_addComment = function(e) {
-        if(e && e.preventDefault) e.preventDefault();
-        if(!window.currentUser || !window.currentPoemData || !window.currentPoemData.id) return;
-
-        let input = document.getElementById('m-comment-input');
-        if(!input) return;
-        let text = input.value.trim();
-        if(!text) return;
-
-        let pId = window.currentPoemData.id;
-        // Erstellt das Profil für das Gedicht, falls noch niemand kommentiert hat
-        if(!window.poemDataStore[pId]) { window.poemDataStore[pId] = { ratings: {}, comments: [] }; }
-        if(!window.poemDataStore[pId].comments) window.poemDataStore[pId].comments = [];
-
-        let dObj = new Date();
-        let timeStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-
-        let newComm = {
-            username: window.currentUser.username,
-            user: window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : ''),
-            text: text,
-            time: timeStr,
-            editTime: null
-        };
-
-        window.poemDataStore[pId].comments.push(newComm);
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-
-        window.updateHeartsUI(); 
-        input.value = '';
+        if (e) e.stopPropagation();
+        if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
+        const input = document.getElementById('m-comment-input'); const text = input.value.trim();
+        if (!text) return;
+        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
         
-        // ZWINGT DEN SOFORTIGEN UPLOAD IN FIREBASE
-        window.lastLocalUpdate = Date.now() + 5000;
-        if(window.syncToCloud) window.syncToCloud(); 
-
+        const poemId = window.currentPoemData.id;
+        if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
+        if (!window.poemDataStore[poemId].comments) window.poemDataStore[poemId].comments = [];
+        
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        if(window.sendSystemMessage) window.sendSystemMessage('Admin', `${fullName} bir yorum yaptı.`, pId, window.currentPoemData.type);
+        window.poemDataStore[poemId].comments.push({ username: window.currentUser.username, user: fullName, text: text, time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) });
+        
+        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.updateHeartsUI(); window.renderUserWorksGrid(); 
+        
+        // 🚀 FIREBASE SYNC: Speichert den Kommentar weltweit!
+        if(window.syncToCloud) window.syncToCloud(); 
+        
+        window.sendSystemMessage('Admin', `${fullName} bir yoruma katıldı.`, poemId, window.currentPoemData.type);
     };
 
     // 2. KOMMENTAR LÖSCHEN
     window.m_delComm = function(poemId, idx, e) {
         if(e) e.stopPropagation(); 
         window.customConfirm('Yorumu sil? <span class="de-sub" style="font-size:0.85em;">(Kommentar löschen?)</span>', () => { 
+            window.lastLocalUpdate = Date.now() + 5000; 
             window.poemDataStore[poemId].comments.splice(idx, 1); 
+            window.updateHeartsUI(); 
             localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
             
-            // LÖSUNG: Nur die UI updaten, Modal NICHT neu öffnen!
-            window.updateHeartsUI(); 
-            window.renderUserWorksGrid(); 
-            
-            window.lastLocalUpdate = Date.now() + 5000; 
+            // 🚀 FIREBASE SYNC: Löscht den Kommentar auf allen Geräten!
             if(window.syncToCloud) window.syncToCloud(); 
-            window.showToast("Yorum silindi. <span class='de-sub'>(Gelöscht)</span>");
+            
+            window.renderUserWorksGrid(); window.openFastModal('contentModal'); window.sendSystemMessage('Admin', `${window.currentUser ? window.currentUser.name : "Admin"} bir yorum sildi.`);
         });
     };
 
