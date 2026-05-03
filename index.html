@@ -3312,6 +3312,52 @@
             filter: drop-shadow(0 0 8px rgba(244,197,66,0.6)); /* Statischer Glow */
         }
 
+        /* ==================================================================
+           SENDEN-BUTTON & INPUT FIX (Kompakt & Vollständig sichtbar)
+           ================================================================== */
+        #chat-input, #m-comment-input {
+            flex-grow: 1 !important;
+            height: 45px !important;
+            min-width: 100px !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Der Senden-Button direkt neben dem Eingabefeld */
+        #chat-input + button, #m-comment-input + button {
+            width: 45px !important;
+            height: 45px !important;
+            min-width: 45px !important;
+            font-size: 1.2rem !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important; /* Verhindert das Zusammenquetschen */
+            border-radius: 12px !important;
+        }
+
+        /* Der Emoji-Button im Chat */
+        button[onclick*="toggleChatEmojis"] {
+            width: 45px !important;
+            height: 45px !important;
+            min-width: 45px !important;
+            font-size: 1.4rem !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            border-radius: 12px !important;
+        }
+
+        /* Verhindert, dass die Zeile über den Bildschirmrand hinausragt */
+        #chat-box + div, #m-comment-list + div {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding-right: 5px !important;
+            align-items: center !important;
+        }
+
     </style>
     <script>
 
@@ -6538,29 +6584,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         } catch(e) { console.error("Error in updateUserWorksBadge", e); }
     };
 
-    window.updateNotifyBadge = function() {
-        try {
-            if(!window.currentUser) return;
-            
-            // 1. Zähle persönliche User-Nachrichten (für JEDEN, auch Admin)
-            let userCount = (window.adminMessages||[]).filter(m => m.to === window.currentUser.username).length;
-            window.forceBadge('user-inbox-badge', userCount, false); 
-            window.forceBadge('user-inbox-modal-badge', userCount, true);
-
-            // 2. Zähle Admin-Nachrichten (NUR für Admins)
-            let adminCount = 0;
-            if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
-                adminCount = (window.adminMessages||[]).filter(m => !m.to || m.to === 'admin').length;
-                window.forceBadge('admin-badge', adminCount, false);
-            }
-
-            // 3. Gesamt-Zähler für die Glocke oben im Header (Summe aus beidem)
-            let totalCount = userCount + adminCount;
-            window.forceBadge('user-notify-badge', totalCount, false);
-            
-        } catch(e) { console.error("Error in updateNotifyBadge", e); }
-    };
-
     window.renderAdminMessages = function() {
         const list = document.getElementById('admin-msg-list');
         if(!list) return;
@@ -7640,14 +7663,21 @@ window.closeAllModals = function(force=false) {
         }
     };
 
+    // ==================================================================
+    // FIX: BENACHRICHTIGUNGEN (Echter Absender & Fehlerfreier Zähler)
+    // ==================================================================
     window.sendSystemMessage = function(toUser, actionText, poemId = null, poemType = null) {
         if (!window.adminMessages) window.adminMessages = [];
         let dt = new Date();
         let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+        
+        // Den wahren Absender dynamisch ermitteln (statt immer nur "Sistem")
+        let fromUser = (window.currentUser && window.currentUser.username) ? window.currentUser.username : 'Sistem';
+
         window.adminMessages.push({
             id: 'notif_' + Date.now() + Math.random().toString(36).substr(2, 9),
-            to: toUser === 'Admin' ? 'admin' : toUser, 
-            from: 'Sistem',
+            to: (toUser === 'Admin' || toUser === 'admin') ? 'admin' : toUser, 
+            from: fromUser,
             msg: actionText,
             poemId: poemId,
             poemType: poemType,
@@ -7655,9 +7685,35 @@ window.closeAllModals = function(force=false) {
         });
         localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
         window.lastLocalUpdate = Date.now() + 5000;
+        
         if(window.updateNotifyBadge) window.updateNotifyBadge();
         if(window.syncToCloud) window.syncToCloud();
     };
+
+    window.updateNotifyBadge = function() {
+        try {
+            if(!window.currentUser) return;
+            
+            // 1. User Posteingang Zähler
+            let userCount = (window.adminMessages||[]).filter(m => m.to === window.currentUser.username).length;
+            window.forceBadge('user-inbox-badge', userCount, false); 
+            window.forceBadge('user-inbox-modal-badge', userCount, true);
+
+            // 2. Admin Posteingang Zähler
+            let adminCount = 0;
+            if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
+                adminCount = (window.adminMessages||[]).filter(m => !m.to || m.to === 'admin').length;
+                window.forceBadge('admin-badge', adminCount, false);
+            }
+
+            // 3. Gesamt-Glocke oben im Header
+            let totalCount = userCount + adminCount;
+            window.forceBadge('user-notify-badge', totalCount, false);
+            
+        } catch(e) { console.error("Error in updateNotifyBadge", e); }
+    };
+
+    
 
     window.renderLeaderboard = function() {
         const list = document.getElementById('leaderboard-list'); 
@@ -8231,7 +8287,7 @@ window.closeAllModals = function(force=false) {
     };
 
 // ==================================================================
-    // FIX: CHAT RENDER (User sieht nur sich selbst, Admin sieht alle)
+    // FIX: CHAT RENDER & SENDEN (Dropdown für User aktiviert & 1-zu-1 Chat)
     // ==================================================================
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); 
@@ -8244,80 +8300,86 @@ window.closeAllModals = function(force=false) {
         let partner = hiddenInput.value;
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
 
-        let optionsHTML = '';
-
-        if (!isAdmin) {
-            // USER MODUS: Sieht nur sich selbst im Header, chattet mit Admin
-            partner = 'AdminKing';
-            hiddenInput.value = 'AdminKing';
-            
-            if(customBtn) {
-                let myFullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-                customBtn.innerHTML = `${window.currentUser.emoji||'👤'} ${myFullName} (@${window.currentUser.username})`;
-                customBtn.style.pointerEvents = 'none'; // Dropdown deaktiviert für User
-                customBtn.style.background = 'rgba(10,25,47,0.9)'; // Entfernt den Dropdown-Pfeil
-            }
-            if(customList) customList.innerHTML = ''; 
-        } 
-        else {
-            // ADMIN MODUS: Dropdown mit allen Usern
-            let totalMsgs = (window.chatDB || []).length;
-            let badgeAll = totalMsgs > 0 ? `<span style="background:#f4c542; color:#000; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px rgba(244,197,66,0.6); border: 1px solid rgba(255,255,255,0.4);">${totalMsgs}</span>` : '';
-            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin Kontrolü) ${badgeAll}</div>`;
-
-            let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
-            users.forEach(u => {
-                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
-                let cleanText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
-                
-                let uRoleIsAdmin = (u.role === 'admin' || u.role === 'co-admin');
-                let badgeBg = uRoleIsAdmin ? '#22d3ee' : '#a78bfa';
-                let badgeColor = uRoleIsAdmin ? '#000' : '#fff';
-                let badgeGlow = uRoleIsAdmin ? 'rgba(34, 211, 238, 0.6)' : 'rgba(167, 139, 250, 0.6)';
-
-                let msgFromUserCount = (window.chatDB || []).filter(m => m.username === u.username && m.toUser === window.currentUser.username).length;
-                let badgeHTML = msgFromUserCount > 0 ? `<span style="background:${badgeBg}; color:${badgeColor}; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px ${badgeGlow}; border: 1px solid rgba(255,255,255,0.4);">${msgFromUserCount}</span>` : '';
-                
-                optionsHTML += `<div style="padding:10px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center; font-size:0.95rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${cleanText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${cleanText} ${badgeHTML}</div>`;
-            });
-            
-            if (customList) customList.innerHTML = optionsHTML;
-            if (customBtn) customBtn.style.pointerEvents = 'auto'; // Dropdown aktivieren
-
-            // Auto-Routing für Admin
-            if (!partner) {
-                hiddenInput.value = 'ALL';
-                if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
-                partner = 'ALL';
-            } else if (partner !== 'ALL' && customBtn && !customBtn.innerHTML.includes(partner)) {
-                let pObj = window.userDatabase[partner] || {};
-                let pFullName = (pObj.name || partner) + (pObj.surname ? ' ' + pObj.surname : '');
-                customBtn.innerHTML = `${pObj.emoji||'👤'} ${pFullName} (@${partner})`;
+        // AUTO-ROUTING: Wenn noch niemand gewählt ist, öffne den letzten aktiven Chat
+        if (!partner && !isAdmin) {
+            let myReceivedMsgs = (window.chatDB || []).filter(m => m.toUser === window.currentUser.username);
+            if (myReceivedMsgs.length > 0) {
+                partner = myReceivedMsgs[myReceivedMsgs.length - 1].username; 
+                hiddenInput.value = partner;
             }
         }
+        
+        // Dropdown dynamisch füllen
+        let optionsHTML = '';
+        if (isAdmin) {
+            let totalMsgs = (window.chatDB || []).length;
+            let badgeAll = totalMsgs > 0 ? `<span style="background:#f4c542; color:#000; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px rgba(244,197,66,0.6); border: 1px solid rgba(255,255,255,0.4);">${totalMsgs}</span>` : '';
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin) ${badgeAll}</div>`;
+        } else {
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='Kişi seçin... (Kontakt wählen)'; document.getElementById('chat-partner-select').value=''; this.parentElement.style.display='none'; window.renderChat();">Kişi seçin... (Kontakt wählen)</div>`;
+        }
 
-        // Gemeinsames Button Styling
+        // Alle User in die Liste laden (AdminKing als Sicherheitsnetz immer anzeigen)
+        let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
+        if(!users.find(u => u.username === 'AdminKing')) {
+            if(window.userDatabase['AdminKing']) users.unshift(window.userDatabase['AdminKing']);
+        }
+
+        users.forEach(u => {
+            let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+            let cleanText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
+            
+            let uRoleIsAdmin = (u.role === 'admin' || u.role === 'co-admin');
+            let badgeBg = uRoleIsAdmin ? '#22d3ee' : '#a78bfa';
+            let badgeColor = uRoleIsAdmin ? '#000' : '#fff';
+            let badgeGlow = uRoleIsAdmin ? 'rgba(34, 211, 238, 0.6)' : 'rgba(167, 139, 250, 0.6)';
+
+            // Zähle NACHRICHTEN VON DIESEM USER AN MICH
+            let msgFromUserCount = (window.chatDB || []).filter(m => m.username === u.username && m.toUser === window.currentUser.username).length;
+            let badgeHTML = msgFromUserCount > 0 ? `<span style="background:${badgeBg}; color:${badgeColor}; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px ${badgeGlow}; border: 1px solid rgba(255,255,255,0.4);">${msgFromUserCount}</span>` : '';
+            
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center; font-size:0.95rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${cleanText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${cleanText} ${badgeHTML}</div>`;
+        });
+        
+        if (customList) customList.innerHTML = optionsHTML;
+
+        // UI Anpassungen für den Button: WIEDER KLICKBAR FÜR DEN USER!
         if(customBtn) {
+            customBtn.style.pointerEvents = 'auto'; 
+            customBtn.style.background = `rgba(10,25,47,0.9) url('data:image/svg+xml;utf8,<svg fill=%22%23f4c542%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center`;
             customBtn.style.maxWidth = "350px";
             customBtn.style.margin = "0 auto";
             customBtn.style.justifyContent = "center";
-            customBtn.style.padding = "8px 30px 8px 15px"; 
+            customBtn.style.padding = "8px 30px 8px 15px";
             customBtn.style.fontSize = "0.95rem";
+        }
+
+        // Dropdown Titel aktualisieren
+        if (partner && partner !== 'ALL' && customBtn && !customBtn.innerHTML.includes(partner)) {
+            let pObj = window.userDatabase[partner] || {};
+            let pFullName = (pObj.name || partner) + (pObj.surname ? ' ' + pObj.surname : '');
+            customBtn.innerHTML = `${pObj.emoji||'👤'} ${pFullName} (@${partner})`;
+        }
+
+        if (!partner && isAdmin) {
+            hiddenInput.value = 'ALL';
+            if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
+            partner = 'ALL';
+        }
+
+        if (!partner) {
+            box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Lütfen sohbet etmek istediğiniz kişiyi seçin.<br><span class="de-sub">(Bitte wähle einen Kontakt aus)</span></div>';
+            return;
         }
 
         let filteredMsgs = [];
         if (isAdmin && partner === 'ALL') {
             filteredMsgs = window.chatDB || []; 
-        } else if (isAdmin) {
+        } else {
+            // NORMALER MODUS (Für User & Admin): Zeigt nur den Chat zwischen Dir und der gewählten Person!
             filteredMsgs = (window.chatDB || []).filter(m => 
                 (m.username === window.currentUser.username && m.toUser === partner) || 
                 (m.username === partner && m.toUser === window.currentUser.username)
-            );
-        } else {
-            // Normal User: Chat zwischen Ihm und Admin
-            filteredMsgs = (window.chatDB || []).filter(m => 
-                (m.username === window.currentUser.username && m.toUser === 'AdminKing') || 
-                (m.username === 'AdminKing' && m.toUser === window.currentUser.username)
             );
         }
 
@@ -8356,7 +8418,7 @@ window.closeAllModals = function(force=false) {
         box.scrollTop = box.scrollHeight;
         if(window.updateChatBadge) window.updateChatBadge();
     };
-
+    
     window.toggleChatEmojis = function(e) {
         if(e) e.stopPropagation();
         const picker = document.getElementById('chat-emoji-picker');
@@ -8393,13 +8455,10 @@ window.closeAllModals = function(force=false) {
         let partner = selectEl ? selectEl.value : '';
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
 
-        if (!isAdmin) {
-            partner = 'AdminKing'; // Zwingend! User sendet an Admin
-        } else {
-            if(!partner || partner === 'ALL') { 
-                window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); 
-                return; 
-            }
+        // Sicherheitssperre: Man muss jemanden auswählen!
+        if (!partner || (isAdmin && partner === 'ALL')) { 
+            window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); 
+            return; 
         }
 
         const input = document.getElementById('chat-input'); const text = input.value.trim();
@@ -8424,7 +8483,12 @@ window.closeAllModals = function(force=false) {
         
         if(window.syncToCloud) window.syncToCloud(); 
         
-        if (partner !== 'AdminKing') { window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`); }
+        // Systembenachrichtigung an den Chatpartner senden
+        if (partner === 'AdminKing') { 
+            window.sendSystemMessage('Admin', `SOHBET: ${fullName}, sana mesaj gönderdi.`); 
+        } else {
+            window.sendSystemMessage(partner, `SOHBET: ${fullName}, sana mesaj gönderdi.`);
+        }
     };
 
     // 3. UNGELESENE NACHRICHTEN ZÄHLER (Nur eigene Nachrichten)
