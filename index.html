@@ -2922,6 +2922,22 @@
             right: 15px !important;
         }
 
+        /* ==================================================================
+           iOS PERFORMANCE & BLACK SCREEN FIX
+           ================================================================== */
+        #modal-backdrop {
+            background: rgba(0,0,0,0.9) !important;
+            /* LÖSUNG: Blur entfernt! Das hat iOS Safari zum Abstürzen gebracht */
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important;
+        }
+        body.modal-open {
+            /* Verhindert das Scrollen im Hintergrund sicher auf allen Handys */
+            overflow: hidden !important;
+            position: fixed;
+            width: 100%;
+        }
+
     </style>
     <script>
 
@@ -4712,10 +4728,15 @@ Blühe, deutsches Vaterland!</p>
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
+        // LÖSUNG CHAT: Der Chat MUSS immer aktualisiert werden, auch wenn du gerade tippst!
         if(r.chat_v0 && Array.isArray(r.chat_v0)) { 
             window.chatDB = r.chat_v0; 
             localStorage.setItem('misaliChatDB_V0', JSON.stringify(r.chat_v0)); 
-            if(!isTyping && window.renderChat) window.renderChat(); 
+            
+            // Wenn das Chat-Fenster offen ist, wird es SOFORT gerendert!
+            if(document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view')) {
+                if(window.renderChat) window.renderChat(); 
+            }
         }
         
         if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
@@ -5774,11 +5795,13 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         } 
     };
 
+    // LÖSUNG SUCHE: Ignoriert ab sofort Punkte, Kommas ve Sonderzeichen!
     window.normalizeStr = function(str) {
         if (!str) return '';
         return str.toLowerCase()
             .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
-            .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u');
+            .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+            .replace(/[^a-z0-9\s]/gi, ''); // Killt alle Sonderzeichen für den perfekten Treffer!
     };
 
     window.forceBadge = function(elId, val, isInline = false) {
@@ -6808,20 +6831,26 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
-        document.body.classList.remove('modal-open'); document.getElementById('modal-backdrop').style.display='none'; 
+        document.body.classList.remove('modal-open'); 
+        document.body.style.position = ''; // Löst den iOS Scroll-Lock
+        document.getElementById('modal-backdrop').style.display='none'; 
     };
     
     window.closeTopModal = function(e) { 
         if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
         if(e === 'force') { window.closeAllModals(); return; }
+        
         const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
         if(modals.length > 0) {
             let lastModal = modals[modals.length - 1]; 
             lastModal.classList.remove('active-modal');
-            if(document.querySelectorAll('.modal.active-modal').length === 0) { 
-                document.body.classList.remove('modal-open'); 
-                document.getElementById('modal-backdrop').style.display='none'; 
-            }
+        }
+        
+        // LÖSUNG BLACK SCREEN: Harte, zielsichere Prüfung, ob wirklich ALLES zu ist!
+        if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+            document.body.classList.remove('modal-open'); 
+            document.body.style.position = ''; // Löst den iOS Scroll-Lock
+            document.getElementById('modal-backdrop').style.display='none'; 
         }
     };
     
