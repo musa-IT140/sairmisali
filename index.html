@@ -2932,28 +2932,27 @@
         }
 
         /* ==================================================================
-           iOS BLACK SCREEN & SCROLL FIX (100% Saftey)
+           100% iOS BLACKSCREEN KILLER (Reflow Prevention)
            ================================================================== */
         #modal-backdrop {
+            position: fixed !important;
+            inset: 0 !important; /* Ersetzt top, left, width, height sicher für iOS */
             background: rgba(0,0,0,0.85) !important;
             backdrop-filter: none !important; 
             -webkit-backdrop-filter: none !important;
-            /* LÖSUNG iOS: bottom: 0 statt height: 100vh! Verhindert das Safari-Hängenbleiben */
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            height: auto !important;
-            width: auto !important;
             z-index: 99998 !important;
-            transform: translateZ(0); /* Hardware-Beschleunigung für flüssiges iOS */
+            /* LÖSUNG: Wir schalten das Element nicht mehr "ab", wir machen es nur unsichtbar! */
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            transform: translateZ(0); /* Zwingt iOS zur Hardware-Beschleunigung */
+            will-change: opacity;
         }
-        
-        body.modal-open {
-            overflow: hidden !important; 
-            /* LÖSUNG iOS: Zwingt Safari, das Scrollen im Hintergrund zu stoppen, ohne das Layout zu sprengen */
-            touch-action: none;
+        #modal-backdrop.show-backdrop {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         /* ==================================================================
@@ -4691,18 +4690,15 @@ Blühe, deutsches Vaterland!</p>
 // ==================================================================
     // 🚀 NEUER MOTOR: FIREBASE REALTIME DATABASE
     // ==================================================================
-     const firebaseConfig = {
-        apiKey: "DEIN_API_KEY_STEHT_HIER",
-        authDomain: "DEINE_AUTH_DOMAIN_STEHT_HIER",
-        
-        // 👇 DIESE ZEILE MUSST DU HINZUFÜGEN! 👇
-        databaseURL: "https://sairmisali-web-default-rtdb.europe-west1.firebasedatabase.app/",
-        
-        projectId: "DEINE_PROJECT_ID",
-        storageBucket: "DEIN_STORAGE_BUCKET",
-        messagingSenderId: "DEINE_SENDER_ID",
-        appId: "DEINE_APP_ID"
-    };
+    const firebaseConfig = {
+    apiKey: "AIzaSyBhcm2ch-3wbjmXPpKLmwTrozbcr8xrPTg",
+    authDomain: "sairmisali-web.firebaseapp.com",
+    projectId: "sairmisali-web",
+    storageBucket: "sairmisali-web.firebasestorage.app",
+    messagingSenderId: "605117806675",
+    appId: "1:605117806675:web:7582affc3036c8cf6baea6"
+  };
+
 
     
     // Firebase starten
@@ -4818,23 +4814,34 @@ Blühe, deutsches Vaterland!</p>
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
-        // CHAT SYNC: Rendert den Chat sofort, wenn du drin bist!
-        if(r.chat_v0 && Array.isArray(r.chat_v0)) { 
-            window.chatDB = r.chat_v0; 
-            localStorage.setItem('misaliChatDB_V0', JSON.stringify(r.chat_v0)); 
+        // LÖSUNG CHAT SYNC: Arrays sicher umwandeln, falls Firebase sie als Objekte sendet!
+        if(r.chat_v0) { 
+            window.chatDB = Array.isArray(r.chat_v0) ? r.chat_v0 : Object.values(r.chat_v0);
+            localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
             if(document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view')) {
                 if(window.renderChat) window.renderChat(); 
             }
             if(window.updateChatBadge) window.updateChatBadge();
         }
         
-        // ADMIN MESSAGES SYNC
-        if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
-            window.adminMessages = r.adminMsgs;
-            localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs)); 
+        // ADMIN MESSAGES SYNC FIX
+        if(r.adminMsgs) { 
+            window.adminMessages = Array.isArray(r.adminMsgs) ? r.adminMsgs : Object.values(r.adminMsgs);
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
             if(window.updateNotifyBadge) window.updateNotifyBadge(); 
             if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
             if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
+        }
+
+        // USER POEMS SYNC FIX
+        if(r.userPoems) { 
+            window.userPoemsDB = Array.isArray(r.userPoems) ? r.userPoems : Object.values(r.userPoems);
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
+            if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            if(window.renderUserWorksSidebar) window.renderUserWorksSidebar();
+            if(window.renderTopWorks) window.renderTopWorks();
+            if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+            if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
 
         // HERZEN & KOMMENTARE SYNC: Rendert das Modal sofort live!
@@ -6849,15 +6856,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }
     });
 
-    window.openFastModal = function(id) { 
+window.openFastModal = function(id) { 
         try {
-            // LÖSUNG iOS KEYBOARD: Zwingt jede offene Handy-Tastatur sofort zum Schließen, bevor das Modal den Bildschirm übernimmt!
             if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-                document.activeElement.blur();
+                document.activeElement.blur(); // Verhindert iOS Tastatur-Crash
             }
-
             window.closeAllSidebars(); 
-            // Schließt alle anderen Fenster absolut gnadenlos, bevor das neue öffnet
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
                 if (m.id !== id) m.classList.remove('active-modal'); 
             });
@@ -6867,17 +6871,13 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 document.body.classList.add('modal-open'); 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.style.display = 'block'; 
-                    bd.style.zIndex = '99998'; // Z-Index hart erzwingen
+                    bd.classList.add('show-backdrop'); // <-- HIER IST DER iOS FIX
+                    bd.style.zIndex = '99998'; 
                 }
                 m.classList.add('active-modal'); 
-                m.style.zIndex = '100000'; // Modal absolut nach vorne zwingen
+                m.style.zIndex = '100000'; 
                 
-                // LÖSUNG VIP-EMOJIS: Grid frisch laden
-                if(id === 'm-register-modal') {
-                    if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
-                }
-                
+                if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
                 if(id === 'profileEditModal' && window.currentUser) {
                     if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-edit-profile', 'edit-emoji', 'selected-edit-emoji', window.currentUser.emoji || '👤');
                     document.getElementById('edit-name').value = window.currentUser.name || '';
@@ -6895,13 +6895,11 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 if(id === 'adminUsersModal' && window.renderOnlineUsers) window.renderOnlineUsers(); 
                 if(id === 'weatherModal' && window.fetchWeather) window.fetchWeather();
                 if(id === 'savedItemsModal' && window.renderSavedItems) window.renderSavedItems();
-
                 if(id === 'falModal') { let fc = document.getElementById('fal-cup'); if(fc) fc.style.display='block'; let fr = document.getElementById('fal-result'); if(fr) fr.style.display='none'; }
                 if(id === 'fastClickModal') { window.fcActive=false; let st=document.getElementById('fc-start'); if(st) st.style.display='block'; let btn=document.getElementById('fc-btn'); if(btn) btn.style.display='none'; let sc=document.getElementById('fc-score'); if(sc) sc.innerText='0'; let ti=document.getElementById('fc-time'); if(ti) ti.innerText='5.0'; }
                 if(id === 'breathModal') { let st=document.getElementById('breath-start'); if(st) st.style.display='block'; let c=document.getElementById('breath-circle'); if(c) c.style.transform='scale(1)'; }
                 if(id === 'magicBallModal') { let ans=document.getElementById('magic-answer'); if(ans) ans.innerText=''; let b=document.getElementById('magic-ball'); if(b) b.style.transform='scale(1)'; }
                 if(id === 'cookieModal' && window.resetCookie) window.resetCookie();
-                
                 if(id === 'rpsModal') { 
                     let sp=document.getElementById('rps-s-p'); if(sp) sp.innerText='0'; 
                     let sc=document.getElementById('rps-s-c'); if(sc) sc.innerText='0'; 
@@ -6910,12 +6908,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     let msg = document.getElementById('rps-msg'); if(msg) msg.innerHTML = window.currentGameLang === 'DE' ? 'Wähle etwas!' : 'Seçimini Yap! <span class="de-sub" style="font-size:0.85em;">(Wähle!)</span>';
                 }
                 if(id === 'tictactoeModal' && window.initTicTacToe) window.initTicTacToe();
-                
                 if(id === 'balloonModal' && window.initBalloon) window.initBalloon();
                 if(id === 'tfModal' && window.initTF) window.initTF();
                 if(id === 'minesweeperModal' && window.initMinesweeper) window.initMinesweeper();
                 if(id === 'alienModal' && window.initAlien) window.initAlien();
-                
                 if(id === 'colorHuntModal' && window.initColorHunt) window.initColorHunt();
                 if(id === 'moleModal' && window.initMole) window.initMole();
                 if(id === 'oddOneModal' && window.initOddOne) window.initOddOne();
@@ -6931,9 +6927,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
-        document.body.style.touchAction = ''; // iOS Reset
+        document.body.style.touchAction = ''; 
         let bd = document.getElementById('modal-backdrop');
-        if(bd) { bd.style.display='none'; }
+        if(bd) { bd.classList.remove('show-backdrop'); } // <-- iOS FIX
     };
     
     window.closeTopModal = function(e) { 
@@ -6946,12 +6942,11 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             lastModal.classList.remove('active-modal');
         }
         
-        // ULTIMATIVE KONTROLLE FÜR iOS: Sind WIRKLICH alle Fenster zu?
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
-            document.body.style.touchAction = ''; // iOS Reset
+            document.body.style.touchAction = ''; 
             let bd = document.getElementById('modal-backdrop');
-            if(bd) bd.style.display='none'; 
+            if(bd) bd.classList.remove('show-backdrop'); // <-- iOS FIX
         }
     };
     
@@ -8073,39 +8068,44 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     // ==================================================================
 
     // 1. KOMMENTAR HINZUFÜGEN
+    // LÖSUNG KOMMENTARE: Schreibt jetzt direkt in window.poemDataStore und löst den Cloud-Sync aus!
     window.m_addComment = function(e) {
         if(e && e.preventDefault) e.preventDefault();
-        if(!window.currentUser || !window.currentPoemData || !window.currentPoemId) return;
+        if(!window.currentUser || !window.currentPoemData || !window.currentPoemData.id) return;
 
         let input = document.getElementById('m-comment-input');
         if(!input) return;
         let text = input.value.trim();
         if(!text) return;
 
-        let db = window.poemDB || {};
-        let poem = db[window.currentPoemId];
-        if(!poem) { poem = { hearts: {}, comments: [] }; }
-        if(!poem.comments) poem.comments = [];
+        let pId = window.currentPoemData.id;
+        // Erstellt das Profil für das Gedicht, falls noch niemand kommentiert hat
+        if(!window.poemDataStore[pId]) { window.poemDataStore[pId] = { ratings: {}, comments: [] }; }
+        if(!window.poemDataStore[pId].comments) window.poemDataStore[pId].comments = [];
+
+        let dObj = new Date();
+        let timeStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
 
         let newComm = {
             username: window.currentUser.username,
-            user: window.currentUser.name,
+            user: window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : ''),
             text: text,
-            time: window.getMisaliTime(),
+            time: timeStr,
             editTime: null
         };
 
-        poem.comments.push(newComm);
-        db[window.currentPoemId] = poem;
-        
-        // Lokales Backup
-        localStorage.setItem('misaliPoemDB_V0', JSON.stringify(db));
-        window.poemDB = db;
+        window.poemDataStore[pId].comments.push(newComm);
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
 
-        // Triggert SOFORT das Rendering & den Cloud-Save
         window.updateHeartsUI(); 
         input.value = '';
-        if(window.updateCloudData) window.updateCloudData('comment_added', newComm); 
+        
+        // ZWINGT DEN SOFORTIGEN UPLOAD IN FIREBASE
+        window.lastLocalUpdate = Date.now() + 5000;
+        if(window.syncToCloud) window.syncToCloud(); 
+
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        if(window.sendSystemMessage) window.sendSystemMessage('Admin', `${fullName} bir yorum yaptı.`, pId, window.currentPoemData.type);
     };
 
     // 2. KOMMENTAR LÖSCHEN
