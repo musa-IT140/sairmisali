@@ -3052,26 +3052,40 @@
         }
 
         /* ==================================================================
-           PLACEHOLDER ZENTRIERUNG (Für alle Browser)
+           100% KUGELSICHERER PLACEHOLDER-ZENTRIERUNGS-FIX (iOS & Android)
            ================================================================== */
-        textarea.edel-comment-input::placeholder,
-        input.edel-comment-input::placeholder {
-            line-height: normal !important;
-            vertical-align: middle !important;
-            /* Sorgt dafür, dass der Text mittig in der Box sitzt */
-            position: absolute !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            width: 100% !important;
-            text-align: left !important;
-        }
+        @media (max-width: 768px) {
+            /* 1. Die Inputs selbst: Flexbox weg, feste Höhe & Standard-Padding! */
+            input#chat-input,
+            input#m-comment-input,
+            input.auth-input,
+            input.edel-comment-input {
+                height: 48px !important;
+                display: block !important; /* WICHTIG: Kein Flexbox auf Inputs! Das crasht Safari. */
+                padding: 0 15px !important;
+                line-height: normal !important; 
+            }
 
-        /* Um den echten Text (nicht den Placeholder) ebenfalls gut auszurichten */
-        textarea.edel-comment-input,
-        input.edel-comment-input {
-            line-height: normal !important;
-            padding-top: 15px !important; /* Passe dies an, bis es optisch mittig ist */
-            padding-bottom: 15px !important;
+            /* 2. Der Placeholder: Einzeilig, klein, exakt mittig & abgeschnitten, falls zu lang */
+            input#chat-input::placeholder,
+            input#m-comment-input::placeholder,
+            input.auth-input::placeholder,
+            input.edel-comment-input::placeholder,
+            /* Spezielle Engine-Prefixes für iOS und alte Androids */
+            input#chat-input::-webkit-input-placeholder,
+            input#m-comment-input::-webkit-input-placeholder,
+            input.auth-input::-webkit-input-placeholder,
+            input.edel-comment-input::-webkit-input-placeholder {
+                font-size: 0.65rem !important; 
+                line-height: 48px !important; /* WICHTIG: Gleiche Höhe wie das Input = Absolute Mitte! */
+                vertical-align: middle !important;
+                white-space: nowrap !important; /* Inputs können keine 2 Zeilen! */
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                color: rgba(148, 163, 184, 0.8) !important;
+                position: static !important;
+                transform: none !important;
+            }
         }
 
     </style>
@@ -4734,11 +4748,13 @@ Blühe, deutsches Vaterland!</p>
     const firebaseConfig = {
     apiKey: "AIzaSyBhcm2ch-3wbjmXPpKLmwTrozbcr8xrPTg",
     authDomain: "sairmisali-web.firebaseapp.com",
+    // 👇 DIESE ZEILE HAT GEFEHLT! OHNE SIE GEHT KEIN SYNC IN EUROPA! 👇
+    databaseURL: "https://sairmisali-web-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "sairmisali-web",
     storageBucket: "sairmisali-web.firebasestorage.app",
     messagingSenderId: "605117806675",
     appId: "1:605117806675:web:7582affc3036c8cf6baea6"
-  };
+};
 
 
     
@@ -6907,11 +6923,53 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }
     });
 
-window.openFastModal = function(id) { 
-        try {
-            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-                document.activeElement.blur(); // Verhindert iOS Tastatur-Crash
+window.closeAllModals = function(force=false) { 
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
+        
+        document.body.classList.remove('modal-open'); 
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('position');
+        document.body.style.removeProperty('height');
+        
+        let bd = document.getElementById('modal-backdrop');
+        if(bd) {
+            bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
+            setTimeout(() => { bd.style.display = 'none'; }, 300); // Dann erst unsichtbar machen
+        }
+    };
+    
+    window.closeTopModal = function(e) { 
+        if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
+        if(e === 'force') { window.closeAllModals(); return; }
+        
+        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
+        if(modals.length > 0) {
+            let lastModal = modals[modals.length - 1]; 
+            lastModal.classList.remove('active-modal');
+        }
+        
+        if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+            document.body.classList.remove('modal-open'); 
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('position');
+            document.body.style.removeProperty('height');
+            
+            let bd = document.getElementById('modal-backdrop');
+            if(bd) {
+                bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
+                setTimeout(() => { bd.style.display = 'none'; }, 300);
             }
+        }
+    };
+
+    window.openFastModal = function(id) { 
+        try {
+            // LÖSUNG iOS FREEZE: Timeout eingebaut, damit die Handy-Tastatur nicht mit der Modal-Animation kollidiert!
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                let el = document.activeElement;
+                setTimeout(() => { el.blur(); }, 50);
+            }
+            
             window.closeAllSidebars(); 
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
                 if (m.id !== id) m.classList.remove('active-modal'); 
@@ -6922,7 +6980,8 @@ window.openFastModal = function(id) {
                 document.body.classList.add('modal-open'); 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.classList.add('show-backdrop'); // <-- HIER IST DER iOS FIX
+                    bd.style.display = 'block'; // Zuerst Display Block
+                    setTimeout(() => { bd.classList.add('show-backdrop'); }, 10); // Dann CSS-Animation feuern
                     bd.style.zIndex = '99998'; 
                 }
                 m.classList.add('active-modal'); 
@@ -6978,7 +7037,6 @@ window.openFastModal = function(id) {
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         
-        // Sanftes Entfernen der Scroll-Sperre
         document.body.classList.remove('modal-open'); 
         document.body.style.removeProperty('overflow');
         document.body.style.removeProperty('position');
@@ -6986,12 +7044,9 @@ window.openFastModal = function(id) {
         
         let bd = document.getElementById('modal-backdrop');
         if(bd) {
-            bd.style.opacity = '0'; // Sanftes Ausblenden
-            setTimeout(() => { bd.style.display='none'; bd.style.opacity = '1'; }, 200); 
+            bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
+            setTimeout(() => { bd.style.display = 'none'; }, 300); // Dann erst unsichtbar machen
         }
-        
-        // WICHTIG: Erzwingt einen Reflow für iOS Safari
-        window.scrollTo(0, window.scrollY); 
     };
     
     window.closeTopModal = function(e) { 
@@ -7005,7 +7060,6 @@ window.openFastModal = function(id) {
         }
         
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
-            // Alles sanft zurücksetzen
             document.body.classList.remove('modal-open'); 
             document.body.style.removeProperty('overflow');
             document.body.style.removeProperty('position');
@@ -7013,12 +7067,9 @@ window.openFastModal = function(id) {
             
             let bd = document.getElementById('modal-backdrop');
             if(bd) {
-                bd.style.opacity = '0';
-                setTimeout(() => { bd.style.display='none'; bd.style.opacity = '1'; }, 200);
+                bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
+                setTimeout(() => { bd.style.display = 'none'; }, 300);
             }
-            
-            // Reflow für iOS
-            window.scrollTo(0, window.scrollY);
         }
     };
     
