@@ -2508,7 +2508,121 @@
                 order: 4 !important; /* Ganz nach unten als letzte Zeile */
             }
         }
+        
+        /* ==================================================================
+           ZÄHLER / BADGES VERKLEINERN (WhatsApp-Style)
+           ================================================================== */
+        .badge-count {
+            font-size: 0.65rem !important; 
+            padding: 2px 5px !important;
+            border: 1px solid rgba(0,0,0,0.5) !important;
+            min-width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Glocke oben rechts */
+        #user-notify-badge {
+            top: -2px !important;
+            right: -2px !important;
+            font-size: 0.6rem !important;
+            padding: 2px 4px !important;
+        }
 
+        /* Navigationsleiste (Menüpunkte) */
+        .header-nav-bar .badge-count {
+            top: -4px !important;
+            right: -6px !important;
+        }
+
+        /* Sidebar Buttons (Links & Rechts) */
+        .floating-menu-items .badge-count {
+            top: -4px !important;
+            right: -4px !important;
+            font-size: 0.6rem !important;
+            padding: 2px 4px !important;
+        }
+        
+        /* ==================================================================
+           1. EINHEITLICHE ZÄHLER / BADGES (WhatsApp-Style)
+           ================================================================== */
+        .badge-count {
+            position: absolute !important;
+            top: -5px !important;
+            right: -6px !important;
+            font-size: 0.65rem !important; 
+            padding: 2px 4px !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            display: none; /* Wird über JS gesteuert */
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(0,0,0,0.8) !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
+            transform: none !important;
+            z-index: 100 !important;
+            line-height: 1 !important;
+        }
+        .badge-count.show-badge {
+            display: flex !important;
+        }
+
+        /* Verhindert, dass Badges aus dem Bildschirm fliegen */
+        .clickable-header-item, nav button, .bottom-btn, .icon-action-btn {
+            position: relative !important;
+            overflow: visible !important;
+        }
+
+        /* ==================================================================
+           2. MOBILE DROPDOWN FIX (Zwingt Handys ins Dark Mode Design)
+           ================================================================== */
+        select.auth-input, #admin-rating-cat, #chat-partner-select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            background-color: rgba(10,25,47,0.95) !important;
+            color: #fff !important;
+            /* Fügt einen schicken goldenen Pfeil ein */
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23f4c542" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            padding-right: 35px !important;
+            border: 1px solid rgba(244, 197, 66, 0.4) !important;
+        }
+
+        /* ==================================================================
+           PROFILBILD KREIS-FIX (Verhindert viereckige Ecken beim Bild)
+           ================================================================== */
+        .header-mini-profile, #user-avatar {
+            border-radius: 50% !important;
+            object-fit: cover !important;
+            overflow: hidden !important;
+            aspect-ratio: 1 / 1 !important; /* Zwingt das Bild in ein perfektes Format */
+            background-color: transparent !important;
+        }
+
+        /* ==================================================================
+           PLACEHOLDER-TEXTE MOBILE VERKLEINERN
+           ================================================================== */
+        @media (max-width: 768px) {
+            input::placeholder, 
+            textarea::placeholder,
+            .auth-input::placeholder,
+            #chat-input::placeholder,
+            .edel-comment-input::placeholder {
+                font-size: 0.75rem !important; /* Macht den Text klein genug */
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            /* Für alle Browser-Engines */
+            ::-webkit-input-placeholder { font-size: 0.75rem !important; }
+            ::-moz-placeholder { font-size: 0.75rem !important; }
+            :-ms-input-placeholder { font-size: 0.75rem !important; }
+        }
 
     </style>
     <script>
@@ -3223,17 +3337,32 @@ Blühe, deutsches Vaterland!</p>
         <section class="page-view" id="sohbet-view">
             <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent-color); text-align: center; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--accent-glow);">Chat <span class="de-sub">(Sohbet)</span></h2>
             <div style="max-width: 900px; margin: 0 auto; background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); height: 75vh; display: flex; flex-direction: column; width: 100%; position: relative; z-index: 5;">
-                <div id="area-chat" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; gap: 20px;">
+                <div id="area-chat" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; gap: 15px; position: relative;">
+                    
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <select id="chat-partner-select" class="auth-input" style="margin:0; width:100%; border-radius:12px; background: rgba(0,0,0,0.6);" onchange="window.renderChat()">
+                            <option value="">Kişi seçin... (Kontakt wählen)</option>
+                        </select>
+                    </div>
+
                     <div id="chat-box" style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px inset rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
                     </div>
-                    <div style="display: flex; gap: 15px; height: 60px;">
-                        <input type="text" id="chat-input" autocomplete="off" spellcheck="false" placeholder="Bir mesaj yazın... (Schreibe etwas...)" onkeypress="if(event.key === 'Enter' && window.sendChat) window.sendChat()" style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(244,197,66,0.4); color: #fff; padding: 0 20px; border-radius: 12px; font-size: 1.1rem; outline: none; margin: 0;">
-                        <button class="reset-btn" style="width: 70px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin: 0;" onclick="if(window.sendChat) window.sendChat()">
+                    
+                    <!-- EMOJI PICKER CONTAINER (Standardmäßig versteckt) -->
+                    <div id="chat-emoji-picker" style="display:none; position:absolute; bottom: 70px; left: 0; width: 100%; max-height: 200px; background: rgba(10,25,47,0.95); border: 1px solid rgba(244,197,66,0.3); border-radius: 12px; padding: 10px; overflow-y: auto; z-index: 100; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);">
+                    </div>
+
+                    <!-- EINGABEBEREICH -->
+                    <div style="display: flex; gap: 10px; height: 50px; align-items: center;">
+                        <button class="reset-btn" style="width: 50px; height: 50px; border-radius: 12px; padding: 0; font-size: 1.5rem; background: rgba(255,255,255,0.1); box-shadow: none;" onclick="window.toggleChatEmojis(event)">
+                            😀
+                        </button>
+                        <input type="text" id="chat-input" autocomplete="off" spellcheck="false" placeholder="Mesaj yaz... (Schreibe...)" onkeypress="if(event.key === 'Enter' && window.sendChat) window.sendChat()" style="flex-grow: 1; height: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(244,197,66,0.4); color: #fff; padding: 0 15px; border-radius: 12px; font-size: 1.1rem; outline: none; margin: 0;">
+                        <button class="reset-btn" style="width: 60px; height: 50px; border-radius: 12px; padding: 0; font-size: 1.5rem;" onclick="if(window.sendChat) window.sendChat()">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </div>
-            </div>
         </section>
 
         <section class="page-view" id="impressum-view">
@@ -4320,6 +4449,9 @@ Blühe, deutsches Vaterland!</p>
         
         if(r.logs && r.logs.length > 0) { window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
         if(r.visits && r.visits > window.siteVisits) { window.siteVisits = r.visits; localStorage.setItem('misaliSiteVisits', window.siteVisits); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
+        
+        // LÖSUNG LIVE-ZÄHLER: Löst sofort aus, wenn Firebase neue Daten schickt!
+        if(window.updateChatBadge) window.updateChatBadge();
     };
 
     // 🚀 DER LIVE-LAUSCHER: Ersetzt die alte Abfrage und lauscht in Echtzeit!
@@ -5229,12 +5361,14 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if(!el) return;
             const alwaysShow = el.classList.contains('always-show');
             el.innerText = val !== undefined ? val : '0';
+            
             if(val > 0 || alwaysShow) {
                 el.classList.add('show-badge');
-                el.style.setProperty('display', isInline ? 'inline-flex' : 'flex', 'important');
+                // Keine harten Inline-Styles mehr nötig, unser CSS regelt das jetzt!
+                el.style.display = ''; 
             } else {
                 el.classList.remove('show-badge');
-                el.style.setProperty('display', 'none', 'important');
+                el.style.display = 'none';
             }
         } catch(e) { console.error("Badge error:", e); }
     };
@@ -7064,37 +7198,174 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         window.forceBadge('nav-chat-badge', unread, false);
     };
 
+    // 1. CHAT RENDER (Filtert nach 1-zu-1 oder Admin-Überwachung)
     window.renderChat = function() {
-        const box = document.getElementById('chat-box'); if(!box) return;
-        if(!window.chatDB || window.chatDB.length === 0) { box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz! <span class="de-sub" style="font-size:0.85em;">(Schreibe als Erster!)</span></div>'; return; }
-        box.innerHTML = window.chatDB.map(msg => {
-            const isMe = window.currentUser && window.currentUser.username === msg.username;
-            let dName = msg.name || msg.username || 'Misafir'; if (dName === 'undefined') dName = 'Misafir';
-            const delBtn = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') ? `<button class="chat-del-btn" onclick="window.deleteChatMessage('${msg.id}')"><i class="fas fa-trash"></i></button>` : '';
+        const box = document.getElementById('chat-box'); 
+        const selectEl = document.getElementById('chat-partner-select');
+        if(!box || !selectEl || !window.currentUser) return;
+
+        let currentSelection = selectEl.value;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+        
+        // Dropdown dynamisch füllen
+        let optionsHTML = '';
+        if (isAdmin) {
+            optionsHTML += `<option value="ALL" style="color:#ef4444; font-weight:bold;">👑 TÜM MESAJLAR (Admin Kontrolü)</option>`;
+        } else {
+            optionsHTML += `<option value="">Kişi seçin... (Kontakt wählen)</option>`;
+        }
+
+        // Alle aktiven User in die Liste laden (außer man selbst)
+        let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
+        users.forEach(u => {
+            let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+            optionsHTML += `<option value="${u.username}">${u.emoji||'👤'} ${fullName} (@${u.username})</option>`;
+        });
+        
+        if (selectEl.options.length <= 1 || selectEl.innerHTML.length < 50) {
+            selectEl.innerHTML = optionsHTML;
+            if (currentSelection) selectEl.value = currentSelection;
+            else if (isAdmin) selectEl.value = 'ALL';
+        }
+
+        let partner = selectEl.value;
+        
+        if (!partner) {
+            box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Lütfen sohbet etmek istediğiniz kişiyi seçin.<br><span class="de-sub">(Bitte wähle einen Kontakt aus)</span></div>';
+            return;
+        }
+
+        // Nachrichten filtern (Admin sieht alles, User nur ihre eigenen Chats)
+        let filteredMsgs = [];
+        if (isAdmin && partner === 'ALL') {
+            filteredMsgs = window.chatDB || []; 
+        } else {
+            filteredMsgs = (window.chatDB || []).filter(m => 
+                (m.username === window.currentUser.username && m.toUser === partner) || 
+                (m.username === partner && m.toUser === window.currentUser.username)
+            );
+        }
+
+        if(filteredMsgs.length === 0) { 
+            box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz!<br><span class="de-sub">(Schreibe die erste Nachricht!)</span></div>'; 
+            return; 
+        }
+
+        box.innerHTML = filteredMsgs.map(msg => {
+            const isMe = window.currentUser.username === msg.username;
+            let dName = msg.name || msg.username || 'Misafir'; 
+            const delBtn = isAdmin ? `<button class="chat-del-btn" onclick="window.deleteChatMessage('${msg.id}')"><i class="fas fa-trash"></i></button>` : '';
             let colorClass = window.getAuthorColorClass(msg.username);
-            return `<div class="chat-bubble-wrapper ${isMe ? 'me' : 'other'}"><div class="chat-meta">${!isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}<span>${msg.time}</span>${delBtn}${isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}</div><div class="chat-bubble">${msg.text}</div></div>`;
+            
+            // Admin sieht, wer wem heimlich schreibt
+            let adminInfo = '';
+            if (isAdmin && partner === 'ALL') {
+                adminInfo = `<div style="font-size:0.7rem; color:#ef4444; margin-bottom:4px; font-weight:bold;">[${msg.username} ➔ ${msg.toUser}]</div>`;
+            }
+
+            return `<div class="chat-bubble-wrapper ${isMe ? 'me' : 'other'}">
+                        ${adminInfo}
+                        <div class="chat-meta">
+                            ${!isMe ? `<strong><span class="${colorClass}">${dName}</span></strong>` : ''}
+                            <span>${msg.time}</span>
+                            ${delBtn}
+                            ${isMe ? `<strong><span class="${colorClass}">Sen (Du)</span></strong>` : ''}
+                        </div>
+                        <div class="chat-bubble">${msg.text}</div>
+                    </div>`;
         }).join('');
+        
         box.scrollTop = box.scrollHeight;
-    if(window.updateChatBadge) window.updateChatBadge();
+        if(window.updateChatBadge) window.updateChatBadge();
     };
 
+    window.toggleChatEmojis = function(e) {
+        if(e) e.stopPropagation();
+        const picker = document.getElementById('chat-emoji-picker');
+        if(picker.style.display === 'flex') {
+            picker.style.display = 'none';
+        } else {
+            picker.style.display = 'flex';
+            picker.style.flexWrap = 'wrap';
+            picker.style.gap = '8px';
+            
+            // Füllt die Emojis nur beim ersten Klick (spart Ladezeit)
+            if(picker.innerHTML.trim() === '') {
+                const ems = Array.from("😀😃😄😁😆😅😂🤣🥲☺️😊😇🙂🙃😉😌😍🥰😘😗😙😚😋😛😝😜🤪🤨🧐🤓😎🥸🤩🥳😏😒😞😔😟😕🙁☹️😣😖😫😩🥺😢😭😤😠😡🤬🤯😳🥵🥶😱😨😰😥😓🤗🤔🤭🤫🤥😶😐😑😬🙄😯😦😧😮😲🥱😴🤤😪😵🤐🥴🤢🤮🤧😷🤒🤕🤑🤠😈👿👹👺🤡💩👻💀☠️👽👾🤖🎃😺😸😹😻😼😽🙀😿😾👋🤚🖐✋🖖👌🤌🤏✌️🤞🤟🤘🤙👈👉👆🖕👇☝️👍👎✊👊🤛🤜👏🙌👐🤲🤝🙏✍️💅🤳💪🦾🦿🦵🦶👂🦻👃🦼🦽🧠🫀🫁🦷🦴👀👁👅👄💋🩸❤️🔥✨🌟🕊️🥀🌹🍂💎🧿🍀🪐🌙☕🍎🍏🍐🍊🍋🍌🍉🍇🍓🍈🍒🍑🥭🍍🥥🥝🍅🍆🥑🥦🥬🥒🌶🫑🌽🥕🧄🧅🥔🍠🥐🥯🍞🥖🥨🧀🥚🍳🧈🥞🧇🥓🥩🍗🍖🦴🌭🍔🍟🍕🫓🥪🥙🧆🌮🌯🫔🥗🥘🫕🥫🍝🍜🍲🍛🍣🍱🥟🦪🍙🍚🍘🍥🥠🥮🍢🍡🍧🍨🍦🥧🧁🍰🎂🍮🍭🍬🍫🍿🍩🍪🌰🥜🍯🥛🍼☕️🍵🧃🥤🧋🍶🍺🍻🥂🍷🥃🍸🍹🧉🍾🧊🥄🍴🍽🥣🥡🥢🧂⚽️🏀🏈⚾️🥎🎾🏐🏉🥏🎱🪀🏓🏸🏒🏑🥍🏏🪃🥅⛳️🪁🏹🎣🤿🥊🥋🎽🛹🛼🛷⛸🥌🎿⛷🏂🪂🏋️‍♀️🏋️‍♂️🤼‍♀️🤼‍♂️🤸‍♀️🤸‍♂️⛹️‍♀️⛹️‍♂️🤺🤾‍♀️🤾‍♂️🏌️‍♀️🏌️‍♂️🏇🧘‍♀️🧘‍♂️🏄‍♀️🏄‍♂️🏊‍♀️🏊‍♂️🤽‍♀️🤽‍♂️🚣‍♀️🚣‍♂️🧗‍♀️🧗‍♂️🚵‍♀️🚵‍♂️🏆🥇🥈🥉🏅🎖🏵🎗🎫🎟🎪🤹‍♀️🤹‍♂️🎭🩰🎨🎬🎤🎧🎼🎹🥁🪘🎷🎺🪗🎸🪕🎻🎲♟🎯🎳🎮🎰🧩🚗🚕🚙🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚜🦯🦽🦼🛴🚲🛵🏍🛺🚨🚔🚍🚘🚖🚖🚡🚠🚟🚃🚋🚞🚝🚄🚅🚈🚂🚆🚇🚊🚉✈️🛫🛬🛩💺🛰🚀🛸🚁🛶⛵️🚤🛥🛳⛴🚢⚓️🪝⛽️🚧🚦🚥🚏🗺🗿🗽🗼🏰🏯🏟🎡🎢🎠⛲️⛱🏖🏝🏜🌋⛰🏔🗻🏕⛺️🛖🏠🏡🏘🏚🏗🏭🏢🏬🏣🏤🏥🏦🏨🏪🏫🏩💒🏛⛪️🕌🕍🛕🕋⛩🛤🛣🗾🎑🏞🌅🌄🌠🎇🎆🌇🌆🏙🌃🌌🌉🌁⌚️📱📲💻⌨️🖥🖨🖱🖲🕹🗜💽💾💿📀📼📷📸📹🎥📽🎞📞☎️📟📠📺📻🎙🎚🎛🧭⏱⏲⏰🕰⌛️⏳📡🔋🔌💡🔦🕯🪔🧯🛢💸💵💴💶💷🪙💰💳💎⚖️🪜🧰🪛🔧🔨⚒🛠⛏🪚🔩⚙️🪤🧱⛓🧲🔫💣🧨🪓🔪🗡⚔️🛡🚬⚰️🪦⚱️🏺🔮📿🧿💈⚗️🔭🔬🕳🩹🩺💊💉🩸🧬🦠🧫🧪🌡🧹🪠🧺🧻🚽🚰🚿🛁🛀🧼🪥🪒🧽🪣🧴🛎🔑🗝🚪🪑🛋🛏🛌🧸🪆🖼🪞🪟🛍🛒🎁🎈🎏🎀🪄🪅🎊🎉🎎🏮🎐🧧✉️📩📨📧💌📥📤📦🏷🪧📪📫📬📭📮📯📜📃📄📑🧾📊📈📉🗒🗓📆📅🗑📇🗃🗳🗄📋📁📂🗂🗞📰📓📔📒📕📗📘📙📚📖🔖🧷🔗📎🖇📐📏🧮📌📍✂️🖊🖋✒️🖌🖍📝✏️🔍🔎🔏🔐🔒🔓❤️🧡💛💚💙💜🖤🤍🤎💔❣️💕💞💓💗💖💘💝");
+                picker.innerHTML = ems.map(e => `<span style="font-size:1.6rem; cursor:pointer; padding:5px; transition:0.2s;" onclick="const inp=document.getElementById('chat-input'); inp.value += '${e}'; inp.focus();">${e}</span>`).join('');
+            }
+        }
+    };
+
+    // Schließt das Emoji-Fenster, wenn man woanders hin klickt
+    document.addEventListener('click', function(e) {
+        let picker = document.getElementById('chat-emoji-picker');
+        if(picker && !picker.contains(e.target) && e.target.innerText !== '😀') {
+            picker.style.display = 'none';
+        }
+    });
+
+    // 2. NACHRICHT SENDEN (Privat an Empfänger)
     window.sendChat = function() {
         if(!window.currentUser) { window.requireAuth(() => {}); return; }
+        
+        const selectEl = document.getElementById('chat-partner-select');
+        const partner = selectEl ? selectEl.value : '';
+        
+        if(!partner || partner === 'ALL') {
+            window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️');
+            return;
+        }
+
         const input = document.getElementById('chat-input'); const text = input.value.trim();
         if(!text) return;
         
         if(window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { 
-            input.value = ''; 
-            window.m_logout(); 
-            window.customAlert('Kötü söz kullandınız! Sistemden atıldınız.', '🚫'); 
-            return; 
+            input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız! Sistemden atıldınız.', '🚫'); return; 
         }
         
         const now = new Date(); const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        const msg = { id: 'chat_' + Date.now() + Math.random().toString(36).substr(2,9), username: window.currentUser.username, name: fullName, text: text, time: timeStr };
-        window.chatDB.push(msg); localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB));
-        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); if(window.syncToCloud) window.syncToCloud(); window.sendSystemMessage('Admin', `SOHBET: ${fullName} sohbete yazdı.`);
+        
+        const msg = { 
+            id: 'chat_' + Date.now() + Math.random().toString(36).substr(2,9), 
+            username: window.currentUser.username, 
+            name: fullName, 
+            toUser: partner, // NEU: Empfänger wird gespeichert!
+            text: text, 
+            time: timeStr 
+        };
+        
+        window.chatDB.push(msg); 
+        localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB));
+        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); 
+        
+        if(window.syncToCloud) window.syncToCloud(); 
+        if (partner !== 'AdminKing') {
+            window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`);
+        }
+    };
+
+    // 3. UNGELESENE NACHRICHTEN ZÄHLER (Nur eigene Nachrichten)
+    window.updateChatBadge = function() {
+        if(!window.currentUser || !window.chatDB) return;
+        
+        // Zählt nur Nachrichten, die AN DICH geschickt wurden
+        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username);
+        let currentCount = myMessages.length;
+        
+        let readCount = parseInt(localStorage.getItem('misaliReadChatCount_' + window.currentUser.username)) || 0;
+        let isChatActive = document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view');
+        
+        if (isChatActive) {
+            readCount = currentCount; // Alle als gelesen markieren, wenn man den Chat öffnet
+            localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, readCount);
+        }
+        
+        let unread = currentCount - readCount;
+        if (unread < 0) { unread = 0; localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, currentCount); }
+        
+        window.forceBadge('nav-chat-badge', unread, false);
     };
 
     window.deleteChatMessage = async function(id) {
@@ -7104,14 +7375,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
             window.renderChat(); 
             
-            // 2. LÖSUNG: Direkt und kugelsicher in Firebase löschen, um Überschneidungen zu vermeiden!
-            try {
-                if (typeof database !== 'undefined') {
-                    await database.ref('misaliData/chat_v0').set(window.chatDB);
-                } else {
-                    if(window.syncToCloud) window.syncToCloud(); 
-                }
-            } catch(e) { console.error("Chat delete sync error:", e); }
+            // 2. LÖSUNG: Wir rufen den KOMPLETTEN Sync auf, damit der Zeitstempel erneuert wird!
+            // Nur so erkennen die Handys der anderen User, dass sich etwas verändert hat.
+            window.lastLocalUpdate = Date.now() + 5000;
+            if(window.syncToCloud) window.syncToCloud(); 
             
             window.showToast("Mesaj silindi. <span class='de-sub'>(Gelöscht)</span>");
         });
@@ -7245,18 +7512,28 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('userPoems', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button></div>`;
                 
                 let currentRating = window.currentPoemData.adminRating || 0; let currentCat = window.currentPoemData.adminCategory || 'Normal'; let currentCatDisplay = currentRating === 0 ? 'Puan Bekliyor' : currentCat;
+                let catIcon = currentCat === 'Super Elite' ? '🏆🏆🏆 Super Elite' : currentCat === 'Elite' ? '🏆🏆 Elite' : '🏆 Normal';
                 
-                // LÖSUNG ÜBERLAPPUNG: Buttons haben jetzt flex-wrap und weniger fettes Padding!
+                // LÖSUNG: Maßgeschneidertes Dropdown, das das Handy-Betriebssystem austrickst!
                 adminRatingHTML = `
-                <div class="modal-interaction-box" style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px;">
+                <div class="modal-interaction-box" style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px; overflow:visible;">
                     <strong style="color:#f4c542; font-size:1.2rem;">🏆 Admin Değerlendirmesi</strong>
                     <div style="color:#fdfbf7; font-size:1.05rem;">Mevcut: <strong style="font-size:1.2rem; color:#f4c542;">${currentRating} Puan</strong> (${currentCatDisplay})</div>
-                    <div style="display:flex; gap:12px; width:100%; align-items:center; justify-content:center; flex-wrap:wrap; margin-top: 5px;">
-                        <select id="admin-rating-cat" class="auth-input" style="width:auto; margin:0; padding:10px; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;">
-                            <option value="Super Elite" ${currentCat === 'Super Elite' ? 'selected' : ''}>🏆🏆🏆 Super Elite</option>
-                            <option value="Elite" ${currentCat === 'Elite' ? 'selected' : ''}>🏆🏆 Elite</option>
-                            <option value="Normal" ${currentCat === 'Normal' ? 'selected' : ''}>🏆 Normal</option>
-                        </select>
+                    
+                    <div style="display:flex; gap:12px; width:100%; align-items:center; justify-content:center; flex-wrap:wrap; margin-top: 5px; position:relative; overflow:visible;">
+                        
+                        <div style="position:relative; width:auto; margin:0;">
+                            <div id="custom-cat-btn" class="auth-input" style="padding:10px 35px 10px 10px; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9) url('data:image/svg+xml;utf8,<svg fill=%22%23f4c542%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 5px center; cursor:pointer; display:flex; align-items:center; border: 1px solid rgba(244, 197, 66, 0.4); color:#fff; white-space:nowrap;" onclick="let l=document.getElementById('custom-cat-list'); l.style.display = l.style.display==='none'?'flex':'none';">
+                                ${catIcon}
+                            </div>
+                            <div id="custom-cat-list" style="display:none; position:absolute; bottom:110%; left:0; width:max-content; min-width:100%; background: rgba(10,25,47,0.98); border: 1px solid #f4c542; border-radius:10px; flex-direction:column; z-index:10000; overflow:hidden; margin-bottom:5px; box-shadow: 0 -5px 15px rgba(0,0,0,0.8);">
+                                <div style="padding:12px 15px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.1); white-space:nowrap;" onclick="document.getElementById('custom-cat-btn').innerHTML='🏆🏆🏆 Super Elite'; document.getElementById('admin-rating-cat-val').value='Super Elite'; this.parentElement.style.display='none';">🏆🏆🏆 Super Elite</div>
+                                <div style="padding:12px 15px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.1); white-space:nowrap;" onclick="document.getElementById('custom-cat-btn').innerHTML='🏆🏆 Elite'; document.getElementById('admin-rating-cat-val').value='Elite'; this.parentElement.style.display='none';">🏆🏆 Elite</div>
+                                <div style="padding:12px 15px; cursor:pointer; color:#fff; white-space:nowrap;" onclick="document.getElementById('custom-cat-btn').innerHTML='🏆 Normal'; document.getElementById('admin-rating-cat-val').value='Normal'; this.parentElement.style.display='none';">🏆 Normal</div>
+                            </div>
+                            <input type="hidden" id="admin-rating-cat-val" value="${currentCat}">
+                        </div>
+
                         <input type="number" id="admin-rating-val" min="0" max="100" value="${currentRating}" class="auth-input" style="width:90px; text-align:center; margin:0; font-size:1rem; border-radius:10px; background: rgba(10,25,47,0.9)!important;" placeholder="Puan">
                     </div>
                     <div style="display:flex; gap:12px; width:100%; justify-content:center; margin-top:5px; flex-wrap:wrap;">
@@ -7317,7 +7594,8 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
     window.saveAdminRating = function(poemId, e) {
         if(e) e.stopPropagation();
-        const v = parseInt(document.getElementById('admin-rating-val').value); const c = document.getElementById('admin-rating-cat').value;
+        const v = parseInt(document.getElementById('admin-rating-val').value); 
+        const c = document.getElementById('admin-rating-cat-val').value;
         if(isNaN(v) || v < 0 || v > 100) return; window.lastLocalUpdate = Date.now() + 5000;
         let p = window.userPoemsDB.find(x => x.id === poemId);
         if(p) {
