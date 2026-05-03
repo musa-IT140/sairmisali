@@ -6827,9 +6827,13 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     window.deleteSingleMessage = function(id) {
-        window.adminMessages = (window.adminMessages || []).filter(m => m.id !== id);
+        // LÖSUNG: Holt die frischeste Liste, damit nichts Altes überschrieben wird
+        window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
+        window.adminMessages = window.adminMessages.filter(m => m.id !== id);
+        
         localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
         window.lastLocalUpdate = Date.now() + 5000;
+        
         if(window.updateNotifyBadge) window.updateNotifyBadge();
         if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
         if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
@@ -6838,11 +6842,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
     window.deleteAllAdminMessages = function() {
         window.customConfirm('Tüm admin mesajlarını silmek istediğinize emin misiniz? <span class="de-sub">(Alle löschen?)</span>', () => {
-            window.adminMessages = (window.adminMessages || []).filter(m => m.to !== 'admin' && m.to);
+            window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
+            window.adminMessages = window.adminMessages.filter(m => m.to !== 'admin' && m.to);
             localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
             window.lastLocalUpdate = Date.now() + 5000;
             if(window.updateNotifyBadge) window.updateNotifyBadge();
-            window.renderAdminMessages();
+            if(window.renderAdminMessages) window.renderAdminMessages();
             if(window.syncToCloud) window.syncToCloud();
             window.showToast('Mesajlar silindi. <span class="de-sub">(Gelöscht)</span>');
         });
@@ -6851,11 +6856,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     window.deleteAllUserMessages = function() {
         if(!window.currentUser) return;
         window.customConfirm('Tüm mesajları silmek istediğinize emin misiniz? <span class="de-sub">(Alle löschen?)</span>', () => {
-            window.adminMessages = (window.adminMessages || []).filter(m => m.to !== window.currentUser.username);
+            window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
+            window.adminMessages = window.adminMessages.filter(m => m.to !== window.currentUser.username);
             localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
             window.lastLocalUpdate = Date.now() + 5000;
             if(window.updateNotifyBadge) window.updateNotifyBadge();
-            window.renderUserMessages();
+            if(window.renderUserMessages) window.renderUserMessages();
             if(window.syncToCloud) window.syncToCloud();
             window.showToast('Mesajlar silindi. <span class="de-sub">(Gelöscht)</span>');
         });
@@ -7652,14 +7658,15 @@ window.closeAllModals = function(force=false) {
     // FIX: BENACHRICHTIGUNGEN (Echter Absender & Fehlerfreier Zähler)
     // ==================================================================
     window.sendSystemMessage = function(toUser, actionText, poemId = null, poemType = null) {
-        if (!window.adminMessages) window.adminMessages = [];
+        // LÖSUNG: Holt zwingend die allerfrischeste Liste, bevor gepusht wird!
+        window.adminMessages = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
+        
         let dt = new Date();
         let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
         
         window.adminMessages.push({
             id: 'notif_' + Date.now() + Math.random().toString(36).substr(2, 9),
             to: toUser === 'Admin' ? 'admin' : toUser, 
-            // LÖSUNG: Den WAHREN Absender eintragen, nicht "Sistem", damit man antworten kann!
             from: window.currentUser ? window.currentUser.username : 'Sistem',
             msg: actionText,
             poemId: poemId,
@@ -7674,28 +7681,26 @@ window.closeAllModals = function(force=false) {
     };
 
     window.updateNotifyBadge = function() {
-        try {
-            if(!window.currentUser) return;
-            
-            // 1. User Posteingang Zähler
-            let userCount = (window.adminMessages||[]).filter(m => m.to === window.currentUser.username).length;
-            window.forceBadge('user-inbox-badge', userCount, false); 
-            window.forceBadge('user-inbox-modal-badge', userCount, true);
+        if(!window.currentUser) return;
+        
+        // 1. Zählt die persönlichen Nachrichten für den eingeloggten User
+        let userMsgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username);
+        let userCount = userMsgs.length;
+        window.forceBadge('user-inbox-badge', userCount, false); 
+        
+        let adminCount = 0;
+        let totalGlockeCount = userCount; // Standard für normale User: Glocke = Eigene Nachrichten
 
-            // 2. Admin Posteingang Zähler
-            let adminCount = 0;
-            if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
-                adminCount = (window.adminMessages||[]).filter(m => !m.to || m.to === 'admin').length;
-                window.forceBadge('admin-badge', adminCount, false);
-            }
+        // 2. Admin-Sonderregel: Der Admin sieht in der Glocke ALLES (Seine eigenen + Allgemeine Admin-Logs)
+        if(window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
+            adminCount = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin').length;
+            window.forceBadge('admin-badge', adminCount, false); 
+            totalGlockeCount = userCount + adminCount; // Admin bekommt die Summe in die rote Glocke!
+        }
 
-            // 3. Gesamt-Glocke oben im Header
-            let totalCount = userCount + adminCount;
-            window.forceBadge('user-notify-badge', totalCount, false);
-            
-        } catch(e) { console.error("Error in updateNotifyBadge", e); }
+        // Aktualisiert die Haupt-Glocke oben rechts im Header
+        window.forceBadge('user-notify-badge', totalGlockeCount, false);
     };
-
     
 
     window.renderLeaderboard = function() {
@@ -8549,14 +8554,8 @@ window.closeAllModals = function(force=false) {
         if(!window.currentUser) { window.requireAuth(() => {}); return; }
         
         const selectEl = document.getElementById('chat-partner-select');
-        let partner = selectEl ? selectEl.value : '';
-        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
-
-        // Sicherheitssperre: Man muss jemanden auswählen!
-        if (!partner || (isAdmin && partner === 'ALL')) { 
-            window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); 
-            return; 
-        }
+        const partner = selectEl ? selectEl.value : '';
+        if(!partner || partner === 'ALL') { window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); return; }
 
         const input = document.getElementById('chat-input'); const text = input.value.trim();
         if(!text) return;
@@ -8574,18 +8573,33 @@ window.closeAllModals = function(force=false) {
             time: timeStr 
         };
         
+        // LÖSUNG: Zwingend vorher neu laden, um Overwrite-Bugs zu killen!
+        window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || [];
         window.chatDB.push(msg); 
         localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB));
-        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); 
         
+        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); 
         if(window.syncToCloud) window.syncToCloud(); 
         
-        // Systembenachrichtigung an den Chatpartner senden
-        if (partner === 'AdminKing') { 
-            window.sendSystemMessage('Admin', `SOHBET: ${fullName}, sana mesaj gönderdi.`); 
-        } else {
-            window.sendSystemMessage(partner, `SOHBET: ${fullName}, sana mesaj gönderdi.`);
-        }
+        // BENACHRICHTIGUNGEN SENDEN (Glocke)
+        if (partner !== 'AdminKing') { window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`); }
+        // LÖSUNG: Jetzt bekommt auch der Chatpartner eine Glocken-Nachricht!
+        window.sendSystemMessage(partner, `SOHBET: <strong style="color:#f4c542;">${fullName}</strong> sana yeni bir mesaj gönderdi. (Chat'i kontrol et)`);
+    };
+
+    window.deleteChatMessage = async function(id) {
+        window.customConfirm('Mesajı sil? <span class="de-sub" style="font-size:0.85em;">(Nachricht löschen?)</span>', async () => { 
+            // LÖSUNG: Zwingend neu laden, um Ghost-Einträge zu zerstören
+            window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || [];
+            window.chatDB = window.chatDB.filter(m => m.id !== id); 
+            
+            localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
+            window.renderChat(); 
+            
+            window.lastLocalUpdate = Date.now() + 5000;
+            if(window.syncToCloud) window.syncToCloud(); 
+            window.showToast("Mesaj silindi. <span class='de-sub'>(Gelöscht)</span>");
+        });
     };
 
     // 3. UNGELESENE NACHRICHTEN ZÄHLER (Nur eigene Nachrichten)
@@ -8667,6 +8681,9 @@ window.closeAllModals = function(force=false) {
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
         
         const poemId = window.currentPoemData.id; 
+        
+        // LÖSUNG: Frischeste Version laden
+        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
         if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
         
         const old = window.poemDataStore[poemId].ratings[window.currentUser.username] || 0;
@@ -8679,7 +8696,9 @@ window.closeAllModals = function(force=false) {
             action = `${rating} kalp bıraktı ❤️`; 
         }
         
-        window.lastLocalUpdate = Date.now() + 5000; window.updateHeartsUI(); localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
+        window.lastLocalUpdate = Date.now() + 5000; window.updateHeartsUI(); 
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        if(window.syncToCloud) window.syncToCloud(); window.renderUserWorksGrid();
         
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
         if(action.includes('kalp bıraktı')) {
@@ -8707,19 +8726,22 @@ window.closeAllModals = function(force=false) {
         if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; }
         
         const poemId = window.currentPoemData.id;
+        
+        // LÖSUNG: Frischeste Version laden
+        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
         if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
         if (!window.poemDataStore[poemId].comments) window.poemDataStore[poemId].comments = [];
         
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
         window.poemDataStore[poemId].comments.push({ username: window.currentUser.username, user: fullName, text: text, time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) });
         
-        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.updateHeartsUI(); window.renderUserWorksGrid(); 
+        input.value = ''; window.lastLocalUpdate = Date.now() + 5000; 
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        window.updateHeartsUI(); window.renderUserWorksGrid(); 
         
         if(window.syncToCloud) window.syncToCloud(); 
         
-        // LÖSUNG: Nachricht geht an Admin UND an den Besitzer des Werkes!
         window.sendSystemMessage('Admin', `${fullName} bir yoruma katıldı.`, poemId, window.currentPoemData.type);
-        
         if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
              window.sendSystemMessage(window.currentPoemData.username, `${fullName} eserine yorum yaptı.`, poemId, window.currentPoemData.type);
         }
