@@ -2923,23 +2923,28 @@
         }
 
         /* ==================================================================
-           iOS BLACK SCREEN & KEYBOARD BUG FIX (100% Saftey)
+           iOS BLACK SCREEN & SCROLL FIX (100% Saftey)
            ================================================================== */
         #modal-backdrop {
             background: rgba(0,0,0,0.85) !important;
             backdrop-filter: none !important; 
             -webkit-backdrop-filter: none !important;
-            height: 100vh !important;
-            width: 100vw !important;
+            /* LÖSUNG iOS: bottom: 0 statt height: 100vh! Verhindert das Safari-Hängenbleiben */
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            height: auto !important;
+            width: auto !important;
             z-index: 99998 !important;
+            transform: translateZ(0); /* Hardware-Beschleunigung für flüssiges iOS */
         }
         
         body.modal-open {
-            /* LÖSUNG: 'position: fixed' und 'width: 100%' SIND WEG! Das hat iOS abstürzen lassen. */
             overflow: hidden !important; 
+            /* LÖSUNG iOS: Zwingt Safari, das Scrollen im Hintergrund zu stoppen, ohne das Layout zu sprengen */
+            touch-action: none;
         }
 
         /* ==================================================================
@@ -4723,99 +4728,85 @@ Blühe, deutsches Vaterland!</p>
         finally { window.isUploading = false; }
     };
 
-    // 🚀 DIE ZENTRALE DATEN-VERARBEITUNG
+// ==================================================================
+    // ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
+    // ==================================================================
     window.processCloudData = function(r, force = false) {
         if (!r) return;
-        
-        // LÖSUNG ONAY-BUG: Wir ignorieren keine Daten mehr wegen falscher Uhrzeiten! Die Cloud hat immer recht!
         if (r.timestamp) {
             window.lastLocalUpdate = r.timestamp;
             localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         }
-        // ... (Rest bleibt gleich)
 
-        let activeEl = document.activeElement;
-        let isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-
+        // LÖSUNG LIVE-SYNC: Wir überschreiben IMMER, ohne Wenn und Aber!
         if(r.contentDB && Object.keys(r.contentDB).length > 0) {
             window.contentDB = r.contentDB;
             localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
             if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
             if(r.contentDB.bulmacalar) window.bulmacalarDB = r.contentDB.bulmacalar;
-            if(!isTyping && window.initContent) window.initContent();
         }
 
         if(r.users && Object.keys(r.users).length > 0) { 
             window.userDatabase = r.users; 
-            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            if(window.checkRemember && !window.currentUser) window.checkRemember(); 
+            localStorage.setItem('misaliUsersDB', JSON.stringify(r.users));
             if(window.renderOnlineUsers) window.renderOnlineUsers(); 
-            if(!isTyping && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal') && window.renderLeaderboard) window.renderLeaderboard();
         }
         
         if(r.userPoems && Array.isArray(r.userPoems)) { 
             window.userPoemsDB = r.userPoems; 
             localStorage.setItem('misaliUserPoems', JSON.stringify(r.userPoems)); 
-            if(!isTyping && window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-            if(!isTyping && window.renderUserWorksSidebar) window.renderUserWorksSidebar();
-            if(!isTyping && window.renderTopWorks) window.renderTopWorks();
+            if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            if(window.renderUserWorksSidebar) window.renderUserWorksSidebar();
+            if(window.renderTopWorks) window.renderTopWorks();
             if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
-        // LÖSUNG CHAT: Der Chat MUSS immer aktualisiert werden, auch wenn du gerade tippst!
+        // CHAT SYNC: Rendert den Chat sofort, wenn du drin bist!
         if(r.chat_v0 && Array.isArray(r.chat_v0)) { 
             window.chatDB = r.chat_v0; 
             localStorage.setItem('misaliChatDB_V0', JSON.stringify(r.chat_v0)); 
-            
-            // Wenn das Chat-Fenster offen ist, wird es SOFORT gerendert!
             if(document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view')) {
                 if(window.renderChat) window.renderChat(); 
             }
+            if(window.updateChatBadge) window.updateChatBadge();
         }
         
+        // ADMIN MESSAGES SYNC
         if(r.adminMsgs && Array.isArray(r.adminMsgs)) { 
-            let localIds = window.adminMessages.map(m => m.id);
-            r.adminMsgs.forEach(rm => { if(!localIds.includes(rm.id)) window.adminMessages.push(rm); });
-            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
+            window.adminMessages = r.adminMsgs;
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs)); 
             if(window.updateNotifyBadge) window.updateNotifyBadge(); 
-            if(!isTyping && document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal') && window.renderAdminMessages) window.renderAdminMessages();
-            if(!isTyping && document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal') && window.renderUserMessages) window.renderUserMessages();
+            if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
+            if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
         }
 
-        // LÖSUNG LIVE-SYNC: !isTyping wurde entfernt. Herzen und Kommentare kommen jetzt IMMER sofort an!
+        // HERZEN & KOMMENTARE SYNC: Rendert das Modal sofort live!
         if(r.heartsDB) { 
             window.poemDataStore = r.heartsDB; 
             localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
-            
-            // Sofortiges Rendern auf allen Geräten
-            if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal') && window.updateHeartsUI) {
-                window.updateHeartsUI(); 
+            if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal')) {
+                if(window.updateHeartsUI) window.updateHeartsUI(); 
             }
             if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
         }
         
-        if(r.calNotes) { 
-            window.calNotesDB = r.calNotes; 
-            localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); 
-            if(!isTyping && window.currentSelectedDate && document.getElementById('eventsModal') && document.getElementById('eventsModal').classList.contains('active-modal')) {
-                if(window.renderCalNotes) window.renderCalNotes(window.currentSelectedDate);
-                if(window.renderCalendar) window.renderCalendar();
-            }
-        }
-
-        if(r.savedItems) {
-            window.savedItemsDB = r.savedItems;
-            localStorage.setItem('misaliSavedItems', JSON.stringify(r.savedItems));
-            if(window.updateSavedBadge) window.updateSavedBadge();
-        }
-        
-        if(r.logs && r.logs.length > 0) { window.adminLogs = r.logs; localStorage.setItem('misaliAdminLogs', JSON.stringify(r.logs)); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
-        if(r.visits && r.visits > window.siteVisits) { window.siteVisits = r.visits; localStorage.setItem('misaliSiteVisits', window.siteVisits); if(!isTyping && window.renderOnlineUsers) window.renderOnlineUsers(); }
-        
-        // LÖSUNG LIVE-ZÄHLER: Löst sofort aus, wenn Firebase neue Daten schickt!
-        if(window.updateChatBadge) window.updateChatBadge();
+        if(r.calNotes) { window.calNotesDB = r.calNotes; localStorage.setItem('misaliCalNotes', JSON.stringify(r.calNotes)); }
+        if(r.savedItems) { window.savedItemsDB = r.savedItems; localStorage.setItem('misaliSavedItems', JSON.stringify(r.savedItems)); }
     };
+    
+    // LÖSUNG CROSS-TAB & FALLBACK SYNC: 
+    // Sorgt dafür, dass 2 Tabs am gleichen Handy/PC sofort synchron sind!
+    window.addEventListener('storage', function(e) {
+        if(window.fetchFromCloud) window.fetchFromCloud(true);
+    });
+
+    // AUTO-POLLER: Zieht alle 3 Sekunden automatisch die neuesten Daten aus dem Netz (Sicherheitsnetz!)
+    setInterval(() => {
+        if (window.fetchFromCloud && navigator.onLine && !window.isUploading) {
+            window.fetchFromCloud(true);
+        }
+    }, 3000);
 
     // 🚀 DER LIVE-LAUSCHER: Ersetzt die alte Abfrage und lauscht in Echtzeit!
     database.ref('misaliData').on('value', (snapshot) => {
@@ -6884,9 +6875,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
-        document.body.style.position = ''; // Notfall-Reset für iOS
+        document.body.style.touchAction = ''; // iOS Reset
         let bd = document.getElementById('modal-backdrop');
-        if(bd) bd.style.display='none'; 
+        if(bd) { bd.style.display='none'; }
     };
     
     window.closeTopModal = function(e) { 
@@ -6899,10 +6890,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             lastModal.classList.remove('active-modal');
         }
         
-        // ULTIMATIVE KONTROLLE: Sind WIRKLICH alle zu? Dann weg mit dem schwarzen Hintergrund!
+        // ULTIMATIVE KONTROLLE FÜR iOS: Sind WIRKLICH alle Fenster zu?
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
-            document.body.style.position = ''; // Notfall-Reset für iOS
+            document.body.style.touchAction = ''; // iOS Reset
             let bd = document.getElementById('modal-backdrop');
             if(bd) bd.style.display='none'; 
         }
