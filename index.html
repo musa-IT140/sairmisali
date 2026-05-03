@@ -3051,6 +3051,29 @@
             }
         }
 
+        /* ==================================================================
+           PLACEHOLDER ZENTRIERUNG (Für alle Browser)
+           ================================================================== */
+        textarea.edel-comment-input::placeholder,
+        input.edel-comment-input::placeholder {
+            line-height: normal !important;
+            vertical-align: middle !important;
+            /* Sorgt dafür, dass der Text mittig in der Box sitzt */
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 100% !important;
+            text-align: left !important;
+        }
+
+        /* Um den echten Text (nicht den Placeholder) ebenfalls gut auszurichten */
+        textarea.edel-comment-input,
+        input.edel-comment-input {
+            line-height: normal !important;
+            padding-top: 15px !important; /* Passe dies an, bis es optisch mittig ist */
+            padding-bottom: 15px !important;
+        }
+
     </style>
     <script>
 
@@ -4770,7 +4793,7 @@ Blühe, deutsches Vaterland!</p>
     } catch(e) { window.chatDB = []; }
 
     // 🚀 FIREBASE UPLOAD
-    window.syncToCloud = async function() {
+window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
         window.lastLocalUpdate = Date.now(); 
@@ -4790,11 +4813,21 @@ Blühe, deutsches Vaterland!</p>
                 savedItems: window.savedItemsDB || {},
                 contentDB: window.contentDB || {} 
             };
-            await database.ref('misaliData').set(data);
             
+            // Update in Firebase setzen
+            await database.ref('misaliData').set(data);
+            console.log("Cloud Sync erfolgreich!");
+            
+            // UI aktualisieren, falls sich etwas geändert hat, das lokal sichtbar sein soll
             if(window.renderOnlineUsers) window.renderOnlineUsers();
             if(window.renderLeaderboard && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
-        } catch(e) { console.error("Firebase Sync Error", e); } 
+        } catch(e) { 
+            console.error("Firebase Sync Error", e); 
+            // Hier könntest du einen Toast für den Admin einbauen
+            if (window.currentUser && window.currentUser.role === 'admin') {
+                window.showToast('Senkronizasyon Hatası! <span class="de-sub">(Sync-Fehler!)</span>');
+            }
+        } 
         finally { window.isUploading = false; }
     };
 
@@ -4891,7 +4924,7 @@ Blühe, deutsches Vaterland!</p>
 
     // 🚀 DER LIVE-LAUSCHER: Ersetzt die alte Abfrage und lauscht in Echtzeit!
     database.ref('misaliData').on('value', (snapshot) => {
-        if(window.isUploading) return; 
+        if(window.isUploading) return; // Ignoriere eigene Uploads
         const data = snapshot.val();
         if(data) window.processCloudData(data, false);
     });
@@ -6944,13 +6977,21 @@ window.openFastModal = function(id) {
     
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
+        
+        // Sanftes Entfernen der Scroll-Sperre
         document.body.classList.remove('modal-open'); 
-        // LÖSUNG iOS FREEZE: Zwingt den Browser hart zum Entsperren!
-        document.body.style.overflow = 'auto'; 
-        document.body.style.position = 'static'; 
-        document.body.style.height = 'auto';
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('position');
+        document.body.style.removeProperty('height');
+        
         let bd = document.getElementById('modal-backdrop');
-        if(bd) bd.style.display='none'; 
+        if(bd) {
+            bd.style.opacity = '0'; // Sanftes Ausblenden
+            setTimeout(() => { bd.style.display='none'; bd.style.opacity = '1'; }, 200); 
+        }
+        
+        // WICHTIG: Erzwingt einen Reflow für iOS Safari
+        window.scrollTo(0, window.scrollY); 
     };
     
     window.closeTopModal = function(e) { 
@@ -6964,13 +7005,20 @@ window.openFastModal = function(id) {
         }
         
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+            // Alles sanft zurücksetzen
             document.body.classList.remove('modal-open'); 
-            // LÖSUNG iOS FREEZE: Zwingt den Browser hart zum Entsperren!
-            document.body.style.overflow = 'auto'; 
-            document.body.style.position = 'static';
-            document.body.style.height = 'auto';
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('position');
+            document.body.style.removeProperty('height');
+            
             let bd = document.getElementById('modal-backdrop');
-            if(bd) bd.style.display='none'; 
+            if(bd) {
+                bd.style.opacity = '0';
+                setTimeout(() => { bd.style.display='none'; bd.style.opacity = '1'; }, 200);
+            }
+            
+            // Reflow für iOS
+            window.scrollTo(0, window.scrollY);
         }
     };
     
