@@ -3264,6 +3264,59 @@
         .sidebar-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
         .sidebar-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
 
+        /* ==================================================================
+           ZUFALLSZITAT (RASTGELE SÖZ) - EPISCHE ANIMATIONEN
+           ================================================================== */
+           
+        /* 1. Der magische 3D-Aufklapp-Effekt beim Öffnen (Einmalig & Geil) */
+        @keyframes magicalQuoteReveal {
+            0% { 
+                opacity: 0; 
+                transform: perspective(1000px) rotateX(-20deg) scale(0.8) translateY(40px);
+                box-shadow: 0 0 0 rgba(244,197,66,0);
+            }
+            60% { 
+                opacity: 1; 
+                transform: perspective(1000px) rotateX(10deg) scale(1.02) translateY(-10px);
+                box-shadow: 0 20px 40px rgba(244,197,66,0.4);
+            }
+            100% { 
+                opacity: 1; 
+                transform: perspective(1000px) rotateX(0deg) scale(1) translateY(0);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            }
+        }
+
+        /* Überschreibt die Standard-Modal-Animation nur für dieses eine Fenster */
+        #randomQuoteModal.active-modal .modal-content {
+            animation: magicalQuoteReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+            transform-style: preserve-3d;
+        }
+
+        /* 2. Sanftes Schweben & Glühen der inneren Textbox (Ruhig & Atmend) */
+        @keyframes gentleQuoteFloat {
+            0% { transform: translateY(0px); box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(244,197,66,0.05); border-color: rgba(244, 197, 66, 0.3); }
+            50% { transform: translateY(-6px); box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 0 25px rgba(244,197,66,0.3); border-color: rgba(244, 197, 66, 0.7); }
+            100% { transform: translateY(0px); box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(244,197,66,0.05); border-color: rgba(244, 197, 66, 0.3); }
+        }
+
+        /* Wählt exakt die dunkle Textbox im Modal aus */
+        #randomQuoteModal .modal-body > div:not(#rq-emoji) {
+            animation: gentleQuoteFloat 5s ease-in-out infinite !important;
+            will-change: transform, box-shadow, border-color;
+        }
+
+        /* 3. Das Emoji oben pulsiert und glüht leicht */
+        @keyframes magicalEmojiGlow {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 5px rgba(244,197,66,0.4)); }
+            50% { transform: scale(1.15) rotate(8deg); filter: drop-shadow(0 0 15px rgba(244,197,66,0.9)); }
+        }
+
+        #rq-emoji {
+            animation: magicalEmojiGlow 3.5s ease-in-out infinite !important;
+            display: inline-block;
+        }
+
     </style>
     <script>
 
@@ -8096,6 +8149,9 @@ window.closeAllModals = function(force=false) {
     };
 
 // 1. CHAT RENDER (Tödlicher Syntax-Fehler behoben!)
+    // ==================================================================
+    // FIX: CHAT RENDER (Mit personalisierten Zähler-Farben)
+    // ==================================================================
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); 
         const hiddenInput = document.getElementById('chat-partner-select');
@@ -8104,29 +8160,69 @@ window.closeAllModals = function(force=false) {
         
         if(!box || !hiddenInput || !window.currentUser) return;
 
-        let currentSelection = hiddenInput.value;
+        let partner = hiddenInput.value;
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+
+        // LÖSUNG AUTO-ROUTING: Wenn kein Partner gewählt ist, öffne den letzten Chat!
+        if (!partner && !isAdmin) {
+            let myReceivedMsgs = (window.chatDB || []).filter(m => m.toUser === window.currentUser.username);
+            if (myReceivedMsgs.length > 0) {
+                partner = myReceivedMsgs[myReceivedMsgs.length - 1].username; // Letzter Absender
+                hiddenInput.value = partner;
+            }
+        }
         
         // Custom Dropdown dynamisch füllen
         let optionsHTML = '';
         if (isAdmin) {
-            optionsHTML += `<div style="padding:12px 15px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin Kontrolü)</div>`;
+            // Zähler für den Admin (zeigt alle Nachrichten im System - Gold/Gelb)
+            let totalMsgs = (window.chatDB || []).length;
+            let badgeAll = totalMsgs > 0 ? `<span style="background:#f4c542; color:#000; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px rgba(244,197,66,0.6); border: 1px solid rgba(255,255,255,0.4);">${totalMsgs}</span>` : '';
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin Kontrolü) ${badgeAll}</div>`;
         } else {
-            optionsHTML += `<div style="padding:12px 15px; cursor:pointer; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='Kişi seçin... (Kontakt wählen)'; document.getElementById('chat-partner-select').value=''; this.parentElement.style.display='none'; window.renderChat();">Kişi seçin... (Kontakt wählen)</div>`;
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='Kişi seçin... (Kontakt wählen)'; document.getElementById('chat-partner-select').value=''; this.parentElement.style.display='none'; window.renderChat();">Kişi seçin... (Kontakt wählen)</div>`;
         }
 
         // Alle aktiven User in die Liste laden
         let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
         users.forEach(u => {
             let fullName = u.name + (u.surname ? ' ' + u.surname : '');
-            let displayText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
-            optionsHTML += `<div style="padding:12px 15px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05);" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${displayText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${displayText}</div>`;
+            let cleanText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
+            
+            // LÖSUNG: Farbe des Zählers basierend auf der Rolle des Senders (Admin = Cyan, User = Lila)
+            let uRoleIsAdmin = (u.role === 'admin' || u.role === 'co-admin');
+            let badgeBg = uRoleIsAdmin ? '#22d3ee' : '#a78bfa';
+            let badgeColor = uRoleIsAdmin ? '#000' : '#fff';
+            let badgeGlow = uRoleIsAdmin ? 'rgba(34, 211, 238, 0.6)' : 'rgba(167, 139, 250, 0.6)';
+
+            // Zählt die Nachrichten, die von DIESEM User an DICH geschickt wurden!
+            let msgFromUserCount = (window.chatDB || []).filter(m => m.username === u.username && m.toUser === window.currentUser.username).length;
+            
+            // Das Badge wird mit den dynamischen Farben generiert
+            let badgeHTML = msgFromUserCount > 0 ? `<span style="background:${badgeBg}; color:${badgeColor}; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px ${badgeGlow}; border: 1px solid rgba(255,255,255,0.4);">${msgFromUserCount}</span>` : '';
+            
+            // Der onclick-Befehl übernimmt nur den "cleanText", damit das rote Badge nicht auf dem geschlossenen Button kleben bleibt.
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center; font-size:0.95rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${cleanText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${cleanText} ${badgeHTML}</div>`;
         });
         
         if (customList) customList.innerHTML = optionsHTML;
 
-        let partner = hiddenInput.value;
-        
+        // UI Anpassungen für den Button (Zentriert & Kompakt)
+        if(customBtn) {
+            customBtn.style.maxWidth = "350px";
+            customBtn.style.margin = "0 auto";
+            customBtn.style.justifyContent = "center";
+            customBtn.style.padding = "8px 30px 8px 15px"; // Platz für den Pfeil
+            customBtn.style.fontSize = "0.95rem";
+        }
+
+        // Dropdown Titel aktualisieren
+        if (partner && partner !== 'ALL' && customBtn && !customBtn.innerHTML.includes(partner)) {
+            let pObj = window.userDatabase[partner] || {};
+            let pFullName = (pObj.name || partner) + (pObj.surname ? ' ' + pObj.surname : '');
+            customBtn.innerHTML = `${pObj.emoji||'👤'} ${pFullName} (@${partner})`;
+        }
+
         if (!partner && isAdmin) {
             hiddenInput.value = 'ALL';
             if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
@@ -8161,9 +8257,7 @@ window.closeAllModals = function(force=false) {
             let uObj = window.userDatabase[msg.username] || {};
             let emj = uObj.emoji || '👤';
             
-            // Einfaches, rahmenloses Badge
             let badgeHTML = `<span class="vip-emoji-badge">${emj}</span>`;
-            let badgeMeHTML = `<span class="vip-emoji-badge me-badge">${emj}</span>`;
             
             let adminInfo = '';
             if (isAdmin && partner === 'ALL') {
@@ -8354,6 +8448,9 @@ window.closeAllModals = function(force=false) {
 
     // 1. KOMMENTAR HINZUFÜGEN
     // LÖSUNG KOMMENTARE: Schreibt jetzt direkt in window.poemDataStore und löst den Cloud-Sync aus!
+    // ==================================================================
+    // FIX: KOMMENTAR HINZUFÜGEN (Benachrichtigt jetzt auch den User!)
+    // ==================================================================
     window.m_addComment = function(e) {
         if (e) e.stopPropagation();
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
@@ -8370,10 +8467,14 @@ window.closeAllModals = function(force=false) {
         
         input.value = ''; window.lastLocalUpdate = Date.now() + 5000; localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); window.updateHeartsUI(); window.renderUserWorksGrid(); 
         
-        // 🚀 FIREBASE SYNC: Speichert den Kommentar weltweit!
         if(window.syncToCloud) window.syncToCloud(); 
         
+        // LÖSUNG: Nachricht geht an Admin UND an den Besitzer des Werkes!
         window.sendSystemMessage('Admin', `${fullName} bir yoruma katıldı.`, poemId, window.currentPoemData.type);
+        
+        if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
+             window.sendSystemMessage(window.currentPoemData.username, `${fullName} eserine yorum yaptı.`, poemId, window.currentPoemData.type);
+        }
     };
 
     // 2. KOMMENTAR LÖSCHEN
@@ -8437,6 +8538,47 @@ window.closeAllModals = function(force=false) {
             window.populateContent('poem_card_container');
             if(window.updateCloudData) window.updateCloudData('text_deleted', delText);
         }
+    };
+
+    // ==================================================================
+    // FIX: EIGENE ESERLERI DÜZENLE / SIL (User Works Management)
+    // ==================================================================
+    window.userDeleteWork = function(poemId) {
+        window.customConfirm('Eserini kalıcı olarak silmek istediğine emin misin? <span class="de-sub">(Wirklich endgültig löschen?)</span>', () => {
+            window.userPoemsDB = window.userPoemsDB.filter(x => x.id !== poemId);
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            window.lastLocalUpdate = Date.now() + 5000;
+            if(window.syncToCloud) window.syncToCloud();
+            
+            window.closeTopModal('force');
+            window.showToast('Eser silindi! <span class="de-sub">(Werk gelöscht)</span>');
+            
+            if(window.renderUserWorksGrid) window.renderUserWorksGrid();
+            if(window.renderUserWorksSidebar) window.renderUserWorksSidebar();
+            if(window.updateUserWorksBadge) window.updateUserWorksBadge();
+        });
+    };
+
+    window.userEditWork = function(poemId) {
+        let item = window.userPoemsDB.find(x => x.id === poemId);
+        if(!item) return;
+        
+        window.customDualPrompt('Eseri Düzenle', '✍️', item.trText, (title, newText) => {
+             if(!newText.trim()) return;
+             item.trText = newText;
+             item.text = newText; // Fallback
+             
+             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+             window.lastLocalUpdate = Date.now() + 5000;
+             if(window.syncToCloud) window.syncToCloud();
+             
+             window.closeTopModal('force');
+             window.showToast('Eser güncellendi! <span class="de-sub">(Aktualisiert)</span>');
+             
+             if(window.renderUserWorksGrid) window.renderUserWorksGrid();
+             // Modal kurz danach neu öffnen, um die Änderungen zu sehen
+             setTimeout(() => window.openUserPoemModal(poemId), 200);
+        });
     };
 
     window.m_editComm = function(poemId, idx, e) {
