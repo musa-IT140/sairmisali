@@ -5092,35 +5092,24 @@ window.syncToCloud = async function() {
         localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         
         try { 
-            const data = { 
-                timestamp: window.lastLocalUpdate,
-                users: window.userDatabase || {}, 
-                userPoems: window.userPoemsDB || [], 
-                chat_v0: window.chatDB || [], 
-                adminMsgs: window.adminMessages || [], 
-                logs: window.adminLogs || [], 
-                heartsDB: window.poemDataStore || {}, 
-                calNotes: window.calNotesDB || {}, 
-                visits: window.siteVisits || 0,
-                savedItems: window.savedItemsDB || {},
-                contentDB: window.contentDB || {} 
-            };
+            const updates = {};
+            updates['timestamp'] = window.lastLocalUpdate;
+            if(window.userDatabase) updates['users'] = window.userDatabase;
+            if(window.userPoemsDB) updates['userPoems'] = window.userPoemsDB;
             
-            // Update in Firebase setzen
-            await database.ref('misaliData').set(data);
-            console.log("Cloud Sync erfolgreich!");
+            // LÖSUNG: Wenn ein Array leer gelöscht wurde, MUSS es als "null" an Firebase 
+            // gesendet werden, damit die Löschung auch bei anderen Usern ankommt!
+            updates['chat_v0'] = (window.chatDB && window.chatDB.length > 0) ? window.chatDB : null;
+            updates['adminMsgs'] = (window.adminMessages && window.adminMessages.length > 0) ? window.adminMessages : null;
             
-            // UI aktualisieren, falls sich etwas geändert hat, das lokal sichtbar sein soll
-            if(window.renderOnlineUsers) window.renderOnlineUsers();
-            if(window.renderLeaderboard && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
-        } catch(e) { 
-            console.error("Firebase Sync Error", e); 
-            // Hier könntest du einen Toast für den Admin einbauen
-            if (window.currentUser && window.currentUser.role === 'admin') {
-                window.showToast('Senkronizasyon Hatası! <span class="de-sub">(Sync-Fehler!)</span>');
-            }
-        } 
-        finally { window.isUploading = false; }
+            if(window.adminLogs) updates['logs'] = window.adminLogs;
+            if(window.poemDataStore) updates['heartsDB'] = window.poemDataStore;
+            if(window.calNotesDB) updates['calNotes'] = window.calNotesDB;
+            if(window.savedItemsDB) updates['savedItems'] = window.savedItemsDB;
+            
+            await database.ref('misaliData').update(updates);
+        } catch(e) { console.error("Sync Error", e); } 
+        finally { setTimeout(() => { window.isUploading = false; }, 300); }
     };
 
 // ==================================================================
@@ -5163,24 +5152,20 @@ window.processCloudData = function(r, force = false) {
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
-        // LÖSUNG CHAT SYNC: Arrays sicher umwandeln, falls Firebase sie als Objekte sendet!
-        if(r.chat_v0) { 
-            window.chatDB = Array.isArray(r.chat_v0) ? r.chat_v0 : Object.values(r.chat_v0);
-            localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
-            if(document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view')) {
-                if(window.renderChat) window.renderChat(); 
-            }
-            if(window.updateChatBadge) window.updateChatBadge();
+        // LÖSUNG GHOST-CHATS: Wenn r.chat_v0 fehlt, bedeutet das, alle wurden gelöscht!
+        window.chatDB = r.chat_v0 ? (Array.isArray(r.chat_v0) ? r.chat_v0 : Object.values(r.chat_v0)) : [];
+        localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
+        if(document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view')) {
+            if(window.renderChat) window.renderChat(); 
         }
+        if(window.updateChatBadge) window.updateChatBadge();
         
-        // ADMIN MESSAGES SYNC FIX
-        if(r.adminMsgs) { 
-            window.adminMessages = Array.isArray(r.adminMsgs) ? r.adminMsgs : Object.values(r.adminMsgs);
-            localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
-            if(window.updateNotifyBadge) window.updateNotifyBadge(); 
-            if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
-            if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
-        }
+        // Das Gleiche für den Posteingang (Glocke)
+        window.adminMessages = r.adminMsgs ? (Array.isArray(r.adminMsgs) ? r.adminMsgs : Object.values(r.adminMsgs)) : [];
+        localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
+        if(window.updateNotifyBadge) window.updateNotifyBadge(); 
+        if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
+        if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
 
         // USER POEMS SYNC FIX
         if(r.userPoems) { 
@@ -7671,21 +7656,19 @@ window.closeAllModals = function(force=false) {
         let dt = new Date();
         let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
         
-        // Den wahren Absender dynamisch ermitteln (statt immer nur "Sistem")
-        let fromUser = (window.currentUser && window.currentUser.username) ? window.currentUser.username : 'Sistem';
-
         window.adminMessages.push({
             id: 'notif_' + Date.now() + Math.random().toString(36).substr(2, 9),
-            to: (toUser === 'Admin' || toUser === 'admin') ? 'admin' : toUser, 
-            from: fromUser,
+            to: toUser === 'Admin' ? 'admin' : toUser, 
+            // LÖSUNG: Den WAHREN Absender eintragen, nicht "Sistem", damit man antworten kann!
+            from: window.currentUser ? window.currentUser.username : 'Sistem',
             msg: actionText,
             poemId: poemId,
             poemType: poemType,
             time: dFmt
         });
+        
         localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages));
         window.lastLocalUpdate = Date.now() + 5000;
-        
         if(window.updateNotifyBadge) window.updateNotifyBadge();
         if(window.syncToCloud) window.syncToCloud();
     };
@@ -8417,6 +8400,120 @@ window.closeAllModals = function(force=false) {
         
         box.scrollTop = box.scrollHeight;
         if(window.updateChatBadge) window.updateChatBadge();
+    };window.renderChat = function() {
+        const box = document.getElementById('chat-box'); 
+        const hiddenInput = document.getElementById('chat-partner-select');
+        const customBtn = document.getElementById('custom-chat-partner-btn');
+        const customList = document.getElementById('custom-chat-partner-list');
+        
+        if(!box || !hiddenInput || !window.currentUser) return;
+
+        let partner = hiddenInput.value;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+
+        // LÖSUNG AUTO-ROUTING: Springt sofort in den Chat der Person, die dir zuletzt geschrieben hat!
+        if (!partner && !isAdmin) {
+            let myReceivedMsgs = (window.chatDB || []).filter(m => m.toUser === window.currentUser.username);
+            if (myReceivedMsgs.length > 0) {
+                partner = myReceivedMsgs[myReceivedMsgs.length - 1].username;
+                hiddenInput.value = partner;
+            }
+        }
+        
+        // KOMPAKTES DESIGN: Dropdown Listenpunkte schmaler und zentriert
+        let optionsHTML = '';
+        if (isAdmin) {
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center; font-size:0.9rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin)</div>`;
+        } else {
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center; font-size:0.9rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='Kişi seçin... (Kontakt wählen)'; document.getElementById('chat-partner-select').value=''; this.parentElement.style.display='none'; window.renderChat();">Kişi seçin... (Kontakt wählen)</div>`;
+        }
+
+        let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
+        users.forEach(u => {
+            let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+            let displayText = `${u.emoji||'👤'} ${fullName}`;
+            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05); text-align:center; font-size:0.9rem; font-weight:500;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${displayText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${displayText}</div>`;
+        });
+        
+        if (customList) {
+            customList.innerHTML = optionsHTML;
+            // Dropdown Liste zentrieren und schmaler machen
+            customList.style.maxWidth = "280px";
+            customList.style.left = "50%";
+            customList.style.transform = "translateX(-50%)";
+        }
+
+        // LÖSUNG: Ausgewählten Button-Text anpassen und kompakt machen
+        if(customBtn) {
+            customBtn.style.maxWidth = "280px";
+            customBtn.style.margin = "0 auto";
+            customBtn.style.justifyContent = "center";
+            customBtn.style.padding = "10px 30px 10px 10px";
+            customBtn.style.fontSize = "0.95rem";
+            customBtn.style.textAlign = "center";
+        }
+
+        if (partner && partner !== 'ALL' && customBtn) {
+            let pObj = window.userDatabase[partner] || {};
+            let pFullName = (pObj.name || partner) + (pObj.surname ? ' ' + pObj.surname : '');
+            customBtn.innerHTML = `${pObj.emoji||'👤'} ${pFullName}`;
+        }
+
+        if (!partner && isAdmin) {
+            hiddenInput.value = 'ALL';
+            if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
+            partner = 'ALL';
+        }
+
+        if (!partner) {
+            box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Lütfen sohbet etmek istediğiniz kişiyi seçin.<br><span class="de-sub">(Bitte wähle einen Kontakt aus)</span></div>';
+            return;
+        }
+
+        let filteredMsgs = [];
+        if (isAdmin && partner === 'ALL') {
+            filteredMsgs = window.chatDB || []; 
+        } else {
+            filteredMsgs = (window.chatDB || []).filter(m => 
+                (m.username === window.currentUser.username && m.toUser === partner) || 
+                (m.username === partner && m.toUser === window.currentUser.username)
+            );
+        }
+
+        if(filteredMsgs.length === 0) { 
+            box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz!<br><span class="de-sub">(Schreibe die erste Nachricht!)</span></div>'; 
+            return; 
+        }
+
+        box.innerHTML = filteredMsgs.map(msg => {
+            const isMe = window.currentUser.username === msg.username;
+            let dName = msg.name || msg.username || 'Misafir'; 
+            const delBtn = isAdmin ? `<button class="chat-del-btn" onclick="window.deleteChatMessage('${msg.id}')" style="margin-left:8px;"><i class="fas fa-trash"></i></button>` : '';
+            let colorClass = window.getAuthorColorClass(msg.username);
+            let uObj = window.userDatabase[msg.username] || {};
+            let emj = uObj.emoji || '👤';
+            
+            let badgeHTML = `<span class="vip-emoji-badge">${emj}</span>`;
+            
+            let adminInfo = '';
+            if (isAdmin && partner === 'ALL') {
+                adminInfo = `<div style="font-size:0.65rem; color:#ef4444; margin-bottom:2px; font-weight:bold;">[${msg.username} ➔ ${msg.toUser}]</div>`;
+            }
+
+            return `<div class="chat-bubble-wrapper ${isMe ? 'me' : 'other'}">
+                        ${adminInfo}
+                        <div class="chat-meta" style="display:flex; align-items:center;">
+                            ${!isMe ? `<strong><span class="${colorClass}">${dName}</span>${badgeHTML}</strong>` : ''}
+                            <span style="margin: 0 6px; font-size:0.7rem;">${msg.time}</span>
+                            ${isMe ? `<strong><span class="${colorClass}">Sen (Du)</span>${badgeHTML}</strong>` : ''}
+                            ${delBtn}
+                        </div>
+                        <div class="chat-bubble" style="padding:10px 14px; font-size:0.9rem;">${msg.text}</div>
+                    </div>`;
+        }).join('');
+        
+        box.scrollTop = box.scrollHeight;
+        if(window.updateChatBadge) window.updateChatBadge();
     };
     
     window.toggleChatEmojis = function(e) {
@@ -8692,18 +8789,21 @@ window.closeAllModals = function(force=false) {
     };
 
     // ==================================================================
-    // FIX: EIGENE ESERLERI DÜZENLE / SIL (User Works Management)
+    // 1. FIX: EIGENE WERKE LÖSCHEN & BEARBEITEN (Fehlte komplett!)
     // ==================================================================
     window.userDeleteWork = function(poemId) {
-        window.customConfirm('Eserini kalıcı olarak silmek istediğine emin misin? <span class="de-sub">(Wirklich endgültig löschen?)</span>', () => {
+        window.customConfirm('Eserini kalıcı olarak silmek istediğine emin misin? <span class="de-sub" style="font-size:0.85em;">(Wirklich endgültig löschen?)</span>', () => {
+            // Aus der Datenbank filtern
             window.userPoemsDB = window.userPoemsDB.filter(x => x.id !== poemId);
             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            
+            // Cloud Sync erzwingen
             window.lastLocalUpdate = Date.now() + 5000;
             if(window.syncToCloud) window.syncToCloud();
             
+            // UI aktualisieren
             window.closeTopModal('force');
-            window.showToast('Eser silindi! <span class="de-sub">(Werk gelöscht)</span>');
-            
+            window.showToast('Eser silindi! <span class="de-sub" style="color:inherit;">(Werk gelöscht)</span>');
             if(window.renderUserWorksGrid) window.renderUserWorksGrid();
             if(window.renderUserWorksSidebar) window.renderUserWorksSidebar();
             if(window.updateUserWorksBadge) window.updateUserWorksBadge();
@@ -8716,6 +8816,7 @@ window.closeAllModals = function(force=false) {
         
         window.customDualPrompt('Eseri Düzenle', '✍️', item.trText, (title, newText) => {
              if(!newText.trim()) return;
+             
              item.trText = newText;
              item.text = newText; // Fallback
              
@@ -8724,11 +8825,11 @@ window.closeAllModals = function(force=false) {
              if(window.syncToCloud) window.syncToCloud();
              
              window.closeTopModal('force');
-             window.showToast('Eser güncellendi! <span class="de-sub">(Aktualisiert)</span>');
-             
+             window.showToast('Eser güncellendi! <span class="de-sub" style="color:inherit;">(Aktualisiert)</span>');
              if(window.renderUserWorksGrid) window.renderUserWorksGrid();
+             
              // Modal kurz danach neu öffnen, um die Änderungen zu sehen
-             setTimeout(() => window.openUserPoemModal(poemId), 200);
+             setTimeout(() => window.openUserPoemModal(poemId), 250);
         });
     };
 
