@@ -2,7 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- NEU (Fix für iOS Stabilität und Accessibility) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google" content="notranslate">
     <title>Şair Misal.i - Şiir ve Söz Dünyası</title>
     
@@ -394,29 +395,37 @@
         .ticker-top { border-bottom: 1px dashed rgba(244, 197, 66, 0.3); }
         .ticker-bottom { border-bottom: 1px solid rgba(244, 197, 66, 0.4); background: rgba(10, 25, 47, 0.5); }
         
-        .ticker-text { 
-            font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent-color); font-style: italic; 
-            white-space: nowrap; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
-            line-height: 30px; /* Hält den Text exakt in der Mitte, ohne nach unten auszubluten */
-        }
-        .ticker-text.show { animation: slideAndGlow 24s linear forwards; }
-        
-        .scrolling-ticker { 
-            display: inline-block; padding-left: 100%; animation: scrollTicker 30s linear infinite; 
-            color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.95rem; white-space: nowrap;
-            line-height: 30px; /* Verhindert das Ausbluten nach oben */
-        }
-        .scrolling-ticker:hover { animation-play-state: paused; }
-        
-        @keyframes slideAndGlow {
-            0%   { left: 100%; transform: translate(0, -50%); text-shadow: none; color: #f4c542; opacity: 0; }
-            5%   { opacity: 1; }
-            45%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
-            50%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 20px #fff; color: #fff; } 
-            55%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
-            95%  { opacity: 1; }
-            100% { left: 0; transform: translate(-100%, -50%); text-shadow: none; color: #f4c542; opacity: 0; }
-        }
+        /* NEUER, OPTIMIERTER TICKER CSS FIX */
+.ticker-text {
+    font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent-color); font-style: italic;
+    white-space: nowrap;
+    position: absolute;
+    /* ALT: left: 100%; top: 50%; transform: translateY(-50%); */
+    /* NEU: Startposition außerhalb rechts mittels transform */
+    top: 0;
+    left: 0;
+    transform: translateX(100vw);
+    line-height: 30px;
+    will-change: transform; /* Sagt iOS: Bereite die GPU vor */
+}
+
+/* Neue performante Animation */
+.ticker-text.show {
+    animation: slideAndGlowPerformant 24s linear forwards;
+}
+
+@keyframes slideAndGlowPerformant {
+    0%   { transform: translateX(100vw); text-shadow: none; color: #f4c542; opacity: 0; }
+    5%   { opacity: 1; }
+    /* Mitte: Zentriert. Da wir nicht genau wissen wie lang der Text ist,
+       ist echtes Zentrieren mit translateX schwierig ohne JS.
+       Ein guter Kompromiss für CSS-only Performance: */
+    45%  { transform: translateX(25vw); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+    50%  { transform: translateX(25vw); text-shadow: 0 0 15px #fff; color: #fff; }
+    55%  { transform: translateX(25vw); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+    95%  { opacity: 1; }
+    100% { transform: translateX(-100%); text-shadow: none; color: #f4c542; opacity: 0; }
+}
         
         .scrolling-ticker { display: inline-block; padding-left: 100%; animation: scrollTicker 30s linear infinite; color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.9rem; white-space: nowrap;}
         .scrolling-ticker:hover { animation-play-state: paused; } 
@@ -2977,6 +2986,53 @@
             line-height: 1.4 !important;
             white-space: normal !important;
         }
+
+        /* ==================================================================
+   iOS STABILITÄTS-PACH (Weniger Schatten/Blur = Kein Blackscreen)
+   ================================================================== */
+
+/* Erkennt fast alle iOS Geräte */
+@supports (-webkit-touch-callout: none) {
+
+    /* 1. Backdrop Blur entfernen - Hauptursache für Blackscreens bei Modals */
+    #modal-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(0,0,0,0.92) !important; /* Dunkler machen als Ersatz für Blur */
+    }
+
+    /* 2. Teure Drop-Shadow Filter bei wild fliegenden Icons entfernen */
+    .wild-icon {
+        filter: none !important;
+        -webkit-filter: none !important;
+        opacity: 0.4 !important; /* Einfache Transparenz statt Schatten */
+    }
+
+    /* 3. Text-Schatten in Animationen entfernen (Namen pulsieren nur noch via Opacity) */
+    @keyframes pulseAdmin { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+    @keyframes pulseUser { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+    @keyframes pulseAuthor { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+    .author-anim-admin, .author-anim-user, .author-anim-author {
+        text-shadow: none !important;
+    }
+
+    /* 4. Sanfte Pulsierung der Wetter Icons vereinfachen */
+    @keyframes gentlePulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.05); opacity: 1; }
+    }
+    .weather-anim-icon {
+        filter: none !important;
+    }
+
+    /* 5. Generelle Glow-Effekte deaktivieren */
+    .logo:hover, .icon-action-btn:hover {
+        text-shadow: none !important;
+        box-shadow: none !important;
+        border-color: #fff !important;
+    }
+}
 
     </style>
     <script>
