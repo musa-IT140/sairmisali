@@ -975,13 +975,15 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
             border-radius: 25px !important;
         }
+        /* LÖSUNG FÜR NORMALE USER: Name in lila Unterschrift Klickbar! */
         .user-profile-group.user-left-mode #header-username {
-            color: #a78bfa !important; /* Lila User-Farbe */
+            color: #a78bfa !important; 
             text-shadow: 0 0 10px rgba(167, 139, 250, 0.6) !important;
-            font-family: 'Great Vibes', cursive !important; /* Unterschriften-Style! */
+            font-family: 'Great Vibes', cursive !important; 
             font-size: 2.2rem !important; 
             padding-top: 5px !important;
-            pointer-events: none;
+            pointer-events: auto !important; /* LÖSUNG: Klicks wieder erlauben! */
+            cursor: pointer !important;
         }
         @media (max-width: 768px) {
             .user-profile-group.user-left-mode #header-username { font-size: 1.8rem !important; }
@@ -3339,10 +3341,15 @@ Blühe, deutsches Vaterland!</p>
             <div style="max-width: 900px; margin: 0 auto; background: rgba(10,25,47,0.8); border: 1px solid rgba(244,197,66,0.3); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); height: 75vh; display: flex; flex-direction: column; width: 100%; position: relative; z-index: 5;">
                 <div id="area-chat" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; gap: 15px; position: relative;">
                     
-                    <div style="display: flex; gap: 10px; width: 100%;">
-                        <select id="chat-partner-select" class="auth-input" style="margin:0; width:100%; border-radius:12px; background: rgba(0,0,0,0.6);" onchange="window.renderChat()">
-                            <option value="">Kişi seçin... (Kontakt wählen)</option>
-                        </select>
+                    <div style="display: flex; gap: 10px; width: 100%; position:relative; overflow:visible; z-index: 105;">
+                        <div id="custom-chat-partner-btn" class="auth-input" style="margin:0; width:100%; border-radius:12px; background: rgba(0,0,0,0.6) url('data:image/svg+xml;utf8,<svg fill=%22%23f4c542%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center; cursor:pointer; display:flex; align-items:center; border: 1px solid rgba(244, 197, 66, 0.4); color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" onclick="let l=document.getElementById('custom-chat-partner-list'); l.style.display = l.style.display==='none'?'flex':'none';">
+                            Kişi seçin... (Kontakt wählen)
+                        </div>
+                        
+                        <div id="custom-chat-partner-list" style="display:none; position:absolute; top:110%; left:0; width:100%; max-height:250px; background: rgba(10,25,47,0.98); border: 1px solid #f4c542; border-radius:10px; flex-direction:column; z-index:10000; overflow-y:auto; box-shadow: 0 5px 15px rgba(0,0,0,0.8);">
+                            </div>
+                        
+                        <input type="hidden" id="chat-partner-select" value="">
                     </div>
 
                     <div id="chat-box" style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px inset rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
@@ -7198,44 +7205,52 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         window.forceBadge('nav-chat-badge', unread, false);
     };
 
-    // 1. CHAT RENDER (Filtert nach 1-zu-1 oder Admin-Überwachung)
+    // 1. CHAT RENDER (Angepasst für das neue Custom-Dropdown)
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); 
-        const selectEl = document.getElementById('chat-partner-select');
-        if(!box || !selectEl || !window.currentUser) return;
+        const hiddenInput = document.getElementById('chat-partner-select');
+        const customBtn = document.getElementById('custom-chat-partner-btn');
+        const customList = document.getElementById('custom-chat-partner-list');
+        
+        if(!box || !hiddenInput || !window.currentUser) return;
 
-        let currentSelection = selectEl.value;
+        let currentSelection = hiddenInput.value;
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
         
-        // Dropdown dynamisch füllen
+        // Custom Dropdown dynamisch füllen
         let optionsHTML = '';
         if (isAdmin) {
-            optionsHTML += `<option value="ALL" style="color:#ef4444; font-weight:bold;">👑 TÜM MESAJLAR (Admin Kontrolü)</option>`;
+            optionsHTML += `<div style="padding:12px 15px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin Kontrolü)</div>`;
         } else {
-            optionsHTML += `<option value="">Kişi seçin... (Kontakt wählen)</option>`;
+            optionsHTML += `<div style="padding:12px 15px; cursor:pointer; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='Kişi seçin... (Kontakt wählen)'; document.getElementById('chat-partner-select').value=''; this.parentElement.style.display='none'; window.renderChat();">Kişi seçin... (Kontakt wählen)</div>`;
         }
 
         // Alle aktiven User in die Liste laden (außer man selbst)
         let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
         users.forEach(u => {
             let fullName = u.name + (u.surname ? ' ' + u.surname : '');
-            optionsHTML += `<option value="${u.username}">${u.emoji||'👤'} ${fullName} (@${u.username})</option>`;
+            let displayText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
+            // Klick-Logik für das Custom-Dropdown
+            optionsHTML += `<div style="padding:12px 15px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05);" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${displayText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${displayText}</div>`;
         });
         
-        if (selectEl.options.length <= 1 || selectEl.innerHTML.length < 50) {
-            selectEl.innerHTML = optionsHTML;
-            if (currentSelection) selectEl.value = currentSelection;
-            else if (isAdmin) selectEl.value = 'ALL';
+        if (customList) customList.innerHTML = optionsHTML;
+
+        let partner = hiddenInput.value;
+        
+        // Admin sieht standardmäßig alles
+        if (!partner && isAdmin) {
+            hiddenInput.value = 'ALL';
+            if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
+            partner = 'ALL';
         }
 
-        let partner = selectEl.value;
-        
         if (!partner) {
             box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Lütfen sohbet etmek istediğiniz kişiyi seçin.<br><span class="de-sub">(Bitte wähle einen Kontakt aus)</span></div>';
             return;
         }
 
-        // Nachrichten filtern (Admin sieht alles, User nur ihre eigenen Chats)
+        // Nachrichten filtern
         let filteredMsgs = [];
         if (isAdmin && partner === 'ALL') {
             filteredMsgs = window.chatDB || []; 
