@@ -395,37 +395,33 @@
         .ticker-top { border-bottom: 1px dashed rgba(244, 197, 66, 0.3); }
         .ticker-bottom { border-bottom: 1px solid rgba(244, 197, 66, 0.4); background: rgba(10, 25, 47, 0.5); }
         
-        /* NEUER, OPTIMIERTER TICKER CSS FIX */
-.ticker-text {
-    font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent-color); font-style: italic;
-    white-space: nowrap;
-    position: absolute;
-    /* ALT: left: 100%; top: 50%; transform: translateY(-50%); */
-    /* NEU: Startposition außerhalb rechts mittels transform */
-    top: 0;
-    left: 0;
-    transform: translateX(100vw);
-    line-height: 30px;
-    will-change: transform; /* Sagt iOS: Bereite die GPU vor */
-}
+        /* ==================================================================
+           TICKER BASIS-CSS (Stabil für Desktop & Mobile)
+           ================================================================== */
+        .ticker-text {
+            font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent-color); font-style: italic;
+            white-space: nowrap;
+            position: absolute;
+            left: 100%; /* Startet rechts außerhalb des Bildschirms */
+            top: 50%; 
+            transform: translateY(-50%);
+            line-height: 30px;
+            will-change: left, opacity, text-shadow; 
+        }
 
-/* Neue performante Animation */
-.ticker-text.show {
-    animation: slideAndGlowPerformant 24s linear forwards;
-}
+        .ticker-text.show {
+            animation: slideAndGlow 24s linear forwards;
+        }
 
-@keyframes slideAndGlowPerformant {
-    0%   { transform: translateX(100vw); text-shadow: none; color: #f4c542; opacity: 0; }
-    5%   { opacity: 1; }
-    /* Mitte: Zentriert. Da wir nicht genau wissen wie lang der Text ist,
-       ist echtes Zentrieren mit translateX schwierig ohne JS.
-       Ein guter Kompromiss für CSS-only Performance: */
-    45%  { transform: translateX(25vw); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
-    50%  { transform: translateX(25vw); text-shadow: 0 0 15px #fff; color: #fff; }
-    55%  { transform: translateX(25vw); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
-    95%  { opacity: 1; }
-    100% { transform: translateX(-100%); text-shadow: none; color: #f4c542; opacity: 0; }
-}
+        @keyframes slideAndGlow {
+            0%   { left: 100%; transform: translate(0, -50%); text-shadow: none; color: #f4c542; opacity: 0; }
+            5%   { opacity: 1; }
+            45%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+            50%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 15px #fff; color: #fff; }
+            55%  { left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 2px rgba(244, 197, 66, 0.5); color: #f4c542; }
+            95%  { opacity: 1; }
+            100% { left: 0; transform: translate(-100%, -50%); text-shadow: none; color: #f4c542; opacity: 0; }
+        }
         
         .scrolling-ticker { display: inline-block; padding-left: 100%; animation: scrollTicker 30s linear infinite; color: #cbd5e1; font-family: 'Poppins', sans-serif; font-size: 0.9rem; white-space: nowrap;}
         .scrolling-ticker:hover { animation-play-state: paused; } 
@@ -3052,82 +3048,75 @@
         }
 
         /* ==================================================================
-           100% KUGELSICHERER PLACEHOLDER-ZENTRIERUNGS-FIX (iOS & Android)
+           TICKER, PLACEHOLDER & KARTEN FIX FÜR ALLE HANDYS (iOS & ANDROID)
            ================================================================== */
         @media (max-width: 768px) {
-            /* 1. Die Inputs selbst: Flexbox weg, feste Höhe & Standard-Padding! */
-            input#chat-input,
-            input#m-comment-input,
-            input.auth-input,
-            input.edel-comment-input {
-                height: 48px !important;
-                display: block !important; /* WICHTIG: Kein Flexbox auf Inputs! Das crasht Safari. */
-                padding: 0 15px !important;
-                line-height: normal !important; 
+            /* 1. TICKER HÖHE GEFIXT (Kein Abschneiden mehr!) */
+            .ticker-wrap { height: 46px !important; }
+            .ticker-half { height: 23px !important; overflow: hidden !important; position: relative !important; }
+            
+            .ticker-text { 
+                line-height: 23px !important; /* Passt die Texthöhe exakt an die Box an */
+                font-size: 0.85rem !important; 
+                top: 50% !important; /* Wieder in die Mitte der Box setzen */
+                left: 100% !important; /* Start rechts */
+                transform: translate(0, -50%) !important; /* Y-Achse zentrieren */
             }
+            .scrolling-ticker { line-height: 23px !important; }
+            header { top: 46px !important; }
+            
+            /* Sichert die Animation für mobile Geräte ab */
+            .ticker-text.show { animation: slideAndGlow 24s linear forwards !important; }
 
-            /* 2. Der Placeholder: Einzeilig, klein, exakt mittig & abgeschnitten, falls zu lang */
+            /* 2. PLACEHOLDER TEXT (Perfekt lesbar, nicht abgeschnitten) */
             input#chat-input::placeholder,
             input#m-comment-input::placeholder,
             input.auth-input::placeholder,
-            input.edel-comment-input::placeholder,
-            /* Spezielle Engine-Prefixes für iOS und alte Androids */
-            input#chat-input::-webkit-input-placeholder,
-            input#m-comment-input::-webkit-input-placeholder,
-            input.auth-input::-webkit-input-placeholder,
-            input.edel-comment-input::-webkit-input-placeholder {
-                font-size: 0.60rem !important; 
-                line-height: 48px !important; /* WICHTIG: Gleiche Höhe wie das Input = Absolute Mitte! */
-                vertical-align: middle !important;
-                white-space: nowrap !important; /* Inputs können keine 2 Zeilen! */
+            input.edel-comment-input::placeholder {
+                font-size: 0.75rem !important;
+                position: relative !important;
+                top: 0 !important;
+                transform: none !important;
+                line-height: normal !important;
+                white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                color: rgba(148, 163, 184, 0.8) !important;
-                position: static !important;
-                transform: none !important;
+            }
+            input#chat-input, input#m-comment-input {
+                padding: 12px 15px !important;
+                height: 48px !important; 
             }
         }
 
         /* ==================================================================
-           100% iOS MOBILE FORMATIERUNG & BLACKSCREEN KILLER
+           SPEZIAL-FIX NUR FÜR iOS SAFARI MOBIL (Blackscreen & Font Size)
            ================================================================== */
-        /* Überschreibt alte Befehle und macht das Backdrop sicher für iOS */
-        #modal-backdrop {
-            display: block !important; /* Zwingt es permanent ins DOM */
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity 0.3s ease-out, visibility 0.3s ease-out !important;
-            background: rgba(0,0,0,0.85) !important;
-        }
-        #modal-backdrop.show-backdrop {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-
-        /* iOS EXKLUSIV: Schriften kompakter machen für Apple-Geräte */
         @supports (-webkit-touch-callout: none) {
+            /* TÖTET DEN iOS BLACKSCREEN (Keine Transition auf Display:none Elemente) */
+            #modal-backdrop {
+                opacity: 1 !important;
+                visibility: visible !important;
+                background: rgba(0,0,0,0.92) !important;
+                transition: none !important; 
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            /* BALANCIERT DIE KARTEN-SCHRIFT (Nicht zu groß, nicht zu klein) */
             @media (max-width: 768px) {
-                .card h3 { font-size: 1.05rem !important; margin-bottom: 4px !important; letter-spacing: -0.2px; }
-                .card .clamp-text { font-size: 0.85rem !important; letter-spacing: -0.2px; line-height: 1.4 !important; }
+                .card h3 { font-size: 1.15rem !important; margin-bottom: 5px !important; }
+                .card .clamp-text { font-size: 0.9rem !important; line-height: 1.4 !important; }
+                .card .card-sub { font-size: 0.8rem !important; }
                 
+                .game-card .bilingual-title { font-size: 0.85rem !important; }
+                .game-card .game-icon { font-size: 1.6rem !important; }
+
+                /* Text-Bereiche und Modals */
                 #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p, .modal-text {
-                    font-size: 0.82rem !important; 
-                    line-height: 1.45 !important;
-                    letter-spacing: -0.1px;
+                    font-size: 0.9rem !important;
+                    line-height: 1.5 !important;
                 }
-                
-                .game-card .bilingual-title { font-size: 0.88rem !important; letter-spacing: -0.3px; }
-                .modal-title, .game-title { font-size: 1.4rem !important; letter-spacing: -0.5px; }
-                .chat-bubble { font-size: 0.88rem !important; line-height: 1.4 !important; }
-                .notif-body { font-size: 0.85rem !important; line-height: 1.4 !important; }
-                
-                /* Zwingt den Placeholder Text in den Inputs noch ein Stück kleiner */
-                input::placeholder, textarea::placeholder {
-                    font-size: 0.7rem !important;
-                    letter-spacing: -0.4px !important;
-                }
+                #hakkimda-view h3 { font-size: 1.5rem !important; }
             }
         }
 
@@ -4851,63 +4840,51 @@ Blühe, deutsches Vaterland!</p>
         } else { window.chatDB = JSON.parse(localStorage.getItem('misaliChatDB_V0')) || []; }
     } catch(e) { window.chatDB = []; }
 
-    // 🚀 FIREBASE UPLOAD
-window.syncToCloud = async function() {
+    // ==================================================================
+    // 1. DER FIREBASE ZEIT-PARADOXON & ÜBERSCHREIB-KILLER
+    // ==================================================================
+    window.syncToCloud = async function() {
         if (window.isUploading || !navigator.onLine) return; 
         window.isUploading = true;
+        
+        // LÖSUNG: Exakte Jetzt-Zeit! Keine +5000 Millisekunden mehr!
         window.lastLocalUpdate = Date.now(); 
         localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         
         try { 
-            const data = { 
-                timestamp: window.lastLocalUpdate,
-                users: window.userDatabase || {}, 
-                userPoems: window.userPoemsDB || [], 
-                chat_v0: window.chatDB || [], 
-                adminMsgs: window.adminMessages || [], 
-                logs: window.adminLogs || [], 
-                heartsDB: window.poemDataStore || {}, 
-                calNotes: window.calNotesDB || {}, 
-                visits: window.siteVisits || 0,
-                savedItems: window.savedItemsDB || {},
-                contentDB: window.contentDB || {} 
-            };
+            // LÖSUNG: Wir nutzen .update() statt .set()! So überschreibt ein User 
+            // niemals die Daten des Admins, wenn seine lokale Liste noch leer ist.
+            const updates = {};
+            updates['timestamp'] = window.lastLocalUpdate;
+            if(window.userDatabase && Object.keys(window.userDatabase).length > 0) updates['users'] = window.userDatabase;
+            if(window.userPoemsDB && window.userPoemsDB.length > 0) updates['userPoems'] = window.userPoemsDB;
+            if(window.chatDB && window.chatDB.length > 0) updates['chat_v0'] = window.chatDB;
+            if(window.adminMessages && window.adminMessages.length > 0) updates['adminMsgs'] = window.adminMessages;
+            if(window.adminLogs && window.adminLogs.length > 0) updates['logs'] = window.adminLogs;
+            if(window.poemDataStore && Object.keys(window.poemDataStore).length > 0) updates['heartsDB'] = window.poemDataStore;
+            if(window.calNotesDB && Object.keys(window.calNotesDB).length > 0) updates['calNotes'] = window.calNotesDB;
+            if(window.savedItemsDB && Object.keys(window.savedItemsDB).length > 0) updates['savedItems'] = window.savedItemsDB;
             
-            // Update in Firebase setzen
-            await database.ref('misaliData').set(data);
-            console.log("Cloud Sync erfolgreich!");
-            
-            // UI aktualisieren, falls sich etwas geändert hat, das lokal sichtbar sein soll
-            if(window.renderOnlineUsers) window.renderOnlineUsers();
-            if(window.renderLeaderboard && document.getElementById('leaderboardModal') && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
+            await database.ref('misaliData').update(updates);
         } catch(e) { 
-            console.error("Firebase Sync Error", e); 
-            // Hier könntest du einen Toast für den Admin einbauen
-            if (window.currentUser && window.currentUser.role === 'admin') {
-                window.showToast('Senkronizasyon Hatası! <span class="de-sub">(Sync-Fehler!)</span>');
-            }
-        } 
-        finally { window.isUploading = false; }
+            console.error("Sync Error", e); 
+        } finally { 
+            setTimeout(() => { window.isUploading = false; }, 300); 
+        }
     };
 
-// ==================================================================
-// ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
-// ==================================================================
-window.processCloudData = function(r, force = false) {
-    if (!r) return;
-    
-    // LÖSUNG LIVE-SYNC: Wir schützen unsere frischen lokalen Daten!
-    if (r.timestamp) {
-        // Wenn die Daten aus der Cloud ÄLTER sind als unsere letzte lokale Aktion, 
-        // ignorieren wir sie (außer force=true). Das verhindert das Verschwinden!
-        if (!force && r.timestamp < window.lastLocalUpdate) return; 
+    window.processCloudData = function(r, force = false) {
+        if (!r) return;
         
-        window.lastLocalUpdate = r.timestamp;
-        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
-    }
+        // Ignoriere Echos des eigenen Uploads
+        if (window.isUploading && !force) return;
 
-    // LÖSUNG LIVE-SYNC: ContentDB sicher updaten
-    if(r.contentDB && Object.keys(r.contentDB).length > 0) {
+        if (r.timestamp) {
+            window.lastLocalUpdate = r.timestamp;
+            localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
+        }
+
+        if(r.contentDB && Object.keys(r.contentDB).length > 0) {
             window.contentDB = r.contentDB;
             localStorage.setItem('misaliFullDB', JSON.stringify(r.contentDB));
             if(r.contentDB.bilmeceler) window.bilmecelerDB = r.contentDB.bilmeceler;
@@ -4930,7 +4907,6 @@ window.processCloudData = function(r, force = false) {
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
-        // LÖSUNG CHAT SYNC: Arrays sicher umwandeln, falls Firebase sie als Objekte sendet!
         if(r.chat_v0) { 
             window.chatDB = Array.isArray(r.chat_v0) ? r.chat_v0 : Object.values(r.chat_v0);
             localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
@@ -4940,7 +4916,6 @@ window.processCloudData = function(r, force = false) {
             if(window.updateChatBadge) window.updateChatBadge();
         }
         
-        // ADMIN MESSAGES SYNC FIX
         if(r.adminMsgs) { 
             window.adminMessages = Array.isArray(r.adminMsgs) ? r.adminMsgs : Object.values(r.adminMsgs);
             localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
@@ -4949,18 +4924,6 @@ window.processCloudData = function(r, force = false) {
             if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
         }
 
-        // USER POEMS SYNC FIX
-        if(r.userPoems) { 
-            window.userPoemsDB = Array.isArray(r.userPoems) ? r.userPoems : Object.values(r.userPoems);
-            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); 
-            if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-            if(window.renderUserWorksSidebar) window.renderUserWorksSidebar();
-            if(window.renderTopWorks) window.renderTopWorks();
-            if(window.updateUserWorksBadge) window.updateUserWorksBadge(); 
-            if(window.updateTopWorksTicker) window.updateTopWorksTicker();
-        }
-
-        // HERZEN & KOMMENTARE SYNC: Rendert das Modal sofort live!
         if(r.heartsDB) { 
             window.poemDataStore = r.heartsDB; 
             localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB)); 
@@ -6965,17 +6928,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }
     });
 
-window.closeAllModals = function(force=false) { 
+// 3. iOS BLACKSCREEN KILLER MODAL SYSTEM
+    window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('position');
-        document.body.style.removeProperty('height');
-        
         let bd = document.getElementById('modal-backdrop');
-        if(bd) { 
-            bd.classList.remove('show-backdrop'); // iOS Fix: Nur Klasse entfernen, KEIN display: none!
-        }
+        if(bd) bd.style.display = 'none'; // HARTER iOS FIX!
     };
     
     window.closeTopModal = function(e) { 
@@ -6983,29 +6941,19 @@ window.closeAllModals = function(force=false) {
         if(e === 'force') { window.closeAllModals(); return; }
         
         const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
-        if(modals.length > 0) {
-            let lastModal = modals[modals.length - 1]; 
-            lastModal.classList.remove('active-modal');
-        }
+        if(modals.length > 0) modals[modals.length - 1].classList.remove('active-modal');
         
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
-            document.body.style.removeProperty('overflow');
-            document.body.style.removeProperty('position');
-            document.body.style.removeProperty('height');
-            
             let bd = document.getElementById('modal-backdrop');
-            if(bd) { 
-                bd.classList.remove('show-backdrop'); // iOS Fix!
-            }
+            if(bd) bd.style.display = 'none'; // HARTER iOS FIX!
         }
     };
 
     window.openFastModal = function(id) { 
         try {
             if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-                let el = document.activeElement;
-                setTimeout(() => { el.blur(); }, 50);
+                document.activeElement.blur();
             }
             window.closeAllSidebars(); 
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
@@ -7016,7 +6964,7 @@ window.closeAllModals = function(force=false) {
                 document.body.classList.add('modal-open'); 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.classList.add('show-backdrop'); // iOS Fix: Direkt Klasse feuern, KEIN display: block!
+                    bd.style.display = 'block'; // HARTER iOS FIX!
                     bd.style.zIndex = '99998'; 
                 }
                 m.classList.add('active-modal'); 
@@ -7914,48 +7862,6 @@ window.closeAllModals = function(force=false) {
         }).join('');
     };
 
-    // 3. UNGELESENE NACHRICHTEN ZÄHLER (Mit Neon-Alarm & Vibration!)
-    window.updateChatBadge = function() {
-        if(!window.currentUser || !window.chatDB) return;
-        
-        // Zählt nur Nachrichten, die AN DICH geschickt wurden
-        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username);
-        let currentCount = myMessages.length;
-        
-        let readCount = parseInt(localStorage.getItem('misaliReadChatCount_' + window.currentUser.username)) || 0;
-        let isChatActive = document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view');
-        
-        if (isChatActive) {
-            readCount = currentCount; // Alle als gelesen markieren, wenn man den Chat öffnet
-            localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, readCount);
-        }
-        
-        let unread = currentCount - readCount;
-        if (unread < 0) { unread = 0; localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, currentCount); }
-        
-        // LÖSUNG: Wir merken uns den ALTEN Wert, bevor wir updaten
-        let badgeEl = document.getElementById('nav-chat-badge');
-        let oldUnread = badgeEl ? (parseInt(badgeEl.innerText) || 0) : 0;
-        
-        window.forceBadge('nav-chat-badge', unread, false);
-
-        // ALARM AUSLÖSEN: Wenn die ungelesenen Nachrichten plötzlich mehr werden!
-        if (unread > oldUnread && unread > 0) {
-            let chatBtn = badgeEl.parentElement;
-            
-            // Setzt die Animation zurück und feuert sie hart ab!
-            chatBtn.classList.remove('chat-alert-anim');
-            void chatBtn.offsetWidth; // Zwingt den Browser zur sofortigen Aktualisierung (Reflow)
-            chatBtn.classList.add('chat-alert-anim');
-            
-            // BONUS: Spielt den dezenten Benachrichtigungssound ab! (Da du das <audio> Tag schon hast)
-            try { 
-                let snd = document.getElementById('notification-sound');
-                if(snd) { snd.currentTime = 0; snd.play(); }
-            } catch(e) {}
-        }
-    };
-
 // 1. CHAT RENDER (Tödlicher Syntax-Fehler behoben!)
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); 
@@ -8107,26 +8013,37 @@ window.closeAllModals = function(force=false) {
         if (partner !== 'AdminKing') { window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`); }
     };
 
-    // 3. UNGELESENE NACHRICHTEN ZÄHLER (Nur eigene Nachrichten)
+    // 2. CHAT ZÄHLER FIX (Damit auch beim User Updates sofort gezählt werden)
     window.updateChatBadge = function() {
         if(!window.currentUser || !window.chatDB) return;
         
-        // Zählt nur Nachrichten, die AN DICH geschickt wurden
-        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username);
+        // Zählt Nachrichten an den User ODER (wenn Admin) alle Nachrichten an Admin/ALL
+        let myMessages = window.chatDB.filter(m => m.toUser === window.currentUser.username || (window.currentUser.role === 'admin' && m.toUser === 'ALL'));
         let currentCount = myMessages.length;
         
         let readCount = parseInt(localStorage.getItem('misaliReadChatCount_' + window.currentUser.username)) || 0;
         let isChatActive = document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view');
         
         if (isChatActive) {
-            readCount = currentCount; // Alle als gelesen markieren, wenn man den Chat öffnet
+            readCount = currentCount; 
             localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, readCount);
         }
         
         let unread = currentCount - readCount;
         if (unread < 0) { unread = 0; localStorage.setItem('misaliReadChatCount_' + window.currentUser.username, currentCount); }
         
+        let badgeEl = document.getElementById('nav-chat-badge');
+        let oldUnread = badgeEl ? (parseInt(badgeEl.innerText) || 0) : 0;
+        
         window.forceBadge('nav-chat-badge', unread, false);
+
+        if (unread > oldUnread && unread > 0 && badgeEl) {
+            let chatBtn = badgeEl.parentElement;
+            chatBtn.classList.remove('chat-alert-anim');
+            void chatBtn.offsetWidth; 
+            chatBtn.classList.add('chat-alert-anim');
+            try { let snd = document.getElementById('notification-sound'); if(snd) { snd.currentTime = 0; snd.play(); } } catch(e) {}
+        }
     };
 
     window.deleteChatMessage = async function(id) {
