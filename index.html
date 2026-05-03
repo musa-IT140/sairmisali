@@ -3265,56 +3265,51 @@
         .sidebar-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f4c542, #b48608); border-radius: 10px; }
 
         /* ==================================================================
-           ZUFALLSZITAT (RASTGELE SÖZ) - EPISCHE ANIMATIONEN
+           ZUFALLSZITAT (RASTGELE SÖZ) - PERFORMANCE OPTIMIERT (Kein Ruckeln!)
            ================================================================== */
            
-        /* 1. Der magische 3D-Aufklapp-Effekt beim Öffnen (Einmalig & Geil) */
+        /* 1. Einmaliger Aufklapp-Effekt (Ohne schweres 3D, nutzt flüssiges Scale/Translate) */
         @keyframes magicalQuoteReveal {
             0% { 
                 opacity: 0; 
-                transform: perspective(1000px) rotateX(-20deg) scale(0.8) translateY(40px);
-                box-shadow: 0 0 0 rgba(244,197,66,0);
-            }
-            60% { 
-                opacity: 1; 
-                transform: perspective(1000px) rotateX(10deg) scale(1.02) translateY(-10px);
-                box-shadow: 0 20px 40px rgba(244,197,66,0.4);
+                transform: scale(0.9) translateY(20px);
             }
             100% { 
                 opacity: 1; 
-                transform: perspective(1000px) rotateX(0deg) scale(1) translateY(0);
-                box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+                transform: scale(1) translateY(0);
             }
         }
 
-        /* Überschreibt die Standard-Modal-Animation nur für dieses eine Fenster */
         #randomQuoteModal.active-modal .modal-content {
-            animation: magicalQuoteReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
-            transform-style: preserve-3d;
+            animation: magicalQuoteReveal 0.4s ease-out forwards !important;
+            will-change: transform, opacity;
         }
 
-        /* 2. Sanftes Schweben & Glühen der inneren Textbox (Ruhig & Atmend) */
+        /* 2. Sanftes Atmen der Textbox (Kein Schatten-Flickern!) */
         @keyframes gentleQuoteFloat {
-            0% { transform: translateY(0px); box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(244,197,66,0.05); border-color: rgba(244, 197, 66, 0.3); }
-            50% { transform: translateY(-6px); box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 0 25px rgba(244,197,66,0.3); border-color: rgba(244, 197, 66, 0.7); }
-            100% { transform: translateY(0px); box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(244,197,66,0.05); border-color: rgba(244, 197, 66, 0.3); }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
         }
 
-        /* Wählt exakt die dunkle Textbox im Modal aus */
         #randomQuoteModal .modal-body > div:not(#rq-emoji) {
-            animation: gentleQuoteFloat 5s ease-in-out infinite !important;
-            will-change: transform, box-shadow, border-color;
+            animation: gentleQuoteFloat 4s ease-in-out infinite !important;
+            will-change: transform;
+            /* Ein statischer Schatten ist viel performanter als ihn zu animieren */
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5) !important;
         }
 
-        /* 3. Das Emoji oben pulsiert und glüht leicht */
+        /* 3. Das Emoji schwingt nur minimal (ohne Glow-Filter-Animation) */
         @keyframes magicalEmojiGlow {
-            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 5px rgba(244,197,66,0.4)); }
-            50% { transform: scale(1.15) rotate(8deg); filter: drop-shadow(0 0 15px rgba(244,197,66,0.9)); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         #rq-emoji {
-            animation: magicalEmojiGlow 3.5s ease-in-out infinite !important;
+            animation: magicalEmojiGlow 3s ease-in-out infinite !important;
             display: inline-block;
+            will-change: transform;
+            filter: drop-shadow(0 0 8px rgba(244,197,66,0.6)); /* Statischer Glow */
         }
 
     </style>
@@ -6639,20 +6634,32 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
+    // ==================================================================
+    // FIX: POSTEINGANG FÜR USER & ADMIN (Kugelsicher & mit Emojis)
+    // ==================================================================
+
     window.renderUserMessages = function() {
         const list = document.getElementById('user-msg-list');
         if(!list) return;
         if(!window.currentUser) return;
+        
+        // Hole alle Nachrichten, die exakt an diesen User gesendet wurden
         let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username);
+        
         if(msgs.length === 0) {
             list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
             return;
         }
+        
         list.innerHTML = msgs.slice().reverse().map(m => {
             let colorClass = window.getAuthorColorClass(m.from);
             let msgText = m.msg;
             
-            // 1. Eser (Werk) klickbar machen und ECHTEN Namen einfügen
+            // Emoji des Absenders holen
+            let uObj = window.userDatabase[m.from] || {};
+            let emj = m.from === 'Sistem' ? '🤖' : (uObj.emoji || '👤');
+            
+            // 1. Eser (Werk) klickbar machen
             if (m.poemId && m.poemType) {
                 let action = '';
                 if (m.poemType === 'bilmeceler' || m.poemType === 'bulmacalar') {
@@ -6663,19 +6670,17 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     action = `window.closeTopModal('force'); setTimeout(() => window.openPoemModal('${m.poemId}', '${m.poemType}'), 100);`;
                 }
                 
-                // Titel des Werks herausfinden
                 let poemTitle = 'Eser';
                 let sourceArr = m.poemType === 'userPoems' ? window.userPoemsDB : (m.poemType === 'bilmeceler' ? window.bilmecelerDB : (m.poemType === 'bulmacalar' ? window.bulmacalarDB : (window.contentDB ? window.contentDB[m.poemType] : [])));
+                
                 if (sourceArr) {
                     let found = sourceArr.find(x => x.id === m.poemId);
                     if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
                 }
 
-                // Wenn Text schon Anführungszeichen hat -> ersetzen.
                 if (msgText.includes('"')) {
                     msgText = msgText.replace(/"(.*?)"/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
                 } else {
-                    // Wenn nicht, tauschen wir "eserine" durch den echten Titel aus
                     if(msgText.includes('eserine')) {
                         msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
                     } else {
@@ -6696,11 +6701,88 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
             }
 
-            let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${m.from !== 'Sistem' ? m.from : 'Admin'}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
+            // WICHTIG: Wenn die Nachricht vom System oder "Admin" kommt, leite die Antwort korrekt an "AdminKing"
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? 'AdminKing' : m.from;
+            let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
 
             return `<div class="notif-card">
                         <div class="notif-header">
-                            <span class="notif-sender"><i class="fas fa-envelope"></i> <span class="${colorClass}">${m.from || 'Sistem'}</span></span>
+                            <span class="notif-sender"><span style="font-size:1.2rem; margin-right:5px;">${emj}</span> <span class="${colorClass}">${m.from || 'Sistem'}</span></span>
+                            <span>${m.time || ''}</span>
+                        </div>
+                        <div class="notif-body">${msgText}</div>
+                        <div class="notif-actions">
+                            ${replyBtn}
+                            <button class="notif-btn del" onclick="window.deleteSingleMessage('${m.id}')"><i class="fas fa-trash"></i> Sil</button>
+                        </div>
+                    </div>`;
+        }).join('');
+    };
+
+    window.renderAdminMessages = function() {
+        const list = document.getElementById('admin-msg-list');
+        if(!list) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin');
+        
+        if(msgs.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
+            return;
+        }
+        
+        list.innerHTML = msgs.slice().reverse().map(m => {
+            let colorClass = window.getAuthorColorClass(m.from);
+            let msgText = m.msg;
+            
+            let uObj = window.userDatabase[m.from] || {};
+            let emj = m.from === 'Sistem' ? '🤖' : (uObj.emoji || '👤');
+            
+            if (m.poemId && m.poemType) {
+                let action = '';
+                if (m.poemType === 'bilmeceler' || m.poemType === 'bulmacalar') {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openPuzzleModal('${m.poemId}', '${m.poemType}'), 100);`;
+                } else if (m.poemType === 'userPoems') {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openUserPoemModal('${m.poemId}'), 100);`;
+                } else {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openPoemModal('${m.poemId}', '${m.poemType}'), 100);`;
+                }
+                
+                let poemTitle = 'Eser';
+                let sourceArr = m.poemType === 'userPoems' ? window.userPoemsDB : (m.poemType === 'bilmeceler' ? window.bilmecelerDB : (m.poemType === 'bulmacalar' ? window.bulmacalarDB : (window.contentDB ? window.contentDB[m.poemType] : [])));
+                
+                if (sourceArr) {
+                    let found = sourceArr.find(x => x.id === m.poemId);
+                    if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
+                }
+
+                if (msgText.includes('"')) {
+                    msgText = msgText.replace(/"(.*?)"/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
+                } else {
+                    if(msgText.includes('eserine')) {
+                        msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
+                    } else {
+                        msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
+                    }
+                }
+            }
+            
+            if (msgText.includes('oyun oynadı:')) {
+                let parts = msgText.split('oyun oynadı:');
+                let gameName = parts[1].trim();
+                let targetView = 'oyunlar-view';
+                if(gameName.toLowerCase().includes('bulmaca')) targetView = 'bulmaca-view';
+                if(gameName.toLowerCase().includes('bilmece')) targetView = 'bilmece-view';
+                
+                let navAction = `window.closeTopModal('force'); window.navigate('${targetView}');`;
+                msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
+            }
+
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? '' : m.from;
+            let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
+
+            return `<div class="notif-card">
+                        <div class="notif-header">
+                            <span class="notif-sender"><span style="font-size:1.2rem; margin-right:5px;">${emj}</span> <span class="${colorClass}">${m.from || 'Sistem'}</span></span>
                             <span>${m.time || ''}</span>
                         </div>
                         <div class="notif-body">${msgText}</div>
@@ -8148,9 +8230,8 @@ window.closeAllModals = function(force=false) {
         }
     };
 
-// 1. CHAT RENDER (Tödlicher Syntax-Fehler behoben!)
-    // ==================================================================
-    // FIX: CHAT RENDER (Mit personalisierten Zähler-Farben)
+// ==================================================================
+    // FIX: CHAT RENDER (User sieht nur sich selbst, Admin sieht alle)
     // ==================================================================
     window.renderChat = function() {
         const box = document.getElementById('chat-box'); 
@@ -8163,84 +8244,80 @@ window.closeAllModals = function(force=false) {
         let partner = hiddenInput.value;
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
 
-        // LÖSUNG AUTO-ROUTING: Wenn kein Partner gewählt ist, öffne den letzten Chat!
-        if (!partner && !isAdmin) {
-            let myReceivedMsgs = (window.chatDB || []).filter(m => m.toUser === window.currentUser.username);
-            if (myReceivedMsgs.length > 0) {
-                partner = myReceivedMsgs[myReceivedMsgs.length - 1].username; // Letzter Absender
-                hiddenInput.value = partner;
-            }
-        }
-        
-        // Custom Dropdown dynamisch füllen
         let optionsHTML = '';
-        if (isAdmin) {
-            // Zähler für den Admin (zeigt alle Nachrichten im System - Gold/Gelb)
+
+        if (!isAdmin) {
+            // USER MODUS: Sieht nur sich selbst im Header, chattet mit Admin
+            partner = 'AdminKing';
+            hiddenInput.value = 'AdminKing';
+            
+            if(customBtn) {
+                let myFullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+                customBtn.innerHTML = `${window.currentUser.emoji||'👤'} ${myFullName} (@${window.currentUser.username})`;
+                customBtn.style.pointerEvents = 'none'; // Dropdown deaktiviert für User
+                customBtn.style.background = 'rgba(10,25,47,0.9)'; // Entfernt den Dropdown-Pfeil
+            }
+            if(customList) customList.innerHTML = ''; 
+        } 
+        else {
+            // ADMIN MODUS: Dropdown mit allen Usern
             let totalMsgs = (window.chatDB || []).length;
             let badgeAll = totalMsgs > 0 ? `<span style="background:#f4c542; color:#000; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px rgba(244,197,66,0.6); border: 1px solid rgba(255,255,255,0.4);">${totalMsgs}</span>` : '';
             optionsHTML += `<div style="padding:10px; cursor:pointer; color:#ef4444; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:center; align-items:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='👑 TÜM MESAJLAR (Admin)'; document.getElementById('chat-partner-select').value='ALL'; this.parentElement.style.display='none'; window.renderChat();">👑 TÜM MESAJLAR (Admin Kontrolü) ${badgeAll}</div>`;
-        } else {
-            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='Kişi seçin... (Kontakt wählen)'; document.getElementById('chat-partner-select').value=''; this.parentElement.style.display='none'; window.renderChat();">Kişi seçin... (Kontakt wählen)</div>`;
+
+            let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
+            users.forEach(u => {
+                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                let cleanText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
+                
+                let uRoleIsAdmin = (u.role === 'admin' || u.role === 'co-admin');
+                let badgeBg = uRoleIsAdmin ? '#22d3ee' : '#a78bfa';
+                let badgeColor = uRoleIsAdmin ? '#000' : '#fff';
+                let badgeGlow = uRoleIsAdmin ? 'rgba(34, 211, 238, 0.6)' : 'rgba(167, 139, 250, 0.6)';
+
+                let msgFromUserCount = (window.chatDB || []).filter(m => m.username === u.username && m.toUser === window.currentUser.username).length;
+                let badgeHTML = msgFromUserCount > 0 ? `<span style="background:${badgeBg}; color:${badgeColor}; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px ${badgeGlow}; border: 1px solid rgba(255,255,255,0.4);">${msgFromUserCount}</span>` : '';
+                
+                optionsHTML += `<div style="padding:10px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center; font-size:0.95rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${cleanText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${cleanText} ${badgeHTML}</div>`;
+            });
+            
+            if (customList) customList.innerHTML = optionsHTML;
+            if (customBtn) customBtn.style.pointerEvents = 'auto'; // Dropdown aktivieren
+
+            // Auto-Routing für Admin
+            if (!partner) {
+                hiddenInput.value = 'ALL';
+                if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
+                partner = 'ALL';
+            } else if (partner !== 'ALL' && customBtn && !customBtn.innerHTML.includes(partner)) {
+                let pObj = window.userDatabase[partner] || {};
+                let pFullName = (pObj.name || partner) + (pObj.surname ? ' ' + pObj.surname : '');
+                customBtn.innerHTML = `${pObj.emoji||'👤'} ${pFullName} (@${partner})`;
+            }
         }
 
-        // Alle aktiven User in die Liste laden
-        let users = Object.values(window.userDatabase || {}).filter(u => u.username !== window.currentUser.username && u.approved !== false);
-        users.forEach(u => {
-            let fullName = u.name + (u.surname ? ' ' + u.surname : '');
-            let cleanText = `${u.emoji||'👤'} ${fullName} (@${u.username})`;
-            
-            // LÖSUNG: Farbe des Zählers basierend auf der Rolle des Senders (Admin = Cyan, User = Lila)
-            let uRoleIsAdmin = (u.role === 'admin' || u.role === 'co-admin');
-            let badgeBg = uRoleIsAdmin ? '#22d3ee' : '#a78bfa';
-            let badgeColor = uRoleIsAdmin ? '#000' : '#fff';
-            let badgeGlow = uRoleIsAdmin ? 'rgba(34, 211, 238, 0.6)' : 'rgba(167, 139, 250, 0.6)';
-
-            // Zählt die Nachrichten, die von DIESEM User an DICH geschickt wurden!
-            let msgFromUserCount = (window.chatDB || []).filter(m => m.username === u.username && m.toUser === window.currentUser.username).length;
-            
-            // Das Badge wird mit den dynamischen Farben generiert
-            let badgeHTML = msgFromUserCount > 0 ? `<span style="background:${badgeBg}; color:${badgeColor}; border-radius:10px; padding:2px 6px; font-size:0.75rem; font-weight:bold; margin-left:8px; box-shadow:0 0 8px ${badgeGlow}; border: 1px solid rgba(255,255,255,0.4);">${msgFromUserCount}</span>` : '';
-            
-            // Der onclick-Befehl übernimmt nur den "cleanText", damit das rote Badge nicht auf dem geschlossenen Button kleben bleibt.
-            optionsHTML += `<div style="padding:10px; cursor:pointer; color:#fff; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center; font-size:0.95rem;" onclick="document.getElementById('custom-chat-partner-btn').innerHTML='${cleanText}'; document.getElementById('chat-partner-select').value='${u.username}'; this.parentElement.style.display='none'; window.renderChat();">${cleanText} ${badgeHTML}</div>`;
-        });
-        
-        if (customList) customList.innerHTML = optionsHTML;
-
-        // UI Anpassungen für den Button (Zentriert & Kompakt)
+        // Gemeinsames Button Styling
         if(customBtn) {
             customBtn.style.maxWidth = "350px";
             customBtn.style.margin = "0 auto";
             customBtn.style.justifyContent = "center";
-            customBtn.style.padding = "8px 30px 8px 15px"; // Platz für den Pfeil
+            customBtn.style.padding = "8px 30px 8px 15px"; 
             customBtn.style.fontSize = "0.95rem";
-        }
-
-        // Dropdown Titel aktualisieren
-        if (partner && partner !== 'ALL' && customBtn && !customBtn.innerHTML.includes(partner)) {
-            let pObj = window.userDatabase[partner] || {};
-            let pFullName = (pObj.name || partner) + (pObj.surname ? ' ' + pObj.surname : '');
-            customBtn.innerHTML = `${pObj.emoji||'👤'} ${pFullName} (@${partner})`;
-        }
-
-        if (!partner && isAdmin) {
-            hiddenInput.value = 'ALL';
-            if(customBtn) customBtn.innerHTML = '👑 TÜM MESAJLAR (Admin)';
-            partner = 'ALL';
-        }
-
-        if (!partner) {
-            box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; margin-top:20px;">Lütfen sohbet etmek istediğiniz kişiyi seçin.<br><span class="de-sub">(Bitte wähle einen Kontakt aus)</span></div>';
-            return;
         }
 
         let filteredMsgs = [];
         if (isAdmin && partner === 'ALL') {
             filteredMsgs = window.chatDB || []; 
-        } else {
+        } else if (isAdmin) {
             filteredMsgs = (window.chatDB || []).filter(m => 
                 (m.username === window.currentUser.username && m.toUser === partner) || 
                 (m.username === partner && m.toUser === window.currentUser.username)
+            );
+        } else {
+            // Normal User: Chat zwischen Ihm und Admin
+            filteredMsgs = (window.chatDB || []).filter(m => 
+                (m.username === window.currentUser.username && m.toUser === 'AdminKing') || 
+                (m.username === 'AdminKing' && m.toUser === window.currentUser.username)
             );
         }
 
@@ -8306,13 +8383,24 @@ window.closeAllModals = function(force=false) {
         }
     });
 
-    // 2. NACHRICHT SENDEN (Privat an Empfänger)
-   window.sendChat = function() {
+  // ==================================================================
+    // FIX: CHAT SENDEN (Stellt sicher, dass User an AdminKing senden)
+    // ==================================================================
+    window.sendChat = function() {
         if(!window.currentUser) { window.requireAuth(() => {}); return; }
         
         const selectEl = document.getElementById('chat-partner-select');
-        const partner = selectEl ? selectEl.value : '';
-        if(!partner || partner === 'ALL') { window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); return; }
+        let partner = selectEl ? selectEl.value : '';
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+
+        if (!isAdmin) {
+            partner = 'AdminKing'; // Zwingend! User sendet an Admin
+        } else {
+            if(!partner || partner === 'ALL') { 
+                window.customAlert('Lütfen önce bir kişi seçin. <span class="de-sub">(Bitte wähle zuerst einen Kontakt)</span>', '⚠️'); 
+                return; 
+            }
+        }
 
         const input = document.getElementById('chat-input'); const text = input.value.trim();
         if(!text) return;
@@ -8334,7 +8422,6 @@ window.closeAllModals = function(force=false) {
         localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB));
         input.value = ''; window.lastLocalUpdate = Date.now() + 5000; window.renderChat(); 
         
-        // 🚀 FIREBASE SYNC: Schickt die Nachricht sofort an die Cloud!
         if(window.syncToCloud) window.syncToCloud(); 
         
         if (partner !== 'AdminKing') { window.sendSystemMessage('Admin', `GİZLİ SOHBET: ${fullName}, @${partner} kullanıcısına mesaj gönderdi.`); }
