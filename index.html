@@ -3359,44 +3359,24 @@
         }
 
         /* ==================================================================
-           DER ULTIMATIVE iOS BLACKSCREEN KILLER (Zwingt Safari zur Sauberkeit)
+           ENDGÜLTIGER iOS BACKDROP FIX (Kein Freeze, Kein Hängenbleiben)
            ================================================================== */
-        /* 1. Überschreibt deine alten, eingefrorenen iOS-Regeln! */
-        @supports (-webkit-touch-callout: none) {
-            #modal-backdrop {
-                opacity: 0 !important;
-                visibility: hidden !important;
-                pointer-events: none !important;
-            }
-            #modal-backdrop.show-backdrop {
-                opacity: 1 !important;
-                visibility: visible !important;
-                pointer-events: auto !important;
-            }
-        }
-        
-        /* 2. Basis-Regel für den Backdrop (Ohne Display:none Toggle!) */
         #modal-backdrop {
-            display: block !important; /* Bleibt immer im DOM, wird nur unsichtbar */
+            display: none; /* JS übernimmt die Steuerung */
             position: fixed !important;
-            inset: 0 !important; /* Ersetzt top/left/right/bottom für perfekten Sitz */
-            background: rgba(0,0,0,0.85) !important;
+            top: 0 !important; left: 0 !important;
+            width: 100vw !important; height: 100vh !important;
+            background: rgba(0,0,0,0.85) !important; /* Solide Farbe, KEIN Blur! */
             z-index: 99998 !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-            transition: opacity 0.3s ease, visibility 0.3s ease !important;
-            backdrop-filter: none !important; /* Blur crasht iOS Safari, deshalb deaktiviert */
+            opacity: 0;
+            transition: opacity 0.25s ease-out !important;
+            backdrop-filter: none !important; 
             -webkit-backdrop-filter: none !important;
-            transform: translateZ(0) !important; /* Erzwingt Hardware-Beschleunigung */
             cursor: pointer !important;
             -webkit-tap-highlight-color: transparent !important;
         }
-
         #modal-backdrop.show-backdrop {
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
+            opacity: 1;
         }
 
     </style>
@@ -7294,7 +7274,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }
     });
 
-window.closeAllModals = function(force=false) { 
+// ==================================================================
+    // FIX: ABSOLUT STABILE MODAL-STEUERUNG (Kein iOS Blackscreen mehr)
+    // ==================================================================
+    window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         
         document.body.classList.remove('modal-open'); 
@@ -7304,8 +7287,13 @@ window.closeAllModals = function(force=false) {
         
         let bd = document.getElementById('modal-backdrop');
         if(bd) {
-            // LÖSUNG: Nur noch die Klasse entfernen. KEIN setTimeout mit display:none mehr!
-            bd.classList.remove('show-backdrop'); 
+            bd.classList.remove('show-backdrop');
+            // Warten bis die Ausblend-Animation fertig ist, dann komplett entfernen
+            setTimeout(() => { 
+                if(document.querySelectorAll('.modal.active-modal').length === 0) {
+                    bd.style.display = 'none'; 
+                }
+            }, 260); 
         }
     };
     
@@ -7327,8 +7315,12 @@ window.closeAllModals = function(force=false) {
             
             let bd = document.getElementById('modal-backdrop');
             if(bd) {
-                // LÖSUNG: Auch hier nur die Klasse entfernen.
                 bd.classList.remove('show-backdrop');
+                setTimeout(() => { 
+                    if(document.querySelectorAll('.modal.active-modal').length === 0) {
+                        bd.style.display = 'none'; 
+                    }
+                }, 260);
             }
         }
     };
@@ -7336,8 +7328,7 @@ window.closeAllModals = function(force=false) {
     window.openFastModal = function(id) { 
         try {
             if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-                let el = document.activeElement;
-                setTimeout(() => { el.blur(); }, 50);
+                document.activeElement.blur();
             }
             window.closeAllSidebars(); 
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
@@ -7346,10 +7337,14 @@ window.closeAllModals = function(force=false) {
             const m = document.getElementById(id); 
             if(m) { 
                 document.body.classList.add('modal-open'); 
+                
+                // LÖSUNG: Erst Block setzen, dann kurz warten und einblenden!
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.classList.add('show-backdrop');
+                    bd.style.display = 'block';
+                    setTimeout(() => { bd.classList.add('show-backdrop'); }, 15);
                 }
+                
                 m.classList.add('active-modal'); 
                 m.style.zIndex = '100000';
                 
