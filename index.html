@@ -3359,24 +3359,31 @@
         }
 
         /* ==================================================================
-           ENDGÜLTIGER iOS BACKDROP FIX (Kein Freeze, Kein Hängenbleiben)
+           DER FINALE IOS BLACKSCREEN KILLER (Pures Visibility-Toggling)
            ================================================================== */
         #modal-backdrop {
-            display: none; /* JS übernimmt die Steuerung */
+            display: block !important; /* Bleibt IMMER im Hintergrund aktiv */
             position: fixed !important;
-            top: 0 !important; left: 0 !important;
-            width: 100vw !important; height: 100vh !important;
-            background: rgba(0,0,0,0.85) !important; /* Solide Farbe, KEIN Blur! */
+            inset: 0 !important; /* Spannt sich perfekt über alle Ränder */
+            background: rgba(0,0,0,0.85) !important;
             z-index: 99998 !important;
-            opacity: 0;
-            transition: opacity 0.25s ease-out !important;
+            /* Unsichtbar und klick-durchlässig wie Luft: */
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease, visibility 0.3s ease !important;
             backdrop-filter: none !important; 
             -webkit-backdrop-filter: none !important;
+            transform: translateZ(0) !important; /* Zwingt iOS zur Hardware-Beschleunigung */
             cursor: pointer !important;
             -webkit-tap-highlight-color: transparent !important;
         }
+
         #modal-backdrop.show-backdrop {
-            opacity: 1;
+            /* Fängt Klicks ab und wird sichtbar: */
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
         }
 
     </style>
@@ -7277,6 +7284,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 // ==================================================================
     // FIX: ABSOLUT STABILE MODAL-STEUERUNG (Kein iOS Blackscreen mehr)
     // ==================================================================
+    // ==================================================================
+    // FIX: ABSOLUT STABILE MODAL-STEUERUNG (Keine Timeouts mehr!)
+    // ==================================================================
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         
@@ -7286,15 +7296,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         document.body.style.removeProperty('height');
         
         let bd = document.getElementById('modal-backdrop');
-        if(bd) {
-            bd.classList.remove('show-backdrop');
-            // Warten bis die Ausblend-Animation fertig ist, dann komplett entfernen
-            setTimeout(() => { 
-                if(document.querySelectorAll('.modal.active-modal').length === 0) {
-                    bd.style.display = 'none'; 
-                }
-            }, 260); 
-        }
+        if(bd) bd.classList.remove('show-backdrop'); // CSS regelt das Ausblenden allein!
     };
     
     window.closeTopModal = function(e) { 
@@ -7314,14 +7316,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             document.body.style.removeProperty('height');
             
             let bd = document.getElementById('modal-backdrop');
-            if(bd) {
-                bd.classList.remove('show-backdrop');
-                setTimeout(() => { 
-                    if(document.querySelectorAll('.modal.active-modal').length === 0) {
-                        bd.style.display = 'none'; 
-                    }
-                }, 260);
-            }
+            if(bd) bd.classList.remove('show-backdrop'); // CSS regelt das Ausblenden allein!
         }
     };
 
@@ -7338,16 +7333,17 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if(m) { 
                 document.body.classList.add('modal-open'); 
                 
-                // LÖSUNG: Erst Block setzen, dann kurz warten und einblenden!
+                // 🚀 DER IOS-REFRESH-TRICK:
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.style.display = 'block';
-                    setTimeout(() => { bd.classList.add('show-backdrop'); }, 15);
+                    void bd.offsetWidth; // Zwingt Safari, die Ebene kurz aufzuwecken (Reflow)
+                    bd.classList.add('show-backdrop');
                 }
                 
                 m.classList.add('active-modal'); 
                 m.style.zIndex = '100000';
                 
+                // --- Ab hier folgen deine normalen Modal-Inhalte ---
                 if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
                 if(id === 'profileEditModal' && window.currentUser) {
                     if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-edit-profile', 'edit-emoji', 'selected-edit-emoji', window.currentUser.emoji || '👤');
@@ -7394,46 +7390,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             } 
         } catch(e) { console.error("Modal error:", e); }
     };
-    
-    window.closeAllModals = function(force=false) { 
-        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         
-        document.body.classList.remove('modal-open'); 
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('position');
-        document.body.style.removeProperty('height');
-        
-        let bd = document.getElementById('modal-backdrop');
-        if(bd) {
-            bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
-            setTimeout(() => { bd.style.display = 'none'; }, 300); // Dann erst unsichtbar machen
-        }
-    };
-    
-    window.closeTopModal = function(e) { 
-        if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
-        if(e === 'force') { window.closeAllModals(); return; }
-        
-        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
-        if(modals.length > 0) {
-            let lastModal = modals[modals.length - 1]; 
-            lastModal.classList.remove('active-modal');
-        }
-        
-        if(document.querySelectorAll('.modal.active-modal').length === 0) { 
-            document.body.classList.remove('modal-open'); 
-            document.body.style.removeProperty('overflow');
-            document.body.style.removeProperty('position');
-            document.body.style.removeProperty('height');
-            
-            let bd = document.getElementById('modal-backdrop');
-            if(bd) {
-                bd.classList.remove('show-backdrop'); // LÖSUNG iOS: Zuerst Klasse sauber entfernen!
-                setTimeout(() => { bd.style.display = 'none'; }, 300);
-            }
-        }
-    };
-    
     window.closeFloatingMenus = function() {
         document.querySelectorAll('.menu-toggle-btn').forEach(b => b.classList.remove('open'));
         document.querySelectorAll('.floating-menu-items').forEach(m => m.classList.remove('show'));
