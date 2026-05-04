@@ -3358,6 +3358,47 @@
             align-items: center !important;
         }
 
+        /* ==================================================================
+           DER ULTIMATIVE iOS BLACKSCREEN KILLER (Zwingt Safari zur Sauberkeit)
+           ================================================================== */
+        /* 1. Überschreibt deine alten, eingefrorenen iOS-Regeln! */
+        @supports (-webkit-touch-callout: none) {
+            #modal-backdrop {
+                opacity: 0 !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+            }
+            #modal-backdrop.show-backdrop {
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+            }
+        }
+        
+        /* 2. Basis-Regel für den Backdrop (Ohne Display:none Toggle!) */
+        #modal-backdrop {
+            display: block !important; /* Bleibt immer im DOM, wird nur unsichtbar */
+            position: fixed !important;
+            inset: 0 !important; /* Ersetzt top/left/right/bottom für perfekten Sitz */
+            background: rgba(0,0,0,0.85) !important;
+            z-index: 99998 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease, visibility 0.3s ease !important;
+            backdrop-filter: none !important; /* Blur crasht iOS Safari, deshalb deaktiviert */
+            -webkit-backdrop-filter: none !important;
+            transform: translateZ(0) !important; /* Erzwingt Hardware-Beschleunigung */
+            cursor: pointer !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        #modal-backdrop.show-backdrop {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+
     </style>
     <script>
 
@@ -7255,14 +7296,16 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
 window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
+        
         document.body.classList.remove('modal-open'); 
         document.body.style.removeProperty('overflow');
         document.body.style.removeProperty('position');
         document.body.style.removeProperty('height');
         
         let bd = document.getElementById('modal-backdrop');
-        if(bd) { 
-            bd.classList.remove('show-backdrop'); // iOS Fix: Nur Klasse entfernen, KEIN display: none!
+        if(bd) {
+            // LÖSUNG: Nur noch die Klasse entfernen. KEIN setTimeout mit display:none mehr!
+            bd.classList.remove('show-backdrop'); 
         }
     };
     
@@ -7283,8 +7326,9 @@ window.closeAllModals = function(force=false) {
             document.body.style.removeProperty('height');
             
             let bd = document.getElementById('modal-backdrop');
-            if(bd) { 
-                bd.classList.remove('show-backdrop'); // iOS Fix!
+            if(bd) {
+                // LÖSUNG: Auch hier nur die Klasse entfernen.
+                bd.classList.remove('show-backdrop');
             }
         }
     };
@@ -7304,8 +7348,7 @@ window.closeAllModals = function(force=false) {
                 document.body.classList.add('modal-open'); 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    bd.classList.add('show-backdrop'); // iOS Fix: Direkt Klasse feuern, KEIN display: block!
-                    bd.style.zIndex = '99998'; 
+                    bd.classList.add('show-backdrop');
                 }
                 m.classList.add('active-modal'); 
                 m.style.zIndex = '100000';
