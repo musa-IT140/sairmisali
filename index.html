@@ -647,70 +647,137 @@
             #user-notify-btn, .auth-view-btn { top: 75px !important; right: 2% !important; display: flex !important; }
         }
 
-        /* =======================================
-           📱 MOBILE (< 768px)
+     /* =======================================
+           📱 MOBILE (< 768px) - SLIM & SMART LAYOUT
            ======================================= */
         @media (max-width: 768px) {
-            header#main-header { 
-                top: 40px !important; 
-                height: auto !important; 
-                display: flex !important; 
-                flex-direction: column !important; 
-            }
-            
-            /* LÖSUNG MOBILE ÜBERLAPPUNG: padding-top extrem erhöht, damit nichts verdeckt wird! */
-            .page-view { padding-top: 450px !important; } 
-            
-            .header-top { 
-                position: relative !important; 
-                height: auto !important; 
-                display: flex !important; 
-                flex-direction: column !important; 
-                align-items: center !important; 
-                padding: 10px 2% !important; 
-                gap: 10px !important; 
+
+            /* 1. Haupt-Header als Flex-Wrap-Container (Intelligentes Raster) */
+            header#main-header {
+                top: 60px !important;
+                height: auto !important;
+                display: flex !important;
+                flex-direction: row !important; /* LÖSUNG: Erlaubt das Nebeneinander-Setzen! */
+                flex-wrap: wrap !important;     /* Bricht in neue Zeile um, wenn 100% voll sind */
+                padding: 0 0 5px 0 !important;
+                background: #000 !important;
+                align-items: center !important;
             }
 
-            .header-nav-bar { 
-                position: relative !important; 
-                top: auto !important;
-                height: auto !important; 
+            /* Erhöhe hier den Abstand, bis das Bild komplett freisteht! */
+            .page-view { padding-top: 480px !important; }
+
+            /* 2. Alle Container-Hüllen auflösen */
+            .header-top, .header-left, .header-search-wrapper, .header-right {
+                display: contents !important;
             }
 
-            .header-left, .header-search-wrapper, .header-right { 
-                position: relative !important; 
-                width: 100% !important; 
-                height: auto !important; 
-                display: flex !important; 
-                flex-direction: column !important; 
-                align-items: center !important; 
-                gap: 10px !important; 
-                pointer-events: auto !important; 
-            }
-            
-            .logo-and-time, .header-user-stats, .user-profile-group, .header-stats-row, .header-search, #header-weather-widget, .weather-widget, #user-notify-btn, .auth-view-btn {
-                position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: none !important; margin: 0 !important; display: flex !important;
+            /* 3. Reset für alle Elemente */
+            .header-user-stats, .header-search, .logo-and-time,
+            .user-profile-group, #header-weather-widget, .weather-widget, #user-notify-btn, .auth-view-btn,
+            .header-stats-row, .header-nav-bar {
+                position: relative !important;
+                top: auto !important; left: auto !important; right: auto !important; bottom: auto !important;
+                transform: none !important;
+                margin: 0 !important;
+                display: flex !important;
             }
 
-            .header-search-wrapper { order: 1 !important; width: 100% !important; }
-            .header-search { max-width: 95vw !important; width: 100% !important; }
-            
-            .header-right { order: 2 !important; flex-direction: row !important; justify-content: center !important; flex-wrap: wrap !important; }
-            .user-profile-group { width: auto !important; justify-content: center !important; }
-            
-            .header-left { order: 3 !important; }
-            .header-user-stats { order: 1 !important; font-size: 0.65rem !important; }
-            .logo-and-time { order: 2 !important; display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; justify-content: center !important; gap: 10px !important; }
-            
-            .header-stats-row {
+            /* --- ZEILE 1: Admin Stats --- */
+            .header-user-stats {
+                order: 1 !important;
+                flex: 0 0 95% !important; /* 95% Breite erzwingt eine eigene Zeile */
+                margin: 10px 2.5% !important;
+                justify-content: center !important;
+                font-size: 0.65rem !important;
+                background: rgba(255,255,255,0.08) !important;
+                padding: 6px 10px !important;
+                border-radius: 6px !important;
+            }
+
+            /* --- ZEILE 2: Suche --- */
+            .header-search {
+                order: 2 !important;
+                flex: 0 0 95% !important; 
+                margin: 0 2.5% 15px 2.5% !important;
+                height: 40px !important;
+                background: rgba(0,0,0,0.6) !important;
+                border: 1px solid #f4c542 !important;
+                border-radius: 20px !important;
+                padding: 0 15px !important;
+            }
+
+            /* --- ZEILE 3: Logo (Links), Wetter & Glocke (Rechts in die Lücke!) --- */
+            .logo-and-time {
+                order: 3 !important;
+                flex: 0 0 45% !important; /* Nimmt nur noch knapp die linke Hälfte ein */
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                justify-content: flex-start !important;
+                padding-left: 2.5% !important;
+                gap: 5px !important;
+                margin-bottom: 15px !important;
+            }
+
+            /* Wetter-Widget schiebt sich in die rechte Lücke */
+            #header-weather-widget, .weather-widget {
                 order: 4 !important;
-                display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; scrollbar-width: none !important; justify-content: flex-start !important; width: 100vw !important; margin: 5px -2% 0 -2% !important; padding: 10px 15px !important; background: rgba(0,0,0,0.5) !important; border-top: 1px solid rgba(244,197,66,0.2) !important; border-bottom: 1px solid rgba(244,197,66,0.2) !important; -webkit-overflow-scrolling: touch !important; gap: 20px !important; cursor: grab !important;
+                flex: 0 0 auto !important;
+                margin-left: auto !important; /* WICHTIG: Drückt es ganz nach rechts */
+                margin-bottom: 15px !important;
+                transform: scale(0.9) !important; /* Minimal kleiner für perfekte Passform */
+                transform-origin: right center !important;
             }
-            .header-stats-row::-webkit-scrollbar { display: none !important; }
-            .header-online-status, .header-works-status, .header-saved-status, .header-hearts-status { flex: 0 0 auto !important; font-size: 0.75rem !important; }
-        }
 
-        
+            /* Glocke sitzt ganz rechts neben dem Wetter */
+            #user-notify-btn {
+                order: 5 !important;
+                flex: 0 0 auto !important;
+                margin-right: 2.5% !important;
+                margin-left: 8px !important;
+                margin-bottom: 15px !important;
+                transform: scale(0.9) !important;
+                transform-origin: right center !important;
+            }
+
+            /* --- ZEILE 4: Profil-Leiste (Şair Misal.i, Gemini, 0 P.) --- */
+            .user-profile-group {
+                order: 6 !important;
+                flex: 0 0 100% !important; /* Volle Breite, eigene Zeile */
+                justify-content: center !important;
+                margin-bottom: 15px !important;
+            }
+            /* Profilbild Rahmen explizit gesichert */
+            .header-mini-profile { border: 2px solid #f4c542 !important; border-radius: 50% !important; }
+
+            /* --- ZEILE 5: User-Zähler --- */
+            .header-stats-row {
+                order: 7 !important;
+                flex: 0 0 100vw !important; /* Zwingend Bildschirmbreite */
+                padding: 10px 15px !important;
+                justify-content: flex-start !important;
+                overflow-x: auto !important;
+                flex-wrap: nowrap !important;
+                background: rgba(255,255,255,0.03) !important;
+                border-top: 1px solid rgba(244,197,66,0.2) !important;
+                border-bottom: 1px solid rgba(244,197,66,0.2) !important;
+                gap: 20px !important;
+            }
+            .header-online-status, .header-works-status, .header-saved-status, .header-hearts-status {
+                flex: 0 0 auto !important;
+                font-size: 0.75rem !important;
+                white-space: nowrap !important;
+            }
+
+            /* --- ZEILE 6: Navigation Überschriften --- */
+            .header-nav-bar {
+                order: 8 !important;
+                flex: 0 0 100vw !important; 
+                background: #000 !important;
+                padding: 10px 0 !important;
+                border-top: none !important;
+            }
+        }
 
 </style>
     <script>
