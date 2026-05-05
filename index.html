@@ -4083,12 +4083,14 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     msgText = msgText.replace(/"(.*?)"/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
                 } else {
                     // Wenn nicht, ersetzen wir "eserine" durch den echten Titel (z.B. "AŞK" adlı eserine)
-                    if(msgText.includes('eserine')) {
-                        msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
-                    } else {
-                        // Notfall-Fallback, falls das Wort "eserine" nicht im Text ist
-                        msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
-                    }
+                    // Diese sichere Methode verhindert den Code-Bruch (Einsetzen in renderAdminMessages UND renderUserMessages)
+        if(msgText.includes('eserine')) {
+            msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
+        } else if (msgText.includes('Eserin "')) {
+            msgText = msgText.replace(/Eserin "(.*?)"/, `Eserin "<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
+        } else {
+            msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
+        }
                 }
             }
             
