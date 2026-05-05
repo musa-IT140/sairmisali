@@ -469,9 +469,29 @@
             .logo:hover, .icon-action-btn:hover { text-shadow: none !important; box-shadow: none !important; border-color: #fff !important; }
         }
 
-        /* DER FINALE IOS BLACKSCREEN KILLER */
-        #modal-backdrop { display: block !important; position: fixed !important; inset: 0 !important; background: rgba(0,0,0,0.85) !important; z-index: 99998 !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; transition: opacity 0.3s ease, visibility 0.3s ease !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; transform: translateZ(0) !important; cursor: pointer !important; -webkit-tap-highlight-color: transparent !important; }
-        #modal-backdrop.show-backdrop { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+        /* DER FINALE IOS BLACKSCREEN KILLER (GEFIXT) */
+        #modal-backdrop { 
+            display: none; /* WICHTIG: Standardmäßig auf none! */
+            position: fixed !important; 
+            inset: 0 !important; 
+            background: rgba(0,0,0,0.85) !important; 
+            z-index: 99998 !important; 
+            opacity: 0 !important; 
+            visibility: hidden !important; 
+            pointer-events: none !important; /* WICHTIG: Keine Klicks abfangen, wenn unsichtbar! */
+            transition: opacity 0.3s ease, visibility 0.3s ease !important; 
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important; 
+            transform: translateZ(0) !important; 
+            cursor: pointer !important; 
+            -webkit-tap-highlight-color: transparent !important; 
+        }
+        #modal-backdrop.show-backdrop { 
+            display: block !important; /* Nur block, wenn auch wirklich angezeigt! */
+            opacity: 1 !important; 
+            visibility: visible !important; 
+            pointer-events: auto !important; /* Klicks nur abfangen, wenn sichtbar! */
+        }
 
 /* ==========================================================================
    🚀 MASTER HEADER-SYSTEM (Extrem Kompakt, Keine Überlappungen!)
@@ -4985,45 +5005,64 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     
     // 1. HERZEN VERGEBEN (Speichert Zeit & Datum perfekt ab)
     window.ratePoem = function(rating, e) {
-        if (e) e.stopPropagation(); 
-        if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
+    if (e) e.stopPropagation(); 
+    if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
+    
+    const poemId = window.currentPoemData.id; 
+    window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+    if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
+    
+    let oldData = window.poemDataStore[poemId].ratings[window.currentUser.username];
+    let oldVal = (typeof oldData === 'object' && oldData !== null) ? parseInt(oldData.val || 0) : parseInt(oldData || 0);
+    
+    let action = '';
+    let nowTs = Date.now(); // Echter Zeitstempel für die Sortierung
+
+    if(oldVal === rating) {
+        delete window.poemDataStore[poemId].ratings[window.currentUser.username];
+        action = 'kalbini geri çekti';
+    } else {
+        let dt = new Date();
+        let timeStr = dt.toLocaleDateString('tr-TR') + ' ' + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
         
-        const poemId = window.currentPoemData.id; 
-        
-        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-        if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
-        
-        let oldData = window.poemDataStore[poemId].ratings[window.currentUser.username];
-        // Liest sicher, egal ob es eine alte nackte Zahl oder ein neues Objekt ist
-        let oldVal = (typeof oldData === 'object' && oldData !== null) ? parseInt(oldData.val || 0) : parseInt(oldData || 0);
-        
-        let action = '';
-        if(oldVal === rating) {
-            delete window.poemDataStore[poemId].ratings[window.currentUser.username];
-            action = 'kalbini geri çekti';
-        } else {
-            let dt = new Date();
-            let timeStr = dt.toLocaleDateString('tr-TR') + ' ' + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-            window.poemDataStore[poemId].ratings[window.currentUser.username] = { val: rating, time: timeStr };
-            action = `${rating} kalp bıraktı ❤️`; 
+        // Speicher-Objekt mit Wert, Anzeige-Zeit und Sortier-Timestamp
+        window.poemDataStore[poemId].ratings[window.currentUser.username] = { 
+            val: rating, 
+            time: timeStr,
+            ts: nowTs 
+        };
+        action = `${rating} kalp bıraktı ❤️`; 
+    }
+    
+    window.lastLocalUpdate = Date.now() + 5000; 
+    localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+    
+    window.updateHeartsUI(); 
+    window.updateMyHeartsBadge(); 
+    
+    if(window.syncToCloud) window.syncToCloud(); 
+    if(window.renderUserWorksGrid) window.renderUserWorksGrid();
+    
+    let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+    let poemTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
+
+    // --- CLEVER NOTIFICATION LOGIC ---
+    if(action.includes('kalp bıraktı')) {
+        // 1. ADMIN immer benachrichtigen (Egal wessen Karte es ist)
+        if(window.currentUser.role !== 'admin') {
+            window.sendSystemMessage('Admin', `BİLDİRİM: <strong style="color:#f4c542;">${fullName}</strong>, "${poemTitle}" adlı esere kalp bıraktı.`);
         }
-        
-        window.lastLocalUpdate = Date.now() + 5000; 
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
-        
-        window.updateHeartsUI(); 
-        if(window.syncToCloud) window.syncToCloud(); 
-        if(window.renderUserWorksGrid) window.renderUserWorksGrid();
-        if(window.updateMyHeartsBadge) window.updateMyHeartsBadge(); 
-        
-        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        if(action.includes('kalp bıraktı')) {
-            if(window.sendSystemMessage) window.sendSystemMessage('Admin', `${fullName} eserine ${action}`, poemId, window.currentPoemData.type);
-            if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
-                if(window.sendSystemMessage) window.sendSystemMessage(window.currentPoemData.username, `${fullName} eserine ${action}`, poemId, window.currentPoemData.type);
+
+        // 2. USER nur benachrichtigen, wenn es SEIN EIGENES Werk ist
+        if(window.currentPoemData.type === 'userPoems') {
+            let owner = window.currentPoemData.username;
+            // Nur senden, wenn der Liker nicht der Besitzer selbst ist
+            if(owner !== window.currentUser.username) {
+                window.sendSystemMessage(owner, `<strong style="color:#ef4444;">${fullName}</strong> senin "${poemTitle}" adlı eserine kalp bıraktı ❤️`);
             }
         }
-    };
+    }
+};
 
     // 2. KARTEN-UI UPDATE (Killt den [object Object] Fehler endgültig)
     window.updateHeartsUI = function() {
@@ -5139,55 +5178,66 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
     // 3. KALPLERİM MODAL (Wer hat wann geliked?)
     window.renderMyHearts = function() {
-        const list = document.getElementById('my-hearts-list');
-        if(!list) return;
-        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span></div>'; return; }
+    const list = document.getElementById('my-hearts-list');
+    if(!list) return;
+    if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın.</div>'; return; }
 
-        let uName = window.currentUser.username;
-        let myPoems = (window.userPoemsDB || []).filter(p => p.username === uName);
-        let heartsData = [];
+    let uName = window.currentUser.username;
+    let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+    let heartsData = [];
 
-        myPoems.forEach(p => {
-            let pData = window.poemDataStore[p.id];
-            if (pData && pData.ratings) {
-                for(let liker in pData.ratings) {
-                    let r = pData.ratings[liker];
-                    let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
-                    let time = (typeof r === 'object' && r !== null && r.time) ? r.time : '<span style="font-style:italic; color:#64748b;">Bilinmiyor</span>';
-                    
-                    heartsData.push({ poemId: p.id, poemTitle: p.title || p.trTitle, liker: liker, val: val, time: time });
-                }
+    // Alle Werke sammeln, für die wir Herzen sehen wollen
+    let myWorks = [];
+    if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
+    if (isAdmin && window.contentDB) {
+        ['poems', 'quotes', 'stories', 'jokes'].forEach(t => { if (window.contentDB[t]) myWorks = myWorks.concat(window.contentDB[t]); });
+        if(window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
+        if(window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
+    }
+
+    myWorks.forEach(p => {
+        let pData = window.poemDataStore[p.id];
+        if (pData && pData.ratings) {
+            for(let liker in pData.ratings) {
+                let r = pData.ratings[liker];
+                let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
+                let time = (typeof r === 'object' && r !== null && r.time) ? r.time : 'Bilinmiyor';
+                let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
+                
+                heartsData.push({ poemId: p.id, poemTitle: p.title || p.trTitle, liker: liker, val: val, time: time, ts: ts });
             }
-        });
-
-        if(heartsData.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz eserlerinize kalp bırakılmamış.<br><span class="de-sub">(Noch keine Herzen erhalten)</span></div>';
-            return;
         }
+    });
 
-        heartsData.reverse(); // Neueste zuerst
+    if(heartsData.length === 0) {
+        list.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Henüz kalp yok.</div>';
+        return;
+    }
 
-        list.innerHTML = heartsData.map(h => {
-            let uObj = window.userDatabase[h.liker] || {};
-            let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : h.liker;
-            let emj = uObj.emoji || '👤';
-            let colorClass = window.getAuthorColorClass(h.liker);
+    // --- CHRONOLOGISCHE SORTIERUNG (Das Neueste zuerst) ---
+    heartsData.sort((a, b) => b.ts - a.ts);
 
-            return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="window.closeTopModal('force'); setTimeout(() => window.openUserPoemModal('${h.poemId}'), 100);">
-                        <div style="display:flex; flex-direction:column; gap:6px;">
-                            <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">✍️ ${h.poemTitle}</div>
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="font-size:1.4rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3));">${emj}</span>
-                                <div style="display:flex; flex-direction:column;">
-                                    <div style="font-size:0.95rem; font-weight:500;"><span class="${colorClass}">${fullName}</span></div>
-                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;"><i class="fas fa-clock" style="color:#f4c542;"></i> ${h.time}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="color:#ef4444; font-weight:900; font-size:1.3rem; background:rgba(239,68,68,0.1); padding:6px 12px; border-radius:12px; filter:drop-shadow(0 0 5px rgba(239,68,68,0.3));">${h.val} ❤️</div>
-                    </div>`;
-        }).join('');
-    };
+    list.innerHTML = heartsData.map(h => {
+        let uObj = window.userDatabase[h.liker] || {};
+        let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : h.liker;
+        let emj = uObj.emoji || '👤';
+        let colorClass = window.getAuthorColorClass(h.liker);
+
+        return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer;" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${h.poemId}'), 100);">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">${h.poemTitle}</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.4rem;">${emj}</span>
+                    <div style="display:flex; flex-direction:column;">
+                        <div style="font-size:0.95rem;"><span class="${colorClass}">${fullName}</span></div>
+                        <div style="font-size:0.75rem; color:#94a3b8;"><i class="fas fa-clock"></i> ${h.time}</div>
+                    </div>
+                </div>
+            </div>
+            <div style="color:#ef4444; font-weight:900; font-size:1.3rem;">${h.val} ❤️</div>
+        </div>`;
+    }).join('');
+};
 
     // ==================================================================
     // 💡 NEU: 100% Synchrone Herz-Reaktion & Zähler Update (FÜR ADMIN & USER)
@@ -5234,6 +5284,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         window.forceBadge('header-my-hearts-badge', totalMyHearts, true);
     };
 
+   // ==================================================================
+    // FIX: KALPLERIM MODAL (Exakte chronologische Sortierung per Timestamp)
+    // ==================================================================
     window.renderMyHearts = function() {
         const list = document.getElementById('my-hearts-list');
         if(!list) return;
@@ -5243,7 +5296,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
         let heartsData = [];
 
-        // 1. Sammle alle Werke (User & Admin)
         let myWorks = [];
         if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
         if (isAdmin && window.contentDB) {
@@ -5254,7 +5306,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if(window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
         }
 
-        // 2. Werte die Herzen aus
         myWorks.forEach(p => {
             let pData = window.poemDataStore[p.id];
             if (pData && pData.ratings) {
@@ -5263,12 +5314,24 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
                     let time = (typeof r === 'object' && r !== null && r.time) ? r.time : '<span style="font-style:italic; color:#64748b;">Bilinmiyor</span>';
                     
+                    // 🚀 MEGA-FIX: Sucht exakt das Datum im Text und macht eine messbare Zahl (Millisekunden) daraus!
+                    let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
+                    if (ts === 0 && typeof time === 'string') {
+                        let cleanTime = time.replace(/<[^>]*>?/gm, '').trim(); 
+                        let match = cleanTime.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{1,2})/);
+                        if (match) {
+                            // Date(Jahr, Monat (0-basiert), Tag, Stunde, Minute)
+                            ts = new Date(match[3], match[2] - 1, match[1], match[4], match[5]).getTime();
+                        }
+                    }
+
                     heartsData.push({
                         poemId: p.id,
                         poemTitle: p.title || p.trTitle || 'Eser',
                         liker: liker,
                         val: val,
-                        time: time
+                        time: time,
+                        ts: ts
                     });
                 }
             }
@@ -5279,8 +5342,8 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             return;
         }
 
-        // Chronologisch absteigend sortieren
-        heartsData.reverse();
+        // 🚀 LÖSUNG: Das NEUESTE Datum zwingend ganz nach OBEN sortieren!
+        heartsData.sort((a, b) => b.ts - a.ts);
 
         list.innerHTML = heartsData.map(h => {
             let uObj = window.userDatabase[h.liker] || {};
@@ -5288,7 +5351,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let emj = uObj.emoji || '👤';
             let colorClass = window.getAuthorColorClass(h.liker);
 
-            // Öffnet das Werk, wenn du draufklickst!
             return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${h.poemId}'), 100);">
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">✍️ ${h.poemTitle}</div>
@@ -5304,6 +5366,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     </div>`;
         }).join('');
     };
+
 
     // Helfer für das Modal (Erkennt automatisch den Typ des Werkes)
     window.openPoemOrUserModal = function(id) {
@@ -6793,13 +6856,26 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let rData = store.ratings[user];
             let val = (typeof rData === 'object' && rData !== null) ? rData.val : rData;
             let time = (typeof rData === 'object' && rData !== null && rData.time) ? rData.time : '<span style="font-style:italic;">Bilinmiyor (Unbekannt)</span>';
-            ratingsArr.push({ user, val, time });
+            
+            // 🚀 Auch hier Datum auslesen!
+            let ts = (typeof rData === 'object' && rData !== null && rData.ts) ? rData.ts : 0;
+            if (ts === 0 && typeof time === 'string') {
+                let cleanTime = time.replace(/<[^>]*>?/gm, '').trim(); 
+                let match = cleanTime.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{1,2})/);
+                if (match) {
+                    ts = new Date(match[3], match[2] - 1, match[1], match[4], match[5]).getTime();
+                }
+            }
+
+            ratingsArr.push({ user, val, time, ts });
         }
         
         if(ratingsArr.length === 0) {
             listHtml = '<div style="color:#94a3b8; text-align:center; padding:30px; font-style:italic;">Henüz kalp bırakan yok. <br><span class="de-sub" style="font-size:0.85em;">(Noch keine Herzen vergeben)</span></div>';
         } else {
-            ratingsArr.sort((a,b) => b.val - a.val); // Sortiert nach den meisten Herzen
+            // 🚀 Hier wird nach Zeitstempel sortiert (b.ts - a.ts) statt nur nach der Anzahl der Herzen!
+            ratingsArr.sort((a,b) => b.ts - a.ts); 
+            
             listHtml = ratingsArr.map(r => {
                 let uObj = window.userDatabase[r.user] || {};
                 let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : r.user;
