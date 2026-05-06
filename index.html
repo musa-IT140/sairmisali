@@ -780,10 +780,21 @@ nav#main-nav, nav {
         margin: 0 !important;
     }
 
-   /* --- KOMPAKTER STACK FÜR MOBILE --- */
+  /* --- KOMPAKTER STACK FÜR MOBILE --- */
         
+        /* 🚀 KLICK-BLOCKADE BEHEBEN: Unsichtbare Hüllen durchlässig machen! */
+        #main-header, #main-header .header-top, #main-header .header-left, #main-header .header-right { 
+            pointer-events: none !important; 
+        }
+        /* Alle wichtigen Elemente wieder klickbar machen */
+        #main-header .clickable-header-item, #main-header button, #main-header input, 
+        #main-header .user-profile-group, #main-header .header-search, #main-header .header-nav-bar {
+            pointer-events: auto !important;
+            z-index: 100 !important;
+        }
+
         /* Zeile 1: Suche ganz oben */
-        #main-header .header-search { order: 1 !important; flex: 0 0 100% !important; height: 35px !important; border-radius: 15px !important; padding: 0 10px !important; margin-bottom: 5px !important; }
+        #main-header .header-search { order: 1 !important; flex: 0 0 100% !important; height: 35px !important; border-radius: 15px !important; padding: 0 10px !important; margin-bottom: 5px !important; position: relative !important; z-index: 100 !important;}
 
         /* Zeile 2: Logo Links */
         #main-header .logo-and-time { 
@@ -793,27 +804,27 @@ nav#main-nav, nav {
             transform: scale(0.85) !important; 
             transform-origin: left top !important; 
             margin-left: -5px !important; 
+            position: relative !important;
         }
         
-        /* Wetter absolut nach rechts oben setzen (Passt perfekt ins leere Feld) */
+        /* Wetter absolut nach rechts oben */
         #main-header #header-weather-widget, 
         #main-header .weather-widget { 
             position: absolute !important;
-            top: 48px !important; /* Etwas höher gezogen */
+            top: 48px !important; 
             right: 12px !important;
             left: auto !important; 
             margin: 0 !important; 
             padding: 4px 8px !important; 
             border-radius: 8px !important; 
-            transform: scale(0.75) !important; /* Angenehme Größe */
+            transform: scale(0.75) !important; 
             transform-origin: right top !important; 
-            z-index: 50 !important;
         }
 
         /* Glocke absolut genau unter das Wetter setzen */
         #main-header #user-notify-btn { 
             position: absolute !important;
-            top: 86px !important; /* Exakt unter dem Wetter */
+            top: 86px !important; 
             right: 15px !important;
             left: auto !important; 
             margin: 0 !important;
@@ -821,7 +832,6 @@ nav#main-nav, nav {
             border-radius: 8px !important; 
             transform: scale(0.85) !important; 
             transform-origin: right top !important; 
-            z-index: 50 !important;
         }
 
         /* Zeile 3: Giriş und Kayıt Ol */
@@ -852,61 +862,77 @@ nav#main-nav, nav {
             order: 7 !important; 
             flex: 0 0 100% !important; 
             justify-content: center !important; 
-            transform: none !important; /* KEIN fehlerhaftes Scale mehr! */
+            transform: none !important; 
             margin-top: 5px !important; 
             padding: 4px !important; 
             white-space: nowrap !important; 
-            overflow: hidden !important;
+            overflow: visible !important;
             font-size: 0.75rem !important; /* Schrift verkleinert, damit es passt */
         }
         #main-header #header-stats-text {
             white-space: nowrap !important;
         }
+        /* Winzige Übersetzung für Admin-Stats, eingefügt in die Zeile */
         #main-header .header-user-stats .de-sub {
-            display: none !important; /* Blendet das deutsche (Online/Reg) aus Platzgründen aus */
+            display: inline-block !important; 
+            font-size: 0.6em !important; 
+            color: #94a3b8 !important;
+            vertical-align: baseline !important;
         }
 
-        /* FIX: Zeile 4 Zähler Reihe - EXAKT EINE ZEILE, KEIN SCROLLEN! */
+        /* FIX: Zeile 4 Zähler Reihe (Canlı, etc.) - EXAKT EINE ZEILE, ÜBERSETZUNG UNTEN! */
         #main-header .header-stats-row { 
             order: 8 !important; 
             flex: 0 0 100vw !important; 
             width: 100vw !important;
             margin-left: -2% !important; 
             justify-content: space-evenly !important; /* Verteilt die 4 Punkte perfekt */
-            align-items: center !important;
-            overflow-x: hidden !important; /* Schaltet das Scrollen ab */
+            align-items: flex-start !important; /* Wichtig für sauberen Text-Umbruch */
+            overflow-x: hidden !important; /* Schaltet das Scrollen/Wischen ab */
             flex-wrap: nowrap !important; 
-            padding: 8px 2% !important; 
+            padding: 8px 1% !important; 
             gap: 2px !important; 
-            transform: none !important; /* KEIN fehlerhaftes Scale mehr! */
+            transform: none !important; /* KEIN scale() mehr! */
             border-top: 1px solid rgba(244,197,66,0.2) !important; 
             border-bottom: 1px solid rgba(244,197,66,0.2) !important; 
             margin-top: 5px !important; 
         }
         
-        /* Die Zähler-Items anpassen */
+        /* Flexbox-Trick: Zwingt die deutsche Übersetzung nach ganz unten */
         #main-header .header-stats-row .clickable-header-item {
+            display: flex !important;
+            flex-wrap: wrap !important; /* Erlaubt den Umbruch innerhalb des Buttons */
+            justify-content: center !important;
+            align-items: center !important;
             font-size: 0.72rem !important; /* Sehr kompakt */
-            gap: 4px !important;
             padding: 0 !important;
+            text-align: center !important;
         }
         #main-header .header-stats-row .clickable-header-item i {
             font-size: 0.85rem !important;
+            margin-right: 3px !important;
         }
         #main-header .header-stats-row .badge-count {
             font-size: 0.65rem !important;
             padding: 2px 4px !important;
             min-width: 16px !important;
-            margin-left: 2px !important;
+            margin-left: 3px !important;
+            order: 2 !important; /* Bleibt in der 1. Zeile neben dem türkischen Wort */
         }
         
-        /* GANZ WICHTIG: Blendet die dt. Texte (Kreation, Save etc.) in dieser Reihe mobil aus! */
+        /* GANZ WICHTIG: Setzt die Übersetzung zentriert und winzig darunter */
         #main-header .header-stats-row .de-sub {
-            display: none !important;
+            display: block !important;
+            width: 100% !important; /* Zwingt den Umbruch zur nächsten Zeile */
+            font-size: 0.65em !important;
+            color: #94a3b8 !important;
+            margin-top: 3px !important;
+            margin-left: 0 !important;
+            order: 10 !important; /* Schiebt es garantiert nach unten */
         }
 
         /* Zeile 5: Navigation */
-        #main-header .header-nav-bar { order: 9 !important; flex: 0 0 100vw !important; margin-left: -2% !important; padding: 5px 0 !important; height: 45px !important; margin-bottom: 0 !important; border-top: none !important; }
+        #main-header .header-nav-bar { order: 9 !important; flex: 0 0 100vw !important; margin-left: -2% !important; padding: 5px 0 !important; height: 45px !important; margin-bottom: 0 !important; border-top: none !important; position: relative !important; z-index: 100 !important; }
         
 /* ADMIN-AKTIONEN FÜR KALPLERIM - MINIMAL-STYLE ALS MINI-ICONS */
         .admin-heart-actions {
