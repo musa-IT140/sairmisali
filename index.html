@@ -1041,6 +1041,54 @@ nav#main-nav, nav {
     }
 }
 
+/* ==========================================================================
+   📱 MOBILE KALENDER SIDEBAR & iOS FREEZE FIX
+   ========================================================================== */
+
+/* 1. Kalender Sidebar Fix für Mobile */
+@media (max-width: 768px) {
+    .cal-holiday-sidebar {
+        position: fixed !important; /* Zieht die Sidebar aus dem Modal heraus */
+        top: 0 !important;
+        right: 0 !important;
+        width: 85vw !important;
+        max-width: 320px !important;
+        height: 100vh !important;
+        z-index: 100050 !important; /* Legt sich über alles andere */
+        border-radius: 20px 0 0 20px !important;
+        transform: translateX(100%); /* Startet unsichtbar außerhalb des Bildschirms */
+        box-shadow: -10px 0 30px rgba(0,0,0,0.8) !important;
+    }
+    .cal-holiday-sidebar.open {
+        transform: translateX(0) !important; /* Fährt sanft in den Bildschirm */
+    }
+}
+
+/* 2. 🍎 iOS ANTI-FREEZE & BLACKSCREEN KILLER */
+@supports (-webkit-touch-callout: none) {
+    /* Killt den Blur-Effekt auf iOS, der den Browser crashen lässt */
+    #modal-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(0,0,0,0.92) !important;
+        transition: none !important; /* Keine Verzögerung beim Einblenden! */
+    }
+    
+    /* Zwingt iOS Safari, die Karte hardwarebeschleunigt zu rendern */
+    .modal-content {
+        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0) !important;
+        will-change: transform, opacity !important;
+    }
+    
+    /* Verhindert das Hängenbleiben beim Scrollen im Hintergrund */
+    body.modal-open {
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+
     
 </style>
 
@@ -4911,25 +4959,19 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     });
 
 // ==================================================================
-    // FIX: ABSOLUT STABILE MODAL-STEUERUNG (Kein iOS Blackscreen mehr)
+    // 🚀 iOS BLACKSCREEN & MODAL ENGINE FIX (OHNE TIMEOUTS)
     // ==================================================================
-    // ==================================================================
-    window.backdropTimeout = null; // Dieser Wächter verhindert das iOS-Einfrieren!
-
+    
     window.closeAllModals = function(force=false) { 
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
         document.body.classList.remove('modal-open'); 
         document.body.style.removeProperty('overflow');
+        document.body.style.position = ''; // Wichtig für iOS Entsperrung
         
         let bd = document.getElementById('modal-backdrop');
         if(bd) {
             bd.classList.remove('show-backdrop');
-            clearTimeout(window.backdropTimeout); // Stoppt alte, laufende Timer!
-            window.backdropTimeout = setTimeout(() => { 
-                if(document.querySelectorAll('.modal.active-modal').length === 0) {
-                    bd.style.display = 'none'; 
-                }
-            }, 260); 
+            bd.style.display = 'none'; // SOFORT verstecken, keine Timeout-Geister mehr!
         }
     };
     
@@ -4946,16 +4988,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         if(document.querySelectorAll('.modal.active-modal').length === 0) { 
             document.body.classList.remove('modal-open'); 
             document.body.style.removeProperty('overflow');
+            document.body.style.position = ''; // iOS Fix
             
             let bd = document.getElementById('modal-backdrop');
             if(bd) {
                 bd.classList.remove('show-backdrop');
-                clearTimeout(window.backdropTimeout); // Stoppt alte, laufende Timer!
-                window.backdropTimeout = setTimeout(() => { 
-                    if(document.querySelectorAll('.modal.active-modal').length === 0) {
-                        bd.style.display = 'none'; 
-                    }
-                }, 260);
+                bd.style.display = 'none'; // SOFORT verstecken!
             }
         }
     };
@@ -4966,18 +5004,20 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 document.activeElement.blur();
             }
             window.closeAllSidebars(); 
+            
+            // Schließt sofort alle anderen offnenen Karten ohne Verzögerung
             document.querySelectorAll('.modal.active-modal').forEach(m => { 
                 if (m.id !== id) m.classList.remove('active-modal'); 
             });
+            
             const m = document.getElementById(id); 
             if(m) { 
                 document.body.classList.add('modal-open'); 
                 
                 let bd = document.getElementById('modal-backdrop'); 
                 if(bd) {
-                    clearTimeout(window.backdropTimeout); // Bricht das Löschen sofort ab!
-                    bd.style.display = 'block';
-                    void bd.offsetWidth; // Weckt iOS Safari auf
+                    bd.style.display = 'block'; // Sofort einblenden
+                    void bd.offsetWidth; // Zwingt den Browser zur sofortigen Darstellung
                     bd.classList.add('show-backdrop');
                 }
                 
