@@ -788,8 +788,20 @@ nav#main-nav, nav {
     /* Zeile 2: Logo Links, Glocke+Wetter Rechts in EINER ZEILE! */
     .logo-and-time { order: 2 !important; flex: 0 0 50% !important; justify-content: flex-start !important; transform: scale(0.8) !important; transform-origin: left center !important; margin-left: -5px !important; }
     
-    #user-notify-btn { order: 3 !important; flex: 0 0 auto !important; margin-left: auto !important; padding: 6px !important; border-radius: 8px !important; transform: scale(0.85) !important; transform-origin: right center !important; }
-    #header-weather-widget, .weather-widget { order: 4 !important; flex: 0 0 auto !important; padding: 6px !important; border-radius: 8px !important; transform: scale(0.85) !important; transform-origin: right center !important; margin-left: 5px !important; }
+    /* ... */
+        #user-notify-btn { order: 3 !important; flex: 0 0 auto !important; margin-left: auto !important; padding: 6px !important; border-radius: 8px !important; transform: scale(0.85) !important; transform-origin: right center !important; }
+        
+        /* FIX: Wetter kleiner und unter das Datum geschoben */
+        #header-weather-widget, .weather-widget { 
+            order: 4 !important; 
+            flex: 0 0 auto !important; 
+            padding: 4px 6px !important; 
+            border-radius: 8px !important; 
+            transform: scale(0.65) !important; /* Deutlich kleiner */
+            transform-origin: left center !important; 
+            margin-left: 0 !important; 
+            margin-top: -15px !important; /* Zieht es nach oben, weg vom Rest */
+        }
 
     /* Zeile 3: Giriş und Kayıt Ol (Nur sichtbar wenn ausgeloggt, direkt nebeneinander) */
     .auth-view-btn { 
@@ -819,6 +831,27 @@ nav#main-nav, nav {
     nav#main-nav { gap: 10px !important; }
     nav button { padding: 4px 8px !important; font-size: 0.85rem !important; }
 }
+
+/* ADMIN-AKTIONEN FÜR KALPLERIM - MINIMAL-STYLE ALS MINI-ICONS */
+        .admin-heart-actions {
+            display: flex; gap: 10px; justify-content: flex-end; align-items: center; 
+            margin-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;
+        }
+        .admin-heart-btn {
+            background: none; border: none; padding: 0; cursor: pointer; 
+            transition: 0.2s; font-size: 1.1rem; filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+        }
+        .admin-heart-btn.del { color: #ef4444; }
+        .admin-heart-btn.del:hover { color: #b91c1c; transform: scale(1.1); }
+        .admin-heart-btn.write { color: #fdfbf7; }
+        .admin-heart-btn.write:hover { color: #cbd5e1; transform: scale(1.1); }
+        
+        @media (max-width: 768px) {
+            .admin-heart-btn { font-size: 1rem; }
+        }
+
+    
+</style>
 
 </style>
     <script>
@@ -874,6 +907,9 @@ nav#main-nav, nav {
             try { if(window.animateLetters) window.animateLetters(); } catch(e){}
             
         }, 200);
+
+        
+        
         
     </script>
 </head>
@@ -1681,6 +1717,23 @@ Blühe, deutsches Vaterland!</p>
             <div style="display:flex; gap:15px; justify-content:center; width:100%;">
                 <button class="reset-btn" id="custom-input-ok" style="flex:1; padding: 12px; font-size: 1.1rem;">Kaydet <span class="de-sub" style="color:inherit;">(Speichern)</span></button>
                 <button class="reset-btn danger" id="custom-input-cancel" style="flex:1; padding: 12px; font-size: 1.1rem;" onclick="if(window.closeTopModal) window.closeTopModal(event)">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WRITE THANK YOU MESSAGE MODAL (Admin Only) -->
+    <div class="modal high-z-modal notranslate" id="write-thank-you-modal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+        <div class="modal-content game-modal-content" style="max-width: 450px; text-align:center;" onclick="event.stopPropagation()">
+            <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <div style="font-size: 3rem; margin-bottom: 15px; color: #f4c542; filter: drop-shadow(0 0 15px rgba(244,197,66,0.6));">✉️</div>
+                <h2 class="game-title" style="font-size: 2rem; border:none; margin-bottom:20px; line-height: 1.2;">Teşekkür Et <span class="de-sub">(Bedanken)</span></h2>
+                <p style="color: #cbd5e1; font-size: 1.1rem; margin-bottom: 15px; text-align: left; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">Kime (An): <strong id="thank-you-recipient" style="color: #f4c542;"></strong></p>
+                <textarea id="thank-you-message-text" class="auth-input" rows="4" placeholder="Teşekkür mesajınızı buraya yazın... (Danke-Nachricht hier schreiben...)" style="width:100%; box-sizing: border-box; margin-bottom:25px;" autocomplete="off" spellcheck="false" onclick="event.stopPropagation()"></textarea>
+                <div style="display:flex; gap:15px; justify-content:center; width:100%;">
+                    <button class="reset-btn" id="send-thank-you-btn" style="flex:1; padding: 12px; font-size: 1.1rem;"><i class="fas fa-paper-plane"></i> Gönder <span class="de-sub" style="color:inherit;">(Senden)</span></button>
+                    <button class="reset-btn danger" style="flex:1; padding: 12px; font-size: 1.1rem;" onclick="if(window.closeTopModal) window.closeTopModal(event)">İptal <span class="de-sub" style="color:inherit;">(Abbrechen)</span></button>
+                </div>
             </div>
         </div>
     </div>
@@ -4070,89 +4123,8 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     window.renderAdminMessages = function() {
         const list = document.getElementById('admin-msg-list');
         if(!list) return;
+        
         let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin');
-        if(msgs.length === 0) {
-            list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
-            return;
-        }
-        list.innerHTML = msgs.slice().reverse().map(m => {
-            let colorClass = window.getAuthorColorClass(m.from);
-            let msgText = m.msg;
-            
-            // 1. Eser (Werk) klickbar machen und ECHTEN Namen einfügen
-            if (m.poemId && m.poemType) {
-                let action = '';
-                if (m.poemType === 'bilmeceler' || m.poemType === 'bulmacalar') {
-                    action = `window.closeTopModal('force'); setTimeout(() => window.openPuzzleModal('${m.poemId}', '${m.poemType}'), 100);`;
-                } else if (m.poemType === 'userPoems') {
-                    action = `window.closeTopModal('force'); setTimeout(() => window.openUserPoemModal('${m.poemId}'), 100);`;
-                } else {
-                    action = `window.closeTopModal('force'); setTimeout(() => window.openPoemModal('${m.poemId}', '${m.poemType}'), 100);`;
-                }
-                
-                // Den tatsächlichen Titel aus der Datenbank fischen
-                let poemTitle = 'Eser';
-                let sourceArr = m.poemType === 'userPoems' ? window.userPoemsDB : (m.poemType === 'bilmeceler' ? window.bilmecelerDB : (m.poemType === 'bulmacalar' ? window.bulmacalarDB : (window.contentDB ? window.contentDB[m.poemType] : [])));
-                if (sourceArr) {
-                    let found = sourceArr.find(x => x.id === m.poemId);
-                    if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
-                }
-
-                // Wenn der Text schon Anführungszeichen hat -> klickbar machen
-                if (msgText.includes('"')) {
-                    msgText = msgText.replace(/"(.*?)"/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
-                } else {
-                    // Wenn nicht, ersetzen wir "eserine" durch den echten Titel (z.B. "AŞK" adlı eserine)
-                    // Diese sichere Methode verhindert den Code-Bruch (Einsetzen in renderAdminMessages UND renderUserMessages)
-        if(msgText.includes('eserine')) {
-            msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
-        } else if (msgText.includes('Eserin "')) {
-            msgText = msgText.replace(/Eserin "(.*?)"/, `Eserin "<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
-        } else {
-            msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
-        }
-                }
-            }
-            
-            // 2. Spiel / Seite klickbar machen
-            if (msgText.includes('oyun oynadı:')) {
-                let parts = msgText.split('oyun oynadı:');
-                let gameName = parts[1].trim();
-                let targetView = 'oyunlar-view';
-                if(gameName.toLowerCase().includes('bulmaca')) targetView = 'bulmaca-view';
-                if(gameName.toLowerCase().includes('bilmece')) targetView = 'bilmece-view';
-                
-                let navAction = `window.closeTopModal('force'); window.navigate('${targetView}');`;
-                msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
-            }
-
-            let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${m.from !== 'Sistem' ? m.from : ''}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
-
-            return `<div class="notif-card">
-                        <div class="notif-header">
-                            <span class="notif-sender"><i class="fas fa-envelope"></i> <span class="${colorClass}">${m.from || 'Sistem'}</span></span>
-                            <span>${m.time || ''}</span>
-                        </div>
-                        <div class="notif-body">${msgText}</div>
-                        <div class="notif-actions">
-                            ${replyBtn}
-                            <button class="notif-btn del" onclick="window.deleteSingleMessage('${m.id}')"><i class="fas fa-trash"></i> Sil</button>
-                        </div>
-                    </div>`;
-        }).join('');
-    };
-
-    // ==================================================================
-    // FIX: POSTEINGANG FÜR USER & ADMIN (Kugelsicher & mit Emojis)
-    // ==================================================================
-
-    window.renderUserMessages = function() {
-        const list = document.getElementById('user-msg-list');
-        if(!list) return;
-        if(!window.currentUser) return;
-        
-        // Hole alle Nachrichten, die exakt an diesen User gesendet wurden
-        let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username);
         
         if(msgs.length === 0) {
             list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
@@ -4163,11 +4135,9 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let colorClass = window.getAuthorColorClass(m.from);
             let msgText = m.msg;
             
-            // Emoji des Absenders holen
             let uObj = window.userDatabase[m.from] || {};
             let emj = m.from === 'Sistem' ? '🤖' : (uObj.emoji || '👤');
             
-            // 1. Eser (Werk) klickbar machen
             if (m.poemId && m.poemType) {
                 let action = '';
                 if (m.poemType === 'bilmeceler' || m.poemType === 'bulmacalar') {
@@ -4186,18 +4156,16 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
                 }
 
-                if (msgText.includes('"')) {
-                    msgText = msgText.replace(/"(.*?)"/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
-                } else {
-                    if(msgText.includes('eserine')) {
-                        msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
-                    } else {
-                        msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
-                    }
+                // LÖSUNG NOTIFICATION BUG: Verwendet « » für den Werktitel, ignoriert HTML-Attribute!
+                if (msgText.includes('«') && msgText.includes('»')) {
+                    msgText = msgText.replace(/«(.*?)»/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
+                } else if (msgText.includes('eserine')) {
+                    msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
+                } else if (!msgText.includes('onclick')) { 
+                    msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
                 }
             }
             
-            // 2. Spiel / Seite klickbar machen
             if (msgText.includes('oyun oynadı:')) {
                 let parts = msgText.split('oyun oynadı:');
                 let gameName = parts[1].trim();
@@ -4209,8 +4177,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
             }
 
-            // WICHTIG: Wenn die Nachricht vom System oder "Admin" kommt, leite die Antwort korrekt an "AdminKing"
-            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? 'AdminKing' : m.from;
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? '' : m.from;
             let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
 
             return `<div class="notif-card">
@@ -4227,11 +4194,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
-    window.renderAdminMessages = function() {
-        const list = document.getElementById('admin-msg-list');
+    window.renderUserMessages = function() {
+        const list = document.getElementById('user-msg-list');
         if(!list) return;
+        if(!window.currentUser) return;
         
-        let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin');
+        let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username);
         
         if(msgs.length === 0) {
             list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
@@ -4263,14 +4231,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
                 }
 
-                if (msgText.includes('"')) {
-                    msgText = msgText.replace(/"(.*?)"/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
-                } else {
-                    if(msgText.includes('eserine')) {
-                        msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
-                    } else {
-                        msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
-                    }
+                if (msgText.includes('«') && msgText.includes('»')) {
+                    msgText = msgText.replace(/«(.*?)»/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"`);
+                } else if (msgText.includes('eserine')) {
+                    msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>" adlı eserine`);
+                } else if (!msgText.includes('onclick')) {
+                    msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>`;
                 }
             }
             
@@ -4285,7 +4251,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
             }
 
-            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? '' : m.from;
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? 'AdminKing' : m.from;
             let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
 
             return `<div class="notif-card">
@@ -5178,66 +5144,133 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
     // 3. KALPLERİM MODAL (Wer hat wann geliked?)
     window.renderMyHearts = function() {
-    const list = document.getElementById('my-hearts-list');
-    if(!list) return;
-    if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın.</div>'; return; }
+        const list = document.getElementById('my-hearts-list');
+        if(!list) return;
+        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span></div>'; return; }
 
-    let uName = window.currentUser.username;
-    let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
-    let heartsData = [];
+        let uName = window.currentUser.username;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+        let heartsData = [];
 
-    // Alle Werke sammeln, für die wir Herzen sehen wollen
-    let myWorks = [];
-    if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
-    if (isAdmin && window.contentDB) {
-        ['poems', 'quotes', 'stories', 'jokes'].forEach(t => { if (window.contentDB[t]) myWorks = myWorks.concat(window.contentDB[t]); });
-        if(window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
-        if(window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
-    }
-
-    myWorks.forEach(p => {
-        let pData = window.poemDataStore[p.id];
-        if (pData && pData.ratings) {
-            for(let liker in pData.ratings) {
-                let r = pData.ratings[liker];
-                let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
-                let time = (typeof r === 'object' && r !== null && r.time) ? r.time : 'Bilinmiyor';
-                let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
-                
-                heartsData.push({ poemId: p.id, poemTitle: p.title || p.trTitle, liker: liker, val: val, time: time, ts: ts });
-            }
+        let myWorks = [];
+        if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
+        if (isAdmin && window.contentDB) {
+            ['poems', 'quotes', 'stories', 'jokes'].forEach(t => {
+                if (window.contentDB[t]) myWorks = myWorks.concat(window.contentDB[t]);
+            });
+            if(window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
+            if(window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
         }
-    });
 
-    if(heartsData.length === 0) {
-        list.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Henüz kalp yok.</div>';
-        return;
-    }
+        myWorks.forEach(p => {
+            let pData = window.poemDataStore[p.id];
+            if (pData && pData.ratings) {
+                for(let liker in pData.ratings) {
+                    let r = pData.ratings[liker];
+                    let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
+                    let time = (typeof r === 'object' && r !== null && r.time) ? r.time : '<span style="font-style:italic; color:#64748b;">Bilinmiyor</span>';
+                    
+                    // MEGA-FIX: Wandelt das Text-Datum in echte Millisekunden um (für makellose Sortierung)
+                    let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
+                    if (ts === 0 && typeof time === 'string' && !time.includes('Bilinmiyor')) {
+                        let cleanTime = time.replace(/<[^>]*>?/gm, '').trim(); 
+                        let match = cleanTime.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{1,2})/);
+                        if (match) {
+                            ts = new Date(match[3], match[2] - 1, match[1], match[4], match[5]).getTime();
+                        }
+                    }
+                    if (!ts || isNaN(ts)) ts = 0;
 
-    // --- CHRONOLOGISCHE SORTIERUNG (Das Neueste zuerst) ---
-    heartsData.sort((a, b) => b.ts - a.ts);
+                    heartsData.push({ poemId: p.id, poemTitle: p.title || p.trTitle || 'Eser', liker: liker, val: val, time: time, ts: ts });
+                }
+            }
+        });
 
-    list.innerHTML = heartsData.map(h => {
-        let uObj = window.userDatabase[h.liker] || {};
-        let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : h.liker;
-        let emj = uObj.emoji || '👤';
-        let colorClass = window.getAuthorColorClass(h.liker);
+        if(heartsData.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz eserlerinize kalp bırakılmamış.<br><span class="de-sub">(Noch keine Herzen erhalten)</span></div>';
+            return;
+        }
 
-        return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer;" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${h.poemId}'), 100);">
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">${h.poemTitle}</div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:1.4rem;">${emj}</span>
-                    <div style="display:flex; flex-direction:column;">
-                        <div style="font-size:0.95rem;"><span class="${colorClass}">${fullName}</span></div>
-                        <div style="font-size:0.75rem; color:#94a3b8;"><i class="fas fa-clock"></i> ${h.time}</div>
-                    </div>
-                </div>
-            </div>
-            <div style="color:#ef4444; font-weight:900; font-size:1.3rem;">${h.val} ❤️</div>
-        </div>`;
-    }).join('');
-};
+        // GLOBALE SORTIERUNG: Höchster/Neuester Zeitstempel GANZ OBEN
+        heartsData.sort((a, b) => b.ts - a.ts);
+
+        list.innerHTML = heartsData.map(h => {
+            let uObj = window.userDatabase[h.liker] || {};
+            let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : h.liker;
+            let emj = uObj.emoji || '👤';
+            let colorClass = window.getAuthorColorClass(h.liker);
+
+            // ADMIN AKTIONEN HINZUFÜGEN (mit event.stopPropagation() gegen ungewollte Klicks)
+            let adminActions = '';
+            if (isAdmin) {
+                adminActions = `<div class="admin-heart-actions">
+                                    <button class="admin-heart-btn del" onclick="event.stopPropagation(); window.deleteAdminHeart('${h.liker}', '${h.poemId}')"><i class="fas fa-trash"></i> Sil</button>
+                                    <button class="admin-heart-btn write" onclick="event.stopPropagation(); window.openWriteThankYouModal('${h.liker}', '${h.poemId}')"><i class="fas fa-envelope"></i> Teşekkür Et</button>
+                                </div>`;
+            }
+
+            return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${h.poemId}'), 100);">
+                        <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">✍️ ${h.poemTitle}</div>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <span style="font-size:1.4rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3));">${emj}</span>
+                                        <div style="display:flex; flex-direction:column;">
+                                            <div style="font-size:0.95rem; font-weight:500;"><span class="${colorClass}">${fullName}</span></div>
+                                            <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;"><i class="fas fa-clock" style="color:#f4c542;"></i> ${h.time}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="color:#ef4444; font-weight:900; font-size:1.3rem; background:rgba(239,68,68,0.1); padding:6px 12px; border-radius:12px; filter:drop-shadow(0 0 5px rgba(239,68,68,0.3)); flex-shrink:0;">${h.val} ❤️</div>
+                            </div>
+                            ${adminActions}
+                        </div>
+                    </div>`;
+        }).join('');
+    };
+
+    window.deleteAdminHeart = function(liker, poemId) {
+        window.customConfirm("Bu like'ı silmek istediğinizden emin misiniz? <span class='de-sub'>(Dieses Like löschen?)</span>", () => {
+            if (window.poemDataStore[poemId] && window.poemDataStore[poemId].ratings) {
+                delete window.poemDataStore[poemId].ratings[liker];
+                localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+                window.lastLocalUpdate = Date.now() + 5000;
+                window.renderMyHearts();
+                window.updateMyHeartsBadge();
+                if(window.syncToCloud) window.syncToCloud(); 
+                window.showToast("Like silindi. <span class='de-sub'>(Like gelöscht)</span>");
+            }
+        });
+    };
+
+    window.openWriteThankYouModal = function(liker, poemId) {
+        let uObj = window.userDatabase[liker] || {};
+        let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : liker;
+        
+        document.getElementById('thank-you-recipient').innerText = fullName;
+        document.getElementById('thank-you-message-text').value = ''; 
+
+        document.getElementById('send-thank-you-btn').onclick = function() {
+            window.sendThankYouMessage(liker);
+        };
+
+        window.openFastModal('write-thank-you-modal');
+    };
+
+    window.sendThankYouMessage = function(toUser) {
+        let text = document.getElementById('thank-you-message-text').value.trim();
+        if (!text) {
+            window.customAlert('Mesaj boş olamaz! <span class="de-sub">(Nachricht ist leer!)</span>', '⚠️');
+            return;
+        }
+
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        window.sendSystemMessage(toUser, `<strong style="color:#f4c542;">${fullName} (Teşekkür / Danke):</strong> ${text}`);
+        
+        window.closeTopModal('force');
+        window.showToast('Teşekkür mesajı gönderildi! <span class="de-sub">(Nachricht gesendet)</span>');
+    };
 
     // ==================================================================
     // 💡 NEU: 100% Synchrone Herz-Reaktion & Zähler Update (FÜR ADMIN & USER)
@@ -5381,13 +5414,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         });
     };
 
+    // 1. HERZEN VERGEBEN (Speichert zwingend den Zeitstempel für die Sortierung)
     window.ratePoem = function(rating, e) {
         if (e) e.stopPropagation(); 
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
         
         const poemId = window.currentPoemData.id; 
-        
-        // Direkter Lesezugriff & Initialisierung
         window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
         if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
         
@@ -5395,49 +5427,52 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         let oldVal = (typeof oldData === 'object' && oldData !== null) ? parseInt(oldData.val || 0) : parseInt(oldData || 0);
         
         let action = '';
+        let nowTs = Date.now(); // 🚀 WICHTIG: Echter Timestamp für die Sortierung
+
         if(oldVal === rating) {
             delete window.poemDataStore[poemId].ratings[window.currentUser.username];
             action = 'kalbini geri çekti';
         } else {
             let dt = new Date();
             let timeStr = dt.toLocaleDateString('tr-TR') + ' ' + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-            window.poemDataStore[poemId].ratings[window.currentUser.username] = { val: rating, time: timeStr };
+            window.poemDataStore[poemId].ratings[window.currentUser.username] = { 
+                val: rating, 
+                time: timeStr,
+                ts: nowTs // 🚀 WICHTIG: Sichert das Datum mathematisch
+            };
             action = `${rating} kalp bıraktı ❤️`; 
         }
         
-        // 1. ZUERST lokal speichern!
         window.lastLocalUpdate = Date.now() + 5000; 
         localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
         
-        // 2. DANN die UI synchron aktualisieren
         window.updateHeartsUI(); 
         window.updateMyHeartsBadge(); 
         
-        // OPTISCHER FEEDBACK-KICK: Lässt den roten Zähler oben kurz aufleuchten!
         let liveBadge = document.getElementById('header-my-hearts-badge');
         if(liveBadge) {
             liveBadge.classList.add('chat-alert-anim'); 
             setTimeout(() => liveBadge.classList.remove('chat-alert-anim'), 600);
         }
 
-        // 3. ZULETZT Cloud & Arrays feuern
         if(window.syncToCloud) window.syncToCloud(); 
         if(window.renderUserWorksGrid) window.renderUserWorksGrid();
         
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        
-        // ===============================================
-        // LÖSUNG BENACHRICHTIGUNGEN (Echter Absender/Empfänger)
-        // ===============================================
+        let poemTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
+
+        // 🚀 KUGELSICHERE GLOBALE ADMIN-BENACHRICHTIGUNGEN 🚀
         if(action.includes('kalp bıraktı')) {
-            // Wer ist der Autor des Werkes?
-            let owner = 'AdminKing'; // Standard: Deine festen Werke gehören dem Admin
-            if (window.currentPoemData.type === 'userPoems') owner = window.currentPoemData.username;
-            
-            // Sende Benachrichtigung an den Besitzer (wenn er es nicht selbst geliket hat)
-            if(owner !== window.currentUser.username) {
-                if (window.sendSystemMessage) {
-                    window.sendSystemMessage(owner, `<strong style="color:#ef4444;">${fullName}</strong> eserine ${action}`, poemId, window.currentPoemData.type);
+            // ADMIN IMMER benachrichtigen (Egal welche Kategorie: saglik, atasozleri, etc.!)
+            if(window.currentUser.role !== 'admin') {
+                window.sendSystemMessage('Admin', `BİLDİRİM: <strong style='color:#f4c542;'>${fullName}</strong>, «${poemTitle}» adlı esere kalp bıraktı ❤️`, poemId, window.currentPoemData.type);
+            }
+
+            // USER nur benachrichtigen, wenn es SEIN EIGENES Werk in "Sizin Kaleminiz" ist
+            if(window.currentPoemData.type === 'userPoems') {
+                let owner = window.currentPoemData.username;
+                if(owner !== window.currentUser.username) {
+                    window.sendSystemMessage(owner, `<strong style='color:#ef4444;'>${fullName}</strong> senin «${poemTitle}» adlı eserine kalp bıraktı ❤️`, poemId, window.currentPoemData.type);
                 }
             }
         }
@@ -8120,32 +8155,51 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     // ==================================================================
-    // NEU: KALPLERIM MODAL (Welche eigenen Werke haben Herzen? + Zeit & Datum)
+    // FIX: "KALPLERIM" MODAL LOGIK MIT MINI-ADMIN-ICONS
     // ==================================================================
+    // 2. KALPLERİM MODAL (Mit mathematischer Sortierung & Mini-Admin-Icons)
     window.renderMyHearts = function() {
         const list = document.getElementById('my-hearts-list');
         if(!list) return;
         if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span></div>'; return; }
 
         let uName = window.currentUser.username;
-        let myPoems = (window.userPoemsDB || []).filter(p => p.username === uName);
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
         let heartsData = [];
 
-        myPoems.forEach(p => {
+        // Alle Werke sammeln
+        let myWorks = [];
+        if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
+        
+        // 🚀 Admin sieht ALLES (inklusive saglik, atasozleri etc.)
+        if (isAdmin && window.contentDB) {
+            ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => { 
+                if (window.contentDB[t]) myWorks = myWorks.concat(window.contentDB[t]); 
+            });
+            if(window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
+            if(window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
+        }
+
+        myWorks.forEach(p => {
             let pData = window.poemDataStore[p.id];
             if (pData && pData.ratings) {
                 for(let liker in pData.ratings) {
                     let r = pData.ratings[liker];
-                    let val = (typeof r === 'object' && r !== null) ? (r.val || 0) : (Number(r) || 0);
+                    let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
                     let time = (typeof r === 'object' && r !== null && r.time) ? r.time : '<span style="font-style:italic; color:#64748b;">Bilinmiyor</span>';
                     
-                    heartsData.push({
-                        poemId: p.id,
-                        poemTitle: p.title || p.trTitle,
-                        liker: liker,
-                        val: val,
-                        time: time
-                    });
+                    // MEGA-FIX: Timestamp generieren für alte und neue Likes
+                    let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
+                    if (ts === 0 && typeof time === 'string' && time.trim() !== '' && !time.includes('Bilinmiyor')) {
+                        let cleanTime = time.replace(/<[^>]*>?/gm, '').trim(); 
+                        let match = cleanTime.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{1,2})/);
+                        if (match) {
+                            ts = new Date(match[3], match[2] - 1, match[1], match[4], match[5]).getTime();
+                        }
+                    }
+                    if (!ts || isNaN(ts)) ts = 0; 
+
+                    heartsData.push({ poemId: p.id, poemTitle: p.title || p.trTitle || 'Eser', liker: liker, val: val, time: time, ts: ts });
                 }
             }
         });
@@ -8155,8 +8209,8 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             return;
         }
 
-        // Chronologisch absteigend sortieren
-        heartsData.reverse();
+        // 🚀 KUGELSICHERE CHRONOLOGISCHE SORTIERUNG: Höchster/Neuester Zeitstempel GANZ OBEN
+        heartsData.sort((a, b) => b.ts - a.ts);
 
         list.innerHTML = heartsData.map(h => {
             let uObj = window.userDatabase[h.liker] || {};
@@ -8164,20 +8218,74 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let emj = uObj.emoji || '👤';
             let colorClass = window.getAuthorColorClass(h.liker);
 
-            return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="window.closeTopModal('force'); setTimeout(() => window.openUserPoemModal('${h.poemId}'), 100);">
-                        <div style="display:flex; flex-direction:column; gap:6px;">
-                            <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">✍️ ${h.poemTitle}</div>
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="font-size:1.4rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3));">${emj}</span>
-                                <div style="display:flex; flex-direction:column;">
-                                    <div style="font-size:0.95rem; font-weight:500;"><span class="${colorClass}">${fullName}</span></div>
-                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;"><i class="fas fa-clock" style="color:#f4c542;"></i> ${h.time}</div>
+            // 🚀 ADMIN AKTIONEN HINZUFÜGEN (als MINI-ICONS mit event.stopPropagation()) 🚀
+            let adminActions = '';
+            if (isAdmin) {
+                adminActions = `<div class="admin-heart-actions">
+                                    <button class="admin-heart-btn del" onclick="event.stopPropagation(); window.deleteAdminHeart('${h.liker}', '${h.poemId}')"><i class="fas fa-trash"></i></button>
+                                    <button class="admin-heart-btn write" onclick="event.stopPropagation(); window.openWriteThankYouModal('${h.liker}', '${h.poemId}')"><i class="fas fa-envelope"></i></button>
+                                </div>`;
+            }
+
+            return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer;" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${h.poemId}'), 100);">
+                        <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif;">✍️ «${h.poemTitle}»</div>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <span style="font-size:1.4rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3));">${emj}</span>
+                                        <div style="display:flex; flex-direction:column;">
+                                            <div style="font-size:0.95rem; font-weight:500;"><span class="${colorClass}">${fullName}</span></div>
+                                            <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;"><i class="fas fa-clock" style="color:#f4c542;"></i> ${h.time}</div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div style="color:#ef4444; font-weight:900; font-size:1.3rem; background:rgba(239,68,68,0.1); padding:6px 12px; border-radius:12px; filter:drop-shadow(0 0 5px rgba(239,68,68,0.3)); flex-shrink:0;">${h.val} ❤️</div>
                             </div>
+                            ${adminActions}
                         </div>
-                        <div style="color:#ef4444; font-weight:900; font-size:1.3rem; background:rgba(239,68,68,0.1); padding:6px 12px; border-radius:12px; filter:drop-shadow(0 0 5px rgba(239,68,68,0.3));">${h.val} ❤️</div>
                     </div>`;
         }).join('');
+    };
+
+    // 3. ADMIN-HELFER-FUNKTIONEN
+    window.deleteAdminHeart = function(liker, poemId) {
+        window.customConfirm("Bu like'ı silmek istediğinizden emin misiniz? <span class='de-sub'>(Dieses Like löschen?)</span>", () => {
+            if (window.poemDataStore[poemId] && window.poemDataStore[poemId].ratings) {
+                delete window.poemDataStore[poemId].ratings[liker];
+                localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+                window.lastLocalUpdate = Date.now() + 5000;
+                window.renderMyHearts();
+                window.updateMyHeartsBadge();
+                if(window.syncToCloud) window.syncToCloud(); 
+                window.showToast("Like silindi. <span class='de-sub'>(Like gelöscht)</span>");
+            }
+        });
+    };
+
+    window.openWriteThankYouModal = function(liker, poemId) {
+        let uObj = window.userDatabase[liker] || {};
+        let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : liker;
+        
+        document.getElementById('thank-you-recipient').innerText = fullName;
+        document.getElementById('thank-you-message-text').value = ''; 
+
+        document.getElementById('send-thank-you-btn').onclick = function() {
+            window.sendThankYouMessage(liker);
+        };
+        window.openFastModal('write-thank-you-modal');
+    };
+
+    window.sendThankYouMessage = function(toUser) {
+        let text = document.getElementById('thank-you-message-text').value.trim();
+        if (!text) {
+            window.customAlert('Mesaj boş olamaz! <span class="de-sub">(Nachricht ist leer!)</span>', '⚠️');
+            return;
+        }
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        window.sendSystemMessage(toUser, `<strong style="color:#f4c542;">${fullName} (Teşekkür / Danke):</strong> ${text}`);
+        window.closeTopModal('force');
+        window.showToast('Teşekkür mesajı gönderildi! <span class="de-sub">(Nachricht gesendet)</span>');
     };
 
     document.addEventListener('DOMContentLoaded', () => {
