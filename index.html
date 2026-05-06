@@ -8521,10 +8521,10 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 
 </script>
 <!-- ==================================================================
-     FINALER SYSTEM-CLEANUP: KALPLERIM, ECHTZEIT-SYNC & LÖSCHEN
+     MASTER OVERRIDE: ECHTZEIT FIREBASE SYNC & GHOST-HEART FIX
      ================================================================== -->
 <script>
-    // 1. ZÄHLER FIX (Der Header-Badge rechnet jetzt live und präzise)
+    // 1. ZÄHLER FIX: Zählt NUR NOCH Herzen von existierenden Gedichten! (Keine Geister-Herzen mehr)
     window.updateMyHeartsBadge = function() {
         if (!window.currentUser) { window.forceBadge('header-my-hearts-badge', 0, false); return; }
         
@@ -8535,31 +8535,30 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         // Immer frisch aus dem Speicher holen
         let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
         
+        let myWorks = [];
+        
+        // Sammle alle aktuell EXISTIERENDEN Werke
         if (isAdmin) {
-            // Admin: Zählt radikal ALLE Herzen auf der gesamten Plattform
-            for (let poemId in freshDB) {
-                let pData = freshDB[poemId];
-                if (pData && pData.ratings) {
-                    for(let k in pData.ratings) {
-                        let r = pData.ratings[k];
-                        totalMyHearts += (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
-                    }
+            if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB);
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => { 
+                if (fullDB[t]) myWorks = myWorks.concat(fullDB[t]); 
+            });
+            if (window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
+            if (window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
+        } else {
+            if (window.userPoemsDB) myWorks = window.userPoemsDB.filter(p => p.username === uName);
+        }
+
+        // Zähle NUR die Herzen, deren Gedichte auch wirklich noch in 'myWorks' sind!
+        myWorks.forEach(p => {
+            if (p && p.id && freshDB[p.id] && freshDB[p.id].ratings) {
+                for(let k in freshDB[p.id].ratings) {
+                    let r = freshDB[p.id].ratings[k];
+                    totalMyHearts += (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
                 }
             }
-        } else {
-            // User: Zählt nur Herzen auf den EIGENEN Gedichten
-            let myWorks = [];
-            if (window.userPoemsDB) myWorks = window.userPoemsDB.filter(p => p.username === uName);
-            myWorks.forEach(p => {
-                let pData = freshDB[p.id];
-                if (pData && pData.ratings) {
-                    for(let k in pData.ratings) {
-                        let r = pData.ratings[k];
-                        totalMyHearts += (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
-                    }
-                }
-            });
-        }
+        });
         
         window.forceBadge('header-my-hearts-badge', totalMyHearts, true);
     };
@@ -8575,7 +8574,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         let heartsData = [];
         let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
 
-        // Helper, um den Werktitel sicher zu finden
         const getPoemTitle = (id) => {
             if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Eser'; }
             if (window.contentDB) {
@@ -8594,10 +8592,12 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         let myWorks = [];
         if (isAdmin) {
             if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB);
-            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
-            ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri', 'bilmeceler', 'bulmacalar'].forEach(t => { 
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => { 
                 if (fullDB[t]) myWorks = myWorks.concat(fullDB[t]); 
             });
+            if (window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
+            if (window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
         } else {
             if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
         }
@@ -8625,7 +8625,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             return;
         }
 
-        // Streng chronologisch sortieren (Neu nach Alt)
         heartsData.sort((a, b) => b.ts - a.ts);
 
         list.innerHTML = heartsData.map(h => {
@@ -8634,7 +8633,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let emj = uObj.emoji || '👤';
             let colorClass = window.getAuthorColorClass(h.liker);
 
-            // 🚀 PERFEKTE SYMBOL-BUTTONS (Exakt wie auf dem Bild gewünscht)
             let adminActions = '';
             if (isAdmin) {
                 adminActions = `
@@ -8669,38 +8667,30 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
-    // 3. RADIKALES LÖSCHEN (Erzwingt Karten-Update & Cloud Sync in Echtzeit)
+    // 3. RADIKALES LÖSCHEN
     window.deleteAdminHeart = function(liker, poemId) {
         window.customConfirm("Bu like'ı silmek istediğinizden emin misiniz? <span class='de-sub'>(Dieses Like löschen?)</span>", () => {
             let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
             
             if (freshDB[poemId] && freshDB[poemId].ratings && freshDB[poemId].ratings[liker]) {
-                // Aus der Datenbank kratzen
                 delete freshDB[poemId].ratings[liker];
                 localStorage.setItem('misaliHeartsDB', JSON.stringify(freshDB));
                 window.poemDataStore = freshDB; 
                 window.lastLocalUpdate = Date.now() + 5000;
                 
-                // UI & Modal Zähler updaten
                 window.renderMyHearts(); 
                 window.updateMyHeartsBadge(); 
                 
-                // 🚀 ZWINGENDES UPDATE FÜR DIE STARTSEITEN-KARTEN
                 if(window.initContent) window.initContent(); 
                 if(window.renderUserWorksGrid) window.renderUserWorksGrid();
                 if(window.renderTopWorks) window.renderTopWorks();
-                if(window.renderBilmeces) window.renderBilmeces();
-                if(window.renderBulmacalar) window.renderBulmacalar();
-                if(window.renderAtasozleri) window.renderAtasozleri();
                 
-                // Falls das Werk gerade als Modal geöffnet ist, die roten Herzen entfernen
                 if(window.currentPoemData && window.currentPoemData.id === poemId) {
                     if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal')) {
                         if(window.updateHeartsUI) window.updateHeartsUI();
                     }
                 }
 
-                // FIREBASE MILLISEKUNDEN-SYNC
                 try { if (typeof database !== 'undefined') database.ref('misaliData/heartsDB').set(freshDB); } catch(err) {}
                 if(window.syncToCloud) window.syncToCloud(); 
                 
@@ -8740,10 +8730,16 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         window.showToast('Mesaj gönderildi! <span class="de-sub">(Nachricht gesendet)</span>');
     };
 
-    // INIT-LOOP: Zwingt den Badge beim Neuladen zur sofortigen Berechnung
-    setTimeout(() => {
-        if(window.updateMyHeartsBadge) window.updateMyHeartsBadge();
-    }, 800);
+    // 5. MOBILE & DESKTOP ROBUST-INIT (Zwingt den Zähler, zu warten bis das Handy bereit ist)
+    let mobileRetry = 0;
+    let mobileBadgeInterval = setInterval(() => {
+        if(window.updateMyHeartsBadge) {
+            window.updateMyHeartsBadge();
+            mobileRetry++;
+            if(mobileRetry >= 5) clearInterval(mobileBadgeInterval);
+        }
+    }, 1000);
+
 </script>
 </body>
 </html>
