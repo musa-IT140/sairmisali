@@ -8596,7 +8596,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
 <script>
 (function() {
     // ----------------------------------------------------------------
-    // 1. HAPTIC ENGINE & SMART SCROLL
+    // 1. HAPTIC ENGINE (FIX: Vibriert nur noch bei Klick, NICHT beim Scrollen!)
     // ----------------------------------------------------------------
     window.addEventListener('scroll', function() {
         let leftBtn = document.querySelector('.floating-menu-wrapper.left .menu-toggle-btn');
@@ -8610,80 +8610,147 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         try { if (navigator.vibrate) navigator.vibrate(intensity); } catch(e) {}
     };
 
-    document.addEventListener('pointerdown', function(e) {
+    // Geändert von 'pointerdown' auf 'click'!
+    document.addEventListener('click', function(e) {
         let clickable = e.target.closest('button, .clickable-header-item, .card, .game-card, .mem-card, .holiday-item, .search-suggestion-item, .zodiac-badge, .fal-cup, .analog-clock, .simon-btn');
         if (clickable && !clickable.disabled) window.vibrateAction(30);
     }, { passive: true });
 
-    // ----------------------------------------------------------------
-    // 2. AKLIMDA ZÄHLER & FIREBASE-GHOST KILLER
-    // ----------------------------------------------------------------
-    window.updateSavedBadge = function() {
-        if(!window.currentUser) { window.forceBadge('header-saved-badge', 0, false); return; }
-        
-        let uName = window.currentUser.username;
-        let db = JSON.parse(localStorage.getItem('misaliSavedItems')) || window.savedItemsDB || {};
-        let items = db[uName] || [];
-        if(!Array.isArray(items)) items = Object.values(items);
-        
-        // LÖSUNG: Wir sammeln alle aktuell EXISTIERENDEN Werke auf der gesamten Seite
-        let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
-        let allWorks = [];
-        if(window.userPoemsDB) allWorks = allWorks.concat(window.userPoemsDB);
-        if(window.bilmecelerDB) allWorks = allWorks.concat(window.bilmecelerDB);
-        if(window.bulmacalarDB) allWorks = allWorks.concat(window.bulmacalarDB);
-        ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => { 
-            if (fullDB[t]) allWorks = allWorks.concat(fullDB[t]); 
-        });
 
-        let validItems = [];
-        items.forEach(id => {
-            // Nur wenn das Werk noch physisch in der Datenbank ist, darf es ins Array!
-            if (allWorks.some(w => w && w.id === id)) {
-                validItems.push(id);
-            }
-        });
+    // ----------------------------------------------------------------
+    // 2. iOS BLACK SCREEN FREEZE FIX (Die absolute Modal-Sicherheit)
+    // ----------------------------------------------------------------
+    // Wir zwingen den Hintergrund per JavaScript dazu, immer präsent zu sein, aber unsichtbar.
+    // Das verhindert das tückische iOS-Einfrieren durch "display: none".
+    let bd = document.getElementById('modal-backdrop');
+    if (bd) {
+        bd.style.setProperty('display', 'block', 'important');
+    }
 
-        // WENN FIREBASE EINEN GEIST HATTE: Überschreibe Firebase mit der sauberen Liste!
-        if (validItems.length !== items.length) {
-            db[uName] = validItems;
-            window.savedItemsDB = db;
-            localStorage.setItem('misaliSavedItems', JSON.stringify(db));
-            
-            // 🔥 Dieser Befehl zwingt Firebase, die 1 zu vergessen!
-            window.lastLocalUpdate = Date.now() + 5000;
-            if(window.syncToCloud) window.syncToCloud(); 
+    window.closeAllModals = function(force=false) { 
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active-modal')); 
+        document.body.classList.remove('modal-open'); 
+        document.body.style.removeProperty('overflow');
+        let bd = document.getElementById('modal-backdrop');
+        if(bd) bd.classList.remove('show-backdrop'); // Nur die Klasse entfernen, keine Timeouts mehr!
+    };
+    
+    window.closeTopModal = function(e) { 
+        if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
+        if(e === 'force') { window.closeAllModals(); return; }
+        
+        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
+        if(modals.length > 0) {
+            let lastModal = modals[modals.length - 1]; 
+            lastModal.classList.remove('active-modal');
         }
         
-        window.forceBadge('header-saved-badge', validItems.length, true);
+        if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+            document.body.classList.remove('modal-open'); 
+            document.body.style.removeProperty('overflow');
+            let bd = document.getElementById('modal-backdrop');
+            if(bd) bd.classList.remove('show-backdrop');
+        }
+    };
+
+    window.openFastModal = function(id) { 
+        try {
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                document.activeElement.blur();
+            }
+            window.closeAllSidebars(); 
+            document.querySelectorAll('.modal.active-modal').forEach(m => { 
+                if (m.id !== id) m.classList.remove('active-modal'); 
+            });
+            const m = document.getElementById(id); 
+            if(m) { 
+                document.body.classList.add('modal-open'); 
+                let bd = document.getElementById('modal-backdrop'); 
+                if(bd) bd.classList.add('show-backdrop');
+                
+                m.classList.add('active-modal'); 
+                m.style.zIndex = '100000';
+                
+                // Modal-Routing
+                if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
+                if(id === 'profileEditModal' && window.currentUser) {
+                    if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-edit-profile', 'edit-emoji', 'selected-edit-emoji', window.currentUser.emoji || '👤');
+                    document.getElementById('edit-name').value = window.currentUser.name || '';
+                    document.getElementById('edit-surname').value = window.currentUser.surname || '';
+                    document.getElementById('edit-day').value = window.currentUser.day || '';
+                    document.getElementById('edit-month').value = window.currentUser.month || '';
+                    document.getElementById('edit-year').value = window.currentUser.year || '';
+                    document.getElementById('edit-pass').value = ''; 
+                }
+                if(id === 'eventsModal' && window.renderCalendar) window.renderCalendar();
+                if(id === 'adminPendingModal' && window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+                if(id === 'userMessagesModal' && window.renderUserMessages) window.renderUserMessages();
+                if(id === 'adminMessagesModal' && window.renderAdminMessages) window.renderAdminMessages();
+                if(id === 'leaderboardModal' && window.renderLeaderboard) window.renderLeaderboard(); 
+                if(id === 'adminUsersModal' && window.renderOnlineUsers) window.renderOnlineUsers(); 
+                if(id === 'weatherModal' && window.fetchWeather) window.fetchWeather();
+                if(id === 'savedItemsModal' && window.renderSavedItems) window.renderSavedItems();
+            } 
+        } catch(e) { console.error("Modal error:", e); }
+    };
+
+
+    // ----------------------------------------------------------------
+    // 3. AKLIMDA SNIPER (Ghost-Killer) & ZÄHLER
+    // ----------------------------------------------------------------
+    function cleanAklimdaDB() {
+        try {
+            let db = JSON.parse(localStorage.getItem('misaliSavedItems')) || {};
+            let changed = false;
+            for (let user in db) {
+                let items = db[user];
+                if (!Array.isArray(items)) items = Object.values(items);
+                if (Array.isArray(items)) {
+                    let cleanItems = items.filter(id => typeof id === 'string' && id.trim() !== '' && id !== 'null' && id !== 'undefined' && id !== '[object Object]');
+                    if (cleanItems.length !== items.length) { db[user] = cleanItems; changed = true; }
+                } else {
+                    db[user] = []; changed = true;
+                }
+            }
+            if (changed) {
+                localStorage.setItem('misaliSavedItems', JSON.stringify(db));
+                window.savedItemsDB = db;
+            }
+            return db;
+        } catch(e) {
+            localStorage.setItem('misaliSavedItems', '{}');
+            window.savedItemsDB = {};
+            return {};
+        }
+    }
+    cleanAklimdaDB();
+
+    window.updateSavedBadge = function() {
+        if(!window.currentUser) { window.forceBadge('header-saved-badge', 0, false); return; }
+        let db = cleanAklimdaDB();
+        let count = db[window.currentUser.username] ? db[window.currentUser.username].length : 0;
+        window.forceBadge('header-saved-badge', count, true);
     };
 
     window.toggleSaveItem = function(id, e) {
         if(e) e.stopPropagation();
         if(!window.currentUser) { window.customAlert('Eserleri kaydetmek için lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span>', '🔒'); return; }
-
         let uName = window.currentUser.username;
-        let db = JSON.parse(localStorage.getItem('misaliSavedItems')) || window.savedItemsDB || {};
+        let db = cleanAklimdaDB();
+        if(!db[uName]) db[uName] = [];
         
-        let currentItems = db[uName] || [];
-        if(!Array.isArray(currentItems)) currentItems = Object.values(currentItems);
-
-        let idx = currentItems.indexOf(id);
+        let idx = db[uName].indexOf(id);
         if(idx > -1) {
-            currentItems.splice(idx, 1);
+            db[uName].splice(idx, 1);
             window.showToast('Aklımdan çıkarıldı. <span class="de-sub">(Entfernt)</span>');
         } else {
-            currentItems.push(id);
+            db[uName].push(id);
             window.showToast('Aklımda! <span class="de-sub">(Gespeichert)</span>');
         }
-
-        db[uName] = [...new Set(currentItems)];
         window.savedItemsDB = db;
         localStorage.setItem('misaliSavedItems', JSON.stringify(db));
-        
         window.lastLocalUpdate = Date.now() + 5000;
         if(window.syncToCloud) window.syncToCloud();
-        
         window.updateSavedBadge();
         
         let icon = document.getElementById('bookmark-icon-' + id);
@@ -8692,14 +8759,13 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             icon.style.color = isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)';
             icon.style.filter = isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none';
         }
-        
         if(document.getElementById('savedItemsModal') && document.getElementById('savedItemsModal').classList.contains('active-modal')) {
             if(window.renderSavedItems) window.renderSavedItems();
         }
     };
 
     // ----------------------------------------------------------------
-    // 3. KALENDER BUNT FIX & KLICK-REPARATUR
+    // 4. KALENDER BUNT FIX & KLICK-REPARATUR
     // ----------------------------------------------------------------
     window.renderHolidays = function() {
         const list = document.getElementById('holiday-list-content');
@@ -8716,7 +8782,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 foundHolidays.push({ day: day, ...window.holidaysDB[key] }); 
             } 
         }
-        
         foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
         
         if(foundHolidays.length === 0) { 
@@ -8741,7 +8806,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     // ----------------------------------------------------------------
-    // 4. KALPLERIM ZÄHLER FIX
+    // 5. KALPLERIM ZÄHLER FIX
     // ----------------------------------------------------------------
     window.updateMyHeartsBadge = function() {
         if (!window.currentUser) { window.forceBadge('header-my-hearts-badge', 0, false); return; }
@@ -8775,7 +8840,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     // ----------------------------------------------------------------
-    // 5. KALPLERIM MODAL (CHRONOLOGISCH, ICONS)
+    // 6. KALPLERIM MODAL (CHRONOLOGISCH, ICONS)
     // ----------------------------------------------------------------
     window.renderMyHearts = function() {
         const list = document.getElementById('my-hearts-list');
@@ -8925,7 +8990,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     // ----------------------------------------------------------------
-    // 6. OMNISCIENT ADMIN TRACKER
+    // 7. OMNISCIENT ADMIN TRACKER
     // ----------------------------------------------------------------
     window.notifyAdmin = function(actionDesc) {
         if(!window.currentUser || window.currentUser.role === 'admin' || window.currentUser.username === 'AdminKing') return;
@@ -8992,7 +9057,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     }
 
     // ----------------------------------------------------------------
-    // 7. BACKGROUND LOOP
+    // 8. BACKGROUND LOOP
     // ----------------------------------------------------------------
     setInterval(() => {
         if (window.currentUser) {
