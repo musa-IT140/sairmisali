@@ -985,6 +985,62 @@ nav#main-nav, nav {
             .admin-heart-btn { font-size: 1rem; }
         }
 
+        /* ==========================================================================
+   📱 MEGA ULTRA PLUS: MOBILE SCHRIFTGRÖSSEN-FIX (Kompakter & Lesbarer)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Karten auf der Startseite */
+    .card h3.clamp-text { font-size: 1.05rem !important; line-height: 1.3 !important; }
+    .card .card-sub { font-size: 0.8rem !important; }
+    .card div { font-size: 0.75rem !important; }
+    
+    /* Spiele & Rätsel Karten */
+    .game-card .bilingual-title { font-size: 1.05rem !important; line-height: 1.2 !important; }
+    .game-card span { font-size: 0.8rem !important; }
+
+    /* Modal (Fenster) Texte & Gedichte */
+    .modal-text { font-size: 0.95rem !important; line-height: 1.5 !important; }
+    #bilmece-text, #bilmece-answer-text { font-size: 1rem !important; line-height: 1.4 !important; }
+    
+    /* Info-Seiten (Impressum, Datenschutz, Hakkımda etc.) */
+    #hakkimda-view p, 
+    #sizin-kaleminiz-view p, 
+    #impressum-view p, 
+    #cookie-view p, 
+    #datenschutz-view p { 
+        font-size: 0.95rem !important; 
+        line-height: 1.5 !important; 
+    }
+}
+
+/* ==========================================================================
+   📱 MEGA ULTRA PLUS: MOBILE SCHRIFTGRÖSSEN-FIX (Kompakter & Lesbarer)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Karten auf der Startseite */
+    .card h3.clamp-text { font-size: 1.05rem !important; line-height: 1.3 !important; }
+    .card .card-sub { font-size: 0.8rem !important; }
+    .card div { font-size: 0.75rem !important; }
+    
+    /* Spiele & Rätsel Karten */
+    .game-card .bilingual-title { font-size: 1.05rem !important; line-height: 1.2 !important; }
+    .game-card span { font-size: 0.8rem !important; }
+
+    /* Modal (Fenster) Texte & Gedichte */
+    .modal-text { font-size: 0.95rem !important; line-height: 1.5 !important; }
+    #bilmece-text, #bilmece-answer-text { font-size: 1rem !important; line-height: 1.4 !important; }
+    
+    /* Info-Seiten (Impressum, Datenschutz, Hakkımda vb.) */
+    #hakkimda-view p, 
+    #sizin-kaleminiz-view p, 
+    #impressum-view p, 
+    #cookie-view p, 
+    #datenschutz-view p { 
+        font-size: 0.95rem !important; 
+        line-height: 1.5 !important; 
+    }
+}
+
     
 </style>
 
@@ -8536,24 +8592,165 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     
 
 </script>
-<!-- ==================================================================
-     MASTER OVERRIDE: ECHTZEIT FIREBASE SYNC & GHOST-HEART FIX
-     ================================================================== -->
+
 <script>
-    // 1. ZÄHLER FIX: Zählt NUR NOCH Herzen von existierenden Gedichten! (Keine Geister-Herzen mehr)
+(function() {
+    // ----------------------------------------------------------------
+    // 1. HAPTIC ENGINE & SMART SCROLL
+    // ----------------------------------------------------------------
+    window.addEventListener('scroll', function() {
+        let leftBtn = document.querySelector('.floating-menu-wrapper.left .menu-toggle-btn');
+        let rightBtn = document.querySelector('.floating-menu-wrapper.right .menu-toggle-btn');
+        if ((leftBtn && leftBtn.classList.contains('open')) || (rightBtn && rightBtn.classList.contains('open'))) {
+            if (window.closeFloatingMenus) window.closeFloatingMenus();
+        }
+    }, { passive: true });
+
+    window.vibrateAction = function(intensity = 30) {
+        try { if (navigator.vibrate) navigator.vibrate(intensity); } catch(e) {}
+    };
+
+    document.addEventListener('pointerdown', function(e) {
+        let clickable = e.target.closest('button, .clickable-header-item, .card, .game-card, .mem-card, .holiday-item, .search-suggestion-item, .zodiac-badge, .fal-cup, .analog-clock, .simon-btn');
+        if (clickable && !clickable.disabled) window.vibrateAction(30);
+    }, { passive: true });
+
+    // ----------------------------------------------------------------
+    // 2. AKLIMDA ZÄHLER & FIREBASE-GHOST KILLER
+    // ----------------------------------------------------------------
+    window.updateSavedBadge = function() {
+        if(!window.currentUser) { window.forceBadge('header-saved-badge', 0, false); return; }
+        
+        let uName = window.currentUser.username;
+        let db = JSON.parse(localStorage.getItem('misaliSavedItems')) || window.savedItemsDB || {};
+        let items = db[uName] || [];
+        if(!Array.isArray(items)) items = Object.values(items);
+        
+        // LÖSUNG: Wir sammeln alle aktuell EXISTIERENDEN Werke auf der gesamten Seite
+        let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+        let allWorks = [];
+        if(window.userPoemsDB) allWorks = allWorks.concat(window.userPoemsDB);
+        if(window.bilmecelerDB) allWorks = allWorks.concat(window.bilmecelerDB);
+        if(window.bulmacalarDB) allWorks = allWorks.concat(window.bulmacalarDB);
+        ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => { 
+            if (fullDB[t]) allWorks = allWorks.concat(fullDB[t]); 
+        });
+
+        let validItems = [];
+        items.forEach(id => {
+            // Nur wenn das Werk noch physisch in der Datenbank ist, darf es ins Array!
+            if (allWorks.some(w => w && w.id === id)) {
+                validItems.push(id);
+            }
+        });
+
+        // WENN FIREBASE EINEN GEIST HATTE: Überschreibe Firebase mit der sauberen Liste!
+        if (validItems.length !== items.length) {
+            db[uName] = validItems;
+            window.savedItemsDB = db;
+            localStorage.setItem('misaliSavedItems', JSON.stringify(db));
+            
+            // 🔥 Dieser Befehl zwingt Firebase, die 1 zu vergessen!
+            window.lastLocalUpdate = Date.now() + 5000;
+            if(window.syncToCloud) window.syncToCloud(); 
+        }
+        
+        window.forceBadge('header-saved-badge', validItems.length, true);
+    };
+
+    window.toggleSaveItem = function(id, e) {
+        if(e) e.stopPropagation();
+        if(!window.currentUser) { window.customAlert('Eserleri kaydetmek için lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span>', '🔒'); return; }
+
+        let uName = window.currentUser.username;
+        let db = JSON.parse(localStorage.getItem('misaliSavedItems')) || window.savedItemsDB || {};
+        
+        let currentItems = db[uName] || [];
+        if(!Array.isArray(currentItems)) currentItems = Object.values(currentItems);
+
+        let idx = currentItems.indexOf(id);
+        if(idx > -1) {
+            currentItems.splice(idx, 1);
+            window.showToast('Aklımdan çıkarıldı. <span class="de-sub">(Entfernt)</span>');
+        } else {
+            currentItems.push(id);
+            window.showToast('Aklımda! <span class="de-sub">(Gespeichert)</span>');
+        }
+
+        db[uName] = [...new Set(currentItems)];
+        window.savedItemsDB = db;
+        localStorage.setItem('misaliSavedItems', JSON.stringify(db));
+        
+        window.lastLocalUpdate = Date.now() + 5000;
+        if(window.syncToCloud) window.syncToCloud();
+        
+        window.updateSavedBadge();
+        
+        let icon = document.getElementById('bookmark-icon-' + id);
+        if(icon) {
+            let isSaved = db[uName].includes(id);
+            icon.style.color = isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)';
+            icon.style.filter = isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none';
+        }
+        
+        if(document.getElementById('savedItemsModal') && document.getElementById('savedItemsModal').classList.contains('active-modal')) {
+            if(window.renderSavedItems) window.renderSavedItems();
+        }
+    };
+
+    // ----------------------------------------------------------------
+    // 3. KALENDER BUNT FIX & KLICK-REPARATUR
+    // ----------------------------------------------------------------
+    window.renderHolidays = function() {
+        const list = document.getElementById('holiday-list-content');
+        if(!list || !window.holidaysDB) return;
+        
+        let cMonth = typeof currentMonth !== 'undefined' ? currentMonth : new Date().getMonth();
+        let cYear = typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear();
+        let currentMonthStr = (cMonth + 1).toString().padStart(2, '0');
+        let foundHolidays = [];
+        
+        for(let key in window.holidaysDB) { 
+            if(key.startsWith(currentMonthStr)) { 
+                let day = key.split('-')[1]; 
+                foundHolidays.push({ day: day, ...window.holidaysDB[key] }); 
+            } 
+        }
+        
+        foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
+        
+        if(foundHolidays.length === 0) { 
+            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = foundHolidays.map(h => {
+            let html = '';
+            let dayPad = h.day.toString().padStart(2, '0');
+            let fullDateStr = `${dayPad}.${currentMonthStr}.${cYear}`;
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem; color:#fdfbf7;">${h.day}.${currentMonthStr}.</strong><br>`;
+            let hoverEffect = `onmouseover="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateX(4px)';" onmouseout="this.style.background=''; this.style.transform='translateX(0)';"`;
+
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverEffect} style="border-left-color: #ef4444 !important;"><span style="color:#ef4444; pointer-events:none;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverEffect} style="border-left-color: #3b82f6 !important;"><span style="color:#3b82f6; pointer-events:none;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverEffect} style="border-left-color: #f97316 !important; background: rgba(249, 115, 22, 0.15);"><span style="color:#fbd38d; pointer-events:none;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem; color:#f97316;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverEffect} style="border-left-color: #a855f7 !important; background: rgba(168, 85, 247, 0.15);"><span style="color:#e9d8fd; pointer-events:none;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem; color:#a855f7;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            return html;
+        }).join('');
+    };
+
+    // ----------------------------------------------------------------
+    // 4. KALPLERIM ZÄHLER FIX
+    // ----------------------------------------------------------------
     window.updateMyHeartsBadge = function() {
         if (!window.currentUser) { window.forceBadge('header-my-hearts-badge', 0, false); return; }
-        
         let totalMyHearts = 0;
         let uName = window.currentUser.username;
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
-
-        // Immer frisch aus dem Speicher holen
         let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
-        
         let myWorks = [];
         
-        // Sammle alle aktuell EXISTIERENDEN Werke
         if (isAdmin) {
             if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB);
             let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
@@ -8566,44 +8763,29 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if (window.userPoemsDB) myWorks = window.userPoemsDB.filter(p => p.username === uName);
         }
 
-        // Zähle NUR die Herzen, deren Gedichte auch wirklich noch in 'myWorks' sind!
         myWorks.forEach(p => {
             if (p && p.id && freshDB[p.id] && freshDB[p.id].ratings) {
-                for(let k in freshDB[p.id].ratings) {
-                    let r = freshDB[p.id].ratings[k];
+                for(let liker in freshDB[p.id].ratings) {
+                    let r = freshDB[p.id].ratings[liker];
                     totalMyHearts += (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
                 }
             }
         });
-        
         window.forceBadge('header-my-hearts-badge', totalMyHearts, true);
     };
 
-    // 2. MODAL LISTE & KOMPAKTE SYMBOL-BUTTONS
+    // ----------------------------------------------------------------
+    // 5. KALPLERIM MODAL (CHRONOLOGISCH, ICONS)
+    // ----------------------------------------------------------------
     window.renderMyHearts = function() {
         const list = document.getElementById('my-hearts-list');
         if(!list) return;
-        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span></div>'; return; }
+        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın.</div>'; return; }
 
         let uName = window.currentUser.username;
         let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
         let heartsData = [];
-        let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-
-        const getPoemTitle = (id) => {
-            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Eser'; }
-            if (window.contentDB) {
-                for (let cat in window.contentDB) {
-                    if(Array.isArray(window.contentDB[cat])) { 
-                        let f = window.contentDB[cat].find(x => x.id === id); 
-                        if (f) return f.trTitle || f.title || f.deTitle || 'Eser'; 
-                    }
-                }
-            }
-            if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bilmece'; }
-            if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bulmaca'; }
-            return 'Eser';
-        };
+        let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
 
         let myWorks = [];
         if (isAdmin) {
@@ -8615,8 +8797,22 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             if (window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
             if (window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
         } else {
-            if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB.filter(p => p.username === uName));
+            if (window.userPoemsDB) myWorks = window.userPoemsDB.filter(p => p.username === uName);
         }
+
+        const getPoemTitle = (id) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Eser'; }
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            for (let cat in fullDB) {
+                if(Array.isArray(fullDB[cat])) { 
+                    let f = fullDB[cat].find(x => x.id === id); 
+                    if (f) return f.trTitle || f.title || f.deTitle || 'Eser'; 
+                }
+            }
+            if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bilmece'; }
+            if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bulmaca'; }
+            return 'Eser';
+        };
 
         myWorks.forEach(p => {
             if (p && p.id && freshDB[p.id] && freshDB[p.id].ratings) {
@@ -8624,7 +8820,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     let r = freshDB[p.id].ratings[liker];
                     let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
                     let time = (typeof r === 'object' && r !== null && r.time) ? r.time : '<span style="font-style:italic; color:#64748b;">Bilinmiyor</span>';
-                    
                     let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
                     if (ts === 0 && typeof time === 'string' && time.trim() !== '' && !time.includes('Bilinmiyor')) {
                         let cleanTime = time.replace(/<[^>]*>?/gm, '').trim(); 
@@ -8637,7 +8832,7 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         });
 
         if(heartsData.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz kalp bırakılmamış.<br><span class="de-sub">(Noch keine Herzen erhalten)</span></div>';
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz kalp bırakılmamış.</div>';
             return;
         }
 
@@ -8673,7 +8868,6 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                                     </div>
                                 </div>
                             </div>
-                            
                             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                                 ${adminActions}
                                 <div style="color:#ef4444; font-weight:900; font-size:1.3rem; background:rgba(239,68,68,0.1); padding:6px 12px; border-radius:12px; filter:drop-shadow(0 0 5px rgba(239,68,68,0.3)); margin-left: 6px;">${h.val} ❤️</div>
@@ -8683,41 +8877,30 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         }).join('');
     };
 
-    // 3. RADIKALES LÖSCHEN
     window.deleteAdminHeart = function(liker, poemId) {
         window.customConfirm("Bu like'ı silmek istediğinizden emin misiniz? <span class='de-sub'>(Dieses Like löschen?)</span>", () => {
             let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-            
             if (freshDB[poemId] && freshDB[poemId].ratings && freshDB[poemId].ratings[liker]) {
                 delete freshDB[poemId].ratings[liker];
                 localStorage.setItem('misaliHeartsDB', JSON.stringify(freshDB));
                 window.poemDataStore = freshDB; 
                 window.lastLocalUpdate = Date.now() + 5000;
-                
                 window.renderMyHearts(); 
-                window.updateMyHeartsBadge(); 
-                
                 if(window.initContent) window.initContent(); 
                 if(window.renderUserWorksGrid) window.renderUserWorksGrid();
                 if(window.renderTopWorks) window.renderTopWorks();
-                
                 if(window.currentPoemData && window.currentPoemData.id === poemId) {
                     if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal')) {
                         if(window.updateHeartsUI) window.updateHeartsUI();
                     }
                 }
-
                 try { if (typeof database !== 'undefined') database.ref('misaliData/heartsDB').set(freshDB); } catch(err) {}
                 if(window.syncToCloud) window.syncToCloud(); 
-                
-                window.showToast("Like başarıyla silindi ve sıfırlandı. <span class='de-sub'>(Zurückgesetzt)</span>");
-            } else {
-                window.showToast("Hata: Like bulunamadı.");
+                window.showToast("Like başarıyla silindi. <span class='de-sub'>(Gelöscht)</span>");
             }
         });
     };
 
-    // 4. ADMIN BEDANKEN NACHRICHT
     window.openWriteThankYouModal = function(liker, poemId) {
         let uObj = window.userDatabase[liker] || {};
         let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : liker;
@@ -8726,18 +8909,13 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         let inputEl = document.getElementById('thank-you-message-text');
         if(inputEl) inputEl.value = ''; 
         let sendBtn = document.getElementById('send-thank-you-btn');
-        if(sendBtn) {
-            sendBtn.onclick = function() { window.sendThankYouMessage(liker); };
-        }
+        if(sendBtn) { sendBtn.onclick = function() { window.sendThankYouMessage(liker); }; }
         window.openFastModal('write-thank-you-modal');
     };
 
     window.sendThankYouMessage = function(toUser) {
         let text = document.getElementById('thank-you-message-text').value.trim();
-        if (!text) {
-            window.customAlert('Mesaj boş olamaz! <span class="de-sub">(Nachricht ist leer!)</span>', '⚠️');
-            return;
-        }
+        if (!text) { window.customAlert('Mesaj boş olamaz! <span class="de-sub">(Nachricht ist leer!)</span>', '⚠️'); return; }
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
         if(window.sendSystemMessage) {
             window.sendSystemMessage(toUser, `<strong style="color:#f4c542;">${fullName} (Admin):</strong> ${text}`);
@@ -8746,50 +8924,84 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
         window.showToast('Mesaj gönderildi! <span class="de-sub">(Nachricht gesendet)</span>');
     };
 
-    // 5. MOBILE & DESKTOP ROBUST-INIT (Zwingt den Zähler, zu warten bis das Handy bereit ist)
-    let mobileRetry = 0;
-    let mobileBadgeInterval = setInterval(() => {
-        if(window.updateMyHeartsBadge) {
-            window.updateMyHeartsBadge();
-            mobileRetry++;
-            if(mobileRetry >= 5) clearInterval(mobileBadgeInterval);
+    // ----------------------------------------------------------------
+    // 6. OMNISCIENT ADMIN TRACKER
+    // ----------------------------------------------------------------
+    window.notifyAdmin = function(actionDesc) {
+        if(!window.currentUser || window.currentUser.role === 'admin' || window.currentUser.username === 'AdminKing') return;
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        if(window.sendSystemMessage) {
+            window.sendSystemMessage('Admin', `👁️ TAKİP (Tracker): <strong style="color:#22d3ee;">${fullName}</strong> ${actionDesc}`);
         }
-    }, 1000);
-
-    <!-- ==================================================================
-     🚀 MEGA ULTRA ZUSATZFUNKTIONEN: HAPTIC ENGINE & SMART SCROLL
-     ================================================================== -->
-    // 1. SMART SCROLL AUTO-CLOSE
-    // Wenn das Menü offen ist und der User scrollt, schließt es sich sanft automatisch!
-    window.addEventListener('scroll', function() {
-        let leftBtn = document.querySelector('.floating-menu-wrapper.left .menu-toggle-btn');
-        let rightBtn = document.querySelector('.floating-menu-wrapper.right .menu-toggle-btn');
-        
-        if ((leftBtn && leftBtn.classList.contains('open')) || (rightBtn && rightBtn.classList.contains('open'))) {
-            if (window.closeFloatingMenus) window.closeFloatingMenus();
-        }
-    }, { passive: true });
-
-    // 2. HAPTIC FEEDBACK ENGINE (Native App Vibration)
-    // Lässt das Handy beim Tippen leicht vibrieren (wie bei einer echten App)
-    window.vibrateAction = function(intensity = 30) {
-        try { 
-            // Greift auf den Vibrationsmotor des Smartphones zu (sofern unterstützt)
-            if (navigator.vibrate) navigator.vibrate(intensity); 
-        } catch(e) {}
     };
 
-    // Klinkt sich vollautomatisch in ALLE klickbaren Elemente der Seite ein!
-    document.addEventListener('pointerdown', function(e) {
-        // Sucht, ob der Klick auf einem Element stattfand, das man drücken kann
-        let clickable = e.target.closest('button, .clickable-header-item, .card, .game-card, .mem-card, .holiday-item, .search-suggestion-item, .zodiac-badge, .fal-cup, .analog-clock, .simon-btn');
-        
-        if (clickable && !clickable.disabled) {
-            window.vibrateAction(30); // 30 Millisekunden Premium-Vibration
+    if (!window.hasInjectedTracker) {
+        const origToggleSaveItem = window.toggleSaveItem;
+        window.toggleSaveItem = function(id, e) {
+            if(origToggleSaveItem) origToggleSaveItem(id, e);
+            setTimeout(() => {
+                if(!window.currentUser) return;
+                let uName = window.currentUser.username;
+                let isSaved = window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(id);
+                window.notifyAdmin(isSaved ? "Aklımda (Favoriler) listesine bir eser ekledi." : "Aklımda listesinden bir eser çıkardı.");
+            }, 100);
+        };
+        const origOpenPoem = window.openPoemModal;
+        window.openPoemModal = function(id, type) {
+            if(origOpenPoem) origOpenPoem(id, type);
+            setTimeout(() => {
+                let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+                window.notifyAdmin(`«${title}» adlı eseri açtı ve okuyor.`);
+            }, 200);
+        };
+        const origOpenUserPoem = window.openUserPoemModal;
+        window.openUserPoemModal = function(id) {
+            if(origOpenUserPoem) origOpenUserPoem(id);
+            setTimeout(() => {
+                let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+                window.notifyAdmin(`«${title}» adlı kullanıcı eserini inceledi.`);
+            }, 200);
+        };
+        const origOpenPuzzle = window.openPuzzleModal;
+        window.openPuzzleModal = function(id, type) {
+            if(origOpenPuzzle) origOpenPuzzle(id, type);
+            setTimeout(() => {
+                let title = window.currentBilmeceItem ? (window.currentBilmeceItem.trTitle || window.currentBilmeceItem.title || 'Oyun') : 'Oyun';
+                window.notifyAdmin(`«${title}» adlı bulmacayı/oyunu açtı.`);
+            }, 200);
+        };
+        const origShareWP = window.shareToWhatsApp;
+        window.shareToWhatsApp = function() {
+            if(origShareWP) origShareWP();
+            let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+            window.notifyAdmin(`«${title}» adlı eseri WhatsApp'ta paylaştı.`);
+        };
+        const origCopy = window.copyShareText;
+        window.copyShareText = function() {
+            if(origCopy) origCopy();
+            let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+            window.notifyAdmin(`«${title}» adlı eserin metnini kopyaladı.`);
+        };
+        const origShareQuick = window.shareItemQuick;
+        window.shareItemQuick = function(id, type, method) {
+            if(origShareQuick) origShareQuick(id, type, method);
+            let methodTr = method === 'whatsapp' ? "WhatsApp'ta paylaştı" : "kopyaladı";
+            window.notifyAdmin(`bir eseri hızlı menüden ${methodTr}.`);
+        };
+        window.hasInjectedTracker = true;
+    }
+
+    // ----------------------------------------------------------------
+    // 7. BACKGROUND LOOP
+    // ----------------------------------------------------------------
+    setInterval(() => {
+        if (window.currentUser) {
+            if (window.updateSavedBadge) window.updateSavedBadge();
+            if (window.updateMyHeartsBadge) window.updateMyHeartsBadge();
         }
-    }, { passive: true });
+    }, 1500);
 
-
+})();
 </script>
 </body>
 </html>
