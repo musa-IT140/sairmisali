@@ -780,7 +780,7 @@ nav#main-nav, nav {
         margin: 0 !important;
     }
 
-  /* --- KOMPAKTER STACK FÜR MOBILE --- */
+  /* /* --- KOMPAKTER STACK FÜR MOBILE --- */
         
         /* 🚀 KLICK-BLOCKADE BEHEBEN: Unsichtbare Hüllen durchlässig machen! */
         #main-header, #main-header .header-top, #main-header .header-left, #main-header .header-right { 
@@ -807,31 +807,38 @@ nav#main-nav, nav {
             position: relative !important;
         }
         
-        /* Wetter absolut nach rechts oben */
+        /* Geringerer Abstand bei Uhrzeit/Datum */
+        #main-header .datetime-container {
+            gap: 4px !important;
+        }
+        
+        /* Wetter absolut nach rechts oben (noch kompakter) */
         #main-header #header-weather-widget, 
         #main-header .weather-widget { 
             position: absolute !important;
-            top: 48px !important; 
-            right: 12px !important;
+            top: 45px !important; 
+            right: 8px !important;
             left: auto !important; 
             margin: 0 !important; 
             padding: 4px 8px !important; 
             border-radius: 8px !important; 
-            transform: scale(0.75) !important; 
+            transform: scale(0.65) !important; 
             transform-origin: right top !important; 
+            z-index: 50 !important;
         }
 
-        /* Glocke absolut genau unter das Wetter setzen */
+        /* Glocke absolut genau unter das Wetter setzen (näher dran) */
         #main-header #user-notify-btn { 
             position: absolute !important;
-            top: 86px !important; 
-            right: 15px !important;
+            top: 76px !important; 
+            right: 12px !important;
             left: auto !important; 
             margin: 0 !important;
             padding: 8px !important; 
             border-radius: 8px !important; 
-            transform: scale(0.85) !important; 
+            transform: scale(0.7) !important; 
             transform-origin: right top !important; 
+            z-index: 50 !important;
         }
 
         /* Zeile 3: Giriş und Kayıt Ol */
@@ -848,31 +855,31 @@ nav#main-nav, nav {
             margin: 5px 1% 0 1% !important; 
         }
 
-        /* Profil - Normale, gut lesbare Größe */
+        /* Profil */
         #main-header .user-profile-group { 
             order: 6 !important; 
             flex: 0 0 100% !important; 
             justify-content: center !important; 
-            transform: scale(0.95) !important; 
+            transform: scale(0.9) !important; 
             margin-top: 5px !important; 
         }
 
-        /* Stats (Admin) Kayıtlı/Aktif/Ziyaretçi - Sauber einzeilig durch Schriftgröße */
+        /* FIX: Stats (Admin) Kayıtlı/Aktif/Ziyaretçi - Zentriert mit Platz links/rechts */
         #main-header .header-user-stats { 
             order: 7 !important; 
-            flex: 0 0 100% !important; 
+            flex: 0 0 92% !important; /* Nimmt nicht mehr 100% ein, lässt Platz am Rand */
+            margin: 5px 4% 0 4% !important; /* Zentriert mit 4% Platz links und rechts */
             justify-content: center !important; 
             transform: none !important; 
-            margin-top: 5px !important; 
             padding: 4px !important; 
             white-space: nowrap !important; 
             overflow: visible !important;
-            font-size: 0.75rem !important; /* Schrift verkleinert, damit es passt */
+            font-size: 0.72rem !important; 
+            border-radius: 12px !important;
         }
         #main-header #header-stats-text {
             white-space: nowrap !important;
         }
-        /* Winzige Übersetzung für Admin-Stats, eingefügt in die Zeile */
         #main-header .header-user-stats .de-sub {
             display: inline-block !important; 
             font-size: 0.6em !important; 
@@ -880,59 +887,68 @@ nav#main-nav, nav {
             vertical-align: baseline !important;
         }
 
-        /* FIX: Zeile 4 Zähler Reihe (Canlı, etc.) - EXAKT EINE ZEILE, ÜBERSETZUNG UNTEN! */
+        /* FIX: Zeile 4 Zähler Reihe - EXAKT EINE ZEILE */
         #main-header .header-stats-row { 
             order: 8 !important; 
             flex: 0 0 100vw !important; 
             width: 100vw !important;
             margin-left: -2% !important; 
-            justify-content: space-evenly !important; /* Verteilt die 4 Punkte perfekt */
-            align-items: flex-start !important; /* Wichtig für sauberen Text-Umbruch */
-            overflow-x: hidden !important; /* Schaltet das Scrollen/Wischen ab */
+            justify-content: space-evenly !important; 
+            align-items: flex-start !important; 
+            overflow: visible !important; 
             flex-wrap: nowrap !important; 
-            padding: 8px 1% !important; 
+            padding: 8px 1% 16px 1% !important; /* Extra Padding unten für die Übersetzungen! */
             gap: 2px !important; 
-            transform: none !important; /* KEIN scale() mehr! */
+            transform: none !important; 
             border-top: 1px solid rgba(244,197,66,0.2) !important; 
             border-bottom: 1px solid rgba(244,197,66,0.2) !important; 
             margin-top: 5px !important; 
         }
         
-        /* Flexbox-Trick: Zwingt die deutsche Übersetzung nach ganz unten */
+        /* Die Zähler-Items anpassen: Alles in EINE Linie zwingen */
         #main-header .header-stats-row .clickable-header-item {
             display: flex !important;
-            flex-wrap: wrap !important; /* Erlaubt den Umbruch innerhalb des Buttons */
+            flex-direction: row !important;
+            flex-wrap: nowrap !important; /* Zwingt Icon + Wort + Zähler in EINE Linie */
             justify-content: center !important;
             align-items: center !important;
-            font-size: 0.72rem !important; /* Sehr kompakt */
+            font-size: 0.68rem !important; 
             padding: 0 !important;
-            text-align: center !important;
+            position: relative !important; /* Wichtig für die absolute Positionierung der .de-sub */
         }
         #main-header .header-stats-row .clickable-header-item i {
-            font-size: 0.85rem !important;
+            font-size: 0.8rem !important;
             margin-right: 3px !important;
         }
+        
+        /* Zähler-Badge MUSS neben dem Text bleiben */
         #main-header .header-stats-row .badge-count {
-            font-size: 0.65rem !important;
-            padding: 2px 4px !important;
-            min-width: 16px !important;
-            margin-left: 3px !important;
-            order: 2 !important; /* Bleibt in der 1. Zeile neben dem türkischen Wort */
+            position: relative !important;
+            top: 0 !important; right: 0 !important;
+            font-size: 0.6rem !important;
+            padding: 1px 4px !important;
+            min-width: 14px !important;
+            margin-left: 4px !important;
+            transform: none !important;
         }
         
-        /* GANZ WICHTIG: Setzt die Übersetzung zentriert und winzig darunter */
+        /* MAGIE: Setzt die deutsche Übersetzung unsichtbar absolut nach unten, damit sie das Türkische nicht verschiebt! */
         #main-header .header-stats-row .de-sub {
-            display: block !important;
-            width: 100% !important; /* Zwingt den Umbruch zur nächsten Zeile */
-            font-size: 0.65em !important;
+            position: absolute !important;
+            bottom: -12px !important; /* Schiebt es genau unter das Icon/Wort */
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            font-size: 0.55rem !important;
             color: #94a3b8 !important;
-            margin-top: 3px !important;
-            margin-left: 0 !important;
-            order: 10 !important; /* Schiebt es garantiert nach unten */
+            margin: 0 !important;
+            white-space: nowrap !important;
+            display: block !important;
         }
 
         /* Zeile 5: Navigation */
         #main-header .header-nav-bar { order: 9 !important; flex: 0 0 100vw !important; margin-left: -2% !important; padding: 5px 0 !important; height: 45px !important; margin-bottom: 0 !important; border-top: none !important; position: relative !important; z-index: 100 !important; }
+        #main-header nav#main-nav { gap: 10px !important; }
+        #main-header nav button { padding: 4px 8px !important; font-size: 0.85rem !important; }
         
 /* ADMIN-AKTIONEN FÜR KALPLERIM - MINIMAL-STYLE ALS MINI-ICONS */
         .admin-heart-actions {
