@@ -9107,6 +9107,141 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     }, 1500);
 
 })();
+
+<style>
+/* 🍎 iOS ANTI-FREEZE CSS 🍎 */
+@supports (-webkit-touch-callout: none) {
+    /* 1. Blur-Effekt vernichten (Der Hauptgrund für iOS-GPU-Crashes!) */
+    #modal-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background-color: rgba(0, 0, 0, 0.98) !important; /* Solides, tiefes Schwarz */
+        transform: translateZ(0) !important;
+        will-change: auto !important;
+    }
+    
+    /* 2. Modal-Animationen extrem vereinfachen, um den Speicher zu schonen */
+    .modal-content {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    
+    /* 3. Scrolling-Freeze beim Body verhindern */
+    body.modal-open {
+        touch-action: none !important; /* Verhindert das "Ziehen" der ganzen Seite */
+    }
+    
+    /* 4. Erlaubt flüssiges Scrollen IN der Karte */
+    .modal-body {
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-y !important; 
+    }
+}
+</style>
+
+(function() {
+    // ----------------------------------------------------------------
+    // 🚀 iOS SCROLL & FREEZE MANAGER (Das Herzstück des Fixes)
+    // ----------------------------------------------------------------
+    let iosScrollPosition = 0;
+
+    window.closeAllModals = function(force=false) { 
+        document.querySelectorAll('.modal.active-modal').forEach(m => m.classList.remove('active-modal')); 
+        
+        // iOS Scroll-Position sicher wiederherstellen
+        if (document.body.classList.contains('modal-open')) {
+            document.body.classList.remove('modal-open'); 
+            if (document.body.style.position === 'fixed') {
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                window.scrollTo(0, iosScrollPosition);
+            }
+        }
+        
+        // Hintergrund sofort ausblenden, keine Timeouts!
+        let bd = document.getElementById('modal-backdrop');
+        if(bd) {
+            bd.style.display = 'none';
+            bd.classList.remove('show-backdrop');
+        }
+    };
+    
+    window.closeTopModal = function(e) { 
+        if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
+        if(e === 'force') { window.closeAllModals(); return; }
+        
+        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
+        if(modals.length > 0) {
+            modals[modals.length - 1].classList.remove('active-modal');
+        }
+        
+        if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+            window.closeAllModals();
+        }
+    };
+
+    window.openFastModal = function(id) { 
+        try {
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                document.activeElement.blur();
+            }
+            window.closeAllSidebars(); 
+            
+            // CRASH-SCHUTZ: Anstatt den Hintergrund flackern zu lassen, tauschen wir nur die Karte aus!
+            document.querySelectorAll('.modal.active-modal').forEach(m => { 
+                if (m.id !== id) m.classList.remove('active-modal'); 
+            });
+            
+            const m = document.getElementById(id); 
+            if(m) { 
+                // iOS Body-Lock (Verhindert Hintergrund-Scrollen perfekt)
+                if (!document.body.classList.contains('modal-open')) {
+                    iosScrollPosition = window.scrollY;
+                    document.body.classList.add('modal-open'); 
+                    
+                    // Nur auf iOS iPhones/iPads den harten Position-Fix anwenden
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+                        document.body.style.position = 'fixed';
+                        document.body.style.top = `-${iosScrollPosition}px`;
+                        document.body.style.width = '100%';
+                    }
+                }
+                
+                // Backdrop nur einblenden, wenn es nicht schon da ist!
+                let bd = document.getElementById('modal-backdrop'); 
+                if(bd && bd.style.display !== 'block') {
+                    bd.style.display = 'block'; 
+                    bd.classList.add('show-backdrop');
+                }
+                
+                m.classList.add('active-modal'); 
+                m.style.zIndex = '100000';
+                
+                // Modal-Routing
+                if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
+                if(id === 'profileEditModal' && window.currentUser) {
+                    if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-edit-profile', 'edit-emoji', 'selected-edit-emoji', window.currentUser.emoji || '👤');
+                    document.getElementById('edit-name').value = window.currentUser.name || '';
+                    document.getElementById('edit-surname').value = window.currentUser.surname || '';
+                    document.getElementById('edit-day').value = window.currentUser.day || '';
+                    document.getElementById('edit-month').value = window.currentUser.month || '';
+                    document.getElementById('edit-year').value = window.currentUser.year || '';
+                    document.getElementById('edit-pass').value = ''; 
+                }
+                if(id === 'eventsModal' && window.renderCalendar) window.renderCalendar();
+                if(id === 'adminPendingModal' && window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+                if(id === 'userMessagesModal' && window.renderUserMessages) window.renderUserMessages();
+                if(id === 'adminMessagesModal' && window.renderAdminMessages) window.renderAdminMessages();
+                if(id === 'leaderboardModal' && window.renderLeaderboard) window.renderLeaderboard(); 
+                if(id === 'adminUsersModal' && window.renderOnlineUsers) window.renderOnlineUsers(); 
+                if(id === 'weatherModal' && window.fetchWeather) window.fetchWeather();
+                if(id === 'savedItemsModal' && window.renderSavedItems) window.renderSavedItems();
+            } 
+        } catch(e) { console.error("Modal error:", e); }
+    };
+})();
 </script>
 </body>
 </html>
