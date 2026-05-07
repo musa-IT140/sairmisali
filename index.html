@@ -1188,61 +1188,75 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 MEGA FIX: MOBILE HEADER, BUTTONS & iOS (APPLE) SPEZIFISCHES DESIGN
+   📱 MEGA FIX: MOBILE HEADER, SWIPE-ZÄHLER & iOS (APPLE) DESIGN
    ========================================================================== */
 @media (max-width: 768px) {
     /* 1. Header extrem kompakt machen */
-    header#main-header { padding: 4px 1% 0 1% !important; gap: 4px !important; }
+    header#main-header { padding: 4px 1% 0 1% !important; gap: 4px !important; display: flex !important; flex-direction: column !important; }
     #main-header .logo { font-size: 1.45rem !important; } 
     #main-header .header-search { height: 32px !important; margin-bottom: 2px !important; flex: 0 0 100% !important;}
     #main-header .header-search input { font-size: 0.8rem !important; padding: 2px 10px !important; }
     #main-header .datetime-container { font-size: 0.65rem !important; }
     
-    /* 2. Login & Registrieren Buttons nebeneinander! */
-    #main-header .auth-view-btn {
-        flex: 0 0 48% !important; /* Zwingt sie auf exakt 48% Breite */
-        max-width: 48% !important;
-        margin: 2px 1% !important; /* Minimaler Abstand */
-        padding: 6px !important;
+    /* 2. Login & Registrieren: Nebeneinander, aber NUR für Gäste sichtbar! */
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
         display: flex !important;
+        flex: 0 0 48% !important;
+        max-width: 48% !important;
+        margin: 2px 1% !important;
+        padding: 6px !important;
+    }
+    body.user-mode #main-header .auth-view-btn,
+    body.admin-mode #main-header .auth-view-btn {
+        display: none !important; /* Absolut unsichtbar, wenn eingeloggt! */
     }
 
-    /* 3. Admin-Stats (Kayıtlı, vb.): Nur für Admin, Einzeilig! */
-    #main-header .header-user-stats { 
-        display: none !important; /* Absolut versteckt für User (Fatma) und Gäste */
-    }
+    /* 3. Profil-Bereich zentrieren */
+    #main-header .user-profile-group { width: 100% !important; justify-content: center !important; margin-top: 2px !important; }
+
+    /* 4. Admin-Stats (Kayıtlı, vb.): Nur für Admin, Einzeilig! */
+    #main-header .header-user-stats { display: none !important; }
     body.admin-mode #main-header .header-user-stats {
-        display: flex !important; /* Nur sichtbar wenn du Admin bist */
-        white-space: nowrap !important; /* Zwingt alles auf EINE Zeile */
-        font-size: 0.5rem !important; /* Sehr kompakt */
+        display: flex !important; 
+        white-space: nowrap !important; 
+        font-size: 0.55rem !important; 
         margin: 2px auto !important; 
-        padding: 3px 6px !important; 
+        padding: 4px 6px !important; 
         width: max-content !important; 
         max-width: 98% !important;
         justify-content: center !important;
         border-radius: 8px !important;
     }
-    body.admin-mode #main-header #header-stats-text { white-space: nowrap !important; }
     
-    /* 4. Zähler-Reihe (Kalplerim passt jetzt perfekt in den Bildschirm!) */
+    /* 5. Zähler-Reihe (SWIPE-FUNKTION! Verhindert das Abschneiden) */
     #main-header .header-stats-row { 
-        padding: 2px 0 10px 0 !important; 
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important; /* Erlaubt horizontales Wischen */
+        -webkit-overflow-scrolling: touch !important; /* Sanftes Wischen auf iOS */
+        scrollbar-width: none !important; /* Versteckt Scrollbar */
+        padding: 4px 5px 12px 5px !important; 
         margin-top: 2px !important; 
         width: 100% !important;
-        justify-content: space-evenly !important; /* Verteilt Platz perfekt */
-        gap: 1px !important;
+        justify-content: flex-start !important; 
+        gap: 12px !important;
     }
+    #main-header .header-stats-row::-webkit-scrollbar { display: none !important; }
+    
     #main-header .header-stats-row .clickable-header-item { 
-        font-size: 0.5rem !important; /* Schrift minimiert für iPhones */
-        padding: 0 !important;
+        font-size: 0.6rem !important; 
+        flex-shrink: 0 !important; /* Verhindert, dass Text gequetscht wird */
     }
-    #main-header .header-stats-row .clickable-header-item i { font-size: 0.75rem !important; margin-right: 2px !important; }
+    #main-header .header-stats-row .clickable-header-item i { font-size: 0.8rem !important; margin-right: 3px !important; }
     #main-header .header-stats-row .badge-count {
-        min-width: 12px !important;
-        padding: 1px 3px !important;
-        font-size: 0.45rem !important;
-        margin-left: 2px !important;
+        min-width: 14px !important;
+        padding: 1px 4px !important;
+        font-size: 0.5rem !important;
+        margin-left: 3px !important;
     }
+
+    #main-header .header-nav-bar { height: 42px !important; padding: 2px 0 !important; width: 100% !important;}
+    nav button { font-size: 0.85rem !important; padding: 4px 8px !important; }
     
     /* Sidebar Kalender Fix für Mobile */
     .cal-holiday-sidebar {
@@ -1256,10 +1270,75 @@ nav#main-nav, nav {
         border-radius: 20px 0 0 20px !important;
         transform: translateX(100%); 
         box-shadow: -10px 0 30px rgba(0,0,0,0.8) !important;
-        transition: transform 0.3s ease-in-out !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     .cal-holiday-sidebar.open {
         transform: translateX(0) !important; 
+    }
+}
+
+/* 6. KALENDER TOGGLE BUTTON (Smart & Dynamisch) */
+#eventsModal.active-modal .holiday-toggle-btn {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    position: fixed !important;
+    top: 50% !important;
+    right: 0 !important;
+    transform: translateY(-50%) !important;
+    z-index: 100060 !important; /* IMMER ÜBER DER SIDEBAR */
+    border-radius: 8px 0 0 8px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 15px 12px !important;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.5) !important;
+    background: linear-gradient(135deg, #f4c542, #b48608) !important;
+    color: #000 !important;
+    border: none !important;
+}
+#eventsModal.active-modal .holiday-toggle-btn.open {
+    right: 85vw !important; /* Fährt mit der Sidebar nach links! */
+    padding: 12px 10px !important; /* Wird etwas kleiner */
+    background: linear-gradient(135deg, #ef4444, #b91c1c) !important; /* Wird rot zum Schließen */
+    color: white !important;
+}
+@media (min-width: 768px) {
+    #eventsModal.active-modal .holiday-toggle-btn.open {
+        right: 250px !important; /* An Desktop-Breite angepasst */
+    }
+}
+
+/* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE & DESIGN 🍎 */
+@supports (-webkit-touch-callout: none) {
+    #modal-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background-color: rgba(0, 0, 0, 0.95) !important; 
+        transform: translateZ(0) !important;
+        will-change: auto !important;
+        transition: none !important; 
+    }
+    .modal.active-modal { display: flex !important; animation: none !important; }
+    .modal-content {
+        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0) !important;
+        will-change: transform, opacity !important;
+        animation: none !important; 
+    }
+    body.modal-open, html.modal-open {
+        overflow: hidden !important;
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+        touch-action: none !important;
+    }
+    .modal-body { -webkit-overflow-scrolling: touch !important; touch-action: pan-y !important; }
+    
+    @media (max-width: 768px) {
+        .card, .game-card { border-width: 0.5px !important; border-color: rgba(244, 197, 66, 0.5) !important; }
+        .modal-content { border-width: 0.5px !important; border-radius: 16px !important; }
+        .hero-title { font-weight: normal !important; -webkit-font-smoothing: subpixel-antialiased !important; }
+        input, select, textarea { font-size: 16px !important; }
+        body.admin-mode #main-header .header-user-stats { border-width: 0.5px !important; }
     }
 }
 
@@ -3368,8 +3447,9 @@ window.processCloudData = function(r, force = false) {
         const btn = document.getElementById('holidayToggleBtn');
         if(sidebar && btn) { 
             sidebar.classList.toggle('open'); 
-            btn.classList.toggle('open');
-            // Wechselt das Icon zu einem "X" wenn geöffnet
+            btn.classList.toggle('open'); 
+            
+            // Wechselt das Icon dynamisch: Lupe/Cheers zu X
             if(sidebar.classList.contains('open')) {
                 btn.innerHTML = '<i class="fas fa-times"></i>';
             } else {
