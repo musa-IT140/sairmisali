@@ -1472,205 +1472,132 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 MEGA FIX V7: LÜCKEN-KILLER, PERFEKTE ZÄHLER & FREIE SUCHE
+   📱 MEGA FIX V8: ABSOLUTE ÜBERLAPPUNGS-KILLER & NAVBAR FIX
    ========================================================================== */
 @media (max-width: 768px) {
-    /* 1. HEADER-BASIS: Ticker freistellen & Riesen-Lücke vernichten */
+    /* 1. HEADER-BASIS: Zwingt alles in ein vertikales, festes Raster */
     header#main-header {
         display: flex !important;
         flex-direction: column !important;
-        padding: 35px 2% 5px 2% !important; /* 35px Top-Padding: Holt die Suche UNTER dem Ticker hervor! */
+        padding: 40px 10px 10px 10px !important; /* Platz für den Ticker oben */
         height: auto !important;
-        position: relative !important; /* KEIN STICKY MEHR! Das schließt die gigantische Lücke zum Inhalt! */
+        position: relative !important; 
         z-index: 1000 !important;
-        box-shadow: none !important;
     }
 
-    /* 2. ELEMENTE IM HEADER: Sauber untereinander ohne Überlappung */
-    #main-header .header-top-row,
+    /* 2. TICKER FREISTELLEN */
+    #main-header .header-top-row {
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; right: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* 3. DER ÜBERLAPPUNGS-KILLER: Keine schwebenden Geister mehr! */
     #main-header .header-search,
     #main-header .header-right,
     #main-header .user-profile-group,
-    #main-header .header-stats-row {
-        position: relative !important; 
-        top: auto !important; right: auto !important; left: auto !important; bottom: auto !important;
-        transform: none !important;
+    #main-header .header-stats-row,
+    #main-header .logo,
+    #main-header .datetime-container {
+        position: static !important; /* Zwingt ALLES in den normalen Textfluss! */
         width: 100% !important;
-        margin: 0 0 6px 0 !important; 
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
+        margin: 5px 0 !important; 
+        transform: none !important;
         box-sizing: border-box !important;
     }
 
-    #main-header .logo { font-size: 1.4rem !important; margin-bottom: 2px !important; }
-    #main-header .header-search input { font-size: 0.8rem !important; padding: 4px 10px !important; height: 32px !important; }
-    #main-header .datetime-container { font-size: 0.6rem !important; }
+    /* Feinjustierung für Elemente im Header */
+    #main-header .logo { font-size: 1.5rem !important; text-align: center !important; }
+    #main-header .header-search input { font-size: 0.85rem !important; padding: 6px 12px !important; height: 36px !important; width: 100% !important; box-sizing: border-box !important; }
+    #main-header .datetime-container { font-size: 0.65rem !important; text-align: center !important; }
     
-    #main-header .user-profile-group { gap: 8px !important; flex-wrap: wrap !important; }
-    #main-header .user-profile-group .profile-pic { width: 32px !important; height: 32px !important; }
-    #main-header .user-profile-group .user-greeting { font-size: 0.85rem !important; }
-    #main-header .user-profile-group .points-badge { font-size: 0.65rem !important; padding: 2px 6px !important; }
-
-    /* 3. LÜCKE ZUM INHALT SCHLIESSEN (Zieht alles nach oben!) */
-    body { padding-top: 0 !important; }
-    #main-wrapper, .main-wrapper, main, #main-content, .main-content, .content-area {
-        margin-top: 5px !important; /* Zerstört den Desktop-Abstand */
-        padding-top: 5px !important;
-    }
-    h1.hero-title, h1.page-title, .hero-section {
-        margin-top: 5px !important;
-        padding-top: 5px !important;
+    #main-header .user-profile-group { 
+        display: flex !important; 
+        flex-direction: row !important; 
+        justify-content: center !important; 
+        align-items: center !important; 
+        gap: 10px !important; 
     }
 
-    /* 4. Login & Register Buttons (Gast) */
+    /* 4. Login & Register Buttons (Gast) sauber nebeneinander */
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        display: inline-flex !important;
         width: 48% !important;
         margin: 0 1% !important;
-        padding: 6px 4px !important;
-        font-size: 0.8rem !important;
+        padding: 8px 4px !important;
+        font-size: 0.85rem !important;
+        justify-content: center !important;
     }
     body.user-mode #main-header .auth-view-btn,
     body.admin-mode #main-header .auth-view-btn {
         display: none !important;
     }
 
-    /* 5. Admin-Stats (Kayıtlı, Aktif...) */
-    #main-header .header-user-stats { display: none !important; }
-    body.admin-mode #main-header .header-user-stats {
-        display: block !important;
-        text-align: center !important;
-        white-space: nowrap !important;
-        font-size: 0.55rem !important;
-        margin: 2px auto 4px auto !important;
-        padding: 4px !important;
-        width: 96% !important;
-    }
-
-    /* 6. ZÄHLER-REIHE (Türkisch & Zähler in EINER Zeile, Deutsch drunter) */
+    /* 5. Zähler-Reihe (Gleichmäßig auf 4 Spalten verteilt) */
     #main-header .header-stats-row {
+        display: flex !important;
         justify-content: space-between !important;
-        padding: 5px 0 16px 0 !important; /* 16px Platz unten für die (Online) Texte */
-        gap: 2px !important;
+        padding: 5px 0 15px 0 !important;
     }
     #main-header .header-stats-row .clickable-header-item {
         flex: 1 1 0 !important;
-        display: flex !important;
-        flex-direction: row !important; /* TEXT UND ZÄHLER NEBENEINANDER! */
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 0.55rem !important;
+        font-size: 0.6rem !important;
         padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important; /* Symbol oben, Text unten */
+        align-items: center !important;
         position: relative !important;
-        white-space: nowrap !important;
-    }
-    #main-header .header-stats-row .clickable-header-item i { font-size: 0.7rem !important; margin-right: 3px !important; }
-    #main-header .header-stats-row .badge-count {
-        position: static !important; /* Zwingt den Zähler direkt neben das Wort! */
-        margin-left: 3px !important;
-        transform: none !important;
-        font-size: 0.5rem !important;
-        min-width: 12px !important;
-        padding: 1px 3px !important;
     }
     #main-header .header-stats-row .de-sub {
         position: absolute !important;
-        bottom: -14px !important; /* Schiebt das (Online) exakt unter "Canlı [4]" */
+        bottom: -14px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         font-size: 0.7em !important;
-        white-space: nowrap !important;
     }
 
-    /* 7. Navigationsleiste (Ana Sayfa etc.) */
-    #main-header .header-nav-bar { height: auto !important; padding: 4px 0 !important; width: 100% !important; flex-wrap: wrap !important; justify-content: center !important; gap: 6px !important; }
-    nav button { font-size: 0.8rem !important; padding: 6px 10px !important; margin: 0 !important; }
-
-    /* 8. GLOCKE SICHERN */
+    /* 6. GLOCKE SICHERN */
     #main-header #user-notify-btn {
         position: absolute !important;
-        top: 35px !important; /* Auf Höhe des Logos, weg vom Ticker! */
-        right: 5px !important;
-        transform: scale(0.85) !important;
+        top: 45px !important; /* Auf Höhe des Logos */
+        right: 15px !important;
         z-index: 1000 !important;
     }
 
-    /* 9. KALENDER SIDEBAR & BUTTON FIX */
-    .cal-holiday-sidebar {
-        position: fixed !important; 
-        top: 0 !important;
-        bottom: 0 !important; 
-        right: 0 !important;
-        width: 85vw !important;
-        max-width: 320px !important;
-        height: 100dvh !important; 
-        z-index: 100050 !important;
-        border-radius: 20px 0 0 20px !important; 
-        transform: translateX(100%); 
-        box-shadow: -10px 0 30px rgba(0,0,0,0.8) !important;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-    .cal-holiday-sidebar.open { transform: translateX(0) !important; }
-
-    #eventsModal.active-modal .holiday-toggle-btn {
-        position: fixed !important;
-        top: 50% !important;
-        right: 0 !important;
-        transform: translateY(-50%) !important;
-        z-index: 100060 !important;
-        border-radius: 8px 0 0 8px !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        padding: 12px 10px !important;
-        box-shadow: -2px 0 10px rgba(0,0,0,0.5) !important;
-        background: linear-gradient(135deg, #f4c542, #b48608) !important;
-        color: #000 !important;
-        border: none !important;
+    /* 7. NAVBAR SCROLL FIX ("Ana Sayfa" nicht mehr abgeschnitten) */
+    #main-header .header-nav-bar {
         display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        justify-content: flex-start !important; /* Setzt es nach LINKS anstatt mittig zu quetschen! */
+        padding: 5px 15px !important;
+        width: 100vw !important;
+        margin-left: -10px !important; /* Gleicht das Padding aus */
+        box-sizing: border-box !important;
     }
-    
-    #eventsModal.active-modal .holiday-toggle-btn.open {
-        right: auto !important;
-        left: 3vw !important; 
-        background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
-        color: white !important;
-        width: 45px !important;
-        height: 45px !important;
-        border-radius: 50% !important; 
-        padding: 0 !important; 
+    #main-header .header-nav-bar::-webkit-scrollbar { display: none !important; }
+
+    /* 8. LÜCKE ZUM INHALT SCHLIESSEN */
+    body { padding-top: 0 !important; }
+    main, #main-content, .main-content, .content-area, .main-wrapper {
+        margin-top: 15px !important; /* Lücke geschlossen! */
+        padding-top: 0 !important;
     }
+
+    /* 9. KARTEN KOMPAKTER MACHEN (iOS & Android) */
+    .card { padding: 12px !important; margin-bottom: 12px !important; min-height: auto !important; }
+    .card h3.clamp-text { font-size: 0.9rem !important; margin-bottom: 5px !important; }
 }
 
-/* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE 🍎 */
+/* 🍎 iOS ONLY ANTI-FREEZE 🍎 */
 @supports (-webkit-touch-callout: none) {
-    #modal-backdrop {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        background-color: rgba(0, 0, 0, 0.95) !important;
-        transform: translateZ(0) !important;
-        will-change: auto !important;
-        transition: none !important;
-    }
+    #modal-backdrop { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: rgba(0, 0, 0, 0.95) !important; transition: none !important; }
     .modal.active-modal { display: flex !important; animation: none !important; }
-    .modal-content {
-        transform: translateZ(0) !important;
-        -webkit-transform: translateZ(0) !important;
-        will-change: transform, opacity !important;
-        animation: none !important;
-    }
-    body.modal-open, html.modal-open {
-        overflow: hidden !important;
-        position: fixed !important;
-        width: 100% !important;
-        height: 100% !important;
-        touch-action: none !important;
-    }
-    .modal-body { -webkit-overflow-scrolling: touch !important; touch-action: pan-y !important; }
-
-    @media (max-width: 768px) {
-        input, select, textarea { font-size: 16px !important; }
-    }
+    .modal-content { animation: none !important; }
+    body.modal-open, html.modal-open { overflow: hidden !important; position: fixed !important; width: 100% !important; height: 100% !important; touch-action: none !important; }
+    @media (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
 }
     
 </style>
@@ -10117,6 +10044,54 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                 if(id === 'savedItemsModal' && window.renderSavedItems) window.renderSavedItems();
             } 
         } catch(e) { console.error("Modal error:", e); }
+    };
+})();
+
+(function() {
+    window.renderHolidays = function() {
+        const list = document.getElementById('holiday-list-content');
+        if(!list || !window.holidaysDB) return;
+        
+        let cMonth = typeof currentMonth !== 'undefined' ? currentMonth : new Date().getMonth();
+        let cYear = typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear();
+        let currentMonthStr = (cMonth + 1).toString().padStart(2, '0');
+        let foundHolidays = [];
+        
+        for(let key in window.holidaysDB) { 
+            if(key.startsWith(currentMonthStr)) { 
+                let day = key.split('-')[1]; 
+                foundHolidays.push({ day: day, ...window.holidaysDB[key] }); 
+            } 
+        }
+        
+        foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
+        
+        if(foundHolidays.length === 0) { 
+            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = foundHolidays.map(h => {
+            let html = '';
+            let dayPad = h.day.toString().padStart(2, '0');
+            let fullDateStr = `${dayPad}.${currentMonthStr}.${cYear}`;
+            
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768 && window.toggleHolidaySidebar) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem !important; color:#fdfbf7 !important;">${h.day}.${currentMonthStr}.</strong><br>`;
+            
+            // Unzerstörbare Styles mit border-left!
+            let styleTR = "border-left: 4px solid #ef4444 !important; background: rgba(0,0,0,0.6) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
+            let styleDE = "border-left: 4px solid #3b82f6 !important; background: rgba(0,0,0,0.6) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
+            let styleTRFerien = "border-left: 4px solid #f97316 !important; background: rgba(249, 115, 22, 0.15) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
+            let styleDEFerien = "border-left: 4px solid #a855f7 !important; background: rgba(168, 85, 247, 0.15) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
+
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleTR}"><span style="color:#ef4444 !important; pointer-events:none;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleDE}"><span style="color:#3b82f6 !important; pointer-events:none;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleTRFerien}"><span style="color:#fbd38d !important; pointer-events:none;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem !important; color:#f97316 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleDEFerien}"><span style="color:#e9d8fd !important; pointer-events:none;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem !important; color:#a855f7 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            
+            return html;
+        }).join('');
     };
 })();
 
