@@ -1472,168 +1472,186 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 MEGA FIX V10: ABSOLUTES RASTER, ZÄHLER OBEN & LÜCKEN-KILLER
+   📱 MEGA FIX V11: SAUBERES LAYOUT, KEINE ÜBERLAPPUNGEN
    ========================================================================== */
 
-/* 🤖 ALLGEMEIN MOBILE (ANDROID & BASIS FÜR iOS) 🤖 */
+/* 🤖 ALLGEMEIN MOBILE (ANDROID & iOS) 🤖 */
 @media (max-width: 768px) {
-    /* 1. HEADER GRID: Zwingt alles in eine vertikale Spalte */
+    /* 1. HEADER: Festes Flex-Raster, keine absoluten Positionen im Weg */
     header#main-header {
         display: flex !important;
         flex-direction: column !important;
-        padding: 35px 10px 10px 10px !important; /* 35px Puffer für den schwarzen Ticker oben */
+        align-items: center !important;
+        padding: 40px 10px 10px 10px !important; /* Platz für Ticker lassen */
         height: auto !important;
         position: relative !important; 
         z-index: 1000 !important;
-        gap: 12px !important; /* Fester Abstand zwischen jeder Reihe! */
+        gap: 12px !important; /* Gleichmäßiger Abstand zwischen allen Elementen */
     }
 
-    /* Ticker ganz nach oben klemmen */
+    /* Ticker ganz oben fixieren */
     #main-header .header-top-row {
         position: absolute !important;
-        top: 0 !important; left: 0 !important; right: 0 !important;
-        width: 100% !important; margin: 0 !important;
+        top: 0 !important; 
+        left: 0 !important; 
+        right: 0 !important;
+        width: 100% !important; 
+        margin: 0 !important;
     }
 
-    /* 2. ÜBERLAPPUNGS-KILLER: Bricht alle alten Koordinaten! */
+    /* 2. ZWANGS-RESET: Alle Elemente in den normalen Textfluss holen */
     #main-header .user-profile-group,
     #main-header .header-right,
     #main-header .header-search,
     #main-header .logo,
     #main-header .datetime-container,
-    #main-header .weather-badge,
-    #main-header #weather-container,
     #main-header .header-stats-row,
+    #main-header .header-user-stats,
     #main-header .header-nav-bar {
-        position: static !important; /* KEIN SCHWEBEN MEHR! */
-        top: auto !important; right: auto !important; bottom: auto !important; left: auto !important;
-        transform: none !important;
+        position: static !important; 
         width: 100% !important;
-        margin: 0 !important;
+        margin: 0 !important; 
+        transform: none !important;
         box-sizing: border-box !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
-    /* 3. REIHENFOLGE ERZWINGEN (Von oben nach unten) */
-    /* Profil (Şair Misal.i, Pokal etc.) */
+    /* 3. REIHENFOLGE FESTLEGEN (Flex Order) */
+    
+    /* Profil-Infos (eingeloggt) */
     #main-header .user-profile-group { 
         order: 1 !important; 
-        display: flex !important; 
         flex-wrap: wrap !important;
-        justify-content: center !important; 
-        align-items: center !important; 
         gap: 8px !important; 
     }
     #main-header .user-profile-group .profile-pic { width: 35px !important; height: 35px !important; }
     
-    /* Login & Register Buttons (Nur sichtbar, wenn ausgeloggt) */
-    #main-header .auth-view-btn-container, #main-header .header-right { 
-        order: 2 !important; 
-        display: flex !important; 
-        justify-content: center !important; 
+    /* Login & Register (ausgeloggt) */
+    #main-header .header-right { 
+        order: 1 !important; 
+        flex-direction: row !important;
         gap: 10px !important; 
     }
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
-        display: flex !important; width: 48% !important; justify-content: center !important; padding: 8px 4px !important; font-size: 0.85rem !important;
+        width: 48% !important; 
+        padding: 8px 4px !important; 
+        font-size: 0.85rem !important;
     }
-    body.user-mode #main-header .auth-view-btn, body.admin-mode #main-header .auth-view-btn { display: none !important; }
-
-    /* Suchleiste */
-    #main-header .header-search { order: 3 !important; }
-    #main-header .header-search input { width: 100% !important; height: 36px !important; font-size: 0.85rem !important; padding: 6px 12px !important; }
+    body.user-mode #main-header .auth-view-btn, 
+    body.admin-mode #main-header .auth-view-btn { display: none !important; }
 
     /* Logo & Datum */
-    #main-header .logo { order: 4 !important; text-align: center !important; font-size: 1.5rem !important; }
-    #main-header .datetime-container { order: 5 !important; text-align: center !important; font-size: 0.65rem !important; }
+    #main-header .logo { order: 2 !important; font-size: 1.6rem !important; margin-bottom: -5px !important; }
+    #main-header .datetime-container { order: 3 !important; font-size: 0.7rem !important; flex-direction: row !important; gap: 15px !important;}
 
-    /* 4. DIE GLOCKE (Absolut oben rechts fixiert) */
-    #main-header #user-notify-btn {
-        position: absolute !important;
-        top: 35px !important; /* Exakt unter dem Ticker */
-        right: 15px !important;
-        z-index: 1001 !important;
-        margin: 0 !important;
-        transform: scale(0.9) !important;
+    /* Suchleiste */
+    #main-header .header-search { order: 4 !important; }
+    #main-header .header-search input { width: 100% !important; height: 38px !important; font-size: 0.9rem !important; padding: 6px 12px !important; }
+
+    /* Admin Statistiken (Kayıtlı etc.) */
+    #main-header .header-user-stats { display: none !important; }
+    body.admin-mode #main-header .header-user-stats {
+        display: flex !important; 
+        order: 5 !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        font-size: 0.6rem !important;
+        padding: 5px !important;
+        border-radius: 6px !important;
     }
 
-    /* 5. ZÄHLER-REIHE: Zähler OBEN, Übersetzung DRUNTER */
+    /* 4. DIE ZÄHLER (Canlı, Toplam Eser...) */
     #main-header .header-stats-row {
         order: 6 !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        padding: 10px 0 5px 0 !important; /* 10px Platz oben für die Badges */
+        justify-content: space-around !important; /* Gleichmäßig verteilen */
+        align-items: flex-start !important; /* Oben ausrichten */
+        padding: 10px 0 !important;
+        border-top: 1px solid rgba(255,255,255,0.1) !important; /* Dezenter Trennstrich */
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
-    #main-header .header-stats-row .clickable-header-item {
-        flex: 1 1 0 !important;
-        display: flex !important;
-        flex-direction: column !important; /* Zwingt alles strikt untereinander */
-        align-items: center !important;
-        justify-content: center !important;
-        position: relative !important;
-        font-size: 0.6rem !important;
-        padding: 0 !important;
-        white-space: nowrap !important;
-    }
-    #main-header .header-stats-row .clickable-header-item br { display: none !important; } /* Killt alte Umbrüche */
     
-    /* Der rote/gelbe Zähler (Badge) fliegt nach OBEN rechts! */
+    #main-header .header-stats-row .clickable-header-item {
+        flex: 1 !important;
+        flex-direction: column !important; /* Alles untereinander */
+        position: relative !important;
+        font-size: 0.65rem !important;
+        gap: 4px !important; /* Abstand zwischen Icon, Text und Übersetzung */
+    }
+    
+    /* Icon größer machen */
+    #main-header .header-stats-row .clickable-header-item i {
+        font-size: 1.1rem !important;
+    }
+
+    /* Badge (roter Zähler) nach rechts oben verschieben */
     #main-header .header-stats-row .badge-count {
         position: absolute !important;
         top: -8px !important;
-        right: 50% !important;
-        transform: translateX(110%) !important; /* Schiebt ihn rechts neben das Icon */
-        font-size: 0.5rem !important;
-        min-width: 14px !important;
+        right: 15% !important; /* Leicht nach rechts versetzt */
+        font-size: 0.55rem !important;
+        min-width: 16px !important;
         padding: 2px 4px !important;
-        margin: 0 !important;
     }
     
-    /* Die Übersetzung in Klammern direkt unter das türkische Wort */
+    /* Übersetzung direkt unter das türkische Wort */
     #main-header .header-stats-row .de-sub {
-        position: static !important;
-        display: block !important;
-        transform: none !important;
-        font-size: 0.65rem !important;
+        font-size: 0.55rem !important;
         color: #94a3b8 !important;
-        margin-top: 3px !important;
+        white-space: nowrap !important;
     }
 
-    /* 6. NAVBAR SCROLL (Ana Sayfa) */
+    /* 5. NAVIGATION (Ana Sayfa etc.) */
     #main-header .header-nav-bar {
         order: 7 !important;
-        display: flex !important;
+        justify-content: flex-start !important; /* Linksbündig für Scrollen */
         flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        justify-content: flex-start !important;
-        padding: 5px 15px !important;
-        width: 100vw !important;
-        margin-left: -10px !important;
+        overflow-x: auto !important; /* Scrollen erlauben */
+        -webkit-overflow-scrolling: touch !important;
+        padding: 5px 0 !important;
+        width: 100vw !important; /* Volle Bildschirmbreite */
+        margin-left: -10px !important; /* Ränder ausgleichen */
     }
     #main-header .header-nav-bar::-webkit-scrollbar { display: none !important; }
+    
+    #main-header .header-nav-bar button {
+        flex-shrink: 0 !important; /* Verhindert Stauchen der Buttons */
+        margin: 0 5px !important;
+    }
 
-    /* 7. LÜCKE ZUM INHALT ("ŞİİRLERİM") MASSIV VERKLEINERN */
+    /* 6. GLOCKE (Benachrichtigungen) */
+    #main-header #user-notify-btn {
+        position: absolute !important;
+        top: 45px !important; 
+        right: 10px !important;
+        z-index: 1001 !important;
+        transform: scale(0.9) !important;
+    }
+
+    /* 7. ABSTAND ZUM INHALT (ŞİİRLERİM) REDUZIEREN */
     body { padding-top: 0 !important; }
     main, #main-content, .main-content, .content-area, .main-wrapper, .wrapper {
-        margin-top: 5px !important; /* Desktop-Lücke zerschmettert! */
-        padding-top: 5px !important;
+        margin-top: 15px !important; /* Reduziert die massive Lücke */
+        padding-top: 0 !important;
     }
     h1.hero-title, h1.page-title {
-        margin-top: 5px !important; 
-        padding-top: 5px !important; 
-        font-size: 2rem !important; /* Minimal kleiner für kompaktere Ansicht */
+        margin-top: 0 !important; 
+        padding-top: 10px !important; 
+        font-size: 1.8rem !important; 
     }
 }
 
-
-/* 🍎 iOS ONLY (iPhones/iPads) SPEZIAL-BEHANDLUNG 🍎 */
+/* 🍎 iOS ONLY (iPhones/iPads) 🍎 */
 @supports (-webkit-touch-callout: none) {
-    /* iOS Anti-Freeze & Blackscreen Fix */
+    /* Verhindert Einfrieren des Bildschirms bei Modals */
     #modal-backdrop { 
         backdrop-filter: none !important; 
         -webkit-backdrop-filter: none !important; 
         background-color: rgba(0, 0, 0, 0.95) !important; 
-        transition: none !important; 
     }
-    .modal.active-modal, .modal-content { animation: none !important; }
     body.modal-open, html.modal-open { 
         overflow: hidden !important; 
         position: fixed !important; 
@@ -1641,8 +1659,8 @@ nav#main-nav, nav {
         height: 100% !important; 
         touch-action: none !important; 
     }
-
-    /* Verhindert Auto-Zoom bei der Suchleiste auf iPhones */
+    
+    /* Verhindert nerviges Auto-Zoom bei Eingabefeldern */
     @media (max-width: 768px) { 
         #main-header .header-search input, select, textarea { font-size: 16px !important; } 
     }
