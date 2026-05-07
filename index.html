@@ -1600,26 +1600,164 @@ nav#main-nav, nav {
 
     /* 7. GLOCKE SICHERN (Ganz oben rechts) */
     #main-header #user-notify-btn {
+/* ==========================================================================
+   📱 HOTFIX V6: ÜBERLAPPUNGS-KILLER, LÜCKEN-SCHLIESSER & SIDEBAR
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. HEADER-BASIS: Zwingt alles in ein vertikales, festes Raster */
+    header#main-header {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 8px 2% 0 2% !important;
+        height: auto !important;
+        position: sticky !important; /* Bleibt oben, aber schiebt den Inhalt sauber vor sich her! */
+        top: 0 !important;
+        z-index: 10000 !important;
+    }
+
+    /* 2. DER ÜBERLAPPUNGS-KILLER: Keine schwebenden Geister mehr! */
+    #main-header .header-top-row,
+    #main-header .header-search,
+    #main-header .header-right,
+    #main-header .user-profile-group,
+    #main-header .header-stats-row {
+        position: relative !important; /* Zwingt Boxen in den normalen Textfluss */
+        top: auto !important; right: auto !important; left: auto !important; bottom: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        margin: 0 0 8px 0 !important; /* Fester, sauberer Abstand nach unten */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Feinjustierung für Elemente im Header */
+    #main-header .logo { font-size: 1.4rem !important; margin-bottom: 2px !important; }
+    #main-header .header-search input { font-size: 0.8rem !important; padding: 4px 10px !important; height: 32px !important; }
+    #main-header .datetime-container { font-size: 0.6rem !important; }
+    
+    #main-header .user-profile-group { gap: 8px !important; flex-wrap: wrap !important; }
+    #main-header .user-profile-group .profile-pic { width: 32px !important; height: 32px !important; }
+    #main-header .user-profile-group .user-greeting { font-size: 0.85rem !important; }
+    #main-header .user-profile-group .points-badge { font-size: 0.65rem !important; padding: 2px 6px !important; }
+
+    /* 3. LÜCKE ZUM INHALT SCHLIESSEN */
+    /* Da der Header jetzt sticky ist, entfernen wir die riesigen Desktop-Lücken */
+    body { padding-top: 0 !important; }
+    main, #main-content, .main-content, .content-area, .main-wrapper {
+        margin-top: 15px !important; /* Zieht "ŞİİRLERİM" und das Bild massiv nach oben! */
+        padding-top: 0 !important;
+    }
+    h1.hero-title, h1.page-title, .hero-section {
+        margin-top: 5px !important;
+        padding-top: 5px !important;
+    }
+
+    /* 4. Login & Register Buttons (Gast) */
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        width: 48% !important;
+        margin: 0 1% !important;
+        padding: 6px 4px !important;
+        font-size: 0.8rem !important;
+    }
+    body.user-mode #main-header .auth-view-btn,
+    body.admin-mode #main-header .auth-view-btn {
+        display: none !important; /* Unsichtbar bei Login */
+    }
+
+    /* 5. Admin-Stats (Kayıtlı, Aktif...) */
+    #main-header .header-user-stats { display: none !important; }
+    body.admin-mode #main-header .header-user-stats {
+        display: block !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        font-size: 0.55rem !important;
+        margin: 2px auto 4px auto !important;
+        padding: 4px !important;
+        width: 96% !important;
+    }
+
+    /* 6. Zähler-Reihe (Gleichmäßig auf 4 Spalten verteilt) */
+    #main-header .header-stats-row {
+        justify-content: space-between !important;
+        padding: 2px 0 12px 0 !important;
+    }
+    #main-header .header-stats-row .clickable-header-item {
+        flex: 1 1 0 !important;
+        font-size: 0.55rem !important;
+        padding: 0 !important;
+        flex-direction: column !important; /* Symbol oben, Text unten */
+    }
+    #main-header .header-stats-row .de-sub {
         position: absolute !important;
-        top: 5px !important;
-        right: 5px !important;
+        bottom: -12px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        font-size: 0.7em !important;
+    }
+
+    /* 7. GLOCKE SICHERN (Ganz oben rechts) */
+    #main-header #user-notify-btn {
+        position: absolute !important;
+        top: 10px !important;
+        right: 10px !important;
         transform: scale(0.8) !important;
         z-index: 1000 !important;
     }
 
-    /* 8. KARTEN KOMPAKTER MACHEN (iOS & Android) */
+    /* 8. KARTEN KOMPAKTER MACHEN (Besserer Lesefluss) */
     .card { padding: 12px !important; margin-bottom: 10px !important; min-height: auto !important; }
     .card h3.clamp-text { font-size: 0.85rem !important; line-height: 1.15 !important; margin-bottom: 4px !important; }
     .card .card-sub { font-size: 0.65rem !important; }
     .card div { font-size: 0.65rem !important; line-height: 1.3 !important; }
 
-    .modal-text, #bilmece-text, #bilmece-answer-text, .anthem-content p, #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p {
-        font-size: 0.85rem !important;
-        line-height: 1.4 !important;
+    /* 9. KALENDER SIDEBAR & BUTTON FIX */
+    .cal-holiday-sidebar {
+        position: fixed !important; 
+        top: 0 !important;
+        bottom: 0 !important; /* Zwingt die Sidebar bis GANZ nach unten */
+        right: 0 !important;
+        width: 85vw !important;
+        max-width: 320px !important;
+        height: 100dvh !important; /* Nutzt dynamische Bildschirmhöhe */
+        z-index: 100050 !important;
+        border-radius: 20px 0 0 20px !important; /* Rundet Oben-Links UND Unten-Links perfekt ab! */
+        transform: translateX(100%); 
+        box-shadow: -10px 0 30px rgba(0,0,0,0.8) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+    .cal-holiday-sidebar.open { transform: translateX(0) !important; }
 
-    #main-header .header-nav-bar { height: 42px !important; padding: 2px 0 !important; width: 100% !important;}
-    nav button { font-size: 0.85rem !important; padding: 4px 8px !important; }
+    #eventsModal.active-modal .holiday-toggle-btn {
+        position: fixed !important;
+        top: 50% !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 100060 !important;
+        border-radius: 8px 0 0 8px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 12px 10px !important;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.5) !important;
+        background: linear-gradient(135deg, #f4c542, #b48608) !important;
+        color: #000 !important;
+        border: none !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    
+    /* FIX: Wenn Sidebar offen ist, springt der Button nach GANZ LINKS in den sichtbaren Bereich! */
+    #eventsModal.active-modal .holiday-toggle-btn.open {
+        right: auto !important;
+        left: 3vw !important; /* Unverfehlbar auf der linken Seite! */
+        background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+        color: white !important;
+        width: 45px !important;
+        height: 45px !important;
+        border-radius: 50% !important; /* Wird zu einem runden X-Button */
+        padding: 0 !important; 
+    }
 }
 
 /* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE 🍎 */
@@ -1647,6 +1785,12 @@ nav#main-nav, nav {
         touch-action: none !important;
     }
     .modal-body { -webkit-overflow-scrolling: touch !important; touch-action: pan-y !important; }
+
+    @media (max-width: 768px) {
+        .card, .game-card { border-width: 0.5px !important; border-color: rgba(244, 197, 66, 0.5) !important; }
+        .modal-content { border-width: 0.5px !important; border-radius: 16px !important; }
+        input, select, textarea { font-size: 16px !important; }
+    }
 }
 
 
