@@ -1472,14 +1472,14 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 MEGA FIX V8: ABSOLUTE ÜBERLAPPUNGS-KILLER & NAVBAR FIX
+   📱 MEGA FIX V9: TABULA RASA (KEINE ÜBERLAPPUNGEN MEHR!)
    ========================================================================== */
 @media (max-width: 768px) {
-    /* 1. HEADER-BASIS: Zwingt alles in ein vertikales, festes Raster */
+    /* 1. HEADER-BASIS: Zwingt alles in ein starres, vertikales Raster */
     header#main-header {
         display: flex !important;
         flex-direction: column !important;
-        padding: 40px 10px 10px 10px !important; /* Platz für den Ticker oben */
+        padding: 40px 10px 5px 10px !important; /* Platz für den Ticker oben */
         height: auto !important;
         position: relative !important; 
         z-index: 1000 !important;
@@ -1489,106 +1489,105 @@ nav#main-nav, nav {
     #main-header .header-top-row {
         position: absolute !important;
         top: 0 !important; left: 0 !important; right: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
+        width: 100% !important; margin: 0 !important;
     }
 
-    /* 3. DER ÜBERLAPPUNGS-KILLER: Keine schwebenden Geister mehr! */
+    /* 3. ALLES ANDERE: Zwingend in den normalen Fluss setzen (Überlappungs-Killer) */
     #main-header .header-search,
     #main-header .header-right,
     #main-header .user-profile-group,
     #main-header .header-stats-row,
     #main-header .logo,
-    #main-header .datetime-container {
-        position: static !important; /* Zwingt ALLES in den normalen Textfluss! */
+    #main-header .datetime-container,
+    #main-header .header-nav-bar {
+        position: static !important; /* Bricht alle alten, überlappenden Koordinaten! */
         width: 100% !important;
-        margin: 5px 0 !important; 
+        margin: 0 0 10px 0 !important; /* Fester Abstand zwischen jedem Element */
         transform: none !important;
         box-sizing: border-box !important;
     }
 
-    /* Feinjustierung für Elemente im Header */
-    #main-header .logo { font-size: 1.5rem !important; text-align: center !important; }
-    #main-header .header-search input { font-size: 0.85rem !important; padding: 6px 12px !important; height: 36px !important; width: 100% !important; box-sizing: border-box !important; }
-    #main-header .datetime-container { font-size: 0.65rem !important; text-align: center !important; }
+    /* 4. DIE STRIKTE REIHENFOLGE (Erzwingt das Layout von oben nach unten) */
+    #main-header .user-profile-group { order: 1 !important; display: flex !important; justify-content: center !important; gap: 10px !important; }
+    #main-header .header-right       { order: 1 !important; } /* Login Buttons (falls nicht eingeloggt) */
+    #main-header .header-search      { order: 2 !important; }
+    #main-header .logo               { order: 3 !important; text-align: center !important; font-size: 1.5rem !important; }
+    #main-header .datetime-container { order: 4 !important; text-align: center !important; font-size: 0.65rem !important; }
+    #main-header .header-user-stats  { order: 5 !important; }
+    #main-header .header-stats-row   { order: 6 !important; }
+    #main-header .header-nav-bar     { order: 7 !important; margin-bottom: 0 !important; }
+
+    /* Feinjustierungen */
+    #main-header .header-search input { font-size: 0.85rem !important; padding: 6px 12px !important; height: 36px !important; width: 100% !important; }
+    #main-header .user-profile-group .profile-pic { width: 35px !important; height: 35px !important; }
     
-    #main-header .user-profile-group { 
-        display: flex !important; 
-        flex-direction: row !important; 
-        justify-content: center !important; 
-        align-items: center !important; 
-        gap: 10px !important; 
-    }
-
-    /* 4. Login & Register Buttons (Gast) sauber nebeneinander */
+    /* Login & Register Buttons (Gast) sauber nebeneinander */
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
-        display: inline-flex !important;
-        width: 48% !important;
-        margin: 0 1% !important;
-        padding: 8px 4px !important;
-        font-size: 0.85rem !important;
-        justify-content: center !important;
+        display: inline-flex !important; width: 48% !important; margin: 0 1% !important; padding: 8px 4px !important; justify-content: center !important; font-size: 0.85rem !important;
     }
-    body.user-mode #main-header .auth-view-btn,
-    body.admin-mode #main-header .auth-view-btn {
-        display: none !important;
-    }
+    body.user-mode #main-header .auth-view-btn, body.admin-mode #main-header .auth-view-btn { display: none !important; }
 
-    /* 5. Zähler-Reihe (Gleichmäßig auf 4 Spalten verteilt) */
+    /* 5. ZÄHLER-REIHE (Türkisch & Zähler OBEN, Übersetzung DRUNTER) */
     #main-header .header-stats-row {
         display: flex !important;
         justify-content: space-between !important;
-        padding: 5px 0 15px 0 !important;
+        padding: 5px 0 !important;
     }
     #main-header .header-stats-row .clickable-header-item {
         flex: 1 1 0 !important;
-        font-size: 0.6rem !important;
-        padding: 0 !important;
         display: flex !important;
-        flex-direction: column !important; /* Symbol oben, Text unten */
+        flex-direction: row !important; /* Zwingt Icon, Text und Zähler nebeneinander */
+        flex-wrap: wrap !important; /* Erlaubt der Übersetzung den Umbruch in die nächste Zeile */
+        justify-content: center !important;
         align-items: center !important;
-        position: relative !important;
+        font-size: 0.65rem !important;
+        padding: 0 !important;
+    }
+    #main-header .header-stats-row .badge-count {
+        position: static !important; /* Sitzt exakt neben dem Wort! */
+        margin-left: 4px !important;
+        transform: none !important;
+        font-size: 0.55rem !important;
+        min-width: 14px !important;
+        padding: 2px 4px !important;
     }
     #main-header .header-stats-row .de-sub {
-        position: absolute !important;
-        bottom: -14px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        font-size: 0.7em !important;
+        width: 100% !important; /* Zwingt die Klammer in eine eigene, neue Zeile! */
+        display: block !important;
+        position: static !important;
+        transform: none !important;
+        margin-top: 3px !important;
+        font-size: 0.65rem !important;
+        color: #94a3b8 !important;
     }
 
     /* 6. GLOCKE SICHERN */
     #main-header #user-notify-btn {
         position: absolute !important;
-        top: 45px !important; /* Auf Höhe des Logos */
+        top: 45px !important; /* Auf sicherer Höhe */
         right: 15px !important;
-        z-index: 1000 !important;
+        z-index: 1001 !important;
     }
 
-    /* 7. NAVBAR SCROLL FIX ("Ana Sayfa" nicht mehr abgeschnitten) */
+    /* 7. NAVBAR SCROLL FIX ("Ana Sayfa" etc.) */
     #main-header .header-nav-bar {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        justify-content: flex-start !important; /* Setzt es nach LINKS anstatt mittig zu quetschen! */
+        justify-content: flex-start !important; /* Schiebt alles sauber nach links, kein Abschneiden mehr! */
         padding: 5px 15px !important;
         width: 100vw !important;
-        margin-left: -10px !important; /* Gleicht das Padding aus */
-        box-sizing: border-box !important;
+        margin-left: -10px !important;
     }
     #main-header .header-nav-bar::-webkit-scrollbar { display: none !important; }
 
     /* 8. LÜCKE ZUM INHALT SCHLIESSEN */
     body { padding-top: 0 !important; }
-    main, #main-content, .main-content, .content-area, .main-wrapper {
-        margin-top: 15px !important; /* Lücke geschlossen! */
+    main, #main-content, .main-content, .content-area, .main-wrapper, .wrapper {
+        margin-top: 10px !important; /* Lücke gnadenlos eliminiert */
         padding-top: 0 !important;
     }
-
-    /* 9. KARTEN KOMPAKTER MACHEN (iOS & Android) */
-    .card { padding: 12px !important; margin-bottom: 12px !important; min-height: auto !important; }
-    .card h3.clamp-text { font-size: 0.9rem !important; margin-bottom: 5px !important; }
+    h1.hero-title, h1.page-title { margin-top: 5px !important; padding-top: 5px !important; }
 }
 
 /* 🍎 iOS ONLY ANTI-FREEZE 🍎 */
@@ -10084,6 +10083,55 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             let styleDE = "border-left: 4px solid #3b82f6 !important; background: rgba(0,0,0,0.6) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
             let styleTRFerien = "border-left: 4px solid #f97316 !important; background: rgba(249, 115, 22, 0.15) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
             let styleDEFerien = "border-left: 4px solid #a855f7 !important; background: rgba(168, 85, 247, 0.15) !important; cursor: pointer; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0;";
+
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleTR}"><span style="color:#ef4444 !important; pointer-events:none;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleDE}"><span style="color:#3b82f6 !important; pointer-events:none;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleTRFerien}"><span style="color:#fbd38d !important; pointer-events:none;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem !important; color:#f97316 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleDEFerien}"><span style="color:#e9d8fd !important; pointer-events:none;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem !important; color:#a855f7 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            
+            return html;
+        }).join('');
+    };
+})();
+
+
+(function() {
+    window.renderHolidays = function() {
+        const list = document.getElementById('holiday-list-content');
+        if(!list || !window.holidaysDB) return;
+        
+        let cMonth = typeof currentMonth !== 'undefined' ? currentMonth : new Date().getMonth();
+        let cYear = typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear();
+        let currentMonthStr = (cMonth + 1).toString().padStart(2, '0');
+        let foundHolidays = [];
+        
+        for(let key in window.holidaysDB) { 
+            if(key.startsWith(currentMonthStr)) { 
+                let day = key.split('-')[1]; 
+                foundHolidays.push({ day: day, ...window.holidaysDB[key] }); 
+            } 
+        }
+        
+        foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
+        
+        if(foundHolidays.length === 0) { 
+            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = foundHolidays.map(h => {
+            let html = '';
+            let dayPad = h.day.toString().padStart(2, '0');
+            let fullDateStr = `${dayPad}.${currentMonthStr}.${cYear}`;
+            
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768 && window.toggleHolidaySidebar) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem !important; color:#fdfbf7 !important;">${h.day}.${currentMonthStr}.</strong><br>`;
+            
+            // Unzerstörbare Styles: display: block zwingt den Browser, den Rahmen komplett zu zeichnen!
+            let styleTR = "display: block !important; border-left: 5px solid #ef4444 !important; background: rgba(0,0,0,0.6) !important; cursor: pointer !important; margin-bottom: 10px !important; padding: 12px 15px !important; border-radius: 6px !important;";
+            let styleDE = "display: block !important; border-left: 5px solid #3b82f6 !important; background: rgba(0,0,0,0.6) !important; cursor: pointer !important; margin-bottom: 10px !important; padding: 12px 15px !important; border-radius: 6px !important;";
+            let styleTRFerien = "display: block !important; border-left: 5px solid #f97316 !important; background: rgba(249, 115, 22, 0.15) !important; cursor: pointer !important; margin-bottom: 10px !important; padding: 12px 15px !important; border-radius: 6px !important;";
+            let styleDEFerien = "display: block !important; border-left: 5px solid #a855f7 !important; background: rgba(168, 85, 247, 0.15) !important; cursor: pointer !important; margin-bottom: 10px !important; padding: 12px 15px !important; border-radius: 6px !important;";
 
             if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleTR}"><span style="color:#ef4444 !important; pointer-events:none;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
             if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" style="${styleDE}"><span style="color:#3b82f6 !important; pointer-events:none;">🇩🇪 ${dateStr}${h.de}</span></div>`;
