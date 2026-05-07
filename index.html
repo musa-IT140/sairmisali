@@ -1289,9 +1289,103 @@ nav#main-nav, nav {
     .card .card-sub { font-size: 0.75rem !important; }
     .card div { font-size: 0.7rem !important; }
     
+/* ==========================================================================
+   📱 MEGA FIX V3: HEADER, ÜBERLAPPUNGEN & iOS (REIN CHIRURGISCH)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Header Basis: WIR LASSEN DAS ORGINAL-LAYOUT IN RUHE! */
+    header#main-header { padding: 5px 2% 0 2% !important; } /* KEIN display:flex hier! */
+    #main-header .logo { font-size: 1.4rem !important; } 
+    #main-header .header-search input { font-size: 0.8rem !important; padding: 2px 10px !important; height: 32px !important; }
+    #main-header .datetime-container { font-size: 0.65rem !important; }
+    
+    /* 2. Login & Registrieren: Sauber nebeneinander einreihen */
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        display: inline-flex !important; /* Zwingt sie in eine Reihe */
+        justify-content: center !important;
+        align-items: center !important;
+        width: 48% !important;
+        box-sizing: border-box !important;
+        margin: 5px 1% !important;
+        padding: 6px 4px !important;
+        font-size: 0.8rem !important;
+        vertical-align: top !important;
+    }
+    body.user-mode #main-header .auth-view-btn,
+    body.admin-mode #main-header .auth-view-btn {
+        display: none !important; /* Unsichtbar bei Login */
+    }
+
+    /* 3. Admin-Stats (Kayıtlı, vb.): Einzeilig, mittig, sicher */
+    #main-header .header-user-stats { display: none !important; }
+    body.admin-mode #main-header .header-user-stats {
+        display: block !important; 
+        text-align: center !important;
+        white-space: nowrap !important; /* Verhindert Umbruch */
+        font-size: 0.55rem !important; 
+        margin: 5px auto !important; 
+        padding: 4px !important; 
+        width: 96% !important; 
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* 4. Zähler-Reihe: Exakt gleichmäßig verteilt (ohne Überlappung) */
+    #main-header .header-stats-row { 
+        display: flex !important;
+        flex-wrap: nowrap !important; /* Zwingt alles in EINE Zeile */
+        width: 100% !important;
+        justify-content: space-between !important; 
+        align-items: center !important;
+        padding: 5px 2px 15px 2px !important; /* Platz für die Übersetzung unten */
+        margin-top: 5px !important; 
+        box-sizing: border-box !important;
+        gap: 2px !important;
+    }
+    #main-header .header-stats-row .clickable-header-item { 
+        flex: 1 1 0 !important; /* Teilt den Platz GERECHT durch 4 auf */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.55rem !important; 
+        white-space: nowrap !important; /* Verhindert Zerstückelung */
+        padding: 0 !important;
+        position: relative !important;
+    }
+    #main-header .header-stats-row .clickable-header-item i { font-size: 0.75rem !important; margin-right: 2px !important; }
+    #main-header .header-stats-row .badge-count {
+        min-width: 12px !important;
+        padding: 1px 3px !important;
+        font-size: 0.5rem !important;
+        margin-left: 2px !important;
+    }
+    #main-header .header-stats-row .de-sub {
+        position: absolute !important;
+        bottom: -12px !important; /* Schiebt die Übersetzung exakt unter das Icon */
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        font-size: 0.75em !important;
+        margin: 0 !important;
+    }
+
+    /* 5. GLOCKE SICHERN (Überlappungs-Fix) */
+    #main-header #user-notify-btn {
+        position: absolute !important;
+        top: 45px !important; /* Sitzt nun perfekt an der Seite */
+        right: 10px !important;
+        transform: scale(0.9) !important;
+        z-index: 100 !important;
+    }
+
+    /* 6. KARTEN KOMPAKTER MACHEN (Besserer Lesefluss) */
+    .card { padding: 12px !important; min-height: auto !important; margin-bottom: 12px !important; }
+    .card h3.clamp-text { font-size: 0.95rem !important; line-height: 1.2 !important; margin-bottom: 4px !important; }
+    .card .card-sub { font-size: 0.75rem !important; }
+    .card div { font-size: 0.75rem !important; }
+    
     .modal-text, #bilmece-text, #bilmece-answer-text, .anthem-content p, #hakkimda-view p, #sizin-kaleminiz-view p, #impressum-view p, #cookie-view p, #datenschutz-view p { 
         font-size: 0.9rem !important; 
-        line-height: 1.45 !important; 
+        line-height: 1.4 !important; 
     }
 
     #main-header .header-nav-bar { height: 42px !important; padding: 2px 0 !important; width: 100% !important;}
@@ -1314,7 +1408,7 @@ nav#main-nav, nav {
     .cal-holiday-sidebar.open { transform: translateX(0) !important; }
 }
 
-/* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE & DESIGN 🍎 */
+/* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE 🍎 */
 @supports (-webkit-touch-callout: none) {
     #modal-backdrop {
         backdrop-filter: none !important;
@@ -1348,6 +1442,7 @@ nav#main-nav, nav {
         body.admin-mode #main-header .header-user-stats { border-width: 0.5px !important; }
     }
 }
+
 
 /* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE & DESIGN 🍎 */
 @supports (-webkit-touch-callout: none) {
