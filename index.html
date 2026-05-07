@@ -1186,6 +1186,104 @@ nav#main-nav, nav {
         touch-action: pan-y !important; 
     }
 }
+
+/* ==========================================================================
+   📱 MEGA FIX: MOBILE HEADER & iOS (APPLE) SPEZIFISCHES DESIGN
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Header extrem kompakt machen */
+    header#main-header { padding: 5px 2% 0 2% !important; gap: 4px !important; }
+    #main-header .logo { font-size: 1.6rem !important; } 
+    #main-header .header-search { height: 34px !important; margin-bottom: 2px !important; }
+    #main-header .header-search input { font-size: 0.85rem !important; padding: 2px 10px !important; }
+    #main-header .datetime-container { font-size: 0.7rem !important; }
+    
+    /* FIX: Überlappung der Statistik-Rahmen (Bild 3) beheben! */
+    #main-header .header-user-stats { 
+        font-size: 0.55rem !important; 
+        margin: 4px auto !important; 
+        padding: 4px 8px !important; 
+        width: 96% !important; 
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        white-space: normal !important; /* Erlaubt Textumbruch, sprengt Rahmen nicht mehr! */
+        text-align: center;
+        line-height: 1.2;
+    }
+    #main-header #header-stats-text { white-space: normal !important; }
+    
+    #main-header .header-stats-row { 
+        padding: 4px 1% 12px 1% !important; 
+        margin-top: 2px !important; 
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    #main-header .header-stats-row .clickable-header-item i { font-size: 0.8rem !important; }
+    #main-header .header-nav-bar { height: 42px !important; padding: 2px 0 !important; }
+    nav button { font-size: 0.85rem !important; padding: 4px 8px !important; }
+    
+    /* Sidebar Kalender Fix für Mobile (Schiebt sie korrekt rein!) */
+    .cal-holiday-sidebar {
+        position: fixed !important; 
+        top: 0 !important;
+        right: 0 !important;
+        width: 85vw !important;
+        max-width: 320px !important;
+        height: 100vh !important;
+        z-index: 100050 !important;
+        border-radius: 20px 0 0 20px !important;
+        transform: translateX(100%); 
+        box-shadow: -10px 0 30px rgba(0,0,0,0.8) !important;
+        transition: transform 0.3s ease-in-out !important;
+    }
+    .cal-holiday-sidebar.open {
+        transform: translateX(0) !important; 
+    }
+}
+
+/* 🍎 iOS ONLY (iPhones/iPads) ANTI-FREEZE & DESIGN 🍎 */
+@supports (-webkit-touch-callout: none) {
+    /* Blackscreen & Freeze Fix (Apple Magie) */
+    #modal-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background-color: rgba(0, 0, 0, 0.95) !important; /* Solides Schwarz = kein GPU Crash! */
+        transform: translateZ(0) !important;
+        will-change: auto !important;
+        transition: none !important; /* Absolut keine Verzögerung! */
+    }
+    .modal.active-modal {
+        display: flex !important;
+        animation: none !important; /* Keine iOS Überlastung */
+    }
+    .modal-content {
+        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0) !important;
+        will-change: transform, opacity !important;
+        animation: none !important; /* Verhindert das Einfrieren beim Öffnen */
+    }
+    /* Verhindert das Hängenbleiben beim Scrollen im Hintergrund auf dem iPhone */
+    body.modal-open, html.modal-open {
+        overflow: hidden !important;
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+        touch-action: none !important;
+    }
+    .modal-body {
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-y !important; 
+    }
+    
+    /* iOS Spezifische Schriften & Borders anpassen */
+    @media (max-width: 768px) {
+        .card, .game-card { border-width: 0.5px !important; border-color: rgba(244, 197, 66, 0.5) !important; }
+        .modal-content { border-width: 0.5px !important; border-radius: 16px !important; }
+        .hero-title { font-weight: normal !important; -webkit-font-smoothing: subpixel-antialiased !important; }
+        input, select, textarea { font-size: 16px !important; /* Verhindert das nervige iOS Auto-Zoom! */ }
+        #main-header .header-user-stats { border-width: 0.5px !important; border-radius: 8px !important; }
+    }
+}
     
 </style>
 
@@ -9433,6 +9531,166 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
                     iosScrollPosition = window.scrollY;
                     document.body.classList.add('modal-open'); 
                     
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+                        document.body.style.position = 'fixed';
+                        document.body.style.top = `-${iosScrollPosition}px`;
+                        document.body.style.width = '100%';
+                    }
+                }
+                
+                let bd = document.getElementById('modal-backdrop'); 
+                if(bd && bd.style.display !== 'block') {
+                    bd.style.display = 'block'; 
+                    bd.classList.add('show-backdrop');
+                }
+                
+                m.classList.add('active-modal'); 
+                m.style.zIndex = '100000';
+                
+                // Modal-Routing
+                if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
+                if(id === 'profileEditModal' && window.currentUser) {
+                    if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-edit-profile', 'edit-emoji', 'selected-edit-emoji', window.currentUser.emoji || '👤');
+                    document.getElementById('edit-name').value = window.currentUser.name || '';
+                    document.getElementById('edit-surname').value = window.currentUser.surname || '';
+                    document.getElementById('edit-day').value = window.currentUser.day || '';
+                    document.getElementById('edit-month').value = window.currentUser.month || '';
+                    document.getElementById('edit-year').value = window.currentUser.year || '';
+                    document.getElementById('edit-pass').value = ''; 
+                }
+                if(id === 'eventsModal' && window.renderCalendar) window.renderCalendar();
+                if(id === 'adminPendingModal' && window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+                if(id === 'userMessagesModal' && window.renderUserMessages) window.renderUserMessages();
+                if(id === 'adminMessagesModal' && window.renderAdminMessages) window.renderAdminMessages();
+                if(id === 'leaderboardModal' && window.renderLeaderboard) window.renderLeaderboard(); 
+                if(id === 'adminUsersModal' && window.renderOnlineUsers) window.renderOnlineUsers(); 
+                if(id === 'weatherModal' && window.fetchWeather) window.fetchWeather();
+                if(id === 'savedItemsModal' && window.renderSavedItems) window.renderSavedItems();
+            } 
+        } catch(e) { console.error("Modal error:", e); }
+    };
+})();
+
+(function() {
+    // ----------------------------------------------------------------
+    // 1. KALENDER BUNT FIX & KLICK-REPARATUR (BRUTE FORCE !IMPORTANT)
+    // ----------------------------------------------------------------
+    window.renderHolidays = function() {
+        const list = document.getElementById('holiday-list-content');
+        if(!list || !window.holidaysDB) return;
+        
+        let cMonth = typeof currentMonth !== 'undefined' ? currentMonth : new Date().getMonth();
+        let cYear = typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear();
+        let currentMonthStr = (cMonth + 1).toString().padStart(2, '0');
+        let foundHolidays = [];
+        
+        for(let key in window.holidaysDB) { 
+            if(key.startsWith(currentMonthStr)) { 
+                let day = key.split('-')[1]; 
+                foundHolidays.push({ day: day, ...window.holidaysDB[key] }); 
+            } 
+        }
+        
+        foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
+        
+        if(foundHolidays.length === 0) { 
+            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = foundHolidays.map(h => {
+            let html = '';
+            let dayPad = h.day.toString().padStart(2, '0');
+            let fullDateStr = `${dayPad}.${currentMonthStr}.${cYear}`;
+            
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768 && window.toggleHolidaySidebar) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem !important; color:#fdfbf7 !important;">${h.day}.${currentMonthStr}.</strong><br>`;
+            
+            let baseStyle = `border-left-width: 4px !important; border-left-style: solid !important; cursor: pointer !important; transition: all 0.2s !important; margin-bottom: 8px !important; padding: 8px 12px !important; border-radius: 0 8px 8px 0 !important; font-family: 'Poppins', sans-serif !important;`;
+            
+            let hoverTR = `onmouseover="this.style.setProperty('background', 'rgba(255,255,255,0.15)', 'important'); this.style.setProperty('transform', 'translateX(4px)', 'important');" onmouseout="this.style.setProperty('background', 'rgba(0,0,0,0.6)', 'important'); this.style.setProperty('transform', 'translateX(0)', 'important');"`;
+            let styleTR = `${baseStyle} border-left-color: #ef4444 !important; background: rgba(0,0,0,0.6) !important;`;
+
+            let hoverDE = `onmouseover="this.style.setProperty('background', 'rgba(255,255,255,0.15)', 'important'); this.style.setProperty('transform', 'translateX(4px)', 'important');" onmouseout="this.style.setProperty('background', 'rgba(0,0,0,0.6)', 'important'); this.style.setProperty('transform', 'translateX(0)', 'important');"`;
+            let styleDE = `${baseStyle} border-left-color: #3b82f6 !important; background: rgba(0,0,0,0.6) !important;`;
+
+            let hoverTRFerien = `onmouseover="this.style.setProperty('background', 'rgba(255,255,255,0.15)', 'important'); this.style.setProperty('transform', 'translateX(4px)', 'important');" onmouseout="this.style.setProperty('background', 'rgba(249, 115, 22, 0.15)', 'important'); this.style.setProperty('transform', 'translateX(0)', 'important');"`;
+            let styleTRFerien = `${baseStyle} border-left-color: #f97316 !important; background: rgba(249, 115, 22, 0.15) !important;`;
+
+            let hoverDEFerien = `onmouseover="this.style.setProperty('background', 'rgba(255,255,255,0.15)', 'important'); this.style.setProperty('transform', 'translateX(4px)', 'important');" onmouseout="this.style.setProperty('background', 'rgba(168, 85, 247, 0.15)', 'important'); this.style.setProperty('transform', 'translateX(0)', 'important');"`;
+            let styleDEFerien = `${baseStyle} border-left-color: #a855f7 !important; background: rgba(168, 85, 247, 0.15) !important;`;
+
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverTR} style="${styleTR}"><span style="color:#ef4444 !important; pointer-events:none !important; display:block !important;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverDE} style="${styleDE}"><span style="color:#3b82f6 !important; pointer-events:none !important; display:block !important;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverTRFerien} style="${styleTRFerien}"><span style="color:#fbd38d !important; pointer-events:none !important; display:block !important;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem !important; color:#f97316 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverDEFerien} style="${styleDEFerien}"><span style="color:#e9d8fd !important; pointer-events:none !important; display:block !important;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem !important; color:#a855f7 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            
+            return html;
+        }).join('');
+    };
+
+    // ----------------------------------------------------------------
+    // 2. iOS SCROLL & FREEZE MANAGER (Anti-Blackscreen)
+    // ----------------------------------------------------------------
+    let iosScrollPosition = 0;
+
+    window.closeAllModals = function(force=false) { 
+        document.querySelectorAll('.modal.active-modal').forEach(m => m.classList.remove('active-modal')); 
+        
+        // iOS Scroll-Position sicher wiederherstellen
+        if (document.body.classList.contains('modal-open')) {
+            document.body.classList.remove('modal-open'); 
+            document.documentElement.classList.remove('modal-open');
+            if (document.body.style.position === 'fixed') {
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                window.scrollTo(0, iosScrollPosition);
+            }
+        }
+        
+        let bd = document.getElementById('modal-backdrop');
+        if(bd) {
+            bd.style.display = 'none';
+            bd.classList.remove('show-backdrop');
+        }
+    };
+    
+    window.closeTopModal = function(e) { 
+        if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
+        if(e === 'force') { window.closeAllModals(); return; }
+        
+        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
+        if(modals.length > 0) {
+            modals[modals.length - 1].classList.remove('active-modal');
+        }
+        
+        if(document.querySelectorAll('.modal.active-modal').length === 0) { 
+            window.closeAllModals();
+        }
+    };
+
+    // HIER ÜBERSCHREIBEN WIR DIE openFastModal DAMIT ES NICHT MEHR FREEZT
+    const origOpenFastModal = window.openFastModal;
+    window.openFastModal = function(id) { 
+        try {
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                document.activeElement.blur();
+            }
+            window.closeAllSidebars(); 
+            
+            document.querySelectorAll('.modal.active-modal').forEach(m => { 
+                if (m.id !== id) m.classList.remove('active-modal'); 
+            });
+            
+            const m = document.getElementById(id); 
+            if(m) { 
+                if (!document.body.classList.contains('modal-open')) {
+                    iosScrollPosition = window.scrollY;
+                    document.body.classList.add('modal-open'); 
+                    document.documentElement.classList.add('modal-open'); 
+                    
+                    // Harter iOS Fix
                     if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
                         document.body.style.position = 'fixed';
                         document.body.style.top = `-${iosScrollPosition}px`;
