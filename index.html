@@ -10221,6 +10221,63 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 })();
 
+(function() {
+    // ----------------------------------------------------------------
+    // 1. KALENDER BUNT FIX & KLICK-REPARATUR (UNZERSTÖRBAR)
+    // ----------------------------------------------------------------
+    window.renderHolidays = function() {
+        const list = document.getElementById('holiday-list-content');
+        if(!list || !window.holidaysDB) return;
+        
+        let cMonth = typeof currentMonth !== 'undefined' ? currentMonth : new Date().getMonth();
+        let cYear = typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear();
+        let currentMonthStr = (cMonth + 1).toString().padStart(2, '0');
+        let foundHolidays = [];
+        
+        for(let key in window.holidaysDB) { 
+            if(key.startsWith(currentMonthStr)) { 
+                let day = key.split('-')[1]; 
+                foundHolidays.push({ day: day, ...window.holidaysDB[key] }); 
+            } 
+        }
+        
+        foundHolidays.sort((a,b) => parseInt(a.day) - parseInt(b.day));
+        
+        if(foundHolidays.length === 0) { 
+            list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = foundHolidays.map(h => {
+            let html = '';
+            // FIX: Tag zwingend zweistellig machen (z.B. "06") für die SelectDate-Funktion!
+            let dayPad = h.day.toString().padStart(2, '0');
+            let fullDateStr = `${dayPad}.${currentMonthStr}.${cYear}`;
+            
+            // Klick: Markiert Tag im Kalender und schließt auf dem Handy die Sidebar
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768 && window.toggleHolidaySidebar) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem; color:#fdfbf7;">${h.day}.${currentMonthStr}.</strong><br>`;
+            
+            // Felsenfeste Inline-Styles, die nicht überschrieben werden können
+            let baseStyle = "border-left: 4px solid; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; padding: 8px 12px; border-radius: 0 8px 8px 0; font-family: 'Poppins', sans-serif; background: rgba(0,0,0,0.6);";
+            
+            let hoverJS = "onmouseover=\"this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateX(4px)';\" onmouseout=\"this.style.background='rgba(0,0,0,0.6)'; this.style.transform='translateX(0)';\"";
+            let hoverJSFerienTR = "onmouseover=\"this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateX(4px)';\" onmouseout=\"this.style.background='rgba(249, 115, 22, 0.15)'; this.style.transform='translateX(0)';\"";
+            let hoverJSFerienDE = "onmouseover=\"this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateX(4px)';\" onmouseout=\"this.style.background='rgba(168, 85, 247, 0.15)'; this.style.transform='translateX(0)';\"";
+
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverJS} style="${baseStyle} border-left-color: #ef4444;"><span style="color:#ef4444; pointer-events:none;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverJS} style="${baseStyle} border-left-color: #3b82f6;"><span style="color:#3b82f6; pointer-events:none;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            
+            // Ferien mit leicht farbigem Hintergrund
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverJSFerienTR} style="${baseStyle} border-left-color: #f97316; background: rgba(249, 115, 22, 0.15);"><span style="color:#fbd38d; pointer-events:none;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem; color:#f97316;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" ${hoverJSFerienDE} style="${baseStyle} border-left-color: #a855f7; background: rgba(168, 85, 247, 0.15);"><span style="color:#e9d8fd; pointer-events:none;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem; color:#a855f7;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            
+            return html;
+        }).join('');
+    };
+})();
+
+
 </script>
 </body>
 </html>
