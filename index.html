@@ -1472,128 +1472,124 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 FINALER ULTRA-FIX: DAS UNZERSTÖRBARE ZEILEN-RASTER (0% ÜBERLAPPUNG)
+   📱 MEGA FIX V12.1: PROFIL-RAHMEN & LOGO TRENNUNG
    ========================================================================== */
+
+/* 🤖 ALLGEMEIN MOBILE (ANDROID & iOS) 🤖 */
 @media (max-width: 768px) {
-    
-    /* 1. HEADER: Flex-Wrap zwingt Elemente in feste Zeilen */
+    /* 1. HEADER: Kompakter, zieht alles nach oben */
     header#main-header {
         display: flex !important;
-        flex-wrap: wrap !important; /* Erlaubt saubere Zeilenumbrüche */
+        flex-direction: column !important;
         align-items: center !important;
-        padding: 35px 5px 5px 5px !important; /* Nur Platz für Ticker lassen */
+        padding: 22px 5px 5px 5px !important; 
         height: auto !important;
-        background: #0b0c10 !important;
-        position: relative !important;
+        position: relative !important; 
         z-index: 1000 !important;
+        gap: 8px !important; 
     }
 
-    /* Ticker ganz oben fixieren */
     #main-header .header-top-row {
-        position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; margin: 0 !important;
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; right: 0 !important;
+        width: 100% !important; margin: 0 !important;
     }
 
-    /* 2. VERSTECKTE CONTAINER ZERSTÖREN */
-    /* Zieht alle Elemente direkt in den Haupt-Header, damit wir sie ordnen können */
-    #main-header .header-left, 
-    #main-header .header-center, 
-    #main-header .header-right,
-    .auth-view-btn-container {
-        display: contents !important; 
+    /* ALLES IN DEN NORMALEN FLUSS ZWINGEN */
+    #main-header .user-profile-group, #main-header .header-right, #main-header .header-search,
+    #main-header .logo, #main-header .datetime-container, #main-header .header-stats-row,
+    #main-header .header-user-stats, #main-header .header-nav-bar {
+        position: static !important; 
+        width: 100% !important; margin: 0 !important; transform: none !important;
+        box-sizing: border-box !important; display: flex !important;
+        justify-content: center !important; align-items: center !important;
     }
 
-    /* ALLE ELEMENTE IN DEN NORMALEN FLUSS ZWINGEN (Kein Schweben mehr!) */
-    #main-header .user-profile-group, #main-header .weather-badge, #main-header #weather-container,
-    #main-header .logo, #main-header #user-notify-btn, #main-header .datetime-container,
-    #main-header .header-search, #main-header .header-user-stats, #main-header .header-stats-row,
-    #main-header .header-nav-bar {
-        position: static !important; transform: none !important; margin: 0 !important; box-sizing: border-box !important;
+    /* 2. PROFIL-RAHMEN (Knapp unter den Ticker) */
+    #main-header .user-profile-group { 
+        order: 1 !important; 
+        flex-wrap: wrap !important;
+        gap: 8px !important; 
+        margin-top: 2px !important; 
     }
-
-    /* ==================================================================
-       ZEILE 1: DIE "SMART PILL" PROFIL-BOX (100% Breite)
-       ================================================================== */
-    #main-header .user-profile-group {
-        order: 1 !important;
-        width: 100% !important; /* Blockiert die ganze Zeile! */
-        display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important;
-        margin-bottom: 10px !important; /* Lücke zur nächsten Zeile */
-        padding: 4px 10px !important;
-        border: 1px solid rgba(244, 197, 66, 0.8) !important; border-radius: 30px !important; background: rgba(0, 0, 0, 0.8) !important;
-    }
-    #main-header .user-profile-group > * { position: static !important; margin: 0 !important; transform: none !important; }
-    #main-header .user-profile-group .profile-pic { width: 32px !important; height: 32px !important; border-radius: 50% !important; }
+    #main-header .user-profile-group .profile-pic { width: 35px !important; height: 35px !important; }
     
-    /* 💥 AUSGANGSSYMBOL (Sicher in der Pille eingesperrt) */
-    #main-header .user-profile-group .logout-btn { 
-        width: 32px !important; height: 32px !important; flex-shrink: 0 !important;
-        display: flex !important; justify-content: center !important; align-items: center !important; 
-        border-radius: 50% !important; background: rgba(239, 68, 68, 0.15) !important; border: 1px solid rgba(239, 68, 68, 0.4) !important;
-    }
+    #main-header .header-right { order: 1 !important; flex-direction: row !important; gap: 10px !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn { width: 48% !important; padding: 8px 4px !important; font-size: 0.85rem !important; }
+    body.user-mode #main-header .auth-view-btn, body.admin-mode #main-header .auth-view-btn { display: none !important; }
 
-    /* GAST-BUTTONS (Wenn ausgeloggt) */
-    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn { order: 1 !important; width: 48% !important; padding: 8px !important; margin: 0 1% 10px 1% !important; font-size: 0.85rem !important; }
+    /* 🔥 HIER IST DER FIX: LOGO WIRD VOM PROFIL WEGGEDRÜCKT 🔥 */
+    #main-header .logo { 
+        order: 2 !important; 
+        font-size: 1.6rem !important; 
+        margin-top: 12px !important; /* Drückt Şair Misal.i & Feder zwingend nach unten! */
+        margin-bottom: 0 !important; 
+    }
+    
+    #main-header .datetime-container { order: 3 !important; font-size: 0.7rem !important; flex-direction: row !important; gap: 15px !important; }
+    #main-header .header-search { order: 4 !important; }
+    #main-header .header-search input { width: 100% !important; height: 38px !important; font-size: 0.9rem !important; padding: 6px 12px !important; }
 
-    /* ==================================================================
-       ZEILE 2: WETTER, LOGO & GLOCKE (Die perfekte Reihe)
-       ================================================================== */
-    /* Wetter Links */
-    #main-header .weather-badge, #main-header #weather-container {
-        order: 2 !important; width: 25% !important; display: flex !important; justify-content: flex-start !important; align-items: center !important; margin-bottom: 10px !important;
-    }
-    /* Logo Mitte */
-    #main-header .logo {
-        order: 3 !important; width: 50% !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 1.5rem !important; margin-bottom: 10px !important;
-    }
-    /* 💥 GLOCKE RECHTS (Endlich sicher auf einer Linie mit Logo) */
+    #main-header .header-user-stats { display: none !important; }
+    body.admin-mode #main-header .header-user-stats { display: flex !important; order: 5 !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 10px !important; font-size: 0.6rem !important; padding: 5px !important; border-radius: 6px !important; }
+
+    /* 3. GLOCKE NACH UNTEN VERSCHIEBEN */
     #main-header #user-notify-btn {
-        order: 4 !important; width: 25% !important; display: flex !important; justify-content: flex-end !important; align-items: center !important; margin-bottom: 10px !important;
+        position: absolute !important;
+        top: 75px !important; 
+        right: 8px !important;
+        z-index: 1001 !important;
+        transform: scale(0.85) !important;
     }
 
-    /* ==================================================================
-       ZEILE 3: DATUM & UHRZEIT
-       ================================================================== */
-    #main-header .datetime-container {
-        order: 5 !important; width: 100% !important; display: flex !important; justify-content: center !important; gap: 15px !important; font-size: 0.7rem !important; margin-bottom: 10px !important;
-    }
-
-    /* ==================================================================
-       ZEILE 4: SUCHE
-       ================================================================== */
-    #main-header .header-search { order: 6 !important; width: 100% !important; margin-bottom: 10px !important; }
-    #main-header .header-search input { width: 100% !important; height: 40px !important; border-radius: 20px !important; padding: 0 15px !important; font-size: 0.9rem !important; box-sizing: border-box !important;}
-
-    /* ==================================================================
-       ZEILE 5: ZÄHLER (Canlı, Toplam Eser...)
-       ================================================================== */
+    /* 4. DIE ZÄHLER (Sauber untereinander) */
     #main-header .header-stats-row {
-        order: 7 !important; width: 100% !important; display: flex !important; justify-content: space-evenly !important; align-items: stretch !important; padding: 10px 0 24px 0 !important; margin-bottom: 5px !important; border-top: 1px solid rgba(255,255,255,0.1) !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        order: 6 !important;
+        justify-content: space-around !important;
+        align-items: flex-start !important; 
+        padding: 10px 0 !important;
+        border-top: 1px solid rgba(255,255,255,0.1) !important; 
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
-    #main-header .header-stats-row .clickable-header-item { display: flex !important; flex-direction: column !important; align-items: center !important; position: relative !important; font-size: 0.65rem !important; width: 25% !important; }
-    #main-header .header-stats-row .clickable-header-item i { font-size: 1.15rem !important; margin-bottom: 5px !important; }
-    #main-header .header-stats-row .badge-count { position: absolute !important; top: -8px !important; right: 10% !important; font-size: 0.55rem !important; padding: 2px 4px !important; min-width: 14px !important; margin: 0 !important; }
-    #main-header .header-stats-row .de-sub { position: absolute !important; bottom: -20px !important; left: 50% !important; transform: translateX(-50%) !important; color: #94a3b8 !important; font-size: 0.55rem !important; white-space: nowrap !important; }
+    #main-header .header-stats-row .clickable-header-item {
+        flex: 1 !important; flex-direction: column !important; position: relative !important; font-size: 0.65rem !important; gap: 4px !important;
+    }
+    #main-header .header-stats-row .clickable-header-item i { font-size: 1.1rem !important; }
+    #main-header .header-stats-row .badge-count { position: absolute !important; top: -8px !important; right: 15% !important; font-size: 0.55rem !important; min-width: 16px !important; padding: 2px 4px !important; }
+    #main-header .header-stats-row .de-sub { font-size: 0.55rem !important; color: #94a3b8 !important; white-space: nowrap !important; margin-top: 0 !important; }
 
-    /* ==================================================================
-       ZEILE 6: NAVBAR
-       ================================================================== */
-    #main-header .header-nav-bar { order: 8 !important; width: 100% !important; display: flex !important; justify-content: flex-start !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding: 5px 0 !important; margin: 0 !important; }
+    #main-header .header-nav-bar {
+        order: 7 !important; justify-content: flex-start !important; flex-wrap: nowrap !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding: 5px 0 !important; width: 100vw !important; margin-left: -10px !important;
+    }
     #main-header .header-nav-bar::-webkit-scrollbar { display: none !important; }
     #main-header .header-nav-bar button { flex-shrink: 0 !important; margin: 0 5px !important; }
 
     /* ==================================================================
-       LÜCKEN-KILLER ZUM HAUPTINHALT
+       💥 LÜCKEN-KILLER 💥
        ================================================================== */
-    .header-spacer, #header-spacer { display: none !important; }
     body { padding-top: 0 !important; margin-top: 0 !important; }
-    main, #main-content, .main-wrapper, .wrapper, .hero-section { margin-top: 5px !important; padding-top: 0 !important; }
-    .profile-picture-container, .hero-image-wrapper { margin-top: 0 !important; padding-top: 0 !important; }
-    h1.hero-title, h1.page-title { margin-top: 5px !important; font-size: 1.8rem !important; }
+    
+    main, #main-content, .main-content, .content-area, .main-wrapper, .wrapper,
+    .hero-section, .profile-hero, #home-hero, .home-hero {
+        margin-top: 0 !important; 
+        padding-top: 5px !important;
+    }
+    
+    .large-profile-pic, .hero-profile-image-container, 
+    .profile-picture-container, .hero-image-wrapper {
+        margin-top: 5px !important;
+    }
+    
+    h1.hero-title, h1.page-title {
+        margin-top: 0 !important; 
+        padding-top: 5px !important; 
+        font-size: 1.8rem !important; 
+    }
 }
 
+/* 🍎 iOS ONLY (iPhones/iPads) 🍎 */
 @supports (-webkit-touch-callout: none) {
     #modal-backdrop { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: rgba(0, 0, 0, 0.95) !important; }
-    .modal.active-modal, .modal-content { animation: none !important; }
     body.modal-open, html.modal-open { overflow: hidden !important; position: fixed !important; width: 100% !important; height: 100% !important; touch-action: none !important; }
     @media (max-width: 768px) { #main-header .header-search input, select, textarea { font-size: 16px !important; } }
 }
