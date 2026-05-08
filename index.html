@@ -1472,7 +1472,7 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 MEGA FIX V15: TICKER-BEFREIUNG & ABSOLUTE SAUBERKEIT (FINAL)
+   📱 MEGA FIX V17: DATETIME & LOGIN-KLICK REPARATUR (FINAL)
    ========================================================================== */
 
 /* 🤖 ALLGEMEIN MOBILE (ANDROID & iOS) 🤖 */
@@ -1482,7 +1482,7 @@ nav#main-nav, nav {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        margin-top: 60px !important; /* 🔥 BEFREIT DAS PROFILBILD KOMPLETT VOM TICKER! 🔥 */
+        margin-top: 60px !important; 
         padding: 15px 5px 5px 5px !important; 
         margin-bottom: 0 !important;
         height: auto !important;
@@ -1492,16 +1492,20 @@ nav#main-nav, nav {
         gap: 8px !important; 
     }
 
+    #main-header .header-top-row {
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; right: 0 !important;
+        width: 100% !important; margin: 0 !important;
+    }
+
     /* Container-Reste töten */
     #main-header .header-top, 
     #main-header .header-left, 
-    #main-header .header-search-wrapper, 
-    #main-header .header-right {
+    #main-header .header-search-wrapper {
         display: contents !important;
     }
 
     /* ALLES IN DEN NORMALEN FLUSS ZWINGEN */
-    #main-header .user-profile-group, #main-header .header-search,
     #main-header .logo, #main-header .datetime-container, #main-header .header-stats-row,
     #main-header .header-user-stats, #main-header .header-nav-bar {
         position: static !important; 
@@ -1510,23 +1514,69 @@ nav#main-nav, nav {
         justify-content: center !important; align-items: center !important;
     }
 
-    /* 2. PROFIL-RAHMEN (Steht jetzt sicher unter dem 60px Ticker) */
-    #main-header .user-profile-group { 
+    /* ==================================================================
+       🔥 LOGGED-IN VS. GUEST TRENNUNG 🔥
+       ================================================================== */
+       
+    /* ---> WENN EINGELOGGT (USER / ADMIN) <--- */
+    body.user-mode #main-header .header-right,
+    body.admin-mode #main-header .header-right {
+        display: contents !important; 
+    }
+    body.user-mode #main-header .auth-view-btn, 
+    body.admin-mode #main-header .auth-view-btn { 
+        display: none !important; 
+    }
+    body.user-mode #main-header .user-profile-group,
+    body.admin-mode #main-header .user-profile-group { 
         order: 1 !important; 
         flex-wrap: wrap !important;
         gap: 8px !important; 
-        margin-top: 0 !important; 
+        margin-top: 2px !important; 
         position: relative !important;
+        display: flex !important;
+        width: 100% !important; 
+        box-sizing: border-box !important;
+        justify-content: center !important; 
+        align-items: center !important;
+        z-index: 10 !important;
     }
     #main-header .user-profile-group .profile-pic { width: 35px !important; height: 35px !important; }
-    
     #main-header .user-profile-group .logout-btn { 
         width: 32px !important; height: 32px !important; margin: 0 0 0 5px !important;
         display: flex !important; justify-content: center !important; align-items: center !important; flex-shrink: 0 !important;
     }
-    
-    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn { width: 48% !important; padding: 8px 4px !important; font-size: 0.85rem !important; order: 1 !important; margin: 5px 1% !important;}
-    body.user-mode #main-header .auth-view-btn, body.admin-mode #main-header .auth-view-btn { display: none !important; }
+
+    /* ---> WENN AUSGELOGGT (GUEST) <--- */
+    body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group {
+        display: none !important; /* Versteckt Pille für Gäste */
+    }
+    body:not(.user-mode):not(.admin-mode) #main-header .header-right {
+        display: flex !important;
+        flex-direction: row !important; 
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 15px !important;
+        width: 100% !important;
+        order: 1 !important; 
+        margin-top: 5px !important;
+        position: relative !important;
+        z-index: 2000 !important; /* 🔥 FIX: Holt den Box-Bereich in den Vordergrund! */
+        pointer-events: auto !important;
+    }
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        display: flex !important;
+        flex: 1 !important;
+        max-width: 45% !important;
+        padding: 8px !important;
+        font-size: 0.85rem !important;
+        margin: 0 !important;
+        flex-direction: column !important;
+        position: relative !important;
+        z-index: 2001 !important; /* 🔥 FIX: Klicks werden garantiert erfasst! */
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
 
     /* 3. LOGO */
     #main-header .logo { 
@@ -1539,26 +1589,28 @@ nav#main-nav, nav {
     /* 🔥 4. DER TURM: GLOCKE (OBEN) 🔥 */
     #main-header #user-notify-btn {
         position: absolute !important;
-        top: 78px !important; /* Auf gleicher Höhe wie das Logo! */
+        top: 78px !important; 
         right: 15px !important; 
         z-index: 1001 !important;
         transform: scale(1.1) !important; 
         transform-origin: top right !important; 
         margin: 0 !important; padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important;
+        pointer-events: auto !important;
     }
-    #main-header #user-notify-btn .badge { position: absolute !important; top: -4px !important; right: -4px !important; }
+    #main-header #user-notify-btn .badge { position: absolute !important; top: -4px !important; right: -4px !important; pointer-events: none !important; }
 
     /* 🔥 5. DER TURM: WETTER (UNTEN) 🔥 */
     #main-header #weather-widget, 
     #main-header .weather-widget {
         position: absolute !important;
-        top: 120px !important; /* Genau unter der Glocke */
+        top: 120px !important; 
         right: 15px !important; 
         margin: 0 !important; 
         transform: scale(0.85) !important; 
         transform-origin: top right !important; 
         z-index: 1001 !important;
         bottom: auto !important; left: auto !important;
+        pointer-events: auto !important;
     }
 
     /* 6. DATUM & SUCHE */
@@ -1567,11 +1619,31 @@ nav#main-nav, nav {
         font-size: 0.7rem !important; 
         flex-direction: row !important; 
         gap: 15px !important; 
-        margin-top: 40px !important; /* Zieht den Rest sicher nach unten */
+        margin-top: 20px !important; /* 🔥 FIX: Zieht Uhr/Kalender hoch, weg vom Wetter! */
         margin-bottom: 10px !important; 
+        position: relative !important;
+        z-index: 10 !important;
     }
-    #main-header .header-search { order: 4 !important; margin-bottom: 10px !important; }
-    #main-header .header-search input { width: 100% !important; height: 38px !important; font-size: 0.9rem !important; padding: 6px 12px !important; }
+    
+    /* 🔥 SEARCH-FIX: PRIORITÄT FÜR SUCHVORSCHLÄGE 🔥 */
+    #main-header .header-search { 
+        order: 4 !important; 
+        margin-bottom: 10px !important; 
+        width: 100% !important; 
+        position: relative !important; 
+        z-index: 9999 !important; 
+        display: flex !important;
+    }
+    #main-header .header-search input { width: 100% !important; height: 38px !important; font-size: 0.9rem !important; padding: 6px 12px !important; position: relative !important; z-index: 10000 !important; }
+    
+    .search-suggestions {
+        position: absolute !important;
+        top: 100% !important; 
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 10005 !important; /* 🔥 POPUP ÜBER ALLEM ANDEREN 🔥 */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.9) !important;
+    }
 
     #main-header .header-user-stats { display: none !important; }
     body.admin-mode #main-header .header-user-stats { display: flex !important; order: 5 !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 10px !important; font-size: 0.6rem !important; padding: 5px !important; border-radius: 6px !important; }
@@ -1607,7 +1679,7 @@ nav#main-nav, nav {
     }
     
     .page-view, #main-content .page-view, main .page-view {
-        padding-top: 15px !important; /* JS'yi tamamen bloke eder! */
+        padding-top: 15px !important; 
     }
     
     #content, .site-content, main, #main-content, .main-content, .content-area, .main-wrapper, .wrapper,
