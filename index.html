@@ -1659,10 +1659,13 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   🍎 iOS ONLY (iPHONES/iPADS) ANTI-FREEZE, SCROLL & KLICK FIX (V32) 🍎
+   🍎 iOS ONLY (iPHONES/iPADS) V33: TEXTE, HOROSKOP, KALENDER, SCROLL & FIXES 🍎
    ========================================================================== */
 @supports (-webkit-touch-callout: none) {
-    /* Blackscreen & Freeze Fix */
+    
+    /* ==================================================================
+       1. GRUNDLEGENDE iOS MODAL & FREEZE FIXES (Wie bisher)
+       ================================================================== */
     #modal-backdrop {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -1672,7 +1675,6 @@ nav#main-nav, nav {
         transition: none !important; 
     }
     
-    /* 🔥 FIX: Modals passen sich der dynamischen iOS-URL-Leiste an! */
     .modal.active-modal {
         display: flex !important;
         animation: none !important; 
@@ -1684,143 +1686,162 @@ nav#main-nav, nav {
         -webkit-transform: translateZ(0) !important;
         will-change: transform, opacity !important;
         animation: none !important; 
-        max-height: 88dvh !important; /* Darf nicht über den Rand wachsen */
+        max-height: 88dvh !important; 
         display: flex !important;
         flex-direction: column !important;
     }
     
-    /* Tastatur-Sperre verhindern */
     body.modal-open, html.modal-open {
         overflow: hidden !important;
         height: 100% !important;
     }
     
     .modal-body {
-        -webkit-overflow-scrolling: touch !important; /* Butterweiches iOS Scrollen */
+        -webkit-overflow-scrolling: touch !important; 
         overflow-y: auto !important;   
         overflow-x: hidden !important; 
         flex-grow: 1 !important;
         padding-bottom: 120px !important; 
     }
 
-    /* LEADERBOARD (Şairler Ligi) TABELLEN-FIX */
-    #leaderboardModal .modal-body {
-        display: flex !important;
-        flex-direction: column !important;
+    /* ==================================================================
+       🔥 2. NEU: GLOBALE TEXTVERKLEINERUNG (FÜR EINZEILIGEN FLUSS) 🔥
+       ================================================================== */
+    .modal-body p, .modal-body span, .poem-line, .stanza, .card-text, blockquote {
+        font-size: 0.8rem !important; /* Zwingt Sätze kompakt in eine Zeile */
+        line-height: 1.4 !important;
     }
-
-    #leaderboardModal .modal-body div[style*="overflow-x:auto"],
-    #leaderboardModal .modal-body div[style*="overflow-x: auto"] {
-        -webkit-overflow-scrolling: touch !important;
-        padding-bottom: 15px !important;
-        min-height: 250px !important;  
-        max-height: 60vh !important;   
-        flex-grow: 1 !important;       
-        overflow-x: auto !important;   
-        overflow-y: auto !important;   
-    }
-
-    #leaderboard-table th, 
-    #leaderboard-table td {
-        white-space: nowrap !important; 
-        font-size: 0.8rem !important;   
-        padding: 12px 10px !important; 
-    }
-
-    /* NEU: KAYIT OL (REGISTRIEREN) KLICK-BUG FIX FÜR iOS */
-    body:not(.user-mode):not(.admin-mode) #main-header .header-right {
-        z-index: 100000 !important; 
-        transform: translateZ(10px) !important; 
-    }
-
-    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
-        background-color: rgba(0, 0, 0, 0.01) !important; 
-        touch-action: manipulation !important; 
-        cursor: pointer !important;
-    }
-
-    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn * {
-        pointer-events: none !important;
+    
+    /* Titel anpassen, damit die Hierarchie stimmt */
+    h1, h2, h3, .modal-title {
+        font-size: 1.2rem !important;
+        line-height: 1.2 !important;
     }
 
     /* ==================================================================
-       🔥 NEU (V32): FLOATING MENU (USER BUTTONS) KOMPAKT & SCROLLBAR 🔥
+       🔥 3. NEU: HOROSKOP "ZURÜCK-BUTTON" RENDER-BUG FIX 🔥
        ================================================================== */
-    @media (max-width: 768px) {
-        /* Wrapper etwas nach unten ziehen */
-        .floating-menu-wrapper.left {
-            bottom: 20px !important; 
-            left: 12px !important;
-            z-index: 9000 !important;
-        }
-
-        /* Hauptbutton minimal verkleinern */
-        .floating-menu-wrapper.left .menu-toggle-btn {
-            width: 48px !important;
-            height: 48px !important;
-            font-size: 1.3rem !important;
-        }
-
-        /* 🔥 SCROLL-BOX FÜR DIE BUTTONS 🔥 */
-        .floating-menu-wrapper.left .floating-menu-items {
-            max-height: 45vh !important; /* STRIKTE GRENZE: Verhindert Berührung mit dem Header! */
-            overflow-y: auto !important; /* Aktiviert das Scrollen */
-            -webkit-overflow-scrolling: touch !important; /* Butterweiches Wischen */
-            padding-bottom: 5px !important; 
-            gap: 8px !important; /* Weniger Abstand zwischen den Buttons */
-            pointer-events: auto !important;
-            scrollbar-width: none !important; 
-            overscroll-behavior: contain !important; /* Verhindert das Mitscrollen der Hauptseite */
-        }
-        
-        /* Unsichtbare Scrollbar */
-        .floating-menu-wrapper.left .floating-menu-items::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
-        }
-
-        /* 🔥 BUTTONS STARK VERKLEINERT 🔥 */
-        .floating-menu-wrapper.left .bottom-btn {
-            height: 38px !important;
-            width: 38px !important;
-            min-height: 38px !important;
-            min-width: 38px !important; 
-            border-radius: 19px !important; /* 50% von 38px für perfekte Rundung */
-        }
-        
-        .floating-menu-wrapper.left .bottom-btn .btn-icon {
-            width: 38px !important;
-            height: 38px !important;
-            min-width: 38px !important;
-            font-size: 1rem !important;
-        }
-
-        /* Hover/Ausgeklappt-Zustand */
-        .floating-menu-wrapper.left .bottom-btn:hover {
-             width: 180px !important; /* Nicht mehr ganz so breit */
-             border-radius: 19px !important;
-        }
-        
-        .floating-menu-wrapper.left .btn-text {
-            font-size: 0.8rem !important;
-            line-height: 1.1 !important;
-        }
-        
-        /* Benachrichtigungs-Punkte (Badges) anpassen */
-        .floating-menu-wrapper.left .badge-count {
-            top: -4px !important;
-            right: -4px !important;
-            transform: scale(0.8) !important; /* Punkte etwas schrumpfen */
-        }
+    #horoscopeModal .modal-body {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 60vh !important; /* Verhindert das Zusammenklappen */
+    }
+    
+    /* Hardware-Beschleunigung: Zwingt iOS, das Grid nach dem Zurückklicken neu zu zeichnen! */
+    #horoscopeModal .modal-body > div:not([style*="display: none"]) {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        width: 100% !important;
+        flex-grow: 1 !important;
+        transform: translateZ(0) !important; 
+        -webkit-transform: translateZ(0) !important;
     }
 
-    /* iOS Spezifische Schriften & Borders anpassen */
+    /* ==================================================================
+       🔥 4. NEU: KALENDER EXTREM KOMPAKT 🔥
+       ================================================================== */
+    #calendarModal .modal-body {
+        padding: 5px !important;
+    }
+    
+    .calendar-grid {
+        gap: 2px !important; /* Kaum noch Lücken zwischen den Tagen */
+    }
+    
+    .calendar-day, .cal-day {
+        font-size: 0.75rem !important;
+        padding: 4px !important;
+        min-height: 35px !important;
+        height: 35px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .calendar-day-header, .weekday-header {
+        font-size: 0.7rem !important;
+        padding: 2px !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* ==================================================================
+       🔥 5. NEU: KALPLERIM (MY HEARTS) DIREKT SICHTBAR 🔥
+       ================================================================== */
+    #heartsModal .card, #favoritesModal .card,
+    #heartsModal .list-group-item, #favoritesModal .list-group-item {
+        padding: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    #heartsModal h4, #heartsModal h5, #heartsModal .card-title,
+    #favoritesModal h4, #favoritesModal h5, #favoritesModal .card-title {
+        font-size: 0.9rem !important;
+        margin-bottom: 5px !important;
+        line-height: 1.2 !important;
+    }
+    
+    #heartsModal p, #heartsModal .card-text,
+    #favoritesModal p, #favoritesModal .card-text {
+        font-size: 0.75rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* ==================================================================
+       🔥 6. NEU: PROFIL & EINGABEFELDER PLACEHOLDER ZENTRIEREN 🔥
+       ================================================================== */
+    input::placeholder, textarea::placeholder {
+        text-align: center !important;
+    }
+    
+    /* Optional: Zentriert auch den Text, den der User dann selbst eintippt */
+    #profileModal input, #settingsModal input {
+        text-align: center !important;
+    }
+
+    /* ==================================================================
+       7. LEADERBOARD TABELLEN-FIX (Wie bisher)
+       ================================================================== */
+    #leaderboardModal .modal-body { display: flex !important; flex-direction: column !important; }
+    #leaderboardModal .modal-body div[style*="overflow-x:auto"], #leaderboardModal .modal-body div[style*="overflow-x: auto"] {
+        -webkit-overflow-scrolling: touch !important; padding-bottom: 15px !important;
+        min-height: 250px !important; max-height: 60vh !important; flex-grow: 1 !important;       
+        overflow-x: auto !important; overflow-y: auto !important;   
+    }
+    #leaderboard-table th, #leaderboard-table td {
+        white-space: nowrap !important; font-size: 0.8rem !important; padding: 12px 10px !important; 
+    }
+
+    /* ==================================================================
+       8. KAYIT OL KLICK-BUG FIX (Wie bisher)
+       ================================================================== */
+    body:not(.user-mode):not(.admin-mode) #main-header .header-right { z-index: 100000 !important; transform: translateZ(10px) !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        background-color: rgba(0, 0, 0, 0.01) !important; touch-action: manipulation !important; cursor: pointer !important;
+    }
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn * { pointer-events: none !important; }
+
+    /* ==================================================================
+       9. FLOATING MENU KOMPAKT & SCROLLBAR (Wie bisher)
+       ================================================================== */
     @media (max-width: 768px) {
-        .card, .game-card { border-width: 0.5px !important; border-color: rgba(244, 197, 66, 0.5) !important; }
-        .modal-content { border-width: 0.5px !important; border-radius: 16px !important; }
-        .hero-title { font-weight: normal !important; -webkit-font-smoothing: subpixel-antialiased !important; }
+        .floating-menu-wrapper.left { bottom: 20px !important; left: 12px !important; z-index: 9000 !important; }
+        .floating-menu-wrapper.left .menu-toggle-btn { width: 48px !important; height: 48px !important; font-size: 1.3rem !important; }
+        .floating-menu-wrapper.left .floating-menu-items {
+            max-height: 45vh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important;
+            padding-bottom: 5px !important; gap: 8px !important; pointer-events: auto !important;
+            scrollbar-width: none !important; overscroll-behavior: contain !important;
+        }
+        .floating-menu-wrapper.left .floating-menu-items::-webkit-scrollbar { display: none !important; width: 0 !important; }
+        .floating-menu-wrapper.left .bottom-btn { height: 38px !important; width: 38px !important; min-height: 38px !important; min-width: 38px !important; border-radius: 19px !important; }
+        .floating-menu-wrapper.left .bottom-btn .btn-icon { width: 38px !important; height: 38px !important; min-width: 38px !important; font-size: 1rem !important; }
+        .floating-menu-wrapper.left .bottom-btn:hover { width: 180px !important; border-radius: 19px !important; }
+        .floating-menu-wrapper.left .btn-text { font-size: 0.8rem !important; line-height: 1.1 !important; }
+        .floating-menu-wrapper.left .badge-count { top: -4px !important; right: -4px !important; transform: scale(0.8) !important; }
+        
+        /* Auto-Zoom Bug Fix für iOS Inputs */
         input, select, textarea { font-size: 16px !important; }
-        #main-header .header-user-stats { border-width: 0.5px !important; border-radius: 8px !important; }
     }
 }
     
