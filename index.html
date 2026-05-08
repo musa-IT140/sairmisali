@@ -1659,7 +1659,7 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   🍎 iOS ONLY (iPHONES/iPADS) ANTI-FREEZE, SCROLL & MODAL FIX (V27) 🍎
+   🍎 iOS ONLY (iPHONES/iPADS) ANTI-FREEZE, SCROLL & MODAL FIX (V28) 🍎
    ========================================================================== */
 @supports (-webkit-touch-callout: none) {
     /* Blackscreen & Freeze Fix */
@@ -1689,28 +1689,34 @@ nav#main-nav, nav {
         flex-direction: column !important;
     }
     
-    /* 🔥 SCROLL-BEFREIUNG: Body darf NICHT "fixed" sein, sonst bricht die Tastatur alles! 🔥 */
+    /* Tastatur-Sperre verhindern */
     body.modal-open, html.modal-open {
         overflow: hidden !important;
         height: 100% !important;
-        /* position: fixed; WURDE GELÖSCHT! */
-        /* touch-action: none; WURDE GELÖSCHT! */
     }
     
     .modal-body {
         -webkit-overflow-scrolling: touch !important; /* Butterweiches iOS Scrollen */
-        overflow-y: auto !important;
+        overflow-y: auto !important;   /* 🔥 Erlaubt NUR Scrollen nach oben/unten */
+        overflow-x: hidden !important; /* 🔥 Blockiert horizontales Wischen auf dieser Ebene */
         flex-grow: 1 !important;
-        padding-bottom: 120px !important; /* 💥 FIX: Zwingt den Registrierungs-Button IMMER ins Bild! */
-        /* touch-action: pan-y; WURDE GELÖSCHT, UM DIE TABELLE NICHT ZU STÖREN! */
+        padding-bottom: 120px !important; 
     }
 
-    /* 🔥 LEADERBOARD (Şairler Ligi) TABELLEN-FIX 🔥 
-       Trennt horizontales von vertikalem Scrollen sauber ab! */
+    /* 🔥 LEADERBOARD (Şairler Ligi) TABELLEN-FIX 🔥 */
+    #leaderboardModal .modal-body {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
     #leaderboardModal .modal-body div[style*="overflow-x:auto"],
     #leaderboardModal .modal-body div[style*="overflow-x: auto"] {
         -webkit-overflow-scrolling: touch !important;
         padding-bottom: 15px !important;
+        min-height: 350px !important;  /* 🔥 Zieht die Box massiv nach unten (Platz für min. 4 Spieler) */
+        flex-grow: 1 !important;       /* 🔥 Füllt den restlichen leeren Raum aus */
+        overflow-x: auto !important;   /* 🔥 Erlaubt NUR horizontales Scrollen in der Tabelle */
+        overflow-y: hidden !important; /* 🔥 TÖTET das diagonale Scroll-Chaos (Scroll-Mix) */
     }
     
     /* iOS Spezifische Schriften & Borders anpassen */
