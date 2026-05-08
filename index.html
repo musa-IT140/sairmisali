@@ -1659,149 +1659,129 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   🍎 iOS ONLY (iPHONES/iPADS) V33: TEXTE, HOROSKOP, KALENDER, SCROLL & FIXES 🍎
+   🍎 iOS ONLY (iPHONES/iPADS) V34: KALENDER-RETTUNG, UHR-FIX & DOWNSCALE 🍎
    ========================================================================== */
 @supports (-webkit-touch-callout: none) {
     
     /* ==================================================================
-       1. GRUNDLEGENDE iOS MODAL & FREEZE FIXES (Wie bisher)
+       1. GRUNDLEGENDE iOS MODAL & FREEZE FIXES
        ================================================================== */
     #modal-backdrop {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
         background-color: rgba(0, 0, 0, 0.95) !important; 
-        transform: translateZ(0) !important;
-        will-change: auto !important;
-        transition: none !important; 
+        transform: translateZ(0) !important; will-change: auto !important; transition: none !important; 
     }
     
-    .modal.active-modal {
-        display: flex !important;
-        animation: none !important; 
-        height: 100dvh !important; 
-    }
+    .modal.active-modal { display: flex !important; animation: none !important; height: 100dvh !important; }
     
     .modal-content {
-        transform: translateZ(0) !important;
-        -webkit-transform: translateZ(0) !important;
-        will-change: transform, opacity !important;
-        animation: none !important; 
-        max-height: 88dvh !important; 
-        display: flex !important;
-        flex-direction: column !important;
+        transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
+        will-change: transform, opacity !important; animation: none !important; 
+        max-height: 88dvh !important; display: flex !important; flex-direction: column !important;
     }
     
-    body.modal-open, html.modal-open {
-        overflow: hidden !important;
-        height: 100% !important;
-    }
+    body.modal-open, html.modal-open { overflow: hidden !important; height: 100% !important; }
     
     .modal-body {
-        -webkit-overflow-scrolling: touch !important; 
-        overflow-y: auto !important;   
-        overflow-x: hidden !important; 
-        flex-grow: 1 !important;
-        padding-bottom: 120px !important; 
+        -webkit-overflow-scrolling: touch !important; overflow-y: auto !important; overflow-x: hidden !important; 
+        flex-grow: 1 !important; padding-bottom: 120px !important; 
     }
 
     /* ==================================================================
-       🔥 2. NEU: GLOBALE TEXTVERKLEINERUNG (FÜR EINZEILIGEN FLUSS) 🔥
+       🔥 2. GLOBALE TEXTVERKLEINERUNG 🔥
        ================================================================== */
     .modal-body p, .modal-body span, .poem-line, .stanza, .card-text, blockquote {
-        font-size: 0.8rem !important; /* Zwingt Sätze kompakt in eine Zeile */
-        line-height: 1.4 !important;
+        font-size: 0.8rem !important; line-height: 1.3 !important;
     }
-    
-    /* Titel anpassen, damit die Hierarchie stimmt */
-    h1, h2, h3, .modal-title {
-        font-size: 1.2rem !important;
-        line-height: 1.2 !important;
-    }
+    h1, h2, h3, .modal-title { font-size: 1.1rem !important; line-height: 1.2 !important; }
 
     /* ==================================================================
-       🔥 3. NEU: HOROSKOP "ZURÜCK-BUTTON" RENDER-BUG FIX 🔥
+       🔥 3. UHR-FIX (ANALOG & DIGITAL ZURÜCK ZUR NORMALITÄT) 🔥
        ================================================================== */
-    #horoscopeModal .modal-body {
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 60vh !important; /* Verhindert das Zusammenklappen */
-    }
-    
-    /* Hardware-Beschleunigung: Zwingt iOS, das Grid nach dem Zurückklicken neu zu zeichnen! */
-    #horoscopeModal .modal-body > div:not([style*="display: none"]) {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
+    /* Zwingt die analoge Uhr in einen perfekten Kreis und macht sie kleiner */
+    #clockModal canvas, .clock-container canvas, #analog-clock, .analog-clock {
+        max-width: 180px !important; /* Macht die Uhr kleiner */
+        max-height: 180px !important;
         width: 100% !important;
-        flex-grow: 1 !important;
-        transform: translateZ(0) !important; 
-        -webkit-transform: translateZ(0) !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1 !important; /* 🔥 VERHINDERT DAS OVALE VERZERREN! 🔥 */
+        margin: 0 auto 15px auto !important;
+        display: block !important;
+    }
+    
+    /* Digitale Uhren verkleinern */
+    .digital-clock-container, .time-box, #clockModal .card {
+        transform: scale(0.85) !important;
+        transform-origin: top center !important;
+        margin-bottom: -10px !important;
     }
 
     /* ==================================================================
-       🔥 4. NEU: KALENDER EXTREM KOMPAKT 🔥
+       🔥 4. KALENDER-RETTUNG (SICHERES SKALIEREN) 🔥
        ================================================================== */
-    #calendarModal .modal-body {
-        padding: 5px !important;
-    }
-    
-    .calendar-grid {
-        gap: 2px !important; /* Kaum noch Lücken zwischen den Tagen */
-    }
-    
+    /* Tötet die zerstörerischen Befehle aus V33, die den Kalender zerfetzt haben */
     .calendar-day, .cal-day {
-        font-size: 0.75rem !important;
-        padding: 4px !important;
-        min-height: 35px !important;
-        height: 35px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        height: auto !important; /* WICHTIG: Darf nicht fixiert sein! */
+        min-height: unset !important;
+        display: block !important; /* Kein Flexbox mehr, das macht die JS-Struktur kaputt */
+        padding: 4px 2px !important;
+        font-size: 0.8rem !important;
     }
-    
-    .calendar-day-header, .weekday-header {
-        font-size: 0.7rem !important;
-        padding: 2px !important;
-        margin-bottom: 5px !important;
+
+    /* Verkleinert den gesamten Kalender sicher wie eine Lupe (Zoom-Out) */
+    #calendarModal .modal-body { padding: 10px 5px !important; }
+    .calendar-wrapper, #calendar-container, .calendar-grid-container {
+        transform: scale(0.9) !important;
+        transform-origin: top center !important;
+        margin-bottom: -5% !important;
     }
 
     /* ==================================================================
-       🔥 5. NEU: KALPLERIM (MY HEARTS) DIREKT SICHTBAR 🔥
+       🔥 5. MARŞLAR (HYMNEN) DOWNSCALE 🔥
        ================================================================== */
-    #heartsModal .card, #favoritesModal .card,
-    #heartsModal .list-group-item, #favoritesModal .list-group-item {
-        padding: 8px !important;
+    #hymnModal h3, #hymnModal h4, .hymn-title {
+        font-size: 1rem !important;
         margin-bottom: 8px !important;
     }
-    
-    #heartsModal h4, #heartsModal h5, #heartsModal .card-title,
-    #favoritesModal h4, #favoritesModal h5, #favoritesModal .card-title {
-        font-size: 0.9rem !important;
-        margin-bottom: 5px !important;
+    #hymnModal p, #hymnModal .poem-line, .hymn-text {
+        font-size: 0.75rem !important;
         line-height: 1.2 !important;
     }
-    
-    #heartsModal p, #heartsModal .card-text,
-    #favoritesModal p, #favoritesModal .card-text {
-        font-size: 0.75rem !important;
+
+    /* ==================================================================
+       🔥 6. KALPLERIM (MY HEARTS) KOMPAKT 🔥
+       ================================================================== */
+    #heartsModal .card, #favoritesModal .card, #heartsModal .list-group-item {
+        padding: 8px 10px !important;
+        margin-bottom: 6px !important;
+    }
+    #heartsModal h4, #heartsModal h5, #heartsModal .card-title {
+        font-size: 0.85rem !important;
+        margin-bottom: 3px !important;
+    }
+    #heartsModal p, #heartsModal .card-text, .notification-text {
+        font-size: 0.7rem !important;
         line-height: 1.2 !important;
         margin-bottom: 0 !important;
     }
 
     /* ==================================================================
-       🔥 6. NEU: PROFIL & EINGABEFELDER PLACEHOLDER ZENTRIEREN 🔥
+       7. HOROSKOP "ZURÜCK-BUTTON" RENDER-BUG FIX
        ================================================================== */
-    input::placeholder, textarea::placeholder {
-        text-align: center !important;
-    }
-    
-    /* Optional: Zentriert auch den Text, den der User dann selbst eintippt */
-    #profileModal input, #settingsModal input {
-        text-align: center !important;
+    #horoscopeModal .modal-body { display: flex !important; flex-direction: column !important; min-height: 60vh !important; }
+    #horoscopeModal .modal-body > div:not([style*="display: none"]) {
+        display: flex !important; flex-wrap: wrap !important; justify-content: center !important; width: 100% !important; flex-grow: 1 !important;
+        transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
     }
 
     /* ==================================================================
-       7. LEADERBOARD TABELLEN-FIX (Wie bisher)
+       8. PROFIL & EINGABEFELDER PLACEHOLDER ZENTRIEREN
+       ================================================================== */
+    input::placeholder, textarea::placeholder { text-align: center !important; }
+    #profileModal input, #settingsModal input { text-align: center !important; }
+
+    /* ==================================================================
+       9. LEADERBOARD TABELLEN-FIX
        ================================================================== */
     #leaderboardModal .modal-body { display: flex !important; flex-direction: column !important; }
     #leaderboardModal .modal-body div[style*="overflow-x:auto"], #leaderboardModal .modal-body div[style*="overflow-x: auto"] {
@@ -1809,12 +1789,10 @@ nav#main-nav, nav {
         min-height: 250px !important; max-height: 60vh !important; flex-grow: 1 !important;       
         overflow-x: auto !important; overflow-y: auto !important;   
     }
-    #leaderboard-table th, #leaderboard-table td {
-        white-space: nowrap !important; font-size: 0.8rem !important; padding: 12px 10px !important; 
-    }
+    #leaderboard-table th, #leaderboard-table td { white-space: nowrap !important; font-size: 0.8rem !important; padding: 12px 10px !important; }
 
     /* ==================================================================
-       8. KAYIT OL KLICK-BUG FIX (Wie bisher)
+       10. KAYIT OL KLICK-BUG FIX
        ================================================================== */
     body:not(.user-mode):not(.admin-mode) #main-header .header-right { z-index: 100000 !important; transform: translateZ(10px) !important; }
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
@@ -1823,15 +1801,14 @@ nav#main-nav, nav {
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn * { pointer-events: none !important; }
 
     /* ==================================================================
-       9. FLOATING MENU KOMPAKT & SCROLLBAR (Wie bisher)
+       11. FLOATING MENU KOMPAKT & SCROLLBAR
        ================================================================== */
     @media (max-width: 768px) {
         .floating-menu-wrapper.left { bottom: 20px !important; left: 12px !important; z-index: 9000 !important; }
         .floating-menu-wrapper.left .menu-toggle-btn { width: 48px !important; height: 48px !important; font-size: 1.3rem !important; }
         .floating-menu-wrapper.left .floating-menu-items {
             max-height: 45vh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important;
-            padding-bottom: 5px !important; gap: 8px !important; pointer-events: auto !important;
-            scrollbar-width: none !important; overscroll-behavior: contain !important;
+            padding-bottom: 5px !important; gap: 8px !important; pointer-events: auto !important; scrollbar-width: none !important; overscroll-behavior: contain !important;
         }
         .floating-menu-wrapper.left .floating-menu-items::-webkit-scrollbar { display: none !important; width: 0 !important; }
         .floating-menu-wrapper.left .bottom-btn { height: 38px !important; width: 38px !important; min-height: 38px !important; min-width: 38px !important; border-radius: 19px !important; }
@@ -1840,7 +1817,6 @@ nav#main-nav, nav {
         .floating-menu-wrapper.left .btn-text { font-size: 0.8rem !important; line-height: 1.1 !important; }
         .floating-menu-wrapper.left .badge-count { top: -4px !important; right: -4px !important; transform: scale(0.8) !important; }
         
-        /* Auto-Zoom Bug Fix für iOS Inputs */
         input, select, textarea { font-size: 16px !important; }
     }
 }
