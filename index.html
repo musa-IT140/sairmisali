@@ -1659,7 +1659,7 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   🍎 iOS ONLY (iPHONES/iPADS) ANTI-FREEZE, SCROLL & MODAL FIX (V28) 🍎
+   🍎 iOS ONLY (iPHONES/iPADS) ANTI-FREEZE, SCROLL & KLICK FIX (V30) 🍎
    ========================================================================== */
 @supports (-webkit-touch-callout: none) {
     /* Blackscreen & Freeze Fix */
@@ -1697,26 +1697,56 @@ nav#main-nav, nav {
     
     .modal-body {
         -webkit-overflow-scrolling: touch !important; /* Butterweiches iOS Scrollen */
-        overflow-y: auto !important;   /* 🔥 Erlaubt NUR Scrollen nach oben/unten */
-        overflow-x: hidden !important; /* 🔥 Blockiert horizontales Wischen auf dieser Ebene */
+        overflow-y: auto !important;   
+        overflow-x: hidden !important; 
         flex-grow: 1 !important;
         padding-bottom: 120px !important; 
     }
 
-    /* 🔥 LEADERBOARD (Şairler Ligi) TABELLEN-FIX 🔥 */
+    /* ==================================================================
+       🔥 LEADERBOARD (Şairler Ligi) TABELLEN-FIX (V30) 🔥
+       ================================================================== */
     #leaderboardModal .modal-body {
         display: flex !important;
         flex-direction: column !important;
     }
 
+    /* 1. Die Scroll-Box: Darf jetzt horizontal UND vertikal unabhängig scrollen! */
     #leaderboardModal .modal-body div[style*="overflow-x:auto"],
     #leaderboardModal .modal-body div[style*="overflow-x: auto"] {
         -webkit-overflow-scrolling: touch !important;
         padding-bottom: 15px !important;
-        min-height: 350px !important;  /* 🔥 Zieht die Box massiv nach unten (Platz für min. 4 Spieler) */
-        flex-grow: 1 !important;       /* 🔥 Füllt den restlichen leeren Raum aus */
-        overflow-x: auto !important;   /* 🔥 Erlaubt NUR horizontales Scrollen in der Tabelle */
-        overflow-y: hidden !important; /* 🔥 TÖTET das diagonale Scroll-Chaos (Scroll-Mix) */
+        min-height: 250px !important;  
+        max-height: 60vh !important;   /* 🔥 Begrenzt die Höhe, aktiviert das interne Scrollen! */
+        flex-grow: 1 !important;       
+        overflow-x: auto !important;   /* 🔥 Nach links/rechts wischen */
+        overflow-y: auto !important;   /* 🔥 Nach oben/unten wischen (INNERHALB der Box) */
+    }
+
+    /* 2. Text in EINER Zeile & Schriftgröße anpassen */
+    #leaderboard-table th, 
+    #leaderboard-table td {
+        white-space: nowrap !important; /* 🔥 Zwingt den Namen auf EINE Zeile! */
+        font-size: 0.8rem !important;   /* 🔥 Etwas kleiner, damit es kompakt aussieht */
+        padding: 12px 10px !important; 
+    }
+
+    /* ==================================================================
+       🔥 NEU: KAYIT OL (REGISTRIEREN) KLICK-BUG FIX FÜR iOS 🔥
+       ================================================================== */
+    body:not(.user-mode):not(.admin-mode) #main-header .header-right {
+        z-index: 100000 !important; 
+        transform: translateZ(10px) !important; 
+    }
+
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        background-color: rgba(0, 0, 0, 0.01) !important; 
+        touch-action: manipulation !important; 
+        cursor: pointer !important;
+    }
+
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn * {
+        pointer-events: none !important;
     }
     
     /* iOS Spezifische Schriften & Borders anpassen */
