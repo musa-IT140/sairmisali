@@ -1472,18 +1472,18 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   📱 MEGA FIX V17: DATETIME & LOGIN-KLICK REPARATUR (FINAL)
+   📱 MEGA FIX V20: ANDROID WETTER- & GLOCKEN-MATHEMATIK (GETRENNT)
    ========================================================================== */
 
-/* 🤖 ALLGEMEIN MOBILE (ANDROID & iOS) 🤖 */
+/* 🤖 1. ALLGEMEIN MOBILE & ANDROID 🤖 */
 @media (max-width: 768px) {
-    /* 1. HEADER: Ticker ist fixiert (60px). Header MUSS exakt darunter! */
+    /* HEADER BASIS */
     header#main-header {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         margin-top: 60px !important; 
-        padding: 15px 5px 5px 5px !important; 
+        padding: 5px 5px 5px 5px !important; 
         margin-bottom: 0 !important;
         height: auto !important;
         position: relative !important; 
@@ -1492,215 +1492,184 @@ nav#main-nav, nav {
         gap: 8px !important; 
     }
 
-    #main-header .header-top-row {
-        position: absolute !important;
-        top: 0 !important; left: 0 !important; right: 0 !important;
-        width: 100% !important; margin: 0 !important;
-    }
+    #main-header .header-top-row { position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; margin: 0 !important; }
+    #main-header .header-top, #main-header .header-left, #main-header .header-search-wrapper { display: contents !important; }
 
-    /* Container-Reste töten */
-    #main-header .header-top, 
-    #main-header .header-left, 
-    #main-header .header-search-wrapper {
-        display: contents !important;
-    }
-
-    /* ALLES IN DEN NORMALEN FLUSS ZWINGEN */
+    /* NORMALE FLUSS-ERZWINGUNG */
     #main-header .logo, #main-header .datetime-container, #main-header .header-stats-row,
     #main-header .header-user-stats, #main-header .header-nav-bar {
-        position: static !important; 
-        width: 100% !important; margin: 0 !important; transform: none !important;
-        box-sizing: border-box !important; display: flex !important;
-        justify-content: center !important; align-items: center !important;
+        position: static !important; width: 100% !important; margin: 0 !important; transform: none !important; box-sizing: border-box !important; display: flex !important; justify-content: center !important; align-items: center !important;
     }
 
     /* ==================================================================
-       🔥 LOGGED-IN VS. GUEST TRENNUNG 🔥
+       🔥 LOGGED-IN (BILD 2 - EINGELOGGT) 🔥
        ================================================================== */
-       
-    /* ---> WENN EINGELOGGT (USER / ADMIN) <--- */
-    body.user-mode #main-header .header-right,
-    body.admin-mode #main-header .header-right {
-        display: contents !important; 
-    }
-    body.user-mode #main-header .auth-view-btn, 
-    body.admin-mode #main-header .auth-view-btn { 
-        display: none !important; 
-    }
-    body.user-mode #main-header .user-profile-group,
-    body.admin-mode #main-header .user-profile-group { 
-        order: 1 !important; 
-        flex-wrap: wrap !important;
-        gap: 8px !important; 
-        margin-top: 2px !important; 
-        position: relative !important;
-        display: flex !important;
-        width: 100% !important; 
-        box-sizing: border-box !important;
-        justify-content: center !important; 
-        align-items: center !important;
-        z-index: 10 !important;
+    body.user-mode #main-header .header-right, body.admin-mode #main-header .header-right { display: contents !important; }
+    body.user-mode #main-header .auth-view-btn, body.admin-mode #main-header .auth-view-btn { display: none !important; }
+    
+    body.user-mode #main-header .user-profile-group, body.admin-mode #main-header .user-profile-group { 
+        order: 1 !important; flex-wrap: wrap !important; gap: 8px !important; margin-top: 2px !important; position: relative !important; display: flex !important; width: 100% !important; justify-content: center !important; align-items: center !important; z-index: 10 !important;
     }
     #main-header .user-profile-group .profile-pic { width: 35px !important; height: 35px !important; }
-    #main-header .user-profile-group .logout-btn { 
-        width: 32px !important; height: 32px !important; margin: 0 0 0 5px !important;
-        display: flex !important; justify-content: center !important; align-items: center !important; flex-shrink: 0 !important;
-    }
+    #main-header .user-profile-group .logout-btn { width: 32px !important; height: 32px !important; margin: 0 0 0 5px !important; display: flex !important; justify-content: center !important; align-items: center !important; flex-shrink: 0 !important; }
 
-    /* ---> WENN AUSGELOGGT (GUEST) <--- */
-    body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group {
-        display: none !important; /* Versteckt Pille für Gäste */
-    }
-    body:not(.user-mode):not(.admin-mode) #main-header .header-right {
-        display: flex !important;
-        flex-direction: row !important; 
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 15px !important;
-        width: 100% !important;
-        order: 1 !important; 
-        margin-top: 5px !important;
-        position: relative !important;
-        z-index: 2000 !important; /* 🔥 FIX: Holt den Box-Bereich in den Vordergrund! */
-        pointer-events: auto !important;
-    }
-    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
-        display: flex !important;
-        flex: 1 !important;
-        max-width: 45% !important;
-        padding: 8px !important;
-        font-size: 0.85rem !important;
-        margin: 0 !important;
-        flex-direction: column !important;
-        position: relative !important;
-        z-index: 2001 !important; /* 🔥 FIX: Klicks werden garantiert erfasst! */
-        pointer-events: auto !important;
-        cursor: pointer !important;
-    }
-
-    /* 3. LOGO */
+    /* STANDARD LOGO & DATUM (Eingeloggt) */
     #main-header .logo { 
-        order: 2 !important; 
-        font-size: 1.6rem !important; 
+        order: 2 !important; font-size: 1.6rem !important; 
         margin-top: 15px !important; 
         margin-bottom: 0 !important; 
     }
+    
+    #main-header .datetime-container { 
+        order: 3 !important; font-size: 0.7rem !important; flex-direction: row !important; gap: 15px !important; 
+        margin-top: 45px !important; /* 🔥 SCHUTZSCHILD: Drückt Suche sicher unter das Wetter! */
+        margin-bottom: 10px !important; position: relative !important; z-index: 10 !important;
+    }
 
-    /* 🔥 4. DER TURM: GLOCKE (OBEN) 🔥 */
-    #main-header #user-notify-btn {
-        position: absolute !important;
-        top: 78px !important; 
-        right: 15px !important; 
-        z-index: 1001 !important;
-        transform: scale(1.1) !important; 
-        transform-origin: top right !important; 
-        margin: 0 !important; padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important;
-        pointer-events: auto !important;
+    /* 🔥 KOORDINATEN BILD 2 (Eingeloggt): Glocke & Wetter nach UNTEN! 🔥 */
+    #main-header #user-notify-btn { 
+        position: absolute !important; 
+        top: 78px !important; /* 🔥 Glocke tiefer, weg von der Profilpille */
+        right: 15px !important; z-index: 1001 !important; transform: scale(1.1) !important; transform-origin: top right !important; margin: 0 !important; padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: auto !important; 
     }
     #main-header #user-notify-btn .badge { position: absolute !important; top: -4px !important; right: -4px !important; pointer-events: none !important; }
 
-    /* 🔥 5. DER TURM: WETTER (UNTEN) 🔥 */
-    #main-header #weather-widget, 
-    #main-header .weather-widget {
-        position: absolute !important;
-        top: 120px !important; 
-        right: 15px !important; 
-        margin: 0 !important; 
-        transform: scale(0.85) !important; 
-        transform-origin: top right !important; 
-        z-index: 1001 !important;
-        bottom: auto !important; left: auto !important;
-        pointer-events: auto !important;
+    #main-header #weather-widget, #main-header .weather-widget {
+        position: absolute !important; 
+        top: 120px !important; /* 🔥 Wetter tiefer, exakt berührungsfrei unter der Glocke */
+        right: 15px !important; margin: 0 !important; transform: scale(0.85) !important; transform-origin: top right !important; z-index: 1001 !important; bottom: auto !important; left: auto !important; pointer-events: auto !important;
     }
 
-    /* 6. DATUM & SUCHE */
-    #main-header .datetime-container { 
-        order: 3 !important; 
-        font-size: 0.7rem !important; 
-        flex-direction: row !important; 
-        gap: 15px !important; 
-        margin-top: 20px !important; /* 🔥 FIX: Zieht Uhr/Kalender hoch, weg vom Wetter! */
-        margin-bottom: 10px !important; 
-        position: relative !important;
-        z-index: 10 !important;
-    }
+    /* ==================================================================
+       🔥 GUEST-MODE (BILD 1 - AUSGELOGGT) 🔥
+       ================================================================== */
+    body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display: none !important; }
     
-    /* 🔥 SEARCH-FIX: PRIORITÄT FÜR SUCHVORSCHLÄGE 🔥 */
-    #main-header .header-search { 
-        order: 4 !important; 
-        margin-bottom: 10px !important; 
-        width: 100% !important; 
-        position: relative !important; 
-        z-index: 9999 !important; 
-        display: flex !important;
+    body:not(.user-mode):not(.admin-mode) #main-header .header-right {
+        display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; gap: 15px !important; width: 100% !important; order: 1 !important; margin-top: 5px !important; position: relative !important; z-index: 2000 !important; pointer-events: auto !important;
     }
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        display: flex !important; flex: 1 !important; max-width: 45% !important; padding: 8px !important; font-size: 0.85rem !important; margin: 0 !important; flex-direction: column !important; position: relative !important; z-index: 2001 !important; pointer-events: auto !important; cursor: pointer !important;
+    }
+
+    body:not(.user-mode):not(.admin-mode) #main-header .logo {
+        margin-top: 25px !important; 
+    }
+
+    /* 🔥 KOORDINATEN BILD 1 (Ausgeloggt): Glocke & Wetter nach OBEN! 🔥 */
+    body:not(.user-mode):not(.admin-mode) #main-header #user-notify-btn {
+        top: 68px !important; /* 🔥 Glocke etwas höher */
+    }
+    body:not(.user-mode):not(.admin-mode) #main-header #weather-widget, 
+    body:not(.user-mode):not(.admin-mode) #main-header .weather-widget {
+        top: 105px !important; /* 🔥 Wetter höher, weg von der Suchleiste! */
+    }
+    body:not(.user-mode):not(.admin-mode) #main-header .datetime-container {
+        margin-top: 25px !important; /* Abstand, damit die Suche perfekt unter dem Wetter landet */
+    }
+
+    /* ==================================================================
+       🔥 SUCHE & ZÄHLER 🔥
+       ================================================================== */
+    #main-header .header-search { order: 4 !important; margin-bottom: 10px !important; width: 100% !important; position: relative !important; z-index: 9999 !important; display: flex !important; }
     #main-header .header-search input { width: 100% !important; height: 38px !important; font-size: 0.9rem !important; padding: 6px 12px !important; position: relative !important; z-index: 10000 !important; }
-    
-    .search-suggestions {
-        position: absolute !important;
-        top: 100% !important; 
-        left: 0 !important;
-        width: 100% !important;
-        z-index: 10005 !important; /* 🔥 POPUP ÜBER ALLEM ANDEREN 🔥 */
-        box-shadow: 0 10px 25px rgba(0,0,0,0.9) !important;
-    }
+    .search-suggestions { position: absolute !important; top: 100% !important; left: 0 !important; width: 100% !important; z-index: 10005 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.9) !important; }
 
     #main-header .header-user-stats { display: none !important; }
     body.admin-mode #main-header .header-user-stats { display: flex !important; order: 5 !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 10px !important; font-size: 0.6rem !important; padding: 5px !important; border-radius: 6px !important; }
 
-    /* 7. DIE ZÄHLER */
-    #main-header .header-stats-row {
-        order: 6 !important;
-        justify-content: space-around !important;
-        align-items: flex-start !important; 
-        padding: 10px 0 !important;
-        border-top: 1px solid rgba(255,255,255,0.1) !important; 
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-    }
+    #main-header .header-stats-row { order: 6 !important; justify-content: space-around !important; align-items: flex-start !important; padding: 10px 0 !important; border-top: 1px solid rgba(255,255,255,0.1) !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
     #main-header .header-stats-row .clickable-header-item { flex: 1 !important; flex-direction: column !important; position: relative !important; font-size: 0.65rem !important; gap: 4px !important; }
     #main-header .header-stats-row .clickable-header-item i { font-size: 1.1rem !important; }
     #main-header .header-stats-row .badge-count { position: absolute !important; top: -8px !important; right: 15% !important; font-size: 0.55rem !important; min-width: 16px !important; padding: 2px 4px !important; }
     #main-header .header-stats-row .de-sub { font-size: 0.55rem !important; color: #94a3b8 !important; white-space: nowrap !important; margin-top: 0 !important; }
 
-    /* 8. NAVBAR */
-    #main-header .header-nav-bar {
-        order: 7 !important; justify-content: flex-start !important; flex-wrap: nowrap !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding: 5px 0 !important; width: 100vw !important; margin-left: -10px !important; margin-bottom: 0 !important;
-    }
+    #main-header .header-nav-bar { order: 7 !important; justify-content: flex-start !important; flex-wrap: nowrap !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding: 5px 0 !important; width: 100vw !important; margin-left: -10px !important; margin-bottom: 0 !important; }
     #main-header .header-nav-bar::-webkit-scrollbar { display: none !important; }
     #main-header .header-nav-bar button { flex-shrink: 0 !important; margin: 0 5px !important; }
 
-    /* ==================================================================
-       💥 LÜCKEN-KILLER (Verhindert doppelte Abstände) 💥
-       ================================================================== */
     body { padding-top: 0 !important; margin-top: 0 !important; }
-    
-    .header-spacer, #header-spacer, .spacer, .empty-space { 
-        display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; 
-    }
-    
-    .page-view, #main-content .page-view, main .page-view {
-        padding-top: 15px !important; 
-    }
-    
-    #content, .site-content, main, #main-content, .main-content, .content-area, .main-wrapper, .wrapper,
-    .hero-section, .profile-hero, #home-hero, .home-hero, .page-content {
-        margin-top: 0 !important; 
-        min-height: 0 !important; 
-    }
-    
-    .page-header, .page-title-container {
-        min-height: 0 !important;
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
-        margin-top: 0 !important;
-        border: none !important;
-    }
+    .header-spacer, #header-spacer, .spacer, .empty-space { display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
+    .page-view, #main-content .page-view, main .page-view { padding-top: 15px !important; }
+    #content, .site-content, main, #main-content, .main-content, .content-area, .main-wrapper, .wrapper, .hero-section, .profile-hero, #home-hero, .home-hero, .page-content { margin-top: 0 !important; min-height: 0 !important; }
+    .page-header, .page-title-container { min-height: 0 !important; padding-top: 5px !important; padding-bottom: 5px !important; margin-top: 0 !important; border: none !important; }
+    h1.hero-title, h1.page-title, .page-header h1, .section-title { margin-top: 5px !important; padding-top: 5px !important; font-size: 1.8rem !important; line-height: 1 !important; }
+}
 
-    h1.hero-title, h1.page-title, .page-header h1, .section-title {
-        margin-top: 5px !important; 
-        padding-top: 5px !important; 
-        font-size: 1.8rem !important; 
-        line-height: 1 !important;
+/* ==========================================================================
+   🍎 2. iOS ONLY (iPHONES/iPADS) - DER EXORZISMUS (BILD 2) 🍎
+   ========================================================================== */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+        
+        /* 🔥 FIX: Chaos oben entzerren (Keine Überlappung mehr!) 🔥 */
+        body:not(.user-mode):not(.admin-mode) #main-header .header-right {
+            position: relative !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            margin-bottom: 15px !important;
+            display: flex !important;
+        }
+
+        #main-header .logo {
+            position: relative !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            margin-bottom: 10px !important;
+        }
+
+        #main-header .header-search {
+            position: relative !important;
+            top: auto !important;
+            margin-top: 20px !important; /* Zwingt die Suche nach unten */
+        }
+
+        /* 🔥 FIX: Zähler iOS an Android angleichen (Pille oben rechts, Text unten) 🔥 */
+        #main-header .header-stats-row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: space-evenly !important;
+            align-items: center !important;
+            padding: 15px 2px 25px 2px !important; /* Extra Platz nach unten für deutsche Übersetzung */
+            width: 100% !important;
+        }
+
+        #main-header .header-stats-row .clickable-header-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            position: relative !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Das Rote/Grüne Badge exakt oben rechts positionieren */
+        #main-header .header-stats-row .badge-count {
+            position: absolute !important;
+            top: -10px !important;
+            right: 8px !important;
+            display: flex !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            font-size: 0.6rem !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+
+        /* Die deutsche Übersetzung exakt unten zentrieren */
+        #main-header .header-stats-row .de-sub {
+            position: absolute !important;
+            bottom: -18px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            white-space: nowrap !important;
+            font-size: 0.65em !important;
+            color: #94a3b8 !important;
+        }
     }
 }
     
