@@ -11252,55 +11252,86 @@ setTimeout(() => {
 })();
 
 // ==================================================================
-// 🚀 MOBILE FIX: KOMMENTAR-BEREICH (Titel, Text & Placeholder perfekt angepasst)
+// 🚀 MOBILE FIX: POSTEINGANG (Mesaj Kutusu) & PROFIL TEXT (Hakkımda)
 // ==================================================================
 (function() {
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Greift nur auf mobilen Geräten (Handys) */
+        /* Greift NUR auf mobilen Geräten (iOS & Android) */
         @media (max-width: 768px) {
-            /* 1. Den Titel "Yorumlar (Kommentare)" verkleinern */
-            #m-comment-area > div:first-child {
-                font-size: 1.05rem !important; 
-                margin-bottom: 10px !important;
-            }
             
-            /* 2. Den Text "İlk yorumu sen yap... (Schreibe Kommentar...)" verkleinern */
-            #m-comment-list > span {
-                font-size: 0.85rem !important;
-                padding: 10px 0 !important;
-                line-height: 1.4 !important;
+            /* ----------------------------------------------------
+               1. POSTEINGANG (Mesaj Kutusu / Hepsini Sil Button) 
+               ---------------------------------------------------- */
+            .msg-modal-header {
+                display: flex !important;
+                flex-direction: row !important; /* Bleibt in einer Reihe */
+                flex-wrap: nowrap !important; /* Kein unerwünschter Zeilenumbruch */
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 10px !important;
+                margin-bottom: 15px !important;
             }
-            
-            /* 3. Die Schrift im Eingabefeld auf sichere 16px setzen (verhindert iOS-Zoom Bug beim Tippen) */
-            #m-comment-input {
-                font-size: 16px !important;
+            /* Titel verkleinern */
+            .msg-modal-header h2.game-title {
+                font-size: 1.3rem !important; /* Deutlich kleiner */
+                line-height: 1.2 !important;
+                margin: 0 !important;
+                flex-shrink: 1 !important;
+            }
+            /* Untertitel (Posteingang) verkleinern */
+            .msg-modal-header h2.game-title .de-sub {
+                font-size: 0.75em !important;
+                margin-left: 6px !important;
+                display: inline-block !important;
+            }
+            /* Roter Löschen-Button verkleinern */
+            .msg-modal-header button.danger {
+                font-size: 0.75rem !important;
+                padding: 6px 12px !important;
+                margin: 0 !important;
+                flex-shrink: 0 !important; /* Verhindert, dass der Button gequetscht wird */
+                width: auto !important;
+                line-height: 1.2 !important;
             }
 
-            /* 4. Den Placeholder-Text so verkleinern und auf EINE Zeile zwingen, dass alles reinpasst */
-            #m-comment-input::-webkit-input-placeholder {
-                font-size: 0.55rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+            /* ----------------------------------------------------
+               2. MY PROFIL (Hakkımda Text) - Verhindert Abschneiden! 
+               ---------------------------------------------------- */
+            /* Zwingt die Ansicht, nicht breiter als das Handy zu sein */
+            #hakkimda-view {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+                width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important; 
             }
-            #m-comment-input::-moz-placeholder {
-                font-size: 0.55rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+            /* Der Kasten, in dem der Text liegt (Padding von 40px auf 15px reduzieren) */
+            #hakkimda-view > div {
+                padding: 20px 15px !important; 
+                gap: 20px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
-            #m-comment-input:-ms-input-placeholder {
-                font-size: 0.55rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+            /* LÖSUNG FÜR DAS ABSCHNEIDEN: Hebt "min-width: 300px" auf! */
+            #hakkimda-view > div > div {
+                min-width: 0 !important; 
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
-            #m-comment-input::placeholder {
-                font-size: 0.55rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+            /* Den Text lesbar machen und Wortbruch-Chaos beheben */
+            #hakkimda-view p {
+                font-size: 0.95rem !important; 
+                line-height: 1.5 !important;
+                text-align: left !important; /* Linksbündig ist auf Mobile viel besser lesbar als Blocksatz */
+                word-wrap: break-word !important;
+                word-break: normal !important; /* Keine zerschnittenen Wörter mehr! */
+                overflow-wrap: break-word !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                padding: 0 !important;
             }
         }
     `;
