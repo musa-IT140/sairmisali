@@ -11338,6 +11338,82 @@ setTimeout(() => {
     document.head.appendChild(style);
 })();
 
+// ==================================================================
+// 🚀 iOS MOBILE FIX: POSTEINGANG BUTTON & MODAL RAHMEN (AŞK)
+// ==================================================================
+(function() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Greift NUR auf mobilen Geräten */
+        @media (max-width: 768px) {
+            
+            /* ----------------------------------------------------
+               1. POSTEINGANG (Mesaj Kutusu): Platz für das "X" machen!
+               ---------------------------------------------------- */
+            .msg-modal-header {
+                /* Schiebt den gesamten Header-Inhalt (inkl. rotem Button) 50px nach links! */
+                padding-right: 50px !important; 
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+            }
+            
+            /* Roter "Hepsini Sil" Button noch kompakter machen */
+            .msg-modal-header button.danger {
+                font-size: 0.65rem !important; /* Schrift noch kleiner */
+                padding: 6px 10px !important;
+                margin: 0 !important;
+                white-space: nowrap !important; /* Verhindert Zeilenumbruch im Button */
+                min-height: 0 !important;
+            }
+            
+            /* Damit der Titel nicht den Button zerquetscht */
+            .msg-modal-header h2.game-title {
+                font-size: 1.15rem !important; 
+            }
+
+            /* ----------------------------------------------------
+               2. MODAL RAHMEN FIX (z.B. AŞK / Gedichte-Fenster)
+               Zwingt den Rahmen dazu, IMMER im Bildschirm zu bleiben
+               ---------------------------------------------------- */
+            /* Zwingt das Modal dazu, sich dem Screen anzupassen */
+            .modal-content {
+                box-sizing: border-box !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+                /* WICHTIG: Überschüssiger Inhalt, der den Rahmen kaputt macht, wird abgeschnitten */
+                overflow-x: hidden !important; 
+            }
+            
+            /* Sorgt dafür, dass innere Boxen (Herzen, Kommentare) den Rahmen nicht aufdrücken */
+            #contentModal .modal-body, 
+            .modal-interaction-box, 
+            .custom-live-hearts, 
+            #m-comment-area {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+                overflow-x: hidden !important;
+            }
+        }
+        
+        /* 🍎 iOS ONLY (iPhones/iPads) SPEZIAL-FIX FÜR DEN RECHTEN RAHMEN 🍎 */
+        @supports (-webkit-touch-callout: none) {
+            @media (max-width: 768px) {
+                .modal {
+                    padding: 10px !important; /* Gibt dem Modal auf iOS einen kleinen Sicherheitsabstand zum Rand */
+                }
+                .modal-content {
+                    /* iOS rechnet oft falsch - hiermit ziehen wir 20px ab, damit der Rahmen sichtbar bleibt! */
+                    width: calc(100vw - 20px) !important; 
+                }
+            }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
 </script>
 </body>
 </html>
