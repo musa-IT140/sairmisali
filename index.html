@@ -3363,7 +3363,7 @@ Blühe, deutsches Vaterland!</p>
 
     <div class="modal notranslate" id="fastClickModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 450px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Hızlı Tıklama <span class="de-sub">(Reaktionstest)</span></h2><div style="display:flex; justify-content:space-between; width:100%; font-size:1.4rem; margin-bottom:20px;"><div style="color:#f4c542; font-weight:bold;"><span id="fc-time-lbl">SÜRE</span>: <span id="fc-time">5.0</span>s</div><div style="color:#22c55e; font-weight:bold;"><span id="fc-score-lbl">SKOR</span>: <span id="fc-score">0</span></div></div><button class="reset-btn" onclick="if(window.clickFast) window.clickFast()" id="fc-btn" style="height:150px; font-size:2rem; border-radius:20px; box-shadow:0 10px 30px rgba(244,197,66,0.5);">BAŞLA! <span class="de-sub" style="color:inherit;">(START!)</span></button><button class="reset-btn" onclick="if(window.startFastClick) window.startFastClick()" id="fc-start" style="display:none; padding:12px; margin-top:15px; border-radius:12px;">Tekrar Oyna <span class="de-sub" style="color:inherit;">(Nochmal spielen)</span></button></div></div></div>
 
-    <div class="modal notranslate" id="horoscopeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Horoskop <span class="de-sub">(Sternzeichen)</span></h2><div class="zodiac-grid" id="zodiac-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; margin-top: 15px;"></div><div id="horoscope-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.5); padding:25px; border-radius:16px; border-left:4px solid #f4c542; width: 100%;"><h3 id="horo-title" style="color:#f4c542; margin-bottom:15px; font-size: 1.8rem; font-family: 'Playfair Display', serif;"></h3><p id="horo-text" style="color:#fff; margin-bottom:15px; line-height:1.6; font-size: 1.1rem;"></p><button class="reset-btn" onclick="document.getElementById('horoscope-result').style.display='none'; document.getElementById('zodiac-grid').style.display='grid';" style="margin-top: 20px; padding: 10px; border-radius: 10px;" id="horo-back-btn">Geri <span class="de-sub" style="color:inherit;">(Zurück)</span></button></div></div></div></div>
+    <div class="modal notranslate" id="horoscopeModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 550px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Horoskop <span class="de-sub">(Sternzeichen)</span></h2><div class="zodiac-grid" id="zodiac-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; margin-top: 15px;"></div><div id="horoscope-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.5); padding:25px; border-radius:16px; border-left:4px solid #f4c542; width: 100%;"><h3 id="horo-title" style="color:#f4c542; margin-bottom:15px; font-size: 1.8rem; font-family: 'Playfair Display', serif;"></h3><p id="horo-text" style="color:#fff; margin-bottom:15px; line-height:1.6; font-size: 1.1rem;"></p><button class="reset-btn" onclick="window.initHoroscopeGrid();" style="margin-top: 20px; padding: 10px; border-radius: 10px;" id="horo-back-btn">Geri <span class="de-sub" style="color:inherit;">(Zurück)</span></button></div></div></div></div>
 
     <!-- Huzur Balonu Modal (Optik repariert) -->
     <div class="modal notranslate" id="breathModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
@@ -4890,37 +4890,47 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     window.updateSavedBadge = function() {
-        if(!window.currentUser) { window.forceBadge('header-saved-badge', 0, false); return; }
-        let uName = window.currentUser.username;
-        let count = (window.savedItemsDB && window.savedItemsDB[uName]) ? window.savedItemsDB[uName].length : 0;
-        window.forceBadge('header-saved-badge', count, true);
-    };
+    if(!window.currentUser) { 
+        window.forceBadge('header-saved-badge', 0, false); 
+        return; 
+    }
+    
+    let uName = window.currentUser.username;
+    let db = window.savedItemsDB || JSON.parse(localStorage.getItem('misaliSavedItems')) || {};
+    let items = db[uName];
+    if (!Array.isArray(items)) items = [];
+    
+    // GEISTER-KILLER: Prüft, ob das gemerkte Werk noch in der Datenbank existiert
+    let validItems = [];
+    let changed = false;
 
-    window.shareItemQuick = function(id, type, method) {
-        let sourceArr = type === 'userPoems' ? window.userPoemsDB : (type === 'bilmeceler' ? window.bilmecelerDB : (type === 'bulmacalar' ? window.bulmacalarDB : window.contentDB[type]));
-        let item = sourceArr.find(x => x.id === id);
-        if(!item) return;
-        
-        let cloned = JSON.parse(JSON.stringify(item));
-        cloned.type = type;
-        
-        let author = type === 'poems' || type === 'quotes' ? 'Şair Misal.i' : type === 'userPoems' ? (cloned.name + (cloned.surname ? ' ' + cloned.surname : '')) : 'Anonim';
-        if (type === 'saglik') author = 'Tavsiye / Empfehlung';
-        if (type === 'atasozleri') author = cloned.authorTR || 'Anonim';
-        cloned.author = author;
+    items.forEach(id => {
+        let found = false;
+        // Alle Datenbanken auf die Existenz der ID prüfen
+        ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => {
+            if(window.contentDB && window.contentDB[t] && window.contentDB[t].find(x => x.id === id)) found = true;
+        });
+        if(!found && window.bilmecelerDB && window.bilmecelerDB.find(x => x.id === id)) found = true;
+        if(!found && window.bulmacalarDB && window.bulmacalarDB.find(x => x.id === id)) found = true;
+        if(!found && window.userPoemsDB && window.userPoemsDB.find(x => x.id === id)) found = true;
 
-        let title = cloned.title || cloned.trTitle || "";
-        let text = cloned.text || cloned.trText || cloned.quote || "";
-        let shareStr = `*${title}*\n\n${text}\n\n- ${author}\n\nDaha fazlası için: https://sairmisali.de`;
-
-        if (method === 'copy') {
-            navigator.clipboard.writeText(shareStr).then(() => { window.showToast('Metin Kopyalandı! <span class="de-sub">(Kopiert)</span>'); }).catch(err => { window.customAlert('Kopyalama başarısız.', '❌'); });
+        if(found) {
+            validItems.push(id);
+        } else {
+            changed = true; // Werk wurde gelöscht -> ID als tot markieren!
         }
-        if (method === 'whatsapp') {
-            let url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareStr)}`;
-            window.open(url, '_blank');
-        }
-    };
+    });
+
+    // Wenn tote IDs gefunden wurden, die gemerkte Liste bereinigen
+    if (changed) {
+        db[uName] = validItems;
+        window.savedItemsDB = db;
+        localStorage.setItem('misaliSavedItems', JSON.stringify(db));
+    }
+
+    // Zähler exakt auf die echten, vorhandenen Items setzen (garantiert 0, wenn leer)
+    window.forceBadge('header-saved-badge', validItems.length, true);
+};
 
     window.renderSavedItems = function() {
         const list = document.getElementById('saved-items-list');
@@ -10416,6 +10426,885 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
             return html;
         }).join('');
     };
+})();
+
+// ==================================================================
+// 🚀 AKLIMDA GHOST-KILLER (Zwingt den Zähler auf 0 bei leeren Einträgen)
+// ==================================================================
+
+window.cleanAklimdaDB = function() {
+    try {
+        let db = JSON.parse(localStorage.getItem('misaliSavedItems')) || {};
+        let changed = false;
+
+        for (let user in db) {
+            let items = db[user];
+            if (!Array.isArray(items)) items = Object.values(items);
+            
+            let validItems = [];
+            items.forEach(id => {
+                let found = false;
+                
+                // Harter Scan: Existiert die gespeicherte ID wirklich noch in einer der Datenbanken?
+                ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => {
+                    if(window.contentDB && window.contentDB[t] && window.contentDB[t].find(x => x.id === id)) found = true;
+                });
+                if(!found && window.bilmecelerDB && window.bilmecelerDB.find(x => x.id === id)) found = true;
+                if(!found && window.bulmacalarDB && window.bulmacalarDB.find(x => x.id === id)) found = true;
+                if(!found && window.userPoemsDB && window.userPoemsDB.find(x => x.id === id)) found = true;
+
+                if(found) {
+                    validItems.push(id);
+                }
+            });
+
+            // Wenn ungültige IDs gefunden wurden, das Array bereinigen!
+            if (validItems.length !== items.length) {
+                db[user] = validItems;
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            // Speichert die saubere Liste ohne Geister-Einträge lokal ab
+            localStorage.setItem('misaliSavedItems', JSON.stringify(db));
+            window.savedItemsDB = db;
+            
+            // Erzwingt einen Sync mit der Firebase, um den Fehler auch bei anderen Geräten zu löschen
+            window.lastLocalUpdate = Date.now() + 5000;
+            if(window.syncToCloud) window.syncToCloud();
+        }
+        return db;
+    } catch(e) { 
+        return {}; 
+    }
+};
+
+// Überschreibt nun alle fehlerhaften Badge-Updates im Code
+window.updateSavedBadge = function() {
+    if(!window.currentUser) { 
+        window.forceBadge('header-saved-badge', 0, false); 
+        return; 
+    }
+    
+    // Führt die Reinigung VOR dem Zählen aus
+    let db = window.cleanAklimdaDB(); 
+    let count = db[window.currentUser.username] ? db[window.currentUser.username].length : 0;
+    
+    // Zwingt das Badge dazu, den korrekten Wert (auch 0) anzuzeigen
+    window.forceBadge('header-saved-badge', count, true);
+};
+
+// Startet den Scan direkt beim Laden der Seite einmalig
+setTimeout(() => {
+    if(window.updateSavedBadge) window.updateSavedBadge();
+}, 800);
+
+// ==================================================================
+// 🚀 KALPLERİM MODAL FIX: "Written by" + ERSTELLER-SIGNATUR
+// ==================================================================
+(function() {
+    window.renderMyHearts = function() {
+        const list = document.getElementById('my-hearts-list');
+        if(!list) return;
+        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın.</div>'; return; }
+
+        let uName = window.currentUser.username;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+        let heartsData = [];
+        let freshDB = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
+
+        let myWorks = [];
+        // Admin sieht alles, User sieht nur seine eigenen Werke
+        if (isAdmin) {
+            if (window.userPoemsDB) myWorks = myWorks.concat(window.userPoemsDB);
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri'].forEach(t => { 
+                if (fullDB[t]) myWorks = myWorks.concat(fullDB[t]); 
+            });
+            if (window.bilmecelerDB) myWorks = myWorks.concat(window.bilmecelerDB);
+            if (window.bulmacalarDB) myWorks = myWorks.concat(window.bulmacalarDB);
+        } else {
+            if (window.userPoemsDB) myWorks = window.userPoemsDB.filter(p => p.username === uName);
+        }
+
+        // Hilfsfunktion: Titel des Werkes
+        const getPoemTitle = (id) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Eser'; }
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            for (let cat in fullDB) {
+                if(Array.isArray(fullDB[cat])) { 
+                    let f = fullDB[cat].find(x => x.id === id); 
+                    if (f) return f.trTitle || f.title || f.deTitle || 'Eser'; 
+                }
+            }
+            if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bilmece'; }
+            if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bulmaca'; }
+            return 'Eser';
+        };
+
+        // Hilfsfunktion: Ersteller (Autor) des Werkes ermitteln
+        const getPoemAuthorStr = (p) => {
+            if (p.username && p.name) return p.name + (p.surname ? ' ' + p.surname : '');
+            if (p.id && p.id.startsWith('user_')) return p.name ? (p.name + (p.surname ? ' ' + p.surname : '')) : 'Anonim';
+            if (p.id && p.id.startsWith('ata_')) return p.authorTR || 'Anonim';
+            if (p.id && p.id.startsWith('sag_')) return 'Tavsiye / Empfehlung';
+            if (p.id && (p.id.startsWith('bil_') || p.id.startsWith('bul_'))) return 'Anonim';
+            return 'Şair Misal.i';
+        };
+
+        // Daten zusammenstellen
+        myWorks.forEach(p => {
+            if (p && p.id && freshDB[p.id] && freshDB[p.id].ratings) {
+                let pAuthor = getPoemAuthorStr(p);
+                for(let liker in freshDB[p.id].ratings) {
+                    let r = freshDB[p.id].ratings[liker];
+                    let val = (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
+                    let time = (typeof r === 'object' && r !== null && r.time) ? r.time : '<span style="font-style:italic; color:#64748b;">Bilinmiyor</span>';
+                    let ts = (typeof r === 'object' && r !== null && r.ts) ? r.ts : 0;
+                    
+                    // Millisekunden berechnen für korrekte Sortierung
+                    if (ts === 0 && typeof time === 'string' && time.trim() !== '' && !time.includes('Bilinmiyor')) {
+                        let cleanTime = time.replace(/<[^>]*>?/gm, '').trim(); 
+                        let match = cleanTime.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{1,2})/);
+                        if (match) ts = new Date(match[3], match[2] - 1, match[1], match[4], match[5]).getTime();
+                    }
+                    
+                    heartsData.push({ 
+                        poemId: p.id, 
+                        poemTitle: getPoemTitle(p.id), 
+                        poemAuthor: pAuthor, 
+                        liker: liker, 
+                        val: val, 
+                        time: time, 
+                        ts: ts || 0 
+                    });
+                }
+            }
+        });
+
+        if(heartsData.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz kalp bırakılmamış.</div>';
+            return;
+        }
+
+        // Neueste Herzen immer ganz oben
+        heartsData.sort((a, b) => b.ts - a.ts);
+
+        // Liste ins HTML rendern
+        list.innerHTML = heartsData.map(h => {
+            let uObj = window.userDatabase[h.liker] || {};
+            let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : h.liker;
+            let emj = uObj.emoji || '👤';
+            let likerColorClass = window.getAuthorColorClass(h.liker);
+
+            // Admin-Buttons
+            let adminActions = '';
+            if (isAdmin) {
+                adminActions = `
+                    <button class="reset-btn danger" style="width:36px; height:36px; padding:0; margin:0; font-size:1.15rem; display:flex; justify-content:center; align-items:center; border-radius:10px; box-shadow:0 2px 5px rgba(239,68,68,0.4);" onclick="event.preventDefault(); event.stopPropagation(); window.deleteAdminHeart('${h.liker}', '${h.poemId}')" title="Sil (Löschen)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="reset-btn" style="width:36px; height:36px; padding:0; margin:0; font-size:1.15rem; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:white; border-radius:10px; box-shadow:0 2px 5px rgba(59,130,246,0.4);" onclick="event.preventDefault(); event.stopPropagation(); window.openWriteThankYouModal('${h.liker}', '${h.poemId}')" title="Mesaj (Schreiben)">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                `;
+            }
+            
+            // 🔥 HIER IST DIE NEUE UNTERSCHRIFT DES ERSTELLERS (Written by) 🔥
+            let authorColorClass = window.getAuthorColorClass(h.poemAuthor);
+            // Für "Anonim" oder "Tavsiye" kann es optional ausgeblendet oder gedimmt werden, ansonsten leuchtet es in der Autorenfarbe
+            let writtenByHTML = `
+                <div style="display:inline-flex; align-items:flex-end; margin-left:8px; margin-top:2px;">
+                    <span style="font-family:'Poppins', sans-serif; font-size:0.55rem; color:#64748b; font-style:italic; margin-bottom:2px;">Written by</span>
+                    <span class="${authorColorClass}" style="font-family:'Great Vibes', cursive; font-size:1.15rem; margin-left:3px; font-weight:normal; letter-spacing:0.5px; line-height:1;">${h.poemAuthor}</span>
+                </div>
+            `;
+
+            return `<div style="display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; background:rgba(0,0,0,0.5); padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${h.poemId}'), 100);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <div style="display:flex; flex-direction:column; gap:4px; flex-grow:1; padding-right:10px;">
+                                
+                                <!-- Titel & Written by -->
+                                <div style="display:flex; align-items:center; flex-wrap:wrap;">
+                                    <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif; font-size:1.1rem; line-height:1.2;">✍️ ${h.poemTitle}</div>
+                                    ${writtenByHTML}
+                                </div>
+                                
+                                <!-- Liker Info -->
+                                <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                                    <span style="font-size:1.4rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3));">${emj}</span>
+                                    <div style="display:flex; flex-direction:column;">
+                                        <div style="font-size:0.95rem; font-weight:500;"><span class="${likerColorClass}">${fullName}</span></div>
+                                        <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;"><i class="fas fa-clock" style="color:#f4c542;"></i> ${h.time}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Aktionen & Herz-Anzahl -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                                ${adminActions}
+                                <div style="color:#ef4444; font-weight:900; font-size:1.3rem; background:rgba(239,68,68,0.1); padding:6px 12px; border-radius:12px; filter:drop-shadow(0 0 5px rgba(239,68,68,0.3)); margin-left: 6px;">${h.val} ❤️</div>
+                            </div>
+                        </div>
+                    </div>`;
+        }).join('');
+    };
+})();
+
+// ==================================================================
+// 🚀 AKLIMDA & BENACHRICHTIGUNGEN FIX: "Written by" + ERSTELLER-SIGNATUR
+// ==================================================================
+(function() {
+    // Hilfsfunktion für Benachrichtigungen (Posteingang), um den Ersteller zu finden
+    window.getWrittenByHtmlForMessages = function(poemId, poemType) {
+        if (!poemId || !poemType) return '';
+        let author = '';
+        if (poemType === 'userPoems' && window.userPoemsDB) {
+            let f = window.userPoemsDB.find(x => x.id === poemId);
+            if (f) author = f.name + (f.surname ? ' ' + f.surname : '');
+        } else if (poemType === 'atasozleri' && window.contentDB && window.contentDB.atasozleri) {
+            let f = window.contentDB.atasozleri.find(x => x.id === poemId);
+            if (f) author = f.authorTR || 'Anonim';
+        } else if (poemType === 'saglik') {
+            author = 'Tavsiye / Empfehlung';
+        } else if (poemType === 'poems' || poemType === 'quotes') {
+            author = 'Şair Misal.i';
+        } else {
+            return ''; // Keine Autoren-Signatur für Rätsel/Witze
+        }
+        
+        if (!author) return '';
+        
+        let authorClass = window.getAuthorColorClass(author);
+        return ` <span style="display:inline-flex; align-items:flex-end; margin-left:4px; vertical-align:middle; line-height:1;"><span style="font-family:'Poppins', sans-serif; font-size:0.5rem; color:#64748b; font-style:italic; margin-bottom:1px;">Written by</span><span class="${authorClass}" style="font-family:'Great Vibes', cursive; font-size:1.05rem; margin-left:3px; font-weight:normal; letter-spacing:0.5px; line-height:1;">${author}</span></span>`;
+    };
+
+    // 1. AKLIMDA (SAVED ITEMS) UPDATE MIT "Written by"
+    window.renderSavedItems = function() {
+        const list = document.getElementById('saved-items-list');
+        if(!list) return;
+        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span></div>'; return; }
+        
+        let uName = window.currentUser.username;
+        let saved = window.savedItemsDB && window.savedItemsDB[uName] ? window.savedItemsDB[uName] : [];
+        
+        if(saved.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic;">Henüz aklında bir eser yok.<br><span class="de-sub">(Noch keine Werke gespeichert)</span></div>';
+            return;
+        }
+
+        let catNames = {
+            'poems': 'Şiirler <span class="de-sub" style="font-size:0.7em;">(Gedichte)</span>',
+            'quotes': 'Sözler <span class="de-sub" style="font-size:0.7em;">(Sprüche)</span>',
+            'stories': 'Kıssalar <span class="de-sub" style="font-size:0.7em;">(Geschichten)</span>',
+            'jokes': 'Fıkralar <span class="de-sub" style="font-size:0.7em;">(Witze)</span>',
+            'atasozleri': 'Atasözleri <span class="de-sub" style="font-size:0.7em;">(Sprichwörter)</span>',
+            'saglik': 'Sağlık <span class="de-sub" style="font-size:0.7em;">(Gesundheit)</span>',
+            'bilmeceler': 'Bilmeceler <span class="de-sub" style="font-size:0.7em;">(Rätsel)</span>',
+            'bulmacalar': 'Bulmacalar <span class="de-sub" style="font-size:0.7em;">(Puzzles)</span>',
+            'userPoems': 'Kullanıcı Eserleri <span class="de-sub" style="font-size:0.7em;">(User Werke)</span>'
+        };
+
+        let grouped = {};
+
+        saved.forEach(id => {
+            let item = null; let type = '';
+            ['poems', 'quotes', 'stories', 'jokes', 'saglik', 'atasozleri', 'bilmeceler', 'bulmacalar'].forEach(t => {
+                let found = window.contentDB[t] ? window.contentDB[t].find(x => x.id === id) : null;
+                if(!found && t==='bilmeceler' && window.bilmecelerDB) found = window.bilmecelerDB.find(x => x.id === id);
+                if(!found && t==='bulmacalar' && window.bulmacalarDB) found = window.bulmacalarDB.find(x => x.id === id);
+                if(found) { item = found; type = t; }
+            });
+            if(!item) {
+                let foundUser = window.userPoemsDB ? window.userPoemsDB.find(x => x.id === id) : null;
+                if(foundUser) { item = foundUser; type = 'userPoems'; }
+            }
+
+            if(item) {
+                if(!grouped[type]) grouped[type] = '';
+                
+                let title = item.trTitle || item.title || item.deTitle || 'Eser';
+                let clickAction = (type === 'bilmeceler' || type === 'bulmacalar') ? `window.openPuzzleModal('${item.id}', '${type}')` : `window.openPoemModal('${item.id}', '${type}')`;
+                if(type === 'userPoems') clickAction = `window.openUserPoemModal('${item.id}')`;
+                
+                let author = '';
+                if (type === 'poems' || type === 'quotes') author = 'Şair Misal.i';
+                else if (type === 'userPoems') author = item.name + (item.surname ? ' ' + item.surname : '');
+                else if (type === 'atasozleri') author = item.authorTR || 'Anonim';
+                else if (type === 'saglik') author = 'Tavsiye / Empfehlung';
+                
+                let writtenByHTML = '';
+                if (author && type !== 'bilmeceler' && type !== 'bulmacalar' && type !== 'stories' && type !== 'jokes') {
+                    let authorClass = window.getAuthorColorClass(author);
+                    writtenByHTML = `
+                        <div style="display:inline-flex; align-items:flex-end; margin-left:8px; margin-top:2px;">
+                            <span style="font-family:'Poppins', sans-serif; font-size:0.55rem; color:#64748b; font-style:italic; margin-bottom:2px;">Written by</span>
+                            <span class="${authorClass}" style="font-family:'Great Vibes', cursive; font-size:1.15rem; margin-left:3px; font-weight:normal; letter-spacing:0.5px; line-height:1;">${author}</span>
+                        </div>
+                    `;
+                }
+                
+                let copyBtn = `<button class="reset-btn" style="width:auto; padding:8px 12px; margin:0; background: rgba(255,255,255,0.1); color: #cbd5e1; box-shadow: none;" onclick="window.shareItemQuick('${item.id}', '${type}', 'copy'); event.stopPropagation();" title="Kopyala"><i class="fas fa-copy"></i></button>`;
+                let wpBtn = `<button class="reset-btn" style="width:auto; padding:8px 12px; margin:0; background: rgba(37, 211, 102, 0.2); color: #25D366; box-shadow: none;" onclick="window.shareItemQuick('${item.id}', '${type}', 'whatsapp'); event.stopPropagation();" title="WhatsApp'ta Paylaş"><i class="fab fa-whatsapp"></i></button>`;
+                let delBtn = `<button class="reset-btn danger" style="width:auto; padding:8px 12px; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-trash"></i></button>`;
+
+                grouped[type] += `<div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; border-left:4px solid #ec4899; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
+                                    <div style="cursor:pointer; flex-grow:1; display:flex; align-items:center; flex-wrap:wrap;" onclick="window.closeTopModal('force'); setTimeout(()=> { ${clickAction} }, 100);">
+                                        <div style="font-weight:bold; color:#fff; font-family:'Playfair Display', serif; font-size: 1.1rem; display:flex; align-items:center; flex-wrap: wrap; line-height:1.2;">
+                                            <span>${item.emoji || '✨'} ${title}</span>
+                                            ${writtenByHTML}
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        ${copyBtn}
+                                        ${wpBtn}
+                                        ${delBtn}
+                                    </div>
+                                 </div>`;
+            }
+        });
+
+        let finalHtml = '';
+        ['poems', 'quotes', 'stories', 'jokes', 'atasozleri', 'saglik', 'bilmeceler', 'bulmacalar', 'userPoems'].forEach(t => {
+            if(grouped[t]) {
+                finalHtml += `<h3 style="color:#f4c542; font-size:1.3rem; border-bottom:1px dashed rgba(236,72,153,0.5); padding-bottom:5px; margin-top:10px; margin-bottom:15px; text-align:left; font-family:'Playfair Display', serif;">${catNames[t]}</h3>`;
+                finalHtml += grouped[t];
+            }
+        });
+
+        list.innerHTML = finalHtml;
+    };
+
+    // 2. ADMIN MESSAGES UPDATE MIT "Written by"
+    window.renderAdminMessages = function() {
+        const list = document.getElementById('admin-msg-list');
+        if(!list) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin');
+        
+        if(msgs.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
+            return;
+        }
+        
+        list.innerHTML = msgs.slice().reverse().map(m => {
+            let colorClass = window.getAuthorColorClass(m.from);
+            let msgText = m.msg;
+            
+            let uObj = window.userDatabase[m.from] || {};
+            let emj = m.from === 'Sistem' ? '🤖' : (uObj.emoji || '👤');
+            
+            if (m.poemId && m.poemType) {
+                let action = '';
+                if (m.poemType === 'bilmeceler' || m.poemType === 'bulmacalar') {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openPuzzleModal('${m.poemId}', '${m.poemType}'), 100);`;
+                } else if (m.poemType === 'userPoems') {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openUserPoemModal('${m.poemId}'), 100);`;
+                } else {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openPoemModal('${m.poemId}', '${m.poemType}'), 100);`;
+                }
+                
+                let poemTitle = 'Eser';
+                let sourceArr = m.poemType === 'userPoems' ? window.userPoemsDB : (m.poemType === 'bilmeceler' ? window.bilmecelerDB : (m.poemType === 'bulmacalar' ? window.bulmacalarDB : (window.contentDB ? window.contentDB[m.poemType] : [])));
+                
+                if (sourceArr) {
+                    let found = sourceArr.find(x => x.id === m.poemId);
+                    if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
+                }
+
+                let writtenByStr = window.getWrittenByHtmlForMessages(m.poemId, m.poemType);
+
+                if (msgText.includes('«') && msgText.includes('»')) {
+                    msgText = msgText.replace(/«(.*?)»/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"${writtenByStr}`);
+                } else if (msgText.includes('eserine')) {
+                    msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>"${writtenByStr} adlı eserine`);
+                } else if (!msgText.includes('onclick')) { 
+                    msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>${writtenByStr}`;
+                }
+            }
+            
+            if (msgText.includes('oyun oynadı:')) {
+                let parts = msgText.split('oyun oynadı:');
+                let gameName = parts[1].trim();
+                let targetView = 'oyunlar-view';
+                if(gameName.toLowerCase().includes('bulmaca')) targetView = 'bulmaca-view';
+                if(gameName.toLowerCase().includes('bilmece')) targetView = 'bilmece-view';
+                
+                let navAction = `window.closeTopModal('force'); window.navigate('${targetView}');`;
+                msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
+            }
+
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? '' : m.from;
+            let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
+
+            return `<div class="notif-card">
+                        <div class="notif-header">
+                            <span class="notif-sender"><span style="font-size:1.2rem; margin-right:5px;">${emj}</span> <span class="${colorClass}">${m.from || 'Sistem'}</span></span>
+                            <span>${m.time || ''}</span>
+                        </div>
+                        <div class="notif-body">${msgText}</div>
+                        <div class="notif-actions">
+                            ${replyBtn}
+                            <button class="notif-btn del" onclick="window.deleteSingleMessage('${m.id}')"><i class="fas fa-trash"></i> Sil</button>
+                        </div>
+                    </div>`;
+        }).join('');
+    };
+
+    // 3. USER MESSAGES UPDATE MIT "Written by"
+    window.renderUserMessages = function() {
+        const list = document.getElementById('user-msg-list');
+        if(!list) return;
+        if(!window.currentUser) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username);
+        
+        if(msgs.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; font-style:italic; padding:20px;">Mesaj kutusu boş.<br><span class="de-sub">(Posteingang leer)</span></div>';
+            return;
+        }
+        
+        list.innerHTML = msgs.slice().reverse().map(m => {
+            let colorClass = window.getAuthorColorClass(m.from);
+            let msgText = m.msg;
+            
+            let uObj = window.userDatabase[m.from] || {};
+            let emj = m.from === 'Sistem' ? '🤖' : (uObj.emoji || '👤');
+            
+            if (m.poemId && m.poemType) {
+                let action = '';
+                if (m.poemType === 'bilmeceler' || m.poemType === 'bulmacalar') {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openPuzzleModal('${m.poemId}', '${m.poemType}'), 100);`;
+                } else if (m.poemType === 'userPoems') {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openUserPoemModal('${m.poemId}'), 100);`;
+                } else {
+                    action = `window.closeTopModal('force'); setTimeout(() => window.openPoemModal('${m.poemId}', '${m.poemType}'), 100);`;
+                }
+                
+                let poemTitle = 'Eser';
+                let sourceArr = m.poemType === 'userPoems' ? window.userPoemsDB : (m.poemType === 'bilmeceler' ? window.bilmecelerDB : (m.poemType === 'bulmacalar' ? window.bulmacalarDB : (window.contentDB ? window.contentDB[m.poemType] : [])));
+                
+                if (sourceArr) {
+                    let found = sourceArr.find(x => x.id === m.poemId);
+                    if (found) poemTitle = found.trTitle || found.title || found.deTitle || 'Eser';
+                }
+
+                let writtenByStr = window.getWrittenByHtmlForMessages(m.poemId, m.poemType);
+
+                if (msgText.includes('«') && msgText.includes('»')) {
+                    msgText = msgText.replace(/«(.*?)»/, `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">$1</span>"${writtenByStr}`);
+                } else if (msgText.includes('eserine')) {
+                    msgText = msgText.replace('eserine', `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>"${writtenByStr} adlı eserine`);
+                } else if (!msgText.includes('onclick')) {
+                    msgText += ` <span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">[${poemTitle}]</span>${writtenByStr}`;
+                }
+            }
+            
+            if (msgText.includes('oyun oynadı:')) {
+                let parts = msgText.split('oyun oynadı:');
+                let gameName = parts[1].trim();
+                let targetView = 'oyunlar-view';
+                if(gameName.toLowerCase().includes('bulmaca')) targetView = 'bulmaca-view';
+                if(gameName.toLowerCase().includes('bilmece')) targetView = 'bilmece-view';
+                
+                let navAction = `window.closeTopModal('force'); window.navigate('${targetView}');`;
+                msgText = parts[0] + `oyun oynadı: <span onclick="${navAction}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${gameName}</span>`;
+            }
+
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? 'AdminKing' : m.from;
+            let replyBtn = `<button class="notif-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>`;
+
+            return `<div class="notif-card">
+                        <div class="notif-header">
+                            <span class="notif-sender"><span style="font-size:1.2rem; margin-right:5px;">${emj}</span> <span class="${colorClass}">${m.from || 'Sistem'}</span></span>
+                            <span>${m.time || ''}</span>
+                        </div>
+                        <div class="notif-body">${msgText}</div>
+                        <div class="notif-actions">
+                            ${replyBtn}
+                            <button class="notif-btn del" onclick="window.deleteSingleMessage('${m.id}')"><i class="fas fa-trash"></i> Sil</button>
+                        </div>
+                    </div>`;
+        }).join('');
+    };
+})();
+
+// ==================================================================
+// 🚀 DATUM, UHRZEIT & STATS-BADGE FIX (ALLES PERFEKT SKALIERT)
+// ==================================================================
+(function() {
+    // 1. CSS INJECTION FÜR RESPONSIVE SCHRIFTGRÖßEN
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Datum & Uhrzeit zentriert */
+        .card-date-time {
+            color: #64748b;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            gap: 4px;
+            font-family: 'Poppins', sans-serif;
+            margin: 0 auto;
+            width: 100%;
+        }
+        /* Herz & Kommentar Box unten rechts */
+        .card-stats-badge {
+            position: absolute;
+            background: rgba(0,0,0,0.6);
+            color: #fdfbf7;
+            border: 1px solid #f4c542;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Mobile: Normal & Gut lesbar */
+        @media (max-width: 768px) {
+            .card-date-time { font-size: 0.55rem !important; opacity: 0.75; margin-top: 2px; }
+            .card-date-time i { font-size: 0.60rem !important; }
+            
+            .card-stats-badge { bottom: 12px; right: 12px; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; gap: 5px; }
+            .card-stats-badge i { font-size: 0.85rem; }
+        }
+        
+        /* Laptop & Desktop: Extrem dezent & verkleinert */
+        @media (min-width: 769px) {
+            .card-date-time { font-size: 0.25rem !important; opacity: 0.6; letter-spacing: 0.5px; margin-top: 3px; }
+            .card-date-time i { font-size: 0.30rem !important; }
+            
+            /* Verkleinerte Herz & Kommentar Box */
+            .card-stats-badge { bottom: 14px; right: 14px; padding: 2px 6px; border-radius: 8px; font-size: 0.55rem !important; gap: 4px; border-width: 0.5px; }
+            .card-stats-badge i { font-size: 0.60rem !important; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. HAUPTKARTEN RENDERER (Şiir, Söz, Kıssa, Fıkra, Sağlık)
+    window.initContent = function() {
+        try {
+            if(!window.contentDB) return;
+            let uName = window.currentUser ? window.currentUser.username : null;
+            ['poems', 'quotes', 'stories', 'jokes', 'saglik'].forEach(type => {
+                const gridId = type === 'poems' ? 'siirler' : type === 'quotes' ? 'sozler' : type === 'stories' ? 'hikayeler' : type === 'jokes' ? 'fikralar' : 'saglik';
+                const grid = document.getElementById(gridId + '-grid');
+                if(grid && window.contentDB[type] && Array.isArray(window.contentDB[type])) {
+                    let sortedItems = window.sortContentItems(window.contentDB[type], false);
+                    grid.innerHTML = sortedItems.map(item => {
+                        const isNew = window.isItemNew(item.id, item.timestamp) ? `<div class="new-badge" id="badge-${item.id}" style="position:absolute; top:-10px; left:-10px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:20; box-shadow:0 4px 10px rgba(239,68,68,0.5); pointer-events:none;">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>` : '';
+                        let authorText = (type === 'poems' || type === 'quotes') ? 'Şair Misal.i' : 'Anonim'; if (type === 'saglik') authorText = 'Tavsiye / Empfehlung';
+                        
+                        let authorClass = window.getAuthorColorClass(authorText);
+                        let borderClass = authorClass === 'author-anim-admin' ? 'card-admin' : (authorClass === 'author-anim-user' ? 'card-user' : 'card-author');
+                        let authorDisplay = `<span class="${authorClass}">${authorText}</span>`;
+
+                        const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
+                        let heartCount = 0; if (poemData.ratings) { for(let k in poemData.ratings) { let r = poemData.ratings[k]; heartCount += (typeof r === 'object' ? (r.val || 0) : (r || 0)); } }
+                        let commCount = poemData.comments ? poemData.comments.length : 0;
+                        
+                        // 🔥 DATUM BERECHNUNG 🔥
+                        let dObj = new Date(item.timestamp || Date.now()); 
+                        let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+                        
+                        let isSaved = false;
+                        try {
+                            if (uName && window.savedItemsDB && window.savedItemsDB[uName] && Array.isArray(window.savedItemsDB[uName])) {
+                                isSaved = window.savedItemsDB[uName].includes(item.id);
+                            }
+                        } catch(err) {}
+
+                        let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${item.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
+
+                        return `<div class="card ${borderClass}" style="background: rgba(10,25,47,0.8); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}')">
+                            ${isNew} ${saveBtn}
+                            
+                            <!-- 🔥 VERKLEINERTE STATS-BADGE 🔥 -->
+                            <div class="card-stats-badge">
+                                <i class="fas fa-heart" style="color:#ef4444;"></i> <span>${heartCount}</span> 
+                                <i class="fas fa-comment" style="color:#f4c542; margin-left: 2px;"></i> <span>${commCount}</span>
+                            </div>
+                            
+                            <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">${item.emoji || '✨'}</h3>
+                            <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.trTitle}</h3>
+                            
+                            <!-- 🔥 ZENTRIERTES PAKET: Autor + Datum 🔥 -->
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 8px; pointer-events:none;">
+                                <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;">${authorDisplay}</span>
+                                <div class="card-date-time"><i class="fas fa-clock"></i> ${dStr}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            });
+            
+            const trCol = document.getElementById('sahsiyetler-tr-col'); const deCol = document.getElementById('sahsiyetler-de-col');
+            if(trCol && deCol && window.contentDB.persons && Array.isArray(window.contentDB.persons)) {
+                let sortedTrP = window.contentDB.persons.filter(p => p.id && p.id.includes('_tr_')).sort((a,b) => (a.trTitle||'').localeCompare((b.trTitle||''), 'tr'));
+                let sortedDeP = window.contentDB.persons.filter(p => p.id && p.id.includes('_de_')).sort((a,b) => (a.deTitle||'').localeCompare((b.deTitle||''), 'de'));
+                trCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇹🇷 Türk Şahsiyetler</h3>' + sortedTrP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.emoji||'👤'} <span class="author-anim-author">${p.trTitle}</span></h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
+                deCol.innerHTML = '<h3 style="color:#f4c542; font-size:1.8rem; border-bottom:1px solid #f4c542; padding-bottom:10px; margin-bottom:15px;">🇩🇪 Deutsche Persönlichkeiten</h3>' + sortedDeP.map(p => `<div style="background:rgba(10,25,47,0.8); border:1px solid rgba(244,197,66,0.3); border-radius:12px; padding:20px; cursor:pointer; margin-bottom:15px;" onclick="window.open('${p.url}', '_blank')"><h3 style="color:white; margin-bottom:10px;">${p.emoji||'👤'} <span class="author-anim-author">${p.deTitle}</span></h3><div style="font-style:italic; color:#94a3b8;">"${p.quote}"</div></div>`).join('');
+            }
+            if(window.renderAtasozleri) window.renderAtasozleri(); if(window.renderUserWorksGrid) window.renderUserWorksGrid(); if(window.renderTopWorks) window.renderTopWorks(); if(window.updateTopWorksTicker) window.updateTopWorksTicker();
+        } catch(e) { console.error("Render Init Error", e); }
+    };
+
+    // 3. USER ESERLERİ (Kullanıcı Eserleri)
+    window.renderUserWorksGrid = function() {
+        const grid = document.getElementById('kullanici-eserleri-grid'); if (!grid) return;
+        if(window.userPoemsDB) { window.forceBadge('header-total-works-badge', window.userPoemsDB.length, true); }
+        if (!window.userPoemsDB || window.userPoemsDB.length === 0) { grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-size: 1.1rem;">Henüz eser bulunmuyor. İlk eseri sen yaz!</div>'; return; }
+        
+        let sortedUserWorks = window.sortContentItems(window.userPoemsDB, true);
+        let uName = window.currentUser ? window.currentUser.username : null;
+
+        grid.innerHTML = sortedUserWorks.map(item => {
+            const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
+            let heartCount = 0; if (poemData.ratings) { for(let k in poemData.ratings) { let r = poemData.ratings[k]; heartCount += (typeof r === 'object' ? (r.val || 0) : (r || 0)); } }
+            let commCount = poemData.comments ? poemData.comments.length : 0;
+            let ratingBadge = '';
+            if (item.adminRating > 0) {
+                let cat = item.adminCategory || 'Normal'; let trophies = cat === 'Super Elite' ? '🏆🏆🏆' : cat === 'Elite' ? '🏆🏆' : '🏆';
+                ratingBadge = `<div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #f4c542, #b48608); color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:0.85rem; box-shadow:0 4px 10px rgba(0,0,0,0.5); white-space:nowrap; z-index:10; pointer-events:none;">${trophies} ${cat} (${item.adminRating} P)</div>`;
+            } else if (window.isItemNew(item.id, item.timestamp)) {
+                ratingBadge = `<div style="position:absolute; top:-12px; left:-12px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:10; box-shadow:0 4px 10px rgba(239,68,68,0.5); pointer-events:none;">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>`;
+            }
+            
+            // 🔥 DATUM BERECHNUNG 🔥
+            let dObj = new Date(item.timestamp || Date.now()); 
+            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            let fullName = item.name + (item.surname ? ' ' + item.surname : '');
+            
+            let colorClass = window.getAuthorColorClass(item.username);
+            let borderClass = colorClass === 'author-anim-admin' ? 'card-admin' : (colorClass === 'author-anim-user' ? 'card-user' : 'card-author');
+            
+            let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(item.id);
+            let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${item.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
+
+            return `<div class="card ${borderClass}" style="background: rgba(10,25,47,0.8); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openUserPoemModal('${item.id}')">
+                ${ratingBadge} ${saveBtn}
+                
+                <!-- 🔥 VERKLEINERTE STATS-BADGE 🔥 -->
+                <div class="card-stats-badge">
+                    <i class="fas fa-heart" style="color:#ef4444;"></i> <span>${heartCount}</span> 
+                    <i class="fas fa-comment" style="color:#f4c542; margin-left: 2px;"></i> <span>${commCount}</span>
+                </div>
+                
+                <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">✍️</h3>
+                <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.title || item.trTitle}</h3>
+                
+                <!-- 🔥 ZENTRIERTES PAKET: Autor + Datum 🔥 -->
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 8px; pointer-events:none;">
+                    <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;"><span class="${colorClass}">${fullName}</span></span>
+                    <div class="card-date-time"><i class="fas fa-clock"></i> ${dStr}</div>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    // 4. ATASÖZLERİ RENDERER
+    window.renderAtasozleri = function() {
+        const container = document.getElementById('atasozleri-grid'); if(!container) return;
+        let uName = window.currentUser ? window.currentUser.username : null;
+        let source = (window.contentDB && window.contentDB.atasozleri) ? window.contentDB.atasozleri : [];
+        let filtered = source.filter(item => window.atasozleriLang === 'DE' ? item.deTitle : item.trTitle);
+        let sorted = window.sortContentItems(filtered, false);
+        
+        if (sorted.length === 0) { container.innerHTML = '<p style="color:#94a3b8; text-align:center; width:100%;">Henüz içerik yok. <span class="de-sub" style="font-size:0.85em;">(Noch kein Inhalt)</span></p>'; return; }
+
+        container.innerHTML = sorted.map(a => {
+            let title = window.atasozleriLang === 'DE' ? a.deTitle : a.trTitle;
+            let author = window.atasozleriLang === 'DE' ? (a.authorDE || 'Unbekannt') : (a.authorTR || 'Anonim');
+            let colorClass = window.getAuthorColorClass(author);
+            let borderClass = colorClass === 'author-anim-admin' ? 'card-admin' : (colorClass === 'author-anim-user' ? 'card-user' : 'card-author');
+            
+            let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(a.id);
+            let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${a.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${a.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
+
+            // 🔥 DATUM BERECHNUNG 🔥
+            let dObj = new Date(a.timestamp || Date.now()); 
+            let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+
+            return `<div class="card ${borderClass}" style="background:rgba(10,25,47,0.8); border-radius:12px; padding:20px; box-shadow:0 5px 15px rgba(0,0,0,0.5); cursor:pointer; text-align:center; position:relative;" onclick="window.openPoemModal('${a.id}', 'atasozleri')">
+                        ${saveBtn}
+                        <h3 style="color:#fdfbf7; margin-bottom:10px; font-family:'Playfair Display', serif; pointer-events:none; padding-right:20px;">${a.emoji||'💬'} ${title}</h3>
+                        
+                        <!-- 🔥 ZENTRIERTES PAKET: Autor + Datum 🔥 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 10px; pointer-events:none;">
+                            <div style="color:#f4c542; font-size:0.85rem; font-weight:bold;">- <span class="${colorClass}">${author}</span></div>
+                            <div class="card-date-time"><i class="fas fa-clock"></i> ${dStr}</div>
+                        </div>
+                    </div>`;
+        }).join('');
+    };
+
+    // 5. BİLMECELER RENDERER
+    window.renderBilmeces = function() {
+        const container = document.getElementById('bilmeceler-grid'); if(!container) return;
+        let uName = window.currentUser ? window.currentUser.username : null;
+        let html = '';
+        const source = (window.contentDB && window.contentDB.bilmeceler && window.contentDB.bilmeceler.length > 0) ? window.contentDB.bilmeceler : window.bilmecelerDB;
+        let filtered = source.filter(item => window.bilmeceLang === 'DE' ? item.deTitle : item.trTitle);
+        let sorted = window.sortContentItems(filtered, false);
+        
+        sorted.forEach((item, idx) => {
+            let text = window.bilmeceLang === 'DE' ? item.deText : item.trText; let title = window.bilmeceLang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
+            if(q && q.trim() !== '') {
+                let lbl = title || (window.bilmeceLang === 'DE' ? 'Rätsel' : 'Bilmece'); let em = item.emoji || '🤔';
+                let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(item.id);
+                let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${item.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
+                
+                // 🔥 DATUM BERECHNUNG 🔥
+                let dObj = new Date(item.timestamp || Date.now()); 
+                let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+
+                html += `<div class="card card-author" style="background:rgba(10,25,47,0.8); border-radius:16px; padding:30px; cursor:pointer; transition:0.3s; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.5); position:relative;" onclick="window.openPuzzleModal('${item.id}', 'bilmeceler')">
+                            ${saveBtn}
+                            <h3 style="font-size:3.5rem; margin-bottom:10px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6)); pointer-events:none;">${em}</h3>
+                            <h3 class="clamp-text" style="color:#fdfbf7; font-family:'Playfair Display', serif; pointer-events:none;">${lbl}</h3>
+                            
+                            <!-- 🔥 ZENTRIERTES PAKET: Datum 🔥 -->
+                            <div class="card-date-time" style="margin-top: 8px;"><i class="fas fa-clock"></i> ${dStr}</div>
+                         </div>`;
+            }
+        });
+        container.innerHTML = html || '<p style="color:#94a3b8; text-align:center; width:100%;">Henüz içerik yok. <span class="de-sub" style="font-size:0.85em;">(Noch kein Inhalt)</span></p>';
+    };
+
+    // 6. BULMACALAR RENDERER
+    window.renderBulmacalar = function() {
+        const container = document.getElementById('bulmacalar-grid'); if(!container) return; 
+        let uName = window.currentUser ? window.currentUser.username : null;
+        let html = '';
+        const source = (window.contentDB && window.contentDB.bulmacalar && window.contentDB.bulmacalar.length > 0) ? window.contentDB.bulmacalar : window.bulmacalarDB;
+        let filtered = source.filter(item => window.bulmacaLang === 'DE' ? item.deTitle : item.trTitle);
+        let sorted = window.sortContentItems(filtered, false);
+        
+        sorted.forEach((item, idx) => {
+            let text = window.bulmacaLang === 'DE' ? item.deText : item.trText; let title = window.bulmacaLang === 'DE' ? item.deTitle : item.trTitle; let q = text ? text.split('||')[0] : '';
+            if(q && q.trim() !== '') {
+                let lbl = title || (window.bulmacaLang === 'DE' ? 'Puzzle' : 'Bulmaca'); let em = item.emoji || '🤔';
+                let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(item.id);
+                let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${item.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
+
+                // 🔥 DATUM BERECHNUNG 🔥
+                let dObj = new Date(item.timestamp || Date.now()); 
+                let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+
+                html += `<div class="card card-author" style="background:rgba(10,25,47,0.8); border-radius:16px; padding:30px; cursor:pointer; transition:0.3s; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.5); position:relative;" onclick="window.openPuzzleModal('${item.id}', 'bulmacalar')">
+                            ${saveBtn}
+                            <h3 style="font-size:3.5rem; margin-bottom:10px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6)); pointer-events:none;">${em}</h3>
+                            <h3 class="clamp-text" style="color:#fdfbf7; font-family:'Playfair Display', serif; pointer-events:none;">${lbl}</h3>
+                            
+                            <!-- 🔥 ZENTRIERTES PAKET: Datum 🔥 -->
+                            <div class="card-date-time" style="margin-top: 8px;"><i class="fas fa-clock"></i> ${dStr}</div>
+                         </div>`;
+            }
+        });
+        container.innerHTML = html || '<p style="color:#94a3b8; text-align:center; width:100%;">Henüz içerik yok. <span class="de-sub" style="font-size:0.85em;">(Noch kein Inhalt)</span></p>';
+    };
+
+    // UI SOFORT AKTUALISIEREN, UM DIE DATUMS-FELDER ANZUZEIGEN
+    setTimeout(() => {
+        if(window.initContent) window.initContent();
+        if(window.renderUserWorksGrid) window.renderUserWorksGrid();
+        if(window.renderAtasozleri) window.renderAtasozleri();
+        if(window.renderBilmeces) window.renderBilmeces();
+        if(window.renderBulmacalar) window.renderBulmacalar();
+    }, 200);
+})();
+
+// ==================================================================
+// 🚀 MOBILE FIX: 3 HERZEN & TEXT KOMPAKTER MACHEN (iOS & Android)
+// ==================================================================
+(function() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Greift nur auf mobilen Geräten (Handys) */
+        @media (max-width: 768px) {
+            /* 1. Den Text "Kalp Bırak (Herzen)" verkleinern */
+            #heart-container > div:first-child {
+                font-size: 1.05rem !important; 
+                margin-bottom: 5px !important;
+            }
+            
+            /* 2. Den Abstand zwischen den Herzen verringern */
+            #heart-container .custom-live-hearts {
+                gap: 20px !important; 
+                margin-top: 5px !important;
+                padding-bottom: 5px !important;
+            }
+            
+            /* 3. Die 3 Herzen selbst deutlich kleiner machen */
+            #heart-container .custom-live-hearts i.fa-heart {
+                font-size: 2.4rem !important; 
+            }
+            
+            /* 4. Die Container-Breite der einzelnen Herzen anpassen */
+            #heart-container .custom-live-hearts > div {
+                width: 35px !important; 
+            }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+// ==================================================================
+// 🚀 MOBILE FIX: KOMMENTAR-BEREICH (Titel, Text & Placeholder perfekt angepasst)
+// ==================================================================
+(function() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Greift nur auf mobilen Geräten (Handys) */
+        @media (max-width: 768px) {
+            /* 1. Den Titel "Yorumlar (Kommentare)" verkleinern */
+            #m-comment-area > div:first-child {
+                font-size: 1.05rem !important; 
+                margin-bottom: 10px !important;
+            }
+            
+            /* 2. Den Text "İlk yorumu sen yap... (Schreibe Kommentar...)" verkleinern */
+            #m-comment-list > span {
+                font-size: 0.85rem !important;
+                padding: 10px 0 !important;
+                line-height: 1.4 !important;
+            }
+            
+            /* 3. Die Schrift im Eingabefeld auf sichere 16px setzen (verhindert iOS-Zoom Bug beim Tippen) */
+            #m-comment-input {
+                font-size: 16px !important;
+            }
+
+            /* 4. Den Placeholder-Text so verkleinern und auf EINE Zeile zwingen, dass alles reinpasst */
+            #m-comment-input::-webkit-input-placeholder {
+                font-size: 0.55rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            #m-comment-input::-moz-placeholder {
+                font-size: 0.55rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            #m-comment-input:-ms-input-placeholder {
+                font-size: 0.55rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            #m-comment-input::placeholder {
+                font-size: 0.55rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 })();
 
 </script>
