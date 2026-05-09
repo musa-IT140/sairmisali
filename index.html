@@ -1659,140 +1659,172 @@ nav#main-nav, nav {
 }
 
 /* ==========================================================================
-   🍎 iOS ONLY: MEGA SUPER ERLEBNIS FIX V40 (UHR, KALENDER, PROFIL) 🍎
+   🍎 iOS ONLY: SUPER ERGEBNIS FIX V41 (ULTRA KOMPAKT, KEIN OVERFLOW) 🍎
    ========================================================================== */
 @supports (-webkit-touch-callout: none) {
     
     /* ==================================================================
-       🔥 1. SAFARI AUTO-ZOOM VERBIETEN 🔥
+       🔥 1. SAFARI AUTO-ZOOM VERBIETEN & GRENZEN SETZEN 🔥
        ================================================================== */
     html, body { -webkit-text-size-adjust: 100% !important; }
 
-    /* ==================================================================
-       2. MODAL & SCROLL BEFREIUNG
-       ================================================================== */
     #modal-backdrop {
         backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
         background-color: rgba(0, 0, 0, 0.95) !important; 
         transform: translateZ(0) !important; will-change: auto !important; transition: none !important; 
     }
     .modal.active-modal { display: flex !important; animation: none !important; height: 100dvh !important; }
+    
     .modal-content {
         transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
         will-change: transform, opacity !important; animation: none !important; 
         max-height: 88dvh !important; display: flex !important; flex-direction: column !important;
         width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }
+    
     body.modal-open, html.modal-open { overflow: hidden !important; height: 100% !important; position: static !important; }
+    
     .modal-body {
         -webkit-overflow-scrolling: touch !important; overflow-y: auto !important; overflow-x: hidden !important; 
-        flex-grow: 1 !important; padding-bottom: 120px !important; width: 100% !important;
+        flex-grow: 1 !important; padding: 10px !important; padding-bottom: 120px !important; 
+        width: 100% !important; box-sizing: border-box !important;
+    }
+
+    /* Zwingt ALLE Elemente innerhalb des Modals, innerhalb der Grenzen zu bleiben */
+    .modal-body * {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
     }
 
     /* ==================================================================
-       🔥 3. KALENDER (BILD 1: KOMPAKT & LÜCKEN SCHLIESSEN) 🔥
+       🔥 2. GLOBALE TEXTVERKLEINERUNG (FÜR EINZEILER) 🔥
        ================================================================== */
-    #calendarModal .modal-body { padding: 5px !important; overflow-x: hidden !important; }
+    .modal-body p, .modal-body span, .poem-line, .stanza, .card-text, blockquote, .hymn-text, td, th {
+        font-size: 0.65rem !important; /* Extrem verkleinert für lange Sätze */
+        line-height: 1.2 !important;
+    }
+    h1, h2, h3, h4, h5, .modal-title, .hymn-title { 
+        font-size: 0.8rem !important; 
+        line-height: 1.2 !important; 
+    }
+
+    /* ==================================================================
+       🔥 3. BENACHRICHTIGUNGEN / MESAJ KUTUSU (BREIT & WINZIGE BUTTONS) 🔥
+       ================================================================== */
+    #messagesModal .list-group-item, #notificationsModal .list-group-item, .message-card {
+        width: 100% !important; 
+        margin-left: 0 !important; margin-right: 0 !important; /* Volle Breite nutzen */
+        padding: 8px !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Text in den Nachrichten extrem kompakt */
+    #messagesModal .list-group-item p, #messagesModal .list-group-item span, .notification-text {
+        font-size: 0.6rem !important;
+        line-height: 1.1 !important;
+    }
+
+    /* Die hässlichen roten und blauen Buttons stark verkleinern */
+    #messagesModal .btn, #notificationsModal .btn, .delete-btn, .reply-btn, .btn-danger, .btn-primary {
+        padding: 2px 8px !important;
+        font-size: 0.55rem !important; /* Winziger Text */
+        height: 22px !important; /* Sehr flach */
+        line-height: 1 !important;
+        border-radius: 4px !important;
+        min-width: 0 !important;
+    }
+
+    /* Der "Hepsini Sil" (Alle löschen) Header-Button */
+    .message-header-action, .header-action-btn, #messagesModal .bg-danger {
+        padding: 4px 8px !important; 
+        font-size: 0.6rem !important;
+    }
+
+    /* ==================================================================
+       🔥 4. MY PROFIL (RECHTEN RAND RETTEN) 🔥
+       ================================================================== */
+    #profileModal .list-group-item, #profileModal .card, #profileModal .d-flex {
+        width: 100% !important; 
+        min-width: 0 !important; 
+        overflow: hidden !important; /* Schneidet Überlauf rigoros ab */
+    }
+    
+    /* Zwingt "Systemadministrator" zum Umbruch an der Kante! */
+    #profileModal p, #profileModal h6, #profileModal span {
+        word-wrap: break-word !important; 
+        word-break: break-word !important; /* Der Lebensretter-Befehl */
+        white-space: normal !important;
+        font-size: 0.65rem !important;
+    }
+
+    /* ==================================================================
+       🔥 5. UHREN (KREIS ABSCHNEIDEN & DIGITALE EINZEILER) 🔥
+       ================================================================== */
+    /* Analoge Uhr */
+    #clockModal canvas, .clock-container canvas, #analog-clock, .analog-clock {
+        aspect-ratio: 1 / 1 !important; 
+        width: 100% !important; 
+        max-width: 120px !important; /* Viel kleiner */
+        height: auto !important;
+        margin: 0 auto 10px auto !important; display: block !important;
+        border-radius: 50% !important; /* Perfekter Kreis */
+        overflow: hidden !important;   /* Zeiger, die drüber ragen, werden abgeschnitten! */
+    }
+    
+    /* Digitale Uhren */
+    .digital-clock-container, .time-box, #clockModal .card {
+        width: 48% !important; 
+        min-width: 0 !important; 
+        margin: 0 !important; padding: 4px 2px !important; 
+        overflow: hidden !important;
+    }
+    
+    /* Land & Uhrzeit einzeilig erzwingen */
+    .digital-clock-container h5, #clockModal .card h5 { 
+        font-size: 0.55rem !important; 
+        white-space: nowrap !important; /* Niemals zweizeilig! */
+        overflow: hidden !important; text-overflow: ellipsis !important; 
+        letter-spacing: -0.5px !important; margin-bottom: 2px !important;
+    }
+    .digital-clock-container .time, #clockModal .card .time { 
+        font-size: 0.7rem !important; 
+        white-space: nowrap !important; 
+        letter-spacing: -0.5px !important;
+    }
+
+    /* ==================================================================
+       🔥 6. KALENDER (LÜCKEN WEG, BESCHRIFTUNG WINZIG) 🔥
+       ================================================================== */
+    #calendarModal .modal-body { padding: 4px !important; overflow-x: hidden !important; }
     
     .calendar-grid {
         display: grid !important;
         grid-template-columns: repeat(7, minmax(0, 1fr)) !important; 
-        gap: 1px !important; /* Fast keine Lücken mehr */
-        width: 100% !important;
+        gap: 1px !important; width: 100% !important;
     }
     
     .calendar-day, .cal-day {
-        padding: 2px 1px !important; /* Paddings massiv reduziert */
+        padding: 2px 1px !important; 
         min-height: 35px !important; height: auto !important;
         display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important;
         text-align: center !important; overflow: hidden !important;
     }
     
-    /* Datum-Zahl (z.B. "19") */
     .calendar-day strong, .cal-day strong, .day-number {
-        font-size: 0.75rem !important; 
-        margin-bottom: 0 !important; /* Lücke zum Text darunter entfernen */
+        font-size: 0.7rem !important; margin-bottom: 0 !important; 
     }
     
-    /* Beschriftung darunter (Feiertage etc.) - EXTREM KOMPAKT */
+    /* Feiertags-Texte extrem klein machen */
     .calendar-day span:not(.day-number), .cal-day span:not(.day-number), .event-text, .holiday-name {
-        font-size: 0.45rem !important; /* 🔥 Winzig! */
-        line-height: 0.9 !important;   /* 🔥 Zeilenabstand minimiert, zieht die Wochen zusammen */
+        font-size: 0.45rem !important; 
+        line-height: 0.9 !important; 
         margin-top: 1px !important;
-        word-wrap: break-word !important; 
-        overflow-wrap: break-word !important; 
-        word-break: break-word !important;
-        hyphens: auto !important;
+        word-wrap: break-word !important; word-break: break-word !important; hyphens: auto !important;
     }
 
     /* ==================================================================
-       🔥 4. MY PROFIL (BILD 2: AUSBRECHEN VERHINDERN) 🔥
-       ================================================================== */
-    /* Zwingt ALLE Container in My Profil, niemals größer als 100% zu werden */
-    #profileModal .modal-body * { box-sizing: border-box !important; }
-    
-    #profileModal .list-group-item, #profileModal .card, #profileModal .d-flex {
-        max-width: 100% !important; width: 100% !important; min-width: 0 !important; 
-        overflow: hidden !important; /* 🔥 Schneidet alles ab, was über den Rahmen will */
-    }
-    
-    /* Der Text selbst - GNADENLOSER UMBRUCH */
-    #profileModal p, #profileModal h6, #profileModal span {
-        word-break: break-all !important; /* 🔥 Bricht "Systemadministrator" mitten im Wort exakt an der Kante um! */
-        white-space: normal !important;
-        font-size: 0.65rem !important;
-        line-height: 1.2 !important;
-    }
-
-    /* ==================================================================
-       🔥 5. UHR (BILD 3: ZEIGER-CLIP & DIGITALE EINZEILER) 🔥
-       ================================================================== */
-    /* Analoge Uhr - Zeiger abschneiden! */
-    #clockModal canvas, .clock-container canvas, #analog-clock, .analog-clock {
-        aspect-ratio: 1 / 1 !important; 
-        width: 100% !important; 
-        max-width: 130px !important;
-        height: auto !important;
-        margin: 0 auto 15px auto !important; display: block !important;
-        border-radius: 50% !important; /* 🔥 Macht den Container kreisrund */
-        overflow: hidden !important;   /* 🔥 Schneidet überlappende Zeiger gnadenlos ab! */
-    }
-    
-    /* Digitale Uhren - Einzeiler erzwingen */
-    .digital-clock-container, .time-box, #clockModal .card {
-        width: 48% !important; 
-        min-width: 0 !important; 
-        margin: 0 !important; padding: 4px 2px !important; box-sizing: border-box !important;
-        overflow: hidden !important;
-    }
-    
-    /* Land (Deutschland / Türkiye) */
-    .digital-clock-container h5, #clockModal .card h5 { 
-        font-size: 0.6rem !important; /* 🔥 Kleiner */
-        white-space: nowrap !important; /* 🔥 ZWINGEND EINE ZEILE */
-        overflow: hidden !important;
-        text-overflow: ellipsis !important; /* Falls es doch zu lang ist: "Deutsch..." */
-        letter-spacing: -0.5px !important; /* Quetscht die Buchstaben leicht zusammen */
-        margin-bottom: 2px !important;
-    }
-    
-    /* Uhrzeit (08:39:10) */
-    .digital-clock-container .time, #clockModal .card .time { 
-        font-size: 0.75rem !important; 
-        white-space: nowrap !important; /* 🔥 ZWINGEND EINE ZEILE */
-        letter-spacing: -0.5px !important;
-    }
-
-    /* ==================================================================
-       6. GLOBALE TEXTVERKLEINERUNG
-       ================================================================== */
-    .modal-body p, .modal-body span, .poem-line, .stanza, .card-text, blockquote, .hymn-text, .notification-text, td, th, .list-group-item {
-        font-size: 0.7rem !important; line-height: 1.2 !important;
-    }
-    h1, h2, h3, h4, h5, .modal-title, .hymn-title { font-size: 0.85rem !important; line-height: 1.2 !important; }
-
-    /* ==================================================================
-       7. EINGABEFELDER & RENDER-FIXES
+       7. EINGABEFELDER, RENDER & LEADERBOARD FIXES
        ================================================================== */
     input::placeholder, textarea::placeholder { text-align: center !important; }
     #profileModal input, #settingsModal input { text-align: center !important; }
@@ -1803,9 +1835,6 @@ nav#main-nav, nav {
         transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
     }
 
-    /* ==================================================================
-       8. LEADERBOARD & KLICK FIXES
-       ================================================================== */
     #leaderboardModal .modal-body div[style*="overflow-x:auto"], #leaderboardModal .modal-body div[style*="overflow-x: auto"] {
         -webkit-overflow-scrolling: touch !important; padding-bottom: 15px !important;
         min-height: 250px !important; max-height: 60vh !important; flex-grow: 1 !important;       
@@ -1818,7 +1847,7 @@ nav#main-nav, nav {
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn * { pointer-events: none !important; }
 
     /* ==================================================================
-       9. FLOATING MENU SCROLLBAR
+       8. FLOATING MENU
        ================================================================== */
     @media (max-width: 768px) {
         .floating-menu-wrapper.left { bottom: 20px !important; left: 12px !important; z-index: 9000 !important; }
