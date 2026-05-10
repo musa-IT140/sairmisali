@@ -12221,6 +12221,137 @@ setTimeout(() => {
     document.head.appendChild(style);
 })();
 
+(function() {
+    // 1. CSS FÜR DEN LESEZEICHEN-BUTTON IM MODAL (Oben Links)
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .modal-bookmark-wrapper {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            z-index: 100005;
+            background: rgba(10, 25, 47, 0.95);
+            border: 2px solid rgba(244, 197, 66, 0.6);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+        .modal-bookmark-wrapper:hover {
+            background: rgba(236, 72, 153, 0.2);
+            border-color: #ec4899;
+            transform: scale(1.1);
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. HILFSFUNKTION: Zeichnet den Button ins Fenster
+    function updateModalBookmarkUI(id, modalId) {
+        let modalContent = document.querySelector('#' + modalId + ' .modal-content');
+        if(!modalContent) return;
+
+        let wrapper = modalContent.querySelector('.modal-bookmark-wrapper');
+        if(!wrapper) {
+            // Element erstellen, wenn es noch nicht existiert
+            wrapper = document.createElement('div');
+            wrapper.className = 'modal-bookmark-wrapper';
+            modalContent.appendChild(wrapper);
+        }
+        
+        let uName = window.currentUser ? window.currentUser.username : null;
+        let isSaved = false;
+        
+        // Holt immer die aktuellste Datenbank
+        let db = window.cleanAklimdaDB ? window.cleanAklimdaDB() : (JSON.parse(localStorage.getItem('misaliSavedItems')) || {});
+        if(uName && db && db[uName]) {
+            isSaved = db[uName].includes(id);
+        }
+        
+        let color = isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)';
+        let filter = isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none';
+        
+        // Erzeugt das Icon
+        wrapper.innerHTML = `<i class="fas fa-bookmark" id="modal-bookmark-icon-${id}" style="color:${color}; filter:${filter}; font-size: 1.2rem; transition: 0.3s; pointer-events:none;"></i>`;
+        
+        // Klick-Logik
+        wrapper.onclick = function(e) {
+            window.toggleSaveItem(id, e);
+        };
+    }
+
+    // 3. ÜBERSCHREIBE DIE ÖFFNEN-FUNKTIONEN, UM DEN BUTTON HINZUZUFÜGEN
+    const origOpenPoemModal = window.openPoemModal;
+    window.openPoemModal = function(id, type) {
+        if(origOpenPoemModal) origOpenPoemModal(id, type);
+        setTimeout(() => updateModalBookmarkUI(id, 'contentModal'), 50); // Timeout sichert ab, dass das Modal fertig geladen ist
+    };
+
+    const origOpenPuzzleModal = window.openPuzzleModal;
+    window.openPuzzleModal = function(id, type) {
+        if(origOpenPuzzleModal) origOpenPuzzleModal(id, type);
+        setTimeout(() => updateModalBookmarkUI(id, 'bilmeceModal'), 50);
+    };
+
+    // 4. ÜBERSCHREIBE DAS SPEICHERN, DAMIT SICH KARTEN UND FENSTER GLEICHZEITIG UPDATEN
+    window.toggleSaveItem = function(id, e) {
+        if(e) e.stopPropagation();
+        if(!window.currentUser) { 
+            window.customAlert('Eserleri kaydetmek için lütfen giriş yapın. <span class="de-sub">(Bitte einloggen)</span>', '🔒'); 
+            return; 
+        }
+        
+        let uName = window.currentUser.username;
+        let db = window.cleanAklimdaDB ? window.cleanAklimdaDB() : (JSON.parse(localStorage.getItem('misaliSavedItems')) || {});
+        if(!db[uName]) db[uName] = [];
+        
+        let idx = db[uName].indexOf(id);
+        let isSavedNow = false;
+        
+        if(idx > -1) {
+            db[uName].splice(idx, 1);
+            window.showToast('Aklımdan çıkarıldı. <span class="de-sub">(Entfernt)</span>');
+        } else {
+            db[uName].push(id);
+            isSavedNow = true;
+            window.showToast('Aklımda! <span class="de-sub">(Gespeichert)</span>');
+        }
+        
+        window.savedItemsDB = db;
+        localStorage.setItem('misaliSavedItems', JSON.stringify(db));
+        window.lastLocalUpdate = Date.now() + 5000;
+        if(window.syncToCloud) window.syncToCloud();
+        if(window.updateSavedBadge) window.updateSavedBadge();
+        
+        // Farben vorbereiten
+        let newColor = isSavedNow ? '#ec4899' : 'rgba(255,255,255,0.4)';
+        let newFilter = isSavedNow ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none';
+
+        // 4A. Update das Icon auf der Karte im Hintergrund (falls sichtbar)
+        let cardIcon = document.getElementById('bookmark-icon-' + id);
+        if(cardIcon) {
+            cardIcon.style.color = newColor;
+            cardIcon.style.filter = newFilter;
+        }
+        
+        // 4B. Update das Icon oben links im geöffneten Fenster
+        let modalIcon = document.getElementById('modal-bookmark-icon-' + id);
+        if(modalIcon) {
+            modalIcon.style.color = newColor;
+            modalIcon.style.filter = newFilter;
+        }
+        
+        // 4C. Update die "Aklımda" Liste, falls sie gerade offen ist
+        if(document.getElementById('savedItemsModal') && document.getElementById('savedItemsModal').classList.contains('active-modal')) {
+            if(window.renderSavedItems) window.renderSavedItems();
+        }
+    };
+})();
+
 </script>
 </body>
 </html>
