@@ -2026,6 +2026,32 @@ nav#main-nav, nav {
         pointer-events: none !important;
     }
 
+    /* 1. RIESIGEN LEERRAUM IM LOGIN & REGISTRIEREN MODAL ENTFERNEN */
+    /* Überschreibt den iOS-Puffer nur für diese beiden Fenster */
+    .auth-modal-content .modal-body {
+        padding-bottom: 25px !important; 
+    }
+
+    /* 2. KALENDER SIDEBAR-BUTTON (GLÄSER) VERKLEINERN (Für alle Versionen) */
+    #eventsModal.active-modal .holiday-toggle-btn {
+        padding: 6px 8px !important;
+        font-size: 1rem !important;
+        transform: translateY(-50%) scale(0.75) !important; /* Macht den Button 25% kleiner! */
+        transform-origin: right center !important;
+        box-shadow: -2px 0 8px rgba(0,0,0,0.6) !important;
+    }
+    
+    /* Der X-Button (Schließen), wenn die Feiertags-Liste offen ist */
+    #eventsModal.active-modal .holiday-toggle-btn.open {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.85rem !important;
+        top: 15px !important;
+        right: 15px !important;
+        transform: scale(1) !important; /* Hier wieder normale Größe */
+        border-width: 1px !important;
+    }
+
 </style>
     <script>
 
@@ -12125,6 +12151,48 @@ setTimeout(() => {
         }
     `;
     document.head.appendChild(style);
+})();
+
+(function() {
+    // ==========================================
+    // 3. JAVASCRIPT CRASH FIX FÜR DEN REGISTRIEREN BUTTON!
+    // ==========================================
+    window.m_register = function() {
+        const u = document.getElementById('m-reg-user').value.trim(); 
+        const e = document.getElementById('m-reg-email').value.trim();
+        const p = document.getElementById('m-reg-pass').value.trim(); 
+        const n = document.getElementById('m-reg-name').value.trim();
+        const s = document.getElementById('m-reg-surname').value.trim(); 
+        const d = document.getElementById('m-reg-day').value;
+        const m = document.getElementById('m-reg-month').value; 
+        const y = document.getElementById('m-reg-year').value;
+        const em = document.getElementById('m-reg-emoji').value;
+        
+        // 🔥 HIER WAR DER FEHLER: Das Element 'm-reg-avatar-b64' existiert nicht!
+        // Der alte Code ist hier gnadenlos abgestürzt. Wir prüfen nun sicher, ob es da ist.
+        const avEl = document.getElementById('m-reg-avatar-b64');
+        const av = avEl ? avEl.value : ''; 
+        
+        if (!u || !e || !p || !n || !s) { window.customAlert('Lütfen zorunlu alanları doldurun.', '⚠️'); return; }
+        if (p.length < 8) { window.customAlert('Şifreniz en az 8 karakter olmalıdır.', '⚠️'); return; }
+        if (window.userDatabase && window.userDatabase[u]) { window.customAlert('Bu kullanıcı adı zaten alınmış.', '❌'); return; }
+        
+        window.lastLocalUpdate = Date.now();
+        let secureHash = window.generateHash(u + p + "misali_secret_key");
+        
+        if(!window.userDatabase) window.userDatabase = {};
+        window.userDatabase[u] = { 
+            username: u, email: e, name: n, surname: s, day: d, month: m, year: y, 
+            avatar: av, emoji: em || '👤', pass: p, _token: secureHash, 
+            role: 'user', score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: false 
+        };
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        
+        if (window.sendSystemMessage) { window.sendSystemMessage('Admin', `🚨 YENİ KAYIT: ${n} ${s} (${u}) onay bekliyor.`); }
+        window.closeTopModal('force'); 
+        window.customAlert('Kayıt başarılı! Admin onayı bekleniyor. <span class="de-sub">(Registriert!)</span>', '✅'); 
+        if(window.syncToCloud) window.syncToCloud();
+    };
 })();
 
 </script>
