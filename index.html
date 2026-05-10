@@ -13262,6 +13262,128 @@ setTimeout(() => {
     // Zur Sicherheit nach einer halben Sekunde nochmal (falls die Seite etwas Ladezeit braucht)
     setTimeout(updateSearchPlaceholder, 500);
 })();
+    
+(function() {
+    /* ==========================================================================
+       🛠️ 1. GÜNCELLE (UPDATE) BUTTON FIX - REAGIERT SOFORT & FEHLERFREI
+       ========================================================================== */
+    window.adminSaveEdit = function() {
+        try {
+            let type = document.getElementById('admin-edit-type').value;
+            let id = document.getElementById('admin-edit-item-select').value;
+            
+            if(!id) {
+                window.showToast('Lütfen güncellenecek eseri seçin! <span class="de-sub">(Bitte Werk auswählen)</span>');
+                return;
+            }
+
+            let items = type === 'userPoems' ? window.userPoemsDB : (type === 'bilmeceler' ? window.bilmecelerDB : (type === 'bulmacalar' ? window.bulmacalarDB : window.contentDB[type]));
+            let item = items.find(x => x.id === id);
+            
+            if(!item) {
+                window.customAlert('Kritik Hata: Eser bulunamadı! <span class="de-sub">(Werk nicht gefunden!)</span>', '❌');
+                return;
+            }
+
+            // Werte aus den Inputs ziehen (Wenn leer, behalte den alten Wert)
+            item.trTitle = document.getElementById('admin-edit-tr-title').value.trim() || item.trTitle;
+            item.deTitle = document.getElementById('admin-edit-de-title').value.trim() || item.deTitle;
+            item.trText = document.getElementById('admin-edit-tr-text').value.trim() || item.trText;
+            item.deText = document.getElementById('admin-edit-de-text').value.trim() || item.deText;
+            item.emoji = document.getElementById('admin-edit-emoji').value || item.emoji;
+
+            // Spezial-Zuweisungen je nach Typ
+            if(type === 'userPoems') { item.title = item.trTitle; item.text = item.trText; }
+            if(type === 'persons') { item.quote = item.trText; item.url = document.getElementById('admin-edit-url').value.trim(); }
+            if(type === 'atasozleri') { item.authorTR = document.getElementById('admin-edit-author').value.trim() || 'Anonim'; item.authorDE = document.getElementById('admin-edit-author').value.trim() || 'Unbekannt'; }
+            if(type === 'ticker') { item.tr = item.trText; item.de = item.deText; }
+
+            // In die korrekte Datenbank speichern
+            if(type === 'userPoems') {
+                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            } else if (type === 'bilmeceler' || type === 'bulmacalar') {
+                window.contentDB[type] = items;
+                localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
+            } else {
+                localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
+            }
+
+            // Sync triggern!
+            window.lastLocalUpdate = Date.now() + 5000; 
+            if(window.syncToCloud) window.syncToCloud();
+            
+            // Erfolg melden
+            window.showToast('Başarıyla güncellendi! <span class="de-sub" style="color:inherit; font-size:0.85em;">(Erfolgreich geupdatet)</span>');
+
+            // 🚀 SOFORTIGES UI UPDATE (Das hat vorher gefehlt!)
+            if(window.initContent) window.initContent();
+            if(window.renderBilmeces && type === 'bilmeceler') window.renderBilmeces();
+            if(window.renderBulmacalar && type === 'bulmacalar') window.renderBulmacalar();
+            if(window.renderAtasozleri && type === 'atasozleri') window.renderAtasozleri();
+            if(window.renderUserWorksGrid && type === 'userPoems') window.renderUserWorksGrid();
+            if(window.renderUserWorksSidebar && type === 'userPoems') window.renderUserWorksSidebar();
+
+            // Falls das Werk zufällig gerade im Lese-Fenster offen ist, aktualisiere es live!
+            if(window.currentPoemData && window.currentPoemData.id === id) {
+                window.currentPoemData = { ...item, type: type };
+                if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal')) {
+                    let hasTr = !!(item.trTitle || item.trText);
+                    if (window.switchModalLang) window.switchModalLang(hasTr ? 'TR' : 'DE');
+                }
+            }
+
+            // Edit-Bereich wieder einklappen, damit man sieht, dass es fertig ist
+            document.getElementById('admin-edit-item-select').value = "";
+            document.getElementById('admin-edit-fields').style.display = "none";
+            
+        } catch (err) {
+            console.error("Güncelle Error: ", err);
+            window.customAlert('Sistem Hatası! <span class="de-sub">(Systemfehler beim Speichern)</span>', '❌');
+        }
+    };
+
+
+    /* ==========================================================================
+       🛡️ 2. UNZERSTÖRBARE DATEN-FESTUNG (VERHINDERT DATENVERLUST BEI HTML UPDATE)
+       ========================================================================== */
+    window.safeMasterSync = async function() {
+        if (!database || !database.ref) return;
+
+        try {
+            console.log("🛡️ Master Sync gestartet: Prüfe Cloud-Daten...");
+            
+            // 1. Zwingt das System, VOR ALLEM ANDEREN die Cloud abzufragen
+            const snapshot = await database.ref('misaliData').once('value');
+            const cloudData = snapshot.val();
+
+            if (cloudData) {
+                console.log("📥 Cloud-Daten gefunden! Überschreibe lokale (leere) HTML-Defaults.");
+                
+                // Wir zwingen das System, die Cloud-Daten zu schlucken (force = true)
+                // Dadurch wird verhindert, dass eine frische HTML-Datei (mit Timestamp 0) 
+                // aus Versehen die vollen Cloud-Daten überschreibt!
+                if(window.processCloudData) window.processCloudData(cloudData, true);
+                
+            } else {
+                console.log("📤 Cloud ist leer. Lade initiale HTML-Daten in die Cloud hoch.");
+                if(window.syncToCloud) window.syncToCloud();
+            }
+        } catch(e) {
+            console.error("🚨 Master Sync Fehler: Keine Verbindung zur Cloud möglich!", e);
+        }
+    };
+
+    // Sobald die Firebase-Datenbank bereit ist und die Seite geladen hat, feuern wir den Master Sync ab!
+    document.addEventListener('DOMContentLoaded', () => {
+        // Kurze Verzögerung, um sicherzustellen, dass Firebase intialisiert wurde
+        setTimeout(() => {
+            if (typeof database !== 'undefined') {
+                window.safeMasterSync();
+            }
+        }, 1000);
+    });
+
+})();
 
 </script>
 </body>
