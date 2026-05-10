@@ -12958,6 +12958,321 @@ setTimeout(() => {
     document.head.appendChild(style);
 })();
 
+(function() {
+    // ----------------------------------------------------
+    // 1. CSS: SPRECHBLASE & ALTE KLAMMERN VERSTECKEN
+    // ----------------------------------------------------
+    const style = document.createElement('style');
+    style.innerHTML = `
+        nav .de-sub, header .de-sub, .sidebar .de-sub, 
+        .sidebar-right .de-sub, .mobile-bottom-bar .de-sub, 
+        .section-title .de-sub, .user-stats .de-sub, 
+        .stat-box .de-sub, .profile-header .de-sub, .profile-stats .de-sub {
+            display: none !important; 
+        }
+
+        .misali-elegant-bubble {
+            position: fixed;
+            background: rgba(10, 20, 40, 0.85); 
+            color: rgba(244, 197, 66, 0.95); 
+            font-size: 0.65rem; 
+            padding: 5px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(244, 197, 66, 0.4); 
+            pointer-events: none; 
+            z-index: 9999999;
+            transform: translate(-50%, 10px);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            backdrop-filter: blur(4px); 
+            font-style: italic;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        
+        .misali-elegant-bubble.show {
+            opacity: 1;
+            transform: translate(-50%, -10px); 
+        }
+
+        .misali-elegant-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: rgba(244, 197, 66, 0.5) transparent transparent transparent;
+        }
+
+        .misali-elegant-bubble.bubble-below {
+            transform: translate(-50%, -20px);
+        }
+        .misali-elegant-bubble.bubble-below.show {
+            transform: translate(-50%, 5px);
+        }
+        .misali-elegant-bubble.bubble-below::after {
+            bottom: auto;
+            top: -5px;
+            border-width: 0 5px 5px;
+            border-color: transparent transparent rgba(244, 197, 66, 0.5) transparent;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // ----------------------------------------------------
+    // 2. DOM CLEANUP: KLAMMERN & DOPPELPUNKTE LÖSCHEN
+    // ----------------------------------------------------
+    function cleanAndRenameUI() {
+        const walkers = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walkers.nextNode()) {
+            let parent = node.parentNode;
+            if(parent && ['SCRIPT', 'STYLE'].includes(parent.tagName)) continue;
+            
+            let text = node.nodeValue;
+            let changed = false;
+
+            if (text.trim() === ':') {
+                text = ''; 
+                changed = true;
+            } else if (/(Canlı|Canli|Toplam Eser|Aklımda|Aklimda|Kalplerim)\s*:/.test(text)) {
+                text = text.replace(/:\s*/g, ' '); 
+                changed = true;
+            }
+
+            if (parent.closest('nav, header, .sidebar, .sidebar-right, .mobile-bottom-bar, h1, h2, h3, h4, h5, h6, .modal-header, .user-stats, .stat-box, .profile-stats, #user-only-online-list, #admin-users-list, .stat-item, .stat-row')) {
+                if (text.includes('Chat')) { text = text.replace(/Chat/g, 'Sohbet'); changed = true; }
+                if (text.includes('My Profil')) { text = text.replace(/My Profil/g, 'Profilim'); changed = true; }
+                if (/\(.*?\)/.test(text)) { text = text.replace(/\s*\(.*?\)/g, ''); changed = true; }
+            }
+
+            if (changed) node.nodeValue = text;
+        }
+    }
+    
+    cleanAndRenameUI();
+    setTimeout(cleanAndRenameUI, 300);
+    setTimeout(cleanAndRenameUI, 1000);
+
+    // ----------------------------------------------------
+    // 3. WÖRTERBÜCHER
+    // ----------------------------------------------------
+    // Kombinierte Texte für Wort + Symbol!
+    const translations = {
+        "Ana Sayfa": "(Startseite)", "Şiirlerim": "(Meine Gedichte)", "Sözlerim": "(Meine Sprüche)",
+        "Önemli Şahsiyetler": "(Persönlichkeiten)", "Atasözleri": "(Sprichwörter)",
+        "Sağlık": "(Gesundheit)", "Saglik": "(Gesundheit)",
+        "Kıssalar": "(Kurzgeschichten)", "Kissalar": "(Kurzgeschichten)",
+        "Fıkralar": "(Witze)", "Fikralar": "(Witze)", "Eğlence": "(Spaß-Ecke)",
+        "Bilmeceler": "(Rätsel)", "Bulmacalar": "(Kreuzworträtsel)",
+        "Sizin Kaleminiz": "(Eigene Verse)", "Kullanıcı Eserleri": "(User Werke)", "Kullanici Eserleri": "(User Werke)",
+        "Sohbet": "(Chat)", "Profilim": "(Mein Profil)", "Hakkımda": "(Über mich)",
+        "Online Üyeler": "(Online User)", "Eserlerim": "(Meine Werke)",
+        "Canlı": "(Online / Canlı)", "Canli": "(Online / Canlı)", 
+        "Toplam Eser": "(Kreationen / Toplam Eser)", 
+        "Aklımda": "(Gespeichert / Aklımda)", "Aklimda": "(Gespeichert / Aklımda)", 
+        "Kalplerim": "(Meine Herzen / Kalplerim)", 
+        "Kayıtlı": "(Registriert)", "Kayitli": "(Registriert)", "Aktif": "(Aktiv)", 
+        "Ziyaretçi": "(Besucher)", "Ziyaretci": "(Besucher)", "Oynanan": "(Gespielte Spiele)", 
+        "Burçlar": "(Sternzeichen)", "Zodyak": "(Sternzeichen)",
+        "İsim": "(Name)", "Isim": "(Name)", "Adınız": "(Name)", "Ara": "(Suchen)",
+        "Şair Misal.i": "(Webseiten Ersteller)", "Şair Misali": "(Webseiten Ersteller)"
+    };
+
+    const iconTooltips = [
+        { selector: 'input[type="text"], input[type="search"], #search-input', text: "(Sucheingabeleiste / Textfeld)" },
+        { selector: '.fa-sign-out-alt, [onclick*="logout"]', text: "(Abmelden / Logout)" },
+        { selector: '.fa-bell', text: "(Benachrichtigungen)" },
+        { selector: '.fa-envelope, .fa-paper-plane', text: "(Posteingang / Nachrichten)" },
+        { selector: '.fa-cloud, .fa-sun, .fa-cloud-sun, .fa-cloud-moon, .weather-icon, [id*="weather"]', text: "(Wetter Informationen)" },
+        { selector: '.fa-calendar, .fa-calendar-alt, .holiday-toggle-btn', text: "(Datum / Tarih)" },
+        { selector: '.fa-clock, .fa-clock-o, .fa-clock-regular', text: "(Uhrzeit / Zaman)" },
+        { selector: '.fa-search', text: "(Suchen)" },
+        { selector: '.fa-cog, .fa-cogs, .fa-sliders-h', text: "(Einstellungen)" },
+        { selector: '.fa-share-alt, .fa-share', text: "(Teilen)" },
+        { selector: '.fa-bookmark', text: "(Gespeichert / Aklımda)" },
+        { selector: '.fa-heart', text: "(Meine Herzen / Kalplerim)" },
+        { selector: '.fa-comments, .fa-comment', text: "(Kommentare / Yorumlar)" },
+        { selector: '.fa-gamepad, .fa-play, .fa-trophy, .fa-medal', text: "(Spiele & Punkte)" },
+        { selector: '.fa-star, .fa-meteor, #zodiac-btn, .zodiac-icon', text: "(Sternzeichen)" },
+        { selector: '.fa-globe, .fa-circle', text: "(Online / Canlı)" },
+        { selector: '.fa-book, .fa-book-open', text: "(Kreationen / Toplam Eser)" }
+    ];
+
+    // ----------------------------------------------------
+    // 4. BUBBLE ENGINE & UNABHÄNGIGER SCANNER
+    // ----------------------------------------------------
+    let hoverTimer = null;
+    let clickTimer = null;
+    let currentBubble = null;
+    let currentHoverTarget = null;
+    let activeClickBubble = false; 
+
+    function removeBubble(force = false) {
+        if (currentBubble) {
+            if (activeClickBubble && !force) return; 
+            let b = currentBubble;
+            b.classList.remove('show');
+            setTimeout(() => { if (b && b.parentNode) b.remove(); }, 300);
+            if(force) { currentBubble = null; activeClickBubble = false; }
+        }
+    }
+
+    function getTooltipData(element) {
+        let current = element;
+        let depth = 0;
+        
+        // Scannt 5 Ebenen hoch
+        while (current && current !== document.body && depth < 5) { 
+            
+            // Blockiert Riesen-Container, damit die Blase nicht am Rand verschwindet
+            let rect = current.getBoundingClientRect();
+            if (rect.width > window.innerWidth * 0.8 || rect.height > window.innerHeight * 0.8) { 
+                current = current.parentElement; depth++; continue; 
+            }
+
+            // 🚀 1. ABSOLUTE PRIORITÄT: Das Miniprofilbild (Exakt dieses Element!)
+            if (current.tagName === 'IMG') {
+                if (current.id === 'home-profile-pic' || current.className.includes('bio-pic') || current.className.includes('profile-pic') || current.src.includes('profil') || current.src.includes('user')) {
+                    return { text: "(Şair Misal.i)", target: current }; // Zwingt die Blase exakt auf das IMG!
+                }
+            }
+
+            // Feder-Icon
+            if (current.nodeType === 1 && current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
+                return { text: "(Webseiten Ersteller)", target: current };
+            }
+
+            let text = "";
+            if (current.tagName === 'INPUT') {
+                text = current.placeholder || "";
+            } else {
+                text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
+            }
+
+            // 🚀 2. REGEX-SCANNER: Uhrzeit, Datum und Punkte mathematisch erkennen!
+            if (text && text.length > 0 && text.length < 25) {
+                if (/\b\d+\s*P\b/.test(text) || text.includes('Puan')) {
+                    return { text: "(Spielpunkte)", target: current };
+                }
+                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(text)) { // Erkennt "21:26" oder "21:26:22"
+                    return { text: "(Uhrzeit / Zaman)", target: current };
+                }
+                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(text)) { // Erkennt "10.05.2026"
+                    return { text: "(Datum / Tarih)", target: current };
+                }
+            }
+
+            // 🚀 3. WÖRTERBUCH-SCAN: Canlı, Toplam Eser etc.
+            if (text && text.length > 0 && text.length < 80) {
+                for (let key in translations) {
+                    if (text.includes(key)) {
+                        return { text: translations[key], target: current };
+                    }
+                }
+            }
+
+            // 🚀 4. ICON-SCAN
+            if (current.nodeType === 1 && current.matches) {
+                for (let item of iconTooltips) {
+                    if (current.matches(item.selector)) {
+                        return { text: item.text, target: current };
+                    }
+                }
+            }
+            
+            current = current.parentElement;
+            depth++;
+        }
+        return null;
+    }
+
+    function createBubble(target, tooltipText) {
+        removeBubble(true); 
+        
+        let rect = target.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) return; 
+
+        currentBubble = document.createElement('div');
+        currentBubble.className = 'misali-elegant-bubble';
+        currentBubble.innerText = tooltipText;
+        document.body.appendChild(currentBubble);
+
+        let leftPos = rect.left + (rect.width / 2);
+        let topPos = rect.top - 25; 
+
+        // 🚀 SICHERHEITS-CHECK: Wenn Blase oben aus dem Bild rutscht (Uhrzeit/Datum!)
+        if (topPos < 10) {
+            topPos = rect.bottom + 5; 
+            currentBubble.classList.add('bubble-below'); 
+        }
+
+        currentBubble.style.left = leftPos + 'px';
+        currentBubble.style.top = topPos + 'px'; 
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if(currentBubble) currentBubble.classList.add('show');
+            });
+        });
+    }
+
+    // ==========================================
+    // HOVER-LOGIK (Nur PC)
+    // ==========================================
+    document.addEventListener('mouseover', function(e) {
+        if (activeClickBubble) return; 
+
+        // Umgeht alle Limits. Nimmt genau das, was die Maus berührt!
+        let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
+        
+        let data = getTooltipData(target);
+        if (data) {
+            currentHoverTarget = data.target;
+            clearTimeout(hoverTimer);
+            
+            hoverTimer = setTimeout(() => {
+                if (!activeClickBubble) createBubble(data.target, data.text);
+            }, 600); 
+        }
+    }, true); 
+
+    document.addEventListener('mouseout', function(e) {
+        clearTimeout(hoverTimer);
+        currentHoverTarget = null;
+        if (!activeClickBubble) removeBubble(true); 
+    }, true);
+
+    // ==========================================
+    // KLICK-LOGIK (FÜR ALLE GERÄTE)
+    // ==========================================
+    document.addEventListener('click', function(e) {
+        let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
+        
+        let data = getTooltipData(target);
+        if (data) {
+            clearTimeout(hoverTimer);
+            clearTimeout(clickTimer);
+            removeBubble(true); 
+            
+            // 🚀 REGEL FÜR ALLE KLICKS: IMMER EXAKT 2 SEKUNDEN WARTEN!
+            clickTimer = setTimeout(() => {
+                activeClickBubble = true; 
+                createBubble(data.target, data.text);
+                
+                setTimeout(() => {
+                    removeBubble(true); 
+                }, 2500); 
+            }, 2000); // 2000 ms = 2 Sekunden für absolut ALLES
+        }
+    }, true); 
+
+})();
+
 </script>
 </body>
 </html>
