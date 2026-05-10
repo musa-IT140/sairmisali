@@ -11667,70 +11667,124 @@ setTimeout(() => {
 })();
 
 // ==================================================================
-// 🚀 MOBILE FIX: REGISTRIEREN & LOGIN BUTTONS KLICKBAR MACHEN
+// 🚀 MASTER FIX V6: BUTTONS KLICKBAR (ALLE GERÄTE) & HOROSKOP FARBEN
 // ==================================================================
 (function() {
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Greift nur auf mobilen Geräten (Handys) */
-        @media (max-width: 768px) {
-            
-            /* 1. Großer gelber Registrieren-Button im Banner unten */
-            .guest-promo-banner {
-                pointer-events: auto !important;
-                position: relative !important;
-                z-index: 50 !important;
-            }
-            .promo-btn-container {
-                pointer-events: auto !important;
-                position: relative !important;
-                z-index: 60 !important;
-            }
-            .promo-btn-container button {
-                pointer-events: auto !important;
-                touch-action: manipulation !important; /* Optimiert für schnelles Tippen */
-                position: relative !important;
-                z-index: 70 !important;
-            }
-            /* WICHTIG: Verhindert, dass der Text im Button den Klick blockiert! */
-            .promo-btn-container button * {
-                pointer-events: none !important;
-            }
+        /* --------------------------------------------------------
+           1. BUTTON FIX FÜR ALLE GERÄTE (Desktop, Tablet, Mobile) 
+           -------------------------------------------------------- */
+        .guest-promo-banner, .promo-btn-container {
+            position: relative !important;
+            z-index: 99999 !important;
+            pointer-events: auto !important;
+        }
+        .promo-btn-container button, 
+        #main-header .auth-view-btn {
+            position: relative !important;
+            z-index: 100000 !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            -webkit-appearance: none !important; /* iOS Native Styling killen */
+        }
+        /* Verhindert, dass innere Elemente (Icons, Texte) den Klick verschlucken */
+        .promo-btn-container button *, 
+        #main-header .auth-view-btn * {
+            pointer-events: none !important;
+        }
 
-            /* 2. Login & Register Buttons oben im Header */
-            #main-header .header-right {
-                pointer-events: auto !important;
-                z-index: 100000 !important;
-            }
-            #main-header .auth-view-btn {
-                pointer-events: auto !important;
-                touch-action: manipulation !important;
-                z-index: 100001 !important;
-            }
-            #main-header .auth-view-btn * {
-                pointer-events: none !important;
+        /* --------------------------------------------------------
+           2. ZODIAC EMOJI FIX (Keine farbigen Quadrate mehr!) 
+           -------------------------------------------------------- */
+        .zodiac-colored-icon {
+            font-family: "Segoe UI Symbol", "Apple Symbols", "Arial Unicode MS", "Noto Sans Symbols", sans-serif !important;
+            color: var(--zodiac-color) !important;
+            /* Zwingt iOS dazu, das Zeichen wie Text einzufärben */
+            -webkit-text-fill-color: var(--zodiac-color) !important; 
+            /* Killt den Quadrat-Bug! */
+            text-shadow: none !important; 
+            filter: drop-shadow(0 0 8px var(--zodiac-color)) !important;
+            background: transparent !important;
+            display: inline-block !important;
+            line-height: 1 !important;
+        }
+        
+        /* --------------------------------------------------------
+           3. iOS Bildgrößen Fix (Profil) - greift nur auf Handys 
+           -------------------------------------------------------- */
+        @supports (-webkit-touch-callout: none) {
+            @media (max-width: 768px) {
+                img#home-profile-pic, #hakkimda-view img.bio-pic {
+                    width: 120px !important; height: 120px !important;
+                    min-width: 120px !important; min-height: 120px !important;
+                    border-width: 3px !important;
+                }
             }
         }
     `;
     document.head.appendChild(style);
 
-    // Hardcore Fallback: Falls iOS/Android das normale 'onclick' verschluckt, zwingen wir es per Touch-Event auf!
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            document.querySelectorAll('.promo-btn-container button, .auth-view-btn').forEach(btn => {
-                btn.addEventListener('touchend', function(e) {
-                    let action = this.getAttribute('onclick');
-                    if(action && action.includes('m-register-modal')) {
-                        e.preventDefault(); // Verhindert Geister-Klicks
-                        if(window.openFastModal) window.openFastModal('m-register-modal');
-                    } else if(action && action.includes('m-login-modal')) {
-                        e.preventDefault();
-                        if(window.openFastModal) window.openFastModal('m-login-modal');
-                    }
-                }, { passive: false });
-            });
-        }, 500);
-    });
+    // --- BUNTES HOROSKOP DATENBANK ---
+    window.zodiacColors = {
+        'aries': '#ef4444', 'taurus': '#22c55e', 'gemini': '#facc15', 'cancer': '#cbd5e1',
+        'leo': '#f97316', 'virgo': '#84cc16', 'libra': '#ec4899', 'scorpio': '#991b1b',
+        'sagittarius': '#a855f7', 'capricorn': '#64748b', 'aquarius': '#06b6d4', 'pisces': '#3b82f6'
+    };
+
+    // --- HOROSKOP GRID FARB-FIX (Zwingt Emojis ins Text-Format) ---
+    window.initHoroscopeGrid = function() {
+        const grid = document.getElementById('zodiac-grid'); if(!grid) return;
+        document.getElementById('horoscope-result').style.display = 'none';
+        grid.style.display = 'grid';
+        
+        grid.innerHTML = window.zodiacs.map(z => {
+            let c = window.zodiacColors[z.id] || '#f4c542';
+            // &#xFE0E; ist der magische Code, der das Betriebssystem zwingt, ein Text-Symbol statt einem bunten Bild-Emoji zu laden
+            return `<div style="background:rgba(0,0,0,0.5); border:1px solid ${c}; box-shadow: 0 4px 10px ${c}30; border-radius:12px; padding:15px; text-align:center; cursor:pointer; transition:0.3s;" 
+                         onmouseover="this.style.transform='scale(1.05)'; this.style.background='${c}20';" 
+                         onmouseout="this.style.transform='scale(1)'; this.style.background='rgba(0,0,0,0.5)';" 
+                         onclick="window.showHoro('${z.id}', '${z.tr}','${z.de}')">
+                        <div class="zodiac-colored-icon" style="font-size:3rem; --zodiac-color: ${c}; pointer-events:none;">${z.icon}&#xFE0E;</div>
+                        <div style="font-size:1rem; margin-top:5px; color:${c}; font-weight:bold; pointer-events:none;">${window.currentGameLang === 'DE' ? z.de : z.tr}</div>
+                    </div>`;
+        }).join('');
+    };
+
+    // --- HEADER LIVE-SYNC FIX (Zodiac oben rechts) ---
+    window.updateHeaderZodiacColor = function() {
+        const zBadge = document.getElementById('header-zodiac');
+        if (zBadge && window.currentUser && window.currentUser.day && window.currentUser.month && window.getZodiacSign) {
+            let z = window.getZodiacSign(window.currentUser.day, window.currentUser.month);
+            let c = window.zodiacColors[z.id] || '#f4c542'; 
+            
+            // Ersetzt das Icon durch das saubere Text-Format mit der neuen Klasse
+            zBadge.innerHTML = `<span class="zodiac-colored-icon" style="--zodiac-color:${c}; pointer-events:none;">${z.icon}&#xFE0E;</span>`; 
+            zBadge.style.fontSize = "1.5rem";
+            zBadge.style.display = "flex";
+            zBadge.style.alignItems = "center";
+        }
+    };
+
+    const origCheckRemember = window.checkRemember;
+    window.checkRemember = function() {
+        if(origCheckRemember) origCheckRemember();
+        setTimeout(window.updateHeaderZodiacColor, 150); 
+    };
+
+    const origSaveProfile = window.saveProfile;
+    window.saveProfile = function() {
+        if(origSaveProfile) origSaveProfile();
+        setTimeout(window.updateHeaderZodiacColor, 200); 
+    };
+
+    // Sofortige Ausführung für die Live-Darstellung
+    setTimeout(() => {
+        window.updateHeaderZodiacColor();
+        if(document.getElementById('horoscopeModal') && document.getElementById('horoscopeModal').classList.contains('active-modal')) {
+            window.initHoroscopeGrid();
+        }
+    }, 300);
 })();
 
 </script>
