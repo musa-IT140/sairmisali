@@ -1938,8 +1938,93 @@ nav#main-nav, nav {
         }).join('');
     };
 })();
+
+    /* 1. BUTTON-KLICK-GARANTIE FÜR ALLE GERÄTE */
+    .guest-promo-banner, .promo-btn-container, #main-header .auth-view-btn {
+        position: relative !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+    }
     
-</style>
+    .promo-btn-container button, 
+    #main-header .auth-view-btn {
+        cursor: pointer !important;
+        touch-action: manipulation !important; /* Verhindert Klick-Verzögerung */
+        z-index: 1000000 !important;
+    }
+
+    /* Blockiert Klicks auf innere Elemente, damit der Button IMMER reagiert */
+    .promo-btn-container button *, 
+    #main-header .auth-view-btn * {
+        pointer-events: none !important;
+    }
+
+    /* 1. STERNZEICHEN HIGHLIGHT-FIX (Zwingt iOS/Android, die lila Boxen zu löschen) */
+    .zodiac-colored-icon {
+        font-family: "Segoe UI Symbol", "Apple Symbols", "Arial Unicode MS", sans-serif !important;
+        color: var(--zodiac-color) !important;
+        /* Überschreibt Apples native Emoji-Farben zwingend! */
+        -webkit-text-fill-color: var(--zodiac-color) !important;
+        text-shadow: 0 0 12px var(--zodiac-color) !important; /* Starker Leucht-Effekt */
+        background: transparent !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* 2. KARTEN-BADGE FIX (Verhindert, dass Herzen und Kommentare verrutschen) */
+    .card > div[style*="bottom:12px;"], .card > div[style*="bottom: 12px;"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        padding: 6px 10px !important;
+        gap: 6px !important;
+        line-height: 1 !important;
+        height: auto !important;
+    }
+    .card > div[style*="bottom:12px;"] i, .card > div[style*="bottom: 12px;"] i {
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+
+    /* 3. POSTEINGANG (Mesaj Kutusu) MOBILE FIX */
+    @media (max-width: 768px) {
+        .msg-modal-header {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 12px !important;
+            text-align: center !important;
+            padding-right: 0 !important;
+        }
+        .msg-modal-header h2 {
+            width: 100% !important;
+            text-align: center !important;
+            margin-bottom: 5px !important;
+        }
+        .msg-modal-header button {
+            width: auto !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Kommentare Input Abstand Fix (Gibt Luft nach unten) */
+        #m-comment-area {
+            padding-bottom: 20px !important;
+        }
+    }
+    
+    /* 4. BUTTON KLICK-GARANTIE */
+    .guest-promo-banner, .promo-btn-container, #main-header .auth-view-btn {
+        position: relative !important; z-index: 999999 !important; pointer-events: auto !important;
+    }
+    .promo-btn-container button, #main-header .auth-view-btn {
+        cursor: pointer !important; touch-action: manipulation !important;
+    }
+    .promo-btn-container button *, #main-header .auth-view-btn * {
+        pointer-events: none !important;
+    }
 
 </style>
     <script>
@@ -11666,14 +11751,21 @@ setTimeout(() => {
     document.head.appendChild(style);
 })();
 
-// ==================================================================
-// 🚀 MASTER FIX V6: BUTTONS KLICKBAR (ALLE GERÄTE) & HOROSKOP FARBEN
-// ==================================================================
 (function() {
     const style = document.createElement('style');
     style.innerHTML = `
         /* --------------------------------------------------------
-           1. BUTTON FIX FÜR ALLE GERÄTE (Desktop, Tablet, Mobile) 
+           1. ANTI-FLACKERN & KLICK-GARANTIE FÜR DEN HEADER 
+           -------------------------------------------------------- */
+        #header-zodiac {
+            color: transparent !important; /* Macht das alte Symbol unsichtbar */
+            text-shadow: none !important;  /* Verhindert Geister-Schatten */
+            cursor: pointer !important;    /* Garantiert den Klick-Finger */
+            pointer-events: auto !important; /* Aktiviert den Klickbereich wieder! */
+        }
+
+        /* --------------------------------------------------------
+           2. BUTTON FIX FÜR ALLE GERÄTE (Desktop, Tablet, Mobile) 
            -------------------------------------------------------- */
         .guest-promo-banner, .promo-btn-container {
             position: relative !important;
@@ -11695,7 +11787,7 @@ setTimeout(() => {
         }
 
         /* --------------------------------------------------------
-           2. ZODIAC EMOJI FIX (Keine farbigen Quadrate mehr!) 
+           3. ZODIAC EMOJI FIX (Keine farbigen Quadrate mehr!) 
            -------------------------------------------------------- */
         .zodiac-colored-icon {
             font-family: "Segoe UI Symbol", "Apple Symbols", "Arial Unicode MS", "Noto Sans Symbols", sans-serif !important;
@@ -11711,7 +11803,7 @@ setTimeout(() => {
         }
         
         /* --------------------------------------------------------
-           3. iOS Bildgrößen Fix (Profil) - greift nur auf Handys 
+           4. iOS Bildgrößen Fix (Profil) - greift nur auf Handys 
            -------------------------------------------------------- */
         @supports (-webkit-touch-callout: none) {
             @media (max-width: 768px) {
@@ -11740,7 +11832,7 @@ setTimeout(() => {
         
         grid.innerHTML = window.zodiacs.map(z => {
             let c = window.zodiacColors[z.id] || '#f4c542';
-            // &#xFE0E; ist der magische Code, der das Betriebssystem zwingt, ein Text-Symbol statt einem bunten Bild-Emoji zu laden
+            // &#xFE0E; zwingt Emojis auf Apple/Android ins reine Text-Design, ohne dass Klicks kaputt gehen
             return `<div style="background:rgba(0,0,0,0.5); border:1px solid ${c}; box-shadow: 0 4px 10px ${c}30; border-radius:12px; padding:15px; text-align:center; cursor:pointer; transition:0.3s;" 
                          onmouseover="this.style.transform='scale(1.05)'; this.style.background='${c}20';" 
                          onmouseout="this.style.transform='scale(1)'; this.style.background='rgba(0,0,0,0.5)';" 
@@ -11754,37 +11846,50 @@ setTimeout(() => {
     // --- HEADER LIVE-SYNC FIX (Zodiac oben rechts) ---
     window.updateHeaderZodiacColor = function() {
         const zBadge = document.getElementById('header-zodiac');
-        if (zBadge && window.currentUser && window.currentUser.day && window.currentUser.month && window.getZodiacSign) {
-            let z = window.getZodiacSign(window.currentUser.day, window.currentUser.month);
-            let c = window.zodiacColors[z.id] || '#f4c542'; 
-            
-            // Ersetzt das Icon durch das saubere Text-Format mit der neuen Klasse
-            zBadge.innerHTML = `<span class="zodiac-colored-icon" style="--zodiac-color:${c}; pointer-events:none;">${z.icon}&#xFE0E;</span>`; 
-            zBadge.style.fontSize = "1.5rem";
-            zBadge.style.display = "flex";
-            zBadge.style.alignItems = "center";
+        if (!zBadge) return;
+
+        // Failsafe: Hole den User direkt aus dem Speicher
+        let user = window.currentUser || JSON.parse(sessionStorage.getItem('misaliUser')) || JSON.parse(localStorage.getItem('misaliUser'));
+
+        // 1. Finde das richtige Sternzeichen heraus (oder setze İkizler als Standard)
+        let z = { id: 'gemini', icon: '♊' }; 
+        if (user && user.day && user.month && window.getZodiacSign) {
+            z = window.getZodiacSign(user.day, user.month) || z;
+        } else if (window.zodiacs) {
+            z = window.zodiacs.find(x => x.id === 'gemini') || z;
+        }
+
+        let c = window.zodiacColors ? (window.zodiacColors[z.id] || '#f4c542') : '#f4c542'; 
+        
+        // 2. HTML aufbauen (Das Symbol liegt klick-neutral im Button)
+        let newHtml = `<span class="zodiac-colored-icon" style="--zodiac-color:${c}; pointer-events:none; font-size:1.5rem; display:flex; align-items:center;">${z.icon}&#xFE0E;</span>`; 
+        
+        // 3. Flacker-Schutz: Nur neu zeichnen, wenn sich das Zeichen wirklich geändert hat!
+        if (zBadge.innerHTML !== newHtml) {
+            zBadge.innerHTML = newHtml;
         }
     };
+
+    // 🚀 SOFORT AUSFÜHREN! (Keine Wartezeit beim Aufbau der Seite)
+    window.updateHeaderZodiacColor();
 
     const origCheckRemember = window.checkRemember;
     window.checkRemember = function() {
         if(origCheckRemember) origCheckRemember();
-        setTimeout(window.updateHeaderZodiacColor, 150); 
+        window.updateHeaderZodiacColor();
     };
 
     const origSaveProfile = window.saveProfile;
     window.saveProfile = function() {
         if(origSaveProfile) origSaveProfile();
-        setTimeout(window.updateHeaderZodiacColor, 200); 
+        window.updateHeaderZodiacColor();
     };
 
-    // Sofortige Ausführung für die Live-Darstellung
-    setTimeout(() => {
+    // 🚀 DER WAHRE LIVE-SYNC: Wacht unsichtbar im Hintergrund
+    setInterval(() => {
         window.updateHeaderZodiacColor();
-        if(document.getElementById('horoscopeModal') && document.getElementById('horoscopeModal').classList.contains('active-modal')) {
-            window.initHoroscopeGrid();
-        }
-    }, 300);
+    }, 1000);
+
 })();
 
 </script>
