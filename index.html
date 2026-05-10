@@ -2055,26 +2055,21 @@ nav#main-nav, nav {
     /* ----------------------------------------------------
        1. SCROLL-CHAINING BEHEBEN (Hintergrund bleibt stehen)
        ---------------------------------------------------- */
-    /* Friert den Body komplett ein */
     html.modal-open, body.modal-open {
         overflow: hidden !important;
     }
     
-    /* Blockiert Wisch-Gesten auf den abgedunkelten Hintergründen */
     #modal-backdrop, .sidebar-overlay {
-        touch-action: none !important;
         overscroll-behavior: none !important;
     }
 
-    /* MAGIC TRICK: "contain" erlaubt das Scrollen IM Fenster, 
-       gibt den Wisch-Befehl aber nicht an die Website dahinter weiter! */
+    /* "contain" erlaubt das Scrollen IM Fenster, gibt den Wisch-Befehl aber nicht nach hinten weiter! */
     .modal-body, .sidebar-content, #holiday-list-content, 
     #m-comment-list, #heart-details-list, .emoji-picker, 
     #admin-msg-list, #user-msg-list, .cal-holiday-sidebar {
         overscroll-behavior: contain !important;
-        -webkit-overscroll-behavior: contain !important;
-        touch-action: pan-y !important; /* Erlaubt nur striktes vertikales Scrollen */
-        -webkit-overflow-scrolling: touch !important; /* Garantiert weiches iOS Scrolling */
+        -webkit-overflow-scrolling: touch !important; 
+        /* ACHTUNG: touch-action wurde hier absichtlich entfernt, damit Klicks wieder perfekt funktionieren! */
     }
 
 </style>
@@ -12542,77 +12537,257 @@ setTimeout(() => {
 
 (function() {
     // ----------------------------------------------------
-    // 2. BACK-BUTTON INTELLIGENZ (Immer nur EINEN Schritt zurück)
+    // 2. BACK-BUTTON INTELLIGENZ (ZURÜCK-TASTE HANDY)
     // ----------------------------------------------------
     
-    let backActionConsumed = false;
-
-    // Fängt den Zurück-Befehl ab, BEVOR dein alter Code feuert
-    window.addEventListener('popstate', () => {
-        backActionConsumed = false; // Reset für den aktuellen Klick
-    }, true); 
-
-    // Wir überschreiben die Schließen-Funktionen, um sie schrittweise auszuführen!
-    const origCloseTopModal = window.closeTopModal;
-    const origCloseAllSidebars = window.closeAllSidebars;
-
-    window.closeTopModal = function(e) {
-        if (e === 'force' || e === true) {
-            // Wenn in diesem Klick schon etwas geschlossen wurde -> ABBRUCH!
-            if (backActionConsumed) return; 
+    // Wenn der Nutzer die Zurück-Taste am Handy drückt:
+    window.addEventListener('popstate', function(event) {
+        
+        // 1. Prüfen, ob ein Modal (Fenster) offen ist
+        const openModals = document.querySelectorAll('.modal.active-modal');
+        if (openModals.length > 0) {
+            // Schließt das Modal
+            if(window.closeTopModal) window.closeTopModal('force'); 
             
-            const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
-            if (modals.length > 0) {
-                // Schließt streng nur das LETZTE (oberste) Fenster!
-                modals[modals.length - 1].classList.remove('active-modal');
-                backActionConsumed = true; // Aktion verbraucht für diesen Klick!
-                
-                if (modals.length === 1) {
-                    // Wenn es das letzte Modal war, räumen wir den Body-Lock auf
-                    if(origCloseTopModal) origCloseTopModal('force');
-                } else {
-                    // Wenn noch ein Modal drunter liegt, füllen wir den State-Puffer wieder auf
-                    ensureHistoryBuffer();
-                }
-                return;
+            // Wenn danach noch ein Modal oder eine Sidebar offen ist, füllen wir den Puffer wieder auf
+            if (openModals.length > 1 || document.querySelectorAll('.sidebar.open, .sidebar-right.open, .cal-holiday-sidebar.open').length > 0) {
+                history.pushState({ uiOpen: true }, null, window.location.href);
             }
-        }
-        if (origCloseTopModal) origCloseTopModal(e);
-    };
-
-    window.closeAllSidebars = function(e) {
-        // Wurde in diesem Klick schon ein Modal geschlossen? Dann lass die Sidebar in Ruhe!
-        if (backActionConsumed) return; 
-
-        const openSidebars = document.querySelectorAll('.sidebar.open, .sidebar-right.open, .cal-holiday-sidebar.open');
-        if (openSidebars.length > 0) {
-            if (origCloseAllSidebars) origCloseAllSidebars(e);
-            backActionConsumed = true; // Aktion verbraucht!
-            ensureHistoryBuffer();
             return;
         }
-        
-        if (origCloseAllSidebars) origCloseAllSidebars(e);
-    };
 
-    // ----------------------------------------------------
-    // 3. APP-SCHUTZ (Verhindert das ungewollte Verlassen der App)
-    // ----------------------------------------------------
-    // Ein endloser Sicherheits-Puffer für die Browser-Historie
-    function ensureHistoryBuffer() {
-        if (!history.state || !history.state.misaliBuffer) {
-            history.pushState({ misaliBuffer: true }, null, window.location.href);
+        // 2. Wenn kein Modal, aber eine Sidebar offen ist
+        const openSidebars = document.querySelectorAll('.sidebar.open, .sidebar-right.open, .cal-holiday-sidebar.open');
+        if (openSidebars.length > 0) {
+            // Schließt die Sidebar
+            if(window.closeAllSidebars) window.closeAllSidebars();
+            return;
         }
-    }
-
-    // Puffer beim Start der App anlegen
-    window.addEventListener('load', ensureHistoryBuffer);
-    
-    // Immer wenn der User irgendwo auf die App tippt, stellen wir sicher, dass der Puffer noch da ist
-    document.body.addEventListener('click', () => {
-        setTimeout(ensureHistoryBuffer, 100);
     });
 
+    // ----------------------------------------------------
+    // 3. APP-SCHUTZ: Puffer nur anlegen, wenn sich wirklich was öffnet!
+    // ----------------------------------------------------
+    // Statt jeden Klick abzufangen (was zum Freeze führte), hängen wir uns 
+    // unsichtbar an deine Öffnen-Befehle und legen einen Zurück-Puffer an.
+
+    const origOpenFastModal = window.openFastModal;
+    window.openFastModal = function(id) {
+        if (origOpenFastModal) origOpenFastModal(id);
+        // Puffer für die Zurück-Taste anlegen
+        history.pushState({ uiOpen: true }, null, window.location.href);
+    };
+
+    const origToggleSidebar = window.toggleSidebar;
+    window.toggleSidebar = function(id, e) {
+        if (origToggleSidebar) origToggleSidebar(id, e);
+        const sb = document.getElementById(id);
+        // Nur wenn die Sidebar gerade GEÖFFNET wird, Puffer anlegen
+        if (sb && sb.classList.contains('open')) {
+            history.pushState({ uiOpen: true }, null, window.location.href);
+        }
+    };
+
+    const origToggleHolidaySidebar = window.toggleHolidaySidebar;
+    window.toggleHolidaySidebar = function(e) {
+        if (origToggleHolidaySidebar) origToggleHolidaySidebar(e);
+        const sb = document.getElementById('holidaySidebar');
+        if (sb && sb.classList.contains('open')) {
+            history.pushState({ uiOpen: true }, null, window.location.href);
+        }
+    };
+
+})();
+
+(function() {
+    // 🌌 ASTRO-DATENBANK (Türkçe & Deutsch)
+    // 12 UNABHÄNGIGE Sternzeichen, jedes mit eigenen 3er-Blöcken (Intro, Liebe, Karriere).
+    // Mit jeweils 3 Variationen rotiert der Text jeden Monat automatisch!
+    const astroData = {
+        TR: {
+            aries: {
+                intro: ["Yönetici gezegenin Mars bu ay içindeki savaşçı ruhu uyandırıyor. Harekete geçme zamanı.", "Liderlik özelliklerin ön planda. Cesaretin sayesinde kapalı kapılar ardına kadar açılacak.", "Ateş elementinin verdiği yüksek enerjiyle bu ay seni durdurabilecek hiçbir engel yok."],
+                love: ["Aşkta sabırsız ve tutkulu bir dönemdesin. Beklenmedik itiraflar kalbini hızla çarptırabilir.", "İlişkilerinde inisiyatif almaktan çekinmeyeceksin. Özgüvenin partnerini büyüleyecek.", "Duygularını filtresiz yaşayacağın, gizlisiz saklısız ve ateşli bir romantizm seni bekliyor."],
+                career: ["Yeni projelere öncülük etmek için kusursuz bir ay. İş hayatında cesur kararlar almalısın.", "Maddi konularda hızlı gelişmeler yaşanacak. Risk almaktan korkmazsan kazanan sen olursun.", "Rekabetçi ruhun sayesinde rakiplerini geride bırakacak ve üstlerinden büyük takdir toplayacaksın."]
+            },
+            taurus: {
+                intro: ["Toprak elementinin sarsılmaz gücü bu ay seni sarıyor. Huzur ve stabilite arayışın sonuç veriyor.", "Venüs'ün estetik enerjisiyle bu ay konforuna, güzelliğe ve sanata daha çok vakit ayıracaksın.", "Sabrının meyvelerini toplayacağın bir aya giriyorsun. Acele etme, evren senin hızında çalışıyor."],
+                love: ["Aşkta güven ve sadakat en büyük önceliğin olacak. Kalıcı ve huzur veren adımlar atacaksın.", "Duygusal anlamda kendini tamamen güvende hissedeceğin, romantik ve şefkatli bir döneme giriyorsun.", "Partnerinle kaliteli zaman geçirmek veya ruh eşinle sağlam temeller üzerine bir bağ kurmak an meselesi."],
+                career: ["Maddi güvence ihtiyacın artıyor. Mantıklı yatırımlar ve birikimler için gökyüzü seni destekliyor.", "İş hayatında inatçılığı bırakıp esnek olursan, uzun zamandır beklediğin finansal kapı aralanacak.", "Çalışkanlığın ve pratik zekan sayesinde üstesinden gelemeyeceğin hiçbir kriz yok. Bolluk seninle."]
+            },
+            gemini: {
+                intro: ["Yönetici gezegenin Merkür, iletişim yeteneğini zirveye taşıyor. Zihnin bir saat gibi tıkır tıkır çalışıyor.", "Bu ay sosyal çevren çok hareketli. Yeni insanlarla tanışmak ve ağını genişletmek için harika bir zaman.", "İçindeki o meraklı çocuk uyanıyor! Yeni eğitimler, seyahatler veya keşifler bu ayın temasını oluşturuyor."],
+                love: ["Aşkta zihinsel uyum arıyorsun. Seni kelimeleriyle etkileyebilecek biri aklını başından alabilir.", "İkili ilişkilerde eğlenceli, esprili ve flörtöz bir dönemdesin. İletişim kopuklukları tamamen çözülüyor.", "Partnerinle saatlerce sürecek derin sohbetler aranızdaki bağı güçlendirecek. Yalnızsan, sosyal medyadaki bir mesaj sürpriz olabilir."],
+                career: ["Aynı anda birden fazla işi mükemmel şekilde yürüteceksin. Pratik zekan iş yerinde seni yıldız yapacak.", "Ticari anlaşmalar, yazılı projeler ve sözleşmeler için yılın en verimli aylarından birine adım atıyorsun.", "Yeni fikirlerin herkesi şaşırtacak. Kariyerinde durağanlık bitiyor, rüzgar artık senin yönünde esiyor."]
+            },
+            cancer: {
+                intro: ["Yönetici gezegenin Ay, sezgilerini ve altıncı hissini bu ay inanılmaz keskinleştiriyor.", "Evine, ailene ve iç dünyana döneceğin, ruhsal bir yenilenme yaşayacağın şifalı bir dönemdesin.", "Geçmişin yüklerini bırakıp, duygusal kabuğundan çıkmanın tam zamanı. Evren seni koruyor."],
+                love: ["Şefkat ve empati dolu bir ay. Sevdiğin insanlara kol kanat gerecek, karşılığında sonsuz bir sevgi göreceksin.", "Aşk hayatında yüzeysellikten uzak, derin ve ruhuna dokunacak romantik bağlar kuruyorsun.", "Eski yaralar tamamen kapanıyor. Partnerinle veya yeni tanışacağın biriyle çok nostaljik anlar yaşayabilirsin."],
+                career: ["İş hayatında mantığından ziyade sezgilerine güvenmelisin. İç sesin sana en kârlı yolu gösterecek.", "Çalışma ortamında arabulucu rolü üstlenecek, iş arkadaşlarının sana olan saygısını artıracaksın.", "Gayrimenkul, aile işleri veya evden yürütülen projelerde büyük maddi şanslar ve bereket seni bekliyor."]
+            },
+            leo: {
+                intro: ["Güneş'in parıltısı üzerinde! Girdiğin her ortamda auranla dikkat çekeceğin şahane bir aydasın.", "Yaratıcılığının ve özgüveninin tavan yaptığı bu günlerde sahnede olmaktan asla çekinme.", "İçindeki yaşam sevinci etrafına da bulaşıyor. Kendi krallığını (veya kraliçeliğini) ilan etme zamanı."],
+                love: ["Aşkta gururu bir kenara bıraktığında, ne kadar tutkulu ve ateşli bir dönem geçireceğine sen bile inanamayacaksın.", "Büyük sürprizler, gösterişli jestler ve romantik maceralar bu ayın aşk temasını belirliyor.", "Yalnızsan kalbini çalacak kişi, senin kadar enerjik ve özgüvenli biri olacak. Aşk kapını gümbür gümbür çalıyor."],
+                career: ["Liderlik vasıfların üstlerin tarafından fark ediliyor. Terfi veya yeni bir pozisyon gündeme gelebilir.", "Risk almaktan korkmadığın sürece finansal anlamda büyük ödüller kazanacağın bir süreçtesin.", "İş hayatında yaratıcı fikirlerinle fark yaratacaksın. Egonu kontrol edersen başaramayacağın hiçbir iş yok."]
+            },
+            virgo: {
+                intro: ["Analitik zekan ve detaycılığın bu ay senin en büyük silahın olacak. Kaosun içinde düzen kuruyorsun.", "Sağlığına, günlük rutinlerine ve kişisel gelişimine odaklanacağın çok verimli bir aya giriyorsun.", "Mükemmeliyetçiliği biraz esnetirsen, aslında hayatın ne kadar güzel aktığını fark edeceksin."],
+                love: ["Aşkta gösteriş yerine sadakat ve emeğe değer vereceğin bir dönem. 'Hizmet dili' senin sevgi dilin oluyor.", "Eğer ilişkinde çözülmemiş ufak tefek sorunlar varsa, sakin ve mantıklı bir konuşmayla hepsini tatlıya bağlayacaksın.", "Sade, dürüst ve seni gerçekten anlayan biriyle yepyeni, çok sağlam bir duygusal temel atacaksın."],
+                career: ["Kimsenin fark etmediği ince detayları yakalayarak şirketine veya kendi işine büyük bir kâr sağlayacaksın.", "Planlı ve disiplinli çalışman sayesinde maddi konularda uzun süredir beklediğin rahatlamaya kavuşuyorsun.", "Emeklerinin karşılığını fazlasıyla alacağın, organizasyon yeteneğinin seni zirveye taşıyacağı bir ay."]
+            },
+            libra: {
+                intro: ["Zarafetin ve diplomasinin burcu! Bu ay hayatındaki tüm teraziler dengeye geliyor, huzuru buluyorsun.", "Venüs sana estetik, sanat ve güzellik vaat ediyor. Kendini yenilemek ve imaj değiştirmek için harika bir zaman.", "Sosyal ilişkilerinde arabulucu olacak, adaletin ve tatlı dilin sayesinde her kapıyı açacaksın."],
+                love: ["Aşk hayatında yılın en romantik ve uyumlu aylarından birindesin. Estetik ve ince ruhlu jestler kalbini çalacak.", "İlişkinde kararsızlıkları geride bırakıp, net ve mutlu adımlar atıyorsun. Ruh ikizini bulma ihtimalin çok yüksek.", "Kibar tavırların ve çekiciliğin karşı cinsi adeta büyülüyor. Gireceğin ortamlarda gözler hep senin üzerinde olacak."],
+                career: ["İş ortaklıkları, sözleşmeler ve takım çalışmaları için gökyüzü sana sonsuz bir şans sunuyor.", "Sanatsal projeler, halkla ilişkiler veya hukuksal konularda ektiğin tohumlar bu ay bol kazanç getirecek.", "İş hayatında adaletsizliklere karşı duruşun sana prestij kazandıracak. Kazancın adil ve bereketli olacak."]
+            },
+            scorpio: {
+                intro: ["Sezgilerinin, tutkularının ve gizemli auranın en yoğun olduğu dönem. Adeta küllerinden yeniden doğuyorsun.", "Sana hizmet etmeyen her şeyi kesip atacağın, büyük bir ruhsal dönüşüm ve arınma ayı seni bekliyor.", "Altıncı hissin sana rehberlik edecek. Kimsenin göremediği gerçekleri bir bir gün yüzüne çıkaracaksın."],
+                love: ["Aşkta yüzeyselliğe yer yok! Ruhuna dokunmayan hiç kimseye kalbini açmayacağın derin bir süreçtesin.", "Mevcut ilişkinde tutku ve bağlılık en üst seviyeye çıkıyor. Kıskançlık krizlerine karşı biraz esnek olmalısın.", "Karşındakinin gözlerinin içine bakarak tüm sırlarını çözebilirsin. Kadersel ve yoğun bir çekim seni bekliyor."],
+                career: ["Stratejik zekan ve pes etmeyen iraden sayesinde kariyerinde adeta bir satranç ustası gibi ilerleyeceksin.", "Kriz anlarını fırsata çevirecek, finansal olarak çok büyük bir güç elde etme şansı yakalayacaksın.", "Gizli kalmış projeler veya derin araştırmalar sana maddi anlamda hiç beklemediğin bir kapı aralayacak."]
+            },
+            sagittarius: {
+                intro: ["Maceracı ruhun uyanıyor! Gökyüzü sana yeni ufuklar, seyahatler ve kişisel özgürlük vadediyor.", "Jüpiter'in şanslı enerjisi üzerinde. İyimserliğin sayesinde girdiğin her ortamda güneşi doğuracaksın.", "Felsefi düşüncelere dalacağın, hayatın anlamını sorgularken kendini çok daha iyi tanıyacağın bir ay."],
+                love: ["Aşk hayatında kuralları ve kısıtlamaları reddediyorsun. Seninle aynı maceracı ruha sahip biriyle yollarınız kesişebilir.", "Farklı kültürlerden veya farklı şehirlerden biriyle beklenmedik, heyecan verici bir çekim yaşayabilirsin.", "İlişkilerinde açık sözlülük ve dürüstlük sana kazandıracak. Birlikte yeni yerler keşfetmek aşkınızı tazeleyecek."],
+                career: ["Yurt dışı bağlantılı işler, eğitim veya akademi alanlarında devasa fırsatlar kapını çalmak üzere.", "İş hayatında şans senden yana! Cesaretle attığın yenilikçi adımlar, sana bol sıfırlı kazançlar olarak geri dönecek.", "Büyük vizyonunu artık hayata geçirme vakti. Detaylarda boğulma, büyük resme odaklan ve kazan."]
+            },
+            capricorn: {
+                intro: ["Zodyak'ın zirveye tırmanan inatçı keçisi! Disiplinin ve sabrın nihayet sana o hak ettiğin ödülü getiriyor.", "Sorumluluklarını başarıyla yöneteceğin, otoriteni ve gücünü hayatının her alanında hissettireceğin bir ay.", "Satürn'ün kurduğu sağlam temeller üzerinde yükseliyorsun. Geleneklerine ve köklerine bağlılığın sana güç verecek."],
+                love: ["Aşkta geçici hevesler değil, uzun vadeli ve sağlam bir güven arıyorsun. Sınavı geçenler kalbinde kalacak.", "Duygularını göstermekte zorlansan da, sadakatin partnerin için en büyük hediye olacak. Duvarlarını biraz indir.", "Saygı ve sevginin harmanlandığı, ciddi adımların atılacağı veya resmiyet kazanacak ilişkilere hazır ol."],
+                career: ["Kariyerin için ektiğin tohumlar bu ay tam anlamıyla hasat veriyor. Terfi, zam veya büyük bir başarı an meselesi.", "Sırtlandığın ağır yüklerin altından ustalıkla kalkacak, yöneticilerinin veya sektörün en saygı duyulan ismi olacaksın.", "Mantıklı ve ayakları yere basan finansal stratejilerin, seni uzun vadeli bir zenginliğe doğru taşıyor."]
+            },
+            aquarius: {
+                intro: ["Farklı, özgür ve vizyoner ruhun bu ay sınır tanımıyor! Klasik olan her şeye başkaldırıp kendi yolunu çizeceksin.", "Toplumsal duyarlılığının arttığı, arkadaşlıkların ve kalabalık grupların içinde parlayacağın bir dönemdesin.", "Zihnin adeta gelecekten haber veriyor. Orijinal fikirlerin sayesinde herkesin bir adım önünde olacaksın."],
+                love: ["Aşk senin için önce zihinsel uyum ve iyi bir arkadaşlık demektir. Bu ay ruhuna ayak uyduracak o sıra dışı kişiyi bulabilirsin.", "İlişkinde özgürlük ihtiyacın artabilir. Partnerinle aranızdaki görünmez ipleri, birbirinize alan tanıyarak güçlendireceksiniz.", "Geleneksel aşk kalıplarını yıkıyorsun! Beklenmedik, sürpriz dolu ve son derece heyecan verici romantik gelişmeler kapıda."],
+                career: ["Teknoloji, bilim veya dijital platformlarla ilgili projelerde eşsiz başarılara imza atacaksın.", "Takım çalışmaları ve ağ oluşturma (networking) sana yepyeni ticari kapılar açacak. Fikirlerini paylaşmaktan korkma.", "Geleceği bugünden gören projelerin, sana maddi anlamda bağımsızlık kazandıracak. Yeniliklere yatırım yapma zamanı."]
+            },
+            pisces: {
+                intro: ["Zodyak'ın en mistik ve en duygusal ruhu... Sezgilerin, rüyaların ve hayal gücün bu ay sana olağanüstü rehberlik edecek.", "Evrenin enerjisiyle tam bir uyum içindesin. Su gibi akıp yolunu bulacağın, ruhsal şifalanma yaşayacağın bir dönem.", "Sanata, müziğe ve spiritüel konulara olan ilgin artıyor. İç sesin sana en doğru kararları aldıracak."],
+                love: ["Aşkta kendini tamamen akışa bırakıyorsun. Koşulsuz sevgi ve fedakarlık üzerine kurulu, masalsı bir romantizm seni bekliyor.", "Ruh eşinle arandaki o telepatik bağ bu ay daha da güçlenecek. Söze gerek kalmadan gözlerinizle anlaşacaksınız.", "Kalbinin kapılarını sonuna kadar aç. Hayalindeki o naif ve derin aşk, hiç ummadığın bir anda karşına çıkabilir."],
+                career: ["Yaratıcılığını konuşturduğun her işte büyük başarı elde edeceksin. Mantıktan çok sezgilerinle hareket etmen sana para kazandıracak.", "Yardımlaşma, şifa veya sanat alanlarında çalışanlar için gökyüzü şöhret ve bereket dağıtıyor.", "Finansal konularda kaygılanmayı bırak; evren senin ihtiyaçlarını hiç beklemediğin ilahi kanallardan karşılayacak."]
+            }
+        },
+        DE: {
+            aries: {
+                intro: ["Dein Herrscherplanet Mars weckt diesen Monat deinen inneren Krieger. Es ist Zeit, zur Tat zu schreiten.", "Deine Führungsqualitäten stehen im Vordergrund. Dank deines Mutes werden sich verschlossene Türen weit öffnen.", "Mit der hohen Energie des Feuerelements gibt es diesen Monat kein Hindernis, das dich aufhalten könnte."],
+                love: ["Du befindest dich in einer ungeduldigen und leidenschaftlichen Phase der Liebe. Unerwartete Geständnisse können dein Herz höher schlagen lassen.", "Du wirst nicht zögern, in deinen Beziehungen die Initiative zu ergreifen. Dein Selbstvertrauen wird deinen Partner faszinieren.", "Eine heiße Romantik ohne Geheimnisse erwartet dich, in der du deine Gefühle völlig ungefiltert ausleben kannst."],
+                career: ["Ein perfekter Monat, um Pionierarbeit bei neuen Projekten zu leisten. Du musst mutige Entscheidungen im Geschäftsleben treffen.", "In finanziellen Angelegenheiten wird es schnelle Entwicklungen geben. Wenn du keine Angst vor Risiken hast, wirst du der Gewinner sein.", "Dank deines Wettbewerbsgeistes wirst du deine Konkurrenten hinter dir lassen und große Anerkennung von deinen Vorgesetzten ernten."]
+            },
+            taurus: {
+                intro: ["Die unerschütterliche Kraft des Erdelements umgibt dich diesen Monat. Deine Suche nach Frieden und Stabilität zahlt sich aus.", "Mit der ästhetischen Energie der Venus wirst du mehr Zeit für deinen Komfort, Schönheit und Kunst aufwenden.", "Du trittst in einen Monat ein, in dem du die Früchte deiner Geduld ernten wirst. Keine Eile, das Universum arbeitet in deinem Tempo."],
+                love: ["Vertrauen und Loyalität werden in der Liebe deine größte Priorität sein. Du wirst dauerhafte und friedliche Schritte unternehmen.", "Du trittst in eine romantische und liebevolle Zeit ein, in der du dich emotional absolut sicher fühlen wirst.", "Qualitätszeit mit deinem Partner zu verbringen oder auf einem soliden Fundament eine Bindung aufzubauen, steht kurz bevor."],
+                career: ["Dein Bedürfnis nach finanzieller Sicherheit steigt. Der Himmel unterstützt dich bei logischen Investitionen und Ersparnissen.", "Wenn du deine Sturheit im Geschäftsleben ablegst und flexibel bist, öffnet sich dir eine lang ersehnte finanzielle Tür.", "Dank deines Fleißes und deiner praktischen Intelligenz gibt es keine Krise, die du nicht bewältigen kannst. Fülle ist mit dir."]
+            },
+            gemini: {
+                intro: ["Dein Herrscherplanet Merkur bringt deine Kommunikationsfähigkeiten auf den Höhepunkt. Dein Verstand arbeitet präzise wie ein Uhrwerk.", "Dein soziales Umfeld ist diesen Monat sehr aktiv. Eine großartige Zeit, um neue Leute kennenzulernen und dein Netzwerk zu erweitern.", "Das neugierige Kind in dir erwacht! Neue Schulungen, Reisen oder Entdeckungen sind das Thema dieses Monats."],
+                love: ["Du suchst nach mentaler Harmonie in der Liebe. Jemand, der dich mit seinen Worten beeindrucken kann, wird dir den Kopf verdrehen.", "Du bist in einer lustigen, witzigen und koketten Phase. Kommunikationslücken werden nun vollständig gelöst.", "Tiefe Gespräche mit deinem Partner werden eure Bindung stärken. Wenn du Single bist, könnte eine Nachricht überraschend kommen."],
+                career: ["Du wirst mehrere Aufgaben gleichzeitig perfekt ausführen. Deine praktische Intelligenz wird dich zum Star am Arbeitsplatz machen.", "Du trittst in einen der produktivsten Monate des Jahres für kommerzielle Vereinbarungen, schriftliche Projekte und Verträge ein.", "Deine neuen Ideen werden alle überraschen. Die Stagnation in deiner Karriere endet, der Wind weht nun in deine Richtung."]
+            },
+            cancer: {
+                intro: ["Dein Herrscherplanet, der Mond, schärft in diesem Monat deine Intuition und deinen sechsten Sinn unglaublich.", "Du befindest dich in einer heilenden Zeit, in der du dich deinem Zuhause und deiner Innenwelt zuwendest und spirituelle Erneuerung erlebst.", "Es ist an der Zeit, die Lasten der Vergangenheit loszulassen. Das Universum beschützt dich voll und ganz."],
+                love: ["Ein Monat voller Mitgefühl und Empathie. Du wirst deine Liebsten beschützen und im Gegenzug unendliche Liebe erfahren.", "In deinem Liebesleben baust du romantische Bindungen fernab von Oberflächlichkeit auf, die tief deine Seele berühren.", "Alte Wunden schließen sich. Du könntest sehr nostalgische Momente mit deinem Partner oder jemandem Neuen erleben."],
+                career: ["Im Geschäftsleben solltest du dich mehr auf deine Intuition als auf reine Logik verlassen. Deine innere Stimme zeigt dir den profitabelsten Weg.", "Du wirst im Arbeitsumfeld eine Vermittlerrolle übernehmen und den Respekt deiner Kollegen massiv steigern.", "Großes finanzielles Glück und Überfluss erwarten dich in Immobilien, Familienunternehmen oder Home-Office-Projekten."]
+            },
+            leo: {
+                intro: ["Das strahlende Licht der Sonne ist auf dir! Du bist in einem wundervollen Monat, in dem du mit deiner Aura die Aufmerksamkeit auf dich ziehst.", "Zögere an diesen Tagen, in denen deine Kreativität und dein Selbstvertrauen ihren Höhepunkt erreichen, niemals, auf der Bühne zu stehen.", "Deine Lebensfreude ist ansteckend. Es ist an der Zeit, dein eigenes Königreich (oder dein Reich als Königin) zu proklamieren."],
+                love: ["Wenn du in der Liebe den Stolz beiseitelegst, wirst du selbst nicht glauben können, welch leidenschaftliche und feurige Zeit du verbringen wirst.", "Große Überraschungen, glamouröse Gesten und romantische Abenteuer bestimmen in diesem Monat dein Liebesthema.", "Wenn du Single bist, wird die Person, die dein Herz stiehlt, genauso energisch und selbstbewusst sein wie du. Die Liebe klopft lautstark an deine Tür."],
+                career: ["Deine Führungsqualitäten werden von deinen Vorgesetzten bemerkt. Eine Beförderung oder eine neue Position könnte auf der Tagesordnung stehen.", "Solange du keine Angst hast, Risiken einzugehen, befindest du dich in einem Prozess, in dem du große finanzielle Belohnungen gewinnst.", "Du wirst mit deinen kreativen Ideen im Geschäftsleben einen echten Unterschied machen. Wenn du dein Ego kontrollierst, wirst du siegreich sein."]
+            },
+            virgo: {
+                intro: ["Deine analytische Intelligenz und deine Detailverliebtheit werden diesen Monat deine größten Waffen sein. Du schaffst Ordnung im Chaos.", "Du trittst in einen sehr produktiven Monat ein, in dem du dich auf deine Gesundheit, deine Routinen und persönliche Entwicklung konzentrierst.", "Wenn du deinen Perfektionismus etwas lockerst, wirst du feststellen, wie schön das Leben eigentlich fließen kann."],
+                love: ["Eine Zeit, in der du in der Liebe Loyalität und Mühe statt reiner Show schätzt. 'Gegenseitig helfen' wird deine Sprache der Liebe.", "Wenn es in deiner Beziehung ungelöste Probleme gibt, wirst du sie alle mit einem ruhigen und logischen Gespräch aus der Welt schaffen.", "Du wirst mit jemandem, der einfach, ehrlich ist und dich wirklich versteht, ein völlig neues emotionales Fundament aufbauen."],
+                career: ["Indem du die feinen Details erkennst, die niemand sonst bemerkt, wirst du deinem Unternehmen oder Geschäft großen Profit bringen.", "Dank deiner geplanten und disziplinierten Arbeit erreichst du die finanzielle Erleichterung, auf die du lange gewartet hast.", "Ein Monat, in dem du für deine Bemühungen reichlich belohnt wirst und deine organisatorischen Fähigkeiten dich an die Spitze bringen."]
+            },
+            libra: {
+                intro: ["Das Zeichen der Eleganz und Diplomatie! Diesen Monat kommen alle Waagschalen in deinem Leben ins Gleichgewicht, du findest inneren Frieden.", "Die Venus verspricht dir Ästhetik, Kunst und Schönheit. Eine großartige Zeit, um dich selbst zu erneuern und dein Image zu ändern.", "Du wirst in deinen sozialen Beziehungen der perfekte Friedensstifter sein und dank deiner süßen Zunge jede Tür öffnen."],
+                love: ["Du bist in einem der romantischsten und harmonischsten Monate des Jahres. Ästhetische und gefühlvolle Gesten werden dein Herz stehlen.", "Du lässt Unentschlossenheiten hinter dir und machst klare, glückliche Schritte. Die Wahrscheinlichkeit, deinen Seelenverwandten zu finden, ist sehr hoch.", "Dein höfliches Auftreten und dein Charme faszinieren das andere Geschlecht. Alle Augen werden auf dich gerichtet sein."],
+                career: ["Der Himmel bietet dir endlose Chancen für Geschäftspartnerschaften, Verträge und fantastische Teamarbeit.", "Die Samen, die du in künstlerischen Projekten, PR oder rechtlichen Angelegenheiten gesät hast, werden viel Gewinn bringen.", "Deine Haltung gegen Ungerechtigkeit im Geschäftsleben wird dir Prestige verleihen. Deine Einnahmen werden fair und fruchtbar sein."]
+            },
+            scorpio: {
+                intro: ["Die intensivste Phase deiner Intuition, deiner Leidenschaften und deiner geheimnisvollen Aura. Du steigst wie ein Phönix aus der Asche auf.", "Ein Monat großer spiritueller Transformation und Reinigung erwartet dich, in dem du alles abschneiden wirst, was dir nicht mehr dient.", "Dein sechster Sinn wird dich leiten. Du wirst die verborgenen Wahrheiten, die sonst niemand sehen kann, ans Licht bringen."],
+                love: ["Es gibt keinen Platz für Oberflächlichkeit in der Liebe! Du befindest dich in einer tiefen Phase, in der du nur echten Seelen dein Herz öffnest.", "In deiner aktuellen Beziehung erreichen Leidenschaft und Hingabe das höchste Niveau. Bei Eifersuchtsanfällen solltest du etwas flexibler sein.", "Indem du der anderen Person in die Augen schaust, kannst du all ihre Geheimnisse lösen. Eine schicksalhafte und intensive Anziehung erwartet dich."],
+                career: ["Dank deiner strategischen Intelligenz und deines unnachgiebigen Willens wirst du in deiner Karriere wie ein Schachmeister voranschreiten.", "Du wirst Momente der Krise in Gelegenheiten verwandeln und die Chance haben, enorme finanzielle Macht zu erlangen.", "Geheime Projekte oder tiefgreifende Forschungen werden dir im finanziellen Sinne eine völlig unerwartete Tür öffnen."]
+            },
+            sagittarius: {
+                intro: ["Dein Abenteuergeist erwacht! Der Himmel verspricht dir neue Horizonte, spannende Reisen und absolute persönliche Freiheit.", "Die glückliche Energie des Jupiters liegt auf dir. Dank deines Optimismus wirst du in jeder Umgebung die Sonne aufgehen lassen.", "Ein Monat, in dem du in philosophische Gedanken eintauchst und dich bei der Frage nach dem Sinn des Lebens viel besser kennenlernst."],
+                love: ["In deinem Liebesleben lehnst du starre Regeln und Einschränkungen ab. Du könntest jemanden mit demselben Abenteuergeist treffen.", "Du könntest eine unerwartete, aufregende Anziehung zu jemandem aus einer anderen Kultur oder einer anderen Stadt erleben.", "Offenheit und Ehrlichkeit werden dich in deinen Beziehungen gewinnen lassen. Gemeinsam neue Orte zu erkunden, wird eure Liebe erfrischen."],
+                career: ["Riesige Möglichkeiten in den Bereichen internationale Geschäfte, Bildung oder Akademie klopfen schon an deine Tür.", "Das Glück im Geschäftsleben ist auf deiner Seite! Die innovativen Schritte, die du mutig gehst, werden als großer Gewinn zu dir zurückkehren.", "Es ist Zeit, deine große Vision in die Realität umzusetzen. Verliere dich nicht in Details, fokussiere dich auf das große Ganze und gewinne."]
+            },
+            capricorn: {
+                intro: ["Die hartnäckige Bergziege des Tierkreises, die den Gipfel erklimmt! Deine Disziplin und Geduld bringen dir endlich die verdiente Belohnung.", "Ein Monat, in dem du deine Aufgaben erfolgreich bewältigst und deine Autorität in allen Bereichen deines Lebens spürbar machst.", "Du erhebst dich auf dem soliden Fundament des Saturns. Deine Treue zu deinen Traditionen und Wurzeln wird dir große Stärke verleihen."],
+                love: ["In der Liebe suchst du keine vorübergehenden Launen, sondern langfristiges und solides Vertrauen. Wer die Prüfung besteht, bleibt in deinem Herzen.", "Auch wenn es dir schwerfällt, deine Gefühle zu zeigen, wird deine Loyalität das größte Geschenk für deinen Partner sein. Lass deine Mauern etwas fallen.", "Mach dich bereit für Beziehungen, in denen sich Respekt und Liebe vermischen und ernste Schritte in Richtung Zukunft unternommen werden."],
+                career: ["Die Samen, die du für deine Karriere gesät hast, bringen diesen Monat die volle Ernte. Beförderung, Gehaltserhöhung oder Erfolg stehen unmittelbar bevor.", "Du wirst die schweren Lasten, die du schulterst, meisterhaft tragen und der angesehenste Name deines Sektors werden.", "Deine logischen und bodenständigen Finanzstrategien tragen dich sicher und unerschütterlich zu langfristigem Reichtum."]
+            },
+            aquarius: {
+                intro: ["Deine andere, freie und visionäre Seele kennt diesen Monat keine Grenzen! Du wirst gegen das Klassische rebellieren und deinen eigenen Weg gehen.", "Du bist in einer Zeit, in der dein soziales Bewusstsein steigt und du im Kreis von Freunden und Menschenmengen strahlen wirst.", "Dein Geist sagt quasi die Zukunft voraus. Dank deiner originellen Ideen wirst du allen anderen immer einen Schritt voraus sein."],
+                love: ["Liebe bedeutet für dich zuerst mentale Harmonie und eine gute Freundschaft. Diesen Monat könntest du diese außergewöhnliche Person finden.", "Dein Bedürfnis nach Freiheit in deiner Beziehung könnte steigen. Indem ihr euch Raum gebt, werdet ihr die unsichtbaren Fäden zwischen euch stärken.", "Du brichst mit traditionellen Liebesmustern! Unerwartete, überraschende und äußerst aufregende romantische Entwicklungen stehen vor der Tür."],
+                career: ["Du wirst beispiellose Erfolge in Projekten im Zusammenhang mit Technologie, Wissenschaft oder digitalen Plattformen erzielen.", "Teamwork und Networking werden dir brandneue kommerzielle Türen öffnen. Hab keine Angst, deine verrücktesten Ideen zu teilen.", "Deine Projekte, die heute schon die Zukunft sehen, werden dir finanzielle Unabhängigkeit bringen. Zeit, in Innovationen zu investieren."]
+            },
+            pisces: {
+                intro: ["Die mystischste und emotionalste Seele des Tierkreises... Deine Intuition, Träume und Vorstellungskraft werden dich diesen Monat außergewöhnlich führen.", "Du bist in vollkommener Harmonie mit der Energie des Universums. Eine Zeit spiritueller Heilung, in der du wie Wasser fließen und deinen Weg finden wirst.", "Dein Interesse an Kunst, Musik und spirituellen Themen wächst. Deine innere Stimme wird dich die absolut richtigen Entscheidungen treffen lassen."],
+                love: ["Du gibst dich in der Liebe völlig dem Fluss hin. Eine märchenhafte Romantik, basierend auf bedingungsloser Liebe und Aufopferung, erwartet dich.", "Die telepathische Bindung zwischen dir und deinem Seelenverwandten wird noch stärker. Ihr werdet euch nur mit den Augen verständigen.", "Öffne die Türen deines Herzens weit. Die naive und tiefe Liebe deiner Träume könnte zu einem Zeitpunkt erscheinen, an dem du es am wenigsten erwartest."],
+                career: ["Du wirst großen Erfolg in jeder Arbeit haben, in der du deine Kreativität zeigst. Wenn du mehr nach Intuition als nach Logik handelst, bringt dir das Geld.", "Für diejenigen, die in den Bereichen Wohlfahrt, Heilung oder Kunst arbeiten, verteilt der Himmel diesen Monat Ruhm und enormen Überfluss.", "Hör auf, dir Sorgen um finanzielle Angelegenheiten zu machen; das Universum wird deine Bedürfnisse durch unerwartete, göttliche Kanäle erfüllen."]
+            }
+        }
+    };
+
+    // Mathematischer Index für jedes Sternzeichen
+    const zodiacIndex = {
+        'aries': 1, 'taurus': 2, 'gemini': 3, 'cancer': 4,
+        'leo': 5, 'virgo': 6, 'libra': 7, 'scorpio': 8,
+        'sagittarius': 9, 'capricorn': 10, 'aquarius': 11, 'pisces': 12
+    };
+
+    // 🚀 Die Algorithmus-Magie: Generiert jeden Monat automatisch einen neuen Code!
+    function getAstroSeed(zId) {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1; // 1-12
+        const zNum = zodiacIndex[zId] || 1;
+        // Formel: Jahr * Monat + Sternzeichen = Einzigartiger, monatlicher Code
+        return (year * 12) + month + zNum; 
+    }
+
+    // ÜBERSCHREIBT DIE ALTE FUNKTION MIT DER NEUEN LIVE-ENGINE
+    window.showHoro = function(id, trName, deName) {
+        document.getElementById('zodiac-grid').style.display = 'none';
+        document.getElementById('horoscope-result').style.display = 'block';
+        
+        let titleHtml = window.currentGameLang === 'DE' 
+            ? (deName + ' Horoskop') 
+            : (trName + ' Burcu <span class="de-sub" style="font-size:0.45em; display:block; margin-top:5px;">(' + deName + ')</span>');
+            
+        document.getElementById('horo-title').innerHTML = titleHtml;
+        
+        // Holt den einzigartigen Code für genau DIESEN Monat und DIESES Sternzeichen
+        let seed = getAstroSeed(id);
+        
+        // Wir verschieben die Indizes leicht, damit sie sauber zwischen 0, 1 und 2 rotieren
+        // Intro, Liebe und Karriere laufen so in leicht anderen Zyklen für maximale Abwechslung
+        let idx1 = (seed) % 3;
+        let idx2 = (seed + 1) % 3;
+        let idx3 = (seed + 2) % 3;
+        
+        let lang = window.currentGameLang === 'DE' ? 'DE' : 'TR';
+        
+        // Sicherheitshalber Fallback auf "aries", falls die ID mal nicht stimmen sollte
+        let zData = astroData[lang][id] || astroData[lang]['aries'];
+        
+        // Setzt das Horoskop zusammen
+        let finalHoroText = 
+            "<span style='color:#f4c542;'>✨</span> " + zData.intro[idx1] + "<br><br>" + 
+            "<span style='color:#ef4444;'>❤️</span> " + zData.love[idx2] + "<br><br>" + 
+            "<span style='color:#22c55e;'>💼</span> " + zData.career[idx3];
+
+        // Sanfte Einblend-Animation für den neuen Text
+        const txtEl = document.getElementById('horo-text');
+        txtEl.style.opacity = 0;
+        txtEl.innerHTML = finalHoroText;
+        
+        setTimeout(() => {
+            txtEl.style.transition = 'opacity 0.5s ease-in-out';
+            txtEl.style.opacity = 1;
+        }, 50);
+    };
 })();
 
 </script>
