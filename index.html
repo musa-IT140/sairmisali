@@ -11666,7 +11666,72 @@ setTimeout(() => {
     document.head.appendChild(style);
 })();
 
+// ==================================================================
+// 🚀 MOBILE FIX: REGISTRIEREN & LOGIN BUTTONS KLICKBAR MACHEN
+// ==================================================================
+(function() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Greift nur auf mobilen Geräten (Handys) */
+        @media (max-width: 768px) {
+            
+            /* 1. Großer gelber Registrieren-Button im Banner unten */
+            .guest-promo-banner {
+                pointer-events: auto !important;
+                position: relative !important;
+                z-index: 50 !important;
+            }
+            .promo-btn-container {
+                pointer-events: auto !important;
+                position: relative !important;
+                z-index: 60 !important;
+            }
+            .promo-btn-container button {
+                pointer-events: auto !important;
+                touch-action: manipulation !important; /* Optimiert für schnelles Tippen */
+                position: relative !important;
+                z-index: 70 !important;
+            }
+            /* WICHTIG: Verhindert, dass der Text im Button den Klick blockiert! */
+            .promo-btn-container button * {
+                pointer-events: none !important;
+            }
 
+            /* 2. Login & Register Buttons oben im Header */
+            #main-header .header-right {
+                pointer-events: auto !important;
+                z-index: 100000 !important;
+            }
+            #main-header .auth-view-btn {
+                pointer-events: auto !important;
+                touch-action: manipulation !important;
+                z-index: 100001 !important;
+            }
+            #main-header .auth-view-btn * {
+                pointer-events: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Hardcore Fallback: Falls iOS/Android das normale 'onclick' verschluckt, zwingen wir es per Touch-Event auf!
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            document.querySelectorAll('.promo-btn-container button, .auth-view-btn').forEach(btn => {
+                btn.addEventListener('touchend', function(e) {
+                    let action = this.getAttribute('onclick');
+                    if(action && action.includes('m-register-modal')) {
+                        e.preventDefault(); // Verhindert Geister-Klicks
+                        if(window.openFastModal) window.openFastModal('m-register-modal');
+                    } else if(action && action.includes('m-login-modal')) {
+                        e.preventDefault();
+                        if(window.openFastModal) window.openFastModal('m-login-modal');
+                    }
+                }, { passive: false });
+            });
+        }, 500);
+    });
+})();
 
 </script>
 </body>
