@@ -12960,11 +12960,11 @@ setTimeout(() => {
 
 (function() {
     // ----------------------------------------------------
-    // 1. CSS: SPRECHBLASE, MOBILE-RESIZING & Z-INDEX FIX
+    // 1. CSS: SPRECHBLASE & Z-INDEX PERFEKTION
     // ----------------------------------------------------
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Versteckt alle alten Übersetzungen */
+        /* Versteckt alle alten System-Übersetzungen */
         nav .de-sub, header .de-sub, .sidebar .de-sub, 
         .sidebar-right .de-sub, .mobile-bottom-bar .de-sub, 
         .section-title .de-sub, .user-stats .de-sub, 
@@ -12972,26 +12972,20 @@ setTimeout(() => {
             display: none !important; 
         }
 
-        /* 🚀 NEU: SUCHFELD-DROPDOWN FIX (Zwingt Vorschläge immer in den absoluten Vordergrund!) */
+        /* Suchfeld-Dropdown Fix (Höchste Priorität über Navigation) */
         .search-container, .header-search, form[action*="search"], #search-form {
             position: relative;
-            z-index: 99999998 !important; /* Hebt die Suchleiste an */
+            z-index: 99999998 !important;
         }
         
         [class*="search-result"], [class*="autocomplete"], [id*="search-result"],
-        [class*="dropdown-menu"], .search-dropdown, .search-suggestions,
-        form[action*="search"] ul, form[action*="search"] div.results {
+        [class*="dropdown-menu"], .search-dropdown, .search-suggestions {
             position: absolute !important;
-            z-index: 99999999 !important; /* Dropdown schwebt über ALLEM */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important; /* Starker Schatten zur Abhebung */
+            z-index: 99999999 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important;
         }
 
-        /* Verhindert, dass der Header das Dropdown abschneidet */
-        header, nav, .header-container {
-            overflow: visible !important;
-        }
-
-        /* Das Design der Magischen Sprechblase */
+        /* Das Design der Magischen Sprechblase (Desktop & Mobile Synchron) */
         .misali-elegant-bubble {
             position: fixed;
             background: rgba(10, 20, 40, 0.85); 
@@ -13001,7 +12995,7 @@ setTimeout(() => {
             border-radius: 12px;
             border: 1px solid rgba(244, 197, 66, 0.4); 
             pointer-events: none; 
-            z-index: 999999999; /* Sprechblase bleibt das Allerhöchste */
+            z-index: 999999999;
             transform: translate(-50%, 10px);
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -13029,6 +13023,7 @@ setTimeout(() => {
             border-color: rgba(244, 197, 66, 0.5) transparent transparent transparent;
         }
 
+        /* Automatisches Umschlagen, wenn oben kein Platz ist */
         .misali-elegant-bubble.bubble-below {
             transform: translate(-50%, -20px);
         }
@@ -13042,6 +13037,7 @@ setTimeout(() => {
             border-color: transparent transparent rgba(244, 197, 66, 0.5) transparent;
         }
 
+        /* Mobile Anpassung für iOS/Android */
         @media (max-width: 768px) {
             .misali-elegant-bubble {
                 font-size: 0.55rem; 
@@ -13052,20 +13048,15 @@ setTimeout(() => {
     document.head.appendChild(style);
 
     // ----------------------------------------------------
-    // 2. DOM CLEANUP & SUCHFELD TEXT (ARAMA MOTORU)
+    // 2. DOM CLEANUP & PLACEHOLDER UPDATE
     // ----------------------------------------------------
-    
-    // Setzt den Platzhalter-Text auf "Arama Motoru"
     function updateSearchPlaceholder() {
-        const searchInputs = document.querySelectorAll('header input[type="text"], header input[type="search"], #search-input, .search-bar input, .mobile-search input');
-        searchInputs.forEach(input => {
-            input.setAttribute('placeholder', 'Arama Motoru');
-        });
+        const searchInputs = document.querySelectorAll('header input, #search-input, .search-bar input');
+        searchInputs.forEach(input => input.setAttribute('placeholder', 'Arama Motoru'));
     }
 
     function cleanAndRenameUI() {
-        updateSearchPlaceholder(); // Ruft den Text-Tausch auf
-
+        updateSearchPlaceholder();
         const walkers = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
         while (node = walkers.nextNode()) {
@@ -13075,30 +13066,26 @@ setTimeout(() => {
             let text = node.nodeValue;
             let changed = false;
 
-            if (text.trim() === ':') {
-                text = ''; 
-                changed = true;
-            } else if (/(Canlı|Canli|Toplam Eser|Aklımda|Aklimda|Kalplerim)\s*:/.test(text)) {
+            if (text.trim() === ':') { text = ''; changed = true; }
+            else if (/(Canlı|Canli|Toplam Eser|Aklımda|Aklimda|Kalplerim)\s*:/.test(text)) {
                 text = text.replace(/:\s*/g, ' '); 
                 changed = true;
             }
 
-            if (parent.closest('nav, header, .sidebar, .sidebar-right, .mobile-bottom-bar, h1, h2, h3, h4, h5, h6, .modal-header, .user-stats, .stat-box, .profile-stats, #user-only-online-list, #admin-users-list, .stat-item, .stat-row')) {
+            if (parent.closest('nav, header, .sidebar, .sidebar-right, .mobile-bottom-bar, h1, h2, h3, h4, h5, h6, .user-stats, .stat-box')) {
                 if (text.includes('Chat')) { text = text.replace(/Chat/g, 'Sohbet'); changed = true; }
                 if (text.includes('My Profil')) { text = text.replace(/My Profil/g, 'Profilim'); changed = true; }
                 if (/\(.*?\)/.test(text)) { text = text.replace(/\s*\(.*?\)/g, ''); changed = true; }
             }
-
             if (changed) node.nodeValue = text;
         }
     }
     
     cleanAndRenameUI();
-    setTimeout(cleanAndRenameUI, 300);
-    setTimeout(cleanAndRenameUI, 1000);
+    setTimeout(cleanAndRenameUI, 500);
 
     // ----------------------------------------------------
-    // 3. WÖRTERBÜCHER (OHNE KLAMMERN)
+    // 3. WÖRTERBUCH (REIN DEUTSCH FÜR STATS)
     // ----------------------------------------------------
     const translations = {
         "Ana Sayfa": "Startseite", "Şiirlerim": "Meine Gedichte", "Sözlerim": "Meine Sprüche",
@@ -13110,34 +13097,38 @@ setTimeout(() => {
         "Sizin Kaleminiz": "Eigene Verse", "Kullanıcı Eserleri": "User Werke", "Kullanici Eserleri": "User Werke",
         "Sohbet": "Chat", "Profilim": "Mein Profil", "Hakkımda": "Über mich",
         "Online Üyeler": "Online User", "Eserlerim": "Meine Werke",
+        // 🚀 NUR DEUTSCH:
+        "Canlı": "Online", "Canli": "Online", 
+        "Toplam Eser": "Kreationen", 
+        "Aklımda": "Gespeichert", "Aklimda": "Gespeichert", 
+        "Kalplerim": "Meine Herzen", 
         "Kayıtlı": "Registriert", "Kayitli": "Registriert", "Aktif": "Aktiv", 
         "Ziyaretçi": "Besucher", "Ziyaretci": "Besucher", "Oynanan": "Gespielte Spiele", 
         "Burçlar": "Sternzeichen", "Zodyak": "Sternzeichen",
-        "İsim": "Name", "Isim": "Name", "Adınız": "Name", "Ara": "Suchen"
+        "İsim": "Name", "Isim": "Name", "Adınız": "Name", "Ara": "Suchen",
+        "Şair Misal.i": "Şair Misal.i"
     };
 
     const iconTooltips = [
-        { selector: 'input[type="text"], input[type="search"], #search-input', text: "Sucheingabeleiste / Textfeld" },
         { selector: '.fa-sign-out-alt, [onclick*="logout"]', text: "Abmelden / Logout" },
         { selector: '.fa-bell', text: "Benachrichtigungen" },
         { selector: '.fa-envelope, .fa-paper-plane', text: "Posteingang / Nachrichten" },
         { selector: '.fa-cloud, .fa-sun, .fa-cloud-sun, .fa-cloud-moon, .weather-icon, [id*="weather"]', text: "Wetter Informationen" },
-        { selector: '.fa-calendar, .fa-calendar-alt, .holiday-toggle-btn, [class*="date"]', text: "Datum / Tarih" },
-        { selector: '.fa-clock, .fa-clock-o, .fa-clock-regular, [class*="time"]', text: "Uhrzeit / Zaman" },
-        { selector: '.fa-search', text: "Suchen" },
+        { selector: '.fa-calendar, .fa-calendar-alt, .holiday-toggle-btn', text: "Datum / Tarih" },
+        { selector: '.fa-clock, .fa-clock-o, .fa-clock-regular', text: "Uhrzeit / Zaman" },
         { selector: '.fa-cog, .fa-cogs, .fa-sliders-h', text: "Einstellungen" },
         { selector: '.fa-share-alt, .fa-share', text: "Teilen" },
-        { selector: '.fa-bookmark', text: "Gespeichert / Aklımda" },
-        { selector: '.fa-heart', text: "Meine Herzen / Kalplerim" },
+        { selector: '.fa-bookmark', text: "Gespeichert" },
+        { selector: '.fa-heart', text: "Meine Herzen" },
         { selector: '.fa-comments, .fa-comment', text: "Kommentare / Yorumlar" },
-        { selector: '.fa-gamepad, .fa-play, .fa-trophy, .fa-medal, [class*="puan"]', text: "Spiele & Punkte" },
-        { selector: '.fa-star, .fa-meteor, #zodiac-btn, .zodiac-icon, [onclick*="showHoro"], [id*="zodiac"]', text: "Sternzeichen" },
-        { selector: '.fa-globe, .fa-circle', text: "Online / Canlı" },
-        { selector: '.fa-book, .fa-book-open', text: "Kreationen / Toplam Eser" }
+        { selector: '.fa-gamepad, .fa-play, .fa-trophy, .fa-medal', text: "Spiele & Punkte" },
+        { selector: '.fa-star, .fa-meteor, #zodiac-btn, .zodiac-icon', text: "Sternzeichen" },
+        { selector: '.fa-globe, .fa-circle', text: "Online" },
+        { selector: '.fa-book, .fa-book-open', text: "Kreationen" }
     ];
 
     // ----------------------------------------------------
-    // 4. BUBBLE ENGINE & SCANNER
+    // 4. BUBBLE ENGINE (SYNCHRON FÜR ALLE GERÄTE)
     // ----------------------------------------------------
     let hoverTimer = null;
     let clickTimer = null;
@@ -13158,83 +13149,49 @@ setTimeout(() => {
     function getTooltipData(element) {
         let current = element;
         let depth = 0;
-        
         while (current && current !== document.body && depth < 5) { 
-            
             let rect = current.getBoundingClientRect();
-            if (rect.width > window.innerWidth * 0.8 || rect.height > window.innerHeight * 0.8) { 
-                current = current.parentElement; depth++; continue; 
+            if (rect.width > window.innerWidth * 0.8) { current = current.parentElement; depth++; continue; }
+
+            // Profilbild Priorität
+            if (current.nodeType === 1 && current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil'))) {
+                return { text: "Şair Misal.i", target: current }; 
             }
 
-            // 🚀 1. ABSOLUTE PRIORITÄT: BILDER UND ICONS
-            if (current.nodeType === 1) {
-                if (current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('bio-pic') || current.className.includes('profile-pic') || current.src.includes('profil') || current.src.includes('user'))) {
-                    return { text: "Şair Misal.i", target: current }; 
-                }
-                if (current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
-                    return { text: "Webseiten Ersteller", target: current };
-                }
-            }
-
-            let text = "";
-            if (current.tagName === 'INPUT') {
-                text = current.placeholder || "";
-            } else {
-                text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
-            }
+            let text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
             let textLower = text.toLowerCase();
 
-            // 🚀 2. WÖRTERBUCH & HAUPTTEXTE
+            // Wort-Check (Nur Deutsch-Ergebnisse)
             if (textLower.length > 0 && textLower.length < 80) {
-                if (textLower.includes("şair misal.i") || textLower.includes("şair misali")) return { text: "Şair Misal.i", target: current };
-                if (textLower.includes("canlı") || textLower.includes("canli")) return { text: "Online / Canlı", target: current };
-                if (textLower.includes("toplam eser")) return { text: "Kreationen / Toplam Eser", target: current };
-                if (textLower.includes("aklımda") || textLower.includes("aklimda")) return { text: "Gespeichert / Aklımda", target: current };
-                if (textLower.includes("kalplerim") || textLower.includes("kalplerim")) return { text: "Meine Herzen / Kalplerim", target: current };
-                
+                if (textLower.includes("şair misal.i")) return { text: "Şair Misal.i", target: current };
                 for (let key in translations) {
-                    if (text.includes(key)) {
-                        return { text: translations[key], target: current };
-                    }
+                    if (text.includes(key)) return { text: translations[key], target: current };
                 }
             }
 
-            // 🚀 3. KURZE REGEX-SCANNER: Punkte, Uhrzeit, Datum 
+            // Regex-Check (Punkte, Uhrzeit, Datum)
             if (textLower.length > 0 && textLower.length < 25) {
-                if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) {
-                    return { text: "Spielpunkte", target: current };
-                }
-                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) {
-                    return { text: "Uhrzeit / Zaman", target: current };
-                }
-                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) { 
-                    return { text: "Datum / Tarih", target: current };
-                }
-                if (/[\u2648-\u2653]/.test(text)) {
-                    return { text: "Sternzeichen", target: current };
-                }
+                if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) return { text: "Spielpunkte", target: current };
+                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) return { text: "Uhrzeit / Zaman", target: current };
+                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) return { text: "Datum / Tarih", target: current };
+                if (/[\u2648-\u2653]/.test(text)) return { text: "Sternzeichen", target: current };
             }
 
-            // 🚀 4. ANDERE ICONS
+            // Icon-Check
             if (current.nodeType === 1 && current.matches) {
                 for (let item of iconTooltips) {
-                    if (current.matches(item.selector)) {
-                        return { text: item.text, target: current };
-                    }
+                    if (current.matches(item.selector)) return { text: item.text, target: current };
                 }
             }
-            
-            current = current.parentElement;
-            depth++;
+            current = current.parentElement; depth++;
         }
         return null;
     }
 
     function createBubble(target, tooltipText) {
         removeBubble(true); 
-        
         let rect = target.getBoundingClientRect();
-        if (rect.width === 0 && rect.height === 0) return; 
+        if (rect.width === 0) return; 
 
         currentBubble = document.createElement('div');
         currentBubble.className = 'misali-elegant-bubble';
@@ -13243,78 +13200,50 @@ setTimeout(() => {
 
         let leftPos = rect.left + (rect.width / 2);
         let topPos = rect.top - 25; 
-
-        if (topPos < 10) {
-            topPos = rect.bottom + 5; 
-            currentBubble.classList.add('bubble-below'); 
-        }
+        if (topPos < 10) { topPos = rect.bottom + 5; currentBubble.classList.add('bubble-below'); }
 
         currentBubble.style.left = leftPos + 'px';
         currentBubble.style.top = topPos + 'px'; 
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                if(currentBubble) currentBubble.classList.add('show');
-            });
-        });
+        requestAnimationFrame(() => requestAnimationFrame(() => currentBubble && currentBubble.classList.add('show')));
     }
 
-    const targetSelector = 'a, button, li, p, span, h1, h2, h3, h4, h5, h6, i, input, img, div, label, strong, b, em';
+    const targetSelector = 'a, button, li, p, span, h1, h2, h3, h4, h5, h6, i, input, img, div, label';
 
-    // ==========================================
-    // HOVER-LOGIK (Nur PC)
-    // ==========================================
+    // HOVER LOGIK (Überall aktiv)
     document.addEventListener('mouseover', function(e) {
         if (activeClickBubble) return; 
-
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
         target = target.closest(targetSelector);
-        
-        if (!target || currentHoverTarget === target) return; 
-        
         let data = getTooltipData(target);
         if (data) {
             currentHoverTarget = data.target;
             clearTimeout(hoverTimer);
-            
-            hoverTimer = setTimeout(() => {
-                if (!activeClickBubble) createBubble(data.target, data.text);
-            }, 600); 
+            hoverTimer = setTimeout(() => !activeClickBubble && createBubble(data.target, data.text), 600); 
         }
     }, true); 
 
-    document.addEventListener('mouseout', function(e) {
+    document.addEventListener('mouseout', function() {
         clearTimeout(hoverTimer);
         currentHoverTarget = null;
         if (!activeClickBubble) removeBubble(true); 
     }, true);
 
-    // ==========================================
-    // KLICK-LOGIK (FÜR ALLE GERÄTE)
-    // ==========================================
+    // KLICK LOGIK (Immer 2 Sekunden, Desktop & Mobile)
     document.addEventListener('click', function(e) {
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
         target = target.closest(targetSelector);
-        if (!target) return;
-
         let data = getTooltipData(target);
         if (data) {
             clearTimeout(hoverTimer);
             clearTimeout(clickTimer);
             removeBubble(true); 
-            
-            // 🚀 REGEL FÜR ALLE KLICKS: IMMER EXAKT 2 SEKUNDEN WARTEN!
             clickTimer = setTimeout(() => {
                 activeClickBubble = true; 
                 createBubble(data.target, data.text);
-                
-                setTimeout(() => {
-                    removeBubble(true); 
-                }, 2500); 
+                setTimeout(() => removeBubble(true), 2500); 
             }, 2000); 
         }
     }, true); 
-
 })();
 
 (function() {
