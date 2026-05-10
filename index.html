@@ -12790,6 +12790,79 @@ setTimeout(() => {
     };
 })();
 
+(function() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* ----------------------------------------------------
+           1. DESKTOP: BILD-ANIMATION (Flüssig & Schnell)
+           ---------------------------------------------------- */
+        @media (min-width: 769px) {
+            img#home-profile-pic, #hakkimda-view img.bio-pic {
+                /* HARDWARE-BESCHLEUNIGUNG: Zwingt die Grafikkarte, das Bild ruckelfrei zu laden! */
+                transform: translateZ(0) !important;
+                will-change: transform, opacity !important;
+                
+                /* Schnelle 0.5s Animation statt ruckeliger Slow-Motion */
+                animation: misaliFastLoad 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+            }
+
+            @keyframes misaliFastLoad {
+                0% { opacity: 0; transform: scale(0.85) translateZ(0); }
+                100% { opacity: 1; transform: scale(1) translateZ(0); }
+            }
+        }
+
+        /* ----------------------------------------------------
+           2. iOS MOBILE ONLY: HERZEN & KOMMENTARE
+           ---------------------------------------------------- */
+        @supports (-webkit-touch-callout: none) {
+            @media (max-width: 768px) {
+                
+                /* A. Herzen verkleinern */
+                #heart-container i.fa-heart {
+                    font-size: 1.6rem !important; /* Deutlich kleiner */
+                    margin: 0 8px !important;
+                }
+                
+                /* B. Lücke unter den Herzen entfernen */
+                #heart-container {
+                    padding-bottom: 5px !important;
+                    margin-bottom: 5px !important;
+                }
+
+                /* C. Yorumlar (Kommentare) zentrieren und verkleinern */
+                .ios-yorumlar-title {
+                    display: flex !important;
+                    justify-content: center !important;
+                    align-items: baseline !important;
+                    font-size: 0.85rem !important; /* Haupttext kleiner */
+                    margin-top: 10px !important;
+                    margin-bottom: 10px !important;
+                    width: 100% !important;
+                }
+                .ios-yorumlar-title .de-sub {
+                    font-size: 0.65rem !important; /* Deutscher Text noch feiner */
+                    margin-left: 5px !important;
+                }
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Hilfsfunktion: Fügt dem Yorumlar-Titel beim Öffnen des Fensters sicher die neue iOS-Klasse hinzu
+    const origOpenPoemModal = window.openPoemModal;
+    window.openPoemModal = function(id, type) {
+        if(origOpenPoemModal) origOpenPoemModal(id, type);
+        setTimeout(() => {
+            let commentIcons = document.querySelectorAll('#modal-interaction-area .fa-comments');
+            commentIcons.forEach(icon => {
+                let parentDiv = icon.parentElement;
+                if(parentDiv) parentDiv.classList.add('ios-yorumlar-title');
+            });
+        }, 50);
+    };
+})();
+
 </script>
 </body>
 </html>
