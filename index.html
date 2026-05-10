@@ -2052,6 +2052,31 @@ nav#main-nav, nav {
         border-width: 1px !important;
     }
 
+    /* ----------------------------------------------------
+       1. SCROLL-CHAINING BEHEBEN (Hintergrund bleibt stehen)
+       ---------------------------------------------------- */
+    /* Friert den Body komplett ein */
+    html.modal-open, body.modal-open {
+        overflow: hidden !important;
+    }
+    
+    /* Blockiert Wisch-Gesten auf den abgedunkelten Hintergründen */
+    #modal-backdrop, .sidebar-overlay {
+        touch-action: none !important;
+        overscroll-behavior: none !important;
+    }
+
+    /* MAGIC TRICK: "contain" erlaubt das Scrollen IM Fenster, 
+       gibt den Wisch-Befehl aber nicht an die Website dahinter weiter! */
+    .modal-body, .sidebar-content, #holiday-list-content, 
+    #m-comment-list, #heart-details-list, .emoji-picker, 
+    #admin-msg-list, #user-msg-list, .cal-holiday-sidebar {
+        overscroll-behavior: contain !important;
+        -webkit-overscroll-behavior: contain !important;
+        touch-action: pan-y !important; /* Erlaubt nur striktes vertikales Scrollen */
+        -webkit-overflow-scrolling: touch !important; /* Garantiert weiches iOS Scrolling */
+    }
+
 </style>
     <script>
 
@@ -12513,6 +12538,81 @@ setTimeout(() => {
         }
     `;
     document.head.appendChild(style);
+})();
+
+(function() {
+    // ----------------------------------------------------
+    // 2. BACK-BUTTON INTELLIGENZ (Immer nur EINEN Schritt zurück)
+    // ----------------------------------------------------
+    
+    let backActionConsumed = false;
+
+    // Fängt den Zurück-Befehl ab, BEVOR dein alter Code feuert
+    window.addEventListener('popstate', () => {
+        backActionConsumed = false; // Reset für den aktuellen Klick
+    }, true); 
+
+    // Wir überschreiben die Schließen-Funktionen, um sie schrittweise auszuführen!
+    const origCloseTopModal = window.closeTopModal;
+    const origCloseAllSidebars = window.closeAllSidebars;
+
+    window.closeTopModal = function(e) {
+        if (e === 'force' || e === true) {
+            // Wenn in diesem Klick schon etwas geschlossen wurde -> ABBRUCH!
+            if (backActionConsumed) return; 
+            
+            const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
+            if (modals.length > 0) {
+                // Schließt streng nur das LETZTE (oberste) Fenster!
+                modals[modals.length - 1].classList.remove('active-modal');
+                backActionConsumed = true; // Aktion verbraucht für diesen Klick!
+                
+                if (modals.length === 1) {
+                    // Wenn es das letzte Modal war, räumen wir den Body-Lock auf
+                    if(origCloseTopModal) origCloseTopModal('force');
+                } else {
+                    // Wenn noch ein Modal drunter liegt, füllen wir den State-Puffer wieder auf
+                    ensureHistoryBuffer();
+                }
+                return;
+            }
+        }
+        if (origCloseTopModal) origCloseTopModal(e);
+    };
+
+    window.closeAllSidebars = function(e) {
+        // Wurde in diesem Klick schon ein Modal geschlossen? Dann lass die Sidebar in Ruhe!
+        if (backActionConsumed) return; 
+
+        const openSidebars = document.querySelectorAll('.sidebar.open, .sidebar-right.open, .cal-holiday-sidebar.open');
+        if (openSidebars.length > 0) {
+            if (origCloseAllSidebars) origCloseAllSidebars(e);
+            backActionConsumed = true; // Aktion verbraucht!
+            ensureHistoryBuffer();
+            return;
+        }
+        
+        if (origCloseAllSidebars) origCloseAllSidebars(e);
+    };
+
+    // ----------------------------------------------------
+    // 3. APP-SCHUTZ (Verhindert das ungewollte Verlassen der App)
+    // ----------------------------------------------------
+    // Ein endloser Sicherheits-Puffer für die Browser-Historie
+    function ensureHistoryBuffer() {
+        if (!history.state || !history.state.misaliBuffer) {
+            history.pushState({ misaliBuffer: true }, null, window.location.href);
+        }
+    }
+
+    // Puffer beim Start der App anlegen
+    window.addEventListener('load', ensureHistoryBuffer);
+    
+    // Immer wenn der User irgendwo auf die App tippt, stellen wir sicher, dass der Puffer noch da ist
+    document.body.addEventListener('click', () => {
+        setTimeout(ensureHistoryBuffer, 100);
+    });
+
 })();
 
 </script>
