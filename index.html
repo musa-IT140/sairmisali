@@ -12960,10 +12960,11 @@ setTimeout(() => {
 
 (function() {
     // ----------------------------------------------------
-    // 1. CSS: SPRECHBLASE & ALTE KLAMMERN VERSTECKEN
+    // 1. CSS: SPRECHBLASE, MOBILE-RESIZING & Z-INDEX FIX
     // ----------------------------------------------------
     const style = document.createElement('style');
     style.innerHTML = `
+        /* Versteckt alle alten Übersetzungen */
         nav .de-sub, header .de-sub, .sidebar .de-sub, 
         .sidebar-right .de-sub, .mobile-bottom-bar .de-sub, 
         .section-title .de-sub, .user-stats .de-sub, 
@@ -12971,6 +12972,26 @@ setTimeout(() => {
             display: none !important; 
         }
 
+        /* 🚀 NEU: SUCHFELD-DROPDOWN FIX (Zwingt Vorschläge immer in den absoluten Vordergrund!) */
+        .search-container, .header-search, form[action*="search"], #search-form {
+            position: relative;
+            z-index: 99999998 !important; /* Hebt die Suchleiste an */
+        }
+        
+        [class*="search-result"], [class*="autocomplete"], [id*="search-result"],
+        [class*="dropdown-menu"], .search-dropdown, .search-suggestions,
+        form[action*="search"] ul, form[action*="search"] div.results {
+            position: absolute !important;
+            z-index: 99999999 !important; /* Dropdown schwebt über ALLEM */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important; /* Starker Schatten zur Abhebung */
+        }
+
+        /* Verhindert, dass der Header das Dropdown abschneidet */
+        header, nav, .header-container {
+            overflow: visible !important;
+        }
+
+        /* Das Design der Magischen Sprechblase */
         .misali-elegant-bubble {
             position: fixed;
             background: rgba(10, 20, 40, 0.85); 
@@ -12980,7 +13001,7 @@ setTimeout(() => {
             border-radius: 12px;
             border: 1px solid rgba(244, 197, 66, 0.4); 
             pointer-events: none; 
-            z-index: 9999999;
+            z-index: 999999999; /* Sprechblase bleibt das Allerhöchste */
             transform: translate(-50%, 10px);
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -13020,13 +13041,31 @@ setTimeout(() => {
             border-width: 0 5px 5px;
             border-color: transparent transparent rgba(244, 197, 66, 0.5) transparent;
         }
+
+        @media (max-width: 768px) {
+            .misali-elegant-bubble {
+                font-size: 0.55rem; 
+                padding: 4px 10px;  
+            }
+        }
     `;
     document.head.appendChild(style);
 
     // ----------------------------------------------------
-    // 2. DOM CLEANUP: KLAMMERN & DOPPELPUNKTE LÖSCHEN
+    // 2. DOM CLEANUP & SUCHFELD TEXT (ARAMA MOTORU)
     // ----------------------------------------------------
+    
+    // Setzt den Platzhalter-Text auf "Arama Motoru"
+    function updateSearchPlaceholder() {
+        const searchInputs = document.querySelectorAll('header input[type="text"], header input[type="search"], #search-input, .search-bar input, .mobile-search input');
+        searchInputs.forEach(input => {
+            input.setAttribute('placeholder', 'Arama Motoru');
+        });
+    }
+
     function cleanAndRenameUI() {
+        updateSearchPlaceholder(); // Ruft den Text-Tausch auf
+
         const walkers = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
         while (node = walkers.nextNode()) {
@@ -13059,52 +13098,46 @@ setTimeout(() => {
     setTimeout(cleanAndRenameUI, 1000);
 
     // ----------------------------------------------------
-    // 3. WÖRTERBÜCHER
+    // 3. WÖRTERBÜCHER (OHNE KLAMMERN)
     // ----------------------------------------------------
-    // Kombinierte Texte für Wort + Symbol!
     const translations = {
-        "Ana Sayfa": "(Startseite)", "Şiirlerim": "(Meine Gedichte)", "Sözlerim": "(Meine Sprüche)",
-        "Önemli Şahsiyetler": "(Persönlichkeiten)", "Atasözleri": "(Sprichwörter)",
-        "Sağlık": "(Gesundheit)", "Saglik": "(Gesundheit)",
-        "Kıssalar": "(Kurzgeschichten)", "Kissalar": "(Kurzgeschichten)",
-        "Fıkralar": "(Witze)", "Fikralar": "(Witze)", "Eğlence": "(Spaß-Ecke)",
-        "Bilmeceler": "(Rätsel)", "Bulmacalar": "(Kreuzworträtsel)",
-        "Sizin Kaleminiz": "(Eigene Verse)", "Kullanıcı Eserleri": "(User Werke)", "Kullanici Eserleri": "(User Werke)",
-        "Sohbet": "(Chat)", "Profilim": "(Mein Profil)", "Hakkımda": "(Über mich)",
-        "Online Üyeler": "(Online User)", "Eserlerim": "(Meine Werke)",
-        "Canlı": "(Online / Canlı)", "Canli": "(Online / Canlı)", 
-        "Toplam Eser": "(Kreationen / Toplam Eser)", 
-        "Aklımda": "(Gespeichert / Aklımda)", "Aklimda": "(Gespeichert / Aklımda)", 
-        "Kalplerim": "(Meine Herzen / Kalplerim)", 
-        "Kayıtlı": "(Registriert)", "Kayitli": "(Registriert)", "Aktif": "(Aktiv)", 
-        "Ziyaretçi": "(Besucher)", "Ziyaretci": "(Besucher)", "Oynanan": "(Gespielte Spiele)", 
-        "Burçlar": "(Sternzeichen)", "Zodyak": "(Sternzeichen)",
-        "İsim": "(Name)", "Isim": "(Name)", "Adınız": "(Name)", "Ara": "(Suchen)",
-        "Şair Misal.i": "(Webseiten Ersteller)", "Şair Misali": "(Webseiten Ersteller)"
+        "Ana Sayfa": "Startseite", "Şiirlerim": "Meine Gedichte", "Sözlerim": "Meine Sprüche",
+        "Önemli Şahsiyetler": "Persönlichkeiten", "Atasözleri": "Sprichwörter",
+        "Sağlık": "Gesundheit", "Saglik": "Gesundheit",
+        "Kıssalar": "Kurzgeschichten", "Kissalar": "Kurzgeschichten",
+        "Fıkralar": "Witze", "Fikralar": "Witze", "Eğlence": "Spaß-Ecke",
+        "Bilmeceler": "Rätsel", "Bulmacalar": "Kreuzworträtsel",
+        "Sizin Kaleminiz": "Eigene Verse", "Kullanıcı Eserleri": "User Werke", "Kullanici Eserleri": "User Werke",
+        "Sohbet": "Chat", "Profilim": "Mein Profil", "Hakkımda": "Über mich",
+        "Online Üyeler": "Online User", "Eserlerim": "Meine Werke",
+        "Kayıtlı": "Registriert", "Kayitli": "Registriert", "Aktif": "Aktiv", 
+        "Ziyaretçi": "Besucher", "Ziyaretci": "Besucher", "Oynanan": "Gespielte Spiele", 
+        "Burçlar": "Sternzeichen", "Zodyak": "Sternzeichen",
+        "İsim": "Name", "Isim": "Name", "Adınız": "Name", "Ara": "Suchen"
     };
 
     const iconTooltips = [
-        { selector: 'input[type="text"], input[type="search"], #search-input', text: "(Sucheingabeleiste / Textfeld)" },
-        { selector: '.fa-sign-out-alt, [onclick*="logout"]', text: "(Abmelden / Logout)" },
-        { selector: '.fa-bell', text: "(Benachrichtigungen)" },
-        { selector: '.fa-envelope, .fa-paper-plane', text: "(Posteingang / Nachrichten)" },
-        { selector: '.fa-cloud, .fa-sun, .fa-cloud-sun, .fa-cloud-moon, .weather-icon, [id*="weather"]', text: "(Wetter Informationen)" },
-        { selector: '.fa-calendar, .fa-calendar-alt, .holiday-toggle-btn', text: "(Datum / Tarih)" },
-        { selector: '.fa-clock, .fa-clock-o, .fa-clock-regular', text: "(Uhrzeit / Zaman)" },
-        { selector: '.fa-search', text: "(Suchen)" },
-        { selector: '.fa-cog, .fa-cogs, .fa-sliders-h', text: "(Einstellungen)" },
-        { selector: '.fa-share-alt, .fa-share', text: "(Teilen)" },
-        { selector: '.fa-bookmark', text: "(Gespeichert / Aklımda)" },
-        { selector: '.fa-heart', text: "(Meine Herzen / Kalplerim)" },
-        { selector: '.fa-comments, .fa-comment', text: "(Kommentare / Yorumlar)" },
-        { selector: '.fa-gamepad, .fa-play, .fa-trophy, .fa-medal', text: "(Spiele & Punkte)" },
-        { selector: '.fa-star, .fa-meteor, #zodiac-btn, .zodiac-icon', text: "(Sternzeichen)" },
-        { selector: '.fa-globe, .fa-circle', text: "(Online / Canlı)" },
-        { selector: '.fa-book, .fa-book-open', text: "(Kreationen / Toplam Eser)" }
+        { selector: 'input[type="text"], input[type="search"], #search-input', text: "Sucheingabeleiste / Textfeld" },
+        { selector: '.fa-sign-out-alt, [onclick*="logout"]', text: "Abmelden / Logout" },
+        { selector: '.fa-bell', text: "Benachrichtigungen" },
+        { selector: '.fa-envelope, .fa-paper-plane', text: "Posteingang / Nachrichten" },
+        { selector: '.fa-cloud, .fa-sun, .fa-cloud-sun, .fa-cloud-moon, .weather-icon, [id*="weather"]', text: "Wetter Informationen" },
+        { selector: '.fa-calendar, .fa-calendar-alt, .holiday-toggle-btn, [class*="date"]', text: "Datum / Tarih" },
+        { selector: '.fa-clock, .fa-clock-o, .fa-clock-regular, [class*="time"]', text: "Uhrzeit / Zaman" },
+        { selector: '.fa-search', text: "Suchen" },
+        { selector: '.fa-cog, .fa-cogs, .fa-sliders-h', text: "Einstellungen" },
+        { selector: '.fa-share-alt, .fa-share', text: "Teilen" },
+        { selector: '.fa-bookmark', text: "Gespeichert / Aklımda" },
+        { selector: '.fa-heart', text: "Meine Herzen / Kalplerim" },
+        { selector: '.fa-comments, .fa-comment', text: "Kommentare / Yorumlar" },
+        { selector: '.fa-gamepad, .fa-play, .fa-trophy, .fa-medal, [class*="puan"]', text: "Spiele & Punkte" },
+        { selector: '.fa-star, .fa-meteor, #zodiac-btn, .zodiac-icon, [onclick*="showHoro"], [id*="zodiac"]', text: "Sternzeichen" },
+        { selector: '.fa-globe, .fa-circle', text: "Online / Canlı" },
+        { selector: '.fa-book, .fa-book-open', text: "Kreationen / Toplam Eser" }
     ];
 
     // ----------------------------------------------------
-    // 4. BUBBLE ENGINE & UNABHÄNGIGER SCANNER
+    // 4. BUBBLE ENGINE & SCANNER
     // ----------------------------------------------------
     let hoverTimer = null;
     let clickTimer = null;
@@ -13126,25 +13159,21 @@ setTimeout(() => {
         let current = element;
         let depth = 0;
         
-        // Scannt 5 Ebenen hoch
         while (current && current !== document.body && depth < 5) { 
             
-            // Blockiert Riesen-Container, damit die Blase nicht am Rand verschwindet
             let rect = current.getBoundingClientRect();
             if (rect.width > window.innerWidth * 0.8 || rect.height > window.innerHeight * 0.8) { 
                 current = current.parentElement; depth++; continue; 
             }
 
-            // 🚀 1. ABSOLUTE PRIORITÄT: Das Miniprofilbild (Exakt dieses Element!)
-            if (current.tagName === 'IMG') {
-                if (current.id === 'home-profile-pic' || current.className.includes('bio-pic') || current.className.includes('profile-pic') || current.src.includes('profil') || current.src.includes('user')) {
-                    return { text: "(Şair Misal.i)", target: current }; // Zwingt die Blase exakt auf das IMG!
+            // 🚀 1. ABSOLUTE PRIORITÄT: BILDER UND ICONS
+            if (current.nodeType === 1) {
+                if (current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('bio-pic') || current.className.includes('profile-pic') || current.src.includes('profil') || current.src.includes('user'))) {
+                    return { text: "Şair Misal.i", target: current }; 
                 }
-            }
-
-            // Feder-Icon
-            if (current.nodeType === 1 && current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
-                return { text: "(Webseiten Ersteller)", target: current };
+                if (current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
+                    return { text: "Webseiten Ersteller", target: current };
+                }
             }
 
             let text = "";
@@ -13153,22 +13182,16 @@ setTimeout(() => {
             } else {
                 text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
             }
+            let textLower = text.toLowerCase();
 
-            // 🚀 2. REGEX-SCANNER: Uhrzeit, Datum und Punkte mathematisch erkennen!
-            if (text && text.length > 0 && text.length < 25) {
-                if (/\b\d+\s*P\b/.test(text) || text.includes('Puan')) {
-                    return { text: "(Spielpunkte)", target: current };
-                }
-                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(text)) { // Erkennt "21:26" oder "21:26:22"
-                    return { text: "(Uhrzeit / Zaman)", target: current };
-                }
-                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(text)) { // Erkennt "10.05.2026"
-                    return { text: "(Datum / Tarih)", target: current };
-                }
-            }
-
-            // 🚀 3. WÖRTERBUCH-SCAN: Canlı, Toplam Eser etc.
-            if (text && text.length > 0 && text.length < 80) {
+            // 🚀 2. WÖRTERBUCH & HAUPTTEXTE
+            if (textLower.length > 0 && textLower.length < 80) {
+                if (textLower.includes("şair misal.i") || textLower.includes("şair misali")) return { text: "Şair Misal.i", target: current };
+                if (textLower.includes("canlı") || textLower.includes("canli")) return { text: "Online / Canlı", target: current };
+                if (textLower.includes("toplam eser")) return { text: "Kreationen / Toplam Eser", target: current };
+                if (textLower.includes("aklımda") || textLower.includes("aklimda")) return { text: "Gespeichert / Aklımda", target: current };
+                if (textLower.includes("kalplerim") || textLower.includes("kalplerim")) return { text: "Meine Herzen / Kalplerim", target: current };
+                
                 for (let key in translations) {
                     if (text.includes(key)) {
                         return { text: translations[key], target: current };
@@ -13176,7 +13199,23 @@ setTimeout(() => {
                 }
             }
 
-            // 🚀 4. ICON-SCAN
+            // 🚀 3. KURZE REGEX-SCANNER: Punkte, Uhrzeit, Datum 
+            if (textLower.length > 0 && textLower.length < 25) {
+                if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) {
+                    return { text: "Spielpunkte", target: current };
+                }
+                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) {
+                    return { text: "Uhrzeit / Zaman", target: current };
+                }
+                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) { 
+                    return { text: "Datum / Tarih", target: current };
+                }
+                if (/[\u2648-\u2653]/.test(text)) {
+                    return { text: "Sternzeichen", target: current };
+                }
+            }
+
+            // 🚀 4. ANDERE ICONS
             if (current.nodeType === 1 && current.matches) {
                 for (let item of iconTooltips) {
                     if (current.matches(item.selector)) {
@@ -13205,7 +13244,6 @@ setTimeout(() => {
         let leftPos = rect.left + (rect.width / 2);
         let topPos = rect.top - 25; 
 
-        // 🚀 SICHERHEITS-CHECK: Wenn Blase oben aus dem Bild rutscht (Uhrzeit/Datum!)
         if (topPos < 10) {
             topPos = rect.bottom + 5; 
             currentBubble.classList.add('bubble-below'); 
@@ -13221,14 +13259,18 @@ setTimeout(() => {
         });
     }
 
+    const targetSelector = 'a, button, li, p, span, h1, h2, h3, h4, h5, h6, i, input, img, div, label, strong, b, em';
+
     // ==========================================
     // HOVER-LOGIK (Nur PC)
     // ==========================================
     document.addEventListener('mouseover', function(e) {
         if (activeClickBubble) return; 
 
-        // Umgeht alle Limits. Nimmt genau das, was die Maus berührt!
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
+        target = target.closest(targetSelector);
+        
+        if (!target || currentHoverTarget === target) return; 
         
         let data = getTooltipData(target);
         if (data) {
@@ -13252,7 +13294,9 @@ setTimeout(() => {
     // ==========================================
     document.addEventListener('click', function(e) {
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
-        
+        target = target.closest(targetSelector);
+        if (!target) return;
+
         let data = getTooltipData(target);
         if (data) {
             clearTimeout(hoverTimer);
@@ -13267,10 +13311,27 @@ setTimeout(() => {
                 setTimeout(() => {
                     removeBubble(true); 
                 }, 2500); 
-            }, 2000); // 2000 ms = 2 Sekunden für absolut ALLES
+            }, 2000); 
         }
     }, true); 
 
+})();
+
+(function() {
+    function updateSearchPlaceholder() {
+        // Sucht alle Suchfelder im Header-Bereich oder mit typischen Such-IDs
+        const searchInputs = document.querySelectorAll('header input[type="text"], header input[type="search"], #search-input, .search-bar input, .mobile-search input');
+        
+        searchInputs.forEach(input => {
+            input.setAttribute('placeholder', 'Arama Motoru');
+        });
+    }
+    
+    // Führt den Texttausch sofort aus
+    updateSearchPlaceholder();
+    
+    // Zur Sicherheit nach einer halben Sekunde nochmal (falls die Seite etwas Ladezeit braucht)
+    setTimeout(updateSearchPlaceholder, 500);
 })();
 
 </script>
