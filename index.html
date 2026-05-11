@@ -13370,56 +13370,59 @@ setTimeout(() => {
     }
 
     function getTooltipData(element) {
-        let current = element;
-        let depth = 0;
-        
-        while (current && current !== document.body && depth < 5) { 
-            let rect = current.getBoundingClientRect();
-            if (rect.width > window.innerWidth * 0.8) { current = current.parentElement; depth++; continue; }
+    let current = element;
+    let depth = 0;
+    
+    while (current && current !== document.body && depth < 5) { 
+        let rect = current.getBoundingClientRect();
+        if (rect.width > window.innerWidth * 0.8) { current = current.parentElement; depth++; continue; }
 
-            if (current.nodeType === 1) {
-                if (current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil'))) {
-                    return { text: "Şair Misal.i", target: current }; 
-                }
-                if (current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
-                    return { text: "Webseiten Ersteller", target: current };
-                }
+        if (current.nodeType === 1) {
+            if (current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil'))) {
+                return { text: "Şair Misal.i", target: current }; 
             }
-
-            let text = "";
-            if (current.tagName === 'INPUT') { text = current.placeholder || ""; } 
-            else { text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim(); }
-            let textLower = text.toLowerCase();
-
-            if (textLower.length > 0 && textLower.length < 80) {
-                if (textLower.includes("şair misal.i") || textLower.includes("şair misali")) return { text: "Şair Misal.i", target: current };
-                if (textLower.includes("sayfa içeriklerim") || textLower.includes("sayfa iceriklerim")) return { text: "Seiten Bereiche", target: current };
-                if (textLower.includes("canlı") || textLower.includes("canli")) return { text: "Online", target: current };
-                if (textLower.includes("toplam eser")) return { text: "Kreationen", target: current };
-                if (textLower.includes("aklımda") || textLower.includes("aklimda")) return { text: "Gespeichert", target: current };
-                if (textLower.includes("kalplerim") || textLower.includes("kalplerim")) return { text: "Meine Herzen", target: current };
-                
-                for (let key in translations) {
-                    if (text.includes(key)) return { text: translations[key], target: current };
-                }
+            if (current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
+                return { text: "Webseiten Ersteller", target: current };
             }
-
-            if (textLower.length > 0 && textLower.length < 25) {
-                if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) return { text: "Spielpunkte", target: current };
-                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) return { text: "Uhrzeit / Zaman", target: current };
-                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) return { text: "Datum / Tarih", target: current };
-                if (/[\u2648-\u2653]/.test(text)) return { text: "Sternzeichen", target: current };
-            }
-
-            if (current.nodeType === 1 && current.matches) {
-                for (let item of iconTooltips) {
-                    if (current.matches(item.selector)) return { text: item.text, target: current };
-                }
-            }
-            current = current.parentElement; depth++;
         }
-        return null;
+
+        let text = "";
+        if (current.tagName === 'INPUT') { text = current.placeholder || ""; } 
+        else { text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim(); }
+        let textLower = text.toLowerCase();
+
+        if (textLower.length > 0 && textLower.length < 80) {
+            if (textLower.includes("şair misal.i") || textLower.includes("şair misali")) return { text: "Şair Misal.i", target: current };
+            
+            /* 🚀 HIER GEÄNDERT: Erkennt jetzt "Sayfa İçerikleri" 🚀 */
+            if (textLower.includes("sayfa içerikleri") || textLower.includes("sayfa icerikleri")) return { text: "Seiten Bereiche", target: current };
+            
+            if (textLower.includes("canlı") || textLower.includes("canli")) return { text: "Online", target: current };
+            if (textLower.includes("toplam eser")) return { text: "Kreationen", target: current };
+            if (textLower.includes("aklımda") || textLower.includes("aklimda")) return { text: "Gespeichert", target: current };
+            if (textLower.includes("kalplerim") || textLower.includes("kalplerim")) return { text: "Meine Herzen", target: current };
+            
+            for (let key in translations) {
+                if (text.includes(key)) return { text: translations[key], target: current };
+            }
+        }
+
+        if (textLower.length > 0 && textLower.length < 25) {
+            if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) return { text: "Spielpunkte", target: current };
+            if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) return { text: "Uhrzeit / Zaman", target: current };
+            if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) return { text: "Datum / Tarih", target: current };
+            if (/[\u2648-\u2653]/.test(text)) return { text: "Sternzeichen", target: current };
+        }
+
+        if (current.nodeType === 1 && current.matches) {
+            for (let item of iconTooltips) {
+                if (current.matches(item.selector)) return { text: item.text, target: current };
+            }
+        }
+        current = current.parentElement; depth++;
     }
+    return null;
+}
 
     function createBubble(target, tooltipText) {
         removeBubble(true); 
@@ -14377,6 +14380,15 @@ setInterval(function() {
         }
     };
 })();
+
+setInterval(function() {
+    // Sucht alle Texte in den Buttons und Überschriften
+    document.querySelectorAll('.btn-text, .sidebar-header h2 span, .sidebar-header h2').forEach(function(el) {
+        if (el.innerHTML.includes('Sayfa İçeriklerim')) {
+            el.innerHTML = el.innerHTML.replace(/Sayfa İçeriklerim/g, 'Sayfa İçerikleri');
+        }
+    });
+}, 500); // Scannt 2x pro Sekunde, um sicherzugehen, dass alte Skripte es nicht wieder zurücksetzen
 
 </script>
 </body>
