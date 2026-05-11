@@ -13414,6 +13414,55 @@ setTimeout(() => {
     setTimeout(updateSearchPlaceholder, 500);
 })();
 
+(function() {
+    function forceGuestButtons() {
+        // Prüfen, ob der Nutzer ausgeloggt ist (Kein user-mode und kein admin-mode)
+        const isGuest = !document.body.classList.contains('user-mode') && !document.body.classList.contains('admin-mode');
+        
+        if (isGuest) {
+            const headerRight = document.querySelector('header#main-header .header-right');
+            const authButtons = document.querySelectorAll('header#main-header .auth-view-btn.guest-only');
+            
+            // Nur auf Desktop und Laptops (ab 769px) hart eingreifen
+            if (window.innerWidth > 768) {
+                let isSmallDesktop = window.innerWidth <= 1250; // Für Lenovo 125% Skalierung
+                
+                // 1. Container (Verpackung) zwingen, rechts oben zu bleiben
+                if (headerRight) {
+                    let gap = isSmallDesktop ? "10px" : "15px";
+                    let rightPos = isSmallDesktop ? "20px" : "3%";
+                    let topPos = isSmallDesktop ? "12px" : "15px";
+                    
+                    headerRight.style.cssText = `display: flex !important; flex-direction: row !important; justify-content: flex-end !important; align-items: center !important; gap: ${gap} !important; position: absolute !important; top: ${topPos} !important; right: ${rightPos} !important; left: auto !important; width: auto !important; height: auto !important; z-index: 100000 !important; pointer-events: auto !important; margin: 0 !important; background: transparent !important; transform: none !important;`;
+                }
+
+                // 2. Beide Buttons zwingen, statisch nebeneinander zu stehen
+                if (authButtons.length > 0) {
+                    let btnWidth = isSmallDesktop ? "110px" : "130px";
+                    let btnPad = isSmallDesktop ? "6px 10px" : "8px 14px";
+                    let btnFont = isSmallDesktop ? "0.75rem" : "0.85rem";
+
+                    authButtons.forEach(btn => {
+                        btn.style.cssText = `display: flex !important; position: static !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; width: ${btnWidth} !important; max-width: none !important; padding: ${btnPad} !important; margin: 0 !important; font-size: ${btnFont} !important; transform: none !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; cursor: pointer !important; z-index: 100001 !important;`;
+                    });
+                }
+            } else {
+                // Auf dem Handy (Mobile) löschen wir die harten JS-Styles, damit dein Mobile-CSS greifen kann
+                if (headerRight) headerRight.style.cssText = "";
+                if (authButtons.length > 0) authButtons.forEach(btn => btn.style.cssText = "");
+            }
+        }
+    }
+
+    // Skript bei jedem wichtigen Event auslösen
+    window.addEventListener('load', forceGuestButtons);
+    window.addEventListener('resize', forceGuestButtons);
+    
+    // Sicherheitsschleife: Erzwingt das Layout nochmal nach 0.5 und 1.5 Sekunden
+    setTimeout(forceGuestButtons, 500);
+    setTimeout(forceGuestButtons, 1500);
+})();
+
 </script>
 </body>
 </html>
