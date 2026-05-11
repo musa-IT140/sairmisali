@@ -12960,11 +12960,11 @@ setTimeout(() => {
 
 (function() {
     // ----------------------------------------------------
-    // 1. CSS: SPRECHBLASE & Z-INDEX PERFEKTION
+    // 1. CSS: SPRECHBLASE, ADMIN-BUTTONS, HEADER FIX
     // ----------------------------------------------------
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Versteckt alle alten System-Übersetzungen */
+        /* Versteckt alte System-Übersetzungen (ABER NICHT in Buttons!) */
         nav .de-sub, header .de-sub, .sidebar .de-sub, 
         .sidebar-right .de-sub, .mobile-bottom-bar .de-sub, 
         .section-title .de-sub, .user-stats .de-sub, 
@@ -12972,12 +12972,34 @@ setTimeout(() => {
             display: none !important; 
         }
 
-        /* Suchfeld-Dropdown Fix (Höchste Priorität über Navigation) */
+        /* 🚀 FIX FÜR BILD 1: Verhindert abgeschnittene Buchstaben im Hauptmenü (Ana Sayfa, Şiirlerim etc.) */
+        nav ul li a, header .nav-link, .header-menu a, .nav-item, .main-nav a {
+            padding-bottom: 8px !important;
+            display: inline-block !important;
+        }
+        header, nav, .header-container, .main-nav {
+            overflow: visible !important;
+        }
+
+        /* ADMIN & USER BUTTON FIX (Kleinere Schrift, kein abgeschnittenes 'g') */
+        button, .btn, .admin-btn, .user-btn {
+            overflow: visible !important;
+            padding-bottom: 6px !important; 
+        }
+        button .de-sub, .btn .de-sub, .admin-btn .de-sub, .user-btn .de-sub {
+            display: block !important; 
+            font-size: 0.65em !important; 
+            line-height: 1.2 !important;
+            margin-top: 3px !important;
+            opacity: 0.85 !important;
+            padding-bottom: 2px !important; 
+        }
+
+        /* Suchfeld-Dropdown Fix */
         .search-container, .header-search, form[action*="search"], #search-form {
             position: relative;
             z-index: 99999998 !important;
         }
-        
         [class*="search-result"], [class*="autocomplete"], [id*="search-result"],
         [class*="dropdown-menu"], .search-dropdown, .search-suggestions {
             position: absolute !important;
@@ -12985,7 +13007,7 @@ setTimeout(() => {
             box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important;
         }
 
-        /* Das Design der Magischen Sprechblase (Desktop & Mobile Synchron) */
+        /* Das Design der Magischen Sprechblase */
         .misali-elegant-bubble {
             position: fixed;
             background: rgba(10, 20, 40, 0.85); 
@@ -13007,48 +13029,28 @@ setTimeout(() => {
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         
-        .misali-elegant-bubble.show {
-            opacity: 1;
-            transform: translate(-50%, -10px); 
-        }
-
+        .misali-elegant-bubble.show { opacity: 1; transform: translate(-50%, -10px); }
         .misali-elegant-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 5px 5px 0;
-            border-style: solid;
-            border-color: rgba(244, 197, 66, 0.5) transparent transparent transparent;
+            content: ''; position: absolute; bottom: -5px; left: 50%;
+            transform: translateX(-50%); border-width: 5px 5px 0;
+            border-style: solid; border-color: rgba(244, 197, 66, 0.5) transparent transparent transparent;
         }
 
-        /* Automatisches Umschlagen, wenn oben kein Platz ist */
-        .misali-elegant-bubble.bubble-below {
-            transform: translate(-50%, -20px);
-        }
-        .misali-elegant-bubble.bubble-below.show {
-            transform: translate(-50%, 5px);
-        }
+        .misali-elegant-bubble.bubble-below { transform: translate(-50%, -20px); }
+        .misali-elegant-bubble.bubble-below.show { transform: translate(-50%, 5px); }
         .misali-elegant-bubble.bubble-below::after {
-            bottom: auto;
-            top: -5px;
-            border-width: 0 5px 5px;
+            bottom: auto; top: -5px; border-width: 0 5px 5px;
             border-color: transparent transparent rgba(244, 197, 66, 0.5) transparent;
         }
 
-        /* Mobile Anpassung für iOS/Android */
         @media (max-width: 768px) {
-            .misali-elegant-bubble {
-                font-size: 0.55rem; 
-                padding: 4px 10px;  
-            }
+            .misali-elegant-bubble { font-size: 0.55rem; padding: 4px 10px; }
         }
     `;
     document.head.appendChild(style);
 
     // ----------------------------------------------------
-    // 2. DOM CLEANUP & PLACEHOLDER UPDATE
+    // 2. DOM CLEANUP, SAYFA İÇERİKLERİM & PLACEHOLDER
     // ----------------------------------------------------
     function updateSearchPlaceholder() {
         const searchInputs = document.querySelectorAll('header input, #search-input, .search-bar input');
@@ -13057,6 +13059,7 @@ setTimeout(() => {
 
     function cleanAndRenameUI() {
         updateSearchPlaceholder();
+
         const walkers = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
         while (node = walkers.nextNode()) {
@@ -13072,20 +13075,31 @@ setTimeout(() => {
                 changed = true;
             }
 
+            // Benennt "Kıssa / Fıkra" in "Sayfa İçeriklerim" um
+            if (text.trim() === 'Kıssa / Fıkra' || text.trim() === 'Kıssalar / Fıkralar' || text.trim() === 'Kissa / Fikra') {
+                text = 'Sayfa İçeriklerim';
+                changed = true;
+            } else if (text.includes('Kıssa') && text.includes('Fıkra')) {
+                text = text.replace(/Kıssa(lar)?\s*[\/\-&]?\s*Fıkra(lar)?/gi, 'Sayfa İçeriklerim');
+                changed = true;
+            }
+
             if (parent.closest('nav, header, .sidebar, .sidebar-right, .mobile-bottom-bar, h1, h2, h3, h4, h5, h6, .user-stats, .stat-box')) {
                 if (text.includes('Chat')) { text = text.replace(/Chat/g, 'Sohbet'); changed = true; }
                 if (text.includes('My Profil')) { text = text.replace(/My Profil/g, 'Profilim'); changed = true; }
                 if (/\(.*?\)/.test(text)) { text = text.replace(/\s*\(.*?\)/g, ''); changed = true; }
             }
+
             if (changed) node.nodeValue = text;
         }
     }
     
     cleanAndRenameUI();
     setTimeout(cleanAndRenameUI, 500);
+    setTimeout(cleanAndRenameUI, 1200);
 
     // ----------------------------------------------------
-    // 3. WÖRTERBUCH (REIN DEUTSCH FÜR STATS)
+    // 3. WÖRTERBÜCHER
     // ----------------------------------------------------
     const translations = {
         "Ana Sayfa": "Startseite", "Şiirlerim": "Meine Gedichte", "Sözlerim": "Meine Sprüche",
@@ -13097,16 +13111,13 @@ setTimeout(() => {
         "Sizin Kaleminiz": "Eigene Verse", "Kullanıcı Eserleri": "User Werke", "Kullanici Eserleri": "User Werke",
         "Sohbet": "Chat", "Profilim": "Mein Profil", "Hakkımda": "Über mich",
         "Online Üyeler": "Online User", "Eserlerim": "Meine Werke",
-        // 🚀 NUR DEUTSCH:
-        "Canlı": "Online", "Canli": "Online", 
-        "Toplam Eser": "Kreationen", 
-        "Aklımda": "Gespeichert", "Aklimda": "Gespeichert", 
-        "Kalplerim": "Meine Herzen", 
+        "Canlı": "Online", "Canli": "Online", "Toplam Eser": "Kreationen", 
+        "Aklımda": "Gespeichert", "Aklimda": "Gespeichert", "Kalplerim": "Meine Herzen", 
         "Kayıtlı": "Registriert", "Kayitli": "Registriert", "Aktif": "Aktiv", 
         "Ziyaretçi": "Besucher", "Ziyaretci": "Besucher", "Oynanan": "Gespielte Spiele", 
         "Burçlar": "Sternzeichen", "Zodyak": "Sternzeichen",
         "İsim": "Name", "Isim": "Name", "Adınız": "Name", "Ara": "Suchen",
-        "Şair Misal.i": "Şair Misal.i"
+        "Şair Misal.i": "Şair Misal.i", "Sayfa İçeriklerim": "Seiten Bereiche" 
     };
 
     const iconTooltips = [
@@ -13128,7 +13139,7 @@ setTimeout(() => {
     ];
 
     // ----------------------------------------------------
-    // 4. BUBBLE ENGINE (SYNCHRON FÜR ALLE GERÄTE)
+    // 4. BUBBLE ENGINE
     // ----------------------------------------------------
     let hoverTimer = null;
     let clickTimer = null;
@@ -13149,27 +13160,38 @@ setTimeout(() => {
     function getTooltipData(element) {
         let current = element;
         let depth = 0;
+        
         while (current && current !== document.body && depth < 5) { 
             let rect = current.getBoundingClientRect();
             if (rect.width > window.innerWidth * 0.8) { current = current.parentElement; depth++; continue; }
 
-            // Profilbild Priorität
-            if (current.nodeType === 1 && current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil'))) {
-                return { text: "Şair Misal.i", target: current }; 
+            if (current.nodeType === 1) {
+                if (current.tagName === 'IMG' && (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil'))) {
+                    return { text: "Şair Misal.i", target: current }; 
+                }
+                if (current.matches('.fa-feather, .fa-feather-alt, .fa-pen-nib')) {
+                    return { text: "Webseiten Ersteller", target: current };
+                }
             }
 
-            let text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
+            let text = "";
+            if (current.tagName === 'INPUT') { text = current.placeholder || ""; } 
+            else { text = (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim(); }
             let textLower = text.toLowerCase();
 
-            // Wort-Check (Nur Deutsch-Ergebnisse)
             if (textLower.length > 0 && textLower.length < 80) {
-                if (textLower.includes("şair misal.i")) return { text: "Şair Misal.i", target: current };
+                if (textLower.includes("şair misal.i") || textLower.includes("şair misali")) return { text: "Şair Misal.i", target: current };
+                if (textLower.includes("sayfa içeriklerim") || textLower.includes("sayfa iceriklerim")) return { text: "Seiten Bereiche", target: current };
+                if (textLower.includes("canlı") || textLower.includes("canli")) return { text: "Online", target: current };
+                if (textLower.includes("toplam eser")) return { text: "Kreationen", target: current };
+                if (textLower.includes("aklımda") || textLower.includes("aklimda")) return { text: "Gespeichert", target: current };
+                if (textLower.includes("kalplerim") || textLower.includes("kalplerim")) return { text: "Meine Herzen", target: current };
+                
                 for (let key in translations) {
                     if (text.includes(key)) return { text: translations[key], target: current };
                 }
             }
 
-            // Regex-Check (Punkte, Uhrzeit, Datum)
             if (textLower.length > 0 && textLower.length < 25) {
                 if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) return { text: "Spielpunkte", target: current };
                 if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) return { text: "Uhrzeit / Zaman", target: current };
@@ -13177,7 +13199,6 @@ setTimeout(() => {
                 if (/[\u2648-\u2653]/.test(text)) return { text: "Sternzeichen", target: current };
             }
 
-            // Icon-Check
             if (current.nodeType === 1 && current.matches) {
                 for (let item of iconTooltips) {
                     if (current.matches(item.selector)) return { text: item.text, target: current };
@@ -13200,20 +13221,22 @@ setTimeout(() => {
 
         let leftPos = rect.left + (rect.width / 2);
         let topPos = rect.top - 25; 
+
         if (topPos < 10) { topPos = rect.bottom + 5; currentBubble.classList.add('bubble-below'); }
 
         currentBubble.style.left = leftPos + 'px';
         currentBubble.style.top = topPos + 'px'; 
+
         requestAnimationFrame(() => requestAnimationFrame(() => currentBubble && currentBubble.classList.add('show')));
     }
 
     const targetSelector = 'a, button, li, p, span, h1, h2, h3, h4, h5, h6, i, input, img, div, label';
 
-    // HOVER LOGIK (Überall aktiv)
     document.addEventListener('mouseover', function(e) {
         if (activeClickBubble) return; 
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
         target = target.closest(targetSelector);
+        if (!target || currentHoverTarget === target) return; 
         let data = getTooltipData(target);
         if (data) {
             currentHoverTarget = data.target;
@@ -13222,24 +13245,20 @@ setTimeout(() => {
         }
     }, true); 
 
-    document.addEventListener('mouseout', function() {
-        clearTimeout(hoverTimer);
-        currentHoverTarget = null;
+    document.addEventListener('mouseout', function(e) {
+        clearTimeout(hoverTimer); currentHoverTarget = null;
         if (!activeClickBubble) removeBubble(true); 
     }, true);
 
-    // KLICK LOGIK (Immer 2 Sekunden, Desktop & Mobile)
     document.addEventListener('click', function(e) {
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
         target = target.closest(targetSelector);
+        if (!target) return;
         let data = getTooltipData(target);
         if (data) {
-            clearTimeout(hoverTimer);
-            clearTimeout(clickTimer);
-            removeBubble(true); 
+            clearTimeout(hoverTimer); clearTimeout(clickTimer); removeBubble(true); 
             clickTimer = setTimeout(() => {
-                activeClickBubble = true; 
-                createBubble(data.target, data.text);
+                activeClickBubble = true; createBubble(data.target, data.text);
                 setTimeout(() => removeBubble(true), 2500); 
             }, 2000); 
         }
@@ -13261,128 +13280,6 @@ setTimeout(() => {
     
     // Zur Sicherheit nach einer halben Sekunde nochmal (falls die Seite etwas Ladezeit braucht)
     setTimeout(updateSearchPlaceholder, 500);
-})();
-    
-(function() {
-    /* ==========================================================================
-       🛠️ 1. GÜNCELLE (UPDATE) BUTTON FIX - REAGIERT SOFORT & FEHLERFREI
-       ========================================================================== */
-    window.adminSaveEdit = function() {
-        try {
-            let type = document.getElementById('admin-edit-type').value;
-            let id = document.getElementById('admin-edit-item-select').value;
-            
-            if(!id) {
-                window.showToast('Lütfen güncellenecek eseri seçin! <span class="de-sub">(Bitte Werk auswählen)</span>');
-                return;
-            }
-
-            let items = type === 'userPoems' ? window.userPoemsDB : (type === 'bilmeceler' ? window.bilmecelerDB : (type === 'bulmacalar' ? window.bulmacalarDB : window.contentDB[type]));
-            let item = items.find(x => x.id === id);
-            
-            if(!item) {
-                window.customAlert('Kritik Hata: Eser bulunamadı! <span class="de-sub">(Werk nicht gefunden!)</span>', '❌');
-                return;
-            }
-
-            // Werte aus den Inputs ziehen (Wenn leer, behalte den alten Wert)
-            item.trTitle = document.getElementById('admin-edit-tr-title').value.trim() || item.trTitle;
-            item.deTitle = document.getElementById('admin-edit-de-title').value.trim() || item.deTitle;
-            item.trText = document.getElementById('admin-edit-tr-text').value.trim() || item.trText;
-            item.deText = document.getElementById('admin-edit-de-text').value.trim() || item.deText;
-            item.emoji = document.getElementById('admin-edit-emoji').value || item.emoji;
-
-            // Spezial-Zuweisungen je nach Typ
-            if(type === 'userPoems') { item.title = item.trTitle; item.text = item.trText; }
-            if(type === 'persons') { item.quote = item.trText; item.url = document.getElementById('admin-edit-url').value.trim(); }
-            if(type === 'atasozleri') { item.authorTR = document.getElementById('admin-edit-author').value.trim() || 'Anonim'; item.authorDE = document.getElementById('admin-edit-author').value.trim() || 'Unbekannt'; }
-            if(type === 'ticker') { item.tr = item.trText; item.de = item.deText; }
-
-            // In die korrekte Datenbank speichern
-            if(type === 'userPoems') {
-                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            } else if (type === 'bilmeceler' || type === 'bulmacalar') {
-                window.contentDB[type] = items;
-                localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
-            } else {
-                localStorage.setItem('misaliFullDB', JSON.stringify(window.contentDB));
-            }
-
-            // Sync triggern!
-            window.lastLocalUpdate = Date.now() + 5000; 
-            if(window.syncToCloud) window.syncToCloud();
-            
-            // Erfolg melden
-            window.showToast('Başarıyla güncellendi! <span class="de-sub" style="color:inherit; font-size:0.85em;">(Erfolgreich geupdatet)</span>');
-
-            // 🚀 SOFORTIGES UI UPDATE (Das hat vorher gefehlt!)
-            if(window.initContent) window.initContent();
-            if(window.renderBilmeces && type === 'bilmeceler') window.renderBilmeces();
-            if(window.renderBulmacalar && type === 'bulmacalar') window.renderBulmacalar();
-            if(window.renderAtasozleri && type === 'atasozleri') window.renderAtasozleri();
-            if(window.renderUserWorksGrid && type === 'userPoems') window.renderUserWorksGrid();
-            if(window.renderUserWorksSidebar && type === 'userPoems') window.renderUserWorksSidebar();
-
-            // Falls das Werk zufällig gerade im Lese-Fenster offen ist, aktualisiere es live!
-            if(window.currentPoemData && window.currentPoemData.id === id) {
-                window.currentPoemData = { ...item, type: type };
-                if(document.getElementById('contentModal') && document.getElementById('contentModal').classList.contains('active-modal')) {
-                    let hasTr = !!(item.trTitle || item.trText);
-                    if (window.switchModalLang) window.switchModalLang(hasTr ? 'TR' : 'DE');
-                }
-            }
-
-            // Edit-Bereich wieder einklappen, damit man sieht, dass es fertig ist
-            document.getElementById('admin-edit-item-select').value = "";
-            document.getElementById('admin-edit-fields').style.display = "none";
-            
-        } catch (err) {
-            console.error("Güncelle Error: ", err);
-            window.customAlert('Sistem Hatası! <span class="de-sub">(Systemfehler beim Speichern)</span>', '❌');
-        }
-    };
-
-
-    /* ==========================================================================
-       🛡️ 2. UNZERSTÖRBARE DATEN-FESTUNG (VERHINDERT DATENVERLUST BEI HTML UPDATE)
-       ========================================================================== */
-    window.safeMasterSync = async function() {
-        if (!database || !database.ref) return;
-
-        try {
-            console.log("🛡️ Master Sync gestartet: Prüfe Cloud-Daten...");
-            
-            // 1. Zwingt das System, VOR ALLEM ANDEREN die Cloud abzufragen
-            const snapshot = await database.ref('misaliData').once('value');
-            const cloudData = snapshot.val();
-
-            if (cloudData) {
-                console.log("📥 Cloud-Daten gefunden! Überschreibe lokale (leere) HTML-Defaults.");
-                
-                // Wir zwingen das System, die Cloud-Daten zu schlucken (force = true)
-                // Dadurch wird verhindert, dass eine frische HTML-Datei (mit Timestamp 0) 
-                // aus Versehen die vollen Cloud-Daten überschreibt!
-                if(window.processCloudData) window.processCloudData(cloudData, true);
-                
-            } else {
-                console.log("📤 Cloud ist leer. Lade initiale HTML-Daten in die Cloud hoch.");
-                if(window.syncToCloud) window.syncToCloud();
-            }
-        } catch(e) {
-            console.error("🚨 Master Sync Fehler: Keine Verbindung zur Cloud möglich!", e);
-        }
-    };
-
-    // Sobald die Firebase-Datenbank bereit ist und die Seite geladen hat, feuern wir den Master Sync ab!
-    document.addEventListener('DOMContentLoaded', () => {
-        // Kurze Verzögerung, um sicherzustellen, dass Firebase intialisiert wurde
-        setTimeout(() => {
-            if (typeof database !== 'undefined') {
-                window.safeMasterSync();
-            }
-        }, 1000);
-    });
-
 })();
 
 </script>
