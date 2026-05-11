@@ -1541,32 +1541,58 @@ nav#main-nav, nav {
     }
 
     /* ==================================================================
-       🔥 GUEST-MODE (AUSGELOGGT) 🔥
-       ================================================================== */
-    body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display: none !important; }
-    
+   🔥 GUEST-MODE (AUSGELOGGT) - RESPONSIVE FIX 🔥
+   ================================================================== */
+body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display: none !important; }
+
+/* 📱 1. NUR FÜR HANDYS (Mobile Ansicht) */
+@media (max-width: 768px) {
     body:not(.user-mode):not(.admin-mode) #main-header .header-right {
         display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; gap: 15px !important; width: 100% !important; order: 1 !important; margin-top: 5px !important; position: relative !important; z-index: 2000 !important; pointer-events: auto !important;
     }
     body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
         display: flex !important; flex: 1 !important; max-width: 45% !important; padding: 8px !important; font-size: 0.85rem !important; margin: 0 !important; flex-direction: column !important; position: relative !important; z-index: 2001 !important; pointer-events: auto !important; cursor: pointer !important;
     }
-
-    body:not(.user-mode):not(.admin-mode) #main-header .logo {
-        margin-top: 25px !important; 
-    }
-
-    /* KOORDINATEN (Ausgeloggt) */
-    body:not(.user-mode):not(.admin-mode) #main-header #user-notify-btn {
-        top: 65px !important; 
-    }
+    body:not(.user-mode):not(.admin-mode) #main-header .logo { margin-top: 25px !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header #user-notify-btn { top: 65px !important; }
     body:not(.user-mode):not(.admin-mode) #main-header #weather-widget, 
-    body:not(.user-mode):not(.admin-mode) #main-header .weather-widget {
-        top: 92px !important; 
+    body:not(.user-mode):not(.admin-mode) #main-header .weather-widget { top: 92px !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header .datetime-container { margin-top: 40px !important; }
+}
+
+/* 💻 2. NUR FÜR DESKTOP / LENOVO NOTEBOOKS (PC Ansicht) */
+@media (min-width: 769px) {
+    body:not(.user-mode):not(.admin-mode) #main-header .header-right {
+        display: flex !important; 
+        flex-direction: row !important; 
+        justify-content: flex-end !important; 
+        align-items: center !important; 
+        gap: 15px !important; 
+        width: auto !important; 
+        position: absolute !important; 
+        top: 15px !important; 
+        right: 3% !important; 
+        z-index: 2000 !important; 
+        pointer-events: auto !important;
+        margin-top: 0 !important;
     }
-    body:not(.user-mode):not(.admin-mode) #main-header .datetime-container {
-        margin-top: 40px !important; 
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+        display: flex !important; 
+        width: 130px !important; /* Normale PC-Breite statt 45% */
+        max-width: none !important;
+        padding: 8px 14px !important; 
+        flex-direction: column !important; 
+        position: relative !important; 
+        margin: 0 !important;
     }
+    
+    /* Repariert die verschobenen Koordinaten auf dem PC */
+    body:not(.user-mode):not(.admin-mode) #main-header .logo { margin-top: 0 !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header #user-notify-btn { top: 75px !important; right: 3% !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header #weather-widget, 
+    body:not(.user-mode):not(.admin-mode) #main-header .weather-widget { top: 75px !important; right: calc(3% + 60px) !important; }
+    body:not(.user-mode):not(.admin-mode) #main-header .datetime-container { margin-top: 0 !important; }
+}
 
     /* ==================================================================
        🔥 SUCHE, ZÄHLER & NAVBAR 🔥
@@ -2071,6 +2097,8 @@ nav#main-nav, nav {
         -webkit-overflow-scrolling: touch !important; 
         /* ACHTUNG: touch-action wurde hier absichtlich entfernt, damit Klicks wieder perfekt funktionieren! */
     }
+
+    
 
 </style>
     <script>
@@ -13385,6 +13413,61 @@ setTimeout(() => {
     // Zur Sicherheit nach einer halben Sekunde nochmal (falls die Seite etwas Ladezeit braucht)
     setTimeout(updateSearchPlaceholder, 500);
 })();
+
+/* ==========================================================================
+   💻 LENOVO / DESKTOP FIX: GUEST-MODE (AUSGELOGGT) PERFEKT ZENTRIERT
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* 1. Befreit den Container und setzt ihn als Box nach rechts oben */
+    body:not(.user-mode):not(.admin-mode) header#main-header .header-right {
+        display: flex !important; 
+        flex-direction: row !important; 
+        justify-content: flex-end !important; 
+        align-items: center !important; 
+        gap: 15px !important; /* Exakter Abstand zwischen Giriş und Kayıt Ol */
+        width: auto !important; 
+        height: auto !important;
+        position: absolute !important; 
+        top: 15px !important; 
+        right: 3% !important; 
+        left: auto !important;
+        z-index: 100000 !important; 
+        pointer-events: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    /* 2. Zwingt BEIDE Buttons in die Box (Kein Herumfliegen mehr!) */
+    body:not(.user-mode):not(.admin-mode) header#main-header .auth-view-btn {
+        display: flex !important; 
+        position: relative !important; /* WICHTIG: Überschreibt das alte "absolute" */
+        width: 130px !important; 
+        max-width: none !important;
+        padding: 8px 14px !important; 
+        flex-direction: column !important; 
+        margin: 0 !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+    }
+
+    /* 3. Etwas kompakter für kleine Lenovo Bildschirme (125% Windows Skalierung) */
+    @media (max-width: 1250px) {
+        body:not(.user-mode):not(.admin-mode) header#main-header .header-right {
+            right: 20px !important;
+            gap: 10px !important;
+            top: 12px !important;
+        }
+        body:not(.user-mode):not(.admin-mode) header#main-header .auth-view-btn {
+            width: 110px !important;
+            padding: 6px 10px !important;
+            font-size: 0.75rem !important;
+        }
+    }
+}
 
 </script>
 </body>
