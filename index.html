@@ -13715,6 +13715,669 @@ setInterval(function() {
     });
 })();
 
+
+(function() {
+    // 🛠️ HILFSFUNKTIONEN FÜR KUGELSICHERE DATEN 🛠️
+    // Macht die Objekte so "fett", dass jedes Spiel seine Variablen findet, egal wie sie heißen!
+    function makeTF(tr, de, ans) { return { tr:tr, de:de, qTR:tr, qDE:de, textTR:tr, textDE:de, ans:ans, answer:ans, correct:ans, isTrue:ans, dogruMu:ans }; }
+    function makeMQ(tr, de, optsTR, optsDE, ans) { return { tr:tr, de:de, qTR:tr, qDE:de, textTR:tr, textDE:de, optsTR:optsTR, optsDE:optsDE, optionsTR:optsTR, optionsDE:optsDE, seceneklerTR:optsTR, seceneklerDE:optsDE, ans:ans, answer:ans, correct:ans }; }
+    
+    // Baut Arrays, die über alle Methoden ausgelesen werden können (Flach, Index 0-2, oder Key "1"-"3")
+    function buildHybrid(l1, l2, l3) {
+        let arr = [].concat(l1, l2, l3);
+        arr["1"] = l1; arr["2"] = l2; arr["3"] = l3;
+        arr[0] = l1; arr[1] = l2; arr[2] = l3;
+        return arr;
+    }
+
+    // ==================================================================
+    // 1. KELİME AVI & KELİME BULMACA (Wörter: 100+ pro Sprache!)
+    // ==================================================================
+    window.gameWordsTR = [
+        "EDEBİYAT","İSTİKLAL","HÜRRİYET","MUHABBET","YAKAMOZ","GÖKYÜZÜ","ŞAFAK","KELİME","FELSEFE","MİMARİ","TEBESSÜM","HAKİKAT","MERHAMET","SADAKAT","TEVAZU","HOŞGÖRÜ","İHTİRAM","CESARET","HAYAL","MUCİZE","İSTİKBAL","MÜTEVAZI","MÜKEMMEL","HUZUR","SONBAHAR","İLKBAHAR","ŞAHESER","GELENEK","GÖRENEK","İHTİŞAM","İHTİRAS","KAHRAMAN","DESTAN","EFSANE","HİKAYE","ROMAN","YAZAR","ŞAİR","SANATÇI","DUYGU","HASRET","GURUR","KADER","SEVDALI","AŞIK","BİLGELİK","ERDEM","ÖZGÜRLÜK","ADALET","SEVİNÇ","GÖZYAŞI","VEDA","KAVUŞMA","YILDIZ","EVREN","DOĞA","MANZARA","ŞİİR","MISRA","KAFİYE","VEFA","ZARAFET","ZAMAN","MEKAN","HATIRA","YADİGAR","GÖLGE","IŞIK","GÜNEŞ","UMUT","YALNIZLIK","SESSİZLİK","RÜZGAR","TUTKU","İSYAN","HAYAT","ÖLÜM","GERÇEK","SIR","BİLMECE","AŞK","SEVGİ","SAYGI","GÜVEN","İNANÇ","DOST","YAREN","YOLCU","YOLCULUK","HEDEF","ZAFER","BİLİM","SANAT","TARİH","KÜLTÜR","DÜŞÜNCE","AKIL","ZİHİN","KALP","YÜREK"
+    ];
+    window.gameWordsDE = [
+        "LITERATUR","FREIHEIT","UNABHAENGIGKEIT","GESPRAECH","MONDLICHT","HIMMEL","MORGENROETE","WORT","PHILOSOPHIE","ARCHITEKTUR","LAECHELN","WAHRHEIT","BARMHERZIGKEIT","LOYALITAET","BESCHEIDENHEIT","TOLERANZ","RESPEKT","MUT","TRAUM","WUNDER","ZUKUNFT","PERFEKTION","FRIEDEN","HERBST","FRUEHLING","MEISTERWERK","TRADITION","BRAUCH","PRACHT","LEIDENSCHAFT","HELD","EPOS","LEGENDE","GESCHICHTE","ROMAN","AUTOR","DICHTER","KUENSTLER","GEFUEHL","SEHNSUCHT","STOLZ","SCHICKSAL","WEISHEIT","TUGEND","GERECHTIGKEIT","FREUDE","TRAENE","ABSCHIED","WIEDERSEHEN","STERN","UNIVERSUM","NATUR","LANDSCHAFT","GEDICHT","VERS","REIM","TREUE","ELEGANZ","ZEIT","RAUM","ERINNERUNG","ANDENKEN","SCHATTEN","LICHT","SONNE","HOFFNUNG","EINSAMKEIT","STILLE","WIND","REBELLION","LEBEN","TOD","GEHEIMNIS","RAETSEL","LIEBE","VERTRAUEN","GLAUBE","FREUND","GEFAEHRTE","REISENDER","REISE","ZIEL","SIEG","WISSENSCHAFT","KUNST","HISTORIE","KULTUR","GEDANKE","VERSTAND","GEIST","HERZ","SEELE","BLUETE","WALD","MEER","FLUSS","BERG","TAL","STADT","DORF"
+    ];
+    
+    // Hook für Anagramm und Hangman setzen
+    if(typeof window.initAnagram !== 'undefined') { const origA = window.initAnagram; window.initAnagram = function(){ window.anagramWordsTR = window.gameWordsTR; window.anagramWordsDE = window.gameWordsDE; origA(); }; }
+    if(typeof window.initHangman !== 'undefined') { const origH = window.initHangman; window.initHangman = function(){ window.hangmanWordsTR = window.gameWordsTR; window.hangmanWordsDE = window.gameWordsDE; origH(); }; }
+
+    // ==================================================================
+    // 2. DOĞRU MU YANLIŞ MI (True/False - 3 Levels)
+    // ==================================================================
+    let tfLevel1 = [
+        makeTF("Türkiye'nin başkenti Ankara'dır.", "Die Hauptstadt der Türkei ist Ankara.", true),
+        makeTF("Güneş bir gezegendir.", "Die Sonne ist ein Planet.", false),
+        makeTF("Su 100 derecede kaynar.", "Wasser kocht bei 100 Grad.", true),
+        makeTF("İnekler uçabilir.", "Kühe können fliegen.", false),
+        makeTF("Bir yılda 12 ay vardır.", "Ein Jahr hat 12 Monate.", true),
+        makeTF("Ay, dünyadan daha büyüktür.", "Der Mond ist größer als die Erde.", false),
+        makeTF("Elma bir sebzedir.", "Der Apfel ist ein Gemüse.", false),
+        makeTF("İnsanların üç gözü vardır.", "Menschen haben 3 Augen.", false),
+        makeTF("Dünya yuvarlaktır.", "Die Erde ist rund.", true),
+        makeTF("Karpuz mavi renktedir.", "Wassermelonen sind blau.", false),
+        makeTF("Karıncalar uçar.", "Ameisen fliegen.", false),
+        makeTF("Şeker tatlıdır.", "Zucker ist süß.", true)
+    ];
+    let tfLevel2 = [
+        makeTF("Örümceklerin 6 bacağı vardır.", "Spinnen haben 6 Beine.", false),
+        makeTF("Everest, dünyanın en yüksek dağıdır.", "Der Mount Everest ist der höchste Berg der Welt.", true),
+        makeTF("Penguenler sadece Kuzey Kutbu'nda yaşar.", "Pinguine leben nur am Nordpol.", false),
+        makeTF("İnsan vücudundaki en büyük organ deridir.", "Das größte Organ des Menschen ist die Haut.", true),
+        makeTF("Nil nehri, dünyanın en uzun nehridir.", "Der Nil ist der längste Fluss der Welt.", true),
+        makeTF("Albert Einstein telefonu icat etmiştir.", "Albert Einstein hat das Telefon erfunden.", false),
+        makeTF("Köpekbalıkları memelidir.", "Haie sind Säugetiere.", false),
+        makeTF("Işık sesten daha hızlı yayılır.", "Licht ist schneller als der Schall.", true),
+        makeTF("Ahtapotlar böcek türüdür.", "Oktopusse sind eine Insektenart.", false),
+        makeTF("Mavi ve sarı rengin karışımı yeşili oluşturur.", "Blau und Gelb gemischt ergibt Grün.", true)
+    ];
+    let tfLevel3 = [
+        makeTF("Venüs, Güneş sistemindeki en sıcak gezegendir.", "Die Venus ist der heißeste Planet im Sonnensystem.", true),
+        makeTF("Ahtapotların 3 tane kalbi vardır.", "Oktopusse haben 3 Herzen.", true),
+        makeTF("Yarasaların kanı mavidir.", "Fledermäuse haben blaues Blut.", false),
+        makeTF("DNA'nın yapısı 1953 yılında keşfedilmiştir.", "Die DNA-Struktur wurde 1953 entdeckt.", true),
+        makeTF("Dünyanın en derin yeri Mariana Çukuru'dur.", "Der tiefste Punkt der Erde ist der Marianengraben.", true),
+        makeTF("Periyodik tabloda K harfi Kalsiyum'u temsil eder.", "Im Periodensystem steht K für Kalzium.", false),
+        makeTF("Zürafaların ses telleri yoktur.", "Giraffen haben keine Stimmbänder.", true),
+        makeTF("Rusya, sadece Asya kıtasındadır.", "Russland liegt nur in Asien.", false),
+        makeTF("Altın havada oksitlenir ve paslanır.", "Gold oxidiert und rostet an der Luft.", false),
+        makeTF("İlk matbaayı Gutenberg icat etmiştir.", "Gutenberg hat den ersten Buchdruck erfunden.", true)
+    ];
+    window.tfQuestions = buildHybrid(tfLevel1, tfLevel2, tfLevel3);
+    window.tfData = window.tfQuestions;
+
+    // ==================================================================
+    // 3. KİM MİLYONER OLMAK İSTER (3 Levels)
+    // ==================================================================
+    let milLevel1 = [
+        makeMQ("Gökyüzü genelde ne renktir?", "Welche Farbe hat der Himmel meistens?", ["Mavi","Yeşil","Kırmızı","Sarı"], ["Blau","Grün","Rot","Gelb"], 0),
+        makeMQ("Hangi hayvan süt verir?", "Welches Tier gibt Milch?", ["İnek","Yılan","Karga","Kartal"], ["Kuh","Schlange","Krähe","Adler"], 0),
+        makeMQ("Haftanın ilk günü hangisidir?", "Was ist der erste Tag der Woche?", ["Pazar","Pazartesi","Salı","Çarşamba"], ["Sonntag","Montag","Dienstag","Mittwoch"], 1),
+        makeMQ("Türk bayrağının renkleri nelerdir?", "Welche Farben hat die türkische Flagge?", ["Sarı Kırmızı","Kırmızı Beyaz","Mavi Beyaz","Siyah Beyaz"], ["Gelb Rot","Rot Weiß","Blau Weiß","Schwarz Weiß"], 1),
+        makeMQ("Hangisi bir meyvedir?", "Was ist ein Obst?", ["Elma","Patates","Soğan","Havuç"], ["Apfel","Kartoffel","Zwiebel","Karotte"], 0),
+        makeMQ("Hangi taşıt havada gider?", "Welches Verkehrsmittel fliegt in der Luft?", ["Gemi","Uçak","Tren","Araba"], ["Schiff","Flugzeug","Zug","Auto"], 1),
+        makeMQ("Hangisi bir renktir?", "Was ist eine Farbe?", ["Kare","Sarı","Üçgen","Daire"], ["Quadrat","Gelb","Dreieck","Kreis"], 1)
+    ];
+    let milLevel2 = [
+        makeMQ("Romeo ve Juliet'in yazarı kimdir?", "Wer ist der Autor von Romeo und Julia?", ["Victor Hugo","Shakespeare","Tolstoy","Goethe"], ["Victor Hugo","Shakespeare","Tolstoi","Goethe"], 1),
+        makeMQ("Güneş sistemindeki en büyük gezegen?", "Der größte Planet im Sonnensystem?", ["Mars","Venüs","Jüpiter","Dünya"], ["Mars","Venus","Jupiter","Erde"], 2),
+        makeMQ("Hangi elementin sembolü 'Fe'dir?", "Welches Element hat das Symbol 'Fe'?", ["Demir","Bakır","Altın","Gümüş"], ["Eisen","Kupfer","Gold","Silber"], 0),
+        makeMQ("Titanic kaç yılında batmıştır?", "In welchem Jahr sank die Titanic?", ["1905","1912","1920","1935"], ["1905","1912","1920","1935"], 1),
+        makeMQ("Kaldırımlar şiirinin şairi kimdir?", "Wer schrieb das Gedicht 'Kaldırımlar'?", ["Orhan Veli","Cemal Süreya","Necip Fazıl","Nazım Hikmet"], ["Orhan Veli","Cemal Süreya","Necip Fazıl","Nazım Hikmet"], 2),
+        makeMQ("Eyfel Kulesi hangi şehirdedir?", "In welcher Stadt steht der Eiffelturm?", ["Londra","Roma","Paris","Berlin"], ["London","Rom","Paris","Berlin"], 2),
+        makeMQ("Mona Lisa tablosu hangi müzededir?", "In welchem Museum befindet sich die Mona Lisa?", ["Prado","British","Louvre","Uffizi"], ["Prado","British","Louvre","Uffizi"], 2)
+    ];
+    let milLevel3 = [
+        makeMQ("Nobel ödülleri hangi ülkede verilir?", "In welchem Land werden Nobelpreise verliehen?", ["İsviçre","Norveç","İsveç","Danimarka"], ["Schweiz","Norwegen","Schweden","Dänemark"], 2),
+        makeMQ("Suyun kimyasal formülü nedir?", "Was ist die chemische Formel von Wasser?", ["HO2","H2O","CO2","O2H"], ["HO2","H2O","CO2","O2H"], 1),
+        makeMQ("Sefiller romanının yazarı kimdir?", "Wer schrieb 'Die Elenden' (Les Misérables)?", ["Dostoyevski","Balzac","Victor Hugo","Dickens"], ["Dostojewski","Balzac","Victor Hugo","Dickens"], 2),
+        makeMQ("En uzun süre tahtta kalan Osmanlı Padişahı?", "Der am längsten regierende osmanische Sultan?", ["Fatih","Yavuz","Kanuni","Abdülhamid"], ["Fatih","Yavuz","Süleyman","Abdülhamid"], 2),
+        makeMQ("Düşünüyorum öyleyse varım sözü kime aittir?", "Von wem stammt 'Ich denke, also bin ich'?", ["Kant","Sokrates","Descartes","Plato"], ["Kant","Sokrates","Descartes","Plato"], 2),
+        makeMQ("Röntgeni icat eden bilim insanı kimdir?", "Wer hat die Röntgenstrahlung erfunden?", ["Curie","Tesla","Röntgen","Edison"], ["Curie","Tesla","Röntgen","Edison"], 2),
+        makeMQ("Görelilik teorisini kim bulmuştur?", "Wer entdeckte die Relativitätstheorie?", ["Newton","Bohr","Einstein","Hawking"], ["Newton","Bohr","Einstein","Hawking"], 2)
+    ];
+    window.milyonerQuestions = buildHybrid(milLevel1, milLevel2, milLevel3);
+    window.milyonerData = window.milyonerQuestions;
+
+    // ==================================================================
+    // 4. ŞİİRSEL QUİZ (Poetry & Literature - 3 Levels)
+    // ==================================================================
+    let quizL1 = [
+        makeMQ("İstiklal Marşı'nın şairi kimdir?", "Wer ist der Dichter der türkischen Nationalhymne?", ["Namık Kemal", "Mehmet Akif Ersoy", "Necip Fazıl Kısakürek", "Cemal Süreya"], ["Namık Kemal", "Mehmet Akif Ersoy", "Necip Fazıl", "Cemal Süreya"], 1),
+        makeMQ("Romeo ve Juliet hangi yazarın eseridir?", "Von welchem Autor stammt 'Romeo und Julia'?", ["Victor Hugo", "William Shakespeare", "Charles Dickens", "Leo Tolstoy"], ["Victor Hugo", "Shakespeare", "Charles Dickens", "Leo Tolstoi"], 1),
+        makeMQ("'Küçük Prens' kitabının yazarı kimdir?", "Wer ist der Autor von 'Der kleine Prinz'?", ["Antoine de Saint-Exupéry", "Jules Verne", "Albert Camus", "Marcel Proust"], ["Saint-Exupéry", "Jules Verne", "Albert Camus", "Marcel Proust"], 0)
+    ];
+    let quizL2 = [
+        makeMQ("'Kaldırımlar' şiiri kime aittir?", "Wem gehört das Gedicht 'Kaldırımlar'?", ["Orhan Veli", "Nazım Hikmet", "Necip Fazıl Kısakürek", "Attila İlhan"], ["Orhan Veli", "Nazım Hikmet", "Necip Fazıl", "Attila İlhan"], 2),
+        makeMQ("'Suç ve Ceza' romanının yazarı kimdir?", "Wer ist der Autor des Romans 'Schuld und Sühne'?", ["Dostoyevski", "Tolstoy", "Çehov", "Gorki"], ["Dostojewski", "Tolstoi", "Tschechow", "Gorki"], 0),
+        makeMQ("'Die Verwandlung' (Dönüşüm) adlı eserin yazarı kimdir?", "Wer ist der Autor von 'Die Verwandlung'?", ["Franz Kafka", "Hermann Hesse", "Erich Maria Remarque", "Günter Grass"], ["Franz Kafka", "Hermann Hesse", "Erich Maria Remarque", "Günter Grass"], 0)
+    ];
+    let quizL3 = [
+        makeMQ("Alman edebiyatının en ünlü eseri 'Faust'u kim yazmıştır?", "Wer schrieb das Werk 'Faust'?", ["Friedrich Schiller", "Johann Wolfgang von Goethe", "Thomas Mann", "Heinrich Heine"], ["Friedrich Schiller", "Goethe", "Thomas Mann", "Heinrich Heine"], 1),
+        makeMQ("Mesnevi adlı eser kimin kaleminden çıkmıştır?", "Wer hat das Werk 'Masnawī' verfasst?", ["Yunus Emre", "Hacı Bektaş Veli", "Mevlana Celaleddin Rumi", "Fuzuli"], ["Yunus Emre", "Hacı Bektaş Veli", "Rumi", "Fuzuli"], 2),
+        makeMQ("Hangi şair 'Garip' akımının kurucularındandır?", "Welcher Dichter ist Gründer der 'Garip'-Bewegung?", ["Turgut Uyar", "Orhan Veli Kanık", "Sezai Karakoç", "Edip Cansever"], ["Turgut Uyar", "Orhan Veli Kanık", "Sezai Karakoç", "Edip Cansever"], 1)
+    ];
+    window.quizQuestions = buildHybrid(quizL1, quizL2, quizL3);
+    window.quizData = window.quizQuestions;
+
+})();
+
+(function() {
+    // ==================================================================
+    // 1. DOĞRU MU YANLIŞ MI (True/False) FIX
+    // ==================================================================
+    window.startTF = function() {
+        let diff = parseInt(document.getElementById('tf-diff').value) || 2;
+        let levelData = window.tfQuestions[diff] || window.tfQuestions[1]; 
+        
+        // 🚀 Mische die Fragen für diese Runde kräftig durch (Shuffle)
+        window.activeTFList = [...levelData].sort(() => Math.random() - 0.5);
+        window.currentTFIndex = 0;
+        window.tfScore = 0;
+        
+        document.getElementById('tf-score').innerText = window.tfScore;
+        document.getElementById('tf-start-btn').style.display = 'none';
+        document.getElementById('tf-btn-true').style.display = 'flex';
+        document.getElementById('tf-btn-false').style.display = 'flex';
+        document.getElementById('tf-diff').style.display = 'none'; // Verstecke Schwierigkeit beim Spielen
+        
+        window.nextTF();
+    };
+
+    window.nextTF = function() {
+        // Nachschub holen und neu mischen, wenn alle Fragen durch sind
+        if (!window.activeTFList || window.currentTFIndex >= window.activeTFList.length) {
+            let diff = parseInt(document.getElementById('tf-diff').value) || 2;
+            let levelData = window.tfQuestions[diff] || window.tfQuestions[1];
+            window.activeTFList = [...levelData].sort(() => Math.random() - 0.5);
+            window.currentTFIndex = 0;
+        }
+        
+        // Nächste Frage aus dem gemischten Deck ziehen
+        window.currentTF = window.activeTFList[window.currentTFIndex];
+        window.currentTFIndex++;
+        
+        let qText = window.currentGameLang === 'DE' ? window.currentTF.de : window.currentTF.tr;
+        document.getElementById('tf-question').innerHTML = qText;
+        
+        // Buttons wieder freischalten
+        document.getElementById('tf-btn-true').style.pointerEvents = 'auto';
+        document.getElementById('tf-btn-false').style.pointerEvents = 'auto';
+    };
+
+    window.checkTF = function(selectedBool) {
+        if (!window.currentTF) return;
+        
+        // 🚀 DER FIX: Strikt auf Boolean prüfen, egal ob als Text "true" oder echter Wert!
+        let correctAns = (window.currentTF.ans === true || window.currentTF.ans === "true" || window.currentTF.ans === 1);
+        let isCorrect = (correctAns === selectedBool);
+        
+        let btnTrue = document.getElementById('tf-btn-true');
+        let btnFalse = document.getElementById('tf-btn-false');
+        
+        // Klicks blockieren, um Doppelklicks zu vermeiden
+        btnTrue.style.pointerEvents = 'none';
+        btnFalse.style.pointerEvents = 'none';
+        
+        if (isCorrect) {
+            window.tfScore += 10;
+            document.getElementById('tf-score').innerText = window.tfScore;
+            window.showToast(window.currentGameLang === 'DE' ? '✅ Richtig! +10 Punkte' : '✅ Doğru! +10 Puan');
+        } else {
+            window.showToast(window.currentGameLang === 'DE' ? '❌ Leider falsch!' : '❌ Yanlış!');
+        }
+        
+        // Kurz warten (1 Sekunde), dann nächste Frage laden
+        setTimeout(() => {
+            window.nextTF();
+        }, 1000);
+    };
+
+    // ==================================================================
+    // 2. KİM MİLYONER OLMAK İSTER FIX (Anti-Wiederholungs-Gedächtnis)
+    // ==================================================================
+    window.initMilyoner = function() {
+        window.milScore = 0;
+        window.milCurrentLevel = 1;
+        window.usedMilQuestions = []; // 🚀 GEDÄCHTNIS: Speichert bereits gestellte Fragen!
+        
+        document.getElementById('milyoner-msg').innerText = '';
+        document.getElementById('milyoner-next').style.display = 'none';
+        document.getElementById('mil-joker-fifty').style.opacity = '1';
+        document.getElementById('mil-joker-fifty').style.pointerEvents = 'auto';
+        document.getElementById('mil-joker-phone').style.opacity = '1';
+        document.getElementById('mil-joker-phone').style.pointerEvents = 'auto';
+        
+        window.loadMilyonerQ();
+    };
+
+    window.loadMilyonerQ = function() {
+        document.getElementById('milyoner-msg').innerText = '';
+        document.getElementById('milyoner-next').style.display = 'none';
+        
+        let levelData = window.milyonerQuestions[window.milCurrentLevel] || window.milyonerQuestions[1];
+        
+        // 🚀 Filtere Fragen heraus, die im Gedächtnis (Blacklist) stehen
+        let available = levelData.filter(q => !window.usedMilQuestions.includes(q.qTR));
+        
+        if (available.length === 0) {
+            window.usedMilQuestions = []; // Reset, wenn wirklich alle durch sind
+            available = levelData;
+        }
+        
+        // Ziehe eine zufällige Frage aus den verbliebenen
+        let randomQ = available[Math.floor(Math.random() * available.length)];
+        window.currentMil = randomQ;
+        window.usedMilQuestions.push(randomQ.qTR); // Ab in die Blacklist damit!
+        
+        let qText = window.currentGameLang === 'DE' ? randomQ.qDE : randomQ.qTR;
+        let opts = window.currentGameLang === 'DE' ? randomQ.optsDE : randomQ.optsTR;
+        
+        document.getElementById('milyoner-q').innerHTML = `Soru ${window.milCurrentLevel}: <br><span style="font-size:1.1rem; font-weight:normal;">${qText}</span>`;
+        
+        let html = '';
+        opts.forEach((o, i) => {
+            let letter = ['A', 'B', 'C', 'D'][i];
+            html += `<button class="reset-btn" id="mil-opt-${i}" onclick="window.checkMilyoner(${i})" style="padding: 12px; margin: 0; text-align: left; justify-content: flex-start;"><strong>${letter})</strong> ${o}</button>`;
+        });
+        document.getElementById('milyoner-options').innerHTML = html;
+    };
+
+    window.checkMilyoner = function(idx) {
+        if(!window.currentMil) return;
+        let isCorrect = (window.currentMil.ans === idx);
+        
+        // Alle Buttons blockieren
+        for(let i=0; i<4; i++) {
+            let b = document.getElementById('mil-opt-'+i);
+            if(b) b.style.pointerEvents = 'none';
+        }
+        
+        let selectedBtn = document.getElementById('mil-opt-'+idx);
+        let correctBtn = document.getElementById('mil-opt-'+window.currentMil.ans);
+        
+        if (isCorrect) {
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            window.milScore += (window.milCurrentLevel * 50);
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Doğru!'} Kazancın: ${window.milScore}₺</span>`;
+            
+            window.milCurrentLevel++;
+            if (window.milCurrentLevel > 3) {
+                document.getElementById('milyoner-msg').innerHTML += `<br>🏆 MİLYONER OLDUN! (Tebrikler)`;
+                setTimeout(() => window.initMilyoner(), 4000);
+            } else {
+                document.getElementById('milyoner-next').style.display = 'block';
+            }
+        } else {
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) {
+                correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                correctBtn.style.color = 'white';
+            }
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#ef4444;">❌ ${window.currentGameLang === 'DE' ? 'Falsch! Spiel vorbei.' : 'Yanlış! Elendin.'} Toplam: ${window.milScore}₺</span>`;
+            setTimeout(() => window.initMilyoner(), 3500);
+        }
+    };
+
+    window.nextMilyoner = function() { window.loadMilyonerQ(); };
+
+    // ==================================================================
+    // 3. ŞİİRSEL QUİZ FIX (Anti-Wiederholungs-Gedächtnis)
+    // ==================================================================
+    window.loadQuiz = function() {
+        if(!window.usedQuizQuestions) window.usedQuizQuestions = [];
+        document.getElementById('quiz-msg').innerText = '';
+        document.getElementById('quiz-next').style.display = 'none';
+        
+        // Alle Level-Fragen zu einem großen Pool zusammenfassen
+        let allQ = [].concat(window.quizQuestions[1]||[], window.quizQuestions[2]||[], window.quizQuestions[3]||[]);
+        
+        // Filtern gegen Blacklist
+        let available = allQ.filter(q => !window.usedQuizQuestions.includes(q.qTR));
+        if (available.length === 0) {
+            window.usedQuizQuestions = []; // Reset Blacklist
+            available = allQ;
+        }
+        
+        let randomQ = available[Math.floor(Math.random() * available.length)];
+        window.currentQuizQ = randomQ;
+        window.usedQuizQuestions.push(randomQ.qTR); // Ab in die Blacklist
+        
+        let qText = window.currentGameLang === 'DE' ? randomQ.qDE : randomQ.qTR;
+        let opts = window.currentGameLang === 'DE' ? randomQ.optsDE : randomQ.optsTR;
+        
+        document.getElementById('quiz-q').innerHTML = qText;
+        
+        let html = '';
+        opts.forEach((o, i) => {
+            html += `<button class="reset-btn" id="quiz-opt-${i}" onclick="window.checkQuiz(${i})" style="padding: 12px; margin: 0; text-align: center;">${o}</button>`;
+        });
+        document.getElementById('quiz-options').innerHTML = html;
+    };
+
+    window.checkQuiz = function(idx) {
+        if(!window.currentQuizQ) return;
+        let isCorrect = (window.currentQuizQ.ans === idx);
+        
+        for(let i=0; i<4; i++) {
+            let b = document.getElementById('quiz-opt-'+i);
+            if(b) b.style.pointerEvents = 'none';
+        }
+        
+        let selectedBtn = document.getElementById('quiz-opt-'+idx);
+        let correctBtn = document.getElementById('quiz-opt-'+window.currentQuizQ.ans);
+        
+        if (isCorrect) {
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            document.getElementById('quiz-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Harika! Doğru Bildin.'}</span>`;
+        } else {
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) {
+                correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                correctBtn.style.color = 'white';
+            }
+            document.getElementById('quiz-msg').innerHTML = `<span style="color:#ef4444;">❌ ${window.currentGameLang === 'DE' ? 'Falsch!' : 'Yanlış Cevap!'}</span>`;
+        }
+        
+        document.getElementById('quiz-next').style.display = 'block';
+    };
+
+    window.nextQuiz = function() { window.loadQuiz(); };
+})();
+
+(function() {
+    // ==================================================================
+    // 1. DOĞRU MU YANLIŞ MI (Realistischer Modus)
+    // ==================================================================
+    window.checkTF = function(selectedBool) {
+        if (!window.currentTF) return;
+        
+        let correctAns = (window.currentTF.ans === true || window.currentTF.ans === "true" || window.currentTF.ans === 1);
+        let isCorrect = (correctAns === selectedBool);
+        
+        let btnTrue = document.getElementById('tf-btn-true');
+        let btnFalse = document.getElementById('tf-btn-false');
+        
+        // Klicks sofort blockieren
+        btnTrue.style.pointerEvents = 'none';
+        btnFalse.style.pointerEvents = 'none';
+        
+        if (isCorrect) {
+            window.tfScore += 10;
+            document.getElementById('tf-score').innerText = window.tfScore;
+            window.showToast(window.currentGameLang === 'DE' ? '✅ Richtig! +10 Punkte' : '✅ Doğru! +10 Puan');
+            
+            // Nächste Frage nach kurzer Pause
+            setTimeout(() => { window.nextTF(); }, 1000);
+        } else {
+            // ❌ FALSCH: Minuspunkte und GAME OVER!
+            window.tfScore -= 10;
+            document.getElementById('tf-score').innerText = window.tfScore;
+            
+            let gameOverTxt = window.currentGameLang === 'DE' ? 
+                `<span style="color:#ef4444; font-size:1.5rem; font-weight:bold;">❌ FALSCH! GAME OVER</span><br>Endstand: ${window.tfScore} Punkte` : 
+                `<span style="color:#ef4444; font-size:1.5rem; font-weight:bold;">❌ YANLIŞ! OYUN BİTTİ</span><br>Son Puanın: ${window.tfScore}`;
+                
+            document.getElementById('tf-question').innerHTML = gameOverTxt;
+            
+            // Spiel abbrechen und Menüs wieder einblenden
+            btnTrue.style.display = 'none';
+            btnFalse.style.display = 'none';
+            document.getElementById('tf-start-btn').style.display = 'block';
+            document.getElementById('tf-start-btn').innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            
+            // Schwierigkeitsgrad wieder sichtbar machen!
+            document.getElementById('tf-diff').style.display = 'block'; 
+        }
+    };
+
+    // ==================================================================
+    // 2. KİM MİLYONER OLMAK İSTER (Realistischer Modus)
+    // ==================================================================
+    window.checkMilyoner = function(idx) {
+        if(!window.currentMil) return;
+        let isCorrect = (window.currentMil.ans === idx);
+        
+        for(let i=0; i<4; i++) {
+            let b = document.getElementById('mil-opt-'+i);
+            if(b) b.style.pointerEvents = 'none';
+        }
+        
+        let selectedBtn = document.getElementById('mil-opt-'+idx);
+        let correctBtn = document.getElementById('mil-opt-'+window.currentMil.ans);
+        
+        if (isCorrect) {
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            window.milScore += (window.milCurrentLevel * 50);
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Doğru!'} Kazancın: ${window.milScore}₺</span>`;
+            
+            window.milCurrentLevel++;
+            if (window.milCurrentLevel > 4) { // Gewonnen!
+                document.getElementById('milyoner-msg').innerHTML += `<br>🏆 MİLYONER OLDUN! (Tebrikler)`;
+                setTimeout(() => window.initMilyoner(), 4000);
+            } else {
+                let nextBtn = document.getElementById('milyoner-next');
+                nextBtn.style.display = 'block';
+                nextBtn.innerText = window.currentGameLang === 'DE' ? 'Nächste Frage' : 'Sonraki Soru';
+                nextBtn.onclick = function() { window.nextMilyoner(); };
+            }
+        } else {
+            // ❌ FALSCH: Minuspunkte und GAME OVER!
+            window.milScore -= 50; 
+            
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) {
+                correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                correctBtn.style.color = 'white';
+            }
+            
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#ef4444; font-size:1.3rem;">❌ ${window.currentGameLang === 'DE' ? 'GAME OVER!' : 'OYUN BİTTİ!'}</span><br>Kasan: ${window.milScore}₺`;
+            
+            // Button zu "Neustart" umbauen
+            let nextBtn = document.getElementById('milyoner-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            nextBtn.onclick = function() { window.initMilyoner(); };
+        }
+    };
+
+    // ==================================================================
+    // 3. ŞİİRSEL QUİZ (Realistischer Modus)
+    // ==================================================================
+    window.checkQuiz = function(idx) {
+        if(!window.currentQuizQ) return;
+        let isCorrect = (window.currentQuizQ.ans === idx);
+        
+        for(let i=0; i<4; i++) {
+            let b = document.getElementById('quiz-opt-'+i);
+            if(b) b.style.pointerEvents = 'none';
+        }
+        
+        let selectedBtn = document.getElementById('quiz-opt-'+idx);
+        let correctBtn = document.getElementById('quiz-opt-'+window.currentQuizQ.ans);
+        
+        // Eigenen Score fürs Quiz initialisieren, falls nicht vorhanden
+        if(typeof window.quizScore === 'undefined') window.quizScore = 0;
+        
+        if (isCorrect) {
+            window.quizScore += 20;
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            document.getElementById('quiz-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Doğru!'} Puan: ${window.quizScore}</span>`;
+            
+            let nextBtn = document.getElementById('quiz-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Nächste Frage' : 'Sonraki Soru';
+            nextBtn.onclick = function() { window.nextQuiz(); };
+        } else {
+            // ❌ FALSCH: Minuspunkte und GAME OVER!
+            window.quizScore -= 10;
+            
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) {
+                correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                correctBtn.style.color = 'white';
+            }
+            
+            document.getElementById('quiz-msg').innerHTML = `<span style="color:#ef4444; font-size:1.3rem;">❌ ${window.currentGameLang === 'DE' ? 'GAME OVER!' : 'OYUN BİTTİ!'}</span><br>Son Puan: ${window.quizScore}`;
+            
+            // Button zu "Neustart" umbauen
+            let nextBtn = document.getElementById('quiz-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            nextBtn.onclick = function() { 
+                window.quizScore = 0; // Score zurücksetzen für neues Spiel
+                window.loadQuiz(); 
+            };
+        }
+    };
+})();
+
+(function() {
+    // 1. ZENTRALE PUNKTE-FUNKTION (Sichert die Punkte im Profil & in der Cloud)
+    window.addGlobalScore = function(pointsToAdd) {
+        if (!window.currentUser) return; // Ausgeloggte User sammeln keine Profilpunkte
+        
+        let currentScore = parseInt(window.currentUser.score) || 0;
+        let newScore = currentScore + pointsToAdd;
+        
+        if (newScore < 0) newScore = 0; // Gesamtpunkte fallen nie unter 0
+        
+        window.currentUser.score = newScore;
+        
+        // UI Updaten (Score-Badge oben im Header)
+        let scoreEl = document.getElementById('user-score');
+        if (scoreEl) scoreEl.innerText = newScore + " P.";
+        
+        // In die lokale Datenbank schreiben
+        if (window.userDatabase && window.userDatabase[window.currentUser.username]) {
+            window.userDatabase[window.currentUser.username].score = newScore;
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        }
+        
+        // Sofortigen Firebase Sync anstoßen
+        window.lastLocalUpdate = Date.now() + 5000;
+        if (window.syncToCloud) window.syncToCloud();
+    };
+
+    // ==================================================================
+    // 2. DOĞRU MU YANLIŞ MI (True/False + Live Sync)
+    // ==================================================================
+    window.checkTF = function(selectedBool) {
+        if (!window.currentTF) return;
+        let correctAns = (window.currentTF.ans === true || window.currentTF.ans === "true" || window.currentTF.ans === 1);
+        let isCorrect = (correctAns === selectedBool);
+        
+        let btnTrue = document.getElementById('tf-btn-true');
+        let btnFalse = document.getElementById('tf-btn-false');
+        btnTrue.style.pointerEvents = 'none'; btnFalse.style.pointerEvents = 'none';
+        
+        if (isCorrect) {
+            window.tfScore += 10;
+            window.addGlobalScore(10); // 🚀 LIVE SYNC
+            document.getElementById('tf-score').innerText = window.tfScore;
+            window.showToast(window.currentGameLang === 'DE' ? '✅ Richtig! +10 Punkte' : '✅ Doğru! +10 Puan');
+            
+            setTimeout(() => { window.nextTF(); }, 1000);
+        } else {
+            // ❌ FALSCH: Minuspunkte und GAME OVER!
+            window.tfScore -= 10;
+            window.addGlobalScore(-10); // 🚀 LIVE SYNC (Punkteabzug)
+            document.getElementById('tf-score').innerText = window.tfScore;
+            
+            let gameOverTxt = window.currentGameLang === 'DE' ? 
+                `<span style="color:#ef4444; font-size:1.5rem; font-weight:bold;">❌ FALSCH! GAME OVER</span><br>Endstand: ${window.tfScore} Punkte` : 
+                `<span style="color:#ef4444; font-size:1.5rem; font-weight:bold;">❌ YANLIŞ! OYUN BİTTİ</span><br>Son Puanın: ${window.tfScore}`;
+            document.getElementById('tf-question').innerHTML = gameOverTxt;
+            
+            btnTrue.style.display = 'none'; btnFalse.style.display = 'none';
+            document.getElementById('tf-start-btn').style.display = 'block';
+            document.getElementById('tf-start-btn').innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            document.getElementById('tf-diff').style.display = 'block'; 
+        }
+    };
+
+    // ==================================================================
+    // 3. KİM MİLYONER OLMAK İSTER (Live Sync)
+    // ==================================================================
+    window.checkMilyoner = function(idx) {
+        if(!window.currentMil) return;
+        let isCorrect = (window.currentMil.ans === idx);
+        for(let i=0; i<4; i++) { let b = document.getElementById('mil-opt-'+i); if(b) b.style.pointerEvents = 'none'; }
+        
+        let selectedBtn = document.getElementById('mil-opt-'+idx);
+        let correctBtn = document.getElementById('mil-opt-'+window.currentMil.ans);
+        
+        if (isCorrect) {
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            
+            let earned = window.milCurrentLevel * 50;
+            window.milScore += earned;
+            window.addGlobalScore(earned); // 🚀 LIVE SYNC
+            
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Doğru!'} Kazancın: ${window.milScore}₺</span>`;
+            window.milCurrentLevel++;
+            
+            if (window.milCurrentLevel > 4) { // Gewonnen!
+                document.getElementById('milyoner-msg').innerHTML += `<br>🏆 MİLYONER OLDUN! (Tebrikler)`;
+                setTimeout(() => window.initMilyoner(), 4000);
+            } else {
+                let nextBtn = document.getElementById('milyoner-next');
+                nextBtn.style.display = 'block';
+                nextBtn.innerText = window.currentGameLang === 'DE' ? 'Nächste Frage' : 'Sonraki Soru';
+                nextBtn.onclick = function() { window.nextMilyoner(); };
+            }
+        } else {
+            // ❌ FALSCH: Minuspunkte und GAME OVER!
+            window.milScore -= 50; 
+            window.addGlobalScore(-50); // 🚀 LIVE SYNC
+            
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) { correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)'; correctBtn.style.color = 'white'; }
+            
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#ef4444; font-size:1.3rem;">❌ ${window.currentGameLang === 'DE' ? 'GAME OVER!' : 'OYUN BİTTİ!'}</span><br>Kasan: ${window.milScore}₺`;
+            
+            let nextBtn = document.getElementById('milyoner-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            nextBtn.onclick = function() { window.initMilyoner(); };
+        }
+    };
+
+    // ==================================================================
+    // 4. ŞİİRSEL QUİZ (Live Sync)
+    // ==================================================================
+    window.checkQuiz = function(idx) {
+        if(!window.currentQuizQ) return;
+        let isCorrect = (window.currentQuizQ.ans === idx);
+        for(let i=0; i<4; i++) { let b = document.getElementById('quiz-opt-'+i); if(b) b.style.pointerEvents = 'none'; }
+        
+        let selectedBtn = document.getElementById('quiz-opt-'+idx);
+        let correctBtn = document.getElementById('quiz-opt-'+window.currentQuizQ.ans);
+        if(typeof window.quizScore === 'undefined') window.quizScore = 0;
+        
+        if (isCorrect) {
+            window.quizScore += 20;
+            window.addGlobalScore(20); // 🚀 LIVE SYNC
+            
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            document.getElementById('quiz-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Doğru!'} Puan: ${window.quizScore}</span>`;
+            
+            let nextBtn = document.getElementById('quiz-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Nächste Frage' : 'Sonraki Soru';
+            nextBtn.onclick = function() { window.nextQuiz(); };
+        } else {
+            // ❌ FALSCH: Minuspunkte und GAME OVER!
+            window.quizScore -= 10;
+            window.addGlobalScore(-10); // 🚀 LIVE SYNC
+            
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) { correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)'; correctBtn.style.color = 'white'; }
+            
+            document.getElementById('quiz-msg').innerHTML = `<span style="color:#ef4444; font-size:1.3rem;">❌ ${window.currentGameLang === 'DE' ? 'GAME OVER!' : 'OYUN BİTTİ!'}</span><br>Son Puan: ${window.quizScore}`;
+            
+            let nextBtn = document.getElementById('quiz-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            nextBtn.onclick = function() { window.quizScore = 0; window.loadQuiz(); };
+        }
+    };
+})();
+
 </script>
 </body>
 </html>
