@@ -2098,7 +2098,87 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         /* ACHTUNG: touch-action wurde hier absichtlich entfernt, damit Klicks wieder perfekt funktionieren! */
     }
 
+    /* ==========================================================================
+   📱 MOBILE FIX: CHAT-TEXT & HERZ-SCROLLBAR (GELBE LINIE) ENTFERNEN
+   ========================================================================== */
+@media (max-width: 768px) {
     
+    /* 1. Gelbe Linie (Scrollbar) neben den Herzen brutal abschneiden */
+    #heart-container, 
+    #heart-container .custom-live-hearts {
+        overflow: hidden !important; /* Verhindert das Auslösen des Scrollbars */
+    }
+    #heart-container::-webkit-scrollbar, 
+    #heart-container .custom-live-hearts::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* 2. Chat-Eingabefeld Platzhalter ("Mesaj yaz...") stark verkleinern */
+    #chat-input::placeholder {
+        font-size: 0.65rem !important; /* Sehr kleine Schrift */
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Setzt "...", falls es immer noch zu lang ist */
+    }
+}
+
+/* =========================================================
+   🚀 NOTFALL-FIX: ABGESCHNITTENE BUTTONS & CHAT-TEXT
+   ========================================================= */
+@media (max-width: 768px) {
+    /* 1. Gibt den Eltern-Containern Platz nach unten (verhindert das Abschneiden!) */
+    #area-chat, 
+    #m-comment-area,
+    #modal-interaction-area {
+        overflow: visible !important;
+        padding-bottom: 25px !important;
+    }
+
+    /* 2. Die Reihe mit dem Eingabefeld und den Buttons */
+    #area-chat > div:last-child,
+    #m-comment-area > div:last-child {
+        padding-bottom: 10px !important;
+        margin-bottom: 10px !important;
+        overflow: visible !important;
+        align-items: center !important;
+    }
+
+    /* 3. Die Sende- & Emoji-Buttons (Zentriert das Icon perfekt) */
+    button[onclick*="sendChat"],
+    button[onclick*="toggleChatEmojis"],
+    button[onclick*="m_addComment"] {
+        padding: 0 !important; 
+        margin: 0 !important;
+        height: 45px !important;
+        min-height: 45px !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    }
+
+    /* 4. Platzhalter-Text extrem verkleinern */
+    input#chat-input::placeholder,
+    input#m-comment-input::placeholder,
+    input.edel-comment-input::placeholder {
+        font-size: 11px !important;
+        letter-spacing: -0.5px !important;
+        white-space: nowrap !important;
+    }
+    
+    /* 5. Die Eingabefelder an die Button-Höhe anpassen */
+    input#chat-input,
+    input#m-comment-input {
+        font-size: 13px !important;
+        height: 45px !important;
+        padding: 0 10px !important;
+        margin: 0 !important;
+    }
+}
 
 </style>
     <script>
@@ -13482,6 +13562,137 @@ setTimeout(() => {
             body:not(.user-mode):not(.admin-mode) #main-header #weather-widget,
             body:not(.user-mode):not(.admin-mode) #main-header .weather-widget {
                 top: 48px !important; /* Etwas höher für kleine Laptops */
+            }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+setInterval(function() {
+    // 1. Prüfen, ob wir im ausgeloggten Modus sind
+    var isGuest = !document.body.classList.contains('user-mode') && !document.body.classList.contains('admin-mode');
+    
+    if (isGuest) {
+        // Die Buttons anhand ihrer Klick-Funktion zu 100% sicher identifizieren
+        var loginBtn = document.querySelector('button[onclick*="m-login-modal"]');
+        var regBtn = document.querySelector('button[onclick*="m-register-modal"]');
+        var headerRight = document.querySelector('.header-right');
+
+        if (loginBtn && regBtn && headerRight) {
+            
+            // 2. FALLS EIN ALTES SCRIPT SIE VERSCHOBEN HAT: Zwingt sie zurück in die rechte Box!
+            if (loginBtn.parentElement !== headerRight) headerRight.appendChild(loginBtn);
+            if (regBtn.parentElement !== headerRight) headerRight.appendChild(regBtn);
+
+            // 3. DESIGN-ZWANG FÜR DESKTOP & LAPTOP
+            if (window.innerWidth > 768) {
+                // Die Box rechts oben festnageln
+                headerRight.style.setProperty('position', 'absolute', 'important');
+                headerRight.style.setProperty('top', '15px', 'important');
+                headerRight.style.setProperty('right', '3%', 'important');
+                headerRight.style.setProperty('left', 'auto', 'important');
+                headerRight.style.setProperty('display', 'flex', 'important');
+                headerRight.style.setProperty('flex-direction', 'row', 'important');
+                headerRight.style.setProperty('gap', '15px', 'important');
+                headerRight.style.setProperty('align-items', 'center', 'important');
+                headerRight.style.setProperty('justify-content', 'flex-end', 'important');
+                
+                // Login Button
+                loginBtn.style.setProperty('position', 'static', 'important');
+                loginBtn.style.setProperty('width', '130px', 'important');
+                loginBtn.style.setProperty('margin', '0', 'important');
+                loginBtn.style.setProperty('display', 'flex', 'important');
+                
+                // Kayit Ol Button
+                regBtn.style.setProperty('position', 'static', 'important');
+                regBtn.style.setProperty('width', '130px', 'important');
+                regBtn.style.setProperty('margin', '0', 'important');
+                regBtn.style.setProperty('display', 'flex', 'important');
+            } 
+            // 4. DESIGN-ZWANG FÜR HANDYS (Mobile)
+            else {
+                headerRight.style.setProperty('position', 'relative', 'important');
+                headerRight.style.setProperty('top', 'auto', 'important');
+                headerRight.style.setProperty('right', 'auto', 'important');
+                headerRight.style.setProperty('left', 'auto', 'important');
+                headerRight.style.setProperty('width', '100%', 'important');
+                headerRight.style.setProperty('display', 'flex', 'important');
+                headerRight.style.setProperty('flex-direction', 'row', 'important');
+                headerRight.style.setProperty('justify-content', 'space-between', 'important');
+                headerRight.style.setProperty('margin-top', '10px', 'important');
+
+                // Beide teilen sich genau 50% des Platzes
+                loginBtn.style.setProperty('position', 'static', 'important');
+                loginBtn.style.setProperty('width', '48%', 'important');
+                loginBtn.style.setProperty('margin', '0', 'important');
+                loginBtn.style.setProperty('display', 'flex', 'important');
+                
+                regBtn.style.setProperty('position', 'static', 'important');
+                regBtn.style.setProperty('width', '48%', 'important');
+                regBtn.style.setProperty('margin', '0', 'important');
+                regBtn.style.setProperty('display', 'flex', 'important');
+            }
+        }
+    }
+}, 500); // Das Skript schlägt 2-mal pro Sekunde zu, damit nichts anderes dazwischenfunken kann!
+
+(function() {
+    var style = document.createElement('style');
+    style.innerHTML = `
+        /* 1. Zwingt die quadratischen Icon-Buttons WELTWEIT (Desktop + Handy) in Form */
+        html body button[onclick*="sendChat"],
+        html body button[onclick*="toggleChatEmojis"],
+        html body button[onclick*="m_addComment"] {
+            padding: 0 !important; /* KILLT das globale padding-bottom: 6px, das das Icon zerdrückt! */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 50px !important;
+            width: 55px !important;
+            min-height: 50px !important;
+            box-sizing: border-box !important;
+            overflow: visible !important;
+            border-radius: 12px !important;
+        }
+
+        /* 2. Chat-Eingabefelder an die neue Höhe anpassen */
+        html body #chat-input,
+        html body #m-comment-input,
+        html body .edel-comment-input {
+            height: 50px !important;
+            min-height: 50px !important;
+            box-sizing: border-box !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* 3. Den Chat- und Kommentar-Boxen unten global mehr Luft geben */
+        html body #area-chat,
+        html body #m-comment-area {
+            overflow: visible !important;
+            padding-bottom: 30px !important;
+        }
+        
+        /* 4. Chat Platzhalter-Text klein machen (Global) */
+        html body #chat-input::placeholder,
+        html body #m-comment-input::placeholder,
+        html body .edel-comment-input::placeholder {
+            font-size: 0.75rem !important;
+            line-height: normal !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        
+        /* 5. Auf dem Handy minimal kompakter */
+        @media (max-width: 768px) {
+            html body button[onclick*="sendChat"],
+            html body button[onclick*="toggleChatEmojis"],
+            html body button[onclick*="m_addComment"],
+            html body #chat-input,
+            html body #m-comment-input,
+            html body .edel-comment-input {
+                height: 45px !important;
+                min-height: 45px !important;
             }
         }
     `;
