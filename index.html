@@ -12972,7 +12972,7 @@ setTimeout(() => {
             display: none !important; 
         }
 
-        /* 🚀 FIX FÜR BILD 1: Verhindert abgeschnittene Buchstaben im Hauptmenü (Ana Sayfa, Şiirlerim etc.) */
+        /* 🚀 FIX FÜR BILD 1: Verhindert abgeschnittene Buchstaben im Hauptmenü */
         nav ul li a, header .nav-link, .header-menu a, .nav-item, .main-nav a {
             padding-bottom: 8px !important;
             display: inline-block !important;
@@ -13050,7 +13050,111 @@ setTimeout(() => {
     document.head.appendChild(style);
 
     // ----------------------------------------------------
-    // 2. DOM CLEANUP, SAYFA İÇERİKLERİM & PLACEHOLDER
+    // 2. DYNAMISCHE SIDEBAR AUFBAUEN (SAYFA İÇERİKLERİM)
+    // ----------------------------------------------------
+    function buildDynamicSidebar() {
+        let sidebar = document.getElementById('kissaFikraSidebar');
+        if (sidebar) {
+            // Titel des Menüs in "Sayfa İçeriklerim" ändern
+            let headerH2 = sidebar.querySelector('.sidebar-header h2');
+            if (headerH2) {
+                headerH2.innerHTML = `<span>📚 Sayfa İçeriklerim</span><span class="de-sub" style="display:block; margin-top:2px;">(Seiten Bereiche)</span>`;
+            }
+
+            // Fehlende Listen-Blöcke injizieren
+            let content = sidebar.querySelector('.sidebar-content');
+            if (content && !document.getElementById('fihrist-atasozleri-list')) {
+                content.innerHTML += `
+                    <div class="sidebar-section">
+                        <h3>Atasözleri <span class="de-sub" style="display:block; margin-top:2px;">(Sprichwörter)</span></h3>
+                        <ul id="fihrist-atasozleri-list"></ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>Sağlık <span class="de-sub" style="display:block; margin-top:2px;">(Gesundheit)</span></h3>
+                        <ul id="fihrist-saglik-list"></ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>Önemli Şahsiyetler <span class="de-sub" style="display:block; margin-top:2px;">(Persönlichkeiten)</span></h3>
+                        <ul id="fihrist-sahsiyetler-list"></ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>Bilmeceler <span class="de-sub" style="display:block; margin-top:2px;">(Rätsel)</span></h3>
+                        <ul id="fihrist-bilmeceler-list"></ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>Bulmacalar <span class="de-sub" style="display:block; margin-top:2px;">(Puzzles)</span></h3>
+                        <ul id="fihrist-bulmacalar-list"></ul>
+                    </div>
+                `;
+            }
+        }
+
+        // Floating Button aktualisieren
+        let btns = document.querySelectorAll('.bottom-btn .btn-text');
+        btns.forEach(btn => {
+            if(btn.innerHTML.includes('Kıssa') || btn.innerHTML.includes('Fıkra') || btn.innerHTML.includes('Sayfa İçeriklerim')) {
+                btn.innerHTML = `Sayfa İçeriklerim <span class="de-sub" style="margin-top:2px;">(Seiten Bereiche)</span>`;
+            }
+        });
+    }
+
+    // ----------------------------------------------------
+    // 3. FIHRIST GENERATOR (Füllt alle Listen live aus DB)
+    // ----------------------------------------------------
+    window.generateFihrist = function() {
+        try {
+            const createList = (type, targetId, clickType) => { 
+                const ul = document.getElementById(targetId); 
+                if(!ul) return;
+                
+                let sourceData = [];
+                if (type === 'bilmeceler') sourceData = window.bilmecelerDB || (window.contentDB ? window.contentDB.bilmeceler : []);
+                else if (type === 'bulmacalar') sourceData = window.bulmacalarDB || (window.contentDB ? window.contentDB.bulmacalar : []);
+                else if (window.contentDB) sourceData = window.contentDB[type];
+
+                if(sourceData && Array.isArray(sourceData)) { 
+                    let sorted = window.sortContentItems(sourceData, false);
+                    ul.innerHTML = sorted.map(item => { 
+                        const isNew = window.isItemNew(item.id, item.timestamp) ? '<span class="sidebar-badge-new">YENİ (NEU)</span>' : ''; 
+                        
+                        let title = item.trTitle || item.title || item.trText || "Eser";
+                        let subtitle = item.deTitle || "";
+                        
+                        if (type === 'persons') {
+                            title = item.trTitle || item.deTitle || "Kişi";
+                            subtitle = item.quote ? `"${item.quote.substring(0, 30)}..."` : "";
+                        }
+
+                        let clickFn = `window.openPoemModal('${item.id}', '${type}')`;
+                        if (clickType === 'puzzle') clickFn = `window.openPuzzleModal('${item.id}', '${type}')`;
+                        if (clickType === 'person') clickFn = `window.open('${item.url}', '_blank')`;
+
+                        return `<li onclick="window.markAsViewed('${item.id}'); ${clickFn}; window.closeAllSidebars();">
+                                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                        <span>${item.emoji || '✨'} ${title}</span>
+                                        ${isNew}
+                                    </div>
+                                    ${subtitle ? `<span class="de-sub" style="color:#f4c542; font-style:italic; margin-left:0; margin-top:4px; font-size:0.85em;">${subtitle}</span>` : ''}
+                                </li>`; 
+                    }).join(''); 
+                } 
+            };
+
+            createList('poems', 'fihrist-siirler-list', 'poem'); 
+            createList('quotes', 'fihrist-sozler-list', 'poem'); 
+            createList('stories', 'fihrist-hikayeler-list', 'poem'); 
+            createList('jokes', 'fihrist-fikralar-list', 'poem');
+            createList('atasozleri', 'fihrist-atasozleri-list', 'poem');
+            createList('saglik', 'fihrist-saglik-list', 'poem');
+            createList('persons', 'fihrist-sahsiyetler-list', 'person');
+            createList('bilmeceler', 'fihrist-bilmeceler-list', 'puzzle');
+            createList('bulmacalar', 'fihrist-bulmacalar-list', 'puzzle');
+
+        } catch(err) { console.error("Fihrist Error", err); }
+    };
+
+    // ----------------------------------------------------
+    // 4. DOM CLEANUP & PLATZHALTER
     // ----------------------------------------------------
     function updateSearchPlaceholder() {
         const searchInputs = document.querySelectorAll('header input, #search-input, .search-bar input');
@@ -13075,13 +13179,10 @@ setTimeout(() => {
                 changed = true;
             }
 
-            // Benennt "Kıssa / Fıkra" in "Sayfa İçeriklerim" um
             if (text.trim() === 'Kıssa / Fıkra' || text.trim() === 'Kıssalar / Fıkralar' || text.trim() === 'Kissa / Fikra') {
-                text = 'Sayfa İçeriklerim';
-                changed = true;
+                text = 'Sayfa İçeriklerim'; changed = true;
             } else if (text.includes('Kıssa') && text.includes('Fıkra')) {
-                text = text.replace(/Kıssa(lar)?\s*[\/\-&]?\s*Fıkra(lar)?/gi, 'Sayfa İçeriklerim');
-                changed = true;
+                text = text.replace(/Kıssa(lar)?\s*[\/\-&]?\s*Fıkra(lar)?/gi, 'Sayfa İçeriklerim'); changed = true;
             }
 
             if (parent.closest('nav, header, .sidebar, .sidebar-right, .mobile-bottom-bar, h1, h2, h3, h4, h5, h6, .user-stats, .stat-box')) {
@@ -13094,12 +13195,15 @@ setTimeout(() => {
         }
     }
     
+    // Setup Functions
+    buildDynamicSidebar();
     cleanAndRenameUI();
     setTimeout(cleanAndRenameUI, 500);
     setTimeout(cleanAndRenameUI, 1200);
+    setTimeout(() => { if(window.generateFihrist) window.generateFihrist(); }, 800);
 
     // ----------------------------------------------------
-    // 3. WÖRTERBÜCHER
+    // 5. WÖRTERBÜCHER FÜR SPRECHBLASE
     // ----------------------------------------------------
     const translations = {
         "Ana Sayfa": "Startseite", "Şiirlerim": "Meine Gedichte", "Sözlerim": "Meine Sprüche",
@@ -13139,7 +13243,7 @@ setTimeout(() => {
     ];
 
     // ----------------------------------------------------
-    // 4. BUBBLE ENGINE
+    // 6. BUBBLE ENGINE
     // ----------------------------------------------------
     let hoverTimer = null;
     let clickTimer = null;
