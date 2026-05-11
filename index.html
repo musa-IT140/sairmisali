@@ -13699,6 +13699,22 @@ setInterval(function() {
     document.head.appendChild(style);
 })();
 
+(function() {
+    document.addEventListener('click', function(e) {
+        var chatPicker = document.getElementById('chat-emoji-picker');
+        var chatInput = document.getElementById('chat-input');
+        
+        // Prüfen, ob der Klick INNERHALB des Chat-Emoji-Pickers passierte (aber nicht auf den Rand)
+        if (chatPicker && chatPicker.contains(e.target) && e.target !== chatPicker) {
+            // 50 Millisekunden warten, damit das originale Skript das Emoji erst noch einfügen kann
+            setTimeout(function() {
+                chatPicker.style.display = 'none'; // Fenster sofort schließen
+                if (chatInput) chatInput.focus();  // Fokus zurück ins Textfeld setzen!
+            }, 50);
+        }
+    });
+})();
+
 </script>
 </body>
 </html>
