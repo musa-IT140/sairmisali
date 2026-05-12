@@ -14760,6 +14760,55 @@ setInterval(function() {
     setTimeout(() => { if(document.getElementById('myHeartsModal') && document.getElementById('myHeartsModal').classList.contains('active-modal')) window.renderMyHearts(); }, 500);
 })();
 
+(function() {
+    // 1. Strikte Erkennung: Nur Apple/iOS Geräte (iPhone, iPad) greifen hierauf zu
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+        // 2. Dynamische Platzierung (JavaScript greift erst ein, wenn alles geladen ist)
+        setTimeout(function() {
+            // Elemente über clevere Selektoren finden (ohne genaue IDs kennen zu müssen)
+            var logoutBtn = document.querySelector('button[onclick*="logout"], a[onclick*="logout"]') || document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket')?.closest('button');
+            var bellBtn = document.querySelector('.fa-bell')?.closest('button');
+            
+            // Finde das Wetter-Element (sucht nach dem °C Zeichen)
+            var weatherElement = Array.from(document.querySelectorAll('*')).find(el => el.textContent.includes('°C') && el.children.length === 0)?.parentElement;
+
+            // --- REPARATUR 1: AUSLOGGSYMBOL & GLOCKE ---
+            if (logoutBtn && logoutBtn.parentElement) {
+                var container = logoutBtn.parentElement; 
+                // Zieht die Gold-Box nach unten auf, um Platz für die roten Kreise zu machen
+                container.style.position = 'relative';
+                container.style.paddingBottom = '60px'; 
+
+                // Ausloggsymbol exakt in deinen roten Kreis (Mitte/Links unten) pinnen
+                logoutBtn.style.position = 'absolute';
+                logoutBtn.style.bottom = '15px';
+                logoutBtn.style.left = '40%';
+                logoutBtn.style.transform = 'translateX(-50%)';
+                logoutBtn.style.margin = '0';
+            }
+
+            if (bellBtn) {
+                // Glocke exakt in deinen roten Kreis (Rechts unten) pinnen
+                bellBtn.style.position = 'absolute';
+                bellBtn.style.bottom = '15px';
+                bellBtn.style.right = '20px';
+                bellBtn.style.margin = '0';
+            }
+
+            // --- REPARATUR 2: WETTER & FEDER ENTZERREN ---
+            if (weatherElement) {
+                // Zwingt das Wetter in eine neue, eigene Zeile unter die Feder
+                weatherElement.style.display = 'block';
+                weatherElement.style.width = '100%';
+                weatherElement.style.marginTop = '15px'; 
+                weatherElement.style.textAlign = 'center';
+            }
+        }, 1000); // 1 Sekunde warten, um sicherzugehen, dass das Original-Layout fertig geladen ist
+    }
+})();
+
 </script>
 </body>
 </html>
