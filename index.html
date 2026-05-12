@@ -14790,6 +14790,71 @@ setInterval(function() {
     }, 500);
 })();
 
+(function() {
+    // 1. Erkennt strikt, ob es sich um ein Apple/iOS Gerät handelt
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+        var attemptIOSFix = function() {
+            // --- REPARATUR 1: WETTER & GLOCKE ENTZERREN ---
+            // Sucht das Wetter-Element (anhand des °C)
+            var weatherNode = Array.from(document.querySelectorAll('*')).find(el => el.textContent.includes('°C') && el.children.length === 0);
+            if (weatherNode && weatherNode.parentElement) {
+                var weatherContainer = weatherNode.parentElement;
+                // Zwingt das Wetter aus dem Namen raus nach unten
+                weatherContainer.style.setProperty('display', 'block', 'important');
+                weatherContainer.style.setProperty('width', '100%', 'important');
+                weatherContainer.style.setProperty('margin-top', '30px', 'important'); // Deutlich nach unten schieben
+                weatherContainer.style.setProperty('text-align', 'center', 'important');
+                weatherContainer.style.setProperty('clear', 'both', 'important');
+            }
+
+            // Sucht die Glocke
+            var bellIcon = document.querySelector('.fa-bell');
+            if (bellIcon) {
+                var bellBtn = bellIcon.closest('button') || bellIcon.closest('div');
+                if (bellBtn) {
+                    // Drückt die Glocke nach unten
+                    bellBtn.style.setProperty('position', 'relative', 'important');
+                    bellBtn.style.setProperty('top', '25px', 'important'); 
+                }
+            }
+
+            // --- REPARATUR 2: HAUPTBUTTONS (USER & ADMIN) SYNCHRONISIEREN ---
+            var menuIcon = document.querySelector('.fa-bars'); // Der linke Button
+            var adminIcon = document.querySelector('.fa-tools, .fa-wrench'); // Der rechte Button
+            
+            if (menuIcon && adminIcon) {
+                var menuBtn = menuIcon.closest('button') || menuIcon.parentElement;
+                var adminBtn = adminIcon.closest('button') || adminIcon.parentElement;
+                
+                if (menuBtn && adminBtn) {
+                    // Wir messen die exakten Werte des sauberen Menü-Buttons (links)...
+                    var menuStyle = window.getComputedStyle(menuBtn);
+                    
+                    // ...und zwingen den Admin-Button, ein exakter Klon zu werden!
+                    adminBtn.style.setProperty('width', menuStyle.width, 'important');
+                    adminBtn.style.setProperty('height', menuStyle.height, 'important');
+                    adminBtn.style.setProperty('bottom', menuStyle.bottom, 'important'); // Exakt gleiche Höhe!
+                    adminBtn.style.setProperty('margin-bottom', menuStyle.marginBottom, 'important');
+                    adminBtn.style.setProperty('transform', menuStyle.transform, 'important');
+                    
+                    // Auch das Icon im Admin-Button muss die gleiche Größe haben
+                    var mIconStyle = window.getComputedStyle(menuIcon);
+                    adminIcon.style.setProperty('font-size', mIconStyle.fontSize, 'important');
+                }
+            }
+        };
+
+        // Skript sofort ausführen und ein paar Mal wiederholen (falls die Seite Elemente dynamisch lädt)
+        attemptIOSFix();
+        var fixInterval = setInterval(attemptIOSFix, 800);
+        
+        // Nach 8 Sekunden stoppen, um den Akku des iPhones zu schonen
+        setTimeout(function() { clearInterval(fixInterval); }, 8000);
+    }
+})();
+
 </script>
 </body>
 </html>
