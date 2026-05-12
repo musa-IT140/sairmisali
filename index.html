@@ -14761,97 +14761,96 @@ setInterval(function() {
 })();
 
 (function() {
-    // Greift erst ein, wenn das Layout fertig geladen ist
-    setTimeout(function() {
-        // 1. Finde den Logout-Button in der oberen Leiste
-        var logoutBtn = document.querySelector('button[onclick*="logout"], a[onclick*="logout"]') || document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket')?.closest('button') || document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket')?.closest('a');
-        
-        if (logoutBtn && logoutBtn.parentElement) {
-            var topBox = logoutBtn.parentElement;
-            
-            // 2. Zwingt die Box strikt in eine einzige Zeile (Verhindert den iPhone Umbruch!)
-            topBox.style.display = 'flex';
-            topBox.style.flexWrap = 'nowrap';
-            topBox.style.alignItems = 'center';
-            
-            // 3. iPhone Flexbox-Bugfix für die inneren Elemente
-            Array.from(topBox.children).forEach(function(child, index) {
-                if (index === 0) {
-                    // Das erste Element (Profilbild & Name) darf sich verkleinern, wenn es eng wird
-                    child.style.flexShrink = '1';
-                    child.style.minWidth = '0';
-                } else {
-                    // Punkte-Button und Logout-Button dürfen auf dem iPhone NIEMALS schrumpfen oder umbrechen
-                    child.style.flexShrink = '0';
-                    child.style.marginLeft = '5px'; // Sorgt für einen sauberen Abstand
-                }
-            });
-        }
-    }, 500);
-})();
-
-(function() {
-    // 1. Erkennt strikt, ob es sich um ein Apple/iOS Gerät handelt
+    // Erkennt strikt, ob es sich um ein Apple/iOS Gerät handelt
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     if (isIOS) {
-        var attemptIOSFix = function() {
-            // --- REPARATUR 1: WETTER & GLOCKE ENTZERREN ---
-            // Sucht das Wetter-Element (anhand des °C)
-            var weatherNode = Array.from(document.querySelectorAll('*')).find(el => el.textContent.includes('°C') && el.children.length === 0);
-            if (weatherNode && weatherNode.parentElement) {
-                var weatherContainer = weatherNode.parentElement;
-                // Zwingt das Wetter aus dem Namen raus nach unten
-                weatherContainer.style.setProperty('display', 'block', 'important');
-                weatherContainer.style.setProperty('width', '100%', 'important');
-                weatherContainer.style.setProperty('margin-top', '30px', 'important'); // Deutlich nach unten schieben
-                weatherContainer.style.setProperty('text-align', 'center', 'important');
-                weatherContainer.style.setProperty('clear', 'both', 'important');
-            }
+        var applyPrecisionFix = function() {
+            
+            // =========================================================
+            // 1. HAUPTBUTTONS UNTEN (MENU & ADMIN) SYNCHRONISIEREN
+            // =========================================================
+            var menuIcon = document.querySelector('.fa-bars');
+            var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
+            
+            if (menuIcon && adminIcon) {
+                var menuBtn = menuIcon.closest('button') || menuIcon.closest('div[class*="btn"]') || menuIcon.parentElement;
+                var adminBtn = adminIcon.closest('button') || adminIcon.closest('div[class*="btn"]') || adminIcon.parentElement;
+                
+                if (menuBtn && adminBtn) {
+                    var size = '55px'; // Exakt gleiche Breite & Höhe für BEIDE
+                    var bottomLevel = '90px'; // Exakt gleiche Höhe vom unteren Rand
+                    
+                    [menuBtn, adminBtn].forEach(function(btn) {
+                        btn.style.setProperty('width', size, 'important');
+                        btn.style.setProperty('height', size, 'important');
+                        btn.style.setProperty('min-width', size, 'important');
+                        btn.style.setProperty('min-height', size, 'important');
+                        btn.style.setProperty('max-width', size, 'important');
+                        btn.style.setProperty('max-height', size, 'important');
+                        btn.style.setProperty('position', 'fixed', 'important');
+                        btn.style.setProperty('bottom', bottomLevel, 'important');
+                        btn.style.setProperty('margin', '0', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('border-radius', '50%', 'important');
+                        btn.style.setProperty('display', 'flex', 'important');
+                        btn.style.setProperty('align-items', 'center', 'important');
+                        btn.style.setProperty('justify-content', 'center', 'important');
+                        btn.style.setProperty('z-index', '9999', 'important');
+                    });
 
-            // Sucht die Glocke
-            var bellIcon = document.querySelector('.fa-bell');
-            if (bellIcon) {
-                var bellBtn = bellIcon.closest('button') || bellIcon.closest('div');
-                if (bellBtn) {
-                    // Drückt die Glocke nach unten
-                    bellBtn.style.setProperty('position', 'relative', 'important');
-                    bellBtn.style.setProperty('top', '25px', 'important'); 
+                    // Fest links (User) und rechts (Admin) anpinnen
+                    menuBtn.style.setProperty('left', '20px', 'important');
+                    adminBtn.style.setProperty('right', '20px', 'important');
+                    adminBtn.style.setProperty('left', 'auto', 'important'); // Löscht falsche Links-Werte beim Admin
                 }
             }
 
-            // --- REPARATUR 2: HAUPTBUTTONS (USER & ADMIN) SYNCHRONISIEREN ---
-            var menuIcon = document.querySelector('.fa-bars'); // Der linke Button
-            var adminIcon = document.querySelector('.fa-tools, .fa-wrench'); // Der rechte Button
-            
-            if (menuIcon && adminIcon) {
-                var menuBtn = menuIcon.closest('button') || menuIcon.parentElement;
-                var adminBtn = adminIcon.closest('button') || adminIcon.parentElement;
-                
-                if (menuBtn && adminBtn) {
-                    // Wir messen die exakten Werte des sauberen Menü-Buttons (links)...
-                    var menuStyle = window.getComputedStyle(menuBtn);
+            // =========================================================
+            // 2. GLOCKE UND WETTER EXAKT RECHTS POSITIONIEREN
+            // =========================================================
+            var bellIcon = document.querySelector('.fa-bell');
+            var weatherText = Array.from(document.querySelectorAll('*')).find(el => el.textContent.includes('°C') && el.children.length === 0);
+
+            var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
+            var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
+
+            // Wir suchen die obere Box (mit Logout-Button), um zu wissen, wo sie endet
+            var logoutIcon = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket');
+            var topBox = logoutIcon ? (logoutIcon.closest('div[style*="border"]') || logoutIcon.closest('.header-box')) : null;
+
+            if (bellContainer && weatherContainer) {
+                // Elemente komplett aus dem Safari-Chaos befreien
+                bellContainer.style.setProperty('position', 'absolute', 'important');
+                bellContainer.style.setProperty('right', '20px', 'important');
+                bellContainer.style.setProperty('margin', '0', 'important');
+                bellContainer.style.setProperty('transform', 'none', 'important');
+
+                weatherContainer.style.setProperty('position', 'absolute', 'important');
+                weatherContainer.style.setProperty('right', '20px', 'important');
+                weatherContainer.style.setProperty('margin', '0', 'important');
+                weatherContainer.style.setProperty('transform', 'none', 'important');
+                weatherContainer.style.setProperty('width', 'auto', 'important');
+
+                // Höhe dynamisch berechnen: Genau unter die Top-Box setzen!
+                if (topBox) {
+                    var boxRect = topBox.getBoundingClientRect();
+                    // absoluter Abstand von ganz oben
+                    var absoluteTop = boxRect.bottom + window.scrollY; 
                     
-                    // ...und zwingen den Admin-Button, ein exakter Klon zu werden!
-                    adminBtn.style.setProperty('width', menuStyle.width, 'important');
-                    adminBtn.style.setProperty('height', menuStyle.height, 'important');
-                    adminBtn.style.setProperty('bottom', menuStyle.bottom, 'important'); // Exakt gleiche Höhe!
-                    adminBtn.style.setProperty('margin-bottom', menuStyle.marginBottom, 'important');
-                    adminBtn.style.setProperty('transform', menuStyle.transform, 'important');
-                    
-                    // Auch das Icon im Admin-Button muss die gleiche Größe haben
-                    var mIconStyle = window.getComputedStyle(menuIcon);
-                    adminIcon.style.setProperty('font-size', mIconStyle.fontSize, 'important');
+                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); // 15px unter der oberen Box
+                    weatherContainer.style.setProperty('top', (absoluteTop + 60) + 'px', 'important'); // 60px unter der oberen Box
+                } else {
+                    // Notfall-Werte, falls die Top-Box nicht sofort lädt
+                    bellContainer.style.setProperty('top', '120px', 'important');
+                    weatherContainer.style.setProperty('top', '165px', 'important');
                 }
             }
         };
 
-        // Skript sofort ausführen und ein paar Mal wiederholen (falls die Seite Elemente dynamisch lädt)
-        attemptIOSFix();
-        var fixInterval = setInterval(attemptIOSFix, 800);
-        
-        // Nach 8 Sekunden stoppen, um den Akku des iPhones zu schonen
-        setTimeout(function() { clearInterval(fixInterval); }, 8000);
+        // Skript sofort ausführen und 2x pro Sekunde absichern (falls die Elemente dynamisch laden)
+        applyPrecisionFix();
+        setInterval(applyPrecisionFix, 500);
     }
 })();
 
