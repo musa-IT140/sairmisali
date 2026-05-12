@@ -14760,7 +14760,6 @@ setInterval(function() {
     setTimeout(() => { if(document.getElementById('myHeartsModal') && document.getElementById('myHeartsModal').classList.contains('active-modal')) window.renderMyHearts(); }, 500);
 })();
 
-
 (function() {
     // Erkennt strikt, ob es sich um ein Apple/iOS Gerät handelt
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -14769,7 +14768,7 @@ setInterval(function() {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. HAUPT- UND SUB-BUTTONS (USER & ADMIN) SYNCHRONISIEREN
+            // 1. HAUPTBUTTONS UNTEN (MENU & ADMIN) SYNCHRONISIEREN & NACH UNTEN SCHIEBEN
             // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
@@ -14778,94 +14777,35 @@ setInterval(function() {
                 var menuBtn = menuIcon.closest('button') || menuIcon.closest('div[class*="btn"]') || menuIcon.parentElement;
                 var adminBtn = adminIcon.closest('button') || adminIcon.closest('div[class*="btn"]') || adminIcon.parentElement;
                 
-                var userWrap = menuBtn ? menuBtn.parentElement : null;
-                var adminWrap = adminBtn ? adminBtn.parentElement : null;
-                
-                var mainSizeInt = 55; // Größe der Hauptbuttons
-                var subSizeInt = 42;  // Größe der Unterbuttons (kleiner!)
-                var bottomLvl = '25px'; // Die Höhe von unten
-
-                // A) Die Container reparieren, damit nichts am Rand abgeschnitten wird
-                [userWrap, adminWrap].forEach(function(wrap, index) {
-                    if (!wrap) return;
-                    var isUser = (index === 0);
+                if (menuBtn && adminBtn) {
+                    var size = '55px'; // Exakt gleiche Breite & Höhe für BEIDE
                     
-                    wrap.style.setProperty('position', 'fixed', 'important');
-                    wrap.style.setProperty('bottom', bottomLvl, 'important');
-                    wrap.style.setProperty('width', mainSizeInt + 'px', 'important');
-                    wrap.style.setProperty('z-index', '9999', 'important');
-                    wrap.style.setProperty('overflow', 'visible', 'important'); // Erlaubt Labels, sichtbar zu bleiben
+                    // 🔥 HIER GEÄNDERT: Von 90px auf 25px (Zieht beide Buttons weit nach unten) 🔥
+                    var bottomLevel = '25px'; 
                     
-                    if (isUser) {
-                        wrap.style.setProperty('left', '20px', 'important');
-                        wrap.style.setProperty('right', 'auto', 'important');
-                    } else {
-                        wrap.style.setProperty('right', '20px', 'important');
-                        wrap.style.setProperty('left', 'auto', 'important');
-                    }
-                });
-
-                // B) Hauptbuttons exakt positionieren
-                [menuBtn, adminBtn].forEach(function(btn) {
-                    if(!btn) return;
-                    btn.style.setProperty('width', mainSizeInt + 'px', 'important');
-                    btn.style.setProperty('height', mainSizeInt + 'px', 'important');
-                    btn.style.setProperty('position', 'absolute', 'important');
-                    btn.style.setProperty('bottom', '0', 'important');
-                    btn.style.setProperty('left', '0', 'important');
-                    btn.style.setProperty('right', '0', 'important');
-                    btn.style.setProperty('margin', 'auto', 'important'); // Zentriert im Container
-                    btn.style.setProperty('border-radius', '50%', 'important');
-                    btn.style.setProperty('display', 'flex', 'important');
-                    btn.style.setProperty('align-items', 'center', 'important');
-                    btn.style.setProperty('justify-content', 'center', 'important');
-                });
-
-                // C) Alle Unterbuttons finden, verkleinern und perfekt darüber zentrieren
-                [userWrap, adminWrap].forEach(function(wrap) {
-                    if (!wrap) return;
-                    var children = wrap.querySelectorAll('*');
-                    
-                    children.forEach(function(el) {
-                        // Den Hauptbutton ignorieren
-                        if (el === menuBtn || menuBtn.contains(el) || el === adminBtn || adminBtn.contains(el)) return;
-                        
-                        // Listen-Container (ul, li) der Unterbuttons mittig ausrichten
-                        if (el.tagName === 'UL' || el.tagName === 'LI') {
-                            el.style.setProperty('left', '0', 'important');
-                            el.style.setProperty('right', '0', 'important');
-                            el.style.setProperty('margin-left', 'auto', 'important');
-                            el.style.setProperty('margin-right', 'auto', 'important');
-                            el.style.setProperty('padding', '0', 'important');
-                            el.style.setProperty('width', '100%', 'important');
-                        }
-                        
-                        // Die eigentlichen runden Unter-Buttons verkleinern
-                        var st = window.getComputedStyle(el);
-                        if (el.tagName === 'BUTTON' || el.tagName === 'A' || el.classList.contains('sub-btn') || parseInt(st.borderRadius) >= 10 || el.querySelector('i')) {
-                            
-                            // Keine langen Text-Labels verkleinern
-                            if (el.textContent.trim().length > 15) return; 
-
-                            el.style.setProperty('width', subSizeInt + 'px', 'important');
-                            el.style.setProperty('height', subSizeInt + 'px', 'important');
-                            el.style.setProperty('min-width', subSizeInt + 'px', 'important');
-                            el.style.setProperty('min-height', subSizeInt + 'px', 'important');
-                            el.style.setProperty('max-width', subSizeInt + 'px', 'important');
-                            el.style.setProperty('max-height', subSizeInt + 'px', 'important');
-                            
-                            // Zwingt sie perfekt in die Mitte über den Hauptbutton
-                            el.style.setProperty('left', '0', 'important');
-                            el.style.setProperty('right', '0', 'important');
-                            el.style.setProperty('margin-left', 'auto', 'important');
-                            el.style.setProperty('margin-right', 'auto', 'important');
-                            el.style.setProperty('border-radius', '50%', 'important');
-                            el.style.setProperty('display', 'flex', 'important');
-                            el.style.setProperty('justify-content', 'center', 'important');
-                            el.style.setProperty('align-items', 'center', 'important');
-                        }
+                    [menuBtn, adminBtn].forEach(function(btn) {
+                        btn.style.setProperty('width', size, 'important');
+                        btn.style.setProperty('height', size, 'important');
+                        btn.style.setProperty('min-width', size, 'important');
+                        btn.style.setProperty('min-height', size, 'important');
+                        btn.style.setProperty('max-width', size, 'important');
+                        btn.style.setProperty('max-height', size, 'important');
+                        btn.style.setProperty('position', 'fixed', 'important');
+                        btn.style.setProperty('bottom', bottomLevel, 'important');
+                        btn.style.setProperty('margin', '0', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('border-radius', '50%', 'important');
+                        btn.style.setProperty('display', 'flex', 'important');
+                        btn.style.setProperty('align-items', 'center', 'important');
+                        btn.style.setProperty('justify-content', 'center', 'important');
+                        btn.style.setProperty('z-index', '9999', 'important');
                     });
-                });
+
+                    // Fest links (User) und rechts (Admin) anpinnen
+                    menuBtn.style.setProperty('left', '20px', 'important');
+                    adminBtn.style.setProperty('right', '20px', 'important');
+                    adminBtn.style.setProperty('left', 'auto', 'important'); // Löscht falsche Links-Werte beim Admin
+                }
             }
 
             // =========================================================
@@ -14877,10 +14817,12 @@ setInterval(function() {
             var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
             var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
 
+            // Wir suchen die obere Box (mit Logout-Button), um zu wissen, wo sie endet
             var logoutIcon = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket');
             var topBox = logoutIcon ? (logoutIcon.closest('div[style*="border"]') || logoutIcon.closest('.header-box')) : null;
 
             if (bellContainer && weatherContainer) {
+                // Elemente komplett aus dem Safari-Chaos befreien
                 bellContainer.style.setProperty('position', 'absolute', 'important');
                 bellContainer.style.setProperty('right', '20px', 'important');
                 bellContainer.style.setProperty('margin', '0', 'important');
@@ -14892,19 +14834,23 @@ setInterval(function() {
                 weatherContainer.style.setProperty('transform', 'none', 'important');
                 weatherContainer.style.setProperty('width', 'auto', 'important');
 
+                // Höhe dynamisch berechnen: Genau unter die Top-Box setzen!
                 if (topBox) {
                     var boxRect = topBox.getBoundingClientRect();
+                    // absoluter Abstand von ganz oben
                     var absoluteTop = boxRect.bottom + window.scrollY; 
-                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); 
-                    weatherContainer.style.setProperty('top', (absoluteTop + 60) + 'px', 'important'); 
+                    
+                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); // 15px unter der oberen Box
+                    weatherContainer.style.setProperty('top', (absoluteTop + 60) + 'px', 'important'); // 60px unter der oberen Box
                 } else {
+                    // Notfall-Werte, falls die Top-Box nicht sofort lädt
                     bellContainer.style.setProperty('top', '120px', 'important');
                     weatherContainer.style.setProperty('top', '165px', 'important');
                 }
             }
         };
 
-        // Skript sofort ausführen und dynamisch sichern
+        // Skript sofort ausführen und 2x pro Sekunde absichern (falls die Elemente dynamisch laden)
         applyPrecisionFix();
         setInterval(applyPrecisionFix, 500);
     }
