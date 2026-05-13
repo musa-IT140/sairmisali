@@ -14764,136 +14764,126 @@ setInterval(function() {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     if (isIOS) {
-        var applyPrecisionFix = function() {
+        // 1. SICHERES CSS INJECTEN (Zerstört keine HTML-Strukturen!)
+        var style = document.createElement('style');
+        style.innerHTML = `
+            /* Verhindert horizontales Verrutschen der Seite */
+            body, html { overflow-x: hidden !important; }
+
+            /* WETTER: Zurück in den normalen Fluss, keine Überlappung mehr! */
+            .ios-weather-safe {
+                position: relative !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                margin: 15px auto 15px auto !important;
+                transform: none !important;
+                top: auto !important;
+                right: auto !important;
+                left: auto !important;
+                bottom: auto !important;
+                width: fit-content !important;
+                clear: both !important;
+                z-index: 50 !important;
+            }
+
+            /* HAUPT-BUTTONS: Exakt 48px Kreis */
+            .ios-main-btn {
+                width: 48px !important;
+                height: 48px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+                border-radius: 50% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                aspect-ratio: 1/1 !important;
+            }
+
+            /* UNTER-BUTTONS: Exakt 38px Kreis */
+            .ios-sub-btn {
+                width: 38px !important;
+                height: 38px !important;
+                min-width: 38px !important;
+                min-height: 38px !important;
+                border-radius: 50% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 auto 8px auto !important;
+                padding: 0 !important;
+                aspect-ratio: 1/1 !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 2. KLASSEN ZUWEISEN (Sanft & Sicher)
+        var applySafeFix = function() {
             
-            // =========================================================
-            // 1. BUTTONS UNABHÄNGIG & IDENTISCH VERARBEITEN
-            // =========================================================
-            var fixMenu = function(iconSelector, isLeft) {
-                var icon = document.querySelector(iconSelector);
-                if (!icon) return; 
-
-                var btn = icon.closest('button') || icon.closest('div[class*="btn"]') || icon.parentElement;
-                if (!btn) return;
-
-                var wrap = btn.parentElement;
-                if (!wrap) return;
-
-                // Absolute identische Größen für User UND Admin
-                var mainSize = '48px'; 
-                var subSize = '38px';
-
-                // Wrapper sicher fixieren
-                wrap.style.setProperty('position', 'fixed', 'important');
-                wrap.style.setProperty('bottom', '25px', 'important');
-                wrap.style.setProperty('width', mainSize, 'important');
-                wrap.style.setProperty('z-index', '999999', 'important');
-                wrap.style.setProperty('overflow', 'visible', 'important');
-
-                if (isLeft) {
-                    wrap.style.setProperty('left', '20px', 'important');
-                    wrap.style.setProperty('right', 'auto', 'important');
-                } else {
-                    wrap.style.setProperty('right', '20px', 'important');
-                    wrap.style.setProperty('left', 'auto', 'important');
-                }
-
-                // Hauptbutton: Kompakt und kreisrund
-                btn.style.setProperty('width', mainSize, 'important');
-                btn.style.setProperty('height', mainSize, 'important');
-                btn.style.setProperty('min-width', mainSize, 'important');
-                btn.style.setProperty('border-radius', '50%', 'important');
-                btn.style.setProperty('display', 'flex', 'important');
-                btn.style.setProperty('align-items', 'center', 'important');
-                btn.style.setProperty('justify-content', 'center', 'important');
-                btn.style.setProperty('margin', '0 auto', 'important');
-                btn.style.setProperty('padding', '0', 'important');
-                btn.style.setProperty('aspect-ratio', '1/1', 'important');
-
-                // Unter-Buttons zentrieren
-                var uls = wrap.querySelectorAll('ul');
-                uls.forEach(function(ul) {
-                    ul.style.setProperty('display', 'flex', 'important');
-                    ul.style.setProperty('flex-direction', 'column', 'important');
-                    ul.style.setProperty('align-items', 'center', 'important');
-                    ul.style.setProperty('padding', '0', 'important');
-                    ul.style.setProperty('margin', '0 0 10px 0', 'important');
-                });
-
-                var subBtns = wrap.querySelectorAll('ul li a, ul li button, ul > a, ul > button');
-                subBtns.forEach(function(sub) {
-                    // Zähler unangetastet lassen
-                    if (sub.classList.contains('badge') || sub.classList.contains('counter')) return;
-
-                    // Unter-Buttons: Noch kompakter (38px) und exakt gleich
-                    sub.style.setProperty('width', subSize, 'important');
-                    sub.style.setProperty('height', subSize, 'important');
-                    sub.style.setProperty('min-width', subSize, 'important');
-                    sub.style.setProperty('border-radius', '50%', 'important');
-                    sub.style.setProperty('display', 'flex', 'important');
-                    sub.style.setProperty('justify-content', 'center', 'important');
-                    sub.style.setProperty('align-items', 'center', 'important');
-                    sub.style.setProperty('margin', '0 auto 8px auto', 'important');
-                    sub.style.setProperty('padding', '0', 'important');
-                    sub.style.setProperty('overflow', 'visible', 'important'); 
-                });
-            };
-
-            // Wende die exakt gleichen Regeln auf User (links) und Admin (rechts) an
-            fixMenu('.fa-bars', true);
-            fixMenu('.fa-tools, .fa-wrench', false);
-
-            // =========================================================
-            // 2. WETTER & GLOCKE KORREKTUR
-            // =========================================================
-            var isLoggedIn = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket') !== null;
-
-            var weatherText = null;
+            // A) WETTER RETTEN
             var allNodes = document.querySelectorAll('*');
             for (var i = 0; i < allNodes.length; i++) {
                 var el = allNodes[i];
                 if (el.textContent.includes('°C') && el.children.length === 0) {
+                    // Modal-Inhalte strikt ignorieren
                     if (!el.closest('[id*="modal"], .modal, .top-modal, [class*="modal"]')) {
-                        weatherText = el;
-                        break;
+                        var weatherContainer = el.closest('div[style*="border"], div[class*="weather"]') || el.parentElement;
+                        if (weatherContainer) {
+                            weatherContainer.classList.add('ios-weather-safe');
+                        }
                     }
                 }
             }
-            var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
 
-            if (weatherContainer) {
-                weatherContainer.style.setProperty('position', 'absolute', 'important');
-                weatherContainer.style.setProperty('right', '20px', 'important');
-                weatherContainer.style.setProperty('margin', '0', 'important');
-                weatherContainer.style.setProperty('transform', 'none', 'important'); 
+            // B) BUTTONS IDENTISCH MACHEN (Ohne Wrapper zu zerstören)
+            var menuIcon = document.querySelector('.fa-bars');
+            var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
+            
+            var menuBtn = menuIcon ? (menuIcon.closest('button') || menuIcon.closest('div[class*="btn"]')) : null;
+            var adminBtn = adminIcon ? (adminIcon.closest('button') || adminIcon.closest('div[class*="btn"]')) : null;
 
-                if (isLoggedIn) {
-                    // Eingeloggt: Unter der Profilbox
-                    weatherContainer.style.setProperty('top', '175px', 'important');
-                } else {
-                    // 🔥 AUSGELOGGT FIX: Massiv nach unten geschoben, damit es zu 100% frei steht 🔥
-                    weatherContainer.style.setProperty('top', '210px', 'important');
-                }
-            }
+            if (menuBtn) menuBtn.classList.add('ios-main-btn');
+            if (adminBtn) adminBtn.classList.add('ios-main-btn');
 
+            var addSubBtnClasses = function(mainBtn) {
+                if (!mainBtn) return;
+                var wrap = mainBtn.closest('.floating-menu-wrapper') || mainBtn.parentElement;
+                if (!wrap) return;
+                
+                // Zwingt die Container nur in den Vordergrund, ändert aber keine Breiten mehr!
+                wrap.style.setProperty('z-index', '999999', 'important');
+
+                var subBtns = wrap.querySelectorAll('ul li a, ul li button, ul > a, ul > button, .bottom-btn, .sub-btn');
+                subBtns.forEach(function(sub) {
+                    // Zähler absolut in Ruhe lassen
+                    if (!sub.classList.contains('badge') && !sub.classList.contains('counter')) {
+                        sub.classList.add('ios-sub-btn');
+                        sub.style.setProperty('overflow', 'visible', 'important'); // Zähler sichern
+                    }
+                });
+            };
+
+            addSubBtnClasses(menuBtn);
+            addSubBtnClasses(adminBtn);
+
+            // C) GLOCKE POSITIONIEREN
             var bellIcon = document.querySelector('.fa-bell');
             var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
             if (bellContainer && !bellContainer.closest('[id*="modal"]')) {
                 bellContainer.style.setProperty('position', 'absolute', 'important');
                 bellContainer.style.setProperty('right', '20px', 'important');
                 bellContainer.style.setProperty('margin', '0', 'important');
-                bellContainer.style.setProperty('transform', 'none', 'important');
-
-                if (isLoggedIn) {
-                    bellContainer.style.setProperty('top', '130px', 'important');
-                } else {
-                    bellContainer.style.setProperty('top', '90px', 'important');
-                }
+                
+                var isLoggedIn = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket') !== null;
+                bellContainer.style.setProperty('top', isLoggedIn ? '130px' : '90px', 'important');
             }
         };
 
-        applyPrecisionFix();
-        setInterval(applyPrecisionFix, 500);
+        // Ausführen
+        applySafeFix();
+        setInterval(applySafeFix, 1000);
     }
 })();
 
