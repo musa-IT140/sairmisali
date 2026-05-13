@@ -14761,14 +14761,13 @@ setInterval(function() {
 })();
 
 (function() {
-    // Erkennt strikt, ob es sich um ein Apple/iOS Gerät handelt
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     if (isIOS) {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. HAUPTBUTTONS & UNTER-BUTTONS SYNCHRONISIEREN & ZENTRIEREN
+            // 1. HAUPT- & UNTERMENÜS MATHEMATISCH ZENTRIEREN
             // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
@@ -14778,20 +14777,21 @@ setInterval(function() {
                 var adminBtn = adminIcon.closest('button') || adminIcon.closest('div[class*="btn"]') || adminIcon.parentElement;
                 
                 if (menuBtn && adminBtn) {
-                    var mainSize = '55px'; // Exakt gleiche Breite & Höhe für HAUPTBUTTONS
-                    var subSize = '45px';  // Minimal kleiner für UNTER-BUTTONS
-                    var bottomLevel = '25px'; // Zieht beide Menüs weit nach unten
+                    var mainSize = '55px'; // Größe Hauptbuttons
+                    var subSize = '42px';  // Einheitliche Größe ALLE Unter-Buttons
+                    var bottomLevel = '25px'; // Abstand von unten
                     
                     var userWrap = menuBtn.parentElement;
                     var adminWrap = adminBtn.parentElement;
 
-                    // A) CONTAINER FIXIEREN (Zwingt die Wrapper auf 55px Breite)
+                    // A) UNSICHTBARES FUNDAMENT (Exakt 55px breit)
                     [userWrap, adminWrap].forEach(function(wrap, index) {
                         if (!wrap) return;
                         var isUser = (index === 0);
                         wrap.style.setProperty('position', 'fixed', 'important');
                         wrap.style.setProperty('bottom', bottomLevel, 'important');
                         wrap.style.setProperty('width', mainSize, 'important');
+                        wrap.style.setProperty('height', mainSize, 'important'); // Fixe Anker-Höhe
                         wrap.style.setProperty('z-index', '9999', 'important');
                         
                         if (isUser) {
@@ -14803,70 +14803,78 @@ setInterval(function() {
                         }
                     });
 
-                    // B) HAUPTBUTTONS FORMATIEREN & IM CONTAINER ZENTRIEREN
+                    // B) HAUPTBUTTONS (Exakt in das Fundament pressen)
                     [menuBtn, adminBtn].forEach(function(btn) {
                         btn.style.setProperty('width', mainSize, 'important');
                         btn.style.setProperty('height', mainSize, 'important');
                         btn.style.setProperty('min-width', mainSize, 'important');
-                        btn.style.setProperty('min-height', mainSize, 'important');
                         btn.style.setProperty('max-width', mainSize, 'important');
-                        btn.style.setProperty('max-height', mainSize, 'important');
-                        
                         btn.style.setProperty('position', 'absolute', 'important');
                         btn.style.setProperty('bottom', '0', 'important');
                         btn.style.setProperty('left', '0', 'important');
-                        btn.style.setProperty('right', '0', 'important');
-                        btn.style.setProperty('margin', 'auto', 'important'); 
-                        
+                        btn.style.setProperty('margin', '0', 'important'); 
                         btn.style.setProperty('padding', '0', 'important');
                         btn.style.setProperty('border-radius', '50%', 'important');
+                        
+                        // Icon im Hauptbutton zentrieren
                         btn.style.setProperty('display', 'flex', 'important');
                         btn.style.setProperty('align-items', 'center', 'important');
                         btn.style.setProperty('justify-content', 'center', 'important');
+                        btn.style.setProperty('box-sizing', 'border-box', 'important');
                     });
 
-                    // C) UNTER-BUTTONS VERKLEINERN UND ZENTRIEREN (OHNE ZÄHLER KAPUTT ZU MACHEN!)
+                    // C) UNTER-BUTTONS (Exakt zentrieren und Symbole mittig setzen)
                     [userWrap, adminWrap].forEach(function(wrap) {
                         if (!wrap) return;
-                        var subElements = wrap.querySelectorAll('*');
+                        // Sucht die Liste, die die Unter-Buttons enthält
+                        var uls = wrap.querySelectorAll('ul'); 
                         
-                        subElements.forEach(function(el) {
-                            // Hauptbuttons beim Formatieren ignorieren
-                            if (el === menuBtn || menuBtn.contains(el) || el === adminBtn || adminBtn.contains(el)) return;
+                        uls.forEach(function(ul) {
+                            // Die Liste genau über das 55px Fundament stellen
+                            ul.style.setProperty('position', 'absolute', 'important');
+                            ul.style.setProperty('bottom', '65px', 'important'); // Startet 10px über dem Hauptbutton
+                            ul.style.setProperty('width', '100%', 'important');  // Ist damit genau 55px breit
+                            ul.style.setProperty('left', '0', 'important');
+                            ul.style.setProperty('margin', '0', 'important');
+                            ul.style.setProperty('padding', '0', 'important');
                             
-                            // Listen-Container mittig ausrichten
-                            if (el.tagName === 'UL') {
-                                el.style.setProperty('left', '0', 'important');
-                                el.style.setProperty('right', '0', 'important');
-                                el.style.setProperty('width', '100%', 'important');
-                                el.style.setProperty('display', 'flex', 'important');
-                                el.style.setProperty('flex-direction', 'column', 'important');
-                                el.style.setProperty('align-items', 'center', 'important');
-                                return;
-                            }
+                            // Flexbox erzwingt nun, dass die 42px Buttons in der 55px Liste EXAKT in der Mitte schweben!
+                            ul.style.setProperty('display', 'flex', 'important');
+                            ul.style.setProperty('flex-direction', 'column', 'important');
+                            ul.style.setProperty('align-items', 'center', 'important'); 
+                            
+                            var subBtns = ul.querySelectorAll('a, button');
+                            subBtns.forEach(function(sub) {
+                                // Nur auf die tatsächlichen Kreis-Buttons anwenden (keine reinen Texte/Badges)
+                                if (sub.textContent.trim().length > 15 && !sub.querySelector('i')) return;
 
-                            // 🛑 ABSOLUTER BADGE-SCHUTZ: Elemente mit nur Zahlen (Zähler) ignorieren! 🛑
-                            var text = el.textContent.trim();
-                            var isBadge = (/^\d+$/.test(text) && !el.querySelector('i')) || el.classList.contains('badge') || el.classList.contains('counter');
-                            if (isBadge) return;
-
-                            // Nur die ECHTEN Unter-Buttons auf 45px zwingen
-                            if (el.tagName === 'BUTTON' || el.tagName === 'A' || el.classList.contains('sub-btn')) {
-                                // Lange Text-Labels ignorieren
-                                if (text.length > 15 && !el.querySelector('i')) return; 
-
-                                el.style.setProperty('width', subSize, 'important');
-                                el.style.setProperty('height', subSize, 'important');
-                                el.style.setProperty('min-width', subSize, 'important');
-                                el.style.setProperty('min-height', subSize, 'important');
-                                el.style.setProperty('max-width', subSize, 'important');
-                                el.style.setProperty('max-height', subSize, 'important');
+                                // 1. Alle Kreis-Buttons exakt gleich groß machen
+                                sub.style.setProperty('width', subSize, 'important');
+                                sub.style.setProperty('height', subSize, 'important');
+                                sub.style.setProperty('min-width', subSize, 'important');
+                                sub.style.setProperty('min-height', subSize, 'important');
+                                sub.style.setProperty('max-width', subSize, 'important');
+                                sub.style.setProperty('max-height', subSize, 'important');
+                                sub.style.setProperty('margin', '4px 0', 'important');
+                                sub.style.setProperty('padding', '0', 'important');
+                                sub.style.setProperty('border-radius', '50%', 'important');
+                                sub.style.setProperty('position', 'relative', 'important');
+                                sub.style.setProperty('box-sizing', 'border-box', 'important');
                                 
-                                // Perfekt mittig über den Hauptbutton
-                                el.style.setProperty('margin-left', 'auto', 'important');
-                                el.style.setProperty('margin-right', 'auto', 'important');
-                                el.style.setProperty('border-radius', '50%', 'important');
-                            }
+                                // 2. Das Symbol/Icon zwingend in die Mitte rücken
+                                sub.style.setProperty('display', 'flex', 'important');
+                                sub.style.setProperty('justify-content', 'center', 'important');
+                                sub.style.setProperty('align-items', 'center', 'important');
+
+                                // Verhindern, dass das Icon selbst noch verrutscht
+                                var icon = sub.querySelector('i');
+                                if(icon) {
+                                    icon.style.setProperty('margin', '0', 'important');
+                                    icon.style.setProperty('padding', '0', 'important');
+                                    icon.style.setProperty('display', 'block', 'important');
+                                    icon.style.setProperty('text-align', 'center', 'important');
+                                }
+                            });
                         });
                     });
                 }
@@ -14908,7 +14916,6 @@ setInterval(function() {
             }
         };
 
-        // Skript sofort ausführen und dynamisch sichern
         applyPrecisionFix();
         setInterval(applyPrecisionFix, 500);
     }
