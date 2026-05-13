@@ -2497,6 +2497,46 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         }
     }
 
+    /* 1. Alte, verbuggte Blasen komplett und zwingend blockieren */
+    .misali-elegant-bubble { display: none !important; opacity: 0 !important; visibility: hidden !important; }
+
+    /* 2. Neue, smarte Blase designen */
+    .misali-smart-bubble {
+        position: fixed;
+        background: rgba(10, 20, 40, 0.95); 
+        color: rgba(244, 197, 66, 1); 
+        font-size: 0.75rem; 
+        padding: 6px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(244, 197, 66, 0.6); 
+        pointer-events: none; 
+        z-index: 2147483647 !important; /* Absoluter Vordergrund, aber scrollt nicht mit! */
+        transform: translate(-50%, 10px);
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        backdrop-filter: blur(8px); 
+        -webkit-backdrop-filter: blur(8px);
+        font-style: italic;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    }
+    .misali-smart-bubble.show { opacity: 1; transform: translate(-50%, -10px); }
+    .misali-smart-bubble::after {
+        content: ''; position: absolute; bottom: -6px; left: 50%;
+        transform: translateX(-50%); border-width: 6px 6px 0;
+        border-style: solid; border-color: rgba(244, 197, 66, 0.6) transparent transparent transparent;
+    }
+    
+    /* Falls die Blase oben keinen Platz hat, klappt sie nach unten auf */
+    .misali-smart-bubble.bubble-below { transform: translate(-50%, -20px); }
+    .misali-smart-bubble.bubble-below.show { transform: translate(-50%, 5px); }
+    .misali-smart-bubble.bubble-below::after {
+        bottom: auto; top: -6px; border-width: 0 6px 6px;
+        border-color: transparent transparent rgba(244, 197, 66, 0.6) transparent;
+    }
+
 </style>
     <script>
 
@@ -14950,6 +14990,193 @@ setInterval(function() {
     // Sofort ausführen und zur Sicherheit nochmal nach dem Laden absichern
     fixProfileDate();
     setTimeout(fixProfileDate, 500);
+})();
+
+(function() {
+    // --- 1. PRÄZISE WÖRTERBÜCHER ---
+    const translations = {
+        "Ana Sayfa": "Startseite", "Şiirlerim": "Meine Gedichte", "Sözlerim": "Meine Sprüche",
+        "Önemli Şahsiyetler": "Persönlichkeiten", "Atasözleri": "Sprichwörter",
+        "Sağlık": "Gesundheit", "Kıssalar": "Kurzgeschichten", "Fıkralar": "Witze",
+        "Eğlence Köşesi": "Spiele", "Bilmeceler": "Rätsel", "Bulmacalar": "Logik & Puzzles",
+        "Sizin Kaleminiz": "Eigene Verse", "Kullanıcı Eserleri": "User Werke",
+        "Sohbet": "Chat", "Profilim": "Mein Profil", "Hakkımda": "Über mich",
+        "Online Üyeler": "Online User", "Eserlerim": "Meine Werke",
+        "Canlı": "Online", "Toplam Eser": "Kreationen", 
+        "Aklımda": "Gespeichert", "Kalplerim": "Meine Herzen", 
+        "Kayıtlı": "Registriert", "Aktif": "Aktiv", 
+        "Ziyaretçi": "Besucher", "Oynanan": "Gespielte Spiele", 
+        "Burçlar": "Sternzeichen", "Zodyak": "Sternzeichen",
+        "İsim": "Name", "Ara": "Suchen", "Sayfa İçerikleri": "Seiten Bereiche",
+        "Şair Misal.i": "Webseiten Ersteller"
+    };
+
+    // Strikte Auswertung nach CSS Selektoren (Vermeidet, dass falsche Dinge erkannt werden)
+    const iconTooltips = [
+        { selector: '.fa-sign-out-alt, [onclick*="logout"]', text: "Abmelden / Logout" },
+        { selector: '.fa-bell, #user-notify-btn', text: "Benachrichtigungen" },
+        { selector: '.fa-envelope, .fa-paper-plane', text: "Nachrichten / Senden" },
+        { selector: '.fa-cloud, .fa-sun, .fa-cloud-sun, .fa-cloud-moon, .weather-icon, #weather-widget, .weather-widget', text: "Wetter Informationen" },
+        { selector: '.fa-calendar, .fa-calendar-alt, .holiday-toggle-btn, .datetime-container div:nth-child(2)', text: "Datum / Kalender" },
+        { selector: '.fa-clock, .fa-clock-o, .fa-clock-regular, .datetime-container div:nth-child(1)', text: "Uhrzeit" },
+        { selector: '.fa-cog, .fa-cogs, .fa-sliders-h', text: "Einstellungen" },
+        { selector: '.fa-share-alt, .fa-share', text: "Teilen" },
+        { selector: '.fa-bookmark', text: "Lesezeichen" },
+        { selector: '.fa-heart', text: "Herzen (Likes)" },
+        { selector: '.fa-comments, .fa-comment', text: "Kommentare" },
+        { selector: '.fa-gamepad, .fa-play, .fa-trophy, .fa-medal', text: "Spiele & Rangliste" },
+        { selector: '.fa-star, .fa-meteor, #header-zodiac, .zodiac-icon', text: "Sternzeichen" },
+        { selector: '.fa-globe, .fa-circle', text: "Online Status" },
+        { selector: '.fa-book, .fa-book-open', text: "Werke / Kreationen" },
+        { selector: '.fa-user-plus', text: "Registrieren" },
+        { selector: '.fa-user', text: "Anmelden" },
+        { selector: '.fa-search', text: "Suchen" },
+        { selector: '.fa-bars', text: "Hauptmenü" },
+        { selector: '.fa-tools, .fa-wrench', text: "Admin Menü" }
+    ];
+
+    // --- 2. INTELLIGENTE ELEMENT-ERKENNUNG ---
+    function getSmartTooltipData(element) {
+        let current = element;
+        let depth = 0;
+        
+        while (current && current !== document.body && depth < 4) { 
+            
+            // Prio 1: Harte CSS Selektoren (Am genausten für Icons und Buttons!)
+            if (current.nodeType === 1 && current.matches) {
+                for (let item of iconTooltips) {
+                    if (current.matches(item.selector)) return { text: item.text, target: current };
+                }
+            }
+
+            // Prio 2: Profilbilder
+            if (current.nodeType === 1 && current.tagName === 'IMG') {
+                if (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil')) {
+                    return { text: "Şair Misal.i", target: current };
+                }
+            }
+
+            // Prio 3: Textinhalte (Präzise Prüfung auf das erste Match)
+            let text = current.tagName === 'INPUT' ? (current.placeholder || "") : (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
+            
+            if (text.length > 0 && text.length < 50) {
+                let textLower = text.toLowerCase();
+                
+                // Exakte Übersetzungen prüfen
+                for (let key in translations) {
+                    if (text.includes(key)) return { text: translations[key], target: current };
+                }
+
+                // Dynamische Zahlen prüfen (Punkte, Datum, Uhrzeit)
+                if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) return { text: "Spielpunkte", target: current };
+                if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) return { text: "Uhrzeit", target: current };
+                if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) return { text: "Datum", target: current };
+                if (/[\u2648-\u2653]/.test(text)) return { text: "Sternzeichen", target: current };
+            }
+
+            current = current.parentElement; 
+            depth++;
+        }
+        return null;
+    }
+
+    // --- 3. DIE NEUE ENGINE ---
+    let smartTimer = null;
+    let activeBubble = null;
+
+    function destroySmartBubble() {
+        clearTimeout(smartTimer);
+        if (activeBubble) {
+            let b = activeBubble;
+            b.classList.remove('show');
+            activeBubble = null;
+            setTimeout(() => { if (b && b.parentNode) b.remove(); }, 200);
+        }
+    }
+
+    function createSmartBubble(target, text) {
+        destroySmartBubble(); // Vorherige sofort killen
+        
+        let rect = target.getBoundingClientRect();
+        if (rect.width === 0) return; 
+
+        activeBubble = document.createElement('div');
+        activeBubble.className = 'misali-smart-bubble';
+        activeBubble.innerText = text;
+        document.body.appendChild(activeBubble);
+
+        let leftPos = rect.left + (rect.width / 2);
+        let topPos = rect.top - 25; 
+
+        // Wenn oben kein Platz ist (z.B. nah am oberen Bildschirmrand), unter dem Element anzeigen
+        if (topPos < 15) { 
+            topPos = rect.bottom + 5; 
+            activeBubble.classList.add('bubble-below'); 
+        }
+
+        activeBubble.style.left = leftPos + 'px';
+        activeBubble.style.top = topPos + 'px'; 
+
+        // Flüssig einblenden
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if(activeBubble) activeBubble.classList.add('show');
+            });
+        });
+
+        // Blase verschwindet so oder so automatisch nach 3 Sekunden
+        setTimeout(() => { destroySmartBubble(); }, 3000);
+    }
+
+    const triggerElements = 'a, button, li, p, span, h1, h2, h3, h4, i, input, img, div.clickable-header-item, div[onclick]';
+
+    // Event: Mouse Enter (Hover) oder Touch Start (Gedrückt halten)
+    function handlePointerEnter(e) {
+        let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
+        target = target.closest(triggerElements);
+        if (!target) return;
+        
+        let data = getSmartTooltipData(target);
+        if (data) {
+            clearTimeout(smartTimer);
+            // 🔥 WICHTIG: Erscheint EXAKT nach 2 Sekunden! 🔥
+            smartTimer = setTimeout(() => {
+                createSmartBubble(data.target, data.text);
+            }, 2000); 
+        }
+    }
+
+    // Event: Mouse Leave oder Touch End / Abbrechen / Klicken
+    function handlePointerLeave(e) {
+        destroySmartBubble();
+    }
+
+    // --- 4. SCROLL KILLER ---
+    // Sobald gescrollt wird, stirbt die Blase sofort!
+    function handleScroll() {
+        destroySmartBubble();
+    }
+
+    // Listener global und extrem sicher anheften (Capture-Phase)
+    document.addEventListener('mouseover', handlePointerEnter, { passive: true, capture: true });
+    document.addEventListener('touchstart', handlePointerEnter, { passive: true, capture: true });
+
+    // Abbruch-Bedingungen (Die Blase wird zerstört bei:)
+    document.addEventListener('mouseout', handlePointerLeave, { passive: true, capture: true }); // Maus geht weg
+    document.addEventListener('touchend', handlePointerLeave, { passive: true, capture: true }); // Finger vom Handy gelöst
+    document.addEventListener('touchcancel', handlePointerLeave, { passive: true, capture: true }); // Wischen abgebrochen
+    document.addEventListener('click', handlePointerLeave, { passive: true, capture: true }); // Klick ausgeführt
+
+    // Auf Scroll reagieren (Gesamtes Fenster)
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    
+    // Auf Scroll in div-Containern reagieren (z.B. Modal-Fenster, Listen, Chat-Box)
+    document.addEventListener('scroll', function(e) {
+        if (e.target.nodeType === 1) { 
+            handleScroll();
+        }
+    }, { passive: true, capture: true });
+
 })();
 
 </script>
