@@ -14767,7 +14767,7 @@ setInterval(function() {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. HAUPT- & UNTERMENÜS MATHEMATISCH ZENTRIEREN
+            // 1. HAUPT- & UNTERMENÜS FORMATIEREN (OHNE KLAPP-FUNKTION ZU ZERSTÖREN)
             // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
@@ -14777,22 +14777,24 @@ setInterval(function() {
                 var adminBtn = adminIcon.closest('button') || adminIcon.closest('div[class*="btn"]') || adminIcon.parentElement;
                 
                 if (menuBtn && adminBtn) {
-                    var mainSize = '55px'; // Größe Hauptbuttons
-                    var subSize = '42px';  // Einheitliche Größe ALLE Unter-Buttons
-                    var bottomLevel = '25px'; // Abstand von unten
+                    var mainSize = '55px'; 
+                    var subSize = '42px';  
+                    var bottomLevel = '25px'; 
                     
                     var userWrap = menuBtn.parentElement;
                     var adminWrap = adminBtn.parentElement;
 
-                    // A) UNSICHTBARES FUNDAMENT (Exakt 55px breit)
+                    // A) WRAPPER FIXIEREN (ABER SICHTBAR LASSEN!)
                     [userWrap, adminWrap].forEach(function(wrap, index) {
                         if (!wrap) return;
                         var isUser = (index === 0);
                         wrap.style.setProperty('position', 'fixed', 'important');
                         wrap.style.setProperty('bottom', bottomLevel, 'important');
-                        wrap.style.setProperty('width', mainSize, 'important');
-                        wrap.style.setProperty('height', mainSize, 'important'); // Fixe Anker-Höhe
+                        wrap.style.setProperty('width', mainSize, 'important'); 
                         wrap.style.setProperty('z-index', '9999', 'important');
+                        wrap.style.setProperty('overflow', 'visible', 'important'); // LEBENSWICHTIG: Erlaubt, dass Untermenüs nach oben rauswachsen können!
+                        
+                        // HINWEIS: Keine feste "height" mehr, damit das Aufklappen funktioniert!
                         
                         if (isUser) {
                             wrap.style.setProperty('left', '20px', 'important');
@@ -14803,78 +14805,50 @@ setInterval(function() {
                         }
                     });
 
-                    // B) HAUPTBUTTONS (Exakt in das Fundament pressen)
+                    // B) HAUPTBUTTONS FORMATIEREN
                     [menuBtn, adminBtn].forEach(function(btn) {
                         btn.style.setProperty('width', mainSize, 'important');
                         btn.style.setProperty('height', mainSize, 'important');
-                        btn.style.setProperty('min-width', mainSize, 'important');
-                        btn.style.setProperty('max-width', mainSize, 'important');
-                        btn.style.setProperty('position', 'absolute', 'important');
-                        btn.style.setProperty('bottom', '0', 'important');
-                        btn.style.setProperty('left', '0', 'important');
-                        btn.style.setProperty('margin', '0', 'important'); 
-                        btn.style.setProperty('padding', '0', 'important');
                         btn.style.setProperty('border-radius', '50%', 'important');
-                        
-                        // Icon im Hauptbutton zentrieren
                         btn.style.setProperty('display', 'flex', 'important');
                         btn.style.setProperty('align-items', 'center', 'important');
                         btn.style.setProperty('justify-content', 'center', 'important');
-                        btn.style.setProperty('box-sizing', 'border-box', 'important');
+                        btn.style.setProperty('margin', '0 auto', 'important'); 
                     });
 
-                    // C) UNTER-BUTTONS (Exakt zentrieren und Symbole mittig setzen)
+                    // C) UNTER-BUTTONS ZENTRIEREN UND GRÖSSE ANPASSEN
                     [userWrap, adminWrap].forEach(function(wrap) {
                         if (!wrap) return;
-                        // Sucht die Liste, die die Unter-Buttons enthält
-                        var uls = wrap.querySelectorAll('ul'); 
                         
+                        // Zwingt die Liste in die Breite des Wrappers (55px)
+                        var uls = wrap.querySelectorAll('ul'); 
                         uls.forEach(function(ul) {
-                            // Die Liste genau über das 55px Fundament stellen
-                            ul.style.setProperty('position', 'absolute', 'important');
-                            ul.style.setProperty('bottom', '65px', 'important'); // Startet 10px über dem Hauptbutton
-                            ul.style.setProperty('width', '100%', 'important');  // Ist damit genau 55px breit
-                            ul.style.setProperty('left', '0', 'important');
-                            ul.style.setProperty('margin', '0', 'important');
+                            ul.style.setProperty('width', '100%', 'important'); 
                             ul.style.setProperty('padding', '0', 'important');
+                            ul.style.setProperty('margin', '0 0 10px 0', 'important');
+                            // WICHTIG: KEIN 'display: flex !important' - Das würde den Schließen/Öffnen-Code der Seite überschreiben!
+                        });
+                        
+                        var subBtns = wrap.querySelectorAll('a, button');
+                        subBtns.forEach(function(sub) {
+                            if (sub === menuBtn || sub === adminBtn) return;
                             
-                            // Flexbox erzwingt nun, dass die 42px Buttons in der 55px Liste EXAKT in der Mitte schweben!
-                            ul.style.setProperty('display', 'flex', 'important');
-                            ul.style.setProperty('flex-direction', 'column', 'important');
-                            ul.style.setProperty('align-items', 'center', 'important'); 
-                            
-                            var subBtns = ul.querySelectorAll('a, button');
-                            subBtns.forEach(function(sub) {
-                                // Nur auf die tatsächlichen Kreis-Buttons anwenden (keine reinen Texte/Badges)
-                                if (sub.textContent.trim().length > 15 && !sub.querySelector('i')) return;
+                            var text = sub.textContent.trim();
+                            if (text.length > 15 && !sub.querySelector('i')) return;
 
-                                // 1. Alle Kreis-Buttons exakt gleich groß machen
-                                sub.style.setProperty('width', subSize, 'important');
-                                sub.style.setProperty('height', subSize, 'important');
-                                sub.style.setProperty('min-width', subSize, 'important');
-                                sub.style.setProperty('min-height', subSize, 'important');
-                                sub.style.setProperty('max-width', subSize, 'important');
-                                sub.style.setProperty('max-height', subSize, 'important');
-                                sub.style.setProperty('margin', '4px 0', 'important');
-                                sub.style.setProperty('padding', '0', 'important');
-                                sub.style.setProperty('border-radius', '50%', 'important');
-                                sub.style.setProperty('position', 'relative', 'important');
-                                sub.style.setProperty('box-sizing', 'border-box', 'important');
-                                
-                                // 2. Das Symbol/Icon zwingend in die Mitte rücken
-                                sub.style.setProperty('display', 'flex', 'important');
-                                sub.style.setProperty('justify-content', 'center', 'important');
-                                sub.style.setProperty('align-items', 'center', 'important');
+                            // Badges/Zähler weiterhin schützen
+                            var isBadge = (/^\d+$/.test(text) && !sub.querySelector('i')) || sub.classList.contains('badge') || sub.classList.contains('counter');
+                            if (isBadge) return;
 
-                                // Verhindern, dass das Icon selbst noch verrutscht
-                                var icon = sub.querySelector('i');
-                                if(icon) {
-                                    icon.style.setProperty('margin', '0', 'important');
-                                    icon.style.setProperty('padding', '0', 'important');
-                                    icon.style.setProperty('display', 'block', 'important');
-                                    icon.style.setProperty('text-align', 'center', 'important');
-                                }
-                            });
+                            sub.style.setProperty('width', subSize, 'important');
+                            sub.style.setProperty('height', subSize, 'important');
+                            sub.style.setProperty('margin', '5px auto', 'important'); // Sorgt für perfekte, automatische Zentrierung über dem Hauptbutton!
+                            sub.style.setProperty('padding', '0', 'important');
+                            sub.style.setProperty('border-radius', '50%', 'important');
+                            sub.style.setProperty('display', 'flex', 'important');
+                            sub.style.setProperty('justify-content', 'center', 'important');
+                            sub.style.setProperty('align-items', 'center', 'important');
+                            sub.style.setProperty('box-sizing', 'border-box', 'important');
                         });
                     });
                 }
