@@ -2497,10 +2497,10 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         }
     }
 
-    /* 1. Alte, verbuggte Blasen komplett und zwingend blockieren */
+    /* Alte, verbuggte Blasen komplett und zwingend blockieren */
     .misali-elegant-bubble { display: none !important; opacity: 0 !important; visibility: hidden !important; }
 
-    /* 2. Neue, smarte Blase designen */
+    /* Neue, smarte Blase designen */
     .misali-smart-bubble {
         position: fixed;
         background: rgba(10, 20, 40, 0.95); 
@@ -2510,7 +2510,7 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         border-radius: 12px;
         border: 1px solid rgba(244, 197, 66, 0.6); 
         pointer-events: none; 
-        z-index: 2147483647 !important; /* Absoluter Vordergrund, aber scrollt nicht mit! */
+        z-index: 2147483647 !important; /* Absoluter Vordergrund */
         transform: translate(-50%, 10px);
         opacity: 0;
         transition: opacity 0.2s ease, transform 0.2s ease;
@@ -2528,8 +2528,6 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         transform: translateX(-50%); border-width: 6px 6px 0;
         border-style: solid; border-color: rgba(244, 197, 66, 0.6) transparent transparent transparent;
     }
-    
-    /* Falls die Blase oben keinen Platz hat, klappt sie nach unten auf */
     .misali-smart-bubble.bubble-below { transform: translate(-50%, -20px); }
     .misali-smart-bubble.bubble-below.show { transform: translate(-50%, 5px); }
     .misali-smart-bubble.bubble-below::after {
@@ -15011,7 +15009,6 @@ setInterval(function() {
         "Şair Misal.i": "Webseiten Ersteller"
     };
 
-    // Strikte Auswertung nach CSS Selektoren (Vermeidet, dass falsche Dinge erkannt werden)
     const iconTooltips = [
         { selector: '.fa-sign-out-alt, [onclick*="logout"]', text: "Abmelden / Logout" },
         { selector: '.fa-bell, #user-notify-btn', text: "Benachrichtigungen" },
@@ -15035,57 +15032,45 @@ setInterval(function() {
         { selector: '.fa-tools, .fa-wrench', text: "Admin Menü" }
     ];
 
-    // --- 2. INTELLIGENTE ELEMENT-ERKENNUNG ---
     function getSmartTooltipData(element) {
         let current = element;
         let depth = 0;
-        
         while (current && current !== document.body && depth < 4) { 
-            
-            // Prio 1: Harte CSS Selektoren (Am genausten für Icons und Buttons!)
             if (current.nodeType === 1 && current.matches) {
                 for (let item of iconTooltips) {
                     if (current.matches(item.selector)) return { text: item.text, target: current };
                 }
             }
-
-            // Prio 2: Profilbilder
             if (current.nodeType === 1 && current.tagName === 'IMG') {
                 if (current.id === 'home-profile-pic' || current.className.includes('profile-pic') || current.src.includes('profil')) {
                     return { text: "Şair Misal.i", target: current };
                 }
             }
-
-            // Prio 3: Textinhalte (Präzise Prüfung auf das erste Match)
             let text = current.tagName === 'INPUT' ? (current.placeholder || "") : (current.innerText || current.textContent || "").replace(/\s+/g, ' ').trim();
-            
             if (text.length > 0 && text.length < 50) {
                 let textLower = text.toLowerCase();
-                
-                // Exakte Übersetzungen prüfen
                 for (let key in translations) {
                     if (text.includes(key)) return { text: translations[key], target: current };
                 }
-
-                // Dynamische Zahlen prüfen (Punkte, Datum, Uhrzeit)
                 if (/\b\d+\s*p\.?\b/.test(textLower) || textLower.includes('puan')) return { text: "Spielpunkte", target: current };
                 if (/\b\d{1,2}:\d{2}(:\d{2})?\b/.test(textLower)) return { text: "Uhrzeit", target: current };
                 if (/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/.test(textLower)) return { text: "Datum", target: current };
                 if (/[\u2648-\u2653]/.test(text)) return { text: "Sternzeichen", target: current };
             }
-
             current = current.parentElement; 
             depth++;
         }
         return null;
     }
 
-    // --- 3. DIE NEUE ENGINE ---
-    let smartTimer = null;
+    let hoverTimer = null;
+    let clickTimer = null;
     let activeBubble = null;
 
+    // 🚀 SCROLL-KILLER: Zerstört die Blase absolut kompromisslos
     function destroySmartBubble() {
-        clearTimeout(smartTimer);
+        clearTimeout(hoverTimer);
+        clearTimeout(clickTimer);
         if (activeBubble) {
             let b = activeBubble;
             b.classList.remove('show');
@@ -15095,7 +15080,7 @@ setInterval(function() {
     }
 
     function createSmartBubble(target, text) {
-        destroySmartBubble(); // Vorherige sofort killen
+        destroySmartBubble(); 
         
         let rect = target.getBoundingClientRect();
         if (rect.width === 0) return; 
@@ -15108,7 +15093,6 @@ setInterval(function() {
         let leftPos = rect.left + (rect.width / 2);
         let topPos = rect.top - 25; 
 
-        // Wenn oben kein Platz ist (z.B. nah am oberen Bildschirmrand), unter dem Element anzeigen
         if (topPos < 15) { 
             topPos = rect.bottom + 5; 
             activeBubble.classList.add('bubble-below'); 
@@ -15117,65 +15101,61 @@ setInterval(function() {
         activeBubble.style.left = leftPos + 'px';
         activeBubble.style.top = topPos + 'px'; 
 
-        // Flüssig einblenden
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 if(activeBubble) activeBubble.classList.add('show');
             });
         });
 
-        // Blase verschwindet so oder so automatisch nach 3 Sekunden
+        // Auto-Hide nach 3 Sekunden
         setTimeout(() => { destroySmartBubble(); }, 3000);
     }
 
     const triggerElements = 'a, button, li, p, span, h1, h2, h3, h4, i, input, img, div.clickable-header-item, div[onclick]';
 
-    // Event: Mouse Enter (Hover) oder Touch Start (Gedrückt halten)
-    function handlePointerEnter(e) {
+    // 🚀 DESKTOP: Maus drüberhalten wartet exakt 2 Sekunden
+    document.addEventListener('mouseover', function(e) {
         let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
         target = target.closest(triggerElements);
         if (!target) return;
         
         let data = getSmartTooltipData(target);
         if (data) {
-            clearTimeout(smartTimer);
-            // 🔥 WICHTIG: Erscheint EXAKT nach 2 Sekunden! 🔥
-            smartTimer = setTimeout(() => {
+            clearTimeout(hoverTimer);
+            hoverTimer = setTimeout(() => {
                 createSmartBubble(data.target, data.text);
             }, 2000); 
         }
-    }
+    }, { passive: true, capture: true });
 
-    // Event: Mouse Leave oder Touch End / Abbrechen / Klicken
-    function handlePointerLeave(e) {
+    document.addEventListener('mouseout', function(e) {
         destroySmartBubble();
-    }
+    }, { passive: true, capture: true });
 
-    // --- 4. SCROLL KILLER ---
-    // Sobald gescrollt wird, stirbt die Blase sofort!
-    function handleScroll() {
-        destroySmartBubble();
-    }
+    // 🚀 MOBILE & DESKTOP: Antippen wartet exakt 2 Sekunden
+    document.addEventListener('click', function(e) {
+        let target = e.target.nodeType === 3 ? e.target.parentElement : e.target;
+        target = target.closest(triggerElements);
+        if (!target) return;
 
-    // Listener global und extrem sicher anheften (Capture-Phase)
-    document.addEventListener('mouseover', handlePointerEnter, { passive: true, capture: true });
-    document.addEventListener('touchstart', handlePointerEnter, { passive: true, capture: true });
-
-    // Abbruch-Bedingungen (Die Blase wird zerstört bei:)
-    document.addEventListener('mouseout', handlePointerLeave, { passive: true, capture: true }); // Maus geht weg
-    document.addEventListener('touchend', handlePointerLeave, { passive: true, capture: true }); // Finger vom Handy gelöst
-    document.addEventListener('touchcancel', handlePointerLeave, { passive: true, capture: true }); // Wischen abgebrochen
-    document.addEventListener('click', handlePointerLeave, { passive: true, capture: true }); // Klick ausgeführt
-
-    // Auf Scroll reagieren (Gesamtes Fenster)
-    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-    
-    // Auf Scroll in div-Containern reagieren (z.B. Modal-Fenster, Listen, Chat-Box)
-    document.addEventListener('scroll', function(e) {
-        if (e.target.nodeType === 1) { 
-            handleScroll();
+        let data = getSmartTooltipData(target);
+        if (data) {
+            destroySmartBubble(); // Killt eventuell alte Blasen
+            // Startet den 2 Sekunden Timer NACH dem Antippen
+            clickTimer = setTimeout(() => {
+                createSmartBubble(data.target, data.text);
+            }, 2000);
         }
     }, { passive: true, capture: true });
+
+    // 🚀 EVENT-LISTENER: Sobald gescrollt wird, verschwindet die Blase sofort!
+    window.addEventListener('scroll', destroySmartBubble, { passive: true, capture: true });
+    document.addEventListener('scroll', function(e) {
+        if (e.target.nodeType === 1) destroySmartBubble();
+    }, { passive: true, capture: true });
+
+    // Wenn man auf dem Handy wischt (Touchmove), stirbt die Blase ebenfalls sofort
+    document.addEventListener('touchmove', destroySmartBubble, { passive: true, capture: true });
 
 })();
 
