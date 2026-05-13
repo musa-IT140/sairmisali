@@ -2485,6 +2485,18 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
     }
 }
 
+@supports (-webkit-touch-callout: none) {
+        @media (max-width: 768px) {
+            /* Zwingt das Wetter im eingeloggten Zustand exakt in den roten Kasten */
+            body.user-mode #main-header #weather-widget, 
+            body.admin-mode #main-header #weather-widget,
+            body.user-mode #main-header .weather-widget, 
+            body.admin-mode #main-header .weather-widget { 
+                top: 185px !important; 
+            }
+        }
+    }
+
 </style>
     <script>
 
@@ -14854,7 +14866,19 @@ setInterval(function() {
     setTimeout(() => { if(document.getElementById('myHeartsModal') && document.getElementById('myHeartsModal').classList.contains('active-modal')) window.renderMyHearts(); }, 500);
 })();
 
-
+// Sicherheits-Skript, das verhindert, dass alte JS-Befehle das Wetter wieder hochziehen
+    setInterval(function() {
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isLoggedIn = document.body.classList.contains('user-mode') || document.body.classList.contains('admin-mode');
+        
+        if (isIOS && isLoggedIn) {
+            var weatherWidget = document.getElementById('weather-widget');
+            if (weatherWidget) {
+                // Schiebt das Widget stur auf 185px (in das rote Feld)
+                weatherWidget.style.setProperty('top', '185px', 'important');
+            }
+        }
+    }, 500);
 
 </script>
 </body>
