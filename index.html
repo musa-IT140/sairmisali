@@ -14764,30 +14764,11 @@ setInterval(function() {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     if (isIOS) {
-        // 1. SICHERES CSS INJECTEN (Zerstört keine HTML-Strukturen!)
+        // 1. SICHERES CSS INJECTEN (Hält die Buttons stabil & die Seite zentriert)
         var style = document.createElement('style');
         style.innerHTML = `
-            /* Verhindert horizontales Verrutschen der Seite */
             body, html { overflow-x: hidden !important; }
 
-            /* WETTER: Zurück in den normalen Fluss, keine Überlappung mehr! */
-            .ios-weather-safe {
-                position: relative !important;
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                margin: 15px auto 15px auto !important;
-                transform: none !important;
-                top: auto !important;
-                right: auto !important;
-                left: auto !important;
-                bottom: auto !important;
-                width: fit-content !important;
-                clear: both !important;
-                z-index: 50 !important;
-            }
-
-            /* HAUPT-BUTTONS: Exakt 48px Kreis */
             .ios-main-btn {
                 width: 48px !important;
                 height: 48px !important;
@@ -14802,7 +14783,6 @@ setInterval(function() {
                 aspect-ratio: 1/1 !important;
             }
 
-            /* UNTER-BUTTONS: Exakt 38px Kreis */
             .ios-sub-btn {
                 width: 38px !important;
                 height: 38px !important;
@@ -14819,25 +14799,11 @@ setInterval(function() {
         `;
         document.head.appendChild(style);
 
-        // 2. KLASSEN ZUWEISEN (Sanft & Sicher)
         var applySafeFix = function() {
             
-            // A) WETTER RETTEN
-            var allNodes = document.querySelectorAll('*');
-            for (var i = 0; i < allNodes.length; i++) {
-                var el = allNodes[i];
-                if (el.textContent.includes('°C') && el.children.length === 0) {
-                    // Modal-Inhalte strikt ignorieren
-                    if (!el.closest('[id*="modal"], .modal, .top-modal, [class*="modal"]')) {
-                        var weatherContainer = el.closest('div[style*="border"], div[class*="weather"]') || el.parentElement;
-                        if (weatherContainer) {
-                            weatherContainer.classList.add('ios-weather-safe');
-                        }
-                    }
-                }
-            }
-
-            // B) BUTTONS IDENTISCH MACHEN (Ohne Wrapper zu zerstören)
+            // =========================================================
+            // A) BUTTONS PERFEKTIONIEREN (Wie im letzten, guten Schritt)
+            // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
             
@@ -14852,15 +14818,13 @@ setInterval(function() {
                 var wrap = mainBtn.closest('.floating-menu-wrapper') || mainBtn.parentElement;
                 if (!wrap) return;
                 
-                // Zwingt die Container nur in den Vordergrund, ändert aber keine Breiten mehr!
                 wrap.style.setProperty('z-index', '999999', 'important');
 
                 var subBtns = wrap.querySelectorAll('ul li a, ul li button, ul > a, ul > button, .bottom-btn, .sub-btn');
                 subBtns.forEach(function(sub) {
-                    // Zähler absolut in Ruhe lassen
                     if (!sub.classList.contains('badge') && !sub.classList.contains('counter')) {
                         sub.classList.add('ios-sub-btn');
-                        sub.style.setProperty('overflow', 'visible', 'important'); // Zähler sichern
+                        sub.style.setProperty('overflow', 'visible', 'important'); 
                     }
                 });
             };
@@ -14868,20 +14832,57 @@ setInterval(function() {
             addSubBtnClasses(menuBtn);
             addSubBtnClasses(adminBtn);
 
-            // C) GLOCKE POSITIONIEREN
+            // =========================================================
+            // B) WETTER & GLOCKE STRIKT TRENNEN (Eingeloggt vs. Ausgeloggt)
+            // =========================================================
+            
+            // Prüfen, ob der Nutzer eingeloggt ist (anhand des Logout-Buttons)
+            var isLoggedIn = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket') !== null;
+
+            // 1. Glocke positionieren
             var bellIcon = document.querySelector('.fa-bell');
             var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
             if (bellContainer && !bellContainer.closest('[id*="modal"]')) {
                 bellContainer.style.setProperty('position', 'absolute', 'important');
                 bellContainer.style.setProperty('right', '20px', 'important');
                 bellContainer.style.setProperty('margin', '0', 'important');
+                bellContainer.style.setProperty('transform', 'none', 'important');
                 
-                var isLoggedIn = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket') !== null;
-                bellContainer.style.setProperty('top', isLoggedIn ? '130px' : '90px', 'important');
+                // Glocke Höhe
+                bellContainer.style.setProperty('top', isLoggedIn ? '135px' : '90px', 'important');
+            }
+
+            // 2. Wetter positionieren (Zieht das Wetter aus dem Text raus an den rechten Rand!)
+            var weatherText = null;
+            var allNodes = document.querySelectorAll('*');
+            for (var i = 0; i < allNodes.length; i++) {
+                var el = allNodes[i];
+                if (el.textContent.includes('°C') && el.children.length === 0) {
+                    if (!el.closest('[id*="modal"], .modal, .top-modal, [class*="modal"]')) {
+                        weatherText = el;
+                        break;
+                    }
+                }
+            }
+            
+            var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
+            if (weatherContainer) {
+                weatherContainer.style.setProperty('position', 'absolute', 'important');
+                weatherContainer.style.setProperty('right', '20px', 'important');
+                weatherContainer.style.setProperty('margin', '0', 'important');
+                weatherContainer.style.setProperty('transform', 'none', 'important');
+                weatherContainer.style.setProperty('width', 'auto', 'important');
+                weatherContainer.style.setProperty('z-index', '50', 'important');
+
+                // 🔥 HIER IST DIE TRENNUNG: Das Wetter sitzt jetzt immer exakt 45 Pixel unter der Glocke 🔥
+                if (isLoggedIn) {
+                    weatherContainer.style.setProperty('top', '180px', 'important'); // Eingeloggt
+                } else {
+                    weatherContainer.style.setProperty('top', '135px', 'important'); // Ausgeloggt
+                }
             }
         };
 
-        // Ausführen
         applySafeFix();
         setInterval(applySafeFix, 1000);
     }
