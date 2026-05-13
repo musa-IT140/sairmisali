@@ -14880,6 +14880,78 @@ setInterval(function() {
         }
     }, 500);
 
+    (function() {
+    // ==========================================
+    // FIX 1: SCORE BADGE & LOGOUT COMPACTNESS (NUR iOS SAFARI)
+    // ==========================================
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+        var style = document.createElement('style');
+        style.innerHTML = `
+            @media (max-width: 768px) {
+                @supports (-webkit-touch-callout: none) {
+                    /* Zwingt die Elemente in EINE Zeile und reduziert Abstände */
+                    #main-header .user-profile-group {
+                        flex-wrap: nowrap !important; 
+                        gap: 5px !important;
+                        justify-content: center !important;
+                        padding: 2px 4px !important;
+                    }
+                    
+                    /* Name minimal anpassen für mehr Platz */
+                    #main-header #header-username {
+                        font-size: 1.15rem !important;
+                        white-space: nowrap !important;
+                    }
+
+                    /* Sternzeichen etwas kleiner */
+                    #main-header #header-zodiac .zodiac-colored-icon {
+                        font-size: 1.0rem !important;
+                    }
+
+                    /* 🚀 SCORE-BADGE VERKLEINERN 🚀 */
+                    #main-header .header-score-badge {
+                        font-size: 0.75rem !important; 
+                        padding: 2px 6px !important;
+                        white-space: nowrap !important;
+                        margin: 0 !important;
+                    }
+
+                    /* 🚀 LOGOUT-BUTTON VERKLEINERN & EINREIHEN 🚀 */
+                    #main-header .logout-btn {
+                        padding: 4px 8px !important;
+                        font-size: 0.9rem !important;
+                        margin-left: 0 !important;
+                        width: auto !important;
+                        height: auto !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ==========================================
+    // FIX 2: GEBURTSDATUM NUR JAHR (GLOBAL FÜR ALLE GERÄTE)
+    // ==========================================
+    function fixProfileDate() {
+        // Sucht den Text im "Hakkımda" Bereich und ändert ihn
+        var profileTexts = document.querySelectorAll('#hakkimda-view p');
+        profileTexts.forEach(function(p) {
+            if (p.innerHTML.includes('3 Haziran 1980')) {
+                p.innerHTML = p.innerHTML.replace('3 Haziran 1980', '1980');
+            }
+        });
+    }
+    
+    // Sofort ausführen und zur Sicherheit nochmal nach dem Laden absichern
+    fixProfileDate();
+    setTimeout(fixProfileDate, 500);
+})();
+
 </script>
 </body>
 </html>
