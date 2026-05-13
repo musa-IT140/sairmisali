@@ -14767,7 +14767,7 @@ setInterval(function() {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. HAUPT- & UNTERMENÜS: NUR DIE BUTTONS SELBST ANFASSEN!
+            // 1. HAUPT- & UNTERMENÜS: VOM DOKUMENT ENTKOPPELN & FIXIEREN
             // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
@@ -14779,18 +14779,33 @@ setInterval(function() {
                 var userWrap = menuBtn ? menuBtn.parentElement : null;
                 var adminWrap = adminBtn ? adminBtn.parentElement : null;
 
-                // 🛑 SICHERHEITS-RESET: Löscht den Müll vom vorherigen Skript (falls im Cache) 🛑
-                [userWrap, adminWrap].forEach(function(wrap) {
+                [userWrap, adminWrap].forEach(function(wrap, index) {
                     if (!wrap) return;
-                    wrap.style.removeProperty('position');
-                    wrap.style.removeProperty('bottom');
-                    wrap.style.removeProperty('width');
-                    wrap.style.removeProperty('left');
-                    wrap.style.removeProperty('right');
+                    
+                    // 🔥 DER RETTER-BEFEHL: Holt die Buttons aus ihrem Container und hängt sie direkt in den <body>. 
+                    // Das macht sie absolut immun gegen alle CSS-Transforms auf der Seite! 🔥
+                    if (wrap.parentElement !== document.body) {
+                        document.body.appendChild(wrap);
+                    }
+                    
+                    var isUser = (index === 0);
+                    wrap.style.setProperty('position', 'fixed', 'important');
+                    // env(safe-area-inset-bottom) berücksichtigt den Safari-Wischbalken unten
+                    wrap.style.setProperty('bottom', 'calc(25px + env(safe-area-inset-bottom))', 'important');
+                    wrap.style.setProperty('width', '55px', 'important'); 
+                    wrap.style.setProperty('z-index', '999999', 'important'); // Über allem anderen!
                     wrap.style.setProperty('overflow', 'visible', 'important'); 
+                    
+                    if (isUser) {
+                        wrap.style.setProperty('left', '20px', 'important');
+                        wrap.style.setProperty('right', 'auto', 'important');
+                    } else {
+                        wrap.style.setProperty('right', '20px', 'important');
+                        wrap.style.setProperty('left', 'auto', 'important');
+                    }
                 });
 
-                // A) HAUPTBUTTONS KREISRUND MACHEN & LEICHT NACH UNTEN SCHIEBEN
+                // A) HAUPTBUTTONS KREISRUND
                 [menuBtn, adminBtn].forEach(function(btn) {
                     if(!btn) return;
                     btn.style.setProperty('width', '55px', 'important');
@@ -14803,12 +14818,10 @@ setInterval(function() {
                     btn.style.setProperty('justify-content', 'center', 'important');
                     btn.style.setProperty('padding', '0', 'important');
                     btn.style.setProperty('aspect-ratio', '1/1', 'important');
-                    
-                    // Schiebt nur den Button nach unten, OHNE das Layout zu zerstören
                     btn.style.setProperty('transform', 'translateY(15px)', 'important'); 
                 });
 
-                // B) UNTER-BUTTONS: EXAKT 42PX KREISE FÜR BEIDE SEITEN
+                // B) UNTER-BUTTONS (Exakt 42px)
                 [userWrap, adminWrap].forEach(function(wrap) {
                     if (!wrap) return;
                     
@@ -14823,10 +14836,8 @@ setInterval(function() {
                     
                     var subBtns = wrap.querySelectorAll('ul li a, ul li button, ul > a, ul > button');
                     subBtns.forEach(function(sub) {
-                        // Zähler/Badges strikt ignorieren
                         if (sub.classList.contains('badge') || sub.classList.contains('counter')) return;
 
-                        // Exakt 42px Kreis für User UND Admin Unter-Buttons
                         sub.style.setProperty('width', '42px', 'important');
                         sub.style.setProperty('height', '42px', 'important');
                         sub.style.setProperty('min-width', '42px', 'important');
@@ -14850,7 +14861,7 @@ setInterval(function() {
             }
 
             // =========================================================
-            // 2. GLOCKE UND WETTER (WIE IM LETZTEN, ERFOLGREICHEN SCHRITT)
+            // 2. GLOCKE UND WETTER (WIE GEHABT: PERFEKT SITZEND)
             // =========================================================
             var bellIcon = document.querySelector('.fa-bell');
             var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
@@ -14881,8 +14892,6 @@ setInterval(function() {
                 weatherContainer.style.setProperty('position', 'absolute', 'important');
                 weatherContainer.style.setProperty('right', '20px', 'important');
                 weatherContainer.style.setProperty('margin', '0', 'important');
-                
-                // Drückt das Wetter stur nach unten ins freie Feld
                 weatherContainer.style.setProperty('transform', 'translateY(65px)', 'important');
                 weatherContainer.style.setProperty('width', 'auto', 'important');
             }
