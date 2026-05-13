@@ -15159,6 +15159,241 @@ setInterval(function() {
 
 })();
 
+(function() {
+    // ==========================================
+    // 1. CSS FIX: Stellt sicher, dass das Buch-Icon bei "Toplam Eser" sichtbar ist
+    // ==========================================
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #main-header .header-works-status i.fa-book-open {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            font-size: 1.1rem !important;
+            color: #f4c542 !important;
+            margin-right: 4px !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // ==========================================
+    // 2. FIREBASE PRESENCE SYSTEM (Echtzeit-Online-Tracking)
+    // ==========================================
+    window.onlineUsersMap = {};
+
+    window.initPresence = function() {
+        if(!window.currentUser || typeof firebase === 'undefined') return;
+        
+        // Verknüpfe dich mit der Firebase-Datenbank
+        const db = firebase.database();
+        const myStatusRef = db.ref('misaliData/online/' + window.currentUser.username);
+        
+        // Firebase "connected" Status lauschen (Baut eine Live-Brücke zum Server)
+        db.ref('.info/connected').on('value', function(snapshot) {
+            if (snapshot.val() === false) {
+                return; // Nicht verbunden
+            }
+            // Sobald die Verbindung abbricht (Handy aus, Tab geschlossen), Server anweisen, den Eintrag zu löschen!
+            myStatusRef.onDisconnect().remove().then(function() {
+                // Wenn verbunden, trage den User mit aktuellem Zeitstempel ein
+                myStatusRef.set(Date.now());
+            });
+        });
+    };
+
+    // ==========================================
+    // 3. ABFANGEN DER ONLINE-DATEN AUS DER CLOUD
+    // ==========================================
+    const origProcess = window.processCloudData;
+    window.processCloudData = function(r, force) {
+        // Speichere die aktuellen Live-User (die von Firebase übermittelt werden)
+        if(r.online) {
+            window.onlineUsersMap = r.online;
+        } else {
+            window.onlineUsersMap = {};
+        }
+        
+        // Führe den restlichen Code aus
+        if(origProcess) origProcess(r, force);
+        
+        // Erzwinge Update der Online-Listen, wenn sich der Status ändert
+        if(window.renderOnlineUsers) window.renderOnlineUsers();
+    };
+
+    // ==========================================
+    // 4. RENDER-FUNKTION ÜBERSCHREIBEN (Nur echte Online-User anzeigen!)
+    // ==========================================
+    window.renderOnlineUsers = function() {
+        try {
+            let allUsers = Object.values(window.userDatabase || {});
+            let totalRegistered = allUsers.length;
+            
+            // 🔥 HIER IST DER FILTER: Nur User, die in der Firebase als Online markiert sind 🔥
+            let onlineUsersList = allUsers.filter(u => window.onlineUsersMap[u.username]);
+            
+            // Notfall-Sicherung: Wenn niemand online ist (z.B. Ladefehler), zeige zumindest dich selbst an
+            if (onlineUsersList.length === 0 && window.currentUser) {
+                onlineUsersList.push(window.currentUser);
+            }
+            
+            let onlineCount = onlineUsersList.length;
+
+            // Badges & Zähler in der Oberfläche updaten
+            window.forceBadge('header-search-online-badge', onlineCount, true);
+            window.forceBadge('online-dot-mini-user', onlineCount, false);
+            window.forceBadge('online-dot-mini-admin', onlineCount, false);
+            window.forceBadge('admin-users-badge', totalRegistered, false);
+            
+            let logCount = window.adminLogs ? window.adminLogs.length : 0;
+            window.forceBadge('rapor-dot-mini-admin', logCount, false);
+            
+            let visits = localStorage.getItem('misaliSiteVisits') || 0;
+            
+            let hk = document.getElementById('h-kayitli'); if(hk) hk.innerText = totalRegistered;
+            let ha = document.getElementById('h-aktif'); if(ha) ha.innerText = onlineCount;
+            let hz = document.getElementById('h-ziyaretci'); if(hz) hz.innerText = visits;
+
+            // -----------------------------------------------------------
+            // A) HTML FÜR "CANLI" (NUR ONLINE USER)
+            // -----------------------------------------------------------
+            let userListHTML = onlineUsersList.filter(u => u.approved !== false).map(u => {
+                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                let roleIcon = u.role === 'admin' ? '🛡️ ' : (u.role === 'co-admin' ? '⚔️ ' : '');
+                let colorClass = window.getAuthorColorClass(u.username);
+                return `<div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; border-left: 3px solid #f4c542;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:1.5rem;">${u.emoji||'👤'}</span>
+                                <div><div style="font-weight:bold; color:#fff;">${roleIcon}<span class="${colorClass}">${fullName}</span></div></div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:#22c55e; font-weight:bold;">${u.score||0} P</div>
+                                <div style="font-size:0.75rem; color:#cbd5e1;">Oynanan <span class="de-sub" style="color:inherit; font-size:0.85em;">(Spiele)</span>: ${u.played||0}</div>
+                            </div>
+                        </div>`;
+            }).join('');
+
+            // -----------------------------------------------------------
+            // B) HTML FÜR "KAYITLI" (ALLE USER IM ADMIN PANEL)
+            // -----------------------------------------------------------
+            let adminUsersListHTML = allUsers.map(u => {
+                let fullName = u.name + (u.surname ? ' ' + u.surname : '');
+                let status = u.approved === false 
+                    ? '<span style="color:#ef4444; font-size:0.8rem; border:1px solid #ef4444; padding:2px 6px; border-radius:8px; margin-left:5px;">Onay Bekliyor</span>' 
+                    : '<span style="color:#22c55e; font-size:0.8rem; border:1px solid #22c55e; padding:2px 6px; border-radius:8px; margin-left:5px;">Aktif</span>';
+                
+                let roleIcon = u.role === 'admin' ? '<span style="color:#f4c542; margin-right:5px;">[Admin]</span>' : (u.role === 'co-admin' ? '<span style="color:#3b82f6; margin-right:5px;">[Co-Admin]</span>' : '');
+                let colorClass = window.getAuthorColorClass(u.username);
+                
+                // Zeigt dem Admin zusätzlich einen Live-Status-Indikator an
+                let isOnlineNow = window.onlineUsersMap[u.username] || (window.currentUser && window.currentUser.username === u.username)
+                    ? '<span style="color:#22c55e; font-size:0.7rem; margin-left:5px;">● Online</span>' 
+                    : '<span style="color:#64748b; font-size:0.7rem; margin-left:5px;">○ Offline</span>';
+
+                let actionBtn = u.approved === false 
+                    ? `<button class="reset-btn success" style="flex:1; padding:6px; font-size:0.85rem; margin:0;" onclick="window.approveUser('${u.username}')"><i class="fas fa-check"></i> Onayla <span class="de-sub" style="color:inherit; font-size:0.85em;">(Aktivieren)</span></button>`
+                    : `<button class="reset-btn warning" style="flex:1; padding:6px; font-size:0.85rem; margin:0;" onclick="window.blockUser('${u.username}')"><i class="fas fa-ban"></i> Engelle <span class="de-sub" style="color:inherit; font-size:0.85em;">(Sperren)</span></button>`;
+
+                let roleBtn = '';
+                if (window.currentUser && window.currentUser.role === 'admin' && u.username !== 'AdminKing') {
+                    if (u.role === 'co-admin') {
+                        roleBtn = `<button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:linear-gradient(135deg, #64748b, #475569); color:white;" onclick="window.changeUserRole('${u.username}', 'user')"><i class="fas fa-user-minus"></i> User Yap <span class="de-sub" style="color:inherit; font-size:0.85em;">(Zu User)</span></button>`;
+                    } else if (u.role !== 'admin') {
+                        roleBtn = `<button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:linear-gradient(135deg, #8b5cf6, #6d28d9); color:white;" onclick="window.changeUserRole('${u.username}', 'co-admin')"><i class="fas fa-user-plus"></i> Co-Admin <span class="de-sub" style="color:inherit; font-size:0.85em;">(Zu Co-Admin)</span></button>`;
+                    }
+                }
+
+                return `<div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 8px; display:flex; flex-direction:column; gap:8px; border-left: 3px solid ${u.approved === false ? '#ef4444' : '#22c55e'};">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-size:1.5rem;">${u.emoji||'👤'}</span>
+                                    <div><div style="font-weight:bold; color:#fff;">${roleIcon}<span class="${colorClass}">${fullName}</span> ${status}</div><div style="font-size:0.8rem; color:#94a3b8;">@${u.username} | ${u.email} ${isOnlineNow}</div></div>
+                                </div>
+                                <div style="color:#22c55e; font-weight:bold; font-size:1.1rem; white-space:nowrap; flex-shrink:0; margin-left:5px;">${u.score||0} P</div>
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px; pointer-events:auto;">
+                                <button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0;" onclick="window.editUserStats('${u.username}')"><i class="fas fa-edit"></i> Puan <span class="de-sub" style="color:inherit; font-size:0.85em;">(Punkte)</span></button>
+                                <button class="reset-btn" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:white;" onclick="window.replyToMessage('${u.username}')"><i class="fas fa-envelope"></i> Mesaj <span class="de-sub" style="color:inherit; font-size:0.85em;">(Nachricht)</span></button>
+                                ${roleBtn}
+                                ${actionBtn}
+                                <button class="reset-btn danger" style="flex:1; padding:6px; font-size:0.85rem; margin:0; background:none; border:1px solid #ef4444; color:#ef4444;" onclick="window.deleteUser('${u.username}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button>
+                            </div>
+                        </div>`;
+            }).join('');
+
+            let ul = document.getElementById('user-only-online-list'); if(ul) ul.innerHTML = userListHTML || '<div style="color:#94a3b8; text-align:center; padding:15px;">Şu an kimse aktif değil. <span class="de-sub">(Niemand online)</span></div>';
+            let al = document.getElementById('admin-only-online-list'); if(al) al.innerHTML = userListHTML || '<div style="color:#94a3b8; text-align:center; padding:15px;">Şu an kimse aktif değil. <span class="de-sub">(Niemand online)</span></div>';
+            let au = document.getElementById('admin-users-list'); if(au) au.innerHTML = adminUsersListHTML || '<div style="color:#94a3b8; text-align:center; padding:15px;">Kullanıcı yok.</div>';
+
+        } catch(e) { console.error("Error in renderOnlineUsers", e); }
+    };
+
+    // 5. INITIALISIERUNG
+    setTimeout(() => {
+        if(window.initPresence) window.initPresence();
+        if(window.renderOnlineUsers) window.renderOnlineUsers();
+    }, 1500);
+    
+})();
+
+(function() {
+    // Macht die Funktion "async", damit sie auf die Firebase-Antwort warten kann
+    window.m_register = async function() {
+        const u = document.getElementById('m-reg-user').value.trim(); 
+        const e = document.getElementById('m-reg-email').value.trim();
+        const p = document.getElementById('m-reg-pass').value.trim(); 
+        const n = document.getElementById('m-reg-name').value.trim();
+        const s = document.getElementById('m-reg-surname').value.trim(); 
+        const d = document.getElementById('m-reg-day').value;
+        const m = document.getElementById('m-reg-month').value; 
+        const y = document.getElementById('m-reg-year').value;
+        const em = document.getElementById('m-reg-emoji').value;
+        
+        const avEl = document.getElementById('m-reg-avatar-b64');
+        const av = avEl ? avEl.value : ''; 
+        
+        if (!u || !e || !p || !n || !s) { window.customAlert('Lütfen zorunlu alanları doldurun.', '⚠️'); return; }
+        if (p.length < 8) { window.customAlert('Şifreniz en az 8 karakter olmalıdır.', '⚠️'); return; }
+
+        // 🚀 DER LEBENSRETTENDE CLOUD-SYNC VOR DEM SPEICHERN 🚀
+        // Zieht sich die neuesten Admin-Nachrichten aus der Cloud, damit sie nicht überschrieben werden!
+        try {
+            if (window.fetchFromCloud) {
+                window.showToast("Bilgiler kontrol ediliyor... <span class='de-sub'>(Prüfe Daten...)</span>");
+                await window.fetchFromCloud(true);
+            }
+        } catch(err) { console.warn("Cloud Sync Fehler bei Registrierung", err); }
+
+        // Erst NACH dem Sync prüfen, ob der User vielleicht schon existiert
+        if (window.userDatabase && window.userDatabase[u]) { window.customAlert('Bu kullanıcı adı zaten alınmış.', '❌'); return; }
+        
+        window.lastLocalUpdate = Date.now();
+        let secureHash = window.generateHash(u + p + "misali_secret_key");
+        
+        if(!window.userDatabase) window.userDatabase = {};
+        
+        // Neuen User in die frische Datenbank eintragen
+        window.userDatabase[u] = { 
+            username: u, email: e, name: n, surname: s, day: d, month: m, year: y, 
+            avatar: av, emoji: em || '👤', pass: p, _token: secureHash, 
+            role: 'user', score: 0, played: 0, wins: 0, losses: 0, draws: 0, alerts: [], approved: false 
+        };
+        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        
+        // 🔔 Benachrichtigung sauber an den Admin schicken (hängt sich jetzt an die korrekte Cloud-Liste an)
+        if (window.sendSystemMessage) { 
+            window.sendSystemMessage('Admin', `🚨 YENİ KAYIT: ${n} ${s} (@${u}) onay bekliyor.`); 
+        }
+        
+        window.closeTopModal('force'); 
+        window.customAlert('Kayıt başarılı! Admin onayı bekleniyor. <span class="de-sub">(Registriert! Warte auf Freischaltung.)</span>', '✅'); 
+        
+        // Finales Pushen in die Cloud (mit leichtem Timeout, damit sich die Push-Befehle nicht überschneiden)
+        if(window.syncToCloud) {
+            setTimeout(() => { window.syncToCloud(); }, 500);
+        }
+    };
+})();
+
 </script>
 </body>
 </html>
