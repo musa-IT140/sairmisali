@@ -14779,7 +14779,7 @@ setInterval(function() {
                 
                 if (menuBtn && adminBtn) {
                     var mainSize = '55px'; // Exakt gleiche Breite & Höhe für HAUPTBUTTONS
-                    var subSize = '45px';  // Minimal kleiner für UNTER-BUTTONS (Badges bleiben proportioniert)
+                    var subSize = '45px';  // Minimal kleiner für UNTER-BUTTONS
                     var bottomLevel = '25px'; // Zieht beide Menüs weit nach unten
                     
                     var userWrap = menuBtn.parentElement;
@@ -14812,7 +14812,6 @@ setInterval(function() {
                         btn.style.setProperty('max-width', mainSize, 'important');
                         btn.style.setProperty('max-height', mainSize, 'important');
                         
-                        // Setzt die Hauptbuttons exakt auf den Boden des jeweiligen Containers
                         btn.style.setProperty('position', 'absolute', 'important');
                         btn.style.setProperty('bottom', '0', 'important');
                         btn.style.setProperty('left', '0', 'important');
@@ -14826,7 +14825,7 @@ setInterval(function() {
                         btn.style.setProperty('justify-content', 'center', 'important');
                     });
 
-                    // C) UNTER-BUTTONS VERKLEINERN UND ZENTRIEREN
+                    // C) UNTER-BUTTONS VERKLEINERN UND ZENTRIEREN (OHNE ZÄHLER KAPUTT ZU MACHEN!)
                     [userWrap, adminWrap].forEach(function(wrap) {
                         if (!wrap) return;
                         var subElements = wrap.querySelectorAll('*');
@@ -14835,7 +14834,7 @@ setInterval(function() {
                             // Hauptbuttons beim Formatieren ignorieren
                             if (el === menuBtn || menuBtn.contains(el) || el === adminBtn || adminBtn.contains(el)) return;
                             
-                            // Listen (ul) zentrieren, damit die Kinder-Buttons mittig darüber schweben
+                            // Listen-Container mittig ausrichten
                             if (el.tagName === 'UL') {
                                 el.style.setProperty('left', '0', 'important');
                                 el.style.setProperty('right', '0', 'important');
@@ -14843,13 +14842,18 @@ setInterval(function() {
                                 el.style.setProperty('display', 'flex', 'important');
                                 el.style.setProperty('flex-direction', 'column', 'important');
                                 el.style.setProperty('align-items', 'center', 'important');
+                                return;
                             }
 
-                            // Die eigentlichen runden Unter-Buttons auf 45px zwingen
-                            var st = window.getComputedStyle(el);
-                            if (el.tagName === 'BUTTON' || el.tagName === 'A' || parseInt(st.borderRadius) >= 10 || el.classList.contains('sub-btn')) {
+                            // 🛑 ABSOLUTER BADGE-SCHUTZ: Elemente mit nur Zahlen (Zähler) ignorieren! 🛑
+                            var text = el.textContent.trim();
+                            var isBadge = (/^\d+$/.test(text) && !el.querySelector('i')) || el.classList.contains('badge') || el.classList.contains('counter');
+                            if (isBadge) return;
+
+                            // Nur die ECHTEN Unter-Buttons auf 45px zwingen
+                            if (el.tagName === 'BUTTON' || el.tagName === 'A' || el.classList.contains('sub-btn')) {
                                 // Lange Text-Labels ignorieren
-                                if (el.textContent.trim().length > 15 && !el.querySelector('i')) return;
+                                if (text.length > 15 && !el.querySelector('i')) return; 
 
                                 el.style.setProperty('width', subSize, 'important');
                                 el.style.setProperty('height', subSize, 'important');
@@ -14858,7 +14862,7 @@ setInterval(function() {
                                 el.style.setProperty('max-width', subSize, 'important');
                                 el.style.setProperty('max-height', subSize, 'important');
                                 
-                                // Perfekt mittig
+                                // Perfekt mittig über den Hauptbutton
                                 el.style.setProperty('margin-left', 'auto', 'important');
                                 el.style.setProperty('margin-right', 'auto', 'important');
                                 el.style.setProperty('border-radius', '50%', 'important');
@@ -14877,12 +14881,10 @@ setInterval(function() {
             var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
             var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
 
-            // Wir suchen die obere Box (mit Logout-Button), um zu wissen, wo sie endet
             var logoutIcon = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket');
             var topBox = logoutIcon ? (logoutIcon.closest('div[style*="border"]') || logoutIcon.closest('.header-box')) : null;
 
             if (bellContainer && weatherContainer) {
-                // Elemente komplett aus dem Safari-Chaos befreien
                 bellContainer.style.setProperty('position', 'absolute', 'important');
                 bellContainer.style.setProperty('right', '20px', 'important');
                 bellContainer.style.setProperty('margin', '0', 'important');
@@ -14894,23 +14896,19 @@ setInterval(function() {
                 weatherContainer.style.setProperty('transform', 'none', 'important');
                 weatherContainer.style.setProperty('width', 'auto', 'important');
 
-                // Höhe dynamisch berechnen: Genau unter die Top-Box setzen!
                 if (topBox) {
                     var boxRect = topBox.getBoundingClientRect();
-                    // absoluter Abstand von ganz oben
                     var absoluteTop = boxRect.bottom + window.scrollY; 
-                    
-                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); // 15px unter der oberen Box
-                    weatherContainer.style.setProperty('top', (absoluteTop + 60) + 'px', 'important'); // 60px unter der oberen Box
+                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); 
+                    weatherContainer.style.setProperty('top', (absoluteTop + 60) + 'px', 'important'); 
                 } else {
-                    // Notfall-Werte, falls die Top-Box nicht sofort lädt
                     bellContainer.style.setProperty('top', '120px', 'important');
                     weatherContainer.style.setProperty('top', '165px', 'important');
                 }
             }
         };
 
-        // Skript sofort ausführen und 2x pro Sekunde absichern (falls die Elemente dynamisch laden)
+        // Skript sofort ausführen und dynamisch sichern
         applyPrecisionFix();
         setInterval(applyPrecisionFix, 500);
     }
