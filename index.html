@@ -14767,7 +14767,7 @@ setInterval(function() {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. HAUPT- & UNTERMENÜS FORMATIEREN (OHNE KLAPP-FUNKTION ZU ZERSTÖREN)
+            // 1. HAUPT- & UNTERMENÜS: EXAKTE KREISE AUF BEIDEN SEITEN
             // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
@@ -14784,7 +14784,7 @@ setInterval(function() {
                     var userWrap = menuBtn.parentElement;
                     var adminWrap = adminBtn.parentElement;
 
-                    // A) WRAPPER FIXIEREN (ABER SICHTBAR LASSEN!)
+                    // A) WRAPPER FIXIEREN
                     [userWrap, adminWrap].forEach(function(wrap, index) {
                         if (!wrap) return;
                         var isUser = (index === 0);
@@ -14792,9 +14792,7 @@ setInterval(function() {
                         wrap.style.setProperty('bottom', bottomLevel, 'important');
                         wrap.style.setProperty('width', mainSize, 'important'); 
                         wrap.style.setProperty('z-index', '9999', 'important');
-                        wrap.style.setProperty('overflow', 'visible', 'important'); // LEBENSWICHTIG: Erlaubt, dass Untermenüs nach oben rauswachsen können!
-                        
-                        // HINWEIS: Keine feste "height" mehr, damit das Aufklappen funktioniert!
+                        wrap.style.setProperty('overflow', 'visible', 'important'); 
                         
                         if (isUser) {
                             wrap.style.setProperty('left', '20px', 'important');
@@ -14813,65 +14811,107 @@ setInterval(function() {
                         btn.style.setProperty('display', 'flex', 'important');
                         btn.style.setProperty('align-items', 'center', 'important');
                         btn.style.setProperty('justify-content', 'center', 'important');
-                        btn.style.setProperty('margin', '0 auto', 'important'); 
+                        btn.style.setProperty('margin', '0 auto', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('aspect-ratio', '1/1', 'important'); // Zwingt zum perfekten Kreis
                     });
 
-                    // C) UNTER-BUTTONS ZENTRIEREN UND GRÖSSE ANPASSEN
+                    // C) UNTER-BUTTONS: ABSOLUT GLEICH & KREISRUND MACHEN
                     [userWrap, adminWrap].forEach(function(wrap) {
                         if (!wrap) return;
                         
-                        // Zwingt die Liste in die Breite des Wrappers (55px)
+                        // Zwingt die Liste in die Mitte, egal wie das HTML aufgebaut ist
                         var uls = wrap.querySelectorAll('ul'); 
                         uls.forEach(function(ul) {
                             ul.style.setProperty('width', '100%', 'important'); 
                             ul.style.setProperty('padding', '0', 'important');
                             ul.style.setProperty('margin', '0 0 10px 0', 'important');
-                            // WICHTIG: KEIN 'display: flex !important' - Das würde den Schließen/Öffnen-Code der Seite überschreiben!
+                            ul.style.setProperty('display', 'flex', 'important');
+                            ul.style.setProperty('flex-direction', 'column', 'important');
+                            ul.style.setProperty('align-items', 'center', 'important'); 
                         });
                         
-                        var subBtns = wrap.querySelectorAll('a, button');
+                        var subBtns = wrap.querySelectorAll('a, button, li');
                         subBtns.forEach(function(sub) {
-                            if (sub === menuBtn || sub === adminBtn) return;
+                            if (sub === menuBtn || sub === adminBtn || menuBtn.contains(sub) || adminBtn.contains(sub)) return;
                             
                             var text = sub.textContent.trim();
-                            if (text.length > 15 && !sub.querySelector('i')) return;
-
-                            // Badges/Zähler weiterhin schützen
+                            // Zähler (Badges) schützen
                             var isBadge = (/^\d+$/.test(text) && !sub.querySelector('i')) || sub.classList.contains('badge') || sub.classList.contains('counter');
                             if (isBadge) return;
 
-                            sub.style.setProperty('width', subSize, 'important');
-                            sub.style.setProperty('height', subSize, 'important');
-                            sub.style.setProperty('margin', '5px auto', 'important'); // Sorgt für perfekte, automatische Zentrierung über dem Hauptbutton!
-                            sub.style.setProperty('padding', '0', 'important');
-                            sub.style.setProperty('border-radius', '50%', 'important');
-                            sub.style.setProperty('display', 'flex', 'important');
-                            sub.style.setProperty('justify-content', 'center', 'important');
-                            sub.style.setProperty('align-items', 'center', 'important');
-                            sub.style.setProperty('box-sizing', 'border-box', 'important');
+                            // Nur echte Buttons mit Symbolen anpassen
+                            if (sub.querySelector('i') || sub.tagName === 'BUTTON' || sub.tagName === 'A') {
+                                
+                                // Maße für einen perfekten, unverzerrten Kreis erzwingen
+                                sub.style.setProperty('width', subSize, 'important');
+                                sub.style.setProperty('height', subSize, 'important');
+                                sub.style.setProperty('min-width', subSize, 'important');
+                                sub.style.setProperty('min-height', subSize, 'important');
+                                sub.style.setProperty('max-width', subSize, 'important');
+                                sub.style.setProperty('max-height', subSize, 'important');
+                                sub.style.setProperty('margin', '5px auto', 'important'); 
+                                sub.style.setProperty('padding', '0', 'important');
+                                sub.style.setProperty('border-radius', '50%', 'important');
+                                sub.style.setProperty('display', 'flex', 'important');
+                                sub.style.setProperty('justify-content', 'center', 'important');
+                                sub.style.setProperty('align-items', 'center', 'important');
+                                sub.style.setProperty('box-sizing', 'border-box', 'important');
+                                sub.style.setProperty('aspect-ratio', '1/1', 'important'); // Anti-Verzerrungs-Schutz
+                                sub.style.setProperty('overflow', 'hidden', 'important');
+
+                                // Icon-Zentrierung sicherstellen
+                                var icon = sub.querySelector('i');
+                                if(icon) {
+                                    icon.style.setProperty('margin', '0', 'important');
+                                    icon.style.setProperty('padding', '0', 'important');
+                                    icon.style.setProperty('display', 'block', 'important');
+                                }
+                            }
                         });
                     });
                 }
             }
 
             // =========================================================
-            // 2. GLOCKE UND WETTER EXAKT RECHTS POSITIONIEREN
+            // 2. GLOCKE UND WETTER (OHNE MODALS ZU ZERSTÖREN)
             // =========================================================
             var bellIcon = document.querySelector('.fa-bell');
-            var weatherText = Array.from(document.querySelectorAll('*')).find(el => el.textContent.includes('°C') && el.children.length === 0);
-
             var bellContainer = bellIcon ? (bellIcon.closest('button') || bellIcon.parentElement) : null;
-            var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
 
+            // Finde nur das Wetter im Header (Vermeide Wetter-Modals!)
+            var weatherText = null;
+            var allNodes = document.querySelectorAll('*');
+            for (var i = 0; i < allNodes.length; i++) {
+                var el = allNodes[i];
+                if (el.textContent.includes('°C') && el.children.length === 0) {
+                    // Strenger Check: Wenn es in einem Modal liegt, ignorieren!
+                    var inModal = el.closest('[id*="modal"], .modal, [class*="modal"]');
+                    if (!inModal) {
+                        weatherText = el;
+                        break; 
+                    }
+                }
+            }
+            
+            var weatherContainer = weatherText ? (weatherText.closest('div[style*="border"], div[class*="weather"]') || weatherText.parentElement) : null;
             var logoutIcon = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket');
             var topBox = logoutIcon ? (logoutIcon.closest('div[style*="border"]') || logoutIcon.closest('.header-box')) : null;
 
-            if (bellContainer && weatherContainer) {
+            if (bellContainer && !bellContainer.closest('[id*="modal"]')) {
                 bellContainer.style.setProperty('position', 'absolute', 'important');
                 bellContainer.style.setProperty('right', '20px', 'important');
                 bellContainer.style.setProperty('margin', '0', 'important');
                 bellContainer.style.setProperty('transform', 'none', 'important');
 
+                if (topBox) {
+                    var boxRect = topBox.getBoundingClientRect();
+                    var absoluteTop = boxRect.bottom + window.scrollY; 
+                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); 
+                }
+            }
+
+            if (weatherContainer) {
                 weatherContainer.style.setProperty('position', 'absolute', 'important');
                 weatherContainer.style.setProperty('right', '20px', 'important');
                 weatherContainer.style.setProperty('margin', '0', 'important');
@@ -14881,11 +14921,7 @@ setInterval(function() {
                 if (topBox) {
                     var boxRect = topBox.getBoundingClientRect();
                     var absoluteTop = boxRect.bottom + window.scrollY; 
-                    bellContainer.style.setProperty('top', (absoluteTop + 15) + 'px', 'important'); 
                     weatherContainer.style.setProperty('top', (absoluteTop + 60) + 'px', 'important'); 
-                } else {
-                    bellContainer.style.setProperty('top', '120px', 'important');
-                    weatherContainer.style.setProperty('top', '165px', 'important');
                 }
             }
         };
