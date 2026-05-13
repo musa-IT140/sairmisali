@@ -14767,12 +14767,11 @@ setInterval(function() {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. BUTTONS UNABHÄNGIG VONEINANDER VERARBEITEN
-            // (Behebt den Fehler, dass bei "Ausgeloggt" alles verschwindet)
+            // 1. BUTTONS UNABHÄNGIG & IDENTISCH VERARBEITEN
             // =========================================================
             var fixMenu = function(iconSelector, isLeft) {
                 var icon = document.querySelector(iconSelector);
-                if (!icon) return; // Wenn ein Button fehlt (z.B. Admin ausgeloggt), überspringen wir NUR diesen!
+                if (!icon) return; 
 
                 var btn = icon.closest('button') || icon.closest('div[class*="btn"]') || icon.parentElement;
                 if (!btn) return;
@@ -14780,10 +14779,14 @@ setInterval(function() {
                 var wrap = btn.parentElement;
                 if (!wrap) return;
 
+                // Absolute identische Größen für User UND Admin
+                var mainSize = '48px'; 
+                var subSize = '38px';
+
                 // Wrapper sicher fixieren
                 wrap.style.setProperty('position', 'fixed', 'important');
                 wrap.style.setProperty('bottom', '25px', 'important');
-                wrap.style.setProperty('width', '55px', 'important');
+                wrap.style.setProperty('width', mainSize, 'important');
                 wrap.style.setProperty('z-index', '999999', 'important');
                 wrap.style.setProperty('overflow', 'visible', 'important');
 
@@ -14795,10 +14798,10 @@ setInterval(function() {
                     wrap.style.setProperty('left', 'auto', 'important');
                 }
 
-                // Hauptbutton Kreisrund und groß
-                btn.style.setProperty('width', '55px', 'important');
-                btn.style.setProperty('height', '55px', 'important');
-                btn.style.setProperty('min-width', '55px', 'important');
+                // Hauptbutton: Kompakt und kreisrund
+                btn.style.setProperty('width', mainSize, 'important');
+                btn.style.setProperty('height', mainSize, 'important');
+                btn.style.setProperty('min-width', mainSize, 'important');
                 btn.style.setProperty('border-radius', '50%', 'important');
                 btn.style.setProperty('display', 'flex', 'important');
                 btn.style.setProperty('align-items', 'center', 'important');
@@ -14807,7 +14810,7 @@ setInterval(function() {
                 btn.style.setProperty('padding', '0', 'important');
                 btn.style.setProperty('aspect-ratio', '1/1', 'important');
 
-                // Unter-Buttons (ULs und LIs) zentrieren
+                // Unter-Buttons zentrieren
                 var uls = wrap.querySelectorAll('ul');
                 uls.forEach(function(ul) {
                     ul.style.setProperty('display', 'flex', 'important');
@@ -14819,28 +14822,29 @@ setInterval(function() {
 
                 var subBtns = wrap.querySelectorAll('ul li a, ul li button, ul > a, ul > button');
                 subBtns.forEach(function(sub) {
-                    // Zähler ignorieren, damit sie nicht zerstört werden
+                    // Zähler unangetastet lassen
                     if (sub.classList.contains('badge') || sub.classList.contains('counter')) return;
 
-                    sub.style.setProperty('width', '42px', 'important');
-                    sub.style.setProperty('height', '42px', 'important');
-                    sub.style.setProperty('min-width', '42px', 'important');
+                    // Unter-Buttons: Noch kompakter (38px) und exakt gleich
+                    sub.style.setProperty('width', subSize, 'important');
+                    sub.style.setProperty('height', subSize, 'important');
+                    sub.style.setProperty('min-width', subSize, 'important');
                     sub.style.setProperty('border-radius', '50%', 'important');
                     sub.style.setProperty('display', 'flex', 'important');
                     sub.style.setProperty('justify-content', 'center', 'important');
                     sub.style.setProperty('align-items', 'center', 'important');
                     sub.style.setProperty('margin', '0 auto 8px auto', 'important');
                     sub.style.setProperty('padding', '0', 'important');
-                    sub.style.setProperty('overflow', 'visible', 'important'); // Zähler sichtbar lassen!
+                    sub.style.setProperty('overflow', 'visible', 'important'); 
                 });
             };
 
-            // Linkes Menü (User) und Rechtes Menü (Admin) separat aufrufen!
+            // Wende die exakt gleichen Regeln auf User (links) und Admin (rechts) an
             fixMenu('.fa-bars', true);
             fixMenu('.fa-tools, .fa-wrench', false);
 
             // =========================================================
-            // 2. WETTER & GLOCKE (ABHÄNGIG VON LOGIN-STATUS)
+            // 2. WETTER & GLOCKE KORREKTUR
             // =========================================================
             var isLoggedIn = document.querySelector('.fa-sign-out-alt, .fa-arrow-right-from-bracket') !== null;
 
@@ -14861,14 +14865,14 @@ setInterval(function() {
                 weatherContainer.style.setProperty('position', 'absolute', 'important');
                 weatherContainer.style.setProperty('right', '20px', 'important');
                 weatherContainer.style.setProperty('margin', '0', 'important');
-                weatherContainer.style.setProperty('transform', 'none', 'important'); // Zerstörerisches Überlappen löschen!
+                weatherContainer.style.setProperty('transform', 'none', 'important'); 
 
                 if (isLoggedIn) {
-                    // Eingeloggt: Viel Platz lassen wegen Profilbox
+                    // Eingeloggt: Unter der Profilbox
                     weatherContainer.style.setProperty('top', '175px', 'important');
                 } else {
-                    // Ausgeloggt: Etwas weniger Platz, damit es genau richtig sitzt
-                    weatherContainer.style.setProperty('top', '135px', 'important');
+                    // 🔥 AUSGELOGGT FIX: Massiv nach unten geschoben, damit es zu 100% frei steht 🔥
+                    weatherContainer.style.setProperty('top', '210px', 'important');
                 }
             }
 
