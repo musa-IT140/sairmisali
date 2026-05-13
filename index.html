@@ -14768,7 +14768,7 @@ setInterval(function() {
         var applyPrecisionFix = function() {
             
             // =========================================================
-            // 1. HAUPTBUTTONS UNTEN (MENU & ADMIN) SYNCHRONISIEREN & NACH UNTEN SCHIEBEN
+            // 1. HAUPTBUTTONS & UNTER-BUTTONS SYNCHRONISIEREN & ZENTRIEREN
             // =========================================================
             var menuIcon = document.querySelector('.fa-bars');
             var adminIcon = document.querySelector('.fa-tools, .fa-wrench');
@@ -14778,33 +14778,93 @@ setInterval(function() {
                 var adminBtn = adminIcon.closest('button') || adminIcon.closest('div[class*="btn"]') || adminIcon.parentElement;
                 
                 if (menuBtn && adminBtn) {
-                    var size = '55px'; // Exakt gleiche Breite & Höhe für BEIDE
+                    var mainSize = '55px'; // Exakt gleiche Breite & Höhe für HAUPTBUTTONS
+                    var subSize = '45px';  // Minimal kleiner für UNTER-BUTTONS (Badges bleiben proportioniert)
+                    var bottomLevel = '25px'; // Zieht beide Menüs weit nach unten
                     
-                    // 🔥 HIER GEÄNDERT: Von 90px auf 25px (Zieht beide Buttons weit nach unten) 🔥
-                    var bottomLevel = '25px'; 
-                    
+                    var userWrap = menuBtn.parentElement;
+                    var adminWrap = adminBtn.parentElement;
+
+                    // A) CONTAINER FIXIEREN (Zwingt die Wrapper auf 55px Breite)
+                    [userWrap, adminWrap].forEach(function(wrap, index) {
+                        if (!wrap) return;
+                        var isUser = (index === 0);
+                        wrap.style.setProperty('position', 'fixed', 'important');
+                        wrap.style.setProperty('bottom', bottomLevel, 'important');
+                        wrap.style.setProperty('width', mainSize, 'important');
+                        wrap.style.setProperty('z-index', '9999', 'important');
+                        
+                        if (isUser) {
+                            wrap.style.setProperty('left', '20px', 'important');
+                            wrap.style.setProperty('right', 'auto', 'important');
+                        } else {
+                            wrap.style.setProperty('right', '20px', 'important');
+                            wrap.style.setProperty('left', 'auto', 'important');
+                        }
+                    });
+
+                    // B) HAUPTBUTTONS FORMATIEREN & IM CONTAINER ZENTRIEREN
                     [menuBtn, adminBtn].forEach(function(btn) {
-                        btn.style.setProperty('width', size, 'important');
-                        btn.style.setProperty('height', size, 'important');
-                        btn.style.setProperty('min-width', size, 'important');
-                        btn.style.setProperty('min-height', size, 'important');
-                        btn.style.setProperty('max-width', size, 'important');
-                        btn.style.setProperty('max-height', size, 'important');
-                        btn.style.setProperty('position', 'fixed', 'important');
-                        btn.style.setProperty('bottom', bottomLevel, 'important');
-                        btn.style.setProperty('margin', '0', 'important');
+                        btn.style.setProperty('width', mainSize, 'important');
+                        btn.style.setProperty('height', mainSize, 'important');
+                        btn.style.setProperty('min-width', mainSize, 'important');
+                        btn.style.setProperty('min-height', mainSize, 'important');
+                        btn.style.setProperty('max-width', mainSize, 'important');
+                        btn.style.setProperty('max-height', mainSize, 'important');
+                        
+                        // Setzt die Hauptbuttons exakt auf den Boden des jeweiligen Containers
+                        btn.style.setProperty('position', 'absolute', 'important');
+                        btn.style.setProperty('bottom', '0', 'important');
+                        btn.style.setProperty('left', '0', 'important');
+                        btn.style.setProperty('right', '0', 'important');
+                        btn.style.setProperty('margin', 'auto', 'important'); 
+                        
                         btn.style.setProperty('padding', '0', 'important');
                         btn.style.setProperty('border-radius', '50%', 'important');
                         btn.style.setProperty('display', 'flex', 'important');
                         btn.style.setProperty('align-items', 'center', 'important');
                         btn.style.setProperty('justify-content', 'center', 'important');
-                        btn.style.setProperty('z-index', '9999', 'important');
                     });
 
-                    // Fest links (User) und rechts (Admin) anpinnen
-                    menuBtn.style.setProperty('left', '20px', 'important');
-                    adminBtn.style.setProperty('right', '20px', 'important');
-                    adminBtn.style.setProperty('left', 'auto', 'important'); // Löscht falsche Links-Werte beim Admin
+                    // C) UNTER-BUTTONS VERKLEINERN UND ZENTRIEREN
+                    [userWrap, adminWrap].forEach(function(wrap) {
+                        if (!wrap) return;
+                        var subElements = wrap.querySelectorAll('*');
+                        
+                        subElements.forEach(function(el) {
+                            // Hauptbuttons beim Formatieren ignorieren
+                            if (el === menuBtn || menuBtn.contains(el) || el === adminBtn || adminBtn.contains(el)) return;
+                            
+                            // Listen (ul) zentrieren, damit die Kinder-Buttons mittig darüber schweben
+                            if (el.tagName === 'UL') {
+                                el.style.setProperty('left', '0', 'important');
+                                el.style.setProperty('right', '0', 'important');
+                                el.style.setProperty('width', '100%', 'important');
+                                el.style.setProperty('display', 'flex', 'important');
+                                el.style.setProperty('flex-direction', 'column', 'important');
+                                el.style.setProperty('align-items', 'center', 'important');
+                            }
+
+                            // Die eigentlichen runden Unter-Buttons auf 45px zwingen
+                            var st = window.getComputedStyle(el);
+                            if (el.tagName === 'BUTTON' || el.tagName === 'A' || parseInt(st.borderRadius) >= 10 || el.classList.contains('sub-btn')) {
+                                // Lange Text-Labels ignorieren
+                                if (el.textContent.trim().length > 15 && !el.querySelector('i')) return;
+
+                                el.style.setProperty('width', subSize, 'important');
+                                el.style.setProperty('height', subSize, 'important');
+                                el.style.setProperty('min-width', subSize, 'important');
+                                el.style.setProperty('min-height', subSize, 'important');
+                                el.style.setProperty('max-width', subSize, 'important');
+                                el.style.setProperty('max-height', subSize, 'important');
+                                
+                                // Perfekt mittig
+                                el.style.setProperty('margin-left', 'auto', 'important');
+                                el.style.setProperty('margin-right', 'auto', 'important');
+                                el.style.setProperty('border-radius', '50%', 'important');
+                            }
+                        });
+                    });
                 }
             }
 
