@@ -2497,7 +2497,7 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         }
     }
 
-    /* Alte, verbuggte Blasen komplett und zwingend blockieren */
+   /* Alte, verbuggte Blasen komplett und zwingend blockieren */
     .misali-elegant-bubble { display: none !important; opacity: 0 !important; visibility: hidden !important; }
 
     /* Neue, smarte Blase designen */
@@ -15153,10 +15153,101 @@ setInterval(function() {
     document.addEventListener('scroll', function(e) {
         if (e.target.nodeType === 1) destroySmartBubble();
     }, { passive: true, capture: true });
-
-    // Wenn man auf dem Handy wischt (Touchmove), stirbt die Blase ebenfalls sofort
     document.addEventListener('touchmove', destroySmartBubble, { passive: true, capture: true });
 
+})();
+
+(function() {
+    // ----------------------------------------------------------------
+    // 🚀 OMNISCIENT ADMIN TRACKER (Die Augen des Admins) 🚀
+    // ----------------------------------------------------------------
+    
+    // Hilfsfunktion: Sendet die Benachrichtigung an den Admin
+    window.notifyAdmin = function(actionDesc) {
+        // Ignoriert den Admin selbst und nicht-eingeloggte User
+        if(!window.currentUser || window.currentUser.role === 'admin' || window.currentUser.username === 'AdminKing') return;
+        
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        
+        if(window.sendSystemMessage) {
+            // "👁️ TAKİP" (Auge) symbolisiert, dass dies eine Tracker-Info ist
+            window.sendSystemMessage('Admin', `👁️ TAKİP (Tracker): <strong style="color:#22d3ee;">${fullName}</strong> ${actionDesc}`);
+        }
+    };
+
+    // Stellt sicher, dass wir uns nicht mehrmals in die Funktionen einklinken
+    if (!window.hasInjectedTracker) {
+        
+        // 1. LESEZEICHEN (Aklımda) TRACKER
+        const origToggleSaveItem = window.toggleSaveItem;
+        window.toggleSaveItem = function(id, e) {
+            if(origToggleSaveItem) origToggleSaveItem(id, e);
+            // Kurz warten, damit die Aktion ausgeführt wird und wir den neuen Status abfragen können
+            setTimeout(() => {
+                if(!window.currentUser) return;
+                let uName = window.currentUser.username;
+                let isSaved = window.savedItemsDB && window.savedItemsDB[uName] && window.savedItemsDB[uName].includes(id);
+                window.notifyAdmin(isSaved ? "Aklımda (Favoriler) listesine bir eser ekledi." : "Aklımda listesinden bir eser çıkardı.");
+            }, 100);
+        };
+
+        // 2. WERKE ÖFFNEN TRACKER (Gedichte, Sprüche, etc.)
+        const origOpenPoem = window.openPoemModal;
+        window.openPoemModal = function(id, type) {
+            if(origOpenPoem) origOpenPoem(id, type);
+            setTimeout(() => {
+                let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+                window.notifyAdmin(`«${title}» adlı eseri açtı ve okuyor.`);
+            }, 200);
+        };
+
+        // 3. USER WERKE ÖFFNEN TRACKER
+        const origOpenUserPoem = window.openUserPoemModal;
+        window.openUserPoemModal = function(id) {
+            if(origOpenUserPoem) origOpenUserPoem(id);
+            setTimeout(() => {
+                let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+                window.notifyAdmin(`«${title}» adlı kullanıcı eserini inceledi.`);
+            }, 200);
+        };
+
+        // 4. RÄTSEL / PUZZLES ÖFFNEN TRACKER
+        const origOpenPuzzle = window.openPuzzleModal;
+        window.openPuzzleModal = function(id, type) {
+            if(origOpenPuzzle) origOpenPuzzle(id, type);
+            setTimeout(() => {
+                let title = window.currentBilmeceItem ? (window.currentBilmeceItem.trTitle || window.currentBilmeceItem.title || 'Oyun') : 'Oyun';
+                window.notifyAdmin(`«${title}» adlı bulmacayı/oyunu açtı.`);
+            }, 200);
+        };
+
+        // 5. TEILEN TRACKER (WhatsApp)
+        const origShareWP = window.shareToWhatsApp;
+        window.shareToWhatsApp = function() {
+            if(origShareWP) origShareWP();
+            let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+            window.notifyAdmin(`«${title}» adlı eseri WhatsApp'ta paylaştı.`);
+        };
+
+        // 6. KOPIEREN TRACKER
+        const origCopy = window.copyShareText;
+        window.copyShareText = function() {
+            if(origCopy) origCopy();
+            let title = window.currentPoemData ? (window.currentPoemData.trTitle || window.currentPoemData.title || 'Eser') : 'Eser';
+            window.notifyAdmin(`«${title}» adlı eserin metnini kopyaladı.`);
+        };
+
+        // 7. SCHNELLES TEILEN AUS DER LISTE (Quick Share)
+        const origShareQuick = window.shareItemQuick;
+        window.shareItemQuick = function(id, type, method) {
+            if(origShareQuick) origShareQuick(id, type, method);
+            let methodTr = method === 'whatsapp' ? "WhatsApp'ta paylaştı" : "kopyaladı";
+            window.notifyAdmin(`bir eseri hızlı menüden ${methodTr}.`);
+        };
+
+        // Marker setzen, damit das Skript nicht mehrfach lädt
+        window.hasInjectedTracker = true;
+    }
 })();
 
 (function() {
@@ -15393,6 +15484,8 @@ setInterval(function() {
         }
     };
 })();
+
+
 
 </script>
 </body>
