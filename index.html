@@ -15704,103 +15704,123 @@ setInterval(function() {
 </script>
 
 <!-- ==========================================================================
-     🎨 ELITE COLOR PICKER V4 (500+ FARBEN, MAXIMALE AUSWAHL)
+     🖼️ ELITE MODAL WINDOWS V6 (DESKTOP EDEL + HANDY GERICHTET)
      ========================================================================== -->
 <style>
-    /* Das Design für den Color-Picker Container */
-    .elite-color-picker-container {
-        background: rgba(10, 25, 47, 0.6);
-        border: 1px solid rgba(244, 197, 66, 0.3);
-        border-radius: 12px;
-        padding: 15px;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        text-align: center;
+    /* 1. MOBIL-STANDARD (Flexible Breite, kein Quetschen der Inhalte) */
+    .modal-content, .modal-box {
+        width: 92% !important; 
+        max-width: 100% !important; /* Kein Limit auf dem Handy */
+        margin: 15px auto !important;
+        /* Weniger Seitenrand auf Handys, damit Kalender und Uhren Platz haben */
+        padding: 50px 10px 15px 10px !important; 
+        position: relative !important;
+        box-sizing: border-box !important;
     }
 
-    /* Der dezente Titel */
-    .elite-color-picker-title {
-        color: #f4c542;
-        font-family: "Playfair Display", serif;
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        letter-spacing: 0.5px;
+    /* 2. DESKTOP & TABLET (Edle, limitierte Größe) */
+    @media (min-width: 768px) {
+        .modal-content, .modal-box {
+            max-width: 650px !important; /* Die perfekte Desktop-Mitte */
+            width: 90% !important;
+            padding: 60px 25px 25px 25px !important; /* Großzügige Ränder am PC */
+        }
     }
 
-    /* Die Scroll-Box für die 500+ Farben */
-    .elite-color-swatches {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px; /* Minimaler Abstand für 500+ Farben */
-        justify-content: center;
-        max-height: 180px; 
-        overflow-y: auto;  
-        padding: 5px;
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.2);
+    /* 3. Das Schließen-X (Sauber und sicher in der Ecke) */
+    .modal-content .close, 
+    .close-modal {
+        position: absolute !important;
+        top: 10px !important; 
+        right: 15px !important; 
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 50% !important;
+        border: 2px solid rgba(244, 197, 66, 0.6) !important; 
+        background: rgba(0, 0, 0, 0.5) !important;
+        color: #f4c542 !important; 
+        font-size: 20px !important; 
+        text-align: center !important;
+        line-height: 30px !important; 
+        cursor: pointer !important;
+        z-index: 99999 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        transition: all 0.2s !important;
     }
 
-    /* Elegante Custom-Scrollbar */
-    .elite-color-swatches::-webkit-scrollbar {
-        width: 6px;
-    }
-    .elite-color-swatches::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-    }
-    .elite-color-swatches::-webkit-scrollbar-thumb {
-        background: rgba(244, 197, 66, 0.6);
-        border-radius: 4px;
+    /* Zerstört jegliche Doppel-X aus deinem HTML */
+    .modal-content .close *,
+    .close-modal * {
+        display: none !important; 
     }
 
-    /* Winzige Farb-Kreise für die riesige Auswahl */
-    .color-swatch {
-        width: 15px; /* Perfekte Größe für 500 Kreise */
-        height: 15px;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+    .modal-content .close:hover,
+    .close-modal:hover {
+        background: #f4c542 !important; 
+        color: #0a192f !important; 
+        transform: scale(1.1) !important;
     }
 
-    .color-swatch:hover {
-        transform: scale(1.5);
-        z-index: 10;
+    /* ==========================================================================
+       🛠️ NOTFALL-FIXES FÜR DEINE HANDY-SCREENSHOTS
+       ========================================================================== */
+    /* Kullanıcılar (Benutzer): Lange E-Mails umbrechen, damit nichts überlappt */
+    .modal-content [style*="gmail.com"], 
+    .modal-content .email, 
+    .modal-content p, 
+    .modal-content span {
+        word-break: break-word !important; 
+        overflow-wrap: break-word !important;
     }
 
-    .color-swatch.selected {
-        transform: scale(1.6);
-        border: 2px solid #fff;
-        box-shadow: 0 0 10px currentColor;
-        z-index: 20;
+    /* Onay Bekliyor in EINE Zeile zwingen */
+    .modal-content .badge, 
+    .modal-content span:contains("Bekliyor") {
+        white-space: nowrap !important;
+        display: inline-block !important;
     }
 
-    /* Der Glow-Effekt für die Namen */
-    .custom-colored-name {
-        font-weight: bold !important;
-        transition: color 0.3s ease, text-shadow 0.3s ease;
+    /* Uhren: Wenn kein Platz ist, untereinander anordnen anstatt abzuschneiden */
+    .modal-content > div[style*="flex"] {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+
+    /* Kalender: Scrollbar erlauben, falls das Handy extrem schmal ist */
+    .modal-content table, 
+    .calendar-wrapper {
+        max-width: 100% !important;
+        overflow-x: auto !important;
     }
 </style>
 
+<!-- ==========================================================================
+     🎨 ELITE COLOR PICKER V5 (SOFORT-LIVE & EIGENE SICHERE DATENBANK)
+     ========================================================================== -->
 <script>
 (function() {
     // 1. GENERATOR FÜR 500+ EDLE FARBEN
-    const eliteColors = ['#ffffff', '#f8fafc', '#e2e8f0', '#cbd5e1']; // Standard Weiß-/Silbertöne
-    
-    // Sättigung und Helligkeit
+    const eliteColors = ['#ffffff', '#f8fafc', '#e2e8f0', '#cbd5e1']; 
     const saturations = [100, 85, 70]; 
     const lightnesses = [85, 75, 65, 55]; 
     
     for (let l of lightnesses) {
         for (let s of saturations) {
-            // In winzigen 8° Schritten durch den Regenbogen (Ergibt über 500 Farben!)
             for (let h = 0; h < 360; h += 8) { 
-                // ADMIN-SCHUTZ: Gold/Gelb (Hue 35-55) wird streng blockiert
-                if (h >= 35 && h <= 55) continue; 
+                if (h >= 35 && h <= 55) continue; // Admin-Farben blockiert
                 eliteColors.push(`hsl(${h}, ${s}%, ${l}%)`);
             }
         }
+    }
+
+    // 🚀 DIE EIGENE DATENBANK FÜR FARBEN (Verhindert Überschreiben beim Speichern!)
+    function getColorsDB() {
+        return JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+    }
+    function saveColorDB(db) {
+        localStorage.setItem('elite_user_colors', JSON.stringify(db));
     }
 
     // 2. Baut das Menü ein
@@ -15818,10 +15838,10 @@ setInterval(function() {
             let html = `<div class="elite-color-picker-title">Kullanıcı Adı Rengi (Benutzername Farbe)</div>
                         <div class="elite-color-swatches" id="swatch-container">`;
             
-            let users = JSON.parse(localStorage.getItem('users') || '{}');
+            let colorsDB = getColorsDB();
             let myColor = '#ffffff';
-            if (window.currentUser && users[window.currentUser.username] && users[window.currentUser.username].color) {
-                myColor = users[window.currentUser.username].color;
+            if (window.currentUser && colorsDB[window.currentUser.username]) {
+                myColor = colorsDB[window.currentUser.username];
             }
 
             eliteColors.forEach(color => {
@@ -15845,58 +15865,59 @@ setInterval(function() {
         }
     }
 
-    // 3. Farb-Auswahl & Speicherung
+    // 3. Farb-Auswahl & SOFORTIGE Speicherung in eigener Datenbank
     window.selectEliteColor = function(color, element) {
         document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
 
         if (window.currentUser) {
-            let users = JSON.parse(localStorage.getItem('users') || '{}');
             let username = window.currentUser.username;
+            let users = JSON.parse(localStorage.getItem('users') || '{}');
             
-            if (!users[username]) users[username] = {};
-            
-            if (users[username].role === 'admin') {
+            // Admin Check
+            if (users[username] && users[username].role === 'admin') {
                 alert("Admins nutzen automatisch die Premium-Admin-Farbe!");
                 return;
             }
 
-            users[username].color = color;
-            window.currentUser.color = color;
-            localStorage.setItem('users', JSON.stringify(users));
+            // Sicher in der eigenen Elite-Datenbank speichern
+            let colorsDB = getColorsDB();
+            colorsDB[username] = color;
+            saveColorDB(colorsDB);
 
+            // Zwingt die Seite, die Farbe JETZT SOFORT zu aktualisieren
             window.applyEliteColors();
         }
     };
 
-    // 4. Live-Rendering der Farben
+    // 4. Live-Rendering mit !important Zwang
     window.applyEliteColors = function() {
+        let colorsDB = getColorsDB();
         let users = JSON.parse(localStorage.getItem('users') || '{}');
         
-        let nameElements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, b, strong');
+        let nameElements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, b, strong, .username');
 
         nameElements.forEach(el => {
             let text = el.innerText.trim().replace(/[:()]/g, ''); 
             
-            if (users[text]) {
-                if (users[text].role === 'admin' || text.toLowerCase().includes('admin')) {
-                    el.style.color = '#f4c542';
-                    el.style.textShadow = '0 0 10px rgba(244, 197, 66, 0.6)';
-                    el.classList.add('custom-colored-name');
-                } else if (users[text].color) {
-                    el.style.color = users[text].color;
-                    el.style.textShadow = `0 0 8px ${users[text].color}80`; 
-                    el.classList.add('custom-colored-name');
-                }
+            // Erst Admin prüfen
+            if (users[text] && (users[text].role === 'admin' || text.toLowerCase().includes('admin'))) {
+                el.style.setProperty('color', '#f4c542', 'important');
+                el.style.setProperty('text-shadow', '0 0 10px rgba(244, 197, 66, 0.6)', 'important');
+            } 
+            // Dann unsere externe Farb-Datenbank checken
+            else if (colorsDB[text]) {
+                el.style.setProperty('color', colorsDB[text], 'important');
+                el.style.setProperty('text-shadow', `0 0 8px ${colorsDB[text]}80`, 'important');
             }
         });
     };
 
-    // 5. Autostart
+    // 5. Schnellerer Autostart (jede halbe Sekunde scannen, um Live-Effekt zu garantieren)
     setInterval(() => {
         injectColorPickerToProfile();
         window.applyEliteColors();
-    }, 1000);
+    }, 500);
 
 })();
 </script>
@@ -15963,6 +15984,325 @@ setInterval(function() {
         color: #0a192f !important;
     }
 </style>
+
+<style>
+    .elite-color-picker-container {
+        background: rgba(10, 25, 47, 0.8);
+        border: 1px solid rgba(244, 197, 66, 0.4);
+        border-radius: 12px;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .elite-color-picker-title {
+        color: #f4c542;
+        font-family: "Playfair Display", serif;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .elite-color-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+        max-height: 200px; 
+        overflow-y: auto;  
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Scrollbar Styling */
+    .elite-color-swatches::-webkit-scrollbar { width: 5px; }
+    .elite-color-swatches::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
+
+    .color-swatch {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .color-swatch:hover { transform: scale(1.5); z-index: 10; }
+    .color-swatch.selected {
+        transform: scale(1.7);
+        border: 2px solid #fff;
+        box-shadow: 0 0 12px currentColor;
+    }
+
+    /* Der Glow für die Namen */
+    .custom-colored-name {
+        font-weight: bold !important;
+        transition: color 0.3s;
+    }
+</style>
+
+<script>
+(function() {
+    // 1. Die 500+ Farben-Datenbank (stabil und gefiltert)
+    function generateElitePalette() {
+        const colors = ['#ffffff', '#f8fafc', '#e2e8f0'];
+        const saturations = [100, 85, 70]; 
+        const lightnesses = [85, 75, 65, 55]; 
+        for (let l of lightnesses) {
+            for (let s of saturations) {
+                for (let h = 0; h < 360; h += 8) { 
+                    if (h >= 35 && h <= 55) continue; // Admin-Farben blockieren
+                    colors.push(`hsl(${h}, ${s}%, ${l}%)`);
+                }
+            }
+        }
+        return colors;
+    }
+
+    // 2. Speicher-Logik
+    function getStoredColor(username) {
+        const localDB = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        return localDB[username] || null;
+    }
+
+    // 3. UI Injektion (Wird bei jedem Modal-Öffnen geprüft)
+    function injectColorPicker() {
+        const profileModal = document.getElementById('profileEditModal');
+        if (!profileModal || document.getElementById('elite-color-picker')) return;
+
+        const modalBody = profileModal.querySelector('.modal-body');
+        if (!modalBody) return;
+
+        const pickerDiv = document.createElement('div');
+        pickerDiv.id = 'elite-color-picker';
+        pickerDiv.className = 'elite-color-picker-container';
+        
+        let html = `<div class="elite-color-picker-title">Kullanıcı Adı Rengi (Benutzername Farbe)</div>
+                    <div class="elite-color-swatches">`;
+        
+        const palette = generateElitePalette();
+        const activeColor = getStoredColor(window.currentUser?.username);
+
+        palette.forEach(color => {
+            const isSelected = (color === activeColor) ? 'selected' : '';
+            html += `<div class="color-swatch ${isSelected}" 
+                          style="background-color: ${color}; color: ${color};" 
+                          onclick="window.selectEliteColor('${color}', this)"></div>`;
+        });
+        
+        html += `</div>`;
+        pickerDiv.innerHTML = html;
+
+        const saveBtn = profileModal.querySelector('button[type="submit"], .save-btn, #saveProfileBtn');
+        if (saveBtn) {
+            saveBtn.parentNode.insertBefore(pickerDiv, saveBtn);
+        } else {
+            modalBody.appendChild(pickerDiv);
+        }
+    }
+
+    // 4. Auswahl & GERÄTEÜBERGREIFENDES SPEICHERN
+    window.selectEliteColor = function(color, element) {
+        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        if (window.currentUser) {
+            const username = window.currentUser.username;
+            
+            // Lokal speichern
+            const localDB = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+            localDB[username] = color;
+            localStorage.setItem('elite_user_colors', JSON.stringify(localDB));
+
+            // FÜR ALLE GERÄTE: Wir hängen die Farbe an das versteckte Profil-Formular an,
+            // damit sie beim Klick auf "Speichern" in deine echte Datenbank wandert.
+            let colorInput = document.getElementById('hidden_user_color_input');
+            if (!colorInput) {
+                colorInput = document.createElement('input');
+                colorInput.type = 'hidden';
+                colorInput.id = 'hidden_user_color_input';
+                colorInput.name = 'custom_color'; // Diesen Namen muss dein Backend kennen
+                const form = document.querySelector('#profileEditModal form');
+                if (form) form.appendChild(colorInput);
+            }
+            colorInput.value = color;
+
+            window.applyEliteColors();
+        }
+    };
+
+    // 5. Namen einfärben (überall auf der Seite)
+    window.applyEliteColors = function() {
+        const localDB = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        // Wir suchen alle möglichen Namens-Container
+        const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, .username, b, strong');
+
+        elements.forEach(el => {
+            const name = el.innerText.trim().replace(/[:()]/g, '');
+            
+            // Admin-Check (Immer Vorrang)
+            if (users[name] && (users[name].role === 'admin' || name.toLowerCase().includes('admin'))) {
+                el.style.setProperty('color', '#f4c542', 'important');
+                el.style.setProperty('text-shadow', '0 0 10px rgba(244, 197, 66, 0.6)', 'important');
+            } 
+            // User-Farbe aus unserer Datenbank
+            else if (localDB[name]) {
+                el.style.setProperty('color', localDB[name], 'important');
+                el.style.setProperty('text-shadow', `0 0 8px ${localDB[name]}80`, 'important');
+                el.classList.add('custom-colored-name');
+            }
+        });
+    };
+
+    // Kontinuierlicher Check
+    setInterval(() => {
+        injectColorPicker();
+        window.applyEliteColors();
+    }, 700);
+
+})();
+</script>
+
+<style>
+    /* Das Design für sicher erkannte Gedichte und lange Texte */
+    .elite-pro-text {
+        /* Fließende, stufenlose Skalierung */
+        font-size: clamp(13px, 3.8vw, 18px) !important;
+        line-height: 1.65 !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        margin-bottom: 12px;
+        
+        /* 🚀 PRO-UPGRADE: Schärfere, professionellere Schrift-Darstellung */
+        text-rendering: optimizeLegibility !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        
+        /* Sanfter Übergang beim Drehen des Handys */
+        transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+
+<script>
+(function() {
+    // 1. Die intelligente Scanner-Funktion (Die Firewall)
+    function scanAndFormatEliteText() {
+        let targetAreas = document.querySelectorAll('.card, .card-body, .modal-body, .modal-content');
+
+        targetAreas.forEach(area => {
+            let textElements = area.querySelectorAll('p, div, span');
+
+            textElements.forEach(el => {
+                if (el.classList.contains('elite-pro-text')) return;
+
+                // 🛡️ BOMBENSICHERE FIREWALL
+                // Keine Menüs, Buttons, Farbwähler oder Icons stören
+                if (el.querySelector('button, input, i, img, a, table, ul, .badge, .btn, form, iframe')) return;
+                
+                // Keine Unterschriften, Titel oder Header anfassen
+                if (el.closest('.author, .signature, .modal-footer, .comments, .close-btn, .modal-header, .elite-color-picker-container')) return;
+
+                let textContent = el.innerText.trim();
+                if (textContent.length < 35) return; // Noch präziser: Ab 35 Zeichen ist es ein langer Text
+
+                // Der Schutz für deine "Şair Misal.i" CSS-Unterschrift
+                let htmlContent = el.innerHTML || "";
+                if (htmlContent.includes('font-size:') || 
+                    htmlContent.includes('clamp(') || 
+                    htmlContent.includes('transform:')) return;
+
+                // Test bestanden! Text in die Premium-Klasse aufnehmen
+                el.classList.add('elite-pro-text');
+            });
+        });
+    }
+
+    // 2. 🚀 PRO-UPGRADE: Der MutationObserver (Die smarte Überwachung)
+    // Anstatt dumm jede Sekunde zu scannen, wartet dieses System, bis sich das HTML ändert (z.B. Modal öffnet sich)
+    const domWatcher = new MutationObserver((mutations) => {
+        let requiresScan = false;
+        
+        // Prüfen, ob neue Elemente zum Bildschirm hinzugefügt wurden
+        for (let mutation of mutations) {
+            if (mutation.addedNodes.length > 0) {
+                requiresScan = true;
+                break; // Einer reicht, wir wissen jetzt: Es gibt was Neues!
+            }
+        }
+        
+        if (requiresScan) {
+            // Ein winziger Moment Verzögerung, damit das HTML komplett geladen ist, bevor wir scannen
+            setTimeout(scanAndFormatEliteText, 50);
+        }
+    });
+
+    // Wir sagen dem Wächter, dass er die gesamte Seite überwachen soll
+    domWatcher.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+    });
+
+    // 3. Einen Erst-Scan beim Neuladen der Seite durchführen
+    scanAndFormatEliteText();
+
+})();
+</script>
+
+<script>
+(function() {
+    function attachUniversalAutoClose() {
+        // Sucht ALLE Buttons auf der aktuellen Seite
+        let buttons = document.querySelectorAll('button');
+
+        buttons.forEach(btn => {
+            // Wenn der Button schon präpariert ist, überspringen wir ihn
+            if (btn.dataset.universalCloseAttached) return;
+
+            let text = btn.innerText.toLowerCase();
+            let onclickAttr = btn.getAttribute('onclick') || '';
+
+            // Erkennt alle Buttons, die "Güncelle" oder "Speichern" heißen oder entsprechende Funktionen haben
+            if (text.includes('güncelle') || 
+                text.includes('speichern') || 
+                text.includes('update') || 
+                onclickAttr.includes('save') || 
+                onclickAttr.includes('update') || 
+                btn.classList.contains('save-btn')) {
+
+                // Markieren, damit der Button nicht doppelt belegt wird
+                btn.dataset.universalCloseAttached = "true";
+
+                btn.addEventListener('click', function() {
+                    // Das übergeordnete Fenster-Element des Buttons finden
+                    let modal = btn.closest('.modal, .modal-box, .modal-content, [id*="Modal"], [id*="modal"]');
+
+                    if (modal) {
+                        // 300 Millisekunden warten, damit das System in Ruhe die Daten speichern kann
+                        setTimeout(() => {
+                            // Die sicherste Methode: Wir simulieren einen Klick auf das "X" des jeweiligen Fensters!
+                            let closeX = modal.querySelector('.close, .close-btn, .close-modal');
+                            
+                            if (closeX) {
+                                closeX.click(); // Klickt das "X" für dich an
+                            } else {
+                                // Notfall-Methode, falls kein "X" gefunden wird: Fenster hart ausblenden
+                                let wrapper = modal.closest('.modal-backdrop, .modal-overlay') || modal;
+                                wrapper.style.display = 'none';
+                            }
+                        }, 300);
+                    }
+                });
+            }
+        });
+    }
+
+    // Läuft dezent im Hintergrund und präpariert jeden Button, sobald ein neues Fenster geöffnet wird
+    setInterval(attachUniversalAutoClose, 800);
+})();
+</script>
 
 </body>
 </html>
