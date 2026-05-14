@@ -16207,7 +16207,168 @@ setInterval(function() {
 })();
 </script>
 
+<link rel="icon" type="image/png" href="https://imagizer.imageshack.com/img923/676/f5U6yR.png">
+<link rel="apple-touch-icon" href="https://imagizer.imageshack.com/img923/676/f5U6yR.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sairmisali.de/">
+<meta property="og:title" content="Şair Misali | Gönülden dile, dilden şiire">
+<meta property="og:description" content="Eine poetische Reise.">
+<meta property="og:image" content="https://imagizer.imageshack.com/img923/676/f5U6yR.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
+<style>
+    /* Color Picker Feedback */
+    .elite-color-picker-container {
+        background: rgba(10, 25, 47, 0.9) !important;
+        border: 1px solid rgba(244, 197, 66, 0.5) !important;
+        border-radius: 12px !important;
+        padding: 15px !important;
+        margin: 20px 0 !important;
+        text-align: center !important;
+    }
+    .elite-color-swatches {
+        display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+        max-height: 180px; overflow-y: auto; padding: 10px;
+        border-radius: 8px; background: rgba(0, 0, 0, 0.5);
+    }
+    .color-swatch {
+        width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
+        transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .color-swatch:hover { transform: scale(1.4); }
+    .color-swatch.selected {
+        transform: scale(1.6);
+        border: 2px solid #fff !important;
+        box-shadow: 0 0 15px currentColor !important;
+    }
+    
+    /* Zwingt Admin-Namen, die goldene Farbe zu behalten */
+    .admin-name-forced { color: #f4c542 !important; text-shadow: 0 0 8px rgba(244, 197, 66, 0.5) !important; }
+</style>
+
+<script>
+(function() {
+    // A. Farbanwendung: Zwingt Namen, Titel und Unterschriften zur neuen Farbe
+    window.applyEliteColors = function() {
+        // Wir holen uns die lokale Datenbank
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}'); // Deine User-Datenbank
+        
+        // Wir erfassen Namen, Titel (b, strong) UND Unterschrift-Elemente (Great Vibes Font)
+        const selectors = [
+            '.author', '.comment-author', '.message-sender', 
+            '.online-user-name', '.username', 'b', 'strong',
+            '#sair_misali_signatur', // Falls du eine ID für deine Unterschrift vergibst
+            '[style*="Great Vibes"]', // Starker Selektor für die edle Schrift
+            '.card-title' // Oft sind Gedicht-Titel auch in Great Vibes
+        ];
+        
+        const elements = document.querySelectorAll(selectors.join(', '));
+        const myUsername = window.currentUser?.username;
+
+        elements.forEach(el => {
+            // Wir reinigen den Text, um nur den Namen zu bekommen
+            let rawName = el.innerText.trim().replace(/[:()]/g, '');
+            
+            // Logik, um zu entscheiden, welcher Name gemeint ist
+            // 1. Wenn es eine Unterschrift oder ein Titel ist, nimm deinen Namen
+            // 2. Ansonsten nimm den Text des Elements
+            let name = (rawName.length > 25 || el.matches('[style*="Great Vibes"]')) ? 'Sair Misali.i' : rawName;
+            
+            // Sonderfall: Wenn du deine eigene Unterschrift bearbeitest, zwinge deinen Namen
+            if (name === 'Sair Misali.i' && myUsername && myUsername.toLowerCase().includes('admin')) {
+                // Admin-Schutz bleibt bestehen, aber wir färben die Unterschrift mit
+            }
+
+            // Wir prüfen die Admin-Rolle
+            const isAdmin = users[name]?.role === 'admin' || name.toLowerCase().includes('admin') || name === 'Sair Misali.i';
+
+            if (isAdmin) {
+                // Admin-Farbe zwingen, aber auch Unterschrift
+                el.classList.add('admin-name-forced');
+                el.style.setProperty('color', '#f4c542', 'important'); 
+            } else if (db[name]) {
+                // Benutzerdefinierte Farbe anwenden
+                el.classList.remove('admin-name-forced');
+                el.style.setProperty('color', db[name], 'important');
+                el.style.setProperty('text-shadow', `0 0 8px ${db[name]}60`, 'important');
+            }
+        });
+    };
+
+    // B. Auswahlfunktion (Speichert SOFORT ohne Reload-Zwang)
+    window.selectEliteColor = function(color, element) {
+        if (!window.currentUser) return;
+        
+        const username = window.currentUser.username;
+        
+        // Optisches Feedback
+        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        // In lokaler Datenbank sichern (Synchronisation über Firebase wäre besser, aber so bleibt es auf dem Gerät)
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        db[username] = color;
+        localStorage.setItem('elite_user_colors', JSON.stringify(db));
+
+        // Farbe SOFORT auf der Seite anwenden
+        window.applyEliteColors();
+
+        // Optional: In ein verstecktes Feld im Profil-Formular schreiben, falls es existiert
+        let hiddenInput = document.getElementById('hidden_color_field');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = 'hidden_color_field';
+            hiddenInput.name = 'custom_color';
+            document.querySelector('#profileEditModal form')?.appendChild(hiddenInput);
+        }
+        hiddenInput.value = color;
+    };
+
+    // C. UI Generator
+    function injectPicker() {
+        const modal = document.getElementById('profileEditModal');
+        // Wenn das Modal nicht offen ist oder der Picker schon da ist, abbrechen
+        if (!modal || document.getElementById('elite-color-picker')) return;
+
+        const container = document.createElement('div');
+        container.id = 'elite-color-picker';
+        container.className = 'elite-color-picker-container';
+        
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const currentColor = db[window.currentUser?.username] || '#ffffff';
+
+        let html = `<div style="color:#f4c542; margin-bottom:10px; font-size:0.9rem; font-weight:bold;">Renk Seçimi (Farbe wählen)</div><div class="elite-color-swatches">`;
+        
+        // Palette generieren (Weiß-Töne + HSL)
+        const palette = ['#ffffff', '#f8fafc', '#e2e8f0'];
+        for (let l of [80, 70, 60]) {
+            for (let h = 0; h < 360; h += 12) {
+                // Wir überspringen Admin-Gold-Bereich (ca. 35-55)
+                if (h >= 35 && h <= 55) continue; 
+                palette.push(`hsl(${h}, 90%, ${l}%)`);
+            }
+        }
+
+        palette.forEach(c => {
+            const isSel = (c === currentColor) ? 'selected' : '';
+            html += `<div class="color-swatch ${isSel}" style="background-color:${c}; color:${c};" onclick="window.selectEliteColor('${c}', this)"></div>`;
+        });
+
+        container.innerHTML = html + `</div>`;
+        // In den Modal-Body einfügen
+        modal.querySelector('.modal-body').appendChild(container);
+    }
+
+    // D. Dauer-Überwachung für Live-Update
+    setInterval(() => {
+        injectPicker();
+        window.applyEliteColors();
+    }, 600); // 0.6 Sekunden Intervall ist ein guter Kompromiss
+})();
+</script>
 
 </body>
 </html>
