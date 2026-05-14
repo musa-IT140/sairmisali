@@ -15703,5 +15703,266 @@ setInterval(function() {
 })();
 </script>
 
+<!-- ==========================================================================
+     🎨 ELITE COLOR PICKER V4 (500+ FARBEN, MAXIMALE AUSWAHL)
+     ========================================================================== -->
+<style>
+    /* Das Design für den Color-Picker Container */
+    .elite-color-picker-container {
+        background: rgba(10, 25, 47, 0.6);
+        border: 1px solid rgba(244, 197, 66, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Der dezente Titel */
+    .elite-color-picker-title {
+        color: #f4c542;
+        font-family: "Playfair Display", serif;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        letter-spacing: 0.5px;
+    }
+
+    /* Die Scroll-Box für die 500+ Farben */
+    .elite-color-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px; /* Minimaler Abstand für 500+ Farben */
+        justify-content: center;
+        max-height: 180px; 
+        overflow-y: auto;  
+        padding: 5px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Elegante Custom-Scrollbar */
+    .elite-color-swatches::-webkit-scrollbar {
+        width: 6px;
+    }
+    .elite-color-swatches::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+    }
+    .elite-color-swatches::-webkit-scrollbar-thumb {
+        background: rgba(244, 197, 66, 0.6);
+        border-radius: 4px;
+    }
+
+    /* Winzige Farb-Kreise für die riesige Auswahl */
+    .color-swatch {
+        width: 15px; /* Perfekte Größe für 500 Kreise */
+        height: 15px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .color-swatch:hover {
+        transform: scale(1.5);
+        z-index: 10;
+    }
+
+    .color-swatch.selected {
+        transform: scale(1.6);
+        border: 2px solid #fff;
+        box-shadow: 0 0 10px currentColor;
+        z-index: 20;
+    }
+
+    /* Der Glow-Effekt für die Namen */
+    .custom-colored-name {
+        font-weight: bold !important;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+</style>
+
+<script>
+(function() {
+    // 1. GENERATOR FÜR 500+ EDLE FARBEN
+    const eliteColors = ['#ffffff', '#f8fafc', '#e2e8f0', '#cbd5e1']; // Standard Weiß-/Silbertöne
+    
+    // Sättigung und Helligkeit
+    const saturations = [100, 85, 70]; 
+    const lightnesses = [85, 75, 65, 55]; 
+    
+    for (let l of lightnesses) {
+        for (let s of saturations) {
+            // In winzigen 8° Schritten durch den Regenbogen (Ergibt über 500 Farben!)
+            for (let h = 0; h < 360; h += 8) { 
+                // ADMIN-SCHUTZ: Gold/Gelb (Hue 35-55) wird streng blockiert
+                if (h >= 35 && h <= 55) continue; 
+                eliteColors.push(`hsl(${h}, ${s}%, ${l}%)`);
+            }
+        }
+    }
+
+    // 2. Baut das Menü ein
+    function injectColorPickerToProfile() {
+        let profileModal = document.getElementById('profileEditModal');
+        if (!profileModal) return;
+
+        let modalBody = profileModal.querySelector('.modal-body');
+        
+        if (modalBody && !document.getElementById('elite-color-picker')) {
+            let pickerDiv = document.createElement('div');
+            pickerDiv.id = 'elite-color-picker';
+            pickerDiv.className = 'elite-color-picker-container';
+            
+            let html = `<div class="elite-color-picker-title">Kullanıcı Adı Rengi (Benutzername Farbe)</div>
+                        <div class="elite-color-swatches" id="swatch-container">`;
+            
+            let users = JSON.parse(localStorage.getItem('users') || '{}');
+            let myColor = '#ffffff';
+            if (window.currentUser && users[window.currentUser.username] && users[window.currentUser.username].color) {
+                myColor = users[window.currentUser.username].color;
+            }
+
+            eliteColors.forEach(color => {
+                let isSelected = (color === myColor) ? 'selected' : '';
+                html += `<div class="color-swatch ${isSelected}" 
+                              style="background-color: ${color}; color: ${color};" 
+                              data-color="${color}" 
+                              onclick="window.selectEliteColor('${color}', this)">
+                         </div>`;
+            });
+            
+            html += `</div>`;
+            pickerDiv.innerHTML = html;
+
+            let saveBtn = profileModal.querySelector('.save-btn, button[onclick*="save"]');
+            if (saveBtn) {
+                saveBtn.parentNode.insertBefore(pickerDiv, saveBtn);
+            } else {
+                modalBody.appendChild(pickerDiv);
+            }
+        }
+    }
+
+    // 3. Farb-Auswahl & Speicherung
+    window.selectEliteColor = function(color, element) {
+        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        if (window.currentUser) {
+            let users = JSON.parse(localStorage.getItem('users') || '{}');
+            let username = window.currentUser.username;
+            
+            if (!users[username]) users[username] = {};
+            
+            if (users[username].role === 'admin') {
+                alert("Admins nutzen automatisch die Premium-Admin-Farbe!");
+                return;
+            }
+
+            users[username].color = color;
+            window.currentUser.color = color;
+            localStorage.setItem('users', JSON.stringify(users));
+
+            window.applyEliteColors();
+        }
+    };
+
+    // 4. Live-Rendering der Farben
+    window.applyEliteColors = function() {
+        let users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        let nameElements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, b, strong');
+
+        nameElements.forEach(el => {
+            let text = el.innerText.trim().replace(/[:()]/g, ''); 
+            
+            if (users[text]) {
+                if (users[text].role === 'admin' || text.toLowerCase().includes('admin')) {
+                    el.style.color = '#f4c542';
+                    el.style.textShadow = '0 0 10px rgba(244, 197, 66, 0.6)';
+                    el.classList.add('custom-colored-name');
+                } else if (users[text].color) {
+                    el.style.color = users[text].color;
+                    el.style.textShadow = `0 0 8px ${users[text].color}80`; 
+                    el.classList.add('custom-colored-name');
+                }
+            }
+        });
+    };
+
+    // 5. Autostart
+    setInterval(() => {
+        injectColorPickerToProfile();
+        window.applyEliteColors();
+    }, 1000);
+
+})();
+</script>
+
+<style>
+    /* 1. Fenster-Größe & Schutzabstand */
+    .modal-content, .modal-box {
+        max-width: 650px !important; 
+        width: 90% !important;
+        margin: auto !important;
+        padding-top: 60px !important; 
+        position: relative !important;
+    }
+
+    /* 2. Der einzige Kreis (Bombensicher zentriert ohne Flexbox) */
+    .modal-content .close, 
+    .close-modal {
+        position: absolute !important;
+        top: 15px !important; 
+        right: 20px !important; 
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        border: 2px solid rgba(244, 197, 66, 0.6) !important; 
+        background: rgba(0, 0, 0, 0.3) !important;
+        color: #f4c542 !important; 
+        
+        /* Kugelsichere Text-Zentrierung */
+        font-size: 24px !important; 
+        text-align: center !important;
+        line-height: 32px !important; /* Exakt Höhe minus Rahmen */
+        
+        cursor: pointer !important;
+        z-index: 99999 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        box-sizing: border-box !important;
+        transition: all 0.2s !important;
+    }
+
+    /* 3. Zerstört alle störenden Doppel-Kreise oder Abstände im Inneren */
+    .modal-content .close *,
+    .close-modal * {
+        border: none !important;
+        background: transparent !important;
+        position: static !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: inline !important; 
+        line-height: inherit !important;
+    }
+
+    /* 4. Hover-Effekt */
+    .modal-content .close:hover,
+    .close-modal:hover {
+        background: #f4c542 !important; 
+        color: #0a192f !important; 
+        transform: scale(1.1) !important;
+    }
+    
+    .modal-content .close:hover *,
+    .close-modal:hover * {
+        color: #0a192f !important;
+    }
+</style>
+
 </body>
 </html>
