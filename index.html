@@ -15833,60 +15833,137 @@ setInterval(function() {
 
 <style>
     .elite-color-picker-container {
-        background: rgba(10, 25, 47, 0.8);
-        border: 1px solid rgba(244, 197, 66, 0.4);
+        background: rgba(10, 25, 47, 0.9);
+        border: 1px solid rgba(244, 197, 66, 0.5);
         border-radius: 12px;
         padding: 15px;
         margin: 20px 0;
         text-align: center;
     }
 
-    .elite-color-picker-title {
-        color: #f4c542;
-        font-family: "Playfair Display", serif;
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-        letter-spacing: 0.5px;
-    }
-
     .elite-color-swatches {
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 6px;
         justify-content: center;
-        max-height: 200px; 
+        max-height: 180px; 
         overflow-y: auto;  
-        padding: 8px;
+        padding: 10px;
         border-radius: 8px;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
     }
-
-    /* Scrollbar Styling */
-    .elite-color-swatches::-webkit-scrollbar { width: 5px; }
-    .elite-color-swatches::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
 
     .color-swatch {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
         cursor: pointer;
-        transition: transform 0.2s;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    .color-swatch:hover { transform: scale(1.5); z-index: 10; }
+    .color-swatch:hover { transform: scale(1.4); }
     .color-swatch.selected {
-        transform: scale(1.7);
+        transform: scale(1.6);
         border: 2px solid #fff;
-        box-shadow: 0 0 12px currentColor;
-    }
-
-    /* Der Glow für die Namen */
-    .custom-colored-name {
-        font-weight: bold !important;
-        transition: color 0.3s;
+        box-shadow: 0 0 15px currentColor;
     }
 </style>
+
+<script>
+(function() {
+    // 1. Farbdirektive: Zwingt Namen und Unterschriften zur neuen Farbe
+    window.applyEliteColors = function() {
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+        // Wir erfassen Namen UND alle Unterschrift-Elemente (Great Vibes Fonts)
+        const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .username, b, strong, [style*="Great Vibes"]');
+
+        elements.forEach(el => {
+            const rawName = el.innerText.trim().replace(/[:()]/g, '');
+            // Falls es eine Unterschrift ist, den Namen aus dem Kontext ziehen (falls möglich)
+            const name = (rawName.length > 25) ? window.currentUser?.username : rawName;
+
+            if (users[name]?.role === 'admin' || name.toLowerCase().includes('admin')) {
+                el.style.setProperty('color', '#f4c542', 'important');
+                el.style.setProperty('text-shadow', '0 0 8px rgba(244, 197, 66, 0.5)', 'important');
+            } else if (db[name]) {
+                el.style.setProperty('color', db[name], 'important');
+                el.style.setProperty('text-shadow', `0 0 8px ${db[name]}60`, 'important');
+            }
+        });
+    };
+
+    // 2. Auswahlfunktion (Speichert SOFORT ohne Reload-Zwang)
+    window.selectEliteColor = function(color, element) {
+        if (!window.currentUser) return;
+        
+        const username = window.currentUser.username;
+        
+        // Optisches Feedback
+        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        // In lokaler Datenbank sichern
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        db[username] = color;
+        localStorage.setItem('elite_user_colors', JSON.stringify(db));
+
+        // Farbe sofort auf der Seite anwenden
+        window.applyEliteColors();
+
+        // Optional: In dein Profil-Formular injizieren, falls vorhanden
+        let hiddenInput = document.getElementById('hidden_color_field');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = 'hidden_color_field';
+            hiddenInput.name = 'custom_color';
+            document.querySelector('#profileEditModal form')?.appendChild(hiddenInput);
+        }
+        hiddenInput.value = color;
+    };
+
+    // 3. UI Generator
+    function injectPicker() {
+        const modal = document.getElementById('profileEditModal');
+        if (!modal || document.getElementById('elite-color-picker')) return;
+
+        const container = document.createElement('div');
+        container.id = 'elite-color-picker';
+        container.className = 'elite-color-picker-container';
+        
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const currentColor = db[window.currentUser?.username] || '#ffffff';
+
+        let html = `<div style="color:#f4c542; margin-bottom:10px; font-size:0.9rem;">Renk Seçimi (Farbe wählen)</div><div class="elite-color-swatches">`;
+        
+        // Palette generieren
+        const palette = ['#ffffff', '#f8fafc', '#e2e8f0'];
+        for (let l of [80, 70, 60]) {
+            for (let h = 0; h < 360; h += 12) {
+                if (h >= 35 && h <= 55) continue; 
+                palette.push(`hsl(${h}, 90%, ${l}%)`);
+            }
+        }
+
+        palette.forEach(c => {
+            const isSel = (c === currentColor) ? 'selected' : '';
+            html += `<div class="color-swatch ${isSel}" style="background-color:${c}; color:${c};" onclick="window.selectEliteColor('${c}', this)"></div>`;
+        });
+
+        container.innerHTML = html + `</div>`;
+        modal.querySelector('.modal-body').appendChild(container);
+    }
+
+    // Dauer-Überwachung für Live-Update
+    setInterval(() => {
+        injectPicker();
+        window.applyEliteColors();
+    }, 500);
+})();
+</script>
 
 <script>
 (function() {
