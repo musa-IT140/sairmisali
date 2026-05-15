@@ -17095,66 +17095,81 @@ setInterval(function() {
 </script>
 
 <style>
-    /* Modal Base - Minimal, Skaliert & Flex-Lock (Kein Overlap mehr!) */
-    .mu-modal-content { display: flex !important; flex-direction: column !important; max-width: 1050px !important; width: 95vw !important; max-height: 90vh !important; background: linear-gradient(145deg, #050b14, #0a192f) !important; border: 1px solid #f4c542 !important; box-shadow: 0 10px 50px rgba(0,0,0,0.95), inset 0 0 15px rgba(244,197,66,0.1) !important; z-index: 100015 !important; border-radius: 12px !important; font-family: 'Poppins', sans-serif !important; }
+    /* Modal Base - Kompakt & Flex-Lock (Kein Overlap!) */
+    .mu-modal-content { display: flex !important; flex-direction: column !important; max-width: 1050px !important; width: 96vw !important; max-height: 88vh !important; background: linear-gradient(145deg, #050b14, #0a192f) !important; border: 1px solid #f4c542 !important; box-shadow: 0 10px 50px rgba(0,0,0,0.95), inset 0 0 15px rgba(244,197,66,0.1) !important; z-index: 100015 !important; border-radius: 12px !important; font-family: 'Poppins', sans-serif !important; overflow: hidden !important; }
     
-    .modal-body.mu-body { display: flex !important; flex-direction: column !important; flex: 1 !important; overflow: hidden !important; padding: 15px !important; }
+    .modal-body.mu-body-wrapper { display: flex !important; flex-direction: column !important; height: 100% !important; overflow: hidden !important; padding: 15px !important; }
 
     /* Header Bereich (Fixiert) */
-    .mu-header-area { flex-shrink: 0 !important; }
-    .mu-main-title { font-size: 1.6rem !important; color: #f4c542 !important; text-align: center !important; margin-bottom: 2px !important; margin-top: 5px !important; font-family: 'Playfair Display', serif !important; font-weight: bold !important; text-shadow: 0 0 10px rgba(244,197,66,0.4) !important; letter-spacing: 1px !important; }
-    .mu-sub-title { text-align: center !important; color: #64748b !important; font-family: monospace !important; margin-bottom: 15px !important; font-size: 0.8rem !important;}
+    .mu-top-section { flex-shrink: 0 !important; }
+    
+    .mu-main-title { font-size: 1.6rem !important; color: #f4c542 !important; text-align: center !important; margin-bottom: 2px !important; margin-top: 5px !important; font-family: 'Playfair Display', serif !important; font-weight: bold !important; text-shadow: 0 0 10px rgba(244,197,66,0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+    .mu-sub-title { text-align: center !important; color: #64748b !important; font-family: monospace !important; margin-bottom: 12px !important; font-size: 0.75rem !important; }
 
     /* Device Tabs - Fixiert & Kompakt */
-    .mu-device-tabs { display: flex !important; flex-shrink: 0 !important; width: 100% !important; border-bottom: 2px solid rgba(255,255,255,0.05) !important; margin-bottom: 15px !important; background: rgba(0,0,0,0.4) !important; border-radius: 8px 8px 0 0 !important; }
-    .mu-device-tab-btn { flex: 1 !important; padding: 8px 5px !important; background: transparent !important; border: none !important; border-bottom: 3px solid transparent !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; }
-    .mu-device-tab-btn i { font-size: 1.1rem !important; color: #64748b !important; }
-    .mu-device-tab-btn strong { font-size: 0.7rem !important; color: #64748b !important; text-transform: uppercase !important; }
-    .mu-device-tab-btn.active { border-bottom: 3px solid #f4c542 !important; background: rgba(244, 197, 66, 0.1) !important; }
-    .mu-device-tab-btn.active i, .mu-device-tab-btn.active strong { color: #f4c542 !important; }
+    .mu-device-tabs { display: flex !important; flex-direction: row !important; width: 100% !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; margin-bottom: 12px !important; background: rgba(0,0,0,0.4) !important; border-radius: 8px 8px 0 0 !important; overflow-x: auto !important; scrollbar-width: none !important; }
+    .mu-device-tab-btn { flex: 1 !important; min-width: 80px !important; padding: 8px 5px !important; margin: 0 !important; background: transparent !important; border: none !important; border-bottom: 2px solid transparent !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; outline: none !important; box-shadow: none !important; color: #94a3b8 !important;}
     
-    /* Category Tabs - Fixiert & Kompakt */
-    .mu-category-tabs { display: flex !important; flex-shrink: 0 !important; flex-wrap: wrap !important; gap: 6px !important; margin-bottom: 15px !important; justify-content: center !important; }
-    .mu-cat-tab-btn { padding: 6px 10px !important; font-size: 0.75rem !important; background: rgba(0,0,0,0.5) !important; color: #cbd5e1 !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 6px !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; align-items: center !important; gap: 5px !important; }
+    .mu-device-tab-btn i { font-size: 1.1rem !important; color: inherit !important; display: block !important; visibility: visible !important; opacity: 1 !important; }
+    .mu-device-tab-btn strong { font-size: 0.7rem !important; color: inherit !important; font-family: 'Poppins', sans-serif !important; font-weight: bold !important; display: block !important; visibility: visible !important; opacity: 1 !important; letter-spacing: 0.5px !important; text-transform: uppercase !important; }
+    
+    .mu-device-tab-btn:hover { color: #fff !important; background: rgba(255,255,255,0.02) !important; }
+    .mu-device-tab-btn.active { color: #f4c542 !important; border-bottom: 2px solid #f4c542 !important; background: rgba(244, 197, 66, 0.1) !important; }
+    
+    /* Category Tabs - Fixiert */
+    .mu-category-tabs { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; margin-bottom: 10px !important; justify-content: center !important; }
+    .mu-cat-tab-btn { padding: 6px 10px !important; font-size: 0.75rem !important; background: rgba(0,0,0,0.5) !important; color: #cbd5e1 !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 6px !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; align-items: center !important; gap: 5px !important; font-family: 'Poppins', sans-serif !important;}
+    .mu-cat-tab-btn i { color: inherit !important; font-size: 0.85rem !important; }
+    .mu-cat-tab-btn:hover { border-color: #f4c542 !important; color: #fff !important; }
     .mu-cat-tab-btn.active { background: #f4c542 !important; color: #000 !important; font-weight: bold !important; border-color: #f4c542 !important; }
 
-    /* Panels - SCROLLBAR NUR HIER! */
-    .mu-panel { display: none !important; flex: 1 !important; padding: 15px !important; background: rgba(255,255,255,0.02) !important; border-radius: 8px !important; margin-bottom: 10px !important; border: 1px inset rgba(255,255,255,0.03) !important; overflow-y: auto !important; }
+    /* Panels - HIER IST DIE SCROLLBAR (Kein Overlap!) */
+    .mu-panel { display: none !important; flex: 1 !important; padding: 12px !important; background: rgba(255,255,255,0.01) !important; border-radius: 8px !important; border: 1px inset rgba(255,255,255,0.03) !important; overflow-y: auto !important; margin-bottom: 0 !important; }
     .mu-panel.active { display: block !important; }
     .mu-panel::-webkit-scrollbar { width: 5px !important; } .mu-panel::-webkit-scrollbar-thumb { background: #f4c542 !important; border-radius: 10px !important; }
     
-    .mu-settings-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px 20px !important; align-items: start !important; }
+    .mu-settings-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px 20px !important; align-items: start !important; }
     @media (max-width: 900px) { .mu-settings-grid { grid-template-columns: 1fr !important; } }
-    .mu-section-title { grid-column: 1 / -1 !important; color: #f4c542 !important; font-size: 0.85rem !important; margin-top: 5px !important; margin-bottom: 2px !important; border-bottom: 1px solid rgba(244,197,66,0.2) !important; padding-bottom: 3px !important; text-transform: uppercase !important; font-weight: bold !important; }
+    .mu-section-title { grid-column: 1 / -1 !important; color: #f4c542 !important; font-size: 0.85rem !important; margin-top: 5px !important; margin-bottom: 2px !important; border-bottom: 1px solid rgba(244,197,66,0.2) !important; padding-bottom: 3px !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: bold !important; }
 
-    /* Rows & Inputs - Skaliert */
-    .mu-setting-row { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 6px 10px !important; background: rgba(0,0,0,0.3) !important; border-radius: 6px !important; border: 1px solid rgba(255,255,255,0.05) !important; gap: 8px !important; }
-    .mu-label { color: #fdfbf7 !important; font-size: 0.8rem !important; display: flex !important; flex-direction: column !important; flex: 1 !important; min-width: 130px !important; }
-    .mu-label .de-sub { font-size: 0.7em !important; color: #94a3b8 !important; }
+    /* Rows & Inputs - Skaliert & Kompakt */
+    .mu-setting-row { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 6px 10px !important; background: rgba(0,0,0,0.3) !important; border-radius: 6px !important; border: 1px solid rgba(255,255,255,0.05) !important; flex-wrap: wrap !important; gap: 8px !important; transition: 0.2s !important;}
+    .mu-setting-row:hover { border-color: rgba(244,197,66,0.3) !important; background: rgba(0,0,0,0.5) !important; }
+    
+    .mu-label { color: #fdfbf7 !important; font-size: 0.8rem !important; font-weight: 500 !important; display: flex !important; flex-direction: column !important; flex: 1 !important; min-width: 120px !important; }
+    .mu-label .de-sub { font-size: 0.7em !important; color: #94a3b8 !important; margin-top: 1px !important; }
     
     .mu-control-group { display: flex !important; align-items: center !important; gap: 6px !important; justify-content: flex-end !important; flex: 1 !important; min-width: 180px !important; }
     
-    .mu-select, .mu-input { background: rgba(0,0,0,0.8) !important; color: #fff !important; border: 1px solid #f4c542 !important; padding: 6px 8px !important; border-radius: 6px !important; font-size: 0.75rem !important; outline: none !important; width: 100% !important; max-width: 200px !important; }
-    .mu-select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23f4c542" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; }
+    .mu-select, .mu-input { background: rgba(0,0,0,0.8) !important; color: #fff !important; border: 1px solid #f4c542 !important; padding: 6px 8px !important; border-radius: 6px !important; font-size: 0.75rem !important; outline: none !important; width: 100% !important; max-width: 200px !important; transition: 0.2s !important; font-family: 'Poppins', sans-serif !important; }
+    .mu-select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23f4c542" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer !important; }
+    .mu-select:hover, .mu-input:focus { box-shadow: 0 0 8px rgba(244,197,66,0.3) !important; }
+    .mu-select option { background: #0a192f !important; color: #fff !important; padding: 6px !important; }
     
-    .mu-undo-btn { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239,68,68,0.3) !important; border-radius: 6px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; height: 28px !important; width: 28px !important; flex-shrink: 0 !important; font-size: 0.85rem !important;}
-    .mu-undo-btn:disabled { opacity: 0.2 !important; cursor: not-allowed !important; }
+    .mu-undo-btn { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239,68,68,0.3) !important; padding: 6px !important; border-radius: 6px !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; align-items: center !important; justify-content: center !important; height: 30px !important; width: 30px !important; flex-shrink: 0 !important; font-size: 0.85rem !important;}
+    .mu-undo-btn:hover:not(:disabled) { background: #ef4444 !important; color: #fff !important; }
+    .mu-undo-btn:disabled { opacity: 0.2 !important; cursor: not-allowed !important; border-color: transparent !important; }
 
     /* Switch - Skaliert */
     .mu-switch { position: relative !important; display: inline-block !important; width: 36px !important; height: 18px !important; flex-shrink: 0 !important; }
     .mu-switch input { opacity: 0 !important; width: 0 !important; height: 0 !important; }
-    .mu-slider { position: absolute !important; cursor: pointer !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; background-color: rgba(255,255,255,0.1) !important; border-radius: 18px !important; border: 1px solid rgba(255,255,255,0.2) !important; transition: .3s !important;}
-    .mu-slider:before { position: absolute !important; content: "" !important; height: 12px !important; width: 12px !important; left: 2px !important; bottom: 2px !important; background-color: #94a3b8 !important; border-radius: 50% !important; transition: .3s !important;}
+    .mu-slider { position: absolute !important; cursor: pointer !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; background-color: rgba(255,255,255,0.1) !important; transition: .4s !important; border-radius: 18px !important; border: 1px solid rgba(255,255,255,0.2) !important; }
+    .mu-slider:before { position: absolute !important; content: "" !important; height: 12px !important; width: 12px !important; left: 2px !important; bottom: 2px !important; background-color: #94a3b8 !important; transition: .4s !important; border-radius: 50% !important; box-shadow: 0 2px 3px rgba(0,0,0,0.5) !important; }
     .mu-switch input:checked + .mu-slider { background-color: rgba(244, 197, 66, 0.2) !important; border-color: #f4c542 !important; }
-    .mu-switch input:checked + .mu-slider:before { transform: translateX(18px) !important; background-color: #f4c542 !important; }
+    .mu-switch input:checked + .mu-slider:before { transform: translateX(18px) !important; background-color: #f4c542 !important; box-shadow: 0 0 8px #f4c542 !important; }
 
-    /* Action Buttons (Fixiert am Boden) */
-    .mu-actions-area { flex-shrink: 0 !important; display:flex !important; gap:8px !important; width:100% !important; margin-top:10px !important; flex-wrap:wrap !important; }
-    .btn-global-save { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: none !important; color: #000 !important; padding: 10px !important; border-radius: 8px !important; font-weight: bold !important; cursor: pointer !important; font-size: 0.95rem !important; width: 100% !important; text-transform: uppercase !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;}
-    .btn-local-reset { background: rgba(245, 158, 11, 0.1) !important; border: 1px solid #f59e0b !important; color: #f59e0b !important; padding: 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; flex: 1 !important; font-weight:bold !important;}
+    /* Action Buttons - Fixiert am unteren Rand */
+    .mu-bottom-actions { flex-shrink: 0 !important; display: flex !important; gap: 8px !important; width: 100% !important; margin-top: 10px !important; padding-top: 10px !important; border-top: 1px solid rgba(255,255,255,0.05) !important; flex-wrap: wrap !important; }
     
-    .file-upload-btn { background: rgba(244,197,66,0.1) !important; border: 1px dashed #f4c542 !important; color: #f4c542 !important; padding: 6px !important; border-radius: 6px !important; cursor: pointer !important; text-align: center !important; width: 100% !important; max-width: 120px !important; font-size: 0.75rem !important; display:inline-block !important;}
-    .mu-preview-img { width: 28px !important; height: 28px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #f4c542 !important; display: none; margin-left: 5px !important; }
+    .btn-global-save { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: none !important; color: #000 !important; padding: 10px !important; border-radius: 8px !important; font-weight: 900 !important; cursor: pointer !important; transition: 0.3s !important; font-size: 0.95rem !important; flex: 2 !important; min-width: 250px !important; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4) !important; text-transform: uppercase !important; letter-spacing: 1px !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;}
+    .btn-global-save:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6) !important; }
+    
+    .btn-local-reset { background: rgba(245, 158, 11, 0.1) !important; border: 1px solid #f59e0b !important; color: #f59e0b !important; padding: 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; cursor: pointer !important; transition: 0.3s !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; flex: 1 !important; font-weight:bold !important;}
+    .btn-local-reset:hover { background: #f59e0b !important; color: #000 !important; }
+
+    .file-upload-btn { background: rgba(244,197,66,0.1) !important; border: 1px dashed #f4c542 !important; color: #f4c542 !important; padding: 6px !important; border-radius: 6px !important; cursor: pointer !important; text-align: center !important; transition: 0.2s !important; width: 100% !important; max-width: 120px !important; font-size: 0.75rem !important; display:inline-block !important; font-weight:bold !important;}
+    .file-upload-btn:hover { background: #f4c542 !important; color: #000 !important; }
+    .file-preview-img { width: 30px !important; height: 30px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #f4c542 !important; display: none; margin-left: 5px !important; }
 
     @keyframes ybAnimGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 </style>
@@ -17162,7 +17177,7 @@ setInterval(function() {
 <script>
 (function() {
     window.purgeOldVersions = function() {
-        for (let i = 20; i <= 77; i++) {
+        for (let i = 20; i <= 80; i++) {
             let oldModule = document.getElementById('root-v' + i);
             if (oldModule) oldModule.remove();
         }
@@ -17184,7 +17199,7 @@ setInterval(function() {
             btn.id = 'admin-btn-megaultra';
             btn.className = 'bottom-btn';
             btn.setAttribute('onclick', "if(window.closeFloatingMenus) window.closeFloatingMenus(); if(window.openFastModal) window.openFastModal('megaUltraModal')");
-            btn.innerHTML = `<span class="btn-icon"><i class="fas fa-layer-group"></i></span><div class="btn-text-wrapper"><span class="btn-text">Mega Ultra Mode</span></div>`;
+            btn.innerHTML = `<span class="btn-icon"><i class="fas fa-layer-group"></i></span><div class="btn-text-wrapper"><span class="btn-text">Yap Boz <span class="de-sub">(CMS Builder)</span></span></div>`;
             rightMenu.appendChild(btn);
             clearInterval(injectYbTimer);
         }
@@ -17203,6 +17218,7 @@ setInterval(function() {
         let cIdx = i % baseColors.length;
         let c1 = baseColors[cIdx];
         let c2 = baseColors[(cIdx + 4) % baseColors.length];
+        
         window.muThemes.push({
             id: 'auto_theme_' + i, n: (isAnim ? '🔥 Animasyonlu Tema ' : '🎨 Özel Tema ') + (i + 1),
             bg: isAnim ? `linear-gradient(-45deg, #000000, ${c1}22, ${c2}22, #000000)` : '#050505',
@@ -17210,6 +17226,7 @@ setInterval(function() {
         });
     }
 
+    // 50 Sichere Header Layouts
     window.muHeaders = [
         { id: 'default', n: 'Orijinal (Klasik)', pt: '120px', css: '' },
         { id: 'centered', n: 'Tam Merkez (Zentriert)', pt: '160px', css: 'header#main-header { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; padding-top:10px !important; } .header-top { display:flex !important; flex-direction:column !important; align-items:center !important; position:static !important; height:auto !important; } .logo-and-time, .header-search-wrapper, .header-right { position:static !important; transform:none !important; width:100% !important; display:flex !important; justify-content:center !important; margin-bottom:10px !important; } .header-search { position:static !important; width: 100% !important; max-width: 500px !important; } .header-nav-bar { position:static !important; justify-content:center !important; } nav#main-nav { margin:0 auto !important; }' },
@@ -17220,25 +17237,28 @@ setInterval(function() {
     let rads = ['0px', '10px', '25px', '50px'];
     let borders = ['dashed', 'dotted', 'double', 'solid'];
     for(let i = 0; i < 46; i++) {
-        window.muHeaders.push({ id: 'auto_header_' + i, n: 'Header Varyasyon ' + (i+1), pt: '130px', css: `header#main-header { border-bottom: ${Math.max(1, i%5)}px ${borders[i%4]} var(--theme-acc, #f4c542) !important; justify-content: ${aligns[i%5]} !important; border-radius: 0 0 ${rads[i%4]} ${rads[i%4]} !important; }` });
+        window.muHeaders.push({
+            id: 'auto_header_' + i, n: 'Header Varyasyon ' + (i+1), pt: '130px',
+            css: `header#main-header { border-bottom: ${Math.max(1, i%5)}px ${borders[i%4]} var(--theme-acc, #f4c542) !important; justify-content: ${aligns[i%5]} !important; border-radius: 0 0 ${rads[i%4]} ${rads[i%4]} !important; }`
+        });
     }
 
-    // 🚀 DAHA ETKİLİ ŞEKİLLER (SHAPES)
+    // ERWEITERTE ŞEKİLLER (SHAPES) DB
     window.muShapes = [
         { id: 'default', n: 'Orijinal (Klasik)', css: 'border-radius: 12px !important; clip-path: none !important;' },
         { id: 'square', n: 'Keskin Dörtgen (Square)', css: 'border-radius: 0 !important; clip-path: none !important;' },
-        { id: 'rounded', n: 'Yumuşak Oval (Rounded)', css: 'border-radius: 20px !important; clip-path: none !important;' },
+        { id: 'rounded', n: 'Yumuşak Oval (Rounded)', css: 'border-radius: 25px !important; clip-path: none !important;' },
         { id: 'pill', n: 'Tam Oval (Pill)', css: 'border-radius: 45px !important; clip-path: none !important;' },
         { id: 'leaf_l', n: 'Sol Yaprak', css: 'border-radius: 40px 0 40px 0 !important; clip-path: none !important;' },
         { id: 'leaf_r', n: 'Sağ Yaprak', css: 'border-radius: 0 40px 0 40px !important; clip-path: none !important;' },
-        { id: 'teardrop', n: 'Su Damlası', css: 'border-radius: 50% 0 50% 50% !important; clip-path: none !important;' },
         { id: 'arch', n: 'Kemer (Arch)', css: 'border-radius: 40px 40px 5px 5px !important; clip-path: none !important;' },
+        { id: 'msg_bubble', n: 'Mesaj Balonu (Bubble)', css: 'border-radius: 20px 20px 20px 0 !important; clip-path: none !important;' },
         { id: 'blob', n: 'Amorf (Blob)', css: 'border-radius: 25px 50px 30px 60px !important; clip-path: none !important;' },
         { id: 'cyber', n: 'Cyberpunk Kesik', css: 'clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px) !important; border-radius: 0 !important;' },
         { id: 'diamond', n: 'Elmas (Diamond)', css: 'clip-path: polygon(5% 0, 95% 0, 100% 5%, 100% 95%, 95% 100%, 5% 100%, 0 95%, 0 5%) !important; border-radius: 0 !important;' },
-        { id: 'octagon', n: 'Sekizgen (Octagon)', css: 'clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0% calc(100% - 15px), 0% 15px) !important; border-radius: 0 !important;' },
-        { id: 'folded', n: 'Kıvrık Köşe', css: 'clip-path: polygon(0 0, calc(100% - 25px) 0, 100% 25px, 100% 100%, 0 100%) !important; border-radius: 0 !important;' },
-        { id: 'ticket', n: 'Bilet (Ticket)', css: 'clip-path: polygon(0 0, 100% 0, 100% calc(50% - 15px), calc(100% - 15px) 50%, 100% calc(50% + 15px), 100% 100%, 0 100%, 0 calc(50% + 15px), 15px 50%, 0 calc(50% - 15px)) !important; border-radius: 0 !important;' }
+        { id: 'hexagon', n: 'Altıgen (Hexagon)', css: 'clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%) !important; border-radius: 0 !important;' },
+        { id: 'shield', n: 'Kalkan (Shield)', css: 'clip-path: polygon(50% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%, 0 0) !important; border-radius: 0 !important;' },
+        { id: 'tag', n: 'Etiket (Tag)', css: 'clip-path: polygon(15px 0, 100% 0, 100% 100%, 15px 100%, 0 calc(50% + 15px), 0 calc(50% - 15px)) !important; border-radius: 0 !important;' }
     ];
 
     window.muElements = [
@@ -17252,7 +17272,7 @@ setInterval(function() {
         window.muElements.push({ id: 'auto_el_'+i, n: 'Stil Varyasyon ' + (i+1), css: `border-radius: ${i%20}px !important; border: ${i%3}px solid var(--theme-acc) !important; opacity: ${(100-(i%20))/100} !important;` });
     }
 
-    // 3. MODAL ERSTELLUNG (KLEIN & KOMPAKT)
+    // 3. MODAL ERSTELLUNG
     let createYbModalTimer = setInterval(() => {
         let uName = window.currentUser?.username || '';
         let isAdm = window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin');
@@ -17269,7 +17289,7 @@ setInterval(function() {
                     <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
                     <div class="mu-control-group">
                         <select id="mu-${id}" class="mu-select" onchange="window.MegaUltra.updateLive('${id}')">${opts}</select>
-                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
                     </div>
                 </div>`;
             }
@@ -17280,7 +17300,7 @@ setInterval(function() {
                     <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
                     <div class="mu-control-group">
                         <label class="mu-switch"><input type="checkbox" id="mu-${id}" checked onchange="window.MegaUltra.updateLive('${id}')"><span class="mu-slider"></span></label>
-                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
                     </div>
                 </div>`;
             }
@@ -17290,8 +17310,8 @@ setInterval(function() {
                 <div class="mu-setting-row">
                     <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
                     <div class="mu-control-group">
-                        <input type="text" id="mu-${id}" class="mu-input" onkeyup="window.MegaUltra.updateLive('${id}')">
-                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                        <input type="text" id="mu-${id}" class="mu-input" oninput="window.MegaUltra.updateLive('${id}')">
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
                     </div>
                 </div>`;
             }
@@ -17301,11 +17321,11 @@ setInterval(function() {
                 <div class="mu-setting-row">
                     <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
                     <div class="mu-control-group" style="justify-content: flex-end;">
-                        <img id="preview-${id}" class="mu-preview-img">
-                        <label class="file-upload-btn"><i class="fas fa-upload"></i> Dosya Seç
+                        <img id="preview-${id}" class="file-preview-img">
+                        <label class="file-upload-btn"><i class="fas fa-upload"></i> Seç
                             <input type="file" accept="image/*" style="display:none;" onchange="window.MegaUltra.handleImage(this, '${id}')">
                         </label>
-                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
                     </div>
                 </div>`;
             }
@@ -17315,24 +17335,36 @@ setInterval(function() {
                 <div class="modal-content mu-modal-content" onclick="event.stopPropagation()">
                     <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
                     
-                    <div class="modal-body mu-body">
-                        <div class="mu-header-area">
+                    <div class="modal-body mu-body-wrapper">
+                        
+                        <div class="mu-top-section">
                             <h2 class="mu-main-title">MEGA ULTRA MODE ŞAİR MİSAL.İ 👑</h2>
-                            <div class="mu-sub-title">(The Executioner CMS - Minimal Edition)</div>
+                            <div class="mu-sub-title">(The Executioner CMS - Locked Panorama)</div>
                             
                             <div class="mu-device-tabs" id="mu-device-tabs-container">
-                                <div class="mu-device-tab-btn active" data-dev="desktop" onclick="window.MegaUltra.switchDevice('desktop')"><i class="fas fa-desktop"></i><strong>Desktop</strong></div>
-                                <div class="mu-device-tab-btn" data-dev="laptop" onclick="window.MegaUltra.switchDevice('laptop')"><i class="fas fa-laptop"></i><strong>Laptop</strong></div>
-                                <div class="mu-device-tab-btn" data-dev="mobile" onclick="window.MegaUltra.switchDevice('mobile')"><i class="fas fa-mobile-alt"></i><strong>Mobil</strong></div>
-                                <div class="mu-device-tab-btn" data-dev="ios" onclick="window.MegaUltra.switchDevice('ios')"><i class="fab fa-apple"></i><strong>iOS</strong></div>
-                                <div class="mu-device-tab-btn" data-dev="android" onclick="window.MegaUltra.switchDevice('android')"><i class="fab fa-android"></i><strong>Android</strong></div>
+                                <div class="mu-device-tab-btn active" data-dev="desktop" onclick="window.MegaUltra.switchDevice('desktop')">
+                                    <i class="fas fa-desktop"></i><strong>Desktop</strong>
+                                </div>
+                                <div class="mu-device-tab-btn" data-dev="laptop" onclick="window.MegaUltra.switchDevice('laptop')">
+                                    <i class="fas fa-laptop"></i><strong>Laptop</strong>
+                                </div>
+                                <div class="mu-device-tab-btn" data-dev="mobile" onclick="window.MegaUltra.switchDevice('mobile')">
+                                    <i class="fas fa-mobile-alt"></i><strong>Mobil</strong>
+                                </div>
+                                <div class="mu-device-tab-btn" data-dev="ios" onclick="window.MegaUltra.switchDevice('ios')">
+                                    <i class="fab fa-apple"></i><strong>iOS</strong>
+                                </div>
+                                <div class="mu-device-tab-btn" data-dev="android" onclick="window.MegaUltra.switchDevice('android')">
+                                    <i class="fab fa-android"></i><strong>Android</strong>
+                                </div>
                             </div>
 
                             <div class="mu-category-tabs">
                                 <div class="mu-cat-tab-btn active" onclick="window.MegaUltra.switchCategory('layout')"><i class="fas fa-border-all"></i> Boyut & Görünüm</div>
                                 <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('shapes')"><i class="fas fa-shapes"></i> Şekiller (Shapes)</div>
                                 <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('themes')"><i class="fas fa-palette"></i> Temalar & Stiller</div>
-                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('texts')"><i class="fas fa-pen"></i> Metinler & Resimler</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('header_items')"><i class="fas fa-heading"></i> Header Detayları</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('texts')"><i class="fas fa-pen"></i> Metin & Resim</div>
                             </div>
                         </div>
 
@@ -17343,6 +17375,7 @@ setInterval(function() {
                                 ${makeSelect('siteWidth', 'Site Genişliği (Webseite)', ['narrow|Dar (1000px)', 'normal|Normal (1400px)', '2k|Geniş (2K)', '4k|Ultra Geniş (4K)', 'fluid|Tam Ekran (100%)'])}
                                 ${makeSelect('cardGap', 'Kart Boşluğu (Abstand)', ['none|Sıfır', 'small|Az', 'normal|Normal', 'large|Çok'])}
                                 ${makeSelect('textAlign', 'Metin Hizalama (Text)', ['left|Sola Dayalı', 'center|Ortalı', 'justify|İki Yana Yasla'])}
+                                ${makeSelect('cardOpacity', 'Kart Şeffaflığı (Opacity)', ['1|%100 (Mat)', '0.9|%90', '0.8|%80', '0.6|%60 (Şeffaf)', '0.4|%40 (Çok Şeffaf)'])}
                                 
                                 <div class="mu-section-title">Görünürlük (Sichtbarkeit)</div>
                                 ${makeToggle('showTicker', 'Kayan Yazı (Ticker)')}
@@ -17359,13 +17392,15 @@ setInterval(function() {
                                 <div class="mu-section-title">Kart & Pencere Şekilleri (Card & Modal Shapes)</div>
                                 ${makeSelect('cardShape', 'Kart Şekli (Karten Form)', window.muShapes)}
                                 ${makeSelect('modalShape', 'Pencere Şekli (Modal Form)', window.muShapes)}
+                                ${makeSelect('imageShape', 'Profil Resmi Şekli (Image Form)', ['default|Orijinal', 'circle|Tam Yuvarlak', 'rounded|Hafif Oval', 'square|Kare', 'hexagon|Altıgen'])}
                             </div>
                         </div>
 
                         <div id="mu-panel-themes" class="mu-panel">
                             <div class="mu-settings-grid">
                                 <div class="mu-section-title">Temalar & Header (Themes & Layout)</div>
-                                ${makeSelect('themeId', 'Global Tema (Theme)', window.muThemes)}
+                                <div style="grid-column: 1 / -1; color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">İstatistikler (Canlı vb.) ve Kalpler temadan etkilenmez, orijinal kalır!</div>
+                                ${makeSelect('themeId', 'Global Tema Seçimi (Theme)', window.muThemes)}
                                 ${makeSelect('headerLayout', 'Header Düzeni (Layout)', window.muHeaders)}
                                 
                                 <div class="mu-section-title">Buton & Ekstra Stiller (Styles)</div>
@@ -17377,8 +17412,20 @@ setInterval(function() {
                                 <div class="mu-section-title">Özel Efektler & Araçlar (FX & Widgets)</div>
                                 ${makeSelect('specialFx', 'Genel Efektler', ['off|Kapalı', 'glass|Buzlu Cam (Glass)', 'oled|OLED True Black', 'retro|Retro CRT TV', 'hologram|Hologram', 'bw|Siyah Beyaz'])}
                                 ${makeSelect('clockStyle', 'Saat Görünümü', ['both|Dijital + Analog', 'digital|Sadece Dijital', 'analog|Sadece Analog', 'minimal|Minimalist'])}
-                                ${makeSelect('weatherStyle', 'Hava Durumu', ['detailed|Detaylı (Sözlü)', 'compact|Kompakt', 'icon|Sadece İkon'])}
+                                ${makeSelect('weatherStyle', 'Hava Durumu Şekli', ['detailed|Detaylı (Sözlü)', 'compact|Kompakt', 'icon|Sadece İkon'])}
                                 ${makeSelect('calendarStyle', 'Takvim Tasarımı', ['default|Orijinal', 'glass|Cam Efekti', 'dark|Koyu Tema', 'neon|Neon Çerçeve'])}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-header_items" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Header Boyutlandırma (Header Sizes)</div>
+                                ${makeSelect('logoSize', 'Logo Boyutu (Logo)', ['1rem|Çok Küçük', '1.5rem|Küçük', '2rem|Normal', '2.5rem|Büyük', '3rem|Devasa'])}
+                                ${makeSelect('logoWeight', 'Logo Kalınlığı (Font Weight)', ['normal|Normal', 'bold|Kalın', '900|Ekstra Kalın'])}
+                                ${makeSelect('searchWidth', 'Arama Çubuğu Genişliği', ['200px|Dar (200px)', '300px|Normal (300px)', '400px|Geniş (400px)', '500px|Çok Geniş (500px)', '100%|Tam Ekran (100%)'])}
+                                ${makeSelect('iconSize', 'İkon Boyutu (Icons)', ['1rem|Küçük', '1.2rem|Normal', '1.5rem|Büyük', '1.8rem|Çok Büyük'])}
+                                ${makeSelect('profileSize', 'Profil Resmi Boyutu', ['30px|Küçük', '40px|Normal', '50px|Büyük', '60px|Çok Büyük'])}
+                                ${makeSelect('headerBlur', 'Header Arka Plan Bulanıklığı', ['none|Yok', 'blur(5px)|Hafif (Light)', 'blur(15px)|Orta (Medium)', 'blur(30px)|Yoğun (Heavy)'])}
                             </div>
                         </div>
 
@@ -17403,11 +17450,12 @@ setInterval(function() {
                             </div>
                         </div>
 
-                        <div class="mu-actions-area">
-                            <button class="btn-local-reset" style="color:white; border-color: rgba(255,255,255,0.2);" onclick="window.MegaUltra.save()"><i class="fas fa-save"></i> Cihaza Kaydet</button>
-                            <button class="btn-local-reset" onclick="window.MegaUltra.undoAllLocal()"><i class="fas fa-undo"></i> Sıfırla (Reset)</button>
-                            <button class="btn-global-save" style="flex:2; min-width: 100%;" onclick="window.MegaUltra.publishGlobal()"><i class="fas fa-globe"></i> GLOBAL SAYFADA UYGULA</button>
+                        <div class="mu-bottom-actions">
+                            <button class="btn-local-reset" style="color:white; border-color: rgba(255,255,255,0.2);" onclick="window.MegaUltra.save()"><i class="fas fa-save"></i> Kaydet</button>
+                            <button class="btn-local-reset" onclick="window.MegaUltra.undoAllLocal()"><i class="fas fa-undo"></i> Sıfırla</button>
+                            <button class="btn-global-save" style="flex:2;" onclick="window.MegaUltra.publishGlobal()"><i class="fas fa-globe"></i> GLOBAL SAYFADA UYGULA</button>
                         </div>
+
                     </div>
                 </div>
             </div>`;
@@ -17419,7 +17467,7 @@ setInterval(function() {
 
     // 4. THE GEHIRN
     window.MegaUltra = {
-        dbName: 'misali_megaultra_master_final',
+        dbName: 'misali_megaultra_master',
         currentDevice: 'desktop', 
         settings: { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} },
         history: { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} }, 
@@ -17459,7 +17507,8 @@ setInterval(function() {
                         let u = window.currentUser;
                         let isAdm = u && (u.role === 'admin' || u.username.toLowerCase().includes('admin'));
                         if (!isAdm) {
-                            this.settings = this.globalSettings;
+                            // Deep copy
+                            this.settings = JSON.parse(JSON.stringify(this.globalSettings));
                             this.injectCSS();
                             this.injectContent();
                         }
@@ -17470,7 +17519,7 @@ setInterval(function() {
 
         publishGlobal: function() {
             if(window.customConfirm) {
-                window.customConfirm('Bu tasarımı <b>TÜM KULLANICILAR</b> için canlıya almak istiyor musunuz? <span class="de-sub"><br>(Für alle User veröffentlichen?)</span>', () => {
+                window.customConfirm('Bu tasarımı ve metinleri/resimleri <b>TÜM KULLANICILAR</b> için canlıya almak istiyor musunuz? <span class="de-sub"><br>(Für alle User veröffentlichen?)</span>', () => {
                     this.executeGlobalPublish();
                 });
             } else {
@@ -17492,11 +17541,19 @@ setInterval(function() {
             this.currentDevice = device;
             
             document.querySelectorAll('.mu-device-tab-btn').forEach(btn => {
+                btn.style.borderBottomColor = 'transparent';
+                btn.style.background = 'transparent';
                 btn.classList.remove('active');
+                btn.querySelector('i').style.color = '#94a3b8';
+                btn.querySelector('strong').style.color = '#94a3b8';
             });
             let activeBtn = document.querySelector(`.mu-device-tab-btn[data-dev="${device}"]`);
             if(activeBtn) {
+                activeBtn.style.borderBottomColor = '#f4c542';
+                activeBtn.style.background = 'rgba(244,197,66,0.1)';
                 activeBtn.classList.add('active');
+                activeBtn.querySelector('i').style.color = '#f4c542';
+                activeBtn.querySelector('strong').style.color = '#f4c542';
             }
             
             this.applyToUI();
@@ -17515,12 +17572,13 @@ setInterval(function() {
 
         getDefaults: function() {
             return {
-                cardSize: 'normal', siteWidth: 'normal', cardGap: 'normal', textAlign: 'center',
+                cardSize: 'normal', siteWidth: 'normal', cardGap: 'normal', textAlign: 'center', cardOpacity: '1',
                 showTicker: true, showWeather: true, showZodiac: true, showScore: true, showSearch: true, showFooter: true,
-                cardShape: 'default', modalShape: 'default',
+                cardShape: 'default', modalShape: 'default', imageShape: 'default',
                 headerLayout: 'default', themeId: 'default', specialFx: 'off',
                 adminMainBtn: 'default', userMainBtn: 'default', sidebarStyle: 'default', modalStyle: 'default',
                 clockStyle: 'both', weatherStyle: 'detailed', calendarStyle: 'default',
+                logoSize: '2rem', logoWeight: 'bold', searchWidth: '300px', iconSize: '1.2rem', profileSize: '40px', headerBlur: 'none',
                 textHero: '', textSubTr: '', textSubDe: '', textInfo: '', textFooter: '', textAboutTr: '', textAboutDe: '', textImprint: '', textCookies: '', textPrivacy: '',
                 imgHeader: '', imgHome: '', imgAbout: ''
             };
@@ -17632,37 +17690,43 @@ setInterval(function() {
             if(window.customConfirm) {
                 window.customConfirm('Lokal ayarları sıfırlamak istiyor musunuz? <span class="de-sub">(Lokal zurücksetzen?)</span>', () => {
                     localStorage.removeItem(this.dbName);
-                    this.settings = this.globalSettings || { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} };
+                    this.settings = JSON.parse(JSON.stringify(this.globalSettings || { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} }));
+                    this.history = { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} };
+                    
                     this.injectCSS();
                     this.injectContent();
                     this.applyToUI();
+                    this.updateUndoButtons();
+                    if(window.showToast) window.showToast('Tümü sıfırlandı! <span class="de-sub">(Zurückgesetzt)</span>');
                 });
+            } else {
+                if(confirm('Reset all?')) {
+                    localStorage.removeItem(this.dbName);
+                    location.reload();
+                }
             }
         },
 
         injectContent: function() {
             let g = this.settings.global || {};
             
-            // Header
-            let hero = document.querySelector('h1.hero-title'); if (hero && g.textHero) hero.innerHTML = g.textHero;
+            let hero = document.querySelector('h1.hero-title'); if (hero && g.textHero !== undefined) hero.innerText = g.textHero;
             let sub = document.querySelector('.hero-subtitle');
-            if (sub && (g.textSubTr || g.textSubDe)) {
+            if (sub && (g.textSubTr !== undefined || g.textSubDe !== undefined)) {
                 let txtTr = g.textSubTr || "Gönülden dile, dilden şiire.";
                 let txtDe = g.textSubDe || "(Vom Herzen auf die Zunge, von der Zunge ins Gedicht)";
                 sub.innerHTML = `${txtTr} <span class="de-sub" style="font-family: 'Poppins', sans-serif; font-size: 0.55em; color: #94a3b8; letter-spacing: normal; font-style: normal; margin-left: 0;">${txtDe}</span>`;
             }
-            let info = document.querySelector('.hero-info span:first-child'); if (info && g.textInfo) info.innerText = g.textInfo;
+            let info = document.querySelector('.hero-info span:first-child'); if (info && g.textInfo !== undefined) info.innerText = g.textInfo;
 
-            // Seiten-Inhalte
-            let ftr = document.querySelector('footer > div:last-child'); if(ftr && g.textFooter) ftr.innerHTML = g.textFooter;
-            let abTr = document.querySelector('#hakkimda-view > div > div:last-child > div:nth-child(2) p'); if(abTr && g.textAboutTr) abTr.innerHTML = g.textAboutTr;
-            let abDe = document.querySelector('#hakkimda-view > div > div:last-child > div:nth-child(3) p'); if(abDe && g.textAboutDe) abDe.innerHTML = g.textAboutDe;
+            let ftr = document.querySelector('footer > div:last-child'); if(ftr && g.textFooter !== undefined) ftr.innerText = g.textFooter;
+            let abTr = document.querySelector('#hakkimda-view > div > div:last-child > div:nth-child(2) p'); if(abTr && g.textAboutTr !== undefined) abTr.innerText = g.textAboutTr;
+            let abDe = document.querySelector('#hakkimda-view > div > div:last-child > div:nth-child(3) p'); if(abDe && g.textAboutDe !== undefined) abDe.innerText = g.textAboutDe;
             
-            let imp = document.querySelector('#impressum-view > div > p:last-child'); if(imp && g.textImprint) imp.innerHTML = g.textImprint;
-            let cook = document.querySelector('#cookie-view > div > p:nth-child(2)'); if(cook && g.textCookies) cook.innerHTML = g.textCookies;
-            let data = document.querySelector('#datenschutz-view > div > p:nth-child(2)'); if(data && g.textPrivacy) data.innerHTML = g.textPrivacy;
+            let imp = document.querySelector('#impressum-view > div > p:last-child'); if(imp && g.textImprint !== undefined) imp.innerText = g.textImprint;
+            let cook = document.querySelector('#cookie-view > div > p:nth-child(2)'); if(cook && g.textCookies !== undefined) cook.innerText = g.textCookies;
+            let data = document.querySelector('#datenschutz-view > div > p:nth-child(2)'); if(data && g.textPrivacy !== undefined) data.innerText = g.textPrivacy;
 
-            // Bilder Injektion
             if(g.imgHeader) { let el = document.getElementById('user-avatar'); if(el) el.src = g.imgHeader; }
             if(g.imgHome) { let el = document.getElementById('home-profile-pic'); if(el) el.src = g.imgHome; }
             if(g.imgAbout) { let els = document.querySelectorAll('.bio-pic'); els.forEach(el => el.src = g.imgAbout); }
@@ -17696,6 +17760,9 @@ setInterval(function() {
             if (tAlign === 'left') css += `.card, .modal-text, p { text-align: left !important; }\n`;
             else if (tAlign === 'justify') css += `.card, .modal-text, p { text-align: justify !important; }\n`;
 
+            let cOpac = getVal('cardOpacity');
+            if (cOpac && cOpac !== '1') css += `.card, .game-card, .notif-card, .section-box { opacity: ${cOpac} !important; }\n`;
+
             // 🚀 ŞEKİLLER (SHAPES)
             let cShape = getVal('cardShape');
             if (cShape && cShape !== 'default') {
@@ -17707,6 +17774,13 @@ setInterval(function() {
                 let shp = window.muShapes.find(x => x.id === mShape);
                 if (shp) css += `.modal-content:not(.mu-modal-content) { ${shp.css} }\n`;
             }
+            let iShape = getVal('imageShape');
+            if (iShape && iShape !== 'default') {
+                if (iShape === 'circle') css += `.bio-pic, #user-avatar, #home-profile-pic { border-radius: 50% !important; clip-path: none !important; }\n`;
+                if (iShape === 'square') css += `.bio-pic, #user-avatar, #home-profile-pic { border-radius: 0 !important; clip-path: none !important; }\n`;
+                if (iShape === 'rounded') css += `.bio-pic, #user-avatar, #home-profile-pic { border-radius: 20px !important; clip-path: none !important; }\n`;
+                if (iShape === 'hexagon') css += `.bio-pic, #user-avatar, #home-profile-pic { border-radius: 0 !important; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%) !important; }\n`;
+            }
 
             // 2. VISIBILITY
             if (getVal('showTicker') === false) css += `.ticker-wrap { display: none !important; } header#main-header { top: 0 !important; } body { padding-top: 100px !important; }\n`;
@@ -17716,7 +17790,7 @@ setInterval(function() {
             if (getVal('showSearch') === false) css += `.header-search { display: none !important; } .header-search-wrapper { width: 0 !important; overflow: hidden !important; display: block !important; border:none !important; padding:0 !important; margin:0 !important;} \n`; 
             if (getVal('showFooter') === false) css += `footer { display: none !important; }\n`;
 
-            // 3. THEMES (🚀 DER SCHUTZSCHILD FÜR STATISTIKEN & HERZEN)
+            // 3. THEMES
             let theme = getVal('themeId');
             if (theme && theme !== 'default') {
                 let t = window.muThemes.find(x => x.id === theme);
@@ -17738,7 +17812,7 @@ setInterval(function() {
                 }
             }
 
-            // 4. HEADERS 
+            // 4. HEADERS
             let hLayout = getVal('headerLayout');
             if (hLayout && hLayout !== 'default') {
                 let h = window.muHeaders.find(x => x.id === hLayout);
@@ -17747,6 +17821,13 @@ setInterval(function() {
                     css += `body { padding-top: ${h.pt} !important; }\n`;
                 }
             }
+
+            let lSize = getVal('logoSize'); if(lSize) css += `.logo { font-size: ${lSize} !important; }\n`;
+            let lWeight = getVal('logoWeight'); if(lWeight) css += `.logo { font-weight: ${lWeight} !important; }\n`;
+            let sWidthH = getVal('searchWidth'); if(sWidthH) css += `.header-search { max-width: ${sWidthH} !important; width: 100% !important; }\n`;
+            let iSize = getVal('iconSize'); if(iSize) css += `header#main-header i { font-size: ${iSize} !important; }\n`;
+            let pSize = getVal('profileSize'); if(pSize) css += `#user-avatar { width: ${pSize} !important; height: ${pSize} !important; }\n`;
+            let hBlur = getVal('headerBlur'); if(hBlur && hBlur !== 'none') css += `header#main-header { backdrop-filter: ${hBlur} !important; -webkit-backdrop-filter: ${hBlur} !important; background: rgba(0,0,0,0.5) !important; }\n`;
 
             // 5. FX
             let fx = getVal('specialFx');
@@ -17768,7 +17849,6 @@ setInterval(function() {
 
             css += getBtnCSS(getVal('adminMainBtn'), '.auth-view-btn, #admin-btn-megaultra');
             css += getBtnCSS(getVal('userMainBtn'), '.bottom-btn:not(#admin-btn-megaultra)');
-            css += getBtnCSS(getVal('subBtns'), 'button.reset-btn, .mu-cat-tab-btn');
             css += getBtnCSS(getVal('sidebarStyle'), '.sidebar, .sidebar-right, .cal-holiday-sidebar');
             css += getBtnCSS(getVal('modalStyle'), '.modal-content:not(.mu-modal-content)');
 
@@ -17821,6 +17901,74 @@ setInterval(function() {
     };
 
     setTimeout(() => { if(window.MegaUltra) window.MegaUltra.init(); }, 1200);
+
+})();
+</script>
+
+<style>
+    /* Verhindert das "Überspringen" des Scrolls von Modal auf Body (Moderne Browser) */
+    .modal {
+        overscroll-behavior: contain !important; 
+    }
+    
+    /* Wird vom Script aktiviert, wenn ein Fenster offen ist */
+    body.modal-scroll-lock {
+        overflow: hidden !important;
+        touch-action: none !important; /* Blockiert iOS Wisch-Gesten im Hintergrund */
+    }
+</style>
+
+<script>
+(function() {
+    if (window.ModalScrollLockReady) return;
+    window.ModalScrollLockReady = true;
+
+    // 1. DAS RADAR: Erkennt sofort, wenn ein Fenster geöffnet/geschlossen wird
+    function checkModals() {
+        // Sucht nach allen Elementen mit der Klasse .modal
+        const modals = document.querySelectorAll('.modal');
+        let isAnyOpen = false;
+        
+        for (let i = 0; i < modals.length; i++) {
+            let style = window.getComputedStyle(modals[i]);
+            // Wenn ein Modal nicht versteckt ist, ist es offen!
+            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+                isAnyOpen = true;
+                break;
+            }
+        }
+
+        // Body sperren oder entsperren
+        if (isAnyOpen) {
+            document.body.classList.add('modal-scroll-lock');
+        } else {
+            document.body.classList.remove('modal-scroll-lock');
+        }
+    }
+
+    // Hört auf jeden Klick (weil Klicks oft Modals öffnen/schließen)
+    document.addEventListener('click', () => setTimeout(checkModals, 50));
+    
+    // Sicherheitsschleife: Scannt 3x pro Sekunde lautlos den Status
+    setInterval(checkModals, 300); 
+
+    // 2. DIE BRUTE-FORCE BLOCKADE: Für Touchscreens (Handy) und Mausrad (PC)
+    function preventBackgroundScroll(e) {
+        if (document.body.classList.contains('modal-scroll-lock')) {
+            
+            // Prüft, ob dein Finger / deine Maus GERADE auf dem echten Inhalt des Modals ist
+            const isInsideModalContent = e.target.closest('.modal-content, .modal-body, .mu-panel, .yapboz-panel');
+            
+            // Wenn du auf den dunklen Hintergrund tippst oder scrollst -> SOFORT BLOCKIEREN!
+            if (!isInsideModalContent) {
+                e.preventDefault(); 
+            }
+        }
+    }
+
+    // Muss zwingend { passive: false } haben, damit e.preventDefault() erlaubt ist!
+    document.addEventListener('touchmove', preventBackgroundScroll, { passive: false });
+    document.addEventListener('wheel', preventBackgroundScroll, { passive: false });
 
 })();
 </script>
