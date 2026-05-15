@@ -14904,20 +14904,6 @@ setInterval(function() {
     setTimeout(() => { if(document.getElementById('myHeartsModal') && document.getElementById('myHeartsModal').classList.contains('active-modal')) window.renderMyHearts(); }, 500);
 })();
 
-// Sicherheits-Skript, das verhindert, dass alte JS-Befehle das Wetter wieder hochziehen
-    setInterval(function() {
-        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        var isLoggedIn = document.body.classList.contains('user-mode') || document.body.classList.contains('admin-mode');
-        
-        if (isIOS && isLoggedIn) {
-            var weatherWidget = document.getElementById('weather-widget');
-            if (weatherWidget) {
-                // Schiebt das Widget stur auf 185px (in das rote Feld)
-                weatherWidget.style.setProperty('top', '185px', 'important');
-            }
-        }
-    }, 500);
-
     (function() {
     // ==========================================
     // FIX 1: SCORE BADGE & LOGOUT COMPACTNESS (NUR iOS SAFARI)
@@ -15703,457 +15689,6 @@ setInterval(function() {
 })();
 </script>
 
-
-
-<!-- ==========================================================================
-     🎨 ELITE COLOR PICKER V5 (SOFORT-LIVE & EIGENE SICHERE DATENBANK)
-     ========================================================================== -->
-<script>
-(function() {
-    // 1. GENERATOR FÜR 500+ EDLE FARBEN
-    const eliteColors = ['#ffffff', '#f8fafc', '#e2e8f0', '#cbd5e1']; 
-    const saturations = [100, 85, 70]; 
-    const lightnesses = [85, 75, 65, 55]; 
-    
-    for (let l of lightnesses) {
-        for (let s of saturations) {
-            for (let h = 0; h < 360; h += 8) { 
-                if (h >= 35 && h <= 55) continue; // Admin-Farben blockiert
-                eliteColors.push(`hsl(${h}, ${s}%, ${l}%)`);
-            }
-        }
-    }
-
-    // 🚀 DIE EIGENE DATENBANK FÜR FARBEN (Verhindert Überschreiben beim Speichern!)
-    function getColorsDB() {
-        return JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-    }
-    function saveColorDB(db) {
-        localStorage.setItem('elite_user_colors', JSON.stringify(db));
-    }
-
-    // 2. Baut das Menü ein
-    function injectColorPickerToProfile() {
-        let profileModal = document.getElementById('profileEditModal');
-        if (!profileModal) return;
-
-        let modalBody = profileModal.querySelector('.modal-body');
-        
-        if (modalBody && !document.getElementById('elite-color-picker')) {
-            let pickerDiv = document.createElement('div');
-            pickerDiv.id = 'elite-color-picker';
-            pickerDiv.className = 'elite-color-picker-container';
-            
-            let html = `<div class="elite-color-picker-title">Kullanıcı Adı Rengi (Benutzername Farbe)</div>
-                        <div class="elite-color-swatches" id="swatch-container">`;
-            
-            let colorsDB = getColorsDB();
-            let myColor = '#ffffff';
-            if (window.currentUser && colorsDB[window.currentUser.username]) {
-                myColor = colorsDB[window.currentUser.username];
-            }
-
-            eliteColors.forEach(color => {
-                let isSelected = (color === myColor) ? 'selected' : '';
-                html += `<div class="color-swatch ${isSelected}" 
-                              style="background-color: ${color}; color: ${color};" 
-                              data-color="${color}" 
-                              onclick="window.selectEliteColor('${color}', this)">
-                         </div>`;
-            });
-            
-            html += `</div>`;
-            pickerDiv.innerHTML = html;
-
-            let saveBtn = profileModal.querySelector('.save-btn, button[onclick*="save"]');
-            if (saveBtn) {
-                saveBtn.parentNode.insertBefore(pickerDiv, saveBtn);
-            } else {
-                modalBody.appendChild(pickerDiv);
-            }
-        }
-    }
-
-    // 3. Farb-Auswahl & SOFORTIGE Speicherung in eigener Datenbank
-    window.selectEliteColor = function(color, element) {
-        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-
-        if (window.currentUser) {
-            let username = window.currentUser.username;
-            let users = JSON.parse(localStorage.getItem('users') || '{}');
-            
-            // Admin Check
-            if (users[username] && users[username].role === 'admin') {
-                alert("Admins nutzen automatisch die Premium-Admin-Farbe!");
-                return;
-            }
-
-            // Sicher in der eigenen Elite-Datenbank speichern
-            let colorsDB = getColorsDB();
-            colorsDB[username] = color;
-            saveColorDB(colorsDB);
-
-            // Zwingt die Seite, die Farbe JETZT SOFORT zu aktualisieren
-            window.applyEliteColors();
-        }
-    };
-
-    // 4. Live-Rendering mit !important Zwang
-    window.applyEliteColors = function() {
-        let colorsDB = getColorsDB();
-        let users = JSON.parse(localStorage.getItem('users') || '{}');
-        
-        let nameElements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, b, strong, .username');
-
-        nameElements.forEach(el => {
-            let text = el.innerText.trim().replace(/[:()]/g, ''); 
-            
-            // Erst Admin prüfen
-            if (users[text] && (users[text].role === 'admin' || text.toLowerCase().includes('admin'))) {
-                el.style.setProperty('color', '#f4c542', 'important');
-                el.style.setProperty('text-shadow', '0 0 10px rgba(244, 197, 66, 0.6)', 'important');
-            } 
-            // Dann unsere externe Farb-Datenbank checken
-            else if (colorsDB[text]) {
-                el.style.setProperty('color', colorsDB[text], 'important');
-                el.style.setProperty('text-shadow', `0 0 8px ${colorsDB[text]}80`, 'important');
-            }
-        });
-    };
-
-    // 5. Schnellerer Autostart (jede halbe Sekunde scannen, um Live-Effekt zu garantieren)
-    setInterval(() => {
-        injectColorPickerToProfile();
-        window.applyEliteColors();
-    }, 500);
-
-})();
-</script>
-
-<style>
-    .elite-color-picker-container {
-        background: rgba(10, 25, 47, 0.9);
-        border: 1px solid rgba(244, 197, 66, 0.5);
-        border-radius: 12px;
-        padding: 15px;
-        margin: 20px 0;
-        text-align: center;
-    }
-
-    .elite-color-swatches {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        justify-content: center;
-        max-height: 180px; 
-        overflow-y: auto;  
-        padding: 10px;
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    .color-swatch {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .color-swatch:hover { transform: scale(1.4); }
-    .color-swatch.selected {
-        transform: scale(1.6);
-        border: 2px solid #fff;
-        box-shadow: 0 0 15px currentColor;
-    }
-</style>
-
-<script>
-(function() {
-    // 1. Farbdirektive: Zwingt Namen und Unterschriften zur neuen Farbe
-    window.applyEliteColors = function() {
-        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
-
-        // Wir erfassen Namen UND alle Unterschrift-Elemente (Great Vibes Fonts)
-        const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .username, b, strong, [style*="Great Vibes"]');
-
-        elements.forEach(el => {
-            const rawName = el.innerText.trim().replace(/[:()]/g, '');
-            // Falls es eine Unterschrift ist, den Namen aus dem Kontext ziehen (falls möglich)
-            const name = (rawName.length > 25) ? window.currentUser?.username : rawName;
-
-            if (users[name]?.role === 'admin' || name.toLowerCase().includes('admin')) {
-                el.style.setProperty('color', '#f4c542', 'important');
-                el.style.setProperty('text-shadow', '0 0 8px rgba(244, 197, 66, 0.5)', 'important');
-            } else if (db[name]) {
-                el.style.setProperty('color', db[name], 'important');
-                el.style.setProperty('text-shadow', `0 0 8px ${db[name]}60`, 'important');
-            }
-        });
-    };
-
-    // 2. Auswahlfunktion (Speichert SOFORT ohne Reload-Zwang)
-    window.selectEliteColor = function(color, element) {
-        if (!window.currentUser) return;
-        
-        const username = window.currentUser.username;
-        
-        // Optisches Feedback
-        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-
-        // In lokaler Datenbank sichern
-        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-        db[username] = color;
-        localStorage.setItem('elite_user_colors', JSON.stringify(db));
-
-        // Farbe sofort auf der Seite anwenden
-        window.applyEliteColors();
-
-        // Optional: In dein Profil-Formular injizieren, falls vorhanden
-        let hiddenInput = document.getElementById('hidden_color_field');
-        if (!hiddenInput) {
-            hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.id = 'hidden_color_field';
-            hiddenInput.name = 'custom_color';
-            document.querySelector('#profileEditModal form')?.appendChild(hiddenInput);
-        }
-        hiddenInput.value = color;
-    };
-
-    // 3. UI Generator
-    function injectPicker() {
-        const modal = document.getElementById('profileEditModal');
-        if (!modal || document.getElementById('elite-color-picker')) return;
-
-        const container = document.createElement('div');
-        container.id = 'elite-color-picker';
-        container.className = 'elite-color-picker-container';
-        
-        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-        const currentColor = db[window.currentUser?.username] || '#ffffff';
-
-        let html = `<div style="color:#f4c542; margin-bottom:10px; font-size:0.9rem;">Renk Seçimi (Farbe wählen)</div><div class="elite-color-swatches">`;
-        
-        // Palette generieren
-        const palette = ['#ffffff', '#f8fafc', '#e2e8f0'];
-        for (let l of [80, 70, 60]) {
-            for (let h = 0; h < 360; h += 12) {
-                if (h >= 35 && h <= 55) continue; 
-                palette.push(`hsl(${h}, 90%, ${l}%)`);
-            }
-        }
-
-        palette.forEach(c => {
-            const isSel = (c === currentColor) ? 'selected' : '';
-            html += `<div class="color-swatch ${isSel}" style="background-color:${c}; color:${c};" onclick="window.selectEliteColor('${c}', this)"></div>`;
-        });
-
-        container.innerHTML = html + `</div>`;
-        modal.querySelector('.modal-body').appendChild(container);
-    }
-
-    // Dauer-Überwachung für Live-Update
-    setInterval(() => {
-        injectPicker();
-        window.applyEliteColors();
-    }, 500);
-})();
-</script>
-
-<script>
-(function() {
-    // 1. Die 500+ Farben-Datenbank (stabil und gefiltert)
-    function generateElitePalette() {
-        const colors = ['#ffffff', '#f8fafc', '#e2e8f0'];
-        const saturations = [100, 85, 70]; 
-        const lightnesses = [85, 75, 65, 55]; 
-        for (let l of lightnesses) {
-            for (let s of saturations) {
-                for (let h = 0; h < 360; h += 8) { 
-                    if (h >= 35 && h <= 55) continue; // Admin-Farben blockieren
-                    colors.push(`hsl(${h}, ${s}%, ${l}%)`);
-                }
-            }
-        }
-        return colors;
-    }
-
-    // 2. Speicher-Logik
-    function getStoredColor(username) {
-        const localDB = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-        return localDB[username] || null;
-    }
-
-    // 3. UI Injektion (Wird bei jedem Modal-Öffnen geprüft)
-    function injectColorPicker() {
-        const profileModal = document.getElementById('profileEditModal');
-        if (!profileModal || document.getElementById('elite-color-picker')) return;
-
-        const modalBody = profileModal.querySelector('.modal-body');
-        if (!modalBody) return;
-
-        const pickerDiv = document.createElement('div');
-        pickerDiv.id = 'elite-color-picker';
-        pickerDiv.className = 'elite-color-picker-container';
-        
-        let html = `<div class="elite-color-picker-title">Kullanıcı Adı Rengi (Benutzername Farbe)</div>
-                    <div class="elite-color-swatches">`;
-        
-        const palette = generateElitePalette();
-        const activeColor = getStoredColor(window.currentUser?.username);
-
-        palette.forEach(color => {
-            const isSelected = (color === activeColor) ? 'selected' : '';
-            html += `<div class="color-swatch ${isSelected}" 
-                          style="background-color: ${color}; color: ${color};" 
-                          onclick="window.selectEliteColor('${color}', this)"></div>`;
-        });
-        
-        html += `</div>`;
-        pickerDiv.innerHTML = html;
-
-        const saveBtn = profileModal.querySelector('button[type="submit"], .save-btn, #saveProfileBtn');
-        if (saveBtn) {
-            saveBtn.parentNode.insertBefore(pickerDiv, saveBtn);
-        } else {
-            modalBody.appendChild(pickerDiv);
-        }
-    }
-
-    // 4. Auswahl & GERÄTEÜBERGREIFENDES SPEICHERN
-    window.selectEliteColor = function(color, element) {
-        document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-
-        if (window.currentUser) {
-            const username = window.currentUser.username;
-            
-            // Lokal speichern
-            const localDB = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-            localDB[username] = color;
-            localStorage.setItem('elite_user_colors', JSON.stringify(localDB));
-
-            // FÜR ALLE GERÄTE: Wir hängen die Farbe an das versteckte Profil-Formular an,
-            // damit sie beim Klick auf "Speichern" in deine echte Datenbank wandert.
-            let colorInput = document.getElementById('hidden_user_color_input');
-            if (!colorInput) {
-                colorInput = document.createElement('input');
-                colorInput.type = 'hidden';
-                colorInput.id = 'hidden_user_color_input';
-                colorInput.name = 'custom_color'; // Diesen Namen muss dein Backend kennen
-                const form = document.querySelector('#profileEditModal form');
-                if (form) form.appendChild(colorInput);
-            }
-            colorInput.value = color;
-
-            window.applyEliteColors();
-        }
-    };
-
-    // 5. Namen einfärben (überall auf der Seite)
-    window.applyEliteColors = function() {
-        const localDB = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
-        
-        // Wir suchen alle möglichen Namens-Container
-        const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, .username, b, strong');
-
-        elements.forEach(el => {
-            const name = el.innerText.trim().replace(/[:()]/g, '');
-            
-            // Admin-Check (Immer Vorrang)
-            if (users[name] && (users[name].role === 'admin' || name.toLowerCase().includes('admin'))) {
-                el.style.setProperty('color', '#f4c542', 'important');
-                el.style.setProperty('text-shadow', '0 0 10px rgba(244, 197, 66, 0.6)', 'important');
-            } 
-            // User-Farbe aus unserer Datenbank
-            else if (localDB[name]) {
-                el.style.setProperty('color', localDB[name], 'important');
-                el.style.setProperty('text-shadow', `0 0 8px ${localDB[name]}80`, 'important');
-                el.classList.add('custom-colored-name');
-            }
-        });
-    };
-
-    // Kontinuierlicher Check
-    setInterval(() => {
-        injectColorPicker();
-        window.applyEliteColors();
-    }, 700);
-
-})();
-</script>
-
-<script>
-(function() {
-    // 1. Die intelligente Scanner-Funktion (Die Firewall)
-    function scanAndFormatEliteText() {
-        let targetAreas = document.querySelectorAll('.card, .card-body, .modal-body, .modal-content');
-
-        targetAreas.forEach(area => {
-            let textElements = area.querySelectorAll('p, div, span');
-
-            textElements.forEach(el => {
-                if (el.classList.contains('elite-pro-text')) return;
-
-                // 🛡️ BOMBENSICHERE FIREWALL
-                // Keine Menüs, Buttons, Farbwähler oder Icons stören
-                if (el.querySelector('button, input, i, img, a, table, ul, .badge, .btn, form, iframe')) return;
-                
-                // Keine Unterschriften, Titel oder Header anfassen
-                if (el.closest('.author, .signature, .modal-footer, .comments, .close-btn, .modal-header, .elite-color-picker-container')) return;
-
-                let textContent = el.innerText.trim();
-                if (textContent.length < 35) return; // Noch präziser: Ab 35 Zeichen ist es ein langer Text
-
-                // Der Schutz für deine "Şair Misal.i" CSS-Unterschrift
-                let htmlContent = el.innerHTML || "";
-                if (htmlContent.includes('font-size:') || 
-                    htmlContent.includes('clamp(') || 
-                    htmlContent.includes('transform:')) return;
-
-                // Test bestanden! Text in die Premium-Klasse aufnehmen
-                el.classList.add('elite-pro-text');
-            });
-        });
-    }
-
-    // 2. 🚀 PRO-UPGRADE: Der MutationObserver (Die smarte Überwachung)
-    // Anstatt dumm jede Sekunde zu scannen, wartet dieses System, bis sich das HTML ändert (z.B. Modal öffnet sich)
-    const domWatcher = new MutationObserver((mutations) => {
-        let requiresScan = false;
-        
-        // Prüfen, ob neue Elemente zum Bildschirm hinzugefügt wurden
-        for (let mutation of mutations) {
-            if (mutation.addedNodes.length > 0) {
-                requiresScan = true;
-                break; // Einer reicht, wir wissen jetzt: Es gibt was Neues!
-            }
-        }
-        
-        if (requiresScan) {
-            // Ein winziger Moment Verzögerung, damit das HTML komplett geladen ist, bevor wir scannen
-            setTimeout(scanAndFormatEliteText, 50);
-        }
-    });
-
-    // Wir sagen dem Wächter, dass er die gesamte Seite überwachen soll
-    domWatcher.observe(document.body, { 
-        childList: true, 
-        subtree: true 
-    });
-
-    // 3. Einen Erst-Scan beim Neuladen der Seite durchführen
-    scanAndFormatEliteText();
-
-})();
-</script>
-
 <script>
 (function() {
     function attachUniversalAutoClose() {
@@ -16207,7 +15742,628 @@ setInterval(function() {
 })();
 </script>
 
+<style>
+    .elite-color-module {
+        background: rgba(10, 25, 47, 0.95) !important;
+        border: 1px solid rgba(244, 197, 66, 0.6) !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        margin: 20px 0 !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;
+    }
+    
+    /* Die Mini-Vorschau */
+    .elite-color-preview {
+        background: rgba(0, 0, 0, 0.4) !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+        text-align: center !important;
+        border: 1px dashed rgba(255,255,255,0.2) !important;
+    }
+    .preview-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+    .preview-name { font-size: 1.2rem; font-weight: bold; transition: color 0.2s ease, text-shadow 0.2s ease; }
+    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 1.8rem; margin-top: 5px; transition: color 0.2s ease, text-shadow 0.2s ease; }
 
+    /* Farbraster */
+    .elite-color-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(24px, 1fr)) !important;
+        gap: 8px !important;
+        max-height: 160px !important;
+        overflow-y: auto !important;
+        padding: 5px !important;
+        margin-bottom: 15px !important;
+    }
+    .color-dot {
+        aspect-ratio: 1; border-radius: 50%; cursor: pointer;
+        border: 2px solid transparent; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .color-dot:hover { transform: scale(1.2); }
+    .color-dot.active {
+        border-color: #ffffff !important;
+        transform: scale(1.3) !important;
+        box-shadow: 0 0 10px currentColor !important;
+        z-index: 2;
+    }
+
+    /* Eigener Speichern-Button */
+    .elite-color-save-btn {
+        width: 100% !important;
+        background: linear-gradient(135deg, #f4c542, #d4af37) !important;
+        color: #0a192f !important;
+        border: none !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+        font-size: 1rem !important;
+        cursor: pointer !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+    }
+    .elite-color-save-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 15px rgba(244, 197, 66, 0.4) !important; }
+</style>
+
+<style>
+    /* Haupt-Container */
+    .elite-color-module { background: linear-gradient(145deg, #0a192f, #112240) !important; border: 1px solid rgba(244, 197, 66, 0.5) !important; border-radius: 16px !important; padding: 20px !important; margin: 20px 0 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important; }
+    
+    /* 2-Säulen-Layout für Vorschau & Tab */
+    .elite-split-layout { display: flex !important; gap: 12px !important; margin-bottom: 20px !important; }
+    .elite-split-col {
+        flex: 1 !important; display: flex !important; flex-direction: column !important;
+        align-items: center !important; justify-content: space-between !important;
+        background: rgba(0, 0, 0, 0.3) !important; border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+        border-radius: 12px !important; padding: 15px 10px !important; cursor: pointer !important; transition: all 0.3s ease !important; min-height: 110px !important;
+    }
+    .elite-split-col.active-col { background: rgba(244, 197, 66, 0.1) !important; border: 1px solid #f4c542 !important; box-shadow: 0 0 15px rgba(244, 197, 66, 0.2) inset !important; }
+    
+    /* Vorschau-Texte */
+    .preview-box { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 10px; }
+    .preview-name { font-size: 1.25rem; font-weight: bold; word-break: break-word; text-align: center; line-height: 1.2; transition: color 0.1s; }
+    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 2.2rem; text-align: center; line-height: 1; transition: color 0.1s; }
+
+    /* Tab-Beschriftung */
+    .tab-label { width: 100%; padding: 8px 0; border-radius: 6px; font-size: 0.8rem; text-align: center; background: rgba(255, 255, 255, 0.05); color: #94a3b8; transition: all 0.3s; }
+    .elite-split-col.active-col .tab-label { background: #f4c542 !important; color: #0a192f !important; font-weight: bold !important; text-transform: uppercase; }
+
+    /* Farbraster & Dots */
+    .elite-color-grid {
+        display: flex !important; flex-wrap: wrap !important; gap: 6px !important; justify-content: center !important;
+        max-height: 180px !important; overflow-y: auto !important; padding: 10px !important;
+        background: rgba(0,0,0,0.2) !important; border-radius: 8px !important; margin-bottom: 15px !important;
+    }
+    .elite-color-grid::-webkit-scrollbar { width: 6px; } .elite-color-grid::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
+    .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s, box-shadow 0.2s; }
+    .color-dot:hover { transform: scale(1.3); z-index: 5; }
+    .color-dot.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 12px currentColor !important; z-index: 10; }
+    
+    /* Blockierte Farben (Nur für Admin) */
+    .color-dot.locked { opacity: 0.15 !important; cursor: not-allowed !important; }
+    .color-dot.locked:hover { transform: none !important; }
+
+    /* Getrennte Speichern Buttons */
+    .elite-save-actions { display: flex !important; gap: 10px !important; }
+    .elite-save-btn {
+        flex: 1 !important; background: linear-gradient(135deg, #f4c542, #d4af37) !important; color: #0a192f !important;
+        border: none !important; padding: 12px !important; border-radius: 8px !important; font-weight: bold !important;
+        font-size: 0.85rem !important; cursor: pointer !important; transition: all 0.3s ease !important; text-transform: uppercase !important;
+    }
+    .elite-save-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 5px 15px rgba(244, 197, 66, 0.5) !important; color: #000 !important; }
+</style>
+
+<script>
+(function() {
+    // 1. FEDER FAVICON
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = 'https://imagizer.imageshack.com/img923/676/f5U6yR.png';
+
+    let currentTarget = 'name'; // 'name' oder 'sign'
+    let pendingNameColor = null;
+    let pendingSignColor = null;
+
+    function generateElitePalette() {
+        const colors = ['#ffffff', '#f8fafc', '#e2e8f0', '#cbd5e1', '#f4c542', '#ef4444', '#3b82f6', '#22c55e', '#ec4899', '#a855f7']; 
+        for (let l of [85, 75, 65, 55]) {
+            for (let s of [100, 85, 70]) {
+                for (let h = 0; h < 360; h += 12) { colors.push(`hsl(${h}, ${s}%, ${l}%)`); }
+            }
+        }
+        return colors;
+    }
+
+    // Ermittelt, welche Farben vom Admin reserviert sind
+    function getAdminReservedColors() {
+        const dbName = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const dbSign = JSON.parse(localStorage.getItem('elite_sign_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        let reserved = ['#f4c542']; // Gold ist immer exklusiv!
+        
+        for (let u in users) {
+            if (users[u].role === 'admin' || u === 'AdminKing') {
+                if (dbName[u]) reserved.push(dbName[u]);
+                if (dbSign[u]) reserved.push(dbSign[u]);
+            }
+        }
+        return [...new Set(reserved)];
+    }
+
+    function buildColorModule() {
+        const modalBody = document.querySelector('#profileEditModal .modal-body');
+        if (!modalBody || document.getElementById('elite-color-module-root')) return;
+
+        const uName = window.currentUser?.username || 'Kullanıcı';
+        const dbName = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const dbSign = JSON.parse(localStorage.getItem('elite_sign_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        const isAdmin = (users[uName]?.role === 'admin' || uName === 'AdminKing');
+        let defaultColor = isAdmin ? '#f4c542' : '#ffffff';
+        
+        pendingNameColor = dbName[uName] || defaultColor; 
+        pendingSignColor = dbSign[uName] || defaultColor;
+
+        const container = document.createElement('div');
+        container.id = 'elite-color-module-root';
+        container.className = 'elite-color-module';
+
+        const palette = generateElitePalette();
+        const reservedColors = getAdminReservedColors();
+        const activeColorToHighlight = currentTarget === 'name' ? pendingNameColor : pendingSignColor;
+
+        let gridHtml = palette.map(c => {
+            // Blockiert die Farbe, wenn der aktuelle User KEIN Admin ist, die Farbe aber reserviert ist
+            let isLocked = !isAdmin && reservedColors.includes(c);
+            let style = isLocked ? `background-color:${c};` : `background-color:${c}; color:${c};`;
+            let classes = `color-dot ${c === activeColorToHighlight ? 'active' : ''} ${isLocked ? 'locked' : ''}`;
+            let clickEvent = isLocked 
+                ? `onclick="window.showToast?.('🚫 Bu renk Admin tarafından rezerve edilmiştir! (Admin Farbe)') || alert('🚫 Admin Farbe!');"` 
+                : `onclick="window.previewEliteColor('${c}', this)"`;
+            
+            return `<div class="${classes}" style="${style}" data-color="${c}" ${clickEvent}></div>`;
+        }).join('');
+
+        container.innerHTML = `
+            <div style="text-align:center; color:#f4c542; font-size:0.75rem; text-transform:uppercase; margin-bottom:10px; letter-spacing:1px;">Canlı Önizleme (Live Vorschau)</div>
+            
+            <div class="elite-split-layout">
+                <div class="elite-split-col ${currentTarget === 'name' ? 'active-col' : ''}" id="col-name" onclick="window.setEliteTarget('name')">
+                    <div class="preview-box"><div class="preview-name" id="preview-n" style="color:${pendingNameColor}; text-shadow: 0 0 10px ${pendingNameColor}80;">${uName}</div></div>
+                    <div class="tab-label">İsim Rengi (Name)</div>
+                </div>
+                
+                <div class="elite-split-col ${currentTarget === 'sign' ? 'active-col' : ''}" id="col-sign" onclick="window.setEliteTarget('sign')">
+                    <div class="preview-box"><div class="preview-sign" id="preview-s" style="color:${pendingSignColor}; text-shadow: 0 0 10px ${pendingSignColor}80;">${uName}</div></div>
+                    <div class="tab-label">İmza Rengi (Unterschrift)</div>
+                </div>
+            </div>
+
+            <div class="elite-color-grid" id="elite-grid-container">${gridHtml}</div>
+            
+            <div class="elite-save-actions">
+                <button type="button" id="save-btn-name" class="elite-save-btn" onclick="window.saveEliteColorFinal('name')"><i class="fas fa-user"></i> İsim Kaydet</button>
+                <button type="button" id="save-btn-sign" class="elite-save-btn" onclick="window.saveEliteColorFinal('sign')"><i class="fas fa-feather"></i> İmza Kaydet</button>
+            </div>
+        `;
+        
+        const saveProfileBtn = modalBody.querySelector('.save-btn, button[type="submit"]');
+        if (saveProfileBtn) { saveProfileBtn.parentNode.insertBefore(container, saveProfileBtn); } 
+        else { modalBody.appendChild(container); }
+    }
+
+    window.setEliteTarget = function(target) {
+        currentTarget = target;
+        document.getElementById('col-name').classList.remove('active-col');
+        document.getElementById('col-sign').classList.remove('active-col');
+        document.getElementById('col-' + target).classList.add('active-col');
+
+        let activeColor = target === 'name' ? pendingNameColor : pendingSignColor;
+        document.querySelectorAll('#elite-grid-container .color-dot').forEach(d => {
+            if(d.getAttribute('data-color') === activeColor) d.classList.add('active');
+            else d.classList.remove('active');
+        });
+    };
+
+    window.previewEliteColor = function(color, el) {
+        document.querySelectorAll('#elite-grid-container .color-dot').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        
+        if (currentTarget === 'name') {
+            pendingNameColor = color;
+            let pName = document.getElementById('preview-n');
+            if (pName) { pName.style.setProperty('color', color, 'important'); pName.style.setProperty('text-shadow', '0 0 10px ' + color + '80', 'important'); }
+        } else {
+            pendingSignColor = color;
+            let pSign = document.getElementById('preview-s');
+            if (pSign) { pSign.style.setProperty('color', color, 'important'); pSign.style.setProperty('text-shadow', '0 0 10px ' + color + '80', 'important'); }
+        }
+    };
+
+    window.saveEliteColorFinal = function(targetType) {
+        if (!window.currentUser) return;
+        const uName = window.currentUser.username;
+        
+        let dbName = targetType === 'sign' ? 'elite_sign_colors' : 'elite_user_colors';
+        let colorToSave = targetType === 'sign' ? pendingSignColor : pendingNameColor;
+        let btnId = targetType === 'sign' ? 'save-btn-sign' : 'save-btn-name';
+        
+        const db = JSON.parse(localStorage.getItem(dbName) || '{}');
+        db[uName] = colorToSave;
+        localStorage.setItem(dbName, JSON.stringify(db));
+
+        window.applyGlobalColors();
+        
+        const btn = document.getElementById(btnId);
+        if(btn) {
+            let oldText = btn.innerHTML;
+            btn.innerHTML = '✅ Kaydedildi!';
+            btn.style.background = '#22c55e'; btn.style.color = '#fff';
+            setTimeout(() => { btn.innerHTML = oldText; btn.style.background = ''; btn.style.color = ''; }, 2000);
+        }
+    };
+
+    window.applyGlobalColors = function() {
+        const dbName = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const dbSign = JSON.parse(localStorage.getItem('elite_sign_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        // Sucht AdminKing
+        let adminUsername = 'AdminKing';
+        for (let u in users) { if (users[u].role === 'admin') adminUsername = u; }
+
+        // Wir scannen Namen, Unterschriften UND die dicken Header-Überschriften
+        const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .username, span[class*="author-anim"], b, strong, [style*="Great Vibes"], #main-header [style*="Great Vibes"], h1, h2, h3, h4');
+        
+        elements.forEach(el => {
+            if (el.closest('.elite-color-module')) return;
+
+            let rawText = el.innerText.trim().replace(/[:()]/g, '');
+            if(!rawText) return;
+
+            let isGreatVibes = el.matches('[style*="Great Vibes"]');
+            // Checkt, ob es der Admin-Name ist
+            let isAdminNameText = rawText.toLowerCase() === 'şair misal.i' || rawText.toLowerCase() === 'sair misal.i';
+            // Checkt, ob es dein Header-Slogan ist
+            let isSloganText = rawText.toLowerCase().includes('gönülden dile');
+
+            let targetUser = rawText;
+            let isSign = isGreatVibes;
+
+            // Zuweisung für Header & Admin
+            if (isAdminNameText) { targetUser = adminUsername; isSign = false; } // ŞAİR MİSAL.İ (Name Farbe)
+            if (isSloganText) { targetUser = adminUsername; isSign = true; } // Gönülden dile (Unterschrift Farbe)
+            
+            // Normale User Unterschrift im Gedicht
+            if (!isAdminNameText && !isSloganText && isGreatVibes && rawText.length > 2) {
+                targetUser = window.currentUser?.username || adminUsername; 
+            }
+
+            let finalColor = null;
+            if (isSign) finalColor = dbSign[targetUser];
+            else finalColor = dbName[targetUser];
+
+            // Admin Gold Fallback
+            if (!finalColor && (targetUser === adminUsername || users[targetUser]?.role === 'admin' || isAdminNameText || isSloganText)) {
+                finalColor = '#f4c542';
+            }
+
+            // Anwenden (Flacker-Schutz mit data-applied-color)
+            if (finalColor && el.dataset.appliedColor !== finalColor) {
+                el.style.setProperty('color', finalColor, 'important');
+                el.style.setProperty('text-shadow', `0 0 10px ${finalColor}80`, 'important');
+                el.dataset.appliedColor = finalColor;
+            }
+        });
+    };
+
+    function scanAndFormatEliteText() {
+        let targetAreas = document.querySelectorAll('.card, .card-body, .modal-body, .modal-content');
+        targetAreas.forEach(area => {
+            area.querySelectorAll('p, div, span').forEach(el => {
+                if (el.classList.contains('elite-pro-text') || el.querySelector('button, input, i, img, a, table, ul, .badge, .btn, form, iframe') || el.closest('.author, .signature, .modal-footer, .comments, .close-btn, .modal-header, .elite-color-module')) return;
+                let textContent = el.innerText.trim();
+                let htmlContent = el.innerHTML || "";
+                if (textContent.length < 35 || htmlContent.includes('font-size:') || htmlContent.includes('clamp(')) return;
+                el.classList.add('elite-pro-text');
+            });
+        });
+    }
+
+    const domWatcher = new MutationObserver(() => { setTimeout(scanAndFormatEliteText, 50); });
+    domWatcher.observe(document.body, { childList: true, subtree: true });
+
+    setInterval(() => { buildColorModule(); window.applyGlobalColors(); }, 800);
+})();
+</script>
+
+
+<style>
+    /* Target iOS Safari explicitly */
+    @supports (-webkit-touch-callout: none) {
+        
+        /* Greift nur wenn der User oder Admin eingeloggt ist auf mobilen Geräten */
+        @media (max-width: 768px) {
+            body.user-mode #main-header, 
+            body.admin-mode #main-header {
+                display: flex !important;
+                flex-direction: column !important;
+                height: auto !important;
+                min-height: 120px !important;
+                padding-bottom: 15px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* Isoliert den Wetter-Container im DOM, damit er nicht nach unten rutscht */
+            body.user-mode #weather-widget,
+            body.admin-mode #weather-widget,
+            body.user-mode .header-weather,
+            body.admin-mode .header-weather {
+                position: relative !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100% !important;
+                margin-top: 10px !important;
+                margin-bottom: 10px !important;
+                z-index: 100 !important;
+                transform: translateZ(0) !important; /* Verhindert Float-Bugs in Safari */
+            }
+
+            /* Drückt den Kalender/Content hart nach unten */
+            body.user-mode #calendar-container,
+            body.admin-mode #calendar-container,
+            body.user-mode main,
+            body.admin-mode main {
+                margin-top: 25px !important;
+                clear: both !important;
+                position: relative !important;
+                z-index: 10 !important;
+            }
+        }
+        
+        /* Spezieller Notch-Schutz für iPhone 13 Pro (und ähnliche Modelle) */
+        @media screen and (max-width: 430px) {
+            #main-header { padding-top: env(safe-area-inset-top, 15px) !important; }
+        }
+    }
+</style>
+
+<style>
+    .elite-color-module { background: linear-gradient(145deg, #0a192f, #112240) !important; border: 1px solid rgba(244, 197, 66, 0.5) !important; border-radius: 16px !important; padding: 20px !important; margin: 20px 0 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important; }
+    .elite-color-preview { background: rgba(0, 0, 0, 0.4) !important; border-radius: 12px !important; padding: 15px !important; margin-bottom: 15px !important; text-align: center !important; border: 1px dashed rgba(244, 197, 66, 0.3) !important; }
+    .preview-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .preview-name { font-size: 1.3rem; font-weight: bold; transition: all 0.3s ease; }
+    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 2rem; margin-top: 5px; transition: all 0.3s ease; }
+    .elite-color-grid { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; justify-content: center !important; max-height: 180px !important; overflow-y: auto !important; padding: 10px !important; background: rgba(0,0,0,0.2) !important; border-radius: 8px !important; margin-bottom: 15px !important; }
+    .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+    .color-dot.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 12px currentColor !important; z-index: 10; }
+    .elite-save-btn { width: 100% !important; background: linear-gradient(135deg, #f4c542, #d4af37) !important; color: #0a192f !important; border: none !important; padding: 12px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 1rem !important; cursor: pointer !important; transition: all 0.3s ease !important; text-transform: uppercase !important; }
+</style>
+
+<script>
+(function() {
+    // 1. FEDER FAVICON INJEKTION (Zwingt die Feder in den Tab)
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = 'https://imagizer.imageshack.com/img923/676/f5U6yR.png';
+
+    let pendingColor = null;
+
+    function buildColorModule() {
+        try {
+            const modalBody = document.querySelector('#profileEditModal .modal-body');
+            if (!modalBody || document.getElementById('elite-color-module-root')) return;
+
+            const uName = window.currentUser?.username || 'Kullanıcı';
+            const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+            let defaultColor = (window.currentUser?.role === 'admin' || uName === 'AdminKing') ? '#f4c542' : '#ffffff';
+            const currentColor = db[uName] || defaultColor;
+            pendingColor = currentColor; 
+
+            const container = document.createElement('div');
+            container.id = 'elite-color-module-root';
+            container.className = 'elite-color-module';
+
+            let colors = ['#ffffff', '#f8fafc', '#e2e8f0', '#ff9ff3', '#feca57', '#ff6b6b', '#48dbfb', '#1dd1a1', '#54a0ff', '#5f27cd'];
+            for (let l of [75, 65, 55]) { for (let h = 0; h < 360; h += 15) { colors.push(`hsl(${h}, 85%, ${l}%)`); } }
+
+            container.innerHTML = `
+                <div class="elite-color-preview">
+                    <span class="preview-label">Canlı Önizleme (Vorschau)</span>
+                    <div class="preview-name" id="preview-n" style="color:${currentColor}">${uName}</div>
+                    <div class="preview-sign" id="preview-s" style="color:${currentColor}">Şair Misal.i</div>
+                </div>
+                <div class="elite-color-grid">
+                    ${colors.map(c => `<div class="color-dot ${c === currentColor ? 'active' : ''}" style="background-color:${c}; color:${c};" onclick="window.previewEliteColor('${c}', this)"></div>`).join('')}
+                </div>
+                <button type="button" class="elite-save-btn" onclick="window.saveEliteColorFinal()"><i class="fas fa-save"></i> Rengi Kaydet (Farbe Speichern)</button>
+            `;
+            
+            const saveBtn = modalBody.querySelector('.save-btn, button[type="submit"]');
+            if (saveBtn) saveBtn.parentNode.insertBefore(container, saveBtn); else modalBody.appendChild(container);
+        } catch(e) {}
+    }
+
+    window.previewEliteColor = function(color, el) {
+        pendingColor = color;
+        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('preview-n').style.color = color;
+        document.getElementById('preview-s').style.color = color;
+    };
+
+    window.saveEliteColorFinal = function() {
+        if (!window.currentUser || !pendingColor) return;
+        const uName = window.currentUser.username;
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        db[uName] = pendingColor;
+        localStorage.setItem('elite_user_colors', JSON.stringify(db));
+
+        window.applyBruteForceColors();
+        const btn = document.querySelector('.elite-save-btn');
+        if(btn) { btn.innerHTML = '✅ Başarılı! (Gespeichert)'; btn.style.background = '#22c55e'; setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Rengi Kaydet (Farbe Speichern)'; btn.style.background = ''; }, 2000); }
+    };
+
+    window.applyBruteForceColors = function() {
+        try {
+            const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+            // Scannt radikal alle Text-Elemente auf der Seite
+            const allElements = document.querySelectorAll('span, b, strong, h1, h2, h3, h4, div');
+            
+            allElements.forEach(el => {
+                // Nur Elemente mit direktem Text (keine riesigen Container)
+                if(el.children.length > 2) return; 
+                
+                let text = el.innerText.trim();
+                let cleanText = text.replace(/[:()]/g, '');
+
+                // 1. Wenn der Text exakt ein Username aus der Farb-DB ist
+                if (db[cleanText]) {
+                    el.style.setProperty('color', db[cleanText], 'important');
+                    el.style.setProperty('text-shadow', `0 0 8px ${db[cleanText]}60`, 'important');
+                }
+                
+                // 2. Unterschrift und Name des Admins (Şair Misal.i)
+                let isMisali = text.toLowerCase().includes('şair misal.i') || text.toLowerCase().includes('sair misal.i') || el.matches('[style*="Great Vibes"]');
+                if (isMisali) {
+                    let adminColor = db['AdminKing'] || db['Şair Misal.i'] || '#f4c542'; // Holt die Admin-Farbe oder Gold
+                    el.style.setProperty('color', adminColor, 'important');
+                    el.style.setProperty('text-shadow', `0 0 8px ${adminColor}60`, 'important');
+                }
+            });
+        } catch(e) {}
+    };
+
+    setInterval(() => { buildColorModule(); window.applyBruteForceColors(); }, 800);
+})();
+</script>
+
+<style>
+    .elite-color-module { background: linear-gradient(145deg, #0a192f, #112240) !important; border: 1px solid rgba(244, 197, 66, 0.5) !important; border-radius: 12px !important; padding: 20px !important; margin: 20px 0 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important; }
+    .elite-color-preview { background: rgba(0, 0, 0, 0.4) !important; border-radius: 8px !important; padding: 15px !important; margin-bottom: 15px !important; text-align: center !important; border: 1px dashed rgba(244, 197, 66, 0.3) !important; }
+    .preview-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .preview-name { font-size: 1.3rem; font-weight: bold; transition: all 0.3s ease; }
+    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 2rem; margin-top: 5px; transition: all 0.3s ease; }
+    .elite-color-grid { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; justify-content: center !important; max-height: 180px !important; overflow-y: auto !important; padding: 10px !important; background: rgba(0,0,0,0.2) !important; border-radius: 8px !important; margin-bottom: 15px !important; }
+    .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+    .color-dot.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 12px currentColor !important; z-index: 10; }
+    .elite-save-btn { width: 100% !important; background: linear-gradient(135deg, #f4c542, #d4af37) !important; color: #0a192f !important; border: none !important; padding: 12px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 1rem !important; cursor: pointer !important; transition: all 0.3s ease !important; text-transform: uppercase !important; }
+</style>
+
+<style>
+    .elite-color-module { background: linear-gradient(145deg, #0a192f, #112240) !important; border: 1px solid rgba(244, 197, 66, 0.5) !important; border-radius: 12px !important; padding: 20px !important; margin: 20px 0 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important; }
+    .elite-color-preview { background: rgba(0, 0, 0, 0.4) !important; border-radius: 8px !important; padding: 15px !important; margin-bottom: 15px !important; text-align: center !important; border: 1px dashed rgba(244, 197, 66, 0.3) !important; }
+    .preview-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .preview-name { font-size: 1.3rem; font-weight: bold; transition: all 0.3s ease; }
+    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 2rem; margin-top: 5px; transition: all 0.3s ease; }
+    .elite-color-grid { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; justify-content: center !important; max-height: 180px !important; overflow-y: auto !important; padding: 10px !important; background: rgba(0,0,0,0.2) !important; border-radius: 8px !important; margin-bottom: 15px !important; }
+    .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+    .color-dot.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 12px currentColor !important; z-index: 10; }
+    .elite-save-btn { width: 100% !important; background: linear-gradient(135deg, #f4c542, #d4af37) !important; color: #0a192f !important; border: none !important; padding: 12px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 1rem !important; cursor: pointer !important; transition: all 0.3s ease !important; text-transform: uppercase !important; }
+</style>
+
+<script>
+(function() {
+    // 1. FEDER FAVICON (Suchleiste Browser Tab)
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = 'https://imagizer.imageshack.com/img923/676/f5U6yR.png';
+
+    let pendingColor = null;
+
+    function buildColorModule() {
+        const modalBody = document.querySelector('#profileEditModal .modal-body');
+        if (!modalBody || document.getElementById('elite-color-module-root')) return;
+
+        const uName = window.currentUser?.username || 'Kullanıcı';
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        // Admin-Default ist Gold, User ist Weiß. Aber jeder kann es ändern!
+        let defaultColor = (users[uName]?.role === 'admin' || uName.toLowerCase().includes('admin')) ? '#f4c542' : '#ffffff';
+        const currentColor = db[uName] || defaultColor;
+        pendingColor = currentColor; 
+
+        const container = document.createElement('div');
+        container.id = 'elite-color-module-root';
+        container.className = 'elite-color-module';
+
+        // 500+ Farben generieren
+        let colors = ['#ffffff', '#f8fafc', '#e2e8f0', '#ff9ff3', '#feca57', '#ff6b6b', '#48dbfb', '#1dd1a1', '#54a0ff', '#5f27cd'];
+        for (let l of [75, 65, 55]) { for (let h = 0; h < 360; h += 15) { colors.push(`hsl(${h}, 85%, ${l}%)`); } }
+
+        container.innerHTML = `
+            <div class="elite-color-preview">
+                <span class="preview-label">Canlı Önizleme (Vorschau)</span>
+                <div class="preview-name" id="preview-n" style="color:${currentColor}">${uName}</div>
+                <div class="preview-sign" id="preview-s" style="color:${currentColor}">Şair Misal.i</div>
+            </div>
+            <div class="elite-color-grid">
+                ${colors.map(c => `<div class="color-dot ${c === currentColor ? 'active' : ''}" style="background-color:${c}; color:${c};" onclick="window.previewEliteColor('${c}', this)"></div>`).join('')}
+            </div>
+            <button type="button" class="elite-save-btn" onclick="window.saveEliteColorFinal()"><i class="fas fa-save"></i> Rengi Kaydet (Farbe Speichern)</button>
+        `;
+        
+        const saveBtn = modalBody.querySelector('.save-btn, button[type="submit"]');
+        if (saveBtn) saveBtn.parentNode.insertBefore(container, saveBtn); else modalBody.appendChild(container);
+    }
+
+    // Live Vorschau in der Box
+    window.previewEliteColor = function(color, el) {
+        pendingColor = color;
+        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('preview-n').style.color = color;
+        document.getElementById('preview-s').style.color = color;
+    };
+
+    // Farbe in der Datenbank speichern
+    window.saveEliteColorFinal = function() {
+        if (!window.currentUser || !pendingColor) return;
+        const uName = window.currentUser.username;
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        db[uName] = pendingColor;
+        localStorage.setItem('elite_user_colors', JSON.stringify(db));
+
+        window.applyGlobalColors();
+        const btn = document.querySelector('.elite-save-btn');
+        if(btn) { btn.innerHTML = '✅ Başarılı! (Gespeichert)'; btn.style.background = '#22c55e'; setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Rengi Kaydet (Farbe Speichern)'; btn.style.background = ''; }, 2000); }
+    };
+
+    // Zwingt die Farbe auf die gesamte Seite
+    window.applyGlobalColors = function() {
+        const db = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        // Sucht Namen und Unterschriften
+        const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .username, span[class*="author-anim"], b, strong, [style*="Great Vibes"]');
+        
+        elements.forEach(el => {
+            let rawText = el.innerText.trim().replace(/[:()]/g, '');
+            // Ist es eine Unterschrift?
+            let isSign = el.matches('[style*="Great Vibes"]') || rawText.toLowerCase().includes('şair misal.i') || rawText.toLowerCase().includes('sair misal.i');
+            
+            let targetUser = isSign ? window.currentUser?.username : rawText;
+            if (!targetUser) return;
+
+            // 1. Wenn der User sich eine Farbe in der DB gespeichert hat
+            if (db[targetUser]) {
+                el.style.setProperty('color', db[targetUser], 'important');
+                el.style.setProperty('text-shadow', `0 0 8px ${db[targetUser]}60`, 'important');
+            } 
+            // 2. Ansonsten Fallback (Admin ist Gold)
+            else if (users[targetUser]?.role === 'admin' || targetUser.toLowerCase().includes('admin')) {
+                el.style.setProperty('color', '#f4c542', 'important');
+                el.style.setProperty('text-shadow', `0 0 8px rgba(244,197,66,0.6)`, 'important');
+            }
+        });
+    };
+
+    setInterval(() => { buildColorModule(); window.applyGlobalColors(); }, 800);
+})();
+</script>
 
 </body>
 </html>
