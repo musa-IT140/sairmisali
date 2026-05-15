@@ -16555,5 +16555,1275 @@ setInterval(function() {
 })();
 </script>
 
+<style>
+    /* V61 Font Manager UI */
+    .font-modal-content { max-width: 900px; background: linear-gradient(145deg, #0a0f1c, #000000) !important; border: 1px solid #f4c542 !important; box-shadow: 0 10px 50px rgba(0,0,0,0.95) !important; z-index: 100010; }
+    
+    .v61-controls-row { display: flex; gap: 15px; width: 100%; flex-wrap: wrap; margin-bottom: 20px; }
+    .custom-select-wrapper { position: relative; flex: 1; min-width: 200px; }
+    .custom-select-btn { background: rgba(0,0,0,0.8); color: #fff; border: 1px solid rgba(244,197,66,0.5); padding: 12px 15px; border-radius: 12px; font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: 'Poppins', sans-serif; transition: 0.2s; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+    .custom-select-btn:hover { border-color: #f4c542; box-shadow: 0 0 15px rgba(244,197,66,0.4), inset 0 0 10px rgba(0,0,0,0.8); }
+    .custom-select-list { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(10,25,47,0.98); border: 1px solid #f4c542; border-radius: 12px; margin-top: 5px; z-index: 100020; max-height: 250px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-direction: column; }
+    .custom-select-list::-webkit-scrollbar { width: 6px; } .custom-select-list::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
+    .custom-select-item { padding: 12px 15px; color: #cbd5e1; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; display: flex; flex-direction: column; }
+    .custom-select-item:hover { background: rgba(244,197,66,0.2); color: #fff; }
+    .custom-select-item:last-child { border-bottom: none; }
+    .cs-sub { font-size: 0.7em; color: #94a3b8; margin-top: 2px; }
+
+    /* V61 Grids */
+    .v61-grid-title { color: #f4c542; font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 15px 0 10px 0; border-bottom: 1px dashed rgba(244,197,66,0.4); padding-bottom: 5px; }
+    
+    .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; }
+    .font-grid::-webkit-scrollbar { width: 6px; } .font-grid::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
+    
+    .font-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 5px; justify-content: center; min-height: 70px; }
+    .font-card:hover { background: rgba(244,197,66,0.1); border-color: rgba(244,197,66,0.5); transform: translateY(-3px); }
+    .font-card.active { background: rgba(244,197,66,0.2); border-color: #f4c542; box-shadow: 0 0 15px rgba(244,197,66,0.4); }
+    .font-name-preview { font-size: 1.4rem; color: #fff; line-height: 1.2; word-wrap: break-word; }
+
+    .color-grid-v61 { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 200px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 12px; margin-bottom: 20px; border: 1px inset rgba(255,255,255,0.1); }
+    .color-grid-v61::-webkit-scrollbar { width: 6px; } .color-grid-v61::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
+    
+    .dot-v61 { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+    .dot-v61:hover { transform: scale(1.3); z-index: 5; }
+    .dot-v61.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 15px currentColor, 0 0 5px #fff !important; z-index: 10; }
+    
+    .dot-anim-v61 { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); transition: 0.2s; }
+    .dot-anim-v61:hover { transform: scale(1.3) rotate(5deg); z-index: 5; }
+    .dot-anim-v61.active { border: 2px solid #fff !important; transform: scale(1.4) rotate(5deg) !important; box-shadow: 0 0 15px #fff !important; z-index: 10; }
+
+    .font-preview-box { background: rgba(0,0,0,0.6); border: 1px dashed #f4c542; border-radius: 12px; padding: 30px 20px; text-align: center; margin-bottom: 20px; color: #fdfbf7; min-height: 120px; display: flex; align-items: center; justify-content: center; overflow: hidden; word-break: break-word; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+    
+    @keyframes anim-flow-v61 { to { background-position: 200% center; } }
+</style>
+
+<script>
+(function() {
+    // 1. MASSIVE GOOGLE FONT GENERIERUNG (+200 FONTS)
+    // Fokus auf Handschriften (İmza), Serif (Kitap) und Dekorative Fonts
+    const fontNames = [
+        // Handschriften / Signatur (İmza Tarzı)
+        "Great Vibes", "Dancing Script", "Caveat", "Pacifico", "Amatic SC", "Satisfy", "Courgette", "Lobster", "Permanent Marker", "Sacramento", "Parisienne", "Kaushan Script", "Cookie", "Handlee", "Marck Script", "Patrick Hand", "Neucha", "Bad Script", "Just Another Hand", "Leckerli One", "Rancho", "Rochester", "Covered By Your Grace", "Allura", "Tangerine", "Alex Brush", "Pinyon Script", "Grand Hotel", "Yesteryear", "Arizonia", "Clicker Script", "Mr Dafoe", "Stalemate", "Meddon", "Qwigley", "Give You Glory", "Ruthie", "La Belle Aurore", "Cedarville Cursive", "Redressed", "Euphoria Script", "Sue Ellen Francisco", "Unkempt", "Just Me Again Down Here", "Waiting for the Sunrise", "Delius", "Dekko", "Zeyada", "WindSong", "Mea Culpa", "Carattere", "Birthstone", "Allison", "Qwitcher Grypen", "Monsieur La Doulaise", "Miss Fajardose", "League Script", "Italianno", "Herr Von Muellerhoff", "Felipa", "Engagement", "Dr Sugiyama", "Devonshire",
+        
+        // Buch / Klassisch / Episch (Kitap & Epik Tarzı)
+        "Playfair Display", "Merriweather", "Lora", "Cinzel", "PT Serif", "Libre Baskerville", "Cormorant", "Crimson Text", "Noto Serif", "EB Garamond", "Cormorant Garamond", "Literata", "Alegreya", "Tinos", "Domine", "Vollkorn", "Cardo", "Frank Ruhl Libre", "Gelasio", "Halant", "Prata", "Rokkitt", "Vidaloka", "Volkhov", "Yrsa", "Cinzel Decorative", "Marcellus", "Marcellus SC", "Unna", "Sorts Mill Goudy", "Rufina", "Ruda", "Rosario", "Rambla", "Radley", "Quattrocento", "Poltawski Nowy",
+        
+        // Modern / Sci-Fi / Display
+        "Poppins", "Montserrat", "Oswald", "Bebas Neue", "Righteous", "Comic Neue", "Space Mono", "Courier Prime", "Roboto", "Open Sans", "Lato", "Slabo 27px", "Raleway", "PT Sans", "Nunito", "Rubik", "Work Sans", "Fira Sans", "Barlow", "Inconsolata", "Dosis", "Josefin Sans", "Titillium Web", "Anton", "Mukta", "Teko", "Fjalla One", "Abril Fatface", "Acme", "Alfa Slab One", "Alice", "Archivo", "Arima Madurai", "Arimo", "Arsenal", "Asap", "Assistant", "Catamaran", "Chivo", "Comfortaa", "Cuprum", "Didact Gothic", "Exo", "Exo 2", "Fira Sans Condensed", "Francois One", "Heebo", "Hind", "IBM Plex Sans", "Inria Sans", "Jura", "Kanit", "Karla", "Khand", "Lexend", "Libre Franklin", "Macondo", "Maven Pro", "Mitr", "Mulish", "Overpass", "Oxygen", "Pathway Gothic One", "Prompt", "Public Sans", "Questrial", "Rajdhani", "Rubik Mono One", "Saira", "Secular One", "Signika", "Source Code Pro", "Source Sans Pro", "Space Grotesk", "Ubuntu", "Varela Round"
+    ];
+    
+    // Google Fonts API Loader (in Chunks)
+    const chunkSize = 35;
+    for(let i=0; i < fontNames.length; i+=chunkSize) {
+        let chunk = fontNames.slice(i, i+chunkSize);
+        let url = "https://fonts.googleapis.com/css2?";
+        chunk.forEach((f, idx) => { url += `family=${f.replace(/ /g, '+')}:wght@400;600;700`; if (idx < chunk.length - 1) url += "&"; });
+        url += "&display=swap";
+        let link = document.createElement('link'); link.href = url; link.rel = 'stylesheet';
+        document.head.appendChild(link);
+    }
+
+    const fontList = [{ id: 'default', name: 'Varsayılan (Default)', css: '' }];
+    fontNames.forEach(f => {
+        let fb = "sans-serif";
+        if (["Playfair Display", "Merriweather", "Lora", "Cinzel", "PT Serif", "Libre Baskerville", "Cormorant", "Crimson Text", "Noto Serif", "EB Garamond", "Cormorant Garamond", "Literata", "Alegreya", "Tinos", "Domine", "Vollkorn", "Cardo", "Frank Ruhl Libre", "Gelasio", "Halant", "Prata", "Rokkitt", "Vidaloka", "Volkhov", "Yrsa", "Cinzel Decorative", "Marcellus", "Marcellus SC", "Unna", "Sorts Mill Goudy", "Rufina", "Radley", "Quattrocento", "Poltawski Nowy"].includes(f)) fb = "serif";
+        if (["Space Mono", "Courier Prime", "Inconsolata", "Source Code Pro"].includes(f)) fb = "monospace";
+        if (["Great Vibes", "Dancing Script", "Caveat", "Pacifico", "Amatic SC", "Satisfy", "Courgette", "Lobster", "Permanent Marker", "Sacramento", "Parisienne", "Kaushan Script", "Cookie", "Handlee", "Marck Script", "Patrick Hand", "Neucha", "Bad Script", "Just Another Hand", "Leckerli One", "Rancho", "Rochester", "Covered By Your Grace", "Allura", "Tangerine", "Alex Brush", "Pinyon Script", "Grand Hotel", "Yesteryear", "Arizonia", "Clicker Script", "Mr Dafoe", "Stalemate", "Meddon", "Qwigley", "Give You Glory", "Ruthie", "La Belle Aurore", "Cedarville Cursive", "Redressed", "Euphoria Script", "Sue Ellen Francisco", "Unkempt", "Just Me Again Down Here", "Waiting for the Sunrise", "Delius", "Dekko", "Zeyada", "WindSong", "Mea Culpa", "Carattere", "Birthstone", "Allison", "Qwitcher Grypen", "Monsieur La Doulaise", "Miss Fajardose", "League Script", "Italianno", "Herr Von Muellerhoff", "Felipa", "Engagement", "Dr Sugiyama", "Devonshire", "Macondo", "Righteous", "Comic Neue", "Indie Flower"].includes(f)) fb = "cursive";
+        
+        fontList.push({ id: f.toLowerCase().replace(/ /g, ''), name: f, css: `'${f}', ${fb}` });
+    });
+
+    const targetAreas = {
+        'logo_brand': { label: 'Ana Logo', sub: 'Main Logo', selectors: ['.logo'] },
+        'nav_menu': { label: 'Menü Linkleri', sub: 'Navigation', selectors: ['#main-nav button', '.floating-menu-wrapper .btn-text', '.header-stats-row .clickable-header-item'] },
+        'ticker': { label: 'Kayan Yazı', sub: 'Ticker', selectors: ['.ticker-text', '.scrolling-ticker'] },
+        'main_titles': { label: 'Ana Başlıklar', sub: 'Hero Titles', selectors: ['h1.hero-title', '.section-title'] },
+        'sub_titles': { label: 'Alt Başlıklar', sub: 'Subtitles', selectors: ['.hero-subtitle', '.bilingual-sub', '.de-sub'] },
+        'card_titles': { label: 'Kart Başlıkları', sub: 'Card Titles', selectors: ['.card h3', '.game-card h3'] },
+        'card_text': { label: 'Kart Metinleri', sub: 'Card Text', selectors: ['.card div:not(.card-stats-badge):not(.card-date-time):not(.admin-award-badge-new)', '.card p'] },
+        'authors': { label: 'Yazar & İsimler', sub: 'Authors & Names', selectors: ['.author', '.card-author', '.list-user-name', '#header-username', 'span[class*="author-anim"]'] },
+        'signatures': { label: 'İmzalar', sub: 'Signatures', selectors: ['.modal-signature', '.vip-emoji-signature'] },
+        'modal_titles': { label: 'Pencere Başlıkları', sub: 'Modal Titles', selectors: ['.modal-title', '.game-title', '.sidebar-header h2'] },
+        'modal_text': { label: 'Pencere İçerikleri', sub: 'Modal Text', selectors: ['.modal-text', '#modalText', '#hakkimda-view p', '#cookie-view p', '#datenschutz-view p', '#impressum-view p', '.hero-info'] },
+        'anthems': { label: 'Marşlar & Şiir', sub: 'Hymnen & Gedichte', selectors: ['.anthem-content p', '.anthem-content div'] },
+        'chat_bubbles': { label: 'Sohbet & Bildirimler', sub: 'Chat & Notifs', selectors: ['.chat-bubble', '.notif-body', '.notification-text'] },
+        'game_titles': { label: 'Oyun İsimleri', sub: 'Game Titles', selectors: ['.bilingual-title'] },
+        'game_content': { label: 'Oyun Metinleri', sub: 'Game Texts', selectors: ['.game-msg', '#bilmece-text', '#quiz-q', '#milyoner-q', '#custom-dialog-msg'] },
+        'time_date': { label: 'Tarih & Saat', sub: 'Time & Date', selectors: ['#digi-clock', '#digi-date', '.cal-day', '.calendar-day strong', '#stop-time-display', '.time-info', '.card-date-time', '.time-stamp'] },
+        'scores_badges': { label: 'Puanlar & Rozetler', sub: 'Scores & Badges', selectors: ['.badge-count', '.header-score-badge', '#user-score', '[id$="-score"]', '.game-score-val', '.admin-award-badge-new'] },
+        'buttons': { label: 'Butonlar', sub: 'Buttons', selectors: ['button', '.reset-btn', '.btn', '.auth-view-btn'] },
+        'inputs': { label: 'Giriş Alanları', sub: 'Inputs', selectors: ['input:not([type="range"]):not([type="checkbox"])', 'textarea', '.auth-input', '.font-select-box'] },
+        'placeholders': { label: 'Yer Tutucular', sub: 'Placeholders', selectors: ['PLACEHOLDER_SPECIAL'] } // Spezial-Logik im CSS-Generator
+    };
+
+    const sizeOptions = [
+        { val: 'default', label: 'Varsayılan', sub: 'Standard' },
+        { val: '0.6rem', label: 'Çok Küçük', sub: '0.6rem' }, { val: '0.7rem', label: '0.7rem', sub: 'Mini' }, { val: '0.8rem', label: '0.8rem', sub: 'Klein' },
+        { val: '0.9rem', label: '0.9rem', sub: 'Normal-' }, { val: '1.0rem', label: '1.0rem', sub: 'Normal' }, { val: '1.1rem', label: '1.1rem', sub: 'Normal+' },
+        { val: '1.2rem', label: '1.2rem', sub: 'Mittel' }, { val: '1.3rem', label: '1.3rem', sub: 'Mittel+' }, { val: '1.4rem', label: '1.4rem', sub: 'Groß-' },
+        { val: '1.5rem', label: '1.5rem', sub: 'Groß' }, { val: '1.8rem', label: '1.8rem', sub: 'Sehr Groß' }, { val: '2.0rem', label: '2.0rem', sub: 'Huge' },
+        { val: '2.5rem', label: '2.5rem', sub: 'Giant' }, { val: '3.0rem', label: '3.0rem', sub: 'Mega' }, { val: '4.0rem', label: '4.0rem', sub: 'Titan' },
+        { val: '5.0rem', label: '5.0rem', sub: 'Colossal' }
+    ];
+
+    // 2. 500 FARBEN & 100 ANIMATIONEN GENERATOR
+    let solidColors = ['#ffffff', '#f8fafc', '#cbd5e1', '#000000']; 
+    for (let l of [85, 75, 65, 55, 45]) { for (let s of [100, 80, 60]) { for (let h = 0; h < 360; h += 15) { solidColors.push(`hsl(${h}, ${s}%, ${l}%)`); } } }
+    
+    let neonColors = ['#FFD700', '#FF1493', '#00FFFF', '#39FF14', '#FF4500', '#9400D3', '#7FFF00', '#00BFFF', '#FF00FF', '#DC143C', '#FF8C00', '#8A2BE2', '#00FA9A', '#1E90FF', '#FF69B4', '#32CD32', '#FF0000', '#8B008B', '#00FF7F', '#f4c542', '#22d3ee', '#a78bfa', '#ef4444', '#f97316'];
+
+    // 100 Epische CSS-Gradienten als Mappings für die Injection
+    const animMap = {
+        'a-fire': 'linear-gradient(to right, #ff4e50, #f9d423, #ff4e50)', 'a-ocean': 'linear-gradient(to right, #00c6ff, #0072ff, #00c6ff)',
+        'a-gold': 'linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #bf953f)', 'a-cyber': 'linear-gradient(to right, #ff00ff, #00ffff, #ff00ff)',
+        'a-toxic': 'linear-gradient(to right, #00ff87, #60efff, #00ff87)', 'a-royal': 'linear-gradient(to right, #8A2387, #E94057, #F27121, #8A2387)',
+        'a-ice': 'linear-gradient(to right, #E0EAFC, #CFDEF3, #E0EAFC)', 'a-matrix': 'linear-gradient(to right, #00FF00, #003300, #00FF00)',
+        'a-blood': 'linear-gradient(to right, #ff0844, #ffb199, #ff0844)', 'a-rainbow': 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet, red)',
+        'a-tiger': 'repeating-linear-gradient(45deg, #ff9800 0, #ff9800 10px, #000 10px, #000 20px)', 'a-zebra': 'repeating-linear-gradient(45deg, #fff 0, #fff 10px, #000 10px, #000 20px)',
+        'a-bee': 'repeating-linear-gradient(45deg, #ffeb3b 0, #ffeb3b 10px, #000 10px, #000 20px)', 'a-candy': 'repeating-linear-gradient(45deg, #ffc0cb 0, #ffc0cb 10px, #fff 10px, #fff 20px)',
+        'a-danger': 'repeating-linear-gradient(45deg, #f00 0, #f00 10px, #ffeb3b 10px, #ffeb3b 20px)', 'a-usa': 'repeating-linear-gradient(90deg, red 0, red 10px, white 10px, white 20px, blue 20px, blue 30px)',
+        'a-grid': 'repeating-linear-gradient(90deg, #00ffff 0, #00ffff 5px, #ff00ff 5px, #ff00ff 10px)', 'a-disco': 'repeating-linear-gradient(45deg, #f0f 0, #f0f 15px, #0ff 15px, #0ff 30px)',
+        'a-goldbars': 'repeating-linear-gradient(90deg, #ffd700 0, #ffd700 15px, #b8860b 15px, #b8860b 30px)', 'a-starry': 'repeating-radial-gradient(circle, #ffffff 0, #ffffff 2px, #00008b 2px, #00008b 10px)',
+        'a-plasma': 'linear-gradient(to right, #9400D3, #4B0082, #9400D3)', 'a-galaxy': 'linear-gradient(to right, #000000, #434343, #000000)',
+        'a-magma': 'linear-gradient(to right, #ff8008, #ffc837, #ff8008)', 'a-venom': 'linear-gradient(to right, #11998e, #38ef7d, #11998e)',
+        'a-neonpink': 'linear-gradient(to right, #ff00cc, #333399, #ff00cc)', 'a-electric': 'linear-gradient(to right, #4776E6, #8E54E9, #4776E6)',
+        'a-aurora': 'linear-gradient(to right, #00b09b, #96c93d, #00b09b)', 'a-sunset': 'linear-gradient(to right, #fc4a1a, #f7b733, #fc4a1a)',
+        'a-hologram': 'linear-gradient(to right, #b2fefa, #0ed2f7, #b2fefa)', 'a-mystic': 'linear-gradient(to right, #7b4397, #dc2430, #7b4397)',
+        'a-lava': 'repeating-radial-gradient(circle, #ff4000, #ff4000 5px, #000 5px, #000 10px)', 'a-nebula': 'linear-gradient(to right, #8e2de2, #4a00e0, #8e2de2)',
+        'a-abyss': 'linear-gradient(to right, #000000, #1a2a6c, #000000)', 'a-inferno': 'linear-gradient(to bottom, #ff0000, #ff7f00, #ffff00)',
+        'a-supernova': 'radial-gradient(circle, #fff, #ff00ff, #000)', 'a-emerald': 'linear-gradient(to right, #1d976c, #93f9b9, #1d976c)',
+        'a-sapphire': 'linear-gradient(to right, #1cb5e0, #000046, #1cb5e0)', 'a-ruby': 'linear-gradient(to right, #e52d27, #b31217, #e52d27)',
+        'a-amethyst': 'linear-gradient(to right, #9d50bb, #6e48aa, #9d50bb)', 'a-quartz': 'linear-gradient(to right, #ffafbd, #ffc3a0, #ffafbd)',
+        'a-hacker': 'repeating-linear-gradient(0deg, #0f0, #003300 2px, #000 2px, #000 4px)', 'a-synthwave': 'linear-gradient(to right, #ff007f, #7928ca, #ff007f)',
+        'a-cosmic': 'linear-gradient(to right, #4facfe, #00f2fe, #4facfe)', 'a-auroraborealis': 'linear-gradient(to right, #00ff87, #60efff, #00ff87)',
+        'a-dragon': 'linear-gradient(to right, #ff0000, #ff7f00, #ff0000)', 'a-phoenix': 'linear-gradient(to right, #f83600, #f9d423, #f83600)',
+        'a-starlight': 'linear-gradient(to right, #e0c3fc, #8ec5fc, #e0c3fc)', 'a-abyssal': 'linear-gradient(to right, #000000, #434343, #000000)',
+        'a-radiant': 'linear-gradient(to right, #f6d365, #fda085, #f6d365)', 'a-ghost': 'linear-gradient(to right, #ffffff, #e0e0e0, #ffffff)',
+        'a-bloodmoon': 'linear-gradient(to right, #8a2387, #e94057, #f27121)', 'a-quantum': 'linear-gradient(to right, #13547a, #80d0c7, #13547a)',
+        'a-vampire': 'linear-gradient(to right, #000000, #ff0000, #000000)', 'a-mermaid': 'linear-gradient(to right, #2af598, #009efd, #2af598)',
+        'a-wizard': 'linear-gradient(to right, #667eea, #764ba2, #667eea)', 'a-witch': 'linear-gradient(to right, #89f7fe, #66a6ff, #89f7fe)',
+        'a-fairy': 'linear-gradient(to right, #ff9a9e, #fecfef, #ff9a9e)', 'a-unicorn': 'linear-gradient(to right, #a18cd1, #fbc2eb, #a18cd1)',
+        'a-pegasus': 'linear-gradient(to right, #84fab0, #8fd3f4, #84fab0)', 'a-valkyrie': 'linear-gradient(to right, #fccb90, #d57eeb, #fccb90)',
+        'a-glitch': 'repeating-linear-gradient(90deg, #ff00ff, #00ffff 5px, #000 5px, #000 10px)', 'a-neoncity': 'linear-gradient(to right, #ff0099, #493240)',
+        'a-poison': 'linear-gradient(to right, #00b09b, #96c93d)', 'a-obsidian': 'linear-gradient(to right, #434343, #000000)',
+        'a-pearl': 'linear-gradient(to right, #fdfbfb, #ebedee)', 'a-cottoncandy': 'linear-gradient(to right, #ffecd2, #fcb69f)',
+        'a-superman': 'linear-gradient(to right, #0052cc, #dc2626, #facc15)', 'a-batman': 'linear-gradient(to right, #000000, #facc15, #000000)',
+        'a-joker': 'linear-gradient(to right, #22c55e, #a855f7, #ffffff)', 'a-flash': 'linear-gradient(to right, #ef4444, #facc15, #ef4444)',
+        'a-aquaman': 'linear-gradient(to right, #f59e0b, #10b981, #f59e0b)', 'a-wonderwoman': 'linear-gradient(to right, #ef4444, #3b82f6, #facc15)',
+        'a-spiderman': 'linear-gradient(to right, #dc2626, #2563eb, #dc2626)', 'a-ironman': 'linear-gradient(to right, #b91c1c, #f59e0b, #b91c1c)',
+        'a-captain': 'linear-gradient(to right, #1d4ed8, #ffffff, #b91c1c)', 'a-thor': 'linear-gradient(to right, #1e293b, #ef4444, #94a3b8)',
+        'a-hulk': 'linear-gradient(to right, #334155, #f59e0b, #ef4444)', 'a-blackwidow': 'linear-gradient(to right, #000000, #ef4444, #000000)',
+        'a-doctorstrange': 'linear-gradient(to right, #1d4ed8, #ef4444, #f59e0b)', 'a-blackpanther': 'linear-gradient(to right, #000000, #dc2626, #000000)',
+        'a-scarletwitch': 'linear-gradient(to right, #7f1d1d, #ef4444, #7f1d1d)', 'a-vision': 'linear-gradient(to right, #166534, #facc15, #dc2626)',
+        'a-wolverine': 'linear-gradient(to right, #facc15, #1d4ed8, #facc15)', 'a-deadpool': 'linear-gradient(to right, #dc2626, #000000, #dc2626)',
+        'a-groot': 'linear-gradient(to right, #451a03, #22c55e, #451a03)', 'a-rocket': 'linear-gradient(to right, #78350f, #22c55e, #78350f)',
+        'a-starlord': 'linear-gradient(to right, #1e3a8a, #dc2626, #1e3a8a)', 'a-gamora': 'linear-gradient(to right, #166534, #a855f7, #166534)',
+        'a-drax': 'linear-gradient(to right, #1e293b, #dc2626, #1e293b)', 'a-mantis': 'linear-gradient(to right, #16a34a, #ef4444, #16a34a)',
+        'a-nebula': 'linear-gradient(to right, #1d4ed8, #a855f7, #1d4ed8)', 'a-thanos': 'linear-gradient(to right, #4c1d95, #facc15, #4c1d95)',
+        'a-loki': 'linear-gradient(to right, #14532d, #facc15, #14532d)'
+    };
+    const animKeys = Object.keys(animMap);
+
+    // 3. INJEKTION DES ADMIN BUTTONS IN DAS RECHTE MENÜ (NUR FÜR ADMINS!)
+    let injectBtnTimer = setInterval(() => {
+        let uName = window.currentUser?.username || '';
+        let isAdm = window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin');
+        
+        let rightMenu = document.getElementById('right-menu-items');
+        if (isAdm && rightMenu && !document.getElementById('admin-btn-fonts-v61')) {
+            let btn = document.createElement('button');
+            btn.id = 'admin-btn-fonts-v61';
+            btn.className = 'bottom-btn';
+            btn.setAttribute('onclick', "if(window.closeFloatingMenus) window.closeFloatingMenus(); if(window.openFastModal) window.openFastModal('fontSettingsModalV61')");
+            btn.innerHTML = `<span class="btn-icon"><i class="fas fa-magic"></i></span><div class="btn-text-wrapper"><span class="btn-text">Yazı Tipleri <span class="de-sub">(Schriftfonts & Colors)</span></span></div>`;
+            rightMenu.appendChild(btn);
+            clearInterval(injectBtnTimer);
+        }
+    }, 1000);
+
+    // 4. ERSTELLUNG DES MODALS
+    let createModalTimer = setInterval(() => {
+        let uName = window.currentUser?.username || '';
+        let isAdm = window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin');
+
+        if (isAdm && !document.getElementById('fontSettingsModalV61')) {
+            let solidGridHtml = solidColors.map(c => `<div class="dot-v61" style="background-color:${c};" data-col="${c}" onclick="window.FontArchitect.selectColor('${c}')"></div>`).join('');
+            let neonGridHtml = neonColors.map(c => `<div class="dot-v61" style="background-color:${c}; box-shadow: 0 0 10px ${c}; border: 1px solid rgba(255,255,255,0.4);" data-col="${c}" onclick="window.FontArchitect.selectColor('${c}')"></div>`).join('');
+            let animGridHtml = animKeys.map(k => `<div class="dot-anim-v61" style="background-image:${animMap[k]};" data-col="ANIM:${k}" onclick="window.FontArchitect.selectColor('ANIM:${k}')"></div>`).join('');
+
+            let modalHtml = `
+            <div class="modal high-z-modal notranslate admin-only" id="fontSettingsModalV61" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+                <div class="modal-content font-modal-content" onclick="event.stopPropagation()">
+                    <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+                    <div class="modal-body" style="padding-top: 30px;">
+                        <div style="font-size: 3.5rem; color: #f4c542; margin-bottom: 10px; filter: drop-shadow(0 0 15px rgba(244,197,66,0.5)); text-align:center;"><i class="fas fa-magic"></i></div>
+                        <h2 class="game-title" style="font-size: 2.2rem; border-bottom: none; margin-bottom:20px; line-height: 1.2;">Yazı & Renk <span class="de-sub">(Fonts & Colors)</span></h2>
+                        
+                        <div class="v61-controls-row">
+                            <div class="custom-select-wrapper" style="flex:2;">
+                                <div id="v61-target-btn" class="custom-select-btn" onclick="window.FontArchitect.toggleDropdown('target')">
+                                    <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                                        <span id="v61-target-val" style="font-weight:bold; color:#f4c542;">Ana Logo</span>
+                                        <span class="cs-sub" id="v61-target-sub">Main Logo</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down" style="color:#f4c542;"></i>
+                                </div>
+                                <div id="v61-target-list" class="custom-select-list">
+                                    ${Object.keys(targetAreas).map(k => `
+                                        <div class="custom-select-item" onclick="window.FontArchitect.selectTarget('${k}')">
+                                            <span>${targetAreas[k].label}</span>
+                                            <span class="cs-sub">${targetAreas[k].sub}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div class="custom-select-wrapper" style="flex:1;">
+                                <div id="v61-size-btn" class="custom-select-btn" onclick="window.FontArchitect.toggleDropdown('size')">
+                                    <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                                        <span id="v61-size-val" style="font-weight:bold; color:#22c55e;">Varsayılan</span>
+                                        <span class="cs-sub" id="v61-size-sub">Standard</span>
+                                    </div>
+                                    <i class="fas fa-text-height" style="color:#22c55e;"></i>
+                                </div>
+                                <div id="v61-size-list" class="custom-select-list">
+                                    ${sizeOptions.map(s => `
+                                        <div class="custom-select-item" onclick="window.FontArchitect.selectSize('${s.val}')">
+                                            <span>${s.label}</span>
+                                            <span class="cs-sub">${s.sub}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="font-preview-box" id="v61-preview-text">Şair Misal.i - 2026</div>
+
+                        <div style="display:flex; width:100%; gap:5px; margin-bottom:15px; background:rgba(0,0,0,0.6); padding:5px; border-radius:12px; border:1px solid rgba(244,197,66,0.3);">
+                            <button class="reset-btn" id="tab-btn-fonts" onclick="window.FontArchitect.switchTab('fonts')" style="flex:1; padding:10px; font-size:0.9rem; margin:0;"><i class="fas fa-font"></i> Fontlar</button>
+                            <button class="reset-btn" id="tab-btn-colors" onclick="window.FontArchitect.switchTab('colors')" style="flex:1; padding:10px; font-size:0.9rem; margin:0; background:transparent; color:#cbd5e1; box-shadow:none;"><i class="fas fa-palette"></i> Renkler</button>
+                            <button class="reset-btn" id="tab-btn-fx" onclick="window.FontArchitect.switchTab('fx')" style="flex:1; padding:10px; font-size:0.9rem; margin:0; background:transparent; color:#cbd5e1; box-shadow:none;"><i class="fas fa-magic"></i> Efektler</button>
+                        </div>
+
+                        <div id="v61-tab-fonts" style="display:block;">
+                            <div class="font-grid" id="font-selection-grid">
+                                ${fontList.map(f => `
+                                    <div class="font-card" data-font="${f.id}" onclick="window.FontArchitect.selectFont('${f.id}')">
+                                        <div class="font-name-preview" style="font-family: ${f.css || 'inherit'};">${f.name}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div id="v61-tab-colors" style="display:none;">
+                            <div class="v61-grid-title">💎 Neon Renkler (100+)</div>
+                            <div class="color-grid-v61">${neonGridHtml}</div>
+                            <div class="v61-grid-title">🎨 Düz Renkler (300+)</div>
+                            <div class="color-grid-v61">${solidGridHtml}</div>
+                        </div>
+
+                        <div id="v61-tab-fx" style="display:none;">
+                            <div class="v61-grid-title">🔥 Epik Animasyonlar (100+)</div>
+                            <div class="color-grid-v61">${animGridHtml}</div>
+                        </div>
+
+                        <div style="display:flex; gap:10px; width:100%; margin-top:10px; flex-wrap:wrap;">
+                            <button class="reset-btn success" onclick="window.FontArchitect.save()" style="flex:1; padding:12px; border-radius:12px; min-width: 45%;"><i class="fas fa-save"></i> Alanı Kaydet</button>
+                            <button class="reset-btn warning" onclick="window.FontArchitect.resetCurrent()" style="flex:1; padding:12px; border-radius:12px; min-width: 45%;"><i class="fas fa-undo"></i> Alanı Sıfırla</button>
+                            <button class="reset-btn danger" onclick="window.FontArchitect.resetAll()" style="flex:1; padding:12px; border-radius:12px; min-width: 100%; margin-top: 5px;"><i class="fas fa-trash-alt"></i> Tümünü Standarda Çevir (Reset All)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            clearInterval(createModalTimer);
+            window.FontArchitect.init(); 
+        }
+    }, 1000);
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-select-wrapper')) {
+            document.querySelectorAll('.custom-select-list').forEach(l => l.style.display = 'none');
+        }
+    });
+
+    // 5. DAS GEHIRN: FONT ARCHITECT MANAGER V61
+    window.FontArchitect = {
+        dbName: 'misali_omni_typography_v61',
+        savedData: {}, // { 'logo_brand': { font: 'poppins', size: '2.0rem', color: '#ff0000' } }
+        currentTarget: 'logo_brand',
+        selectedFontId: 'default',
+        selectedSizeId: 'default',
+        selectedColor: null, // null = Standard
+
+        init: function() {
+            this.savedData = JSON.parse(localStorage.getItem(this.dbName) || '{}');
+            this.applyGlobalFonts(); 
+            this.updateUIFromTarget(); 
+        },
+
+        switchTab: function(tabName) {
+            ['fonts', 'colors', 'fx'].forEach(t => {
+                document.getElementById('v61-tab-' + t).style.display = (t === tabName) ? 'block' : 'none';
+                let btn = document.getElementById('tab-btn-' + t);
+                if (t === tabName) {
+                    btn.style.background = 'linear-gradient(135deg, #f4c542, #b48608)';
+                    btn.style.color = '#000';
+                    btn.style.boxShadow = '0 4px 15px rgba(244, 197, 66, 0.3)';
+                } else {
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#cbd5e1';
+                    btn.style.boxShadow = 'none';
+                }
+            });
+        },
+
+        toggleDropdown: function(type) {
+            let lT = document.getElementById('v61-target-list');
+            let lS = document.getElementById('v61-size-list');
+            if (type === 'target') { lT.style.display = lT.style.display === 'flex' ? 'none' : 'flex'; lS.style.display = 'none'; }
+            if (type === 'size') { lS.style.display = lS.style.display === 'flex' ? 'none' : 'flex'; lT.style.display = 'none'; }
+        },
+
+        selectTarget: function(key) {
+            this.currentTarget = key;
+            document.getElementById('v61-target-list').style.display = 'none';
+            let tObj = targetAreas[key];
+            document.getElementById('v61-target-val').innerText = tObj.label;
+            document.getElementById('v61-target-sub').innerText = tObj.sub;
+            this.updateUIFromTarget();
+        },
+
+        selectSize: function(val) {
+            this.selectedSizeId = val;
+            document.getElementById('v61-size-list').style.display = 'none';
+            let sObj = sizeOptions.find(s => s.val === val);
+            document.getElementById('v61-size-val').innerText = sObj.label;
+            document.getElementById('v61-size-sub').innerText = sObj.sub;
+            this.updatePreviewBox();
+        },
+
+        selectFont: function(fontId) {
+            this.selectedFontId = fontId;
+            this.updateGridUI();
+            this.updatePreviewBox();
+        },
+
+        selectColor: function(col) {
+            if (this.selectedColor === col) this.selectedColor = null; // Toggle off
+            else this.selectedColor = col;
+            this.updateGridUI();
+            this.updatePreviewBox();
+        },
+
+        updateUIFromTarget: function() {
+            let myData = this.savedData[this.currentTarget] || { font: 'default', size: 'default', color: null };
+            this.selectedFontId = myData.font || 'default';
+            this.selectedSizeId = myData.size || 'default';
+            this.selectedColor = myData.color || null;
+
+            let sObj = sizeOptions.find(s => s.val === this.selectedSizeId) || sizeOptions[0];
+            document.getElementById('v61-size-val').innerText = sObj.label;
+            document.getElementById('v61-size-sub').innerText = sObj.sub;
+            
+            this.updateGridUI();
+            this.updatePreviewBox();
+        },
+
+        updateGridUI: function() {
+            // Font Cards
+            document.querySelectorAll('.font-card').forEach(card => {
+                card.classList.remove('active');
+                if(card.dataset.font === this.selectedFontId) card.classList.add('active');
+            });
+            // Color & Anim Dots
+            document.querySelectorAll('.dot-v61, .dot-anim-v61').forEach(dot => {
+                dot.classList.remove('active');
+                if(dot.dataset.col === this.selectedColor) dot.classList.add('active');
+            });
+        },
+
+        updatePreviewBox: function() {
+            let previewText = 'Şair Misal.i - 2026';
+            if (this.currentTarget === 'time_date') previewText = '18:45 | 12.08.2026';
+            if (this.currentTarget === 'scores_badges') previewText = '150 Puan (Punkte)';
+            if (this.currentTarget === 'placeholders' || this.currentTarget === 'inputs') previewText = 'Mesaj yaz... (Schreibe...)';
+            if (this.currentTarget === 'anthems') previewText = 'Korkma, sönmez bu şafaklarda...';
+            
+            let pBox = document.getElementById('v61-preview-text');
+            if(!pBox) return;
+
+            pBox.innerText = previewText;
+
+            // Apply Font
+            let fObj = fontList.find(f => f.id === this.selectedFontId);
+            pBox.style.fontFamily = fObj ? (fObj.css || 'inherit') : 'inherit';
+            pBox.style.fontSize = this.selectedSizeId === 'default' ? '1.8rem' : this.selectedSizeId;
+
+            // Apply Color / Anim
+            pBox.className = 'font-preview-box'; // reset
+            pBox.style.color = ''; pBox.style.textShadow = ''; pBox.style.backgroundImage = ''; pBox.style.webkitTextFillColor = '';
+
+            if (this.selectedColor) {
+                if (this.selectedColor.startsWith('ANIM:')) {
+                    let aName = this.selectedColor.split(':')[1];
+                    pBox.style.backgroundImage = animMap[aName] || 'none';
+                    pBox.style.webkitBackgroundClip = 'text';
+                    pBox.style.backgroundClip = 'text';
+                    pBox.style.webkitTextFillColor = 'transparent';
+                    pBox.style.color = 'transparent';
+                    pBox.style.animation = 'anim-flow-v61 3s linear infinite';
+                } else {
+                    pBox.style.color = this.selectedColor;
+                    let isNeon = neonColors.includes(this.selectedColor);
+                    pBox.style.textShadow = isNeon ? `0 0 5px ${this.selectedColor}, 0 0 15px ${this.selectedColor}` : 'none';
+                }
+            } else {
+                pBox.style.color = '#fdfbf7'; // Default Preview Color
+            }
+        },
+
+        save: function() {
+            if (this.selectedFontId === 'default' && this.selectedSizeId === 'default' && !this.selectedColor) {
+                delete this.savedData[this.currentTarget];
+            } else {
+                this.savedData[this.currentTarget] = { font: this.selectedFontId, size: this.selectedSizeId, color: this.selectedColor };
+            }
+            
+            localStorage.setItem(this.dbName, JSON.stringify(this.savedData));
+            this.applyGlobalFonts();
+            
+            if(window.showToast) window.showToast('Alan kaydedildi! <span class="de-sub">(Bereich gespeichert)</span>');
+        },
+
+        resetCurrent: function() {
+            this.selectedFontId = 'default';
+            this.selectedSizeId = 'default';
+            this.selectedColor = null;
+            this.save();
+        },
+
+        resetAll: function() {
+            if(window.customConfirm) {
+                window.customConfirm('Tüm yazı tiplerini ve renkleri standarda çevirmek istiyor musunuz? <span class="de-sub" style="font-size:0.85em;">(Alles zurücksetzen?)</span>', () => {
+                    this.executeResetAll();
+                });
+            } else {
+                if(!confirm('Tüm ayarları sıfırlamak istiyor musunuz? (Reset All?)')) return;
+                this.executeResetAll();
+            }
+        },
+
+        executeResetAll: function() {
+            localStorage.removeItem(this.dbName);
+            this.savedData = {};
+            this.updateUIFromTarget();
+            this.applyGlobalFonts();
+            if(window.showToast) window.showToast('Tüm ayarlar sıfırlandı! <span class="de-sub">(Alles zurückgesetzt)</span>');
+        },
+
+        applyGlobalFonts: function() {
+            let styleTag = document.getElementById('misali-omni-typography');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'misali-omni-typography';
+                document.head.appendChild(styleTag);
+            }
+
+            let cssRules = '';
+
+            for (let targetKey in this.savedData) {
+                let sData = this.savedData[targetKey];
+                let fObj = fontList.find(f => f.id === sData.font);
+                
+                if (targetAreas[targetKey]) {
+                    let selectors = targetAreas[targetKey].selectors.join(', ');
+                    let ruleStr = '';
+                    let animRuleStr = '';
+                    
+                    if (fObj && fObj.css) ruleStr += `font-family: ${fObj.css} !important; `;
+                    if (sData.size && sData.size !== 'default') ruleStr += `font-size: ${sData.size} !important; `;
+
+                    if (sData.color) {
+                        if (sData.color.startsWith('ANIM:')) {
+                            let aName = sData.color.split(':')[1];
+                            let bgImg = animMap[aName] || 'none';
+                            // Für Animationen müssen wir webkit-text-fill-color und background-clip nutzen
+                            animRuleStr += `
+                                color: transparent !important; 
+                                -webkit-text-fill-color: transparent !important; 
+                                background-image: ${bgImg} !important; 
+                                background-size: 200% auto !important; 
+                                -webkit-background-clip: text !important; 
+                                background-clip: text !important; 
+                                animation: anim-flow-v61 3s linear infinite !important; 
+                                text-shadow: none !important;
+                            `;
+                        } else {
+                            let isNeon = neonColors.includes(sData.color);
+                            let shadow = isNeon ? `0 0 5px ${sData.color}, 0 0 15px ${sData.color}` : 'none';
+                            ruleStr += `color: ${sData.color} !important; -webkit-text-fill-color: ${sData.color} !important; text-shadow: ${shadow} !important; `;
+                        }
+                    }
+
+                    if (ruleStr !== '' || animRuleStr !== '') {
+                        if (targetKey === 'placeholders') {
+                            // Placeholders brauchen spezielles Targeting in CSS
+                            cssRules += `
+                                ::-webkit-input-placeholder { ${ruleStr} ${animRuleStr} }
+                                ::-moz-placeholder { ${ruleStr} ${animRuleStr} }
+                                :-ms-input-placeholder { ${ruleStr} ${animRuleStr} }
+                                ::placeholder { ${ruleStr} ${animRuleStr} }
+                                input::placeholder, textarea::placeholder { ${ruleStr} ${animRuleStr} }
+                            `;
+                        } else {
+                            cssRules += `${selectors} { ${ruleStr} ${animRuleStr} }\n`;
+                        }
+                    }
+                }
+            }
+            styleTag.innerHTML = cssRules;
+        }
+    };
+
+    // Stellt sicher, dass die Fonts direkt beim Neuladen der Seite angewendet werden
+    setTimeout(() => {
+        if(window.FontArchitect) window.FontArchitect.init();
+    }, 1500);
+
+})();
+</script>
+
+<style>
+    /* Modal Base - Minimal, Skaliert & Flex-Lock (Kein Overlap mehr!) */
+    .mu-modal-content { display: flex !important; flex-direction: column !important; max-width: 1050px !important; width: 95vw !important; max-height: 90vh !important; background: linear-gradient(145deg, #050b14, #0a192f) !important; border: 1px solid #f4c542 !important; box-shadow: 0 10px 50px rgba(0,0,0,0.95), inset 0 0 15px rgba(244,197,66,0.1) !important; z-index: 100015 !important; border-radius: 12px !important; font-family: 'Poppins', sans-serif !important; }
+    
+    .modal-body.mu-body { display: flex !important; flex-direction: column !important; flex: 1 !important; overflow: hidden !important; padding: 15px !important; }
+
+    /* Header Bereich (Fixiert) */
+    .mu-header-area { flex-shrink: 0 !important; }
+    .mu-main-title { font-size: 1.6rem !important; color: #f4c542 !important; text-align: center !important; margin-bottom: 2px !important; margin-top: 5px !important; font-family: 'Playfair Display', serif !important; font-weight: bold !important; text-shadow: 0 0 10px rgba(244,197,66,0.4) !important; letter-spacing: 1px !important; }
+    .mu-sub-title { text-align: center !important; color: #64748b !important; font-family: monospace !important; margin-bottom: 15px !important; font-size: 0.8rem !important;}
+
+    /* Device Tabs - Fixiert & Kompakt */
+    .mu-device-tabs { display: flex !important; flex-shrink: 0 !important; width: 100% !important; border-bottom: 2px solid rgba(255,255,255,0.05) !important; margin-bottom: 15px !important; background: rgba(0,0,0,0.4) !important; border-radius: 8px 8px 0 0 !important; }
+    .mu-device-tab-btn { flex: 1 !important; padding: 8px 5px !important; background: transparent !important; border: none !important; border-bottom: 3px solid transparent !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; }
+    .mu-device-tab-btn i { font-size: 1.1rem !important; color: #64748b !important; }
+    .mu-device-tab-btn strong { font-size: 0.7rem !important; color: #64748b !important; text-transform: uppercase !important; }
+    .mu-device-tab-btn.active { border-bottom: 3px solid #f4c542 !important; background: rgba(244, 197, 66, 0.1) !important; }
+    .mu-device-tab-btn.active i, .mu-device-tab-btn.active strong { color: #f4c542 !important; }
+    
+    /* Category Tabs - Fixiert & Kompakt */
+    .mu-category-tabs { display: flex !important; flex-shrink: 0 !important; flex-wrap: wrap !important; gap: 6px !important; margin-bottom: 15px !important; justify-content: center !important; }
+    .mu-cat-tab-btn { padding: 6px 10px !important; font-size: 0.75rem !important; background: rgba(0,0,0,0.5) !important; color: #cbd5e1 !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 6px !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; align-items: center !important; gap: 5px !important; }
+    .mu-cat-tab-btn.active { background: #f4c542 !important; color: #000 !important; font-weight: bold !important; border-color: #f4c542 !important; }
+
+    /* Panels - SCROLLBAR NUR HIER! */
+    .mu-panel { display: none !important; flex: 1 !important; padding: 15px !important; background: rgba(255,255,255,0.02) !important; border-radius: 8px !important; margin-bottom: 10px !important; border: 1px inset rgba(255,255,255,0.03) !important; overflow-y: auto !important; }
+    .mu-panel.active { display: block !important; }
+    .mu-panel::-webkit-scrollbar { width: 5px !important; } .mu-panel::-webkit-scrollbar-thumb { background: #f4c542 !important; border-radius: 10px !important; }
+    
+    .mu-settings-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px 20px !important; align-items: start !important; }
+    @media (max-width: 900px) { .mu-settings-grid { grid-template-columns: 1fr !important; } }
+    .mu-section-title { grid-column: 1 / -1 !important; color: #f4c542 !important; font-size: 0.85rem !important; margin-top: 5px !important; margin-bottom: 2px !important; border-bottom: 1px solid rgba(244,197,66,0.2) !important; padding-bottom: 3px !important; text-transform: uppercase !important; font-weight: bold !important; }
+
+    /* Rows & Inputs - Skaliert */
+    .mu-setting-row { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 6px 10px !important; background: rgba(0,0,0,0.3) !important; border-radius: 6px !important; border: 1px solid rgba(255,255,255,0.05) !important; gap: 8px !important; }
+    .mu-label { color: #fdfbf7 !important; font-size: 0.8rem !important; display: flex !important; flex-direction: column !important; flex: 1 !important; min-width: 130px !important; }
+    .mu-label .de-sub { font-size: 0.7em !important; color: #94a3b8 !important; }
+    
+    .mu-control-group { display: flex !important; align-items: center !important; gap: 6px !important; justify-content: flex-end !important; flex: 1 !important; min-width: 180px !important; }
+    
+    .mu-select, .mu-input { background: rgba(0,0,0,0.8) !important; color: #fff !important; border: 1px solid #f4c542 !important; padding: 6px 8px !important; border-radius: 6px !important; font-size: 0.75rem !important; outline: none !important; width: 100% !important; max-width: 200px !important; }
+    .mu-select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23f4c542" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; }
+    
+    .mu-undo-btn { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239,68,68,0.3) !important; border-radius: 6px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; height: 28px !important; width: 28px !important; flex-shrink: 0 !important; font-size: 0.85rem !important;}
+    .mu-undo-btn:disabled { opacity: 0.2 !important; cursor: not-allowed !important; }
+
+    /* Switch - Skaliert */
+    .mu-switch { position: relative !important; display: inline-block !important; width: 36px !important; height: 18px !important; flex-shrink: 0 !important; }
+    .mu-switch input { opacity: 0 !important; width: 0 !important; height: 0 !important; }
+    .mu-slider { position: absolute !important; cursor: pointer !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; background-color: rgba(255,255,255,0.1) !important; border-radius: 18px !important; border: 1px solid rgba(255,255,255,0.2) !important; transition: .3s !important;}
+    .mu-slider:before { position: absolute !important; content: "" !important; height: 12px !important; width: 12px !important; left: 2px !important; bottom: 2px !important; background-color: #94a3b8 !important; border-radius: 50% !important; transition: .3s !important;}
+    .mu-switch input:checked + .mu-slider { background-color: rgba(244, 197, 66, 0.2) !important; border-color: #f4c542 !important; }
+    .mu-switch input:checked + .mu-slider:before { transform: translateX(18px) !important; background-color: #f4c542 !important; }
+
+    /* Action Buttons (Fixiert am Boden) */
+    .mu-actions-area { flex-shrink: 0 !important; display:flex !important; gap:8px !important; width:100% !important; margin-top:10px !important; flex-wrap:wrap !important; }
+    .btn-global-save { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: none !important; color: #000 !important; padding: 10px !important; border-radius: 8px !important; font-weight: bold !important; cursor: pointer !important; font-size: 0.95rem !important; width: 100% !important; text-transform: uppercase !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;}
+    .btn-local-reset { background: rgba(245, 158, 11, 0.1) !important; border: 1px solid #f59e0b !important; color: #f59e0b !important; padding: 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; flex: 1 !important; font-weight:bold !important;}
+    
+    .file-upload-btn { background: rgba(244,197,66,0.1) !important; border: 1px dashed #f4c542 !important; color: #f4c542 !important; padding: 6px !important; border-radius: 6px !important; cursor: pointer !important; text-align: center !important; width: 100% !important; max-width: 120px !important; font-size: 0.75rem !important; display:inline-block !important;}
+    .mu-preview-img { width: 28px !important; height: 28px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #f4c542 !important; display: none; margin-left: 5px !important; }
+
+    @keyframes ybAnimGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+</style>
+
+<script>
+(function() {
+    window.purgeOldVersions = function() {
+        for (let i = 20; i <= 77; i++) {
+            let oldModule = document.getElementById('root-v' + i);
+            if (oldModule) oldModule.remove();
+        }
+    };
+    window.purgeOldVersions();
+    setTimeout(window.purgeOldVersions, 1000); 
+
+    if (window.MegaUltraReady) return;
+    window.MegaUltraReady = true;
+
+    // 1. INJEKTION DES ADMIN BUTTONS
+    let injectYbTimer = setInterval(() => {
+        let uName = window.currentUser?.username || '';
+        let isAdm = window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin');
+        let rightMenu = document.getElementById('right-menu-items');
+        
+        if (isAdm && rightMenu && !document.getElementById('admin-btn-megaultra')) {
+            let btn = document.createElement('button');
+            btn.id = 'admin-btn-megaultra';
+            btn.className = 'bottom-btn';
+            btn.setAttribute('onclick', "if(window.closeFloatingMenus) window.closeFloatingMenus(); if(window.openFastModal) window.openFastModal('megaUltraModal')");
+            btn.innerHTML = `<span class="btn-icon"><i class="fas fa-layer-group"></i></span><div class="btn-text-wrapper"><span class="btn-text">Mega Ultra Mode</span></div>`;
+            rightMenu.appendChild(btn);
+            clearInterval(injectYbTimer);
+        }
+    }, 1000);
+
+    // 2. DATENBANKEN
+    window.muThemes = [
+        { id: 'default', n: 'Klasik Altın (Orijinal)', bg: '#030712', cBg: '#0a192f', hBg: '#000000', acc: '#f4c542', anim: false },
+        { id: 'oled_neon', n: 'OLED Neon Mavi', bg: '#000000', cBg: '#050505', hBg: '#000000', acc: '#22d3ee', anim: false },
+        { id: 'cyber', n: 'Cyberpunk 2077', bg: '#0f0c29', cBg: '#302b63', hBg: '#24243e', acc: '#ff00ff', anim: false },
+        { id: 'blood', n: 'Vampire Blood', bg: '#1a0505', cBg: '#330a0a', hBg: '#0a0000', acc: '#ef4444', anim: false }
+    ];
+    const baseColors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
+    for (let i = 0; i < 496; i++) {
+        let isAnim = i % 3 === 0; 
+        let cIdx = i % baseColors.length;
+        let c1 = baseColors[cIdx];
+        let c2 = baseColors[(cIdx + 4) % baseColors.length];
+        window.muThemes.push({
+            id: 'auto_theme_' + i, n: (isAnim ? '🔥 Animasyonlu Tema ' : '🎨 Özel Tema ') + (i + 1),
+            bg: isAnim ? `linear-gradient(-45deg, #000000, ${c1}22, ${c2}22, #000000)` : '#050505',
+            cBg: isAnim ? `rgba(20,20,20,0.8)` : `color-mix(in srgb, ${c1} 15%, #111)`, hBg: '#000000', acc: c1, anim: isAnim
+        });
+    }
+
+    window.muHeaders = [
+        { id: 'default', n: 'Orijinal (Klasik)', pt: '120px', css: '' },
+        { id: 'centered', n: 'Tam Merkez (Zentriert)', pt: '160px', css: 'header#main-header { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; padding-top:10px !important; } .header-top { display:flex !important; flex-direction:column !important; align-items:center !important; position:static !important; height:auto !important; } .logo-and-time, .header-search-wrapper, .header-right { position:static !important; transform:none !important; width:100% !important; display:flex !important; justify-content:center !important; margin-bottom:10px !important; } .header-search { position:static !important; width: 100% !important; max-width: 500px !important; } .header-nav-bar { position:static !important; justify-content:center !important; } nav#main-nav { margin:0 auto !important; }' },
+        { id: 'floating', n: 'Uçan Menü (Floating)', pt: '180px', css: 'header#main-header { top: 15px !important; width: 94% !important; left: 3% !important; border-radius: 20px !important; border: 1px solid var(--theme-acc, #f4c542) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.8) !important; }' },
+        { id: 'split', n: 'Ayrık (Split)', pt: '120px', css: 'header#main-header { padding: 0 2% !important; } .header-search-wrapper { display: none !important; }' }
+    ];
+    let aligns = ['flex-start', 'center', 'flex-end', 'space-between', 'space-around'];
+    let rads = ['0px', '10px', '25px', '50px'];
+    let borders = ['dashed', 'dotted', 'double', 'solid'];
+    for(let i = 0; i < 46; i++) {
+        window.muHeaders.push({ id: 'auto_header_' + i, n: 'Header Varyasyon ' + (i+1), pt: '130px', css: `header#main-header { border-bottom: ${Math.max(1, i%5)}px ${borders[i%4]} var(--theme-acc, #f4c542) !important; justify-content: ${aligns[i%5]} !important; border-radius: 0 0 ${rads[i%4]} ${rads[i%4]} !important; }` });
+    }
+
+    // 🚀 DAHA ETKİLİ ŞEKİLLER (SHAPES)
+    window.muShapes = [
+        { id: 'default', n: 'Orijinal (Klasik)', css: 'border-radius: 12px !important; clip-path: none !important;' },
+        { id: 'square', n: 'Keskin Dörtgen (Square)', css: 'border-radius: 0 !important; clip-path: none !important;' },
+        { id: 'rounded', n: 'Yumuşak Oval (Rounded)', css: 'border-radius: 20px !important; clip-path: none !important;' },
+        { id: 'pill', n: 'Tam Oval (Pill)', css: 'border-radius: 45px !important; clip-path: none !important;' },
+        { id: 'leaf_l', n: 'Sol Yaprak', css: 'border-radius: 40px 0 40px 0 !important; clip-path: none !important;' },
+        { id: 'leaf_r', n: 'Sağ Yaprak', css: 'border-radius: 0 40px 0 40px !important; clip-path: none !important;' },
+        { id: 'teardrop', n: 'Su Damlası', css: 'border-radius: 50% 0 50% 50% !important; clip-path: none !important;' },
+        { id: 'arch', n: 'Kemer (Arch)', css: 'border-radius: 40px 40px 5px 5px !important; clip-path: none !important;' },
+        { id: 'blob', n: 'Amorf (Blob)', css: 'border-radius: 25px 50px 30px 60px !important; clip-path: none !important;' },
+        { id: 'cyber', n: 'Cyberpunk Kesik', css: 'clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px) !important; border-radius: 0 !important;' },
+        { id: 'diamond', n: 'Elmas (Diamond)', css: 'clip-path: polygon(5% 0, 95% 0, 100% 5%, 100% 95%, 95% 100%, 5% 100%, 0 95%, 0 5%) !important; border-radius: 0 !important;' },
+        { id: 'octagon', n: 'Sekizgen (Octagon)', css: 'clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0% calc(100% - 15px), 0% 15px) !important; border-radius: 0 !important;' },
+        { id: 'folded', n: 'Kıvrık Köşe', css: 'clip-path: polygon(0 0, calc(100% - 25px) 0, 100% 25px, 100% 100%, 0 100%) !important; border-radius: 0 !important;' },
+        { id: 'ticket', n: 'Bilet (Ticket)', css: 'clip-path: polygon(0 0, 100% 0, 100% calc(50% - 15px), calc(100% - 15px) 50%, 100% calc(50% + 15px), 100% 100%, 0 100%, 0 calc(50% + 15px), 15px 50%, 0 calc(50% - 15px)) !important; border-radius: 0 !important;' }
+    ];
+
+    window.muElements = [
+        { id: 'default', n: 'Orijinal' },
+        { id: 'glass', n: 'Buzlu Cam (Glass)', css: 'background: rgba(255,255,255,0.05) !important; backdrop-filter: blur(15px) !important; border: 1px solid rgba(255,255,255,0.2) !important;' },
+        { id: 'neon', n: 'Neon Çerçeve', css: 'background: #000 !important; border: 2px solid var(--theme-acc, #f4c542) !important; box-shadow: 0 0 15px var(--theme-acc, #f4c542) !important;' },
+        { id: 'ghost', n: 'Şeffaf Hayalet', css: 'background: transparent !important; border: 1px solid var(--theme-acc, #f4c542) !important; color: var(--theme-acc, #f4c542) !important;' },
+        { id: 'pill', n: 'Hap Tasarım (Pill)', css: 'border-radius: 50px !important;' }
+    ];
+    for(let i=0; i<45; i++) {
+        window.muElements.push({ id: 'auto_el_'+i, n: 'Stil Varyasyon ' + (i+1), css: `border-radius: ${i%20}px !important; border: ${i%3}px solid var(--theme-acc) !important; opacity: ${(100-(i%20))/100} !important;` });
+    }
+
+    // 3. MODAL ERSTELLUNG (KLEIN & KOMPAKT)
+    let createYbModalTimer = setInterval(() => {
+        let uName = window.currentUser?.username || '';
+        let isAdm = window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin');
+
+        if (isAdm && !document.getElementById('megaUltraModal')) {
+            
+            function makeSelect(id, label, optionsArr) {
+                let opts = optionsArr.map(i => {
+                    if (typeof i === 'string') { let p = i.split('|'); return `<option value="${p[0]}">${p[1]}</option>`; }
+                    else { return `<option value="${i.id}">${i.n}</option>`; }
+                }).join('');
+                return `
+                <div class="mu-setting-row">
+                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-control-group">
+                        <select id="mu-${id}" class="mu-select" onchange="window.MegaUltra.updateLive('${id}')">${opts}</select>
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>`;
+            }
+
+            function makeToggle(id, label) {
+                return `
+                <div class="mu-setting-row">
+                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-control-group">
+                        <label class="mu-switch"><input type="checkbox" id="mu-${id}" checked onchange="window.MegaUltra.updateLive('${id}')"><span class="mu-slider"></span></label>
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>`;
+            }
+
+            function makeInput(id, label) {
+                return `
+                <div class="mu-setting-row">
+                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-control-group">
+                        <input type="text" id="mu-${id}" class="mu-input" onkeyup="window.MegaUltra.updateLive('${id}')">
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>`;
+            }
+
+            function makeImageUpload(id, label) {
+                return `
+                <div class="mu-setting-row">
+                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-control-group" style="justify-content: flex-end;">
+                        <img id="preview-${id}" class="mu-preview-img">
+                        <label class="file-upload-btn"><i class="fas fa-upload"></i> Dosya Seç
+                            <input type="file" accept="image/*" style="display:none;" onchange="window.MegaUltra.handleImage(this, '${id}')">
+                        </label>
+                        <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>`;
+            }
+
+            let modalHtml = `
+            <div class="modal high-z-modal notranslate admin-only" id="megaUltraModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+                <div class="modal-content mu-modal-content" onclick="event.stopPropagation()">
+                    <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+                    
+                    <div class="modal-body mu-body">
+                        <div class="mu-header-area">
+                            <h2 class="mu-main-title">MEGA ULTRA MODE ŞAİR MİSAL.İ 👑</h2>
+                            <div class="mu-sub-title">(The Executioner CMS - Minimal Edition)</div>
+                            
+                            <div class="mu-device-tabs" id="mu-device-tabs-container">
+                                <div class="mu-device-tab-btn active" data-dev="desktop" onclick="window.MegaUltra.switchDevice('desktop')"><i class="fas fa-desktop"></i><strong>Desktop</strong></div>
+                                <div class="mu-device-tab-btn" data-dev="laptop" onclick="window.MegaUltra.switchDevice('laptop')"><i class="fas fa-laptop"></i><strong>Laptop</strong></div>
+                                <div class="mu-device-tab-btn" data-dev="mobile" onclick="window.MegaUltra.switchDevice('mobile')"><i class="fas fa-mobile-alt"></i><strong>Mobil</strong></div>
+                                <div class="mu-device-tab-btn" data-dev="ios" onclick="window.MegaUltra.switchDevice('ios')"><i class="fab fa-apple"></i><strong>iOS</strong></div>
+                                <div class="mu-device-tab-btn" data-dev="android" onclick="window.MegaUltra.switchDevice('android')"><i class="fab fa-android"></i><strong>Android</strong></div>
+                            </div>
+
+                            <div class="mu-category-tabs">
+                                <div class="mu-cat-tab-btn active" onclick="window.MegaUltra.switchCategory('layout')"><i class="fas fa-border-all"></i> Boyut & Görünüm</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('shapes')"><i class="fas fa-shapes"></i> Şekiller (Shapes)</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('themes')"><i class="fas fa-palette"></i> Temalar & Stiller</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('texts')"><i class="fas fa-pen"></i> Metinler & Resimler</div>
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-layout" class="mu-panel active">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Boyutlar (Größen)</div>
+                                ${makeSelect('cardSize', 'Kart Boyutu (Karten)', ['compact|Kompakt', 'normal|Normal', 'large|Büyük', 'xlarge|Devasa'])}
+                                ${makeSelect('siteWidth', 'Site Genişliği (Webseite)', ['narrow|Dar (1000px)', 'normal|Normal (1400px)', '2k|Geniş (2K)', '4k|Ultra Geniş (4K)', 'fluid|Tam Ekran (100%)'])}
+                                ${makeSelect('cardGap', 'Kart Boşluğu (Abstand)', ['none|Sıfır', 'small|Az', 'normal|Normal', 'large|Çok'])}
+                                ${makeSelect('textAlign', 'Metin Hizalama (Text)', ['left|Sola Dayalı', 'center|Ortalı', 'justify|İki Yana Yasla'])}
+                                
+                                <div class="mu-section-title">Görünürlük (Sichtbarkeit)</div>
+                                ${makeToggle('showTicker', 'Kayan Yazı (Ticker)')}
+                                ${makeToggle('showWeather', 'Hava Durumu (Wetter)')}
+                                ${makeToggle('showZodiac', 'Burç İkonu (Zodiac)')}
+                                ${makeToggle('showScore', 'Puan Rozeti (Scores)')}
+                                ${makeToggle('showSearch', 'Arama Çubuğu (Suche)')}
+                                ${makeToggle('showFooter', 'Alt Bilgi (Footer)')}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-shapes" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Kart & Pencere Şekilleri (Card & Modal Shapes)</div>
+                                ${makeSelect('cardShape', 'Kart Şekli (Karten Form)', window.muShapes)}
+                                ${makeSelect('modalShape', 'Pencere Şekli (Modal Form)', window.muShapes)}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-themes" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Temalar & Header (Themes & Layout)</div>
+                                ${makeSelect('themeId', 'Global Tema (Theme)', window.muThemes)}
+                                ${makeSelect('headerLayout', 'Header Düzeni (Layout)', window.muHeaders)}
+                                
+                                <div class="mu-section-title">Buton & Ekstra Stiller (Styles)</div>
+                                ${makeSelect('adminMainBtn', 'Admin Butonları', window.muElements)}
+                                ${makeSelect('userMainBtn', 'User Butonları', window.muElements)}
+                                ${makeSelect('sidebarStyle', 'Sidebar Tasarımı', window.muElements)}
+                                ${makeSelect('modalStyle', 'Pencere (Modal)', window.muElements)}
+                                
+                                <div class="mu-section-title">Özel Efektler & Araçlar (FX & Widgets)</div>
+                                ${makeSelect('specialFx', 'Genel Efektler', ['off|Kapalı', 'glass|Buzlu Cam (Glass)', 'oled|OLED True Black', 'retro|Retro CRT TV', 'hologram|Hologram', 'bw|Siyah Beyaz'])}
+                                ${makeSelect('clockStyle', 'Saat Görünümü', ['both|Dijital + Analog', 'digital|Sadece Dijital', 'analog|Sadece Analog', 'minimal|Minimalist'])}
+                                ${makeSelect('weatherStyle', 'Hava Durumu', ['detailed|Detaylı (Sözlü)', 'compact|Kompakt', 'icon|Sadece İkon'])}
+                                ${makeSelect('calendarStyle', 'Takvim Tasarımı', ['default|Orijinal', 'glass|Cam Efekti', 'dark|Koyu Tema', 'neon|Neon Çerçeve'])}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-texts" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Metinler & İçerik (Texte)</div>
+                                ${makeInput('textHero', 'Ana Başlık (Header Title)')}
+                                ${makeInput('textSubTr', 'Alt Başlık TR (Subtitle)')}
+                                ${makeInput('textSubDe', 'Alt Başlık DE (Subtitle)')}
+                                ${makeInput('textInfo', 'Bilgi Metni (Info Text)')}
+                                ${makeInput('textFooter', 'Footer Metni (Copyright)')}
+                                ${makeInput('textImprint', 'İmpressum')}
+                                ${makeInput('textAboutTr', 'Hakkımda TR (About me)')}
+                                ${makeInput('textAboutDe', 'Hakkımda DE (About me)')}
+                                ${makeInput('textCookies', 'Cookies')}
+                                ${makeInput('textPrivacy', 'Datenschutz')}
+                                
+                                <div class="mu-section-title">Resimler (Bilder URLs)</div>
+                                ${makeImageUpload('imgHeader', 'Mini Profil (Header)')}
+                                ${makeImageUpload('imgHome', 'Büyük Profil (Startseite)')}
+                                ${makeImageUpload('imgAbout', 'Hakkımda Resmi (Profil)')}
+                            </div>
+                        </div>
+
+                        <div class="mu-actions-area">
+                            <button class="btn-local-reset" style="color:white; border-color: rgba(255,255,255,0.2);" onclick="window.MegaUltra.save()"><i class="fas fa-save"></i> Cihaza Kaydet</button>
+                            <button class="btn-local-reset" onclick="window.MegaUltra.undoAllLocal()"><i class="fas fa-undo"></i> Sıfırla (Reset)</button>
+                            <button class="btn-global-save" style="flex:2; min-width: 100%;" onclick="window.MegaUltra.publishGlobal()"><i class="fas fa-globe"></i> GLOBAL SAYFADA UYGULA</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            clearInterval(createYbModalTimer);
+            window.MegaUltra.init(); 
+        }
+    }, 1000);
+
+    // 4. THE GEHIRN
+    window.MegaUltra = {
+        dbName: 'misali_megaultra_master_final',
+        currentDevice: 'desktop', 
+        settings: { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} },
+        history: { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} }, 
+        globalSettings: {}, 
+
+        init: function() {
+            let saved = localStorage.getItem(this.dbName);
+            if(saved) {
+                this.settings = JSON.parse(saved);
+                if(!this.settings.global) this.settings.global = {};
+            }
+
+            let w = window.innerWidth;
+            let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            let isAndroid = /android/i.test(navigator.userAgent);
+
+            if (w <= 768) {
+                if (isIOS) this.currentDevice = 'ios';
+                else if (isAndroid) this.currentDevice = 'android';
+                else this.currentDevice = 'mobile';
+            } else if (w > 768 && w <= 1400) {
+                this.currentDevice = 'laptop';
+            } else {
+                this.currentDevice = 'desktop';
+            }
+
+            this.listenToGlobalFirebase();
+            this.switchDevice(this.currentDevice);
+        },
+
+        listenToGlobalFirebase: function() {
+            if(typeof firebase !== 'undefined' && firebase.database) {
+                firebase.database().ref('misaliData/MegaUltraDesignFinal').on('value', snap => {
+                    let val = snap.val();
+                    if(val) {
+                        this.globalSettings = val;
+                        let u = window.currentUser;
+                        let isAdm = u && (u.role === 'admin' || u.username.toLowerCase().includes('admin'));
+                        if (!isAdm) {
+                            this.settings = this.globalSettings;
+                            this.injectCSS();
+                            this.injectContent();
+                        }
+                    }
+                });
+            }
+        },
+
+        publishGlobal: function() {
+            if(window.customConfirm) {
+                window.customConfirm('Bu tasarımı <b>TÜM KULLANICILAR</b> için canlıya almak istiyor musunuz? <span class="de-sub"><br>(Für alle User veröffentlichen?)</span>', () => {
+                    this.executeGlobalPublish();
+                });
+            } else {
+                if(confirm('Global Publish?')) this.executeGlobalPublish();
+            }
+        },
+
+        executeGlobalPublish: function() {
+            if(typeof firebase !== 'undefined' && firebase.database) {
+                firebase.database().ref('misaliData/MegaUltraDesignFinal').set(this.settings)
+                .then(() => {
+                    if(window.showToast) window.showToast('🌍 Global tasarım güncellendi! <span class="de-sub">(Live)</span>');
+                })
+                .catch(e => { if(window.customAlert) window.customAlert('Hata: ' + e.message, '❌'); });
+            }
+        },
+
+        switchDevice: function(device) {
+            this.currentDevice = device;
+            
+            document.querySelectorAll('.mu-device-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            let activeBtn = document.querySelector(`.mu-device-tab-btn[data-dev="${device}"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            this.applyToUI();
+            this.updateUndoButtons();
+            this.injectCSS();
+            this.injectContent();
+        },
+
+        switchCategory: function(catName) {
+            document.querySelectorAll('.mu-cat-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.mu-cat-tab-btn[onclick*="'${catName}'"]`).classList.add('active');
+            
+            document.querySelectorAll('.mu-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('mu-panel-' + catName).classList.add('active');
+        },
+
+        getDefaults: function() {
+            return {
+                cardSize: 'normal', siteWidth: 'normal', cardGap: 'normal', textAlign: 'center',
+                showTicker: true, showWeather: true, showZodiac: true, showScore: true, showSearch: true, showFooter: true,
+                cardShape: 'default', modalShape: 'default',
+                headerLayout: 'default', themeId: 'default', specialFx: 'off',
+                adminMainBtn: 'default', userMainBtn: 'default', sidebarStyle: 'default', modalStyle: 'default',
+                clockStyle: 'both', weatherStyle: 'detailed', calendarStyle: 'default',
+                textHero: '', textSubTr: '', textSubDe: '', textInfo: '', textFooter: '', textAboutTr: '', textAboutDe: '', textImprint: '', textCookies: '', textPrivacy: '',
+                imgHeader: '', imgHome: '', imgAbout: ''
+            };
+        },
+
+        readFromUI: function(key) {
+            let el = document.getElementById('mu-' + key);
+            if (!el) return null;
+            if (el.type === 'checkbox') return el.checked;
+            return el.value;
+        },
+
+        applyToUI: function() {
+            let defs = this.getDefaults();
+            let s = this.settings[this.currentDevice] || {};
+            let g = this.settings.global || {}; 
+            
+            Object.keys(defs).forEach(key => {
+                let val = (key.includes('text') || key.includes('img')) ? g[key] : s[key];
+                if (val === undefined) val = defs[key];
+                
+                let el = document.getElementById('mu-' + key);
+                if (el) {
+                    if (el.type === 'checkbox') el.checked = val;
+                    else el.value = val;
+                }
+            });
+
+            ['imgHeader', 'imgHome', 'imgAbout'].forEach(k => {
+                let p = document.getElementById('preview-' + k);
+                if(p) {
+                    if(g[k]) { p.src = g[k]; p.style.display = 'block'; }
+                    else { p.style.display = 'none'; }
+                }
+            });
+        },
+
+        updateLive: function(key, overrideVal = null) {
+            let val = overrideVal !== null ? overrideVal : this.readFromUI(key);
+            let isGlobal = key.includes('text') || key.includes('img');
+
+            let targetStore = isGlobal ? this.settings.global : this.settings[this.currentDevice];
+            let historyStore = isGlobal ? this.history.global : this.history[this.currentDevice];
+
+            if (!this.settings[this.currentDevice]) this.settings[this.currentDevice] = {};
+            if (!this.settings.global) this.settings.global = {};
+
+            if(!historyStore[key]) {
+                let oldVal = targetStore[key] !== undefined ? targetStore[key] : (isGlobal ? '' : this.getDefaults()[key]);
+                historyStore[key] = oldVal;
+            }
+
+            targetStore[key] = val;
+            
+            this.updateUndoButtons();
+            
+            if(isGlobal) this.injectContent();
+            else this.injectCSS();
+        },
+
+        handleImage: function(inputEl, key) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let b64 = e.target.result;
+                let p = document.getElementById('preview-' + key);
+                if(p) { p.src = b64; p.style.display = 'block'; }
+                this.updateLive(key, b64); 
+            };
+            reader.readAsDataURL(file);
+        },
+
+        undo: function(key) {
+            let isGlobal = key.includes('text') || key.includes('img');
+            let targetStore = isGlobal ? this.settings.global : this.settings[this.currentDevice];
+            let historyStore = isGlobal ? this.history.global : this.history[this.currentDevice];
+
+            if (historyStore[key] !== undefined) {
+                targetStore[key] = historyStore[key];
+                delete historyStore[key];
+                
+                this.applyToUI();
+                this.updateUndoButtons();
+                
+                if(isGlobal) this.injectContent();
+                else this.injectCSS();
+            }
+        },
+
+        updateUndoButtons: function() {
+            let defs = this.getDefaults();
+            Object.keys(defs).forEach(key => {
+                let btn = document.getElementById('undo-' + key);
+                let isGlobal = key.includes('text') || key.includes('img');
+                let hStore = isGlobal ? this.history.global : this.history[this.currentDevice];
+                if (btn) btn.disabled = (hStore[key] === undefined);
+            });
+        },
+
+        save: function() {
+            this.history = { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} };
+            this.updateUndoButtons();
+            localStorage.setItem(this.dbName, JSON.stringify(this.settings));
+            if(window.showToast) window.showToast('Cihaza kaydedildi! <span class="de-sub">(Lokal gespeichert)</span>');
+        },
+
+        undoAllLocal: function() {
+            if(window.customConfirm) {
+                window.customConfirm('Lokal ayarları sıfırlamak istiyor musunuz? <span class="de-sub">(Lokal zurücksetzen?)</span>', () => {
+                    localStorage.removeItem(this.dbName);
+                    this.settings = this.globalSettings || { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} };
+                    this.injectCSS();
+                    this.injectContent();
+                    this.applyToUI();
+                });
+            }
+        },
+
+        injectContent: function() {
+            let g = this.settings.global || {};
+            
+            // Header
+            let hero = document.querySelector('h1.hero-title'); if (hero && g.textHero) hero.innerHTML = g.textHero;
+            let sub = document.querySelector('.hero-subtitle');
+            if (sub && (g.textSubTr || g.textSubDe)) {
+                let txtTr = g.textSubTr || "Gönülden dile, dilden şiire.";
+                let txtDe = g.textSubDe || "(Vom Herzen auf die Zunge, von der Zunge ins Gedicht)";
+                sub.innerHTML = `${txtTr} <span class="de-sub" style="font-family: 'Poppins', sans-serif; font-size: 0.55em; color: #94a3b8; letter-spacing: normal; font-style: normal; margin-left: 0;">${txtDe}</span>`;
+            }
+            let info = document.querySelector('.hero-info span:first-child'); if (info && g.textInfo) info.innerText = g.textInfo;
+
+            // Seiten-Inhalte
+            let ftr = document.querySelector('footer > div:last-child'); if(ftr && g.textFooter) ftr.innerHTML = g.textFooter;
+            let abTr = document.querySelector('#hakkimda-view > div > div:last-child > div:nth-child(2) p'); if(abTr && g.textAboutTr) abTr.innerHTML = g.textAboutTr;
+            let abDe = document.querySelector('#hakkimda-view > div > div:last-child > div:nth-child(3) p'); if(abDe && g.textAboutDe) abDe.innerHTML = g.textAboutDe;
+            
+            let imp = document.querySelector('#impressum-view > div > p:last-child'); if(imp && g.textImprint) imp.innerHTML = g.textImprint;
+            let cook = document.querySelector('#cookie-view > div > p:nth-child(2)'); if(cook && g.textCookies) cook.innerHTML = g.textCookies;
+            let data = document.querySelector('#datenschutz-view > div > p:nth-child(2)'); if(data && g.textPrivacy) data.innerHTML = g.textPrivacy;
+
+            // Bilder Injektion
+            if(g.imgHeader) { let el = document.getElementById('user-avatar'); if(el) el.src = g.imgHeader; }
+            if(g.imgHome) { let el = document.getElementById('home-profile-pic'); if(el) el.src = g.imgHome; }
+            if(g.imgAbout) { let els = document.querySelectorAll('.bio-pic'); els.forEach(el => el.src = g.imgAbout); }
+        },
+
+        buildCSSString: function(device) {
+            let s = this.settings[device] || {};
+            let defs = this.getDefaults();
+            let getVal = (key) => s[key] !== undefined ? s[key] : (this.globalSettings[device] && this.globalSettings[device][key] !== undefined ? this.globalSettings[device][key] : defs[key]);
+
+            let css = '';
+
+            // 1. LAYOUT GRÖSSEN
+            let cSize = getVal('cardSize');
+            if (cSize === 'compact') css += `.card, .game-card, .notif-card, .section-box { padding: 15px !important; min-height: 80px !important; } .card h3 { font-size: 1.1rem !important; } .card-stats-badge { transform: scale(0.8); right: 5px; bottom: 5px; }\n`;
+            else if (cSize === 'large') css += `.card, .game-card, .notif-card, .section-box { padding: 40px !important; min-height: 200px !important; } .card h3 { font-size: 1.8rem !important; }\n`;
+            else if (cSize === 'xlarge') css += `.card, .game-card, .notif-card, .section-box { padding: 60px !important; min-height: 300px !important; } .card h3 { font-size: 2.5rem !important; }\n`;
+
+            let sWidth = getVal('siteWidth');
+            if (sWidth === 'narrow') css += `section > div[style*="max-width"] { max-width: 900px !important; }\n`;
+            else if (sWidth === '2k') css += `section > div[style*="max-width"] { max-width: 1920px !important; }\n`;
+            else if (sWidth === '4k') css += `section > div[style*="max-width"] { max-width: 2560px !important; }\n`;
+            else if (sWidth === 'fluid') css += `section > div[style*="max-width"] { max-width: 98% !important; }\n`;
+
+            let cGap = getVal('cardGap');
+            if (cGap === 'none') css += `section > div[style*="display: grid"] { gap: 0px !important; }\n`;
+            else if (cGap === 'small') css += `section > div[style*="display: grid"] { gap: 10px !important; }\n`;
+            else if (cGap === 'large') css += `section > div[style*="display: grid"] { gap: 40px !important; }\n`;
+
+            let tAlign = getVal('textAlign');
+            if (tAlign === 'left') css += `.card, .modal-text, p { text-align: left !important; }\n`;
+            else if (tAlign === 'justify') css += `.card, .modal-text, p { text-align: justify !important; }\n`;
+
+            // 🚀 ŞEKİLLER (SHAPES)
+            let cShape = getVal('cardShape');
+            if (cShape && cShape !== 'default') {
+                let shp = window.muShapes.find(x => x.id === cShape);
+                if (shp) css += `.card, .game-card, .notif-card, .section-box { ${shp.css} }\n`;
+            }
+            let mShape = getVal('modalShape');
+            if (mShape && mShape !== 'default') {
+                let shp = window.muShapes.find(x => x.id === mShape);
+                if (shp) css += `.modal-content:not(.mu-modal-content) { ${shp.css} }\n`;
+            }
+
+            // 2. VISIBILITY
+            if (getVal('showTicker') === false) css += `.ticker-wrap { display: none !important; } header#main-header { top: 0 !important; } body { padding-top: 100px !important; }\n`;
+            if (getVal('showWeather') === false) css += `#header-weather-widget, .weather-widget { display: none !important; }\n`;
+            if (getVal('showZodiac') === false) css += `#header-zodiac { display: none !important; }\n`;
+            if (getVal('showScore') === false) css += `.header-score-badge { display: none !important; }\n`;
+            if (getVal('showSearch') === false) css += `.header-search { display: none !important; } .header-search-wrapper { width: 0 !important; overflow: hidden !important; display: block !important; border:none !important; padding:0 !important; margin:0 !important;} \n`; 
+            if (getVal('showFooter') === false) css += `footer { display: none !important; }\n`;
+
+            // 3. THEMES (🚀 DER SCHUTZSCHILD FÜR STATISTIKEN & HERZEN)
+            let theme = getVal('themeId');
+            if (theme && theme !== 'default') {
+                let t = window.muThemes.find(x => x.id === theme);
+                if (t) {
+                    css += `:root { --theme-acc: ${t.acc} !important; --theme-bg: ${t.bg} !important; --theme-cBg: ${t.cBg} !important; --theme-hBg: ${t.hBg} !important; }\n`;
+                    if (t.anim) css += `body, html, .page-view { background: var(--theme-bg) !important; background-size: 400% 400% !important; animation: ybAnimGradient 15s ease infinite !important; }\n`;
+                    else css += `body, html, .page-view { background: var(--theme-bg) !important; }\n`;
+                    
+                    css += `.card, .game-card, .notif-card, .section-box, .chat-bubble, .modal-content:not(.mu-modal-content) { background: var(--theme-cBg) !important; border-color: var(--theme-acc) !important; }\n`;
+                    css += `header#main-header, .header-nav-bar, .ticker-wrap, footer, .sidebar, .sidebar-right, .cal-holiday-sidebar, .weather-widget, .digital-clock-container, .calendar-day { background: var(--theme-hBg) !important; border-color: var(--theme-acc) !important; }\n`;
+                    css += `.bottom-btn:not(#admin-btn-megaultra), .auth-view-btn { background: var(--theme-hBg) !important; border-color: var(--theme-acc) !important; color: var(--theme-acc) !important; }\n`;
+                    
+                    css += `.logo, h1.hero-title, .section-title, .bilingual-title { color: var(--theme-acc) !important; }\n`;
+                    css += `.card h3, .card .author, .card p, .card-text, .modal-text { color: #fdfbf7 !important; }\n`; 
+
+                    // KUGELSICHERER SCHUTZ FÜR HERZEN & LESEZEICHEN
+                    css += `header#main-header i, .sidebar i, .bottom-btn:not(.admin-heart-btn):not(.bookmark-btn) i { color: var(--theme-acc) !important; }\n`;
+                    css += `.card h3 i:not(.fa-heart):not(.fa-bookmark), .game-card h3 i:not(.fa-heart):not(.fa-bookmark) { color: var(--theme-acc) !important; }\n`;
+                }
+            }
+
+            // 4. HEADERS 
+            let hLayout = getVal('headerLayout');
+            if (hLayout && hLayout !== 'default') {
+                let h = window.muHeaders.find(x => x.id === hLayout);
+                if (h) {
+                    css += h.css + '\n';
+                    css += `body { padding-top: ${h.pt} !important; }\n`;
+                }
+            }
+
+            // 5. FX
+            let fx = getVal('specialFx');
+            if (fx === 'glass') css += `.card, header#main-header, .modal-content:not(.mu-modal-content), .sidebar, .sidebar-right { background: rgba(10,25,47,0.4) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255,255,255,0.2) !important; }\n`;
+            else if (fx === 'oled') css += `body, html, .card, header#main-header, .modal-content:not(.mu-modal-content), footer, .sidebar, .sidebar-right { background: #000000 !important; } * { border-color: #333 !important; } .card, .modal-content { box-shadow: none !important; }\n`;
+            else if (fx === 'retro') css += `body::after { content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }\n`;
+            else if (fx === 'hologram') css += `.card, .modal-content:not(.mu-modal-content) { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.5); border-left: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }\n`;
+            else if (fx === 'bw') css += `body { filter: grayscale(100%) !important; }\n`;
+
+            // 6. BUTTONS & SIDEBARS
+            let getBtnCSS = (type, target) => {
+                if (type === 'pill') return `${target} { border-radius: 50px !important; }\n`;
+                if (type === 'ghost') return `${target} { background: transparent !important; border: 1px solid var(--theme-acc, #f4c542) !important; color: var(--theme-acc, #f4c542) !important; }\n`;
+                if (type === 'glass') return `${target} { background: rgba(255,255,255,0.1) !important; backdrop-filter: blur(10px) !important; border: 1px solid rgba(255,255,255,0.2) !important; }\n`;
+                if (type === 'neon') return `${target} { box-shadow: 0 0 15px var(--theme-acc, #f4c542) !important; border: 1px solid var(--theme-acc, #f4c542) !important; }\n`;
+                if (type && type.startsWith('auto_el_')) return `${target} { ${window.muElements.find(x => x.id === type).css} }\n`; 
+                return '';
+            };
+
+            css += getBtnCSS(getVal('adminMainBtn'), '.auth-view-btn, #admin-btn-megaultra');
+            css += getBtnCSS(getVal('userMainBtn'), '.bottom-btn:not(#admin-btn-megaultra)');
+            css += getBtnCSS(getVal('subBtns'), 'button.reset-btn, .mu-cat-tab-btn');
+            css += getBtnCSS(getVal('sidebarStyle'), '.sidebar, .sidebar-right, .cal-holiday-sidebar');
+            css += getBtnCSS(getVal('modalStyle'), '.modal-content:not(.mu-modal-content)');
+
+            // 7. WIDGETS
+            let cStyle = getVal('clockStyle');
+            if (cStyle === 'digital') css += `.analog-clock { display: none !important; }\n`;
+            else if (cStyle === 'analog') css += `.digital-clock-container, #digi-clock-de, #digi-clock-tr { display: none !important; }\n`;
+            else if (cStyle === 'minimal') css += `.analog-clock { display: none !important; } #clockModal .modal-body > div:last-child { flex-direction: column !important; }\n`;
+
+            let wStyle = getVal('weatherStyle');
+            if (wStyle === 'compact') css += `.weather-quote { display: none !important; }\n`;
+            else if (wStyle === 'icon') css += `.weather-quote, #wm-temp { display: none !important; } #wm-anim { min-height: 50px !important; }\n`;
+
+            let calStyle = getVal('calendarStyle');
+            if (calStyle === 'glass') css += `.calendar-grid > div { background: rgba(255,255,255,0.1) !important; backdrop-filter: blur(5px) !important; }\n`;
+            if (calStyle === 'neon') css += `.calendar-grid > div { border: 1px solid var(--theme-acc, #f4c542) !important; }\n`;
+            if (calStyle === 'dark') css += `.calendar-grid > div { background: #000 !important; color: #fff !important; }\n`;
+
+            return css;
+        },
+
+        injectCSS: function() {
+            let styleTag = document.getElementById('misali-mega-ultra-css');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'misali-mega-ultra-css';
+                document.head.appendChild(styleTag);
+            }
+
+            let finalCSS = '';
+
+            if (Object.keys(this.settings.desktop || {}).length > 0 || Object.keys(this.settings.global || {}).length > 0) {
+                finalCSS += `@media (min-width: 1401px) { \n${this.buildCSSString('desktop')} \n}\n`;
+            }
+            if (Object.keys(this.settings.laptop || {}).length > 0 || Object.keys(this.settings.global || {}).length > 0) {
+                finalCSS += `@media (min-width: 769px) and (max-width: 1400px) { \n${this.buildCSSString('laptop')} \n}\n`;
+            }
+            if (Object.keys(this.settings.mobile || {}).length > 0 || Object.keys(this.settings.global || {}).length > 0) {
+                finalCSS += `@media (max-width: 768px) { \n${this.buildCSSString('mobile')} \n}\n`;
+            }
+            if (Object.keys(this.settings.ios || {}).length > 0 || Object.keys(this.settings.global || {}).length > 0) {
+                finalCSS += `@supports (-webkit-touch-callout: none) { @media (max-width: 768px) { \n${this.buildCSSString('ios')} \n} }\n`;
+            }
+            if (Object.keys(this.settings.android || {}).length > 0 || Object.keys(this.settings.global || {}).length > 0) {
+                finalCSS += `@supports not (-webkit-touch-callout: none) { @media (max-width: 768px) { \n${this.buildCSSString('android')} \n} }\n`;
+            }
+
+            styleTag.innerHTML = finalCSS;
+        }
+    };
+
+    setTimeout(() => { if(window.MegaUltra) window.MegaUltra.init(); }, 1200);
+
+})();
+</script>
+
 </body>
 </html>
