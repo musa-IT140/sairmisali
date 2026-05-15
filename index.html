@@ -15821,8 +15821,8 @@ setInterval(function() {
     
     /* Vorschau-Texte */
     .preview-box { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 10px; }
-    .preview-name { font-size: 1.25rem; font-weight: bold; word-break: break-word; text-align: center; line-height: 1.2; transition: color 0.1s; }
-    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 2.2rem; text-align: center; line-height: 1; transition: color 0.1s; }
+    .preview-name { font-size: 1.25rem; font-weight: bold; word-break: break-word; text-align: center; line-height: 1.2; transition: all 0.2s; }
+    .preview-sign { font-family: 'Great Vibes', cursive; font-size: 2.2rem; text-align: center; line-height: 1; transition: all 0.2s; }
 
     /* Tab-Beschriftung */
     .tab-label { width: 100%; padding: 8px 0; border-radius: 6px; font-size: 0.8rem; text-align: center; background: rgba(255, 255, 255, 0.05); color: #94a3b8; transition: all 0.3s; }
@@ -15839,7 +15839,7 @@ setInterval(function() {
     .color-dot:hover { transform: scale(1.3); z-index: 5; }
     .color-dot.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 12px currentColor !important; z-index: 10; }
     
-    /* Blockierte Farben (Nur für Admin) */
+    /* Blockierte Farben */
     .color-dot.locked { opacity: 0.15 !important; cursor: not-allowed !important; }
     .color-dot.locked:hover { transform: none !important; }
 
@@ -15855,12 +15855,12 @@ setInterval(function() {
 
 <script>
 (function() {
-    // 1. FEDER FAVICON
+    // 1. FAVICON
     let link = document.querySelector("link[rel~='icon']");
     if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
     link.href = 'https://imagizer.imageshack.com/img923/676/f5U6yR.png';
 
-    let currentTarget = 'name'; // 'name' oder 'sign'
+    let currentTarget = 'name'; 
     let pendingNameColor = null;
     let pendingSignColor = null;
 
@@ -15874,19 +15874,12 @@ setInterval(function() {
         return colors;
     }
 
-    // Ermittelt, welche Farben vom Admin reserviert sind
     function getAdminReservedColors() {
         const dbName = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
         const dbSign = JSON.parse(localStorage.getItem('elite_sign_colors') || '{}');
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
         let reserved = ['#f4c542']; // Gold ist immer exklusiv!
-        
-        for (let u in users) {
-            if (users[u].role === 'admin' || u === 'AdminKing') {
-                if (dbName[u]) reserved.push(dbName[u]);
-                if (dbSign[u]) reserved.push(dbSign[u]);
-            }
-        }
+        if (dbName['AdminMaster']) reserved.push(dbName['AdminMaster']);
+        if (dbSign['AdminMaster']) reserved.push(dbSign['AdminMaster']);
         return [...new Set(reserved)];
     }
 
@@ -15895,15 +15888,18 @@ setInterval(function() {
         if (!modalBody || document.getElementById('elite-color-module-root')) return;
 
         const uName = window.currentUser?.username || 'Kullanıcı';
+        const isAdmin = (window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin'));
+        
+        // 🚀 MASTERKEY: Wenn Admin, laden wir die Farben aus dem Master-Safe
+        const lookupKey = isAdmin ? 'AdminMaster' : uName;
+        
         const dbName = JSON.parse(localStorage.getItem('elite_user_colors') || '{}');
         const dbSign = JSON.parse(localStorage.getItem('elite_sign_colors') || '{}');
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
         
-        const isAdmin = (users[uName]?.role === 'admin' || uName === 'AdminKing');
         let defaultColor = isAdmin ? '#f4c542' : '#ffffff';
         
-        pendingNameColor = dbName[uName] || defaultColor; 
-        pendingSignColor = dbSign[uName] || defaultColor;
+        pendingNameColor = dbName[lookupKey] || defaultColor; 
+        pendingSignColor = dbSign[lookupKey] || defaultColor;
 
         const container = document.createElement('div');
         container.id = 'elite-color-module-root';
@@ -15914,9 +15910,8 @@ setInterval(function() {
         const activeColorToHighlight = currentTarget === 'name' ? pendingNameColor : pendingSignColor;
 
         let gridHtml = palette.map(c => {
-            // Blockiert die Farbe, wenn der aktuelle User KEIN Admin ist, die Farbe aber reserviert ist
             let isLocked = !isAdmin && reservedColors.includes(c);
-            let style = isLocked ? `background-color:${c};` : `background-color:${c}; color:${c};`;
+            let style = `background-color:${c}; color:${c};`;
             let classes = `color-dot ${c === activeColorToHighlight ? 'active' : ''} ${isLocked ? 'locked' : ''}`;
             let clickEvent = isLocked 
                 ? `onclick="window.showToast?.('🚫 Bu renk Admin tarafından rezerve edilmiştir! (Admin Farbe)') || alert('🚫 Admin Farbe!');"` 
@@ -15930,12 +15925,12 @@ setInterval(function() {
             
             <div class="elite-split-layout">
                 <div class="elite-split-col ${currentTarget === 'name' ? 'active-col' : ''}" id="col-name" onclick="window.setEliteTarget('name')">
-                    <div class="preview-box"><div class="preview-name" id="preview-n" style="color:${pendingNameColor}; text-shadow: 0 0 10px ${pendingNameColor}80;">${uName}</div></div>
+                    <div class="preview-box"><div class="preview-name" id="preview-n" style="color:${pendingNameColor}; text-shadow: 0 0 8px ${pendingNameColor};">${uName}</div></div>
                     <div class="tab-label">İsim Rengi (Name)</div>
                 </div>
                 
                 <div class="elite-split-col ${currentTarget === 'sign' ? 'active-col' : ''}" id="col-sign" onclick="window.setEliteTarget('sign')">
-                    <div class="preview-box"><div class="preview-sign" id="preview-s" style="color:${pendingSignColor}; text-shadow: 0 0 10px ${pendingSignColor}80;">${uName}</div></div>
+                    <div class="preview-box"><div class="preview-sign" id="preview-s" style="color:${pendingSignColor}; text-shadow: 0 0 8px ${pendingSignColor};">Şair Misal.i</div></div>
                     <div class="tab-label">İmza Rengi (Unterschrift)</div>
                 </div>
             </div>
@@ -15970,29 +15965,36 @@ setInterval(function() {
         document.querySelectorAll('#elite-grid-container .color-dot').forEach(d => d.classList.remove('active'));
         el.classList.add('active');
         
+        // 🚀 SYNTAX FIX: Kein Anhängen von Transparenz mehr! Reiner Color-Code.
         if (currentTarget === 'name') {
             pendingNameColor = color;
             let pName = document.getElementById('preview-n');
-            if (pName) { pName.style.setProperty('color', color, 'important'); pName.style.setProperty('text-shadow', '0 0 10px ' + color + '80', 'important'); }
+            if (pName) { pName.style.setProperty('color', color, 'important'); pName.style.setProperty('text-shadow', '0 0 8px ' + color, 'important'); }
         } else {
             pendingSignColor = color;
             let pSign = document.getElementById('preview-s');
-            if (pSign) { pSign.style.setProperty('color', color, 'important'); pSign.style.setProperty('text-shadow', '0 0 10px ' + color + '80', 'important'); }
+            if (pSign) { pSign.style.setProperty('color', color, 'important'); pSign.style.setProperty('text-shadow', '0 0 8px ' + color, 'important'); }
         }
     };
 
     window.saveEliteColorFinal = function(targetType) {
         if (!window.currentUser) return;
         const uName = window.currentUser.username;
+        const isAdmin = (window.currentUser.role === 'admin' || uName.toLowerCase().includes('admin'));
+        
+        // 🚀 MASTERKEY: Admins speichern immer in 'AdminMaster'
+        const saveKey = isAdmin ? 'AdminMaster' : uName;
         
         let dbName = targetType === 'sign' ? 'elite_sign_colors' : 'elite_user_colors';
         let colorToSave = targetType === 'sign' ? pendingSignColor : pendingNameColor;
         let btnId = targetType === 'sign' ? 'save-btn-sign' : 'save-btn-name';
         
         const db = JSON.parse(localStorage.getItem(dbName) || '{}');
-        db[uName] = colorToSave;
+        db[saveKey] = colorToSave;
         localStorage.setItem(dbName, JSON.stringify(db));
 
+        // Zwingt die Live-Schleife, die neuen Daten zu laden
+        document.querySelectorAll('.elite-color-applied').forEach(el => el.classList.remove('elite-color-applied'));
         window.applyGlobalColors();
         
         const btn = document.getElementById(btnId);
@@ -16009,11 +16011,6 @@ setInterval(function() {
         const dbSign = JSON.parse(localStorage.getItem('elite_sign_colors') || '{}');
         const users = JSON.parse(localStorage.getItem('users') || '{}');
         
-        // Sucht AdminKing
-        let adminUsername = 'AdminKing';
-        for (let u in users) { if (users[u].role === 'admin') adminUsername = u; }
-
-        // Wir scannen Namen, Unterschriften UND die dicken Header-Überschriften
         const elements = document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .username, span[class*="author-anim"], b, strong, [style*="Great Vibes"], #main-header [style*="Great Vibes"], h1, h2, h3, h4');
         
         elements.forEach(el => {
@@ -16023,41 +16020,44 @@ setInterval(function() {
             if(!rawText) return;
 
             let isGreatVibes = el.matches('[style*="Great Vibes"]');
-            // Checkt, ob es der Admin-Name ist
-            let isAdminNameText = rawText.toLowerCase() === 'şair misal.i' || rawText.toLowerCase() === 'sair misal.i';
-            // Checkt, ob es dein Header-Slogan ist
+            let isAdminNameText = rawText.toLowerCase().includes('şair misal.i') || rawText.toLowerCase().includes('sair misal.i');
             let isSloganText = rawText.toLowerCase().includes('gönülden dile');
 
-            let targetUser = rawText;
             let isSign = isGreatVibes;
+            // 🚀 MASTERKEY ABFRAGE
+            let targetKey = rawText; 
 
-            // Zuweisung für Header & Admin
-            if (isAdminNameText) { targetUser = adminUsername; isSign = false; } // ŞAİR MİSAL.İ (Name Farbe)
-            if (isSloganText) { targetUser = adminUsername; isSign = true; } // Gönülden dile (Unterschrift Farbe)
+            if (isAdminNameText) { targetKey = 'AdminMaster'; isSign = false; }
+            if (isSloganText) { targetKey = 'AdminMaster'; isSign = true; }
             
-            // Normale User Unterschrift im Gedicht
+            // Wenn es eine User-Unterschrift ist
             if (!isAdminNameText && !isSloganText && isGreatVibes && rawText.length > 2) {
-                targetUser = window.currentUser?.username || adminUsername; 
+                targetKey = (window.currentUser?.role === 'admin') ? 'AdminMaster' : window.currentUser?.username;
             }
 
-            let finalColor = null;
-            if (isSign) finalColor = dbSign[targetUser];
-            else finalColor = dbName[targetUser];
+            // Falls der Text zu einem Admin gehört (z.B. in der Online-Liste)
+            if (users[rawText]?.role === 'admin' || rawText.toLowerCase().includes('admin')) {
+                targetKey = 'AdminMaster';
+            }
+
+            let finalColor = isSign ? dbSign[targetKey] : dbName[targetKey];
 
             // Admin Gold Fallback
-            if (!finalColor && (targetUser === adminUsername || users[targetUser]?.role === 'admin' || isAdminNameText || isSloganText)) {
+            if (!finalColor && targetKey === 'AdminMaster') {
                 finalColor = '#f4c542';
             }
 
-            // Anwenden (Flacker-Schutz mit data-applied-color)
+            // 🚀 SYNTAX FIX: Nur die Farbe anwenden, ohne + '80' Transparenz
             if (finalColor && el.dataset.appliedColor !== finalColor) {
                 el.style.setProperty('color', finalColor, 'important');
-                el.style.setProperty('text-shadow', `0 0 10px ${finalColor}80`, 'important');
+                el.style.setProperty('text-shadow', `0 0 8px ${finalColor}`, 'important');
                 el.dataset.appliedColor = finalColor;
+                el.classList.add('elite-color-applied');
             }
         });
     };
 
+    // DEIN TEXT SCANNER (FIREWALL)
     function scanAndFormatEliteText() {
         let targetAreas = document.querySelectorAll('.card, .card-body, .modal-body, .modal-content');
         targetAreas.forEach(area => {
