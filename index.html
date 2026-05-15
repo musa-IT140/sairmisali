@@ -16049,62 +16049,386 @@ setInterval(function() {
             </div>
         `;
         
+<style>
+    /* Haupt-Container */
+    .module-v35 { background: linear-gradient(145deg, #0f172a, #1e293b) !important; border: 1px solid rgba(244, 197, 66, 0.4) !important; border-radius: 16px !important; padding: 20px !important; margin: 20px 0 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.7) !important; position: relative; font-family: sans-serif; }
+    .header-v35 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+    .title-v35 { color: #f4c542; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; margin: 0; }
+    
+    /* Top-Tools */
+    .tools-v35 { display: flex; gap: 10px; }
+    .tool-btn-v35 { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+    .tool-btn-v35:hover { background: rgba(244, 197, 66, 0.2); color: #f4c542; border-color: #f4c542; box-shadow: 0 0 10px rgba(244,197,66,0.3); }
+
+    /* 4-Säulen-Layout */
+    .split-layout-v35 { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin-bottom: 15px !important; justify-content: center; }
+    .split-col-v35 { position: relative !important; flex: 1 !important; min-width: 45% !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: space-between !important; background: rgba(0, 0, 0, 0.3) !important; border: 1px dashed rgba(255, 255, 255, 0.2) !important; border-radius: 12px !important; padding: 15px 10px !important; cursor: pointer !important; transition: all 0.3s ease !important; min-height: 100px !important; overflow: visible !important; }
+    .split-col-v35.active-col { background: rgba(244, 197, 66, 0.1) !important; border: 1px solid #f4c542 !important; box-shadow: 0 0 15px rgba(244, 197, 66, 0.2) inset !important; }
+    
+    /* 💾 MINI-SPEICHER BUTTONS */
+    .mini-save-v35 { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); color: #94a3b8; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; z-index: 20; }
+    .mini-save-v35:hover { background: #22c55e; color: #fff; border-color: #22c55e; transform: scale(1.15); box-shadow: 0 0 10px #22c55e; }
+    .split-col-v35.active-col .mini-save-v35 { color: #f4c542; border-color: #f4c542; }
+
+    /* Vorschau-Elemente (Bugfix: Cut-off behoben durch line-height und padding) */
+    .prev-box-v35 { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 5px; flex-direction: column; overflow: visible; padding: 5px 0; }
+    .prev-name-v35 { font-size: 1.1rem; font-weight: bold; word-break: break-word; text-align: center; line-height: 1.3; transition: all 0.2s ease; padding: 5px; }
+    .prev-sign-v35 { font-family: 'Great Vibes', cursive; font-size: 1.6rem; text-align: center; line-height: 1.5; padding: 10px 5px; transition: all 0.2s ease; }
+    .prev-icon-v35 { font-size: 1.8rem; filter: drop-shadow(0 0 8px currentColor); transition: all 0.2s ease; padding: 5px; }
+    .tab-lbl-v35 { width: 100%; padding: 4px 0; border-radius: 6px; font-size: 0.75rem; text-align: center; background: rgba(255, 255, 255, 0.05); color: #94a3b8; transition: all 0.3s; }
+    .split-col-v35.active-col .tab-lbl-v35 { background: #f4c542 !important; color: #0a192f !important; font-weight: bold !important; text-transform: uppercase; }
+
+    /* 🎯 MINI-BEREICH: MEHRERE SYMBOLE */
+    .symbol-selector-v35 { display: none; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px; justify-content: center; gap: 8px; flex-wrap: wrap; max-height: 180px; overflow-y: auto; }
+    .sym-item-v35 { font-size: 1.3rem; color: #94a3b8; cursor: pointer; padding: 6px; border-radius: 50%; transition: all 0.2s; border: 1px solid transparent; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+    .sym-item-v35:hover { transform: scale(1.2); color: #fff; background: rgba(255,255,255,0.1); }
+    .sym-item-v35.active { color: #f4c542; border-color: #f4c542; background: rgba(244,197,66,0.1); transform: scale(1.2); box-shadow: 0 0 10px rgba(244,197,66,0.4); }
+
+    /* Farbraster */
+    .grid-v35 { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; justify-content: center !important; max-height: 160px !important; overflow-y: auto !important; padding: 10px !important; background: rgba(0,0,0,0.2) !important; border-radius: 8px !important; margin-bottom: 15px !important; }
+    .grid-v35::-webkit-scrollbar, .symbol-selector-v35::-webkit-scrollbar { width: 6px; } 
+    .grid-v35::-webkit-scrollbar-thumb, .symbol-selector-v35::-webkit-scrollbar-thumb { background: #f4c542; border-radius: 10px; }
+    .dot-v35 { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s, box-shadow 0.2s; }
+    .dot-v35:hover { transform: scale(1.3); z-index: 5; }
+    .dot-v35.active { border-color: #ffffff !important; transform: scale(1.4) !important; box-shadow: 0 0 12px currentColor, 0 0 5px #fff !important; z-index: 10; }
+    
+    /* Premium Admin Farben */
+    .premium-title-v35 { text-align: center; color: #f4c542; font-size: 0.85rem; font-weight: bold; margin: 15px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+    .premium-grid-v35 { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; justify-content: center !important; padding: 12px !important; background: rgba(244, 197, 66, 0.05) !important; border: 1px solid rgba(244, 197, 66, 0.3) !important; border-radius: 8px !important; margin-bottom: 10px !important; max-height: 140px; overflow-y: auto; }
+    .dot-premium-v35 { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 8px currentColor; transition: transform 0.2s; }
+    .dot-premium-v35:hover { transform: scale(1.3) rotate(5deg); z-index: 5; }
+    .dot-premium-v35.active { border: 2px solid #fff !important; transform: scale(1.4) rotate(5deg) !important; box-shadow: 0 0 15px currentColor, 0 0 5px #fff !important; z-index: 10; }
+
+    /* Großer Speichern Button */
+    .actions-v35 { display: flex !important; margin-top:10px; width: 100%; }
+    .save-btn-v35 { width: 100% !important; background: linear-gradient(135deg, #f4c542, #d4af37) !important; color: #0a192f !important; border: none !important; padding: 15px !important; border-radius: 8px !important; font-weight: bold !important; font-size: 1rem !important; cursor: pointer !important; transition: all 0.3s ease !important; text-transform: uppercase !important; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .save-btn-v35:hover { transform: translateY(-2px) !important; box-shadow: 0 5px 15px rgba(244, 197, 66, 0.5) !important; color: #000 !important; }
+
+    /* 🚀 ANIMATION CSS ENGINE 🚀 */
+    .anim-base-v35 { background-size: 200% auto !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important; color: transparent !important; animation: anim-flow-v35 3s linear infinite !important; filter: drop-shadow(0 0 4px rgba(255,255,255,0.3)) !important; }
+    @keyframes anim-flow-v35 { to { background-position: 200% center; } }
+    
+    .a-fire { background-image: linear-gradient(to right, #ff4e50, #f9d423, #ff4e50) !important; } .a-ocean { background-image: linear-gradient(to right, #00c6ff, #0072ff, #00c6ff) !important; } .a-gold { background-image: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #bf953f) !important; } .a-cyber { background-image: linear-gradient(to right, #ff00ff, #00ffff, #ff00ff) !important; } .a-toxic { background-image: linear-gradient(to right, #00ff87, #60efff, #00ff87) !important; } .a-royal { background-image: linear-gradient(to right, #8A2387, #E94057, #F27121, #8A2387) !important; } .a-ice { background-image: linear-gradient(to right, #E0EAFC, #CFDEF3, #E0EAFC) !important; } .a-matrix { background-image: linear-gradient(to right, #00FF00, #003300, #00FF00) !important; } .a-blood { background-image: linear-gradient(to right, #ff0844, #ffb199, #ff0844) !important; } .a-rainbow { background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet, red) !important; } .a-tiger { background-image: repeating-linear-gradient(45deg, #ff9800 0, #ff9800 10px, #000 10px, #000 20px) !important; } .a-zebra { background-image: repeating-linear-gradient(45deg, #fff 0, #fff 10px, #000 10px, #000 20px) !important; } .a-bee { background-image: repeating-linear-gradient(45deg, #ffeb3b 0, #ffeb3b 10px, #000 10px, #000 20px) !important; } .a-candy { background-image: repeating-linear-gradient(45deg, #ffc0cb 0, #ffc0cb 10px, #fff 10px, #fff 20px) !important; } .a-danger { background-image: repeating-linear-gradient(45deg, #f00 0, #f00 10px, #ffeb3b 10px, #ffeb3b 20px) !important; } .a-usa { background-image: repeating-linear-gradient(90deg, red 0, red 10px, white 10px, white 20px, blue 20px, blue 30px) !important; } .a-grid { background-image: repeating-linear-gradient(90deg, #00ffff 0, #00ffff 5px, #ff00ff 5px, #ff00ff 10px) !important; } .a-disco { background-image: repeating-linear-gradient(45deg, #f0f 0, #f0f 15px, #0ff 15px, #0ff 30px) !important; } .a-goldbars { background-image: repeating-linear-gradient(90deg, #ffd700 0, #ffd700 15px, #b8860b 15px, #b8860b 30px) !important; } .a-starry { background-image: repeating-radial-gradient(circle, #ffffff 0, #ffffff 2px, #00008b 2px, #00008b 10px) !important; } .a-plasma { background-image: linear-gradient(to right, #9400D3, #4B0082, #9400D3) !important; } .a-galaxy { background-image: linear-gradient(to right, #000000, #434343, #000000) !important; } .a-magma { background-image: linear-gradient(to right, #ff8008, #ffc837, #ff8008) !important; } .a-venom { background-image: linear-gradient(to right, #11998e, #38ef7d, #11998e) !important; } .a-neonpink { background-image: linear-gradient(to right, #ff00cc, #333399, #ff00cc) !important; } .a-electric { background-image: linear-gradient(to right, #4776E6, #8E54E9, #4776E6) !important; } .a-aurora { background-image: linear-gradient(to right, #00b09b, #96c93d, #00b09b) !important; } .a-sunset { background-image: linear-gradient(to right, #fc4a1a, #f7b733, #fc4a1a) !important; } .a-hologram { background-image: linear-gradient(to right, #b2fefa, #0ed2f7, #b2fefa) !important; } .a-mystic { background-image: linear-gradient(to right, #7b4397, #dc2430, #7b4397) !important; } .a-lava { background-image: repeating-radial-gradient(circle, #ff4000, #ff4000 5px, #000 5px, #000 10px) !important; } .a-nebula { background-image: linear-gradient(to right, #8e2de2, #4a00e0, #8e2de2) !important; } .a-abyss { background-image: linear-gradient(to right, #000000, #1a2a6c, #000000) !important; } .a-inferno { background-image: linear-gradient(to bottom, #ff0000, #ff7f00, #ffff00) !important; } .a-supernova { background-image: radial-gradient(circle, #fff, #ff00ff, #000) !important; } .a-emerald { background-image: linear-gradient(to right, #1d976c, #93f9b9, #1d976c) !important; } .a-sapphire { background-image: linear-gradient(to right, #1cb5e0, #000046, #1cb5e0) !important; } .a-ruby { background-image: linear-gradient(to right, #e52d27, #b31217, #e52d27) !important; } .a-amethyst { background-image: linear-gradient(to right, #9d50bb, #6e48aa, #9d50bb) !important; } .a-quartz { background-image: linear-gradient(to right, #ffafbd, #ffc3a0, #ffafbd) !important; }
+
+    /* 🛡️ PERFEKTER SCHUTZ FÜR SYMBOLE */
+    .custom-icon-v35 { transition: all 0.2s; display: inline-block; }
+    .custom-icon-v35.fas, .custom-icon-v35.fa, .custom-icon-v35.active, .custom-icon-v35.fa-feather { color: var(--sym-color) !important; text-shadow: 0 0 8px var(--sym-color) !important; }
+    .custom-icon-v35.far, .custom-icon-v35.fal { color: var(--sym-color) !important; text-shadow: none !important; -webkit-text-fill-color: initial !important; }
+    
+    @media (max-width: 768px) { .split-col-v35 { min-height: 80px !important; padding: 15px 5px 5px 5px !important; } .prev-name-v35 { font-size: 1rem !important; } .prev-sign-v35 { font-size: 1.5rem !important; } .tab-lbl-v35 { font-size: 0.65rem !important; } .sym-item-v35 { width: 34px; height: 34px; font-size: 1.1rem; } .save-btn-v35 { font-size: 0.85rem !important; padding: 12px !important; } .mini-save-v35 { width: 24px; height: 24px; font-size: 0.7rem; top: 4px; right: 4px; } }
+</style>
+
+<script>
+(function() {
+    // 🚀 MODERN PRO ARCHITECTURE
+    if (window.EliteV35Active) return;
+    window.EliteV35Active = true;
+
+    window.EliteV35 = {
+        tab: 'name',
+        sym: 'fa-heart',
+        colName: null, colSign: null, colFeather: null, colSyms: {},
+        history: [],
+        DB: { name: 'db_v35_n', sign: 'db_v35_s', feather: 'db_v35_f', sym: 'db_v35_sym' },
+        
+        neons: ['#FFD700', '#FF1493', '#00FFFF', '#39FF14', '#FF4500', '#9400D3', '#7FFF00', '#00BFFF', '#FF00FF', '#DC143C', '#FF8C00', '#8A2BE2', '#00FA9A', '#1E90FF', '#FF69B4', '#32CD32', '#FF0000', '#8B008B', '#00FF7F', '#ffffff'],
+        anims: ['ANIM:a-fire', 'ANIM:a-ocean', 'ANIM:a-gold', 'ANIM:a-cyber', 'ANIM:a-toxic', 'ANIM:a-royal', 'ANIM:a-ice', 'ANIM:a-matrix', 'ANIM:a-blood', 'ANIM:a-rainbow', 'ANIM:a-tiger', 'ANIM:a-zebra', 'ANIM:a-bee', 'ANIM:a-candy', 'ANIM:a-danger', 'ANIM:a-usa', 'ANIM:a-grid', 'ANIM:a-disco', 'ANIM:a-goldbars', 'ANIM:a-starry', 'ANIM:a-plasma', 'ANIM:a-galaxy', 'ANIM:a-magma', 'ANIM:a-venom', 'ANIM:a-neonpink', 'ANIM:a-electric', 'ANIM:a-aurora', 'ANIM:a-sunset', 'ANIM:a-hologram', 'ANIM:a-mystic', 'ANIM:a-lava', 'ANIM:a-nebula', 'ANIM:a-abyss', 'ANIM:a-inferno', 'ANIM:a-supernova', 'ANIM:a-emerald', 'ANIM:a-sapphire', 'ANIM:a-ruby', 'ANIM:a-amethyst', 'ANIM:a-quartz'],
+        symList: ['fa-heart', 'fa-star', 'fa-bookmark', 'fa-bell', 'fa-comment', 'fa-check', 'fa-user', 'fa-fire', 'fa-envelope', 'fa-share', 'fa-thumbs-up', 'fa-gem', 'fa-crown', 'fa-moon', 'fa-sun', 'fa-music', 'fa-paper-plane', 'fa-quote-left', 'fa-book', 'fa-image', 'fa-camera', 'fa-leaf', 'fa-tree', 'fa-paw', 'fa-bolt', 'fa-snowflake', 'fa-tint', 'fa-palette', 'fa-magic', 'fa-medal', 'fa-trophy', 'fa-gift', 'fa-key', 'fa-lock', 'fa-unlock', 'fa-shield-alt', 'fa-map-marker-alt', 'fa-globe', 'fa-eye', 'fa-eye-slash'],
+
+        getPal: function() {
+            let p = ['#ffffff', '#f8fafc', '#e2e8f0', '#cbd5e1']; 
+            for (let l of [85, 75, 65, 55]) { for (let s of [100, 85, 70]) { for (let h = 0; h < 360; h += 15) { p.push(`hsl(${h}, ${s}%, ${l}%)`); } } }
+            return p;
+        },
+
+        applyVis: function(el, col) {
+            if (!el) return;
+            el.className = el.className.replace(/\ba-\w+\b/g, '').replace('anim-base-v35', '').trim();
+            if(!col) { el.style.color = ''; el.style.textShadow = ''; return; }
+            if (col.startsWith('ANIM:')) {
+                el.classList.add('anim-base-v35', col.split(':')[1]);
+                el.style.setProperty('color', 'transparent', 'important'); el.style.setProperty('text-shadow', 'none', 'important');
+            } else {
+                el.style.setProperty('color', col, 'important');
+                el.style.setProperty('text-shadow', this.neons.includes(col) ? `0 0 5px ${col}, 0 0 15px ${col}` : `0 0 8px ${col}`, 'important'); 
+            }
+        },
+
+        load: function() {
+            let uName = window.currentUser?.username || 'Misafir';
+            let isAdmin = (window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin') || document.body.classList.contains('admin-mode'));
+            let mk = isAdmin ? 'AdminMaster' : uName;
+            
+            this.colName = JSON.parse(localStorage.getItem(this.DB.name) || '{}')[mk] || (isAdmin ? '#f4c542' : '#ffffff');
+            this.colSign = JSON.parse(localStorage.getItem(this.DB.sign) || '{}')[mk] || (isAdmin ? '#f4c542' : '#ffffff');
+            this.colFeather = JSON.parse(localStorage.getItem(this.DB.feather) || '{}')[mk] || '#f4c542';
+            this.colSyms = JSON.parse(localStorage.getItem(this.DB.sym) || '{}')[mk] || {}; 
+        },
+
+        // UNIVERSAL SAVE (Speichert ALLES auf einmal!)
+        saveAll: function(btnEl) {
+            this.history.push({ n: localStorage.getItem(this.DB.name), s: localStorage.getItem(this.DB.sign), f: localStorage.getItem(this.DB.feather), sym: localStorage.getItem(this.DB.sym) });
+            if(this.history.length > 10) this.history.shift();
+
+            let uName = window.currentUser?.username || 'Misafir';
+            let mk = (window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin') || document.body.classList.contains('admin-mode')) ? 'AdminMaster' : uName;
+            
+            let dbN = JSON.parse(localStorage.getItem(this.DB.name)||'{}'); dbN[mk] = this.colName; localStorage.setItem(this.DB.name, JSON.stringify(dbN));
+            let dbS = JSON.parse(localStorage.getItem(this.DB.sign)||'{}'); dbS[mk] = this.colSign; localStorage.setItem(this.DB.sign, JSON.stringify(dbS));
+            let dbF = JSON.parse(localStorage.getItem(this.DB.feather)||'{}'); dbF[mk] = this.colFeather; localStorage.setItem(this.DB.feather, JSON.stringify(dbF));
+            
+            let dbSym = JSON.parse(localStorage.getItem(this.DB.sym)||'{}'); 
+            if(!dbSym[mk]) dbSym[mk] = {}; 
+            dbSym[mk] = this.colSyms; // Das komplette Objekt wird gesichert!
+            localStorage.setItem(this.DB.sym, JSON.stringify(dbSym));
+            
+            document.querySelectorAll('.applied-v35').forEach(el => { el.classList.remove('applied-v35'); delete el.dataset.appliedV35; });
+            this.applyToDOM();
+            
+            if(btnEl) {
+                let old = btnEl.innerHTML;
+                btnEl.innerHTML = '<i class="fas fa-check-double"></i> BAŞARILI! (Gespeichert)';
+                btnEl.style.background = '#22c55e'; btnEl.style.color = '#fff';
+                setTimeout(() => { btnEl.innerHTML = old; btnEl.style.background = ''; btnEl.style.color = ''; }, 1500);
+            }
+        },
+
+        reset: function() {
+            if(!confirm('Tüm renkleri sıfırlamak istiyor musunuz? (Reset?)')) return;
+            this.history.push({ n: localStorage.getItem(this.DB.name), s: localStorage.getItem(this.DB.sign), f: localStorage.getItem(this.DB.feather), sym: localStorage.getItem(this.DB.sym) });
+            localStorage.removeItem(this.DB.name); localStorage.removeItem(this.DB.sign); localStorage.removeItem(this.DB.feather); localStorage.removeItem(this.DB.sym);
+            
+            document.querySelectorAll('.applied-v35').forEach(el => { el.style.color = ''; el.style.textShadow = ''; el.className = el.className.replace(/\ba-\w+\b/g, '').replace('anim-base-v35', ''); delete el.dataset.appliedV35; el.classList.remove('applied-v35'); });
+            document.querySelectorAll('.custom-icon-v35').forEach(i => { i.classList.remove('custom-icon-v35'); i.style.removeProperty('--sym-color'); });
+            
+            this.load(); this.updateGUI(); this.applyToDOM();
+        },
+
+        undo: function() {
+            if(this.history.length === 0) return window.showToast?.('Yok');
+            let l = this.history.pop();
+            l.n ? localStorage.setItem(this.DB.name, l.n) : localStorage.removeItem(this.DB.name);
+            l.s ? localStorage.setItem(this.DB.sign, l.s) : localStorage.removeItem(this.DB.sign);
+            l.f ? localStorage.setItem(this.DB.feather, l.f) : localStorage.removeItem(this.DB.feather);
+            l.sym ? localStorage.setItem(this.DB.sym, l.sym) : localStorage.removeItem(this.DB.sym);
+            
+            document.querySelectorAll('.applied-v35').forEach(el => { el.classList.remove('applied-v35'); delete el.dataset.appliedV35; });
+            document.querySelectorAll('.custom-icon-v35').forEach(i => { i.classList.remove('custom-icon-v35'); i.style.removeProperty('--sym-color'); });
+            
+            this.load(); this.updateGUI(); this.applyToDOM();
+        },
+
+        updateGUI: function() {
+            ['name', 'sign', 'feather', 'symbol'].forEach(t => {
+                let col = document.getElementById('col-' + t + '-v35');
+                if (col) { if (t === this.tab) col.classList.add('active-col'); else col.classList.remove('active-col'); }
+            });
+
+            let symBox = document.getElementById('sym-select-v35');
+            if (symBox) symBox.style.display = (this.tab === 'symbol') ? 'flex' : 'none';
+
+            document.querySelectorAll('.sym-item-v35').forEach(el => {
+                el.classList.remove('active');
+                if (el.getAttribute('data-val') === this.activeSym) el.classList.add('active');
+            });
+
+            this.applyVis(document.getElementById('prev-name-v35'), this.colName);
+            this.applyVis(document.getElementById('prev-sign-v35'), this.colSign);
+            this.applyVis(document.getElementById('prev-feather-v35'), this.colFeather);
+            
+            let pSym = document.getElementById('prev-symbol-v35');
+            if (pSym) { pSym.className = `fas ${this.activeSym} prev-icon-v35`; this.applyVis(pSym, this.colSyms[this.activeSym] || '#ffffff'); }
+
+            let actCol = this.colName;
+            if(this.tab === 'sign') actCol = this.colSign;
+            if(this.tab === 'feather') actCol = this.colFeather;
+            if(this.tab === 'symbol') actCol = this.colSyms[this.activeSym] || '#ffffff';
+
+            document.querySelectorAll('.dot-v35, .dot-premium-v35').forEach(d => {
+                d.classList.remove('active');
+                if (d.getAttribute('data-val') === actCol) d.classList.add('active');
+            });
+        },
+
+        applyToDOM: function() {
+            try {
+                let dbN = JSON.parse(localStorage.getItem(this.DB.name) || '{}'), dbS = JSON.parse(localStorage.getItem(this.DB.sign) || '{}');
+                let dbF = JSON.parse(localStorage.getItem(this.DB.feather) || '{}'), dbSym = JSON.parse(localStorage.getItem(this.DB.sym) || '{}');
+                let users = JSON.parse(localStorage.getItem('users') || '{}'), admDict = dbSym['AdminMaster'] || {}; 
+
+                // ICONS
+                document.querySelectorAll('i.fa, i.fas, i.far, i.fal, i.fad, svg, .fa-feather').forEach(icon => {
+                    if (icon.closest('.module-v35')) return; 
+                    let col = null;
+                    if (icon.className.includes('feather') || icon.className.includes('pen')) {
+                        if (dbF['AdminMaster']) col = dbF['AdminMaster'];
+                    } else {
+                        for (let k in admDict) { if (icon.className.includes(k)) { col = admDict[k]; break; } }
+                    }
+                    if (col) { icon.classList.add('custom-icon-v35'); icon.style.setProperty('--sym-color', col); } 
+                    else { icon.classList.remove('custom-icon-v35'); icon.style.removeProperty('--sym-color'); }
+                });
+
+                // TEXTE
+                document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, .username, .card-author, .modal-signature, [style*="Great Vibes"], h1, h2, h3, h4, #main-header span').forEach(el => {
+                    if (el.closest('.module-v35')) return; 
+                    let rawText = ""; Array.from(el.childNodes).forEach(n => { if(n.nodeType === 3) rawText += n.textContent; });
+                    let txt = rawText.replace(/[:()]/g, '').trim(); if(!txt) return;
+
+                    let isName = false, isSign = false, tk = null;
+                    let upperTxt = txt.toUpperCase();
+
+                    // ABSOLUT KUGELSICHERE ZUORDNUNG
+                    if (upperTxt === 'ŞAİR MİSAL.İ' || upperTxt === 'SAIR MISAL.I') { 
+                        isName = true; tk = 'AdminMaster'; 
+                    } 
+                    else if (txt === 'Şair Misal.i' || txt === 'Sair Misal.i') { 
+                        if (el.closest('#main-header, header, .navbar')) isSign = true; else isName = true; 
+                        tk = 'AdminMaster'; 
+                    } 
+                    else if (txt.toLowerCase().includes('gönülden dile')) { 
+                        isSign = true; tk = 'AdminMaster'; 
+                    } 
+                    else if (el.matches('[style*="Great Vibes"]') || el.classList.contains('modal-signature')) { 
+                        isSign = true; 
+                        tk = (users[txt]?.role === 'admin') ? 'AdminMaster' : txt; 
+                    } 
+                    else { 
+                        isName = true; 
+                        tk = (users[txt]?.role === 'admin' || txt.toLowerCase().includes('admin')) ? 'AdminMaster' : txt; 
+                    }
+
+                    if (!isName && !isSign) return;
+                    
+                    let col = isSign ? dbS[tk] : dbN[tk];
+                    if (!col && tk === 'AdminMaster') col = '#f4c542';
+
+                    if (col && el.dataset.appliedV35 !== col) { 
+                        this.applyVis(el, col); 
+                        el.dataset.appliedV35 = col; 
+                        el.classList.add('applied-v35'); 
+                    }
+                });
+            } catch(e) {}
+        }
+    };
+
+    function initBuilder() {
+        const modalBody = document.querySelector('#profileEditModal .modal-body');
+        if (!modalBody || document.getElementById('root-v35')) return;
+        
+        window.EliteV35.load();
+        const uName = window.currentUser?.username || 'Misafir';
+        const isAdmin = (window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin') || document.body.classList.contains('admin-mode'));
+
+        // FIX: Dynamische Vorschau-Unterschrift (User sehen IHREN Namen als Unterschrift, Admin sieht Şair Misal.i)
+        const signPreviewText = isAdmin ? 'Şair Misal.i' : uName;
+
+        const container = document.createElement('div');
+        container.id = 'root-v35'; container.className = 'module-v35';
+
+        let gridHtml = window.EliteV35.getPal().map(c => `<div class="dot-v35" style="background-color:${c}; color:${c};" data-val="${c}" onclick="window.actionV35('color', '${c}', event)"></div>`).join('');
+
+        let adminTabsHtml = '', premiumHtml = '';
+        if (isAdmin) {
+            adminTabsHtml = `
+                <div class="split-col-v35" id="col-feather-v35" onclick="window.actionV35('tab', 'feather', event)">
+                    <div class="mini-save-v35" onclick="window.actionV35('msave', null, event)" title="Kaydet"><i class="fas fa-save"></i></div>
+                    <div class="prev-box-v35"><i class="fas fa-feather prev-icon-v35" id="prev-feather-v35"></i></div>
+                    <div class="tab-lbl-v35">Tüy (Feder)</div>
+                </div>
+                <div class="split-col-v35" id="col-symbol-v35" onclick="window.actionV35('tab', 'symbol', event)">
+                    <div class="mini-save-v35" onclick="window.actionV35('msave', null, event)" title="Kaydet"><i class="fas fa-save"></i></div>
+                    <div class="prev-box-v35"><i class="fas ${window.EliteV35.activeSym} prev-icon-v35" id="prev-symbol-v35"></i></div>
+                    <div class="tab-lbl-v35">Semboller</div>
+                </div>
+            `;
+            let neonGrid = window.EliteV35.neons.map(c => `<div class="dot-premium-v35" style="background-color:${c}; color:${c};" data-val="${c}" onclick="window.actionV35('color', '${c}', event)"></div>`).join('');
+            let animGrid = window.EliteV35.anims.map(c => `<div class="dot-premium-v35 anim-base-v35 ${c.split(':')[1]}" data-val="${c}" onclick="window.actionV35('color', '${c}', event)"></div>`).join('');
+            premiumHtml = `<div class="premium-title-v35">💎 20 Premium Neon 💎</div><div class="premium-grid-v35">${neonGrid}</div><div class="premium-title-v35">🔥 40 Animasyon 🔥</div><div class="premium-grid-v35">${animGrid}</div>`;
+        }
+
+        let symbolSelectorHtml = window.EliteV35.symList.map(sym => `<i class="fas ${sym} sym-item-v35" data-val="${sym}" onclick="window.actionV35('sym', '${sym}', event)"></i>`).join('');
+
+        container.innerHTML = `
+            <div class="header-v35">
+                <div class="title-v35">V35 MASTER SYSTEM</div>
+                <div class="tools-v35">
+                    <button class="tool-btn-v35" onclick="window.actionV35('undo', null, event)" title="Rückgängig"><i class="fas fa-undo"></i></button>
+                    <button class="tool-btn-v35" onclick="window.actionV35('reset', null, event)" title="Alles Zurücksetzen"><i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+            
+            <div class="split-layout-v35">
+                <div class="split-col-v35" id="col-name-v35" onclick="window.actionV35('tab', 'name', event)">
+                    <div class="mini-save-v35" onclick="window.actionV35('msave', null, event)" title="Kaydet"><i class="fas fa-save"></i></div>
+                    <div class="prev-box-v35"><div class="prev-name-v35" id="prev-name-v35">${uName}</div></div>
+                    <div class="tab-lbl-v35">İsim (Name)</div>
+                </div>
+                <div class="split-col-v35" id="col-sign-v35" onclick="window.actionV35('tab', 'sign', event)">
+                    <div class="mini-save-v35" onclick="window.actionV35('msave', null, event)" title="Kaydet"><i class="fas fa-save"></i></div>
+                    <div class="prev-box-v35"><div class="prev-sign-v35" id="prev-sign-v35">${signPreviewText}</div></div>
+                    <div class="tab-lbl-v35">İmza (Signatur)</div>
+                </div>
+                ${adminTabsHtml}
+            </div>
+
+            <div class="symbol-selector-v35" id="sym-select-v35">
+                <div style="width:100%; text-align:center; color:#94a3b8; font-size:0.75rem; margin-bottom:8px;">Sembolü seç ve boya!</div>
+                ${symbolSelectorHtml}
+            </div>
+
+            ${premiumHtml}
+            <div class="grid-v35">${gridHtml}</div>
+            
+            <div class="actions-v35">
+                <button type="button" class="save-btn-v35" id="big-save-v35" onclick="window.actionV35('saveclose', null, event)"><i class="fas fa-check-double"></i> Kaydet ve Kapat</button>
+            </div>
+        `;
+        
         let saveProfileBtn = modalBody.querySelector('.save-btn, button[type="submit"]');
         if (saveProfileBtn) saveProfileBtn.parentNode.insertBefore(container, saveProfileBtn); 
         else modalBody.appendChild(container);
 
-        updateGUIV34(); // Einmaliges Setzen der Klassen
+        window.EliteV35.updateGUI(); 
     }
 
-    // 🚀 GLOBALE FARBANWENDUNG AUF DER SEITE
-    window.applyColorsV34 = function() {
-        try {
-            let dbName = JSON.parse(localStorage.getItem(DB_NAME) || '{}'), dbSign = JSON.parse(localStorage.getItem(DB_SIGN) || '{}');
-            let dbFeather = JSON.parse(localStorage.getItem(DB_FEATHER) || '{}'), dbSymbol = JSON.parse(localStorage.getItem(DB_SYMBOL) || '{}');
-            let users = JSON.parse(localStorage.getItem('users') || '{}'), admDict = dbSymbol['AdminMaster'] || {}; 
+    // 🚀 LOKALE KLICK-STEUERUNG (Kein Modal-Blocker mehr)
+    window.actionV35 = function(action, val, event) {
+        if(event) event.stopPropagation();
 
-            // ICONS
-            document.querySelectorAll('i.fa, i.fas, i.far, i.fal, i.fad, svg, .fa-feather').forEach(icon => {
-                if (icon.closest('.module-v34')) return; 
-                let col = null;
-                if (icon.className.includes('feather') || icon.className.includes('pen')) {
-                    if (dbFeather['AdminMaster']) col = dbFeather['AdminMaster'];
-                } else {
-                    for (let k in admDict) { if (icon.className.includes(k)) { col = admDict[k]; break; } }
-                }
-                if (col) { icon.classList.add('custom-icon-v34'); icon.style.setProperty('--sym-color', col); } 
-                else { icon.classList.remove('custom-icon-v34'); icon.style.removeProperty('--sym-color'); }
-            });
-
-            // TEXTE
-            document.querySelectorAll('.author, .comment-author, .message-sender, .online-user-name, .list-user-name, .username, .card-author, .modal-signature, [style*="Great Vibes"], h1, h2, h3, h4, #main-header span').forEach(el => {
-                if (el.closest('.module-v34')) return; 
-                let rawText = ""; Array.from(el.childNodes).forEach(n => { if(n.nodeType === 3) rawText += n.textContent; });
-                let txt = rawText.replace(/[:()]/g, '').trim(); if(!txt) return;
-
-                let isName = false, isSign = false, tk = null;
-                if (txt.toUpperCase() === 'ŞAİR MİSAL.İ' || txt.toUpperCase() === 'SAIR MISAL.I') { isName = true; tk = 'AdminMaster'; } 
-                else if (txt === 'Şair Misal.i' || txt === 'Sair Misal.i') { if (el.closest('#main-header, header, .navbar')) isSign = true; else isName = true; tk = 'AdminMaster'; } 
-                else if (txt.toLowerCase().includes('gönülden dile')) { isSign = true; tk = 'AdminMaster'; } 
-                else if (el.matches('[style*="Great Vibes"]') || el.classList.contains('modal-signature')) { isSign = true; tk = (window.currentUser?.role === 'admin') ? 'AdminMaster' : window.currentUser?.username; if (!tk) tk = 'AdminMaster'; } 
-                else { isName = true; if (users[txt]?.role === 'admin' || txt.toLowerCase().includes('admin')) tk = 'AdminMaster'; else tk = txt; }
-
-                if (!isName && !isSign) return;
-                let col = isSign ? dbSign[tk] : dbName[tk];
-                if (!col && tk === 'AdminMaster') col = '#f4c542';
-
-                if (col && el.dataset.appliedV34 !== col) { applyVisuals(el, col); el.dataset.appliedV34 = col; el.classList.add('applied-v34'); }
-            });
-        } catch(e) {}
+        if (action === 'tab') { window.EliteV35.tab = val; window.EliteV35.updateGUI(); }
+        else if (action === 'sym') { window.EliteV35.activeSym = val; window.EliteV35.updateGUI(); }
+        else if (action === 'color') {
+            if (window.EliteV35.tab === 'name') window.EliteV35.colName = val;
+            else if (window.EliteV35.tab === 'sign') window.EliteV35.colSign = val;
+            else if (window.EliteV35.tab === 'feather') window.EliteV35.colFeather = val;
+            else if (window.EliteV35.tab === 'symbol') window.EliteV35.colSyms[window.EliteV35.activeSym] = val;
+            window.EliteV35.updateGUI();
+        }
+        else if (action === 'msave') { 
+            window.EliteV35.saveAll(event.currentTarget); // Speichert ALLES, nutzt den kleinen Button für Feedback
+        }
+        else if (action === 'saveclose') { 
+            window.EliteV35.saveAll(document.getElementById('big-save-v35')); 
+            setTimeout(() => { 
+                let m = document.getElementById('profileEditModal'); 
+                if(m) { let cb = m.querySelector('.close-btn, .btn-close, .close, [data-dismiss="modal"]'); if(cb) cb.click(); else m.style.display='none'; } 
+            }, 600); 
+        }
+        else if (action === 'undo') { window.EliteV35.undo(); }
+        else if (action === 'reset') { window.EliteV35.reset(); }
     };
 
-    // Text Firewall
+    // Loop für ständiges Live-Update
     setInterval(() => { 
-        if(!document.getElementById('root-v34') && document.querySelector('#profileEditModal .modal-body')) buildModuleV34();
-        window.applyColorsV34(); 
+        if(!document.getElementById('root-v35') && document.querySelector('#profileEditModal .modal-body')) buildModuleV35();
+        window.EliteV35.applyToDOM(); 
+        
+        // Anti-Text-Zerstörer Firewall
         document.querySelectorAll('.card, .card-body, .modal-body, .modal-content').forEach(area => {
             area.querySelectorAll('p, div, span').forEach(el => {
-                if (el.classList.contains('elite-pro-text') || el.querySelector('button, input, i, img, a, table, ul, .badge, .btn, form, iframe') || el.closest('.author, .signature, .modal-footer, .comments, .close-btn, .modal-header, .module-v34, .online-user-name, .list-user-name')) return;
+                if (el.classList.contains('elite-pro-text') || el.querySelector('button, input, i, img, a, table, ul, .badge, .btn, form, iframe') || el.closest('.author, .signature, .modal-footer, .comments, .close-btn, .modal-header, .module-v35, .online-user-name, .list-user-name')) return;
                 let t = el.innerText.trim(); if (t.length < 35 || (el.innerHTML||'').includes('font-size:') || (el.innerHTML||'').includes('clamp(')) return;
                 el.classList.add('elite-pro-text');
             });
@@ -16112,6 +16436,7 @@ setInterval(function() {
     }, 800);
 })();
 </script>
+
 
 
 <style>
