@@ -17163,6 +17163,10 @@ setInterval(function() {
     .file-upload-btn:hover { background: #f4c542 !important; color: #000 !important; }
     .file-preview-img { width: 30px !important; height: 30px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #f4c542 !important; display: none; margin-left: 5px !important; }
 
+    /* Custom Alert Box Styles */
+    #mu-custom-alert { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); z-index:100020 !important; justify-content:center; align-items:center; backdrop-filter:blur(8px); }
+    .mu-alert-box { background: linear-gradient(145deg, #050b14, #0a192f); border: 1px solid #f4c542; padding: 35px 25px; border-radius: 16px; max-width: 420px; width: 90%; text-align: center; color: #fdfbf7; font-family: 'Poppins', sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,0.95), inset 0 0 20px rgba(244,197,66,0.1); }
+
     /* HUNDERTE CSS ANIMATIONEN */
     @keyframes ybAnimGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes muPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
@@ -17185,8 +17189,9 @@ setInterval(function() {
 
 <script>
 (function() {
+    // 🚀 LÖSCHT ALLE ALTEN VERSIONEN RESTLOS
     window.purgeOldVersions = function() {
-        for (let i = 20; i <= 99; i++) {
+        for (let i = 20; i <= 110; i++) {
             let oldModule = document.getElementById('root-v' + i);
             if (oldModule) oldModule.remove();
         }
@@ -17214,7 +17219,7 @@ setInterval(function() {
     }
 
     // =====================================================================
-    // 🚀 GLOBALE DATENBANKEN: GARANTIERT FEHLERFREI
+    // 🚀 GLOBALE DATENBANKEN: GARANTIERT FEHLERFREI SYNCHRONISIERT
     // =====================================================================
     window.muOptSizes = []; for(let i=5; i<=50; i+=2) window.muOptSizes.push((i/10).toFixed(1) + 'rem|Boyut ' + (i/10).toFixed(1));
     window.muOptWidths = []; for(let i=300; i<=3000; i+=100) window.muOptWidths.push(i + 'px|Genişlik ' + i + 'px'); window.muOptWidths.push('100%|Tam Ekran (100%)');
@@ -17382,25 +17387,11 @@ setInterval(function() {
         }
     }, 1000);
 
-    // 🚀 3. MODAL CREATE
+    // 🚀 3. MODAL CREATE & CUSTOM ALERT INJECTION (GARANTIERT GEMEINSAM GELADEN)
     let createYbModalTimer = setInterval(() => {
         let isAdm = window.currentUser?.role === 'admin' || (window.currentUser?.username || '').toLowerCase().includes('admin');
         if (isAdm && !document.getElementById('megaUltraModal')) {
             
-            // WUNDERSCHÖNES ALERT FENSTER DIREKT HIER INJIZIEREN (Garantierte DOM-Verfügbarkeit!)
-            let alertHtml = `
-            <div id="mu-custom-alert" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); z-index:100020 !important; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
-                <div style="background: linear-gradient(145deg, #050b14, #0a192f); border: 1px solid #f4c542; padding: 35px 25px; border-radius: 12px; max-width: 420px; width: 90%; text-align: center; color: #fdfbf7; font-family: 'Poppins', sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,0.95), inset 0 0 20px rgba(244,197,66,0.1);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f4c542; margin-bottom: 15px;"></i>
-                    <h3 style="margin: 0 0 10px 0; color: #f4c542; font-size: 1.2rem; font-weight: bold; text-transform: uppercase;">Sistem Mesajı</h3>
-                    <p id="mu-alert-msg" style="margin-bottom: 25px; font-size: 0.9rem; color: #cbd5e1;"></p>
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button id="mu-alert-cancel" style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Abbrechen</button>
-                        <button id="mu-alert-ok" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #000; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">OK</button>
-                    </div>
-                </div>
-            </div>`;
-
             function makeSelect(id, label, arr) {
                 if(!arr || !Array.isArray(arr)) return '';
                 let opts = arr.map(i => { let v,n; if(typeof i==='string'){let p=i.split('|'); v=p[0]; n=p[1];}else{v=i.id; n=i.n;} return `<option value="${v}">${n}</option>`; }).join('');
@@ -17420,12 +17411,25 @@ setInterval(function() {
                 return '<div class="mu-setting-row"><div class="mu-label">' + label.split('(')[0] + '</div><div class="mu-control-group" style="justify-content: flex-end;"><img id="preview-' + id + '" class="file-preview-img"><label class="file-upload-btn"><i class="fas fa-upload"></i> Seç<input type="file" accept="image/*" style="display:none;" onchange="window.MegaUltra.handleImage(this, \'' + id + '\')"></label><button class="mu-undo-btn" id="undo-' + id + '" onclick="window.MegaUltra.undo(\'' + id + '\')" disabled><i class="fas fa-undo"></i></button></div></div>';
             }
 
+            let alertHtml = `
+            <div id="mu-custom-alert" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); z-index:100020 !important; justify-content:center; align-items:center; backdrop-filter:blur(8px);">
+                <div style="background: linear-gradient(145deg, #050b14, #0a192f); border: 1px solid #f4c542; padding: 35px 25px; border-radius: 12px; max-width: 420px; width: 90%; text-align: center; color: #fdfbf7; font-family: 'Poppins', sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,0.95), inset 0 0 20px rgba(244,197,66,0.1);">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f4c542; margin-bottom: 15px;"></i>
+                    <h3 style="margin: 0 0 10px 0; color: #f4c542; font-size: 1.2rem; font-weight: bold; text-transform: uppercase;">Sistem Mesajı</h3>
+                    <p id="mu-alert-msg" style="margin-bottom: 25px; font-size: 0.9rem; color: #cbd5e1; line-height: 1.5;"></p>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="mu-alert-cancel" style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Abbrechen</button>
+                        <button id="mu-alert-ok" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #000; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">OK</button>
+                    </div>
+                </div>
+            </div>`;
+
             let modalHtml = `
             <div class="modal high-z-modal notranslate admin-only" id="megaUltraModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
                 <div class="modal-content mu-modal-content" onclick="event.stopPropagation()">
                     <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
                     <div class="modal-body mu-body-wrapper">
-                        <div class="mu-top-section"><h2 class="mu-main-title">MEGA ULTRA MODE 👑</h2><div class="mu-sub-title">(The Executioner CMS - V85 Absolute)</div>
+                        <div class="mu-top-section"><h2 class="mu-main-title">MEGA ULTRA MODE 👑</h2><div class="mu-sub-title">(The Executioner CMS - V85 Master)</div>
                             <div class="mu-device-tabs" id="mu-device-tabs-container">
                                 <div class="mu-device-tab-btn active" data-dev="desktop" onclick="window.MegaUltra.switchDevice('desktop')"><i class="fas fa-desktop"></i><strong>Desktop</strong></div>
                                 <div class="mu-device-tab-btn" data-dev="laptop" onclick="window.MegaUltra.switchDevice('laptop')"><i class="fas fa-laptop"></i><strong>Laptop</strong></div>
@@ -17521,7 +17525,11 @@ setInterval(function() {
         // 🚀 CUSTOM CONFIRM MODAL CALLS
         customConfirm: function(msg, onOk) {
             let m = document.getElementById('mu-custom-alert');
-            if(!m) { if(confirm(msg.replace(/<[^>]*>?/gm, ''))) onOk(); return; }
+            if(!m) { 
+                let cleanMsg = msg.replace(/<br>/g, '\n').replace(/<[^>]*>?/gm, '');
+                if(confirm(cleanMsg)) onOk(); 
+                return; 
+            }
             document.getElementById('mu-alert-msg').innerHTML = msg;
             m.style.display = 'flex';
             document.getElementById('mu-alert-cancel').onclick = () => { m.style.display = 'none'; };
@@ -17660,6 +17668,7 @@ setInterval(function() {
                 this.applyUIAndCSS();
             } 
         },
+        // 🚀 THE ULTIMATE RESET
         resetAll: function() {
             this.customConfirm('Her şeyi orijinaline döndür? Tüm ayarlar silinecek!<br><span style="font-size:0.8em;color:#94a3b8;">(Alles auf Standard zurücksetzen?)</span>', () => {
                 localStorage.removeItem(this.dbName);
@@ -17709,19 +17718,6 @@ setInterval(function() {
             let els = document.querySelectorAll('.bio-pic'); 
             els.forEach(el => { if (g.imgAbout) el.src = g.imgAbout; else if (o.imgAbout) el.src = o.imgAbout; });
 
-            // 🚀 KUSURSUZ FEDER ICON
-            let logoEl = document.querySelector('header#main-header .logo');
-            if (logoEl) {
-                let existingFeather = logoEl.querySelector('.mu-feather');
-                if (!existingFeather) {
-                    let feather = document.createElement('i');
-                    feather.className = 'fas fa-feather-alt mu-feather';
-                    feather.style.marginLeft = '8px';
-                    feather.style.fontSize = '0.8em';
-                    logoEl.appendChild(feather);
-                }
-            }
-            
             let admIcon = document.querySelector('#admin-btn i'); if(admIcon) admIcon.className = g.iconAdmin ? g.iconAdmin : 'fas fa-user-shield';
             let usrIcon = document.querySelector('.bottom-btn:not(#admin-btn-megaultra):not(#admin-btn) i'); if(usrIcon) usrIcon.className = g.iconUser ? g.iconUser : 'fas fa-user';
             
