@@ -17145,6 +17145,9 @@ setInterval(function() {
     .mu-select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23f4c542" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer !important; }
     .mu-select:hover, .mu-input:focus { box-shadow: 0 0 8px rgba(244,197,66,0.3) !important; }
     .mu-select option { background: #0a192f !important; color: #fff !important; padding: 6px !important; }
+
+    /* Advanced Color Picker UI */
+    .mu-color-picker { width: 35px !important; height: 25px !important; padding: 0 !important; border: 1px solid #f4c542 !important; border-radius: 4px !important; cursor: pointer !important; background: transparent !important; }
     
     .mu-undo-btn { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239,68,68,0.3) !important; padding: 6px !important; border-radius: 6px !important; cursor: pointer !important; transition: 0.2s !important; display: flex !important; align-items: center !important; justify-content: center !important; height: 30px !important; width: 30px !important; flex-shrink: 0 !important; font-size: 0.85rem !important;}
     .mu-undo-btn:hover:not(:disabled) { background: #ef4444 !important; color: #fff !important; }
@@ -17171,19 +17174,33 @@ setInterval(function() {
     .file-upload-btn:hover { background: #f4c542 !important; color: #000 !important; }
     .file-preview-img { width: 30px !important; height: 30px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #f4c542 !important; display: none; margin-left: 5px !important; }
 
+    /* CSS Animasyonları */
     @keyframes ybAnimGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    @keyframes muPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes muFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
+    @keyframes muShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) rotate(-3deg); } 75% { transform: translateX(3px) rotate(3deg); } }
 </style>
 
 <script>
 (function() {
+    // 🚀 LÖSCHT ALTE VERSIONEN (Sichert sauberen Start)
     window.purgeOldVersions = function() {
-        for (let i = 20; i <= 80; i++) {
-            let oldModule = document.getElementById('root-v' + i);
-            if (oldModule) oldModule.remove();
-        }
+        let oldMu = document.getElementById('megaUltraModal');
+        if (oldMu) oldMu.remove();
+        let oldBtn = document.getElementById('admin-btn-megaultra');
+        if (oldBtn) oldBtn.remove();
     };
     window.purgeOldVersions();
-    setTimeout(window.purgeOldVersions, 1000); 
+    
+    // Backup Original Images for Reset
+    if (!window.muOriginalData) {
+        window.muOriginalData = { imgHeader: '', imgHome: '', imgAbout: '' };
+        setTimeout(() => {
+            let hImg = document.getElementById('user-avatar'); if(hImg) window.muOriginalData.imgHeader = hImg.src;
+            let mImg = document.getElementById('home-profile-pic'); if(mImg) window.muOriginalData.imgHome = mImg.src;
+            let aImg = document.querySelector('.bio-pic'); if(aImg) window.muOriginalData.imgAbout = aImg.src;
+        }, 500);
+    }
 
     if (window.MegaUltraReady) return;
     window.MegaUltraReady = true;
@@ -17199,7 +17216,7 @@ setInterval(function() {
             btn.id = 'admin-btn-megaultra';
             btn.className = 'bottom-btn';
             btn.setAttribute('onclick', "if(window.closeFloatingMenus) window.closeFloatingMenus(); if(window.openFastModal) window.openFastModal('megaUltraModal')");
-            btn.innerHTML = `<span class="btn-icon"><i class="fas fa-layer-group"></i></span><div class="btn-text-wrapper"><span class="btn-text">Yap Boz <span class="de-sub">(CMS Builder)</span></span></div>`;
+            btn.innerHTML = `<span class="btn-icon"><i class="fas fa-layer-group"></i></span><div class="btn-text-wrapper"><span class="btn-text">Mega Ultra Mode</span></div>`;
             rightMenu.appendChild(btn);
             clearInterval(injectYbTimer);
         }
@@ -17218,7 +17235,6 @@ setInterval(function() {
         let cIdx = i % baseColors.length;
         let c1 = baseColors[cIdx];
         let c2 = baseColors[(cIdx + 4) % baseColors.length];
-        
         window.muThemes.push({
             id: 'auto_theme_' + i, n: (isAnim ? '🔥 Animasyonlu Tema ' : '🎨 Özel Tema ') + (i + 1),
             bg: isAnim ? `linear-gradient(-45deg, #000000, ${c1}22, ${c2}22, #000000)` : '#050505',
@@ -17226,7 +17242,6 @@ setInterval(function() {
         });
     }
 
-    // 50 Sichere Header Layouts
     window.muHeaders = [
         { id: 'default', n: 'Orijinal (Klasik)', pt: '120px', css: '' },
         { id: 'centered', n: 'Tam Merkez (Zentriert)', pt: '160px', css: 'header#main-header { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; padding-top:10px !important; } .header-top { display:flex !important; flex-direction:column !important; align-items:center !important; position:static !important; height:auto !important; } .logo-and-time, .header-search-wrapper, .header-right { position:static !important; transform:none !important; width:100% !important; display:flex !important; justify-content:center !important; margin-bottom:10px !important; } .header-search { position:static !important; width: 100% !important; max-width: 500px !important; } .header-nav-bar { position:static !important; justify-content:center !important; } nav#main-nav { margin:0 auto !important; }' },
@@ -17237,13 +17252,9 @@ setInterval(function() {
     let rads = ['0px', '10px', '25px', '50px'];
     let borders = ['dashed', 'dotted', 'double', 'solid'];
     for(let i = 0; i < 46; i++) {
-        window.muHeaders.push({
-            id: 'auto_header_' + i, n: 'Header Varyasyon ' + (i+1), pt: '130px',
-            css: `header#main-header { border-bottom: ${Math.max(1, i%5)}px ${borders[i%4]} var(--theme-acc, #f4c542) !important; justify-content: ${aligns[i%5]} !important; border-radius: 0 0 ${rads[i%4]} ${rads[i%4]} !important; }`
-        });
+        window.muHeaders.push({ id: 'auto_header_' + i, n: 'Header Varyasyon ' + (i+1), pt: '130px', css: `header#main-header { border-bottom: ${Math.max(1, i%5)}px ${borders[i%4]} var(--theme-acc, #f4c542) !important; justify-content: ${aligns[i%5]} !important; border-radius: 0 0 ${rads[i%4]} ${rads[i%4]} !important; }` });
     }
 
-    // ERWEITERTE ŞEKİLLER (SHAPES) DB
     window.muShapes = [
         { id: 'default', n: 'Orijinal (Klasik)', css: 'border-radius: 12px !important; clip-path: none !important;' },
         { id: 'square', n: 'Keskin Dörtgen (Square)', css: 'border-radius: 0 !important; clip-path: none !important;' },
@@ -17284,9 +17295,11 @@ setInterval(function() {
                     if (typeof i === 'string') { let p = i.split('|'); return `<option value="${p[0]}">${p[1]}</option>`; }
                     else { return `<option value="${i.id}">${i.n}</option>`; }
                 }).join('');
+                let l1 = label.split('(')[0];
+                let l2 = label.includes('(') ? '(' + label.split('(')[1] : '';
                 return `
                 <div class="mu-setting-row">
-                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-label">${l1} <span class="de-sub">${l2}</span></div>
                     <div class="mu-control-group">
                         <select id="mu-${id}" class="mu-select" onchange="window.MegaUltra.updateLive('${id}')">${opts}</select>
                         <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
@@ -17295,9 +17308,11 @@ setInterval(function() {
             }
 
             function makeToggle(id, label) {
+                let l1 = label.split('(')[0];
+                let l2 = label.includes('(') ? '(' + label.split('(')[1] : '';
                 return `
                 <div class="mu-setting-row">
-                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-label">${l1} <span class="de-sub">${l2}</span></div>
                     <div class="mu-control-group">
                         <label class="mu-switch"><input type="checkbox" id="mu-${id}" checked onchange="window.MegaUltra.updateLive('${id}')"><span class="mu-slider"></span></label>
                         <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
@@ -17306,9 +17321,11 @@ setInterval(function() {
             }
 
             function makeInput(id, label) {
+                let l1 = label.split('(')[0];
+                let l2 = label.includes('(') ? '(' + label.split('(')[1] : '';
                 return `
                 <div class="mu-setting-row">
-                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-label">${l1} <span class="de-sub">${l2}</span></div>
                     <div class="mu-control-group">
                         <input type="text" id="mu-${id}" class="mu-input" oninput="window.MegaUltra.updateLive('${id}')">
                         <button class="mu-undo-btn" id="undo-${id}" onclick="window.MegaUltra.undo('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
@@ -17317,9 +17334,11 @@ setInterval(function() {
             }
 
             function makeImageUpload(id, label) {
+                let l1 = label.split('(')[0];
+                let l2 = label.includes('(') ? '(' + label.split('(')[1] : '';
                 return `
                 <div class="mu-setting-row">
-                    <div class="mu-label">${label.split('(')[0]} <span class="de-sub">(${label.split('(')[1] || ''}</span></div>
+                    <div class="mu-label">${l1} <span class="de-sub">${l2}</span></div>
                     <div class="mu-control-group" style="justify-content: flex-end;">
                         <img id="preview-${id}" class="file-preview-img">
                         <label class="file-upload-btn"><i class="fas fa-upload"></i> Seç
@@ -17330,6 +17349,29 @@ setInterval(function() {
                 </div>`;
             }
 
+            // 🚀 EKSİK OLAN ADVANCED COLOR FONKSİYONU EKLENDİ!
+            function makeAdvColor(id, label) {
+                let l1 = label.split('(')[0];
+                let l2 = label.includes('(') ? '(' + label.split('(')[1] : '';
+                return `
+                <div class="mu-setting-row">
+                    <div class="mu-label">${l1} <span class="de-sub">${l2}</span></div>
+                    <div class="mu-control-group" style="gap:4px;">
+                        <input type="color" id="mu-${id}_1" class="mu-color-picker" title="Renk 1" onchange="window.MegaUltra.updateLive('${id}_1')">
+                        <input type="color" id="mu-${id}_2" class="mu-color-picker" title="Renk 2 (Geçiş)" onchange="window.MegaUltra.updateLive('${id}_2')">
+                        <select id="mu-${id}_type" class="mu-select" style="width:65px; padding:2px; font-size:0.7rem; background-position:right 4px center;" onchange="window.MegaUltra.updateLive('${id}_type')">
+                            <option value="solid">Tek</option>
+                            <option value="gradient">Geçiş</option>
+                            <option value="anim">Anim.</option>
+                        </select>
+                        <button class="mu-undo-btn" id="undo-${id}_1" onclick="window.MegaUltra.undoAdvColor('${id}')" disabled title="Geri Al"><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>`;
+            }
+
+            let fxShadows = ['none|Yok', 'default|Temadan Al', 'light|Hafif Gölgeli', 'deep|Derin Gölge', 'glow|Parlama (Glow)', 'neon|Neon Işığı', 'dark|Siyah Vurgu'];
+            let fxAnims = ['none|Yok', 'hover_pulse|Nabız (Hover)', 'hover_float|Uçma (Hover)', 'hover_shake|Sarsıntı (Hover)', 'pulse|Sürekli Nabız', 'float|Sürekli Uçma'];
+
             let modalHtml = `
             <div class="modal high-z-modal notranslate admin-only" id="megaUltraModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
                 <div class="modal-content mu-modal-content" onclick="event.stopPropagation()">
@@ -17339,7 +17381,7 @@ setInterval(function() {
                         
                         <div class="mu-top-section">
                             <h2 class="mu-main-title">MEGA ULTRA MODE ŞAİR MİSAL.İ 👑</h2>
-                            <div class="mu-sub-title">(The Executioner CMS - Locked Panorama)</div>
+                            <div class="mu-sub-title">(The Executioner CMS)</div>
                             
                             <div class="mu-device-tabs" id="mu-device-tabs-container">
                                 <div class="mu-device-tab-btn active" data-dev="desktop" onclick="window.MegaUltra.switchDevice('desktop')">
@@ -17361,9 +17403,12 @@ setInterval(function() {
 
                             <div class="mu-category-tabs">
                                 <div class="mu-cat-tab-btn active" onclick="window.MegaUltra.switchCategory('layout')"><i class="fas fa-border-all"></i> Boyut & Görünüm</div>
-                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('shapes')"><i class="fas fa-shapes"></i> Şekiller (Shapes)</div>
-                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('themes')"><i class="fas fa-palette"></i> Temalar & Stiller</div>
-                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('header_items')"><i class="fas fa-heading"></i> Header Detayları</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('shapes')"><i class="fas fa-shapes"></i> Şekiller</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('themes')"><i class="fas fa-palette"></i> Temalar</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('section_colors')"><i class="fas fa-fill-drip"></i> Bölüm Renkleri</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('fx_anims')"><i class="fas fa-magic"></i> Efekt & Animasyon</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('header_items')"><i class="fas fa-heading"></i> Header Detayı</div>
+                                <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('buttons')"><i class="fas fa-hand-pointer"></i> Butonlar</div>
                                 <div class="mu-cat-tab-btn" onclick="window.MegaUltra.switchCategory('texts')"><i class="fas fa-pen"></i> Metin & Resim</div>
                             </div>
                         </div>
@@ -17393,6 +17438,7 @@ setInterval(function() {
                                 ${makeSelect('cardShape', 'Kart Şekli (Karten Form)', window.muShapes)}
                                 ${makeSelect('modalShape', 'Pencere Şekli (Modal Form)', window.muShapes)}
                                 ${makeSelect('imageShape', 'Profil Resmi Şekli (Image Form)', ['default|Orijinal', 'circle|Tam Yuvarlak', 'rounded|Hafif Oval', 'square|Kare', 'hexagon|Altıgen'])}
+                                ${makeSelect('buttonShape', 'Buton Şekli (Button Form)', window.muShapes)}
                             </div>
                         </div>
 
@@ -17408,24 +17454,78 @@ setInterval(function() {
                                 ${makeSelect('userMainBtn', 'User Butonları', window.muElements)}
                                 ${makeSelect('sidebarStyle', 'Sidebar Tasarımı', window.muElements)}
                                 ${makeSelect('modalStyle', 'Pencere (Modal)', window.muElements)}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-section_colors" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Sayfa Arka Planı (Page Background)</div>
+                                ${makeAdvColor('pageBg', 'Sayfa Arka Plan Rengi (Tüm Sayfa)')}
+
+                                <div class="mu-section-title">Header Renklendirme (Kısmi veya Tümü)</div>
+                                ${makeAdvColor('hdrAll', 'Tüm Header (Genel Renk)')}
+                                ${makeAdvColor('hdrTop', 'Üst Kısım (Header Top)')}
+                                ${makeAdvColor('hdrNav', 'Menü Çubuğu (Nav Bar)')}
+                                ${makeAdvColor('hdrTick', 'Kayan Yazı (Ticker)')}
                                 
-                                <div class="mu-section-title">Özel Efektler & Araçlar (FX & Widgets)</div>
-                                ${makeSelect('specialFx', 'Genel Efektler', ['off|Kapalı', 'glass|Buzlu Cam (Glass)', 'oled|OLED True Black', 'retro|Retro CRT TV', 'hologram|Hologram', 'bw|Siyah Beyaz'])}
-                                ${makeSelect('clockStyle', 'Saat Görünümü', ['both|Dijital + Analog', 'digital|Sadece Dijital', 'analog|Sadece Analog', 'minimal|Minimalist'])}
-                                ${makeSelect('weatherStyle', 'Hava Durumu Şekli', ['detailed|Detaylı (Sözlü)', 'compact|Kompakt', 'icon|Sadece İkon'])}
-                                ${makeSelect('calendarStyle', 'Takvim Tasarımı', ['default|Orijinal', 'glass|Cam Efekti', 'dark|Koyu Tema', 'neon|Neon Çerçeve'])}
+                                <div class="mu-section-title">Spesifik Bölüm Renkleri (Spezifische Bereiche)</div>
+                                ${makeAdvColor('cardAll', 'Kart Arka Planı (Tüm Kartlar)')}
+                                ${makeAdvColor('cardSah', 'Önemli Şahsiyetler (Karten)')}
+                                ${makeAdvColor('cardSiz', 'Sizin Kaleminiz & Eserler')}
+                                ${makeAdvColor('cardSoh', 'Sohbet & Bildirimler (Chat)')}
+                                ${makeAdvColor('cardPro', 'Profilim (My Profile)')}
+                                ${makeAdvColor('sidebar', 'Yan Menüler (Sidebars)')}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-fx_anims" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Gölge ve Vurgular (Shadows & Filters)</div>
+                                ${makeSelect('shadowAll', 'Genel Gölge (Hepsine Birden)', fxShadows)}
+                                ${makeSelect('shadowImg', 'Resimler & Fotolar (Images)', fxShadows)}
+                                ${makeSelect('shadowText', 'Başlıklar & Yazılar (Texts)', fxShadows)}
+                                ${makeSelect('shadowSym', 'İkonlar & Semboller (Symbols)', fxShadows)}
+                                ${makeSelect('shadowBtn', 'Butonlar (Buttons)', fxShadows)}
+                                
+                                <div class="mu-section-title">Animasyonlar (Hareket ve Hover)</div>
+                                ${makeSelect('animAll', 'Genel Animasyon (Hepsine Birden)', fxAnims)}
+                                ${makeSelect('animImg', 'Resim Animasyonu', fxAnims)}
+                                ${makeSelect('animText', 'Yazı Animasyonu', fxAnims)}
+                                ${makeSelect('animSym', 'İkon & Sembol Animasyonu', fxAnims)}
+                                ${makeSelect('animBtn', 'Buton Animasyonu', fxAnims)}
                             </div>
                         </div>
 
                         <div id="mu-panel-header_items" class="mu-panel">
                             <div class="mu-settings-grid">
                                 <div class="mu-section-title">Header Boyutlandırma (Header Sizes)</div>
-                                ${makeSelect('logoSize', 'Logo Boyutu (Logo)', ['1rem|Çok Küçük', '1.5rem|Küçük', '2rem|Normal', '2.5rem|Büyük', '3rem|Devasa'])}
-                                ${makeSelect('logoWeight', 'Logo Kalınlığı (Font Weight)', ['normal|Normal', 'bold|Kalın', '900|Ekstra Kalın'])}
-                                ${makeSelect('searchWidth', 'Arama Çubuğu Genişliği', ['200px|Dar (200px)', '300px|Normal (300px)', '400px|Geniş (400px)', '500px|Çok Geniş (500px)', '100%|Tam Ekran (100%)'])}
-                                ${makeSelect('iconSize', 'İkon Boyutu (Icons)', ['1rem|Küçük', '1.2rem|Normal', '1.5rem|Büyük', '1.8rem|Çok Büyük'])}
-                                ${makeSelect('profileSize', 'Profil Resmi Boyutu', ['30px|Küçük', '40px|Normal', '50px|Büyük', '60px|Çok Büyük'])}
+                                ${makeSelect('logoSize', 'Logo Boyutu (Logo)', ['0.5rem|Ultra Küçük', '0.8rem|Çok Küçük', '1rem|Küçük', '1.5rem|Orta Küçük', '2rem|Normal', '2.5rem|Büyük', '3rem|Çok Büyük', '4rem|Devasa', '5rem|Mega'])}
+                                ${makeSelect('logoWeight', 'Logo Kalınlığı (Font Weight)', ['300|İnce', 'normal|Normal', '600|Yarı Kalın', 'bold|Kalın', '900|Ekstra Kalın'])}
+                                ${makeSelect('searchWidth', 'Arama Çubuğu Genişliği', ['100px|Çok Dar (100px)', '150px|Dar (150px)', '200px|Normal Dar (200px)', '300px|Normal (300px)', '400px|Geniş (400px)', '500px|Çok Geniş (500px)', '600px|Devasa (600px)', '800px|Mega (800px)', '100%|Tam Ekran (100%)'])}
+                                ${makeSelect('iconSize', 'İkon Boyutu (Icons)', ['0.6rem|Ultra Küçük', '0.8rem|Çok Küçük', '1rem|Küçük', '1.2rem|Normal', '1.5rem|Büyük', '2rem|Çok Büyük', '2.5rem|Devasa', '3rem|Mega'])}
+                                ${makeSelect('profileSize', 'Profil Resmi Boyutu', ['20px|Ultra Küçük', '25px|Çok Küçük', '30px|Küçük', '40px|Normal', '50px|Büyük', '60px|Çok Büyük', '80px|Devasa', '100px|Mega'])}
                                 ${makeSelect('headerBlur', 'Header Arka Plan Bulanıklığı', ['none|Yok', 'blur(5px)|Hafif (Light)', 'blur(15px)|Orta (Medium)', 'blur(30px)|Yoğun (Heavy)'])}
+                            </div>
+                        </div>
+
+                        <div id="mu-panel-buttons" class="mu-panel">
+                            <div class="mu-settings-grid">
+                                <div class="mu-section-title">Semboller (İkon Değiştirme)</div>
+                                <div style="grid-column: 1 / -1; color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">FontAwesome ikon kodlarını girin (Örn: fas fa-star, fas fa-heart)</div>
+                                ${makeInput('iconAdmin', 'Admin Buton İkonu')}
+                                ${makeInput('iconUser', 'User Buton İkonu')}
+
+                                <div class="mu-section-title">Yeni Özel Buton Ekle (Admin)</div>
+                                <div style="grid-column: 1 / -1; color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Sadece adminlerin göreceği menüye yeni buton ekler.</div>
+                                ${makeInput('newBtnAdmText', 'Buton Adı (Text)')}
+                                ${makeInput('newBtnAdmIcon', 'İkon Kodu (Icon)')}
+                                ${makeInput('newBtnAdmLink', 'Bağlantı (URL)')}
+
+                                <div class="mu-section-title">Yeni Özel Buton Ekle (Genel Kullanıcı)</div>
+                                <div style="grid-column: 1 / -1; color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Herkesin göreceği genel menüye yeni buton ekler.</div>
+                                ${makeInput('newBtnUsrText', 'Buton Adı (Text)')}
+                                ${makeInput('newBtnUsrIcon', 'İkon Kodu (Icon)')}
+                                ${makeInput('newBtnUsrLink', 'Bağlantı (URL)')}
                             </div>
                         </div>
 
@@ -17453,9 +17553,8 @@ setInterval(function() {
                         <div class="mu-bottom-actions">
                             <button class="btn-local-reset" style="color:white; border-color: rgba(255,255,255,0.2);" onclick="window.MegaUltra.save()"><i class="fas fa-save"></i> Kaydet</button>
                             <button class="btn-local-reset" onclick="window.MegaUltra.undoAllLocal()"><i class="fas fa-undo"></i> Sıfırla</button>
-                            <button class="btn-global-save" style="flex:2;" onclick="window.MegaUltra.publishGlobal()"><i class="fas fa-globe"></i> GLOBAL SAYFADA UYGULA</button>
+                            <button class="btn-global-save" style="flex:2; min-width: 100%;" onclick="window.MegaUltra.publishGlobal()"><i class="fas fa-globe"></i> GLOBAL SAYFADA UYGULA</button>
                         </div>
-
                     </div>
                 </div>
             </div>`;
@@ -17507,7 +17606,6 @@ setInterval(function() {
                         let u = window.currentUser;
                         let isAdm = u && (u.role === 'admin' || u.username.toLowerCase().includes('admin'));
                         if (!isAdm) {
-                            // Deep copy
                             this.settings = JSON.parse(JSON.stringify(this.globalSettings));
                             this.injectCSS();
                             this.injectContent();
@@ -17519,7 +17617,7 @@ setInterval(function() {
 
         publishGlobal: function() {
             if(window.customConfirm) {
-                window.customConfirm('Bu tasarımı ve metinleri/resimleri <b>TÜM KULLANICILAR</b> için canlıya almak istiyor musunuz? <span class="de-sub"><br>(Für alle User veröffentlichen?)</span>', () => {
+                window.customConfirm('Bu tasarımı ve ayarları <b>TÜM KULLANICILAR</b> için canlıya almak istiyor musunuz? <span class="de-sub"><br>(Für alle User veröffentlichen?)</span>', () => {
                     this.executeGlobalPublish();
                 });
             } else {
@@ -17571,17 +17669,26 @@ setInterval(function() {
         },
 
         getDefaults: function() {
-            return {
+            let defs = {
                 cardSize: 'normal', siteWidth: 'normal', cardGap: 'normal', textAlign: 'center', cardOpacity: '1',
                 showTicker: true, showWeather: true, showZodiac: true, showScore: true, showSearch: true, showFooter: true,
-                cardShape: 'default', modalShape: 'default', imageShape: 'default',
+                cardShape: 'default', modalShape: 'default', imageShape: 'default', buttonShape: 'default',
                 headerLayout: 'default', themeId: 'default', specialFx: 'off',
+                shadowAll: 'none', shadowImg: 'default', shadowText: 'default', shadowSym: 'default', shadowBtn: 'default',
+                animAll: 'none', animImg: 'none', animText: 'none', animSym: 'none', animBtn: 'none',
                 adminMainBtn: 'default', userMainBtn: 'default', sidebarStyle: 'default', modalStyle: 'default',
                 clockStyle: 'both', weatherStyle: 'detailed', calendarStyle: 'default',
                 logoSize: '2rem', logoWeight: 'bold', searchWidth: '300px', iconSize: '1.2rem', profileSize: '40px', headerBlur: 'none',
                 textHero: '', textSubTr: '', textSubDe: '', textInfo: '', textFooter: '', textAboutTr: '', textAboutDe: '', textImprint: '', textCookies: '', textPrivacy: '',
-                imgHeader: '', imgHome: '', imgAbout: ''
+                imgHeader: '', imgHome: '', imgAbout: '',
+                iconAdmin: '', iconUser: '', newBtnAdmText: '', newBtnAdmIcon: '', newBtnAdmLink: '', newBtnUsrText: '', newBtnUsrIcon: '', newBtnUsrLink: ''
             };
+            
+            let colorKeys = ['pageBg', 'hdrAll', 'hdrTop', 'hdrNav', 'hdrTick', 'cardAll', 'cardSah', 'cardSiz', 'cardSoh', 'cardPro', 'sidebar'];
+            colorKeys.forEach(k => {
+                defs[k + '_1'] = ''; defs[k + '_2'] = ''; defs[k + '_type'] = 'solid';
+            });
+            return defs;
         },
 
         readFromUI: function(key) {
@@ -17597,7 +17704,7 @@ setInterval(function() {
             let g = this.settings.global || {}; 
             
             Object.keys(defs).forEach(key => {
-                let val = (key.includes('text') || key.includes('img')) ? g[key] : s[key];
+                let val = (key.includes('text') || key.includes('img') || key.includes('icon') || key.includes('newBtn')) ? g[key] : s[key];
                 if (val === undefined) val = defs[key];
                 
                 let el = document.getElementById('mu-' + key);
@@ -17610,15 +17717,17 @@ setInterval(function() {
             ['imgHeader', 'imgHome', 'imgAbout'].forEach(k => {
                 let p = document.getElementById('preview-' + k);
                 if(p) {
-                    if(g[k]) { p.src = g[k]; p.style.display = 'block'; }
-                    else { p.style.display = 'none'; }
+                    // Hvis Global Custom yoksa Original'i goster
+                    p.src = g[k] ? g[k] : (window.muOriginalData ? window.muOriginalData[k] : '');
+                    if (p.src && p.src !== window.location.href) p.style.display = 'block'; 
+                    else p.style.display = 'none';
                 }
             });
         },
 
         updateLive: function(key, overrideVal = null) {
             let val = overrideVal !== null ? overrideVal : this.readFromUI(key);
-            let isGlobal = key.includes('text') || key.includes('img');
+            let isGlobal = key.includes('text') || key.includes('img') || key.includes('icon') || key.includes('newBtn');
 
             let targetStore = isGlobal ? this.settings.global : this.settings[this.currentDevice];
             let historyStore = isGlobal ? this.history.global : this.history[this.currentDevice];
@@ -17653,7 +17762,7 @@ setInterval(function() {
         },
 
         undo: function(key) {
-            let isGlobal = key.includes('text') || key.includes('img');
+            let isGlobal = key.includes('text') || key.includes('img') || key.includes('icon') || key.includes('newBtn');
             let targetStore = isGlobal ? this.settings.global : this.settings[this.currentDevice];
             let historyStore = isGlobal ? this.history.global : this.history[this.currentDevice];
 
@@ -17669,11 +17778,17 @@ setInterval(function() {
             }
         },
 
+        undoAdvColor: function(baseId) {
+            this.undo(baseId + '_1');
+            this.undo(baseId + '_2');
+            this.undo(baseId + '_type');
+        },
+
         updateUndoButtons: function() {
             let defs = this.getDefaults();
             Object.keys(defs).forEach(key => {
                 let btn = document.getElementById('undo-' + key);
-                let isGlobal = key.includes('text') || key.includes('img');
+                let isGlobal = key.includes('text') || key.includes('img') || key.includes('icon') || key.includes('newBtn');
                 let hStore = isGlobal ? this.history.global : this.history[this.currentDevice];
                 if (btn) btn.disabled = (hStore[key] === undefined);
             });
@@ -17697,7 +17812,6 @@ setInterval(function() {
                     this.injectContent();
                     this.applyToUI();
                     this.updateUndoButtons();
-                    if(window.showToast) window.showToast('Tümü sıfırlandı! <span class="de-sub">(Zurückgesetzt)</span>');
                 });
             } else {
                 if(confirm('Reset all?')) {
@@ -17728,8 +17842,49 @@ setInterval(function() {
             let data = document.querySelector('#datenschutz-view > div > p:nth-child(2)'); if(data && g.textPrivacy !== undefined) data.innerText = g.textPrivacy;
 
             if(g.imgHeader) { let el = document.getElementById('user-avatar'); if(el) el.src = g.imgHeader; }
+            else if(window.muOriginalData && window.muOriginalData.imgHeader) { let el = document.getElementById('user-avatar'); if(el) el.src = window.muOriginalData.imgHeader; }
+            
             if(g.imgHome) { let el = document.getElementById('home-profile-pic'); if(el) el.src = g.imgHome; }
-            if(g.imgAbout) { let els = document.querySelectorAll('.bio-pic'); els.forEach(el => el.src = g.imgAbout); }
+            else if(window.muOriginalData && window.muOriginalData.imgHome) { let el = document.getElementById('home-profile-pic'); if(el) el.src = window.muOriginalData.imgHome; }
+            
+            let els = document.querySelectorAll('.bio-pic'); els.forEach(el => {
+                if (g.imgAbout) el.src = g.imgAbout;
+                else if (window.muOriginalData && window.muOriginalData.imgAbout) el.src = window.muOriginalData.imgAbout;
+            });
+
+            // 🚀 IKONS & CUSTOM BUTTONS
+            if(g.iconAdmin) { let ic = document.querySelector('#admin-btn i'); if(ic) ic.className = g.iconAdmin; }
+            if(g.iconUser) { let ic = document.querySelector('.bottom-btn:not(#admin-btn-megaultra):not(#admin-btn) i'); if(ic) ic.className = g.iconUser; }
+
+            // Custom Admin Button Injection
+            let rightMenu = document.getElementById('right-menu-items');
+            if (rightMenu) {
+                let oldCustAdm = document.getElementById('mu-custom-adm');
+                if (oldCustAdm) oldCustAdm.remove();
+                if (g.newBtnAdmText) {
+                    let btn = document.createElement('button');
+                    btn.id = 'mu-custom-adm';
+                    btn.className = 'bottom-btn';
+                    btn.onclick = () => window.location.href = g.newBtnAdmLink || '#';
+                    btn.innerHTML = `<span class="btn-icon"><i class="${g.newBtnAdmIcon || 'fas fa-link'}"></i></span><div class="btn-text-wrapper"><span class="btn-text">${g.newBtnAdmText}</span></div>`;
+                    rightMenu.appendChild(btn);
+                }
+            }
+
+            // Custom User Button Injection
+            let usrMenu = document.querySelector('.bottom-btn:not(#admin-btn-megaultra)')?.parentElement;
+            if (usrMenu) {
+                let oldCustUsr = document.getElementById('mu-custom-usr');
+                if (oldCustUsr) oldCustUsr.remove();
+                if (g.newBtnUsrText) {
+                    let btn = document.createElement('button');
+                    btn.id = 'mu-custom-usr';
+                    btn.className = 'bottom-btn';
+                    btn.onclick = () => window.location.href = g.newBtnUsrLink || '#';
+                    btn.innerHTML = `<span class="btn-icon"><i class="${g.newBtnUsrIcon || 'fas fa-link'}"></i></span><div class="btn-text-wrapper"><span class="btn-text">${g.newBtnUsrText}</span></div>`;
+                    usrMenu.appendChild(btn);
+                }
+            }
         },
 
         buildCSSString: function(device) {
@@ -17741,9 +17896,9 @@ setInterval(function() {
 
             // 1. LAYOUT GRÖSSEN
             let cSize = getVal('cardSize');
-            if (cSize === 'compact') css += `.card, .game-card, .notif-card, .section-box { padding: 15px !important; min-height: 80px !important; } .card h3 { font-size: 1.1rem !important; } .card-stats-badge { transform: scale(0.8); right: 5px; bottom: 5px; }\n`;
-            else if (cSize === 'large') css += `.card, .game-card, .notif-card, .section-box { padding: 40px !important; min-height: 200px !important; } .card h3 { font-size: 1.8rem !important; }\n`;
-            else if (cSize === 'xlarge') css += `.card, .game-card, .notif-card, .section-box { padding: 60px !important; min-height: 300px !important; } .card h3 { font-size: 2.5rem !important; }\n`;
+            if (cSize === 'compact') css += `.card, .game-card, .notif-card, .section-box, .sahsiyet-card, .person-card, .vip-card, .author-card, .poem-card, .song-card { padding: 15px !important; min-height: 80px !important; } .card h3 { font-size: 1.1rem !important; } .card-stats-badge { transform: scale(0.8); right: 5px; bottom: 5px; }\n`;
+            else if (cSize === 'large') css += `.card, .game-card, .notif-card, .section-box, .sahsiyet-card, .person-card, .vip-card, .author-card, .poem-card, .song-card { padding: 40px !important; min-height: 200px !important; } .card h3 { font-size: 1.8rem !important; }\n`;
+            else if (cSize === 'xlarge') css += `.card, .game-card, .notif-card, .section-box, .sahsiyet-card, .person-card, .vip-card, .author-card, .poem-card, .song-card { padding: 60px !important; min-height: 300px !important; } .card h3 { font-size: 2.5rem !important; }\n`;
 
             let sWidth = getVal('siteWidth');
             if (sWidth === 'narrow') css += `section > div[style*="max-width"] { max-width: 900px !important; }\n`;
@@ -17761,13 +17916,13 @@ setInterval(function() {
             else if (tAlign === 'justify') css += `.card, .modal-text, p { text-align: justify !important; }\n`;
 
             let cOpac = getVal('cardOpacity');
-            if (cOpac && cOpac !== '1') css += `.card, .game-card, .notif-card, .section-box { opacity: ${cOpac} !important; }\n`;
+            if (cOpac && cOpac !== '1') css += `.card, .game-card, .notif-card, .section-box, .sahsiyet-card, .person-card, .vip-card, .author-card, .poem-card, .song-card { opacity: ${cOpac} !important; }\n`;
 
-            // 🚀 ŞEKİLLER (SHAPES)
+            // 🚀 2. ŞEKİLLER (SHAPES)
             let cShape = getVal('cardShape');
             if (cShape && cShape !== 'default') {
                 let shp = window.muShapes.find(x => x.id === cShape);
-                if (shp) css += `.card, .game-card, .notif-card, .section-box { ${shp.css} }\n`;
+                if (shp) css += `.card, .game-card, .notif-card, .section-box, .sahsiyet-card, .person-card, .vip-card, .author-card, .poem-card, .song-card { ${shp.css} }\n`;
             }
             let mShape = getVal('modalShape');
             if (mShape && mShape !== 'default') {
@@ -17781,8 +17936,13 @@ setInterval(function() {
                 if (iShape === 'rounded') css += `.bio-pic, #user-avatar, #home-profile-pic { border-radius: 20px !important; clip-path: none !important; }\n`;
                 if (iShape === 'hexagon') css += `.bio-pic, #user-avatar, #home-profile-pic { border-radius: 0 !important; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%) !important; }\n`;
             }
+            let bShape = getVal('buttonShape');
+            if (bShape && bShape !== 'default') {
+                let shp = window.muShapes.find(x => x.id === bShape);
+                if (shp) css += `button, .btn, .bottom-btn, .auth-view-btn { ${shp.css} }\n`;
+            }
 
-            // 2. VISIBILITY
+            // 3. VISIBILITY
             if (getVal('showTicker') === false) css += `.ticker-wrap { display: none !important; } header#main-header { top: 0 !important; } body { padding-top: 100px !important; }\n`;
             if (getVal('showWeather') === false) css += `#header-weather-widget, .weather-widget { display: none !important; }\n`;
             if (getVal('showZodiac') === false) css += `#header-zodiac { display: none !important; }\n`;
@@ -17790,29 +17950,101 @@ setInterval(function() {
             if (getVal('showSearch') === false) css += `.header-search { display: none !important; } .header-search-wrapper { width: 0 !important; overflow: hidden !important; display: block !important; border:none !important; padding:0 !important; margin:0 !important;} \n`; 
             if (getVal('showFooter') === false) css += `footer { display: none !important; }\n`;
 
-            // 3. THEMES
+            // 4. THEMES
             let theme = getVal('themeId');
             if (theme && theme !== 'default') {
                 let t = window.muThemes.find(x => x.id === theme);
                 if (t) {
                     css += `:root { --theme-acc: ${t.acc} !important; --theme-bg: ${t.bg} !important; --theme-cBg: ${t.cBg} !important; --theme-hBg: ${t.hBg} !important; }\n`;
-                    if (t.anim) css += `body, html, .page-view { background: var(--theme-bg) !important; background-size: 400% 400% !important; animation: ybAnimGradient 15s ease infinite !important; }\n`;
-                    else css += `body, html, .page-view { background: var(--theme-bg) !important; }\n`;
+                    if (t.anim) css += `body, html, .page-view, #main-wrapper { background: var(--theme-bg) !important; background-size: 400% 400% !important; animation: ybAnimGradient 15s ease infinite !important; }\n`;
+                    else css += `body, html, .page-view, #main-wrapper { background: var(--theme-bg) !important; }\n`;
                     
-                    css += `.card, .game-card, .notif-card, .section-box, .chat-bubble, .modal-content:not(.mu-modal-content) { background: var(--theme-cBg) !important; border-color: var(--theme-acc) !important; }\n`;
+                    css += `.card, .game-card, .notif-card, .section-box, .sahsiyet-card, .person-card, .vip-card, .author-card, .poem-card, .song-card, .chat-bubble, .modal-content:not(.mu-modal-content) { background: var(--theme-cBg) !important; border-color: var(--theme-acc) !important; }\n`;
                     css += `header#main-header, .header-nav-bar, .ticker-wrap, footer, .sidebar, .sidebar-right, .cal-holiday-sidebar, .weather-widget, .digital-clock-container, .calendar-day { background: var(--theme-hBg) !important; border-color: var(--theme-acc) !important; }\n`;
                     css += `.bottom-btn:not(#admin-btn-megaultra), .auth-view-btn { background: var(--theme-hBg) !important; border-color: var(--theme-acc) !important; color: var(--theme-acc) !important; }\n`;
                     
                     css += `.logo, h1.hero-title, .section-title, .bilingual-title { color: var(--theme-acc) !important; }\n`;
                     css += `.card h3, .card .author, .card p, .card-text, .modal-text { color: #fdfbf7 !important; }\n`; 
 
-                    // KUGELSICHERER SCHUTZ FÜR HERZEN & LESEZEICHEN
+                    // 🛡️ KUGELSICHERER SCHUTZ FÜR HERZEN & LESEZEICHEN & İSTATİSTİKLER
                     css += `header#main-header i, .sidebar i, .bottom-btn:not(.admin-heart-btn):not(.bookmark-btn) i { color: var(--theme-acc) !important; }\n`;
-                    css += `.card h3 i:not(.fa-heart):not(.fa-bookmark), .game-card h3 i:not(.fa-heart):not(.fa-bookmark) { color: var(--theme-acc) !important; }\n`;
+                    css += `.card h3 i:not(.fa-heart):not(.fa-bookmark), .game-card h3 i:not(.fa-heart):not(.fa-bookmark), .sahsiyet-card i:not(.fa-heart):not(.fa-bookmark) { color: var(--theme-acc) !important; }\n`;
                 }
             }
 
-            // 4. HEADERS
+            // 🚀 5. BÖLÜM RENKLERİ (Advanced Colors)
+            let getAdvColorCss = (prefix, targetSelector) => {
+                let c1 = getVal(prefix + '_1');
+                let c2 = getVal(prefix + '_2');
+                let type = getVal(prefix + '_type');
+                if (!c1) return '';
+                
+                if (type === 'solid') {
+                    return `${targetSelector} { background: ${c1} !important; background-color: ${c1} !important; background-image: none !important; }\n`;
+                } else if (type === 'gradient' && c2) {
+                    return `${targetSelector} { background: linear-gradient(135deg, ${c1}, ${c2}) !important; background-image: linear-gradient(135deg, ${c1}, ${c2}) !important; }\n`;
+                } else if (type === 'anim' && c2) {
+                    return `${targetSelector} { background: linear-gradient(-45deg, ${c1}, ${c2}, ${c1}, ${c2}) !important; background-size: 400% 400% !important; animation: ybAnimGradient 10s ease infinite !important; }\n`;
+                }
+                return `${targetSelector} { background: ${c1} !important; }\n`;
+            };
+
+            css += getAdvColorCss('pageBg', 'body, html, .page-view, #main-wrapper');
+            css += getAdvColorCss('hdrAll', 'header#main-header, .header-nav-bar, .ticker-wrap');
+            css += getAdvColorCss('hdrTop', 'header#main-header');
+            css += getAdvColorCss('hdrNav', '.header-nav-bar');
+            css += getAdvColorCss('hdrTick', '.ticker-wrap');
+            
+            css += getAdvColorCss('cardAll', '.card, .game-card, .notif-card, .section-box, .chat-bubble');
+            css += getAdvColorCss('cardSah', '[id*="sahsiyet"] .card, [id*="sahsiyet"] .section-box, [id*="person"] .card, .sahsiyet-card');
+            css += getAdvColorCss('cardSiz', '[id*="kalem"] .card, [id*="eser"] .card, [id*="siir"] .card, [id*="şiir"] .card, .poem-card');
+            css += getAdvColorCss('cardSoh', '[id*="sohbet"] .card, [id*="chat"] .card, .chat-bubble, .message-box, .notif-card');
+            css += getAdvColorCss('cardPro', '[id*="profil"] .card, [id*="hakkimda"] .card, [id*="about"] .card');
+            css += getAdvColorCss('sidebar', '.sidebar, .sidebar-right, .cal-holiday-sidebar, aside');
+
+            // 🚀 6. GÖLGELER VE EFEKTLER
+            let getShadowCss = (val, isText) => {
+                if (val === 'light') return isText ? 'text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;' : 'filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)) !important;';
+                if (val === 'deep') return isText ? 'text-shadow: 0 4px 8px rgba(0,0,0,1) !important;' : 'filter: drop-shadow(0 8px 15px rgba(0,0,0,0.9)) !important;';
+                if (val === 'glow') return isText ? 'text-shadow: 0 0 10px var(--theme-acc, #f4c542) !important;' : 'filter: drop-shadow(0 0 10px var(--theme-acc, #f4c542)) !important;';
+                if (val === 'neon') return isText ? 'text-shadow: 0 0 5px #fff, 0 0 15px var(--theme-acc, #f4c542) !important;' : 'filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 15px var(--theme-acc, #f4c542)) !important;';
+                if (val === 'dark') return isText ? 'text-shadow: 0 0 10px #000 !important;' : 'filter: drop-shadow(0 0 10px #000) !important;';
+                return '';
+            };
+
+            let shAll = getVal('shadowAll');
+            let shImg = getVal('shadowImg') !== 'default' ? getVal('shadowImg') : shAll;
+            let shTxt = getVal('shadowText') !== 'default' ? getVal('shadowText') : shAll;
+            let shSym = getVal('shadowSym') !== 'default' ? getVal('shadowSym') : shAll;
+            let shBtn = getVal('shadowBtn') !== 'default' ? getVal('shadowBtn') : shAll;
+
+            if (shImg && shImg !== 'none') css += `img, .bio-pic, #user-avatar, #home-profile-pic { ${getShadowCss(shImg, false)} }\n`;
+            if (shTxt && shTxt !== 'none') css += `.card h3, h1.hero-title, .section-title, .hero-subtitle, p { ${getShadowCss(shTxt, true)} }\n`;
+            if (shSym && shSym !== 'none') css += `i.fas, i.fab, i.far { ${getShadowCss(shSym, false)} }\n`;
+            if (shBtn && shBtn !== 'none') css += `button, .btn, .bottom-btn, .auth-view-btn, .mu-cat-tab-btn, .mu-device-tab-btn { ${getShadowCss(shBtn, false)} }\n`;
+
+            // 🚀 7. ANİMASYONLAR
+            let getAnimCss = (val, target) => {
+                if(val === 'pulse') return `${target} { animation: muPulse 2s infinite !important; }\n`;
+                if(val === 'float') return `${target} { animation: muFloat 3s ease-in-out infinite !important; }\n`;
+                if(val === 'hover_pulse') return `${target}:hover { animation: muPulse 1s infinite !important; }\n`;
+                if(val === 'hover_float') return `${target}:hover { animation: muFloat 1.5s ease-in-out infinite !important; }\n`;
+                if(val === 'hover_shake') return `${target}:hover { animation: muShake 0.4s ease-in-out infinite !important; }\n`;
+                return '';
+            };
+
+            let anAll = getVal('animAll');
+            let anImg = getVal('animImg') !== 'none' ? getVal('animImg') : anAll;
+            let anTxt = getVal('animText') !== 'none' ? getVal('animText') : anAll;
+            let anSym = getVal('animSym') !== 'none' ? getVal('animSym') : anAll;
+            let anBtn = getVal('animBtn') !== 'none' ? getVal('animBtn') : anAll;
+
+            if (anImg && anImg !== 'none') css += getAnimCss(anImg, 'img');
+            if (anTxt && anTxt !== 'none') css += getAnimCss(anTxt, '.card h3, h1.hero-title, .section-title');
+            if (anSym && anSym !== 'none') css += getAnimCss(anSym, 'i.fas, i.fab, i.far');
+            if (anBtn && anBtn !== 'none') css += getAnimCss(anBtn, 'button, .btn, .bottom-btn, .auth-view-btn');
+
+            // 8. HEADERS
             let hLayout = getVal('headerLayout');
             if (hLayout && hLayout !== 'default') {
                 let h = window.muHeaders.find(x => x.id === hLayout);
@@ -17822,6 +18054,7 @@ setInterval(function() {
                 }
             }
 
+            // 9. HEADER DETAILS
             let lSize = getVal('logoSize'); if(lSize) css += `.logo { font-size: ${lSize} !important; }\n`;
             let lWeight = getVal('logoWeight'); if(lWeight) css += `.logo { font-weight: ${lWeight} !important; }\n`;
             let sWidthH = getVal('searchWidth'); if(sWidthH) css += `.header-search { max-width: ${sWidthH} !important; width: 100% !important; }\n`;
@@ -17829,15 +18062,7 @@ setInterval(function() {
             let pSize = getVal('profileSize'); if(pSize) css += `#user-avatar { width: ${pSize} !important; height: ${pSize} !important; }\n`;
             let hBlur = getVal('headerBlur'); if(hBlur && hBlur !== 'none') css += `header#main-header { backdrop-filter: ${hBlur} !important; -webkit-backdrop-filter: ${hBlur} !important; background: rgba(0,0,0,0.5) !important; }\n`;
 
-            // 5. FX
-            let fx = getVal('specialFx');
-            if (fx === 'glass') css += `.card, header#main-header, .modal-content:not(.mu-modal-content), .sidebar, .sidebar-right { background: rgba(10,25,47,0.4) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255,255,255,0.2) !important; }\n`;
-            else if (fx === 'oled') css += `body, html, .card, header#main-header, .modal-content:not(.mu-modal-content), footer, .sidebar, .sidebar-right { background: #000000 !important; } * { border-color: #333 !important; } .card, .modal-content { box-shadow: none !important; }\n`;
-            else if (fx === 'retro') css += `body::after { content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }\n`;
-            else if (fx === 'hologram') css += `.card, .modal-content:not(.mu-modal-content) { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.5); border-left: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }\n`;
-            else if (fx === 'bw') css += `body { filter: grayscale(100%) !important; }\n`;
-
-            // 6. BUTTONS & SIDEBARS
+            // 10. BUTTONS & SIDEBARS
             let getBtnCSS = (type, target) => {
                 if (type === 'pill') return `${target} { border-radius: 50px !important; }\n`;
                 if (type === 'ghost') return `${target} { background: transparent !important; border: 1px solid var(--theme-acc, #f4c542) !important; color: var(--theme-acc, #f4c542) !important; }\n`;
@@ -17852,7 +18077,7 @@ setInterval(function() {
             css += getBtnCSS(getVal('sidebarStyle'), '.sidebar, .sidebar-right, .cal-holiday-sidebar');
             css += getBtnCSS(getVal('modalStyle'), '.modal-content:not(.mu-modal-content)');
 
-            // 7. WIDGETS
+            // 11. WIDGETS
             let cStyle = getVal('clockStyle');
             if (cStyle === 'digital') css += `.analog-clock { display: none !important; }\n`;
             else if (cStyle === 'analog') css += `.digital-clock-container, #digi-clock-de, #digi-clock-tr { display: none !important; }\n`;
@@ -17878,7 +18103,11 @@ setInterval(function() {
                 document.head.appendChild(styleTag);
             }
 
-            let finalCSS = '';
+            let finalCSS = `
+                @keyframes muPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+                @keyframes muFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
+                @keyframes muShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) rotate(-3deg); } 75% { transform: translateX(3px) rotate(3deg); } }
+            `;
 
             if (Object.keys(this.settings.desktop || {}).length > 0 || Object.keys(this.settings.global || {}).length > 0) {
                 finalCSS += `@media (min-width: 1401px) { \n${this.buildCSSString('desktop')} \n}\n`;
