@@ -17955,62 +17955,55 @@ setInterval(function() {
 
 <script>
 (function() {
-    // 🚀 1. SUPER-CLEANER: Zerstört alle alten Geister-Versionen restlos
+    // 🚀 1. SUPER-CLEANER: Zerstört alle kaputten Altlasten
     document.querySelectorAll('[id^="hf-"], [class^="hf-"], [id^="stu-"], [class^="stu-"], [id^="ls-"], #admin-btn-livestudio').forEach(e => e.remove());
 
     if (window.LiveStudioReady) { window.LiveStudioReady = false; }
 
-    // 🚀 2. CSS FÜR DESIGN, LAYOUT UND ANIMATIONEN
+    // 🚀 2. CSS FÜR DESIGN, LAYOUT UND RESPONSIVENESS
     let style = document.createElement('style');
     style.id = 'stu-core-styles';
     style.innerHTML = `
-        .stu-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: transparent !important; z-index: 2147483640 !important; justify-content: center !important; align-items: flex-end !important; pointer-events: none !important; margin: 0 !important; padding: 0 !important; }
-        
+        /* --- 🚀 NUCLEAR FIX: KILL YELLOW TYPING CURSOR FOREVER --- */
+        .ityped-cursor, .typed-cursor, .typed-cursor--blink, [class*="typed-cursor"], .blinking-cursor {
+            display: none !important; opacity: 0 !important; visibility: hidden !important; animation: none !important; width: 0 !important; height: 0 !important;
+        }
+
+        /* --- DESKTOP & GLOBAL BASE --- */
+        .stu-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: transparent !important; z-index: 2147483640 !important; justify-content: center !important; align-items: flex-end !important; pointer-events: none !important; margin: 0 !important; padding: 0 !important; display: none; }
         .stu-modal { pointer-events: auto !important; position: relative !important; width: 100vw !important; max-width: 1300px !important; height: 55vh !important; background: linear-gradient(180deg, rgba(10, 25, 47, 0.98), rgba(5, 11, 20, 1)) !important; backdrop-filter: blur(25px) !important; border-top: 3px solid #06b6d4 !important; border-radius: 20px 20px 0 0 !important; box-shadow: 0 -15px 50px rgba(0,0,0,0.95), inset 0 5px 20px rgba(6, 182, 212, 0.2) !important; display: flex !important; flex-direction: column !important; padding: 20px 30px !important; font-family: 'Poppins', sans-serif !important; }
-        
         .stu-close-btn { position: absolute !important; top: 15px !important; right: 25px !important; font-size: 2rem !important; color: #ef4444 !important; cursor: pointer !important; z-index: 2147483647 !important; transition: 0.3s !important; text-shadow: 0 0 10px rgba(239,68,68,0.5); }
         .stu-close-btn:hover { transform: scale(1.1) !important; }
-
-        /* Tabs */
         .stu-tabs { display: flex; width: 100%; border-bottom: 2px solid rgba(6, 182, 212, 0.3); margin-bottom: 15px; background: rgba(0,0,0,0.7); border-radius: 10px 10px 0 0; }
         .stu-tab-btn { flex: 1; padding: 12px 5px; background: transparent; border: none; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b; font-weight: bold; font-size: 0.85rem; transition: 0.3s; }
         .stu-tab-btn.active { background: rgba(6, 182, 212, 0.2); border-bottom-color: #06b6d4; color: #06b6d4; }
-
-        /* Layout */
         .stu-split-view { display: flex; flex: 1; gap: 20px; overflow: hidden; }
         .stu-left-panel { flex: 7; overflow-y: auto; padding-right: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 15px; }
         .stu-right-panel { flex: 3; display: flex; flex-direction: column; background: #010409; border: 1px solid rgba(6,182,212,0.3); border-radius: 12px; padding: 15px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5); }
-        
         .stu-left-panel::-webkit-scrollbar { width: 8px; } 
         .stu-left-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; } 
         .stu-left-panel::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; }
-
-        /* Row Controls */
         .stu-row { background: rgba(0,0,0,0.5); border: 1px solid rgba(6,182,212,0.3); border-radius: 10px; padding: 15px; transition: 0.3s; }
         .stu-row:hover { background: rgba(0,0,0,0.8); border-color: #06b6d4; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .stu-row-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 12px; }
         .stu-title { color: #06b6d4; font-size: 1rem; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         .stu-undo-btn { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s; }
         .stu-undo-btn:hover { background: #ef4444; color: #fff; box-shadow: 0 0 10px rgba(239,68,68,0.5); }
-        
         .stu-controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
         .stu-input-box { display: flex; align-items: center; justify-content: space-between; background: #010409; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
         .stu-input-box span { font-size: 0.8rem; font-weight: bold; color: #888; }
         .stu-input-box input { background: transparent; border: none; color: #fff; width: 50px; text-align: right; font-family: monospace; font-size: 0.9rem; outline: none; }
         .stu-input-box select { background: transparent; border: none; color: #06b6d4; width: 100%; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: bold; outline: none; cursor: pointer; }
-
-        /* Footer */
         .stu-footer { flex-shrink: 0; display: flex; gap: 12px; margin-top: 15px; border-top: 1px solid rgba(6,182,212,0.3); padding-top: 15px; }
         .stu-footer-btn { padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; }
 
-        /* 🚀 DESIGN PASSEND ALERT SYSTEM */
+        /* Alerts */
         .stu-alert-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(0,0,0,0.85) !important; z-index: 2147483647 !important; justify-content: center !important; align-items: center !important; backdrop-filter: blur(8px) !important; pointer-events: auto !important; }
         .stu-alert-box { background: linear-gradient(145deg, #050b14, #0a192f); border: 1px solid #06b6d4; padding: 35px 25px; border-radius: 12px; max-width: 450px; width: 90%; text-align: center; color: #fdfbf7; font-family: 'Poppins', sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,0.95), inset 0 0 20px rgba(6,182,212,0.15); transition: 0.3s; }
         .stu-alert-icon { font-size: 3.5rem; color: #06b6d4; margin-bottom: 20px; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
         .stu-alert-title { margin: 0 0 10px 0; color: #06b6d4; font-size: 1.3rem; font-weight: 900; text-transform: uppercase; letter-spacing:1px; }
         .stu-alert-msg { margin-bottom: 20px; font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; }
         .stu-alert-input { width: 100%; background: #010409; border: 1px solid rgba(6,182,212,0.5); color: #06b6d4; padding: 12px; border-radius: 8px; margin-bottom: 25px; outline: none; font-family: monospace; text-align: center; font-size: 0.9rem; }
-        
         .stu-alert-btn-wrap { display: flex; gap: 15px; justify-content: center; }
         .stu-alert-btn-cancel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1; }
         .stu-alert-btn-cancel:hover { background: rgba(255,255,255,0.1); }
@@ -18019,22 +18012,42 @@ setInterval(function() {
         @keyframes alertPop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .stu-pop-anim { animation: alertPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important; }
 
-        /* Animations */
-        @keyframes stuPulse { 0%, 100% { transform: var(--stu-trans) scale(1) !important; } 50% { transform: var(--stu-trans) scale(1.05) !important; } }
-        @keyframes stuFloat { 0%, 100% { top: var(--stu-y) !important; } 50% { top: calc(var(--stu-y) - 10px) !important; } }
-        @keyframes stuShake { 0%, 100% { transform: var(--stu-trans) rotate(0deg) !important; } 25% { transform: var(--stu-trans) rotate(-3deg) !important; } 75% { transform: var(--stu-trans) rotate(3deg) !important; } }
-        @keyframes stuSpin { 0% { transform: var(--stu-trans) rotate(0deg) !important; } 100% { transform: var(--stu-trans) rotate(360deg) !important; } }
-        @keyframes stuBounce { 0%, 20%, 50%, 80%, 100% { top: var(--stu-y) !important; } 40% { top: calc(var(--stu-y) - 15px) !important; } 60% { top: calc(var(--stu-y) - 7px) !important; } }
+        /* 📱 100% UNABHÄNGIGE MOBILE MATRIX (Kompakt & Übersichtlich) */
+        @media (max-width: 850px) {
+            .stu-modal { height: 65vh !important; padding: 12px !important; border-radius: 15px 15px 0 0 !important; }
+            .stu-close-btn { top: 8px !important; right: 12px !important; font-size: 1.5rem !important; }
+            .stu-split-view { flex-direction: column !important; gap: 8px !important; }
+            .stu-left-panel { flex: 1 !important; grid-template-columns: 1fr !important; padding-right: 5px !important; gap: 8px !important; }
+            .stu-right-panel { flex: 0 0 80px !important; padding: 8px !important; }
+            .stu-tab-btn span { display: none !important; } 
+            .stu-tab-btn { font-size: 1.2rem !important; padding: 8px !important; }
+            
+            .stu-controls-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
+            .stu-input-box { flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 4px !important; height: 45px !important; }
+            .stu-input-box span { font-size: 0.6rem !important; margin-bottom: 2px !important; }
+            .stu-input-box input { width: 100% !important; text-align: center !important; font-size: 0.8rem !important; height: 18px !important; }
+            .stu-input-box select { width: 100% !important; text-align: center !important; font-size: 0.65rem !important; height: 18px !important; padding: 0 !important; }
+            
+            .stu-row { padding: 8px !important; margin-bottom: 5px !important; }
+            .stu-row-header { margin-bottom: 8px !important; padding-bottom: 5px !important; }
+            .stu-title { font-size: 0.75rem !important; }
+            .stu-undo-btn { padding: 3px 6px !important; font-size: 0.65rem !important; }
+            
+            .stu-footer { flex-wrap: wrap !important; gap: 6px !important; padding-top: 8px !important; margin-top: 8px !important; }
+            .stu-footer-btn { padding: 8px !important; font-size: 0.75rem !important; flex: 1 1 calc(33% - 6px) !important; }
+            .stu-footer-btn[data-action="publish"] { flex: 1 1 100% !important; margin-top: 2px !important; font-size: 0.9rem !important; }
+            #stu-import-export-wrap { flex: 1 1 100% !important; margin-bottom: 2px !important; }
+        }
     `;
     document.head.appendChild(style);
 
     const stuAnims = [
         { id: 'none', n: '0. Sabit (Yok)', c: '' },
-        { id: 'p1', n: '1. Nabız', c: 'stuPulse 2s infinite' },
-        { id: 'f1', n: '2. Uçuş', c: 'stuFloat 3s ease-in-out infinite' },
-        { id: 's1', n: '3. Titreme', c: 'stuShake 1s infinite' },
-        { id: 'sp1', n: '4. Dönüş', c: 'stuSpin 4s linear infinite' },
-        { id: 'b1', n: '5. Zıplama', c: 'stuBounce 2s infinite' }
+        { id: 'p1', n: '1. Nabız', c: 'ease-in-out infinite' },
+        { id: 'f1', n: '2. Uçuş', c: 'ease-in-out infinite' },
+        { id: 's1', n: '3. Titreme', c: 'infinite' },
+        { id: 'sp1', n: '4. Dönüş', c: 'linear infinite' },
+        { id: 'b1', n: '5. Zıplama', c: 'infinite' }
     ];
     let animOptsHtml = stuAnims.map(a => `<option value="${a.id}" style="background:#050b14;color:#06b6d4;">${a.n}</option>`).join('');
 
@@ -18054,12 +18067,12 @@ setInterval(function() {
         { id: 'footer', name: 'Alt Bölüm: Footer', sel: 'footer' }
     ];
 
-    // 🚀 3. HTML STRUKTUR (Perfektes Design ohne Auto-Open)
-    let makeRow = (el) => {
+    // 🚀 3. HTML STRUKTUR (MIT data-action)
+    let makePosRow = (el) => {
         return `
         <div class="stu-row">
             <div class="stu-row-header">
-                <p class="stu-title"><i class="fas fa-cube" style="margin-right:8px; color:#888;"></i>${el.name}</p>
+                <p class="stu-title"><i class="fas fa-cube" style="margin-right:8px; color:#64748b;"></i>${el.name}</p>
                 <button class="stu-undo-btn" data-action="undoRow" data-id="${el.id}"><i class="fas fa-undo-alt"></i> Sıfırla (Undo)</button>
             </div>
             <div class="stu-controls-grid">
@@ -18075,7 +18088,6 @@ setInterval(function() {
         </div>`;
     };
 
-    // DYNAMISCHES ALERT MODAL (Hardcoded display: none !important)
     let alertHtml = `
     <div id="stu-alert-overlay" class="stu-alert-overlay" style="display: none !important;">
         <div id="stu-alert-box" class="stu-alert-box stu-pop-anim">
@@ -18090,7 +18102,6 @@ setInterval(function() {
         </div>
     </div>`;
 
-    // STUDIO DOCK (Hardcoded display: none !important - VERHINDERT AUTO-OPEN!)
     let modalHtml = `
     <div id="stu-master-modal" class="stu-overlay notranslate admin-only" style="display: none !important;">
         <div class="stu-modal">
@@ -18098,7 +18109,7 @@ setInterval(function() {
             <div id="stu-close-btn" class="stu-close-btn"><i class="fas fa-times-circle"></i></div>
             
             <div style="text-align: center; margin-bottom: 15px; flex-shrink: 0;">
-                <h2 style="color: #06b6d4; font-size: 1.5rem; margin: 0 0 5px 0; font-weight: 900; letter-spacing: 2px;">ELITE STUDIO PRO <i class="fas fa-satellite-dish" style="color:#f4c542;"></i></h2>
+                <h2 style="color: #06b6d4; font-size: 1.5rem; margin: 0 0 5px 0; font-weight: 900; letter-spacing: 2px;">ELITE STUDIO PRO</h2>
                 <p style="color: #fdfbf7; font-size: 0.8rem; margin: 0; background: rgba(6,182,212,0.2); display: inline-block; padding: 4px 15px; border-radius: 20px; border: 1px solid rgba(6,182,212,0.5); font-weight: bold;"><i class="fas fa-eye"></i> Canlı Önizleme Aktif</p>
             </div>
             
@@ -18112,7 +18123,7 @@ setInterval(function() {
             
             <div class="stu-split-view">
                 <div class="stu-left-panel">
-                    ${elementsToMove.map(el => makeRow(el)).join('')}
+                    ${elementsToMove.map(el => makePosRow(el)).join('')}
                 </div>
                 
                 <div class="stu-right-panel">
@@ -18122,7 +18133,7 @@ setInterval(function() {
             </div>
             
             <div class="stu-footer">
-                <div style="display: flex; gap: 10px; flex: 1;">
+                <div id="stu-import-export-wrap" style="display: flex; gap: 10px; flex: 1;">
                     <button class="stu-footer-btn" data-action="import" title="Yedek Yükle" style="background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid #a855f7;"><i class="fas fa-file-import"></i></button>
                     <button class="stu-footer-btn" data-action="export" title="Yedek Al" style="background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid #a855f7;"><i class="fas fa-file-export"></i></button>
                 </div>
@@ -18152,73 +18163,81 @@ setInterval(function() {
         }
     }, 1000);
 
-    // 🚀 5. EVENT DELEGATION: RADAR SCHIRM
-    if (!window.STU_EventsBound) {
-        document.addEventListener('click', function(e) {
-            
-            // 1. OPEN (Nur über Klick, niemals automatisch)
-            if (e.target.closest('#admin-btn-livestudio')) {
-                e.preventDefault(); e.stopPropagation();
-                if(window.closeFloatingMenus) window.closeFloatingMenus();
-                let modal = document.getElementById('stu-master-modal');
-                if(modal) {
-                    modal.style.setProperty('display', 'flex', 'important');
-                    if(window.STU_Engine) window.STU_Engine.init();
-                }
+    // 🚀 5. EVENT DELEGATION: RADAR SCHIRM (Kugelsicher)
+    if(window.stuClick) document.removeEventListener('click', window.stuClick, true);
+    window.stuClick = function(e) {
+        if (e.target.closest('#admin-btn-livestudio')) {
+            e.preventDefault(); e.stopPropagation();
+            if(window.closeFloatingMenus) window.closeFloatingMenus();
+            let modal = document.getElementById('stu-master-modal');
+            if(modal) {
+                modal.style.setProperty('display', 'flex', 'important');
+                if(window.STU_Engine) window.STU_Engine.init();
             }
-            
-            // 2. CLOSE
-            if (e.target.closest('#stu-close-btn')) {
-                e.preventDefault();
-                document.getElementById('stu-master-modal').style.setProperty('display', 'none', 'important');
+        }
+        if (e.target.closest('#stu-close-btn')) {
+            e.preventDefault();
+            document.getElementById('stu-master-modal').style.setProperty('display', 'none', 'important');
+        }
+        let tabBtn = e.target.closest('.stu-tab-btn');
+        if (tabBtn && window.STU_Engine) {
+            e.preventDefault();
+            window.STU_Engine.switchDev(tabBtn.getAttribute('data-dev'));
+        }
+        
+        // 🔥 AKTIONEN KUGELSICHER ABGEFANGEN 🔥
+        let actionBtn = e.target.closest('[data-action]');
+        if (actionBtn && window.STU_Engine) {
+            e.preventDefault();
+            let act = actionBtn.getAttribute('data-action');
+            if(act === 'undoRow') window.STU_Engine.undoRow(actionBtn.getAttribute('data-id'));
+            if(act === 'resetAll') window.STU_Engine.resetAll();
+            if(act === 'save') window.STU_Engine.save();
+            if(act === 'publish') window.STU_Engine.publish();
+            if(act === 'undoGlobal') window.STU_Engine.undoLastStep();
+            if(act === 'export') window.STU_Engine.exportData();
+            if(act === 'import') window.STU_Engine.importData();
+            if(act === 'grid') window.STU_Engine.toggleGrid();
+        }
+    };
+    document.addEventListener('click', window.stuClick, true);
+
+    if(window.stuInput) document.removeEventListener('input', window.stuInput, true);
+    window.stuInput = function(e) {
+        if (e.target.id && e.target.id.startsWith('stu_')) {
+            let parts = e.target.id.split('_');
+            if(parts.length === 3 && window.STU_Engine) window.STU_Engine.update(parts[1]);
+        }
+    };
+    document.addEventListener('input', window.stuInput, true);
+
+    if(window.stuChange) document.removeEventListener('change', window.stuChange, true);
+    window.stuChange = function(e) {
+        if (e.target.id && e.target.id.startsWith('stu_') && e.target.tagName === 'SELECT') {
+            let parts = e.target.id.split('_');
+            if(parts.length === 3 && window.STU_Engine) window.STU_Engine.update(parts[1]);
+        }
+    };
+    document.addEventListener('change', window.stuChange, true);
+
+    // 🚀 6. SILENT JS-KILLER FÜR DEN GELBEN CURSOR (Tötet alle 500ms neu)
+    if(window.hfCursorKiller) clearInterval(window.hfCursorKiller);
+    window.hfCursorKiller = setInterval(() => {
+        document.querySelectorAll('.ityped-cursor, .typed-cursor, .typed-cursor--blink, [class*="typed-cursor"], .blinking-cursor').forEach(c => {
+            c.remove(); // 100% Terminator
+        });
+        
+        // Backup: Suche nach einsamen blinkenden | Zeichen im Header
+        document.querySelectorAll('span').forEach(s => {
+            if(s.textContent.trim() === '|' && (s.style.animation || s.className.includes('blink'))) {
+                s.remove();
             }
+        });
+    }, 500);
 
-            // 3. TABS
-            let tabBtn = e.target.closest('.stu-tab-btn');
-            if (tabBtn && window.STU_Engine) {
-                e.preventDefault();
-                window.STU_Engine.switchDev(tabBtn.getAttribute('data-dev'));
-            }
-
-            // 4. ACTIONS
-            let actionBtn = e.target.closest('[data-action]');
-            if (actionBtn && window.STU_Engine) {
-                e.preventDefault();
-                let act = actionBtn.getAttribute('data-action');
-                if(act === 'undoRow') window.STU_Engine.undoRow(actionBtn.getAttribute('data-id'));
-                if(act === 'resetAll') window.STU_Engine.resetAll();
-                if(act === 'save') window.STU_Engine.save();
-                if(act === 'publish') window.STU_Engine.publish();
-                if(act === 'undoGlobal') window.STU_Engine.undoLastStep();
-                if(act === 'export') window.STU_Engine.exportData();
-                if(act === 'import') window.STU_Engine.importData();
-                if(act === 'grid') window.STU_Engine.toggleGrid();
-            }
-
-        }, true);
-
-        // Inputs
-        document.addEventListener('input', function(e) {
-            if (e.target.id && e.target.id.startsWith('stu_')) {
-                let parts = e.target.id.split('_');
-                if(parts.length === 3 && window.STU_Engine) window.STU_Engine.update(parts[1]);
-            }
-        }, true);
-
-        // Selects
-        document.addEventListener('change', function(e) {
-            if (e.target.id && e.target.id.startsWith('stu_') && e.target.tagName === 'SELECT') {
-                let parts = e.target.id.split('_');
-                if(parts.length === 3 && window.STU_Engine) window.STU_Engine.update(parts[1]);
-            }
-        }, true);
-
-        window.STU_EventsBound = true;
-    }
-
-    // 🚀 6. THE ENGINE
+    // 🚀 7. THE ENGINE
     window.STU_Engine = {
-        db: 'stu_core_db_final', dev: 'desktop', 
+        db: 'stu_core_db_v120', dev: 'desktop', 
         data: { desktop: {}, laptop: {}, mobile: {}, ios: {}, android: {}, global: {} },
         els: elementsToMove, history: [],
 
@@ -18233,14 +18252,14 @@ setInterval(function() {
             else this.dev = 'desktop';
 
             if(typeof firebase !== 'undefined' && firebase.database) {
-                firebase.database().ref('stu_global_final').on('value', snap => {
+                firebase.database().ref('stu_global_v120').on('value', snap => {
                     if(snap.val()) { this.data = snap.val(); this.apply(); }
                 });
             }
             this.switchDev(this.dev);
         },
 
-        // 🎨 CUSTOM ALERTS & PROMPTS ENGINE
+        // 🎨 CUSTOM ALERTS
         openAlert: function(msg, type = 'info', onOk = null, isPrompt = false, promptVal = '') {
             let ov = document.getElementById('stu-alert-overlay');
             let box = document.getElementById('stu-alert-box');
@@ -18252,7 +18271,6 @@ setInterval(function() {
 
             if(!ov) { if(isPrompt) { let v = prompt(msg, promptVal); if(v && onOk) onOk(v); } else { if(confirm(msg)) if(onOk) onOk(); } return; }
 
-            // Reset Animation
             box.classList.remove('stu-pop-anim');
             void box.offsetWidth; 
             box.classList.add('stu-pop-anim');
@@ -18277,7 +18295,7 @@ setInterval(function() {
                 box.style.boxShadow = '0 20px 60px rgba(0,0,0,0.95), inset 0 0 20px rgba(239,68,68,0.15)';
                 okBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
                 okBtn.style.borderColor = '#f87171';
-                okBtn.innerHTML = 'Evet / Yes';
+                okBtn.innerHTML = 'Sıfırla / Reset';
             } else {
                 icon.className = isPrompt ? 'fas fa-code' : 'fas fa-satellite-dish';
                 icon.style.color = '#06b6d4';
@@ -18341,35 +18359,58 @@ setInterval(function() {
             this.data[this.dev][id+'_a'] = document.getElementById(`stu_${id}_a`)?.value || 'none';
             this.injectCSS();
         },
+
+        // 🔥 HARD RESET EINZELN 🔥
         undoRow: function(id) {
             this.history.push(JSON.stringify(this.data));
-            if(this.data[this.dev]) {
-                ['x','y','s','r','o','b','z','a'].forEach(k => delete this.data[this.dev][id+'_'+k]);
-            }
+            if(!this.data[this.dev]) this.data[this.dev] = {};
+            this.data[this.dev][id+'_x'] = '0';
+            this.data[this.dev][id+'_y'] = '0';
+            this.data[this.dev][id+'_s'] = '100';
+            this.data[this.dev][id+'_r'] = '0';
+            this.data[this.dev][id+'_o'] = '1';
+            this.data[this.dev][id+'_b'] = '0';
+            this.data[this.dev][id+'_z'] = '10';
+            this.data[this.dev][id+'_a'] = 'none';
             this.apply();
+            this.save();
         },
         undoLastStep: function() {
             if(this.history.length > 0) {
                 this.data = JSON.parse(this.history.pop());
                 this.apply();
+                this.save();
                 if(window.showToast) window.showToast("Geri Alındı!");
             }
         },
+
+        // 🔥 HARD RESET ALLES 🔥
         resetAll: function() {
-            this.openAlert("Bu cihaz modundaki tüm ayarları sıfırlamak (silmek) istiyor musunuz?", () => {
+            this.openAlert("Bu cihaz modundaki tüm ayarları sıfırlamak istiyor musunuz?", () => {
                 this.history.push(JSON.stringify(this.data));
-                this.data[this.dev] = {}; 
+                if(!this.data[this.dev]) this.data[this.dev] = {};
+                this.els.forEach(el => {
+                    this.data[this.dev][el.id+'_x'] = '0';
+                    this.data[this.dev][el.id+'_y'] = '0';
+                    this.data[this.dev][el.id+'_s'] = '100';
+                    this.data[this.dev][el.id+'_r'] = '0';
+                    this.data[this.dev][el.id+'_o'] = '1';
+                    this.data[this.dev][el.id+'_b'] = '0';
+                    this.data[this.dev][el.id+'_z'] = '10';
+                    this.data[this.dev][el.id+'_a'] = 'none';
+                });
                 this.apply();
+                this.save();
             }, 'warning');
         },
         save: function() {
             localStorage.setItem(this.db, JSON.stringify(this.data));
-            if(window.showToast) window.showToast("Kaydedildi!"); else alert("Kaydedildi!");
+            if(window.showToast) window.showToast("Kaydedildi!");
         },
         publish: function() {
             this.openAlert("TÜM KULLANICILAR VE CİHAZLAR İÇİN UYGULANSIN MI? (Global Save)", () => {
                 if(typeof firebase !== 'undefined' && firebase.database) {
-                    firebase.database().ref('stu_global_final').set(this.data);
+                    firebase.database().ref('stu_global_v120').set(this.data);
                 }
                 if(window.showToast) window.showToast('Global Live!');
             }, 'info');
@@ -18398,32 +18439,65 @@ setInterval(function() {
                 document.body.appendChild(grid);
             } else { grid.remove(); }
         },
+        
+        // 🚀 DYNAMIC KEYFRAMES GENERATOR (Keine !important Konflikte mehr!)
         buildCSS: function(device) {
             let d = this.data[device] || {}; let g = this.data.global || {}; let css = '/* Live CSS - ' + device.toUpperCase() + ' */\n\n';
             let hasChanges = false;
 
             this.els.forEach(el => {
-                let x = d[el.id+'_x'] ?? g[el.id+'_x'] ?? '0';
-                let y = d[el.id+'_y'] ?? g[el.id+'_y'] ?? '0';
-                let s = d[el.id+'_s'] ?? g[el.id+'_s'] ?? '100';
-                let r = d[el.id+'_r'] ?? g[el.id+'_r'] ?? '0';
-                let o = d[el.id+'_o'] ?? g[el.id+'_o'] ?? '1';
-                let b = d[el.id+'_b'] ?? g[el.id+'_b'] ?? '0';
-                let z = d[el.id+'_z'] ?? g[el.id+'_z'] ?? '10';
+                let x = parseFloat(d[el.id+'_x'] ?? g[el.id+'_x'] ?? '0');
+                let y = parseFloat(d[el.id+'_y'] ?? g[el.id+'_y'] ?? '0');
+                let s = parseFloat(d[el.id+'_s'] ?? g[el.id+'_s'] ?? '100') / 100;
+                let r = parseFloat(d[el.id+'_r'] ?? g[el.id+'_r'] ?? '0');
+                let o = parseFloat(d[el.id+'_o'] ?? g[el.id+'_o'] ?? '1');
+                let b = parseFloat(d[el.id+'_b'] ?? g[el.id+'_b'] ?? '0');
+                let z = parseFloat(d[el.id+'_z'] ?? g[el.id+'_z'] ?? '10');
                 let a = d[el.id+'_a'] ?? g[el.id+'_a'] ?? 'none';
                 
                 let rules = [];
-                if(x !== '0' || y !== '0' || z !== '10') rules.push(`position: relative !important; left: ${x}px !important; top: ${y}px !important; z-index: ${z} !important;`);
-                if(s !== '100') rules.push(`zoom: ${s/100} !important; transform: scale(${s/100}) !important;`);
-                if(r !== '0') rules.push(`transform: rotate(${r}deg) !important;`);
-                if(o !== '1') rules.push(`opacity: ${o} !important;`);
-                if(b !== '0') rules.push(`filter: blur(${b}px) !important;`);
                 
-                if(rules.length > 0 || a !== 'none') {
-                    rules.push(`--stu-x: ${x}px !important; --stu-y: ${y}px !important; --stu-trans: translate(${x}px, ${y}px) scale(${s/100}) rotate(${r}deg) !important;`);
-                    if(a !== 'none') { let anObj = stuAnims.find(an => an.id === a); if(anObj && anObj.c) rules.push(`animation: ${anObj.c} !important;`); }
+                // Basis Styling
+                if(x !== 0 || y !== 0 || z !== 10) rules.push(`position: relative !important; left: ${x}px !important; top: ${y}px !important; z-index: ${z} !important;`);
+                if(o !== 1) rules.push(`opacity: ${o} !important;`);
+                if(b !== 0) rules.push(`filter: blur(${b}px) !important;`);
+
+                let baseTrans = `scale(${s}) rotate(${r}deg)`;
+
+                // 🚀 DYNAMISCHE ANIMATIONEN 🚀
+                if(a !== 'none') {
+                    let animName = `anim_${device}_${el.id}_${a}`;
+                    let kf = '';
                     
-                    css += `${el.sel} {\n  ${rules.join('\n  ')}\n  transition: all 0.3s ease;\n}\n\n`;
+                    if(a === 'p1') {
+                        kf = `@keyframes ${animName} { 0%, 100% { transform: ${baseTrans}; } 50% { transform: scale(${s * 1.05}) rotate(${r}deg); } }`;
+                        rules.push(`animation: ${animName} 2s ease-in-out infinite !important;`);
+                    } 
+                    else if(a === 'f1') {
+                        kf = `@keyframes ${animName} { 0%, 100% { transform: ${baseTrans} translateY(0px); } 50% { transform: ${baseTrans} translateY(-10px); } }`;
+                        rules.push(`animation: ${animName} 3s ease-in-out infinite !important;`);
+                    } 
+                    else if(a === 's1') {
+                        kf = `@keyframes ${animName} { 0%, 100% { transform: ${baseTrans}; } 25% { transform: scale(${s}) rotate(${r - 3}deg); } 75% { transform: scale(${s}) rotate(${r + 3}deg); } }`;
+                        rules.push(`animation: ${animName} 1s infinite !important;`);
+                    }
+                    else if(a === 'sp1') {
+                        kf = `@keyframes ${animName} { 0% { transform: scale(${s}) rotate(${r}deg); } 100% { transform: scale(${s}) rotate(${r + 360}deg); } }`;
+                        rules.push(`animation: ${animName} 4s linear infinite !important;`);
+                    }
+                    else if(a === 'b1') {
+                        kf = `@keyframes ${animName} { 0%, 20%, 50%, 80%, 100% { transform: ${baseTrans} translateY(0px); } 40% { transform: ${baseTrans} translateY(-15px); } 60% { transform: ${baseTrans} translateY(-7px); } }`;
+                        rules.push(`animation: ${animName} 2s infinite !important;`);
+                    }
+                    
+                    css += `${kf}\n`;
+                    rules.push(`transform: ${baseTrans} !important;`);
+                } else {
+                    if(s !== 1 || r !== 0) rules.push(`transform: ${baseTrans} !important; transform-origin: center center !important;`);
+                }
+                
+                if(rules.length > 0) {
+                    css += `${el.sel} {\n  ${rules.join('\n  ')}\n  transition: opacity 0.3s, filter 0.3s;\n}\n\n`;
                     hasChanges = true;
                 }
             });
@@ -18437,9 +18511,13 @@ setInterval(function() {
             let style = document.getElementById('stu-dynamic-css');
             if(!style) { style = document.createElement('style'); style.id = 'stu-dynamic-css'; document.head.appendChild(style); }
             let css = '';
+            
             if (Object.keys(this.data.desktop||{}).length || Object.keys(this.data.global||{}).length) css += `@media (min-width: 1401px) { \n${this.buildCSS('desktop')} }\n`;
-            if (Object.keys(this.data.laptop||{}).length || Object.keys(this.data.global||{}).length) css += `@media (min-width: 769px) and (max-width: 1400px) { \n${this.buildCSS('laptop')} }\n`;
-            if (Object.keys(this.data.mobile||{}).length || Object.keys(this.data.global||{}).length) css += `@media (max-width: 768px) { \n${this.buildCSS('mobile')} }\n`;
+            if (Object.keys(this.data.laptop||{}).length || Object.keys(this.data.global||{}).length) css += `@media (min-width: 851px) and (max-width: 1400px) { \n${this.buildCSS('laptop')} }\n`;
+            if (Object.keys(this.data.mobile||{}).length || Object.keys(this.data.global||{}).length) css += `@media (max-width: 850px) { \n${this.buildCSS('mobile')} }\n`;
+            if (Object.keys(this.data.android||{}).length || Object.keys(this.data.global||{}).length) css += `@supports not (-webkit-touch-callout: none) { @media (max-width: 850px) { \n${this.buildCSS('android')} } }\n`;
+            if (Object.keys(this.data.ios||{}).length || Object.keys(this.data.global||{}).length) css += `@supports (-webkit-touch-callout: none) { @media (max-width: 850px) { \n${this.buildCSS('ios')} } }\n`;
+
             style.innerHTML = css;
         }
     };
