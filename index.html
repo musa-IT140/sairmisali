@@ -20462,5 +20462,139 @@ setInterval(function() {
 })();
 </script>
 
+<script>
+(function() {
+    // 1. DATENBANK HEILUNG (Repariert alle kaputten Kommentare im Hintergrund)
+    function healDatabase() {
+        let db = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+        let healed = false;
+        
+        for (let poemId in db) {
+            let pData = db[poemId];
+            if (pData && pData.comments) {
+                // Falls Firebase das Array in ein Objekt verwandelt hat, reparieren
+                if (!Array.isArray(pData.comments)) {
+                    pData.comments = Object.values(pData.comments).filter(Boolean);
+                    healed = true;
+                }
+                
+                // Repariert jeden einzelnen Kommentar und füllt fehlende Daten auf
+                pData.comments.forEach(c => {
+                    if (c) {
+                        if (!c.likes) { c.likes = []; healed = true; }
+                        if (!c.replies) { c.replies = []; healed = true; }
+                        if (!c.likeTimes) { c.likeTimes = {}; healed = true; }
+                        if (!c.ts) { c.ts = Date.now(); healed = true; }
+                        if (!c.id) { c.id = 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2,4); healed = true; }
+                        
+                        // Repariert auch alle Antworten (Replies)
+                        if (Array.isArray(c.replies)) {
+                            c.replies.forEach(r => {
+                                if (r) {
+                                    if (!r.likes) { r.likes = []; healed = true; }
+                                    if (!r.likeTimes) { r.likeTimes = {}; healed = true; }
+                                    if (!r.ts) { r.ts = Date.now(); healed = true; }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+        
+        if (healed) {
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(db));
+            window.poemDataStore = db;
+            console.log("🛡️ V58 Protector: Versteckte Karten-Fehler wurden repariert!");
+            if (window.syncToCloud) window.syncToCloud();
+        }
+    }
+    
+    // Führt die Heilung sofort beim Start aus
+    healDatabase();
+
+    // 2. CRASH-SCHILD FÜR DAS KARTEN-FENSTER
+    // Verhindert, dass das alte Script abstürzt und das Fenster blockiert
+    if (!window.v58Protected) {
+        const originalUpdateHeartsUI = window.updateHeartsUI;
+        window.updateHeartsUI = function() {
+            try {
+                if (originalUpdateHeartsUI) originalUpdateHeartsUI();
+            } catch(err) {
+                console.warn("🛡️ V58 hat einen tödlichen Absturz blockiert:", err);
+            }
+            // Der sichere V57 Renderer übernimmt die Darstellung!
+            if (window.currentPoemData && window.currentPoemData.id && window.renderCommentsV57) {
+                setTimeout(() => window.renderCommentsV57(window.currentPoemData.id), 50);
+            }
+        };
+        window.v58Protected = true;
+    }
+
+    // 3. SICHERES KOMMENTIEREN (m_addComment OVERRIDE)
+    // Ersetzt den kaputten Code, damit neue Kommentare niemals wieder die Karten zerstören!
+    window.m_addComment = function(e) {
+        if (e) e.stopPropagation();
+        if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
+        
+        const input = document.getElementById('m-comment-input') || document.querySelector('.edel-comment-input'); 
+        if (!input) return;
+        
+        const text = input.value.trim();
+        if (!text) return;
+        
+        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { 
+            input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; 
+        }
+        
+        const poemId = window.currentPoemData.id;
+        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
+        if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
+        
+        // Zwingt die Kommentare immer in ein gesundes Array-Format
+        if(!Array.isArray(window.poemDataStore[poemId].comments)) {
+            window.poemDataStore[poemId].comments = Object.values(window.poemDataStore[poemId].comments).filter(Boolean);
+        }
+        
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        
+        // 🔥 HIER IST DER FIX: Das Array "likes: []" und "replies: []" MÜSSEN gespeichert werden!
+        window.poemDataStore[poemId].comments.push({ 
+            id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            username: window.currentUser.username, 
+            user: fullName, 
+            text: text, 
+            time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+            ts: Date.now(),
+            likes: [],
+            replies: [],
+            likeTimes: {}
+        });
+        
+        input.value = ''; 
+        window.lastLocalUpdate = Date.now() + 5000; 
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        
+        // Löst das UI-Update sicher aus
+        window.updateHeartsUI(); 
+        if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+        if(window.syncToCloud) window.syncToCloud(); 
+        
+        // Benachrichtigungen versenden
+        if(window.sendSystemMessage) {
+            let pTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
+            window.sendSystemMessage('Admin', `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı esere yorum yaptı.`, poemId, window.currentPoemData.type);
+            if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
+                 window.sendSystemMessage(window.currentPoemData.username, `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı eserine yorum yaptı.`, poemId, window.currentPoemData.type);
+            }
+        }
+    };
+    
+    // 4. DAUERHAFTE SICHERHEIT: Scannt alle 2 Sekunden den Speicher, 
+    // um sicherzugehen, dass Firebase uns keine unsauberen Daten reinpusht.
+    setInterval(healDatabase, 2000);
+})();
+</script>
+
 </body>
 </html>
