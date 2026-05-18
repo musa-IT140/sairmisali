@@ -19737,7 +19737,7 @@ setInterval(function() {
     body #main-header .header-stats-row, body .header-stats-row, body #main-header .header-nav-bar, body .header-nav-bar { border: none !important; border-bottom: 0px solid transparent !important; border-top: 0px solid transparent !important; box-shadow: none !important; outline: none !important; background: transparent !important; }
     .typed-cursor { display: none !important; width: 0 !important; height: 0 !important; opacity: 0 !important; animation: none !important; }
     
-    /* 2. GÜLLERİM ZÄHLER IM HEADER - TEMEL STİLLER */
+    /* 2. GÜLLERİM ZÄHLER IM HEADER */
     body #header-my-roses-badge-container { display: flex !important; position: relative !important; margin: 0 !important; border: none !important; cursor: pointer !important; pointer-events: auto !important; z-index: 99999 !important; color: #00d2ff !important; font-family: "Poppins", sans-serif !important; }
     body #header-my-roses-badge { background: #00d2ff !important; color: #000 !important; border: 1px solid #fff !important; position: relative !important; display: inline-flex !important; box-shadow: 0 2px 5px rgba(0, 210, 255, 0.5) !important; }
 
@@ -19793,13 +19793,12 @@ setInterval(function() {
 
     /* V57 FLEX-LOCK: Die 3 Reihen der Architektur */
     .v57-top-row { display: flex !important; justify-content: space-between !important; align-items: flex-start !important; margin-bottom: 6px !important; width: 100% !important; gap: 8px !important; }
-    
     .v57-author-box { display: flex !important; align-items: center !important; gap: 6px !important; flex: 1 1 auto !important; min-width: 0 !important; }
     .v57-author-name { font-weight: bold !important; font-size: 0.85rem !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; line-height: 1.2 !important; }
-    
     .v57-action-box { display: flex !important; align-items: center !important; gap: 6px !important; flex-shrink: 0 !important; justify-content: flex-end !important; }
 
-    .likers-list-v57 { font-size: 0.55rem !important; color: #94a3b8 !important; display: flex !important; flex-wrap: wrap !important; gap: 3px !important; max-width: 100px !important; line-height: 1.1 !important; align-items: center !important; justify-content: flex-end !important; text-align: right !important; }
+    /* LIKERS LISTE WINZIG MACHEN, DAMIT SIE NICHTS ÜBERLAPPT */
+    .likers-list-v57 { font-size: 0.55rem !important; color: #94a3b8 !important; display: flex !important; flex-wrap: wrap !important; gap: 3px !important; max-width: 130px !important; line-height: 1.1 !important; align-items: center !important; justify-content: flex-start !important; text-align: left !important; }
     
     .yazar-gold-badge { background: linear-gradient(135deg, #f4c542, #b48608); color: #000; font-size: 0.45rem; font-weight: 800; padding: 2px 5px; border-radius: 5px; margin-left: 4px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: inline-block; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
     .liker-name-hover:hover { color: #fdfbf7 !important; filter: drop-shadow(0 0 3px rgba(255,255,255,0.5)); }
@@ -19932,30 +19931,6 @@ setInterval(function() {
         if (window.updateHeartsUI) window.updateHeartsUI();
     };
 
-    // ==================================================================
-    // 🎨 ANTI-FLICKER FÜR UNTERSCHRIFT
-    // ==================================================================
-    function secureSignatureColors(container) {
-        // Zwingt die Farben hart rein und entzieht sie dem unruhigen Interval-Scanner
-        let sigSpans = container.querySelectorAll('.modal-signature span');
-        sigSpans.forEach(el => {
-            if (!el.dataset.v57secured) {
-                let currentAuthor = el.textContent.trim();
-                let col = '#ffffff'; // Fallback
-                
-                if (currentAuthor === 'Şair Misal.i' || currentAuthor.toLowerCase().includes('admin')) {
-                    col = '#f4c542'; 
-                } else {
-                    let uObj = Object.values(window.userDatabase || {}).find(u => (u.name + (u.surname ? ' ' + u.surname : '')) === currentAuthor);
-                    if (uObj) col = '#a78bfa'; // User
-                }
-                
-                el.style.setProperty('color', col, 'important');
-                el.style.setProperty('text-shadow', `0 0 8px ${col}80`, 'important');
-                el.dataset.v57secured = "true";
-            }
-        });
-    }
 
     // ==================================================================
     // 🔥 FORMATTER FÜR DAS SMARTE @MENTION BADGE
@@ -20049,24 +20024,30 @@ setInterval(function() {
         if (origProcessCloudDataV57) origProcessCloudDataV57(r, force);
         
         if (r && r.heartsDB) {
-            window.poemDataStore = r.heartsDB; // Überschreibt lokalen RAM
+            window.poemDataStore = r.heartsDB; 
             localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB));
 
-            // Zähler Updates
             window.updateRosesBadgeV57();
             if (window.updateMyHeartsBadge) window.updateMyHeartsBadge();
             
-            // Grid Updates im Hintergrund
             if (window.initContent) window.initContent();
             if (window.renderUserWorksGrid) window.renderUserWorksGrid();
 
-            // Modal Fenster Updates (Wenn sie gerade offen sind)
             if(document.getElementById('myRosesModal') && document.getElementById('myRosesModal').classList.contains('active-modal')) { 
                 window.renderMyRosesList(); 
             }
             if (document.body.classList.contains('modal-open') && window.currentPoemData && window.currentPoemData.id) {
-                window.updateHeartsUI(); // Das große Herz aktualisieren
+                window.renderCommentsV57(window.currentPoemData.id);
+                if (window.updateHeartsUI) window.updateHeartsUI(); 
             }
+        }
+        
+        if (r && r.adminMsgs) {
+            window.adminMessages = r.adminMsgs;
+            localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs));
+            if(window.updateNotifyBadge) window.updateNotifyBadge();
+            if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
+            if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
         }
     };
 
@@ -20104,10 +20085,11 @@ setInterval(function() {
             let fName = lObj.name ? (lObj.name + (lObj.surname ? ' ' + lObj.surname : '')) : likerName;
             let colorClass = window.getAuthorColorClass(likerName);
             let comma = (idx < target.likes.length - 1) ? '<span style="color:#64748b;">,</span> ' : '';
+            
             let isLikerAuth = (likerName === pAuth || likerName === 'Şair Misal.i' || likerName === 'AdminMaster' || likerName === 'AdminKing' || lObj.role === 'admin');
             let lBadge = isLikerAuth ? `<span class="yazar-gold-badge" style="font-size:0.4rem; padding:1px 3px; margin-left:2px;">Yazar</span>` : '';
             
-            return `<span class="liker-name-hover likers-list-v57 ${colorClass}" style="cursor:help; transition:0.2s; display:inline-flex; align-items:center;">${fName}${lBadge}</span>${comma}`;
+            return `<span class="liker-name-hover ${colorClass}" style="cursor:help; transition:0.2s; display:inline-flex; align-items:center; white-space:nowrap;" onmouseenter="window.showLikerTimeV57(this, '${target.likeTimes?.[likerName]||0}')" onmouseleave="window.hideLikerTimeV57()">${fName}${lBadge}</span>${comma}`;
         }).join('');
     };
 
@@ -20135,9 +20117,6 @@ setInterval(function() {
         if(window.openFastModal) window.openFastModal('myRosesModal');
     };
 
-    // ==================================================================
-    // 🔥 DIE GÜLLERİM LISTE (AKILLI KART DÜZENİ - ANTI OVERLAP V57) 🔥
-    // ==================================================================
     window.renderMyRosesList = function() {
         const list = document.getElementById('my-roses-list');
         if(!list) return;
@@ -20308,6 +20287,7 @@ setInterval(function() {
         if(window.showToast) window.showToast("Geri alındı! ↩ (Rückgängig gemacht)");
     };
 
+    // 🔥 DER FIX FÜR DIE LIKES: DOM-PFAD SICHERGESTELLT 🔥
     window.toggleRoseLikeV57 = function(poemId, cIdx, rIdx = null, btnEl) {
         if (!window.currentUser) { window.customAlert ? window.customAlert('Giriş yapmalısınız.', '🔒') : alert('Giriş yapın'); return; }
         let uName = window.currentUser.username;
@@ -20320,8 +20300,10 @@ setInterval(function() {
         if (!target.likeTimes) target.likeTimes = {}; 
 
         let hasLiked = target.likes.includes(uName);
-        let containerRow = btnEl.closest('.v57-bottom-row');
-        let likersContainer = containerRow ? containerRow.querySelector('.likers-list-v57') : null;
+        
+        // HIER WAR DER FEHLER: .v57-bottom-row ist korrekt für V57!
+        let cardWrap = btnEl.closest('.comment-card-v57, .c-v57-reply-item');
+        let likersContainer = cardWrap ? cardWrap.querySelector('.likers-list-v57') : null;
         let pAuth = window.getPoemAuthorGlobalV57(poemId) || 'AdminMaster';
 
         if (hasLiked) {
@@ -20348,7 +20330,7 @@ setInterval(function() {
             }
         }
         
-        if (likersContainer && likersContainer.classList.contains('likers-list-v57')) {
+        if (likersContainer) {
             likersContainer.innerHTML = window.buildLikersHtmlV57(target, pAuth);
         }
 
@@ -20381,110 +20363,6 @@ setInterval(function() {
     // ==================================================================
     // 🔥 DER NEUE, CRASH-SICHERE SMART-STACK RENDERER V57 🔥
     // ==================================================================
-    window.updateHeartsUI = function() {
-        if (!window.currentPoemData || !window.currentPoemData.id) return;
-        const poemId = window.currentPoemData.id; 
-        const container = document.getElementById('modal-interaction-area'); 
-        if (!container) return;
-        
-        const btnDE = document.getElementById('modalLangDE'); 
-        const isDE = btnDE ? btnDE.classList.contains('active') : false; 
-        const langIsDe = isDE && window.currentPoemData.type !== 'userPoems';
-        
-        let adminOrOwnerEdit = ''; let adminRatingHTML = ''; let cuteRatingHTML = ''; let copyrightText = '';
-
-        if (window.currentPoemData.type === 'poems' || window.currentPoemData.type === 'quotes') {
-            copyrightText = `<div style="width: 100%; text-align: center; font-size: 0.95rem; color: #f4c542; border-top: 1px dashed rgba(244,197,66,0.4); padding-top: 20px; margin-top: 25px;"><strong>&copy; Telif Hakkı / Copyright</strong><br><span style="color:#94a3b8;">Bu eser Şair Misal.i'ye aittir.<br><span style="font-style: italic;">Dieses Werk gehört Şair Misal.i.</span></span></div>`;
-        }
-
-        let upDB = window.userPoemsDB || [];
-        window.currentPoemData.adminRating = upDB.find(x => x.id === poemId)?.adminRating || window.currentPoemData.adminRating;
-        window.currentPoemData.adminCategory = upDB.find(x => x.id === poemId)?.adminCategory || window.currentPoemData.adminCategory;
-        if (window.currentPoemData.type === 'userPoems' && window.currentPoemData.adminRating > 0) {
-            let r = window.currentPoemData.adminRating; let rCat = window.currentPoemData.adminCategory || 'Normal';
-            let trophies = rCat === 'Super Elite' ? '🏆🏆🏆' : rCat === 'Elite' ? '🏆🏆' : '🏆';
-            cuteRatingHTML = `<div class="admin-award-badge-new" style="margin-top:10px; background:linear-gradient(135deg, #f4c542, #b48608); color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; display:inline-block;">${trophies} ${rCat} (${r} Puan)</div>`;
-        }
-
-        if (window.currentPoemData.type === 'userPoems' && window.currentUser) {
-            if (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin') {
-                adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('userPoems', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button></div>`;
-            } else if (window.currentUser.username === window.currentPoemData.username) {
-                adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%; flex-wrap: wrap;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border:none; padding: 10px 20px; width:auto;" onclick="window.userEditWork('${poemId}')"><i class="fas fa-edit"></i> Düzenle <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten)</span></button><button class="reset-btn danger" style="width:auto; padding: 10px 20px;" onclick="window.userDeleteWork('${poemId}')"><i class="fas fa-trash"></i> Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Löschen)</span></button></div>`;
-            }
-        } else if (window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin')) {
-            adminOrOwnerEdit = `<div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; width:100%;"><button class="reset-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 10px 20px; width:auto;" onclick="window.triggerAdminEdit('${window.currentPoemData.type}', '${poemId}')"><i class="fas fa-cog"></i> Düzenle / Sil <span class="de-sub" style="color:inherit; font-size:0.85em;">(Bearbeiten/Löschen)</span></button></div>`;
-        }
-
-        let db = sanitizeCloudDataV57(poemId);
-        
-        let totalHearts = 0; 
-        for(let k in db.ratings) { 
-            let r = db.ratings[k];
-            totalHearts += (typeof r === 'object' && r !== null) ? (r.val || 0) : (Number(r) || 0); 
-        }
-        
-        let myRatingData = window.currentUser ? db.ratings[window.currentUser.username] : 0;
-        let myRating = (typeof myRatingData === 'object' && myRatingData !== null) ? (myRatingData.val || 0) : (Number(myRatingData) || 0);
-        
-        let heartHTML = '';
-        for(let i = 1; i <= 3; i++) {
-            let isRed = i <= myRating; let color = isRed ? '#ef4444' : 'transparent'; let stroke = isRed ? '1.5px #ef4444' : '1.5px #94a3b8'; let drop = isRed ? 'drop-shadow(0 0 15px rgba(239, 68, 68, 0.6))' : 'none'; let scale = isRed ? 'scale(1.2)' : 'scale(1)';
-            heartHTML += `<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 50px;"><i class="fas fa-heart" onclick="window.ratePoem(${i}, event)" style="cursor:pointer; font-size:3.5rem; transition:0.3s ease-out; color:${color}; -webkit-text-stroke:${stroke}; filter:${drop}; transform:${scale}; pointer-events:auto !important;"></i></div>`;
-        }
-
-        let currentAuthor = window.currentPoemData.author;
-        if(langIsDe && window.currentPoemData.authorDE) currentAuthor = window.currentPoemData.authorDE;
-        else if (!langIsDe && window.currentPoemData.authorTR) currentAuthor = window.currentPoemData.authorTR;
-        
-        let authorClass = window.getAuthorColorClass(currentAuthor);
-
-        let authorEmojiHtml = '';
-        if (currentAuthor === 'Şair Misal.i') {
-            authorEmojiHtml = `<span class="vip-emoji-badge vip-emoji-signature">🪶</span>`;
-        } else if (currentAuthor !== 'Anonim' && currentAuthor !== 'Unbekannt') {
-            let foundU = Object.values(window.userDatabase || {}).find(u => (u.name + (u.surname ? ' ' + u.surname : '')) === currentAuthor);
-            if (foundU && foundU.emoji && foundU.emoji !== '👤') {
-                authorEmojiHtml = `<span class="vip-emoji-badge vip-emoji-signature">${foundU.emoji}</span>`;
-            }
-        }
-
-        container.innerHTML = 
-            adminOrOwnerEdit +
-            `<div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 10px; margin-bottom: 25px; pointer-events:none;">
-                <div style="width: 100%; display: flex; justify-content: center; text-align: center; align-items:center;">
-                    <span class="modal-signature" style="font-family: 'Great Vibes', cursive; font-size: clamp(2rem, 8vw, 2.8rem); color: #f4c542; transform: rotate(-3deg); margin-bottom: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.8); pointer-events:none; word-wrap: break-word; display:flex; align-items:center; justify-content:center;">
-                        ${authorEmojiHtml}
-                        <span class="${authorClass}" style="font-family:'Great Vibes', cursive; pointer-events:none;">${currentAuthor}</span>
-                    </span>
-                </div>
-                ${cuteRatingHTML}
-                <button class="reset-btn" onclick="window.openFastModal('shareModal')" style="width:auto; margin:0; padding: 10px 20px; font-size: 1rem; border-radius:12px; pointer-events:auto !important;"><i class="fas fa-share-alt" style="margin-right:5px;"></i> Paylaş <span class="de-sub" style="color:inherit; font-size:0.85em;">(Teilen)</span></button>
-            </div>
-            
-            <div class="modal-interaction-box" id="heart-container" style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; margin: 15px 0;">
-                <div style="width: 100%; position: relative; height: 30px;">
-                    <button onclick="window.showHeartDetails('${poemId}')" style="position: absolute; right: 5px; top: 0; background: transparent; border: none; font-size: 1.8rem; cursor: pointer; color: #ef4444; pointer-events:auto; display:flex; align-items:flex-end; padding:5px; transition:0.2s;" title="Kalp detayları">
-                        <i class="fas fa-heart" style="filter:drop-shadow(0 0 5px rgba(239,68,68,0.5));"></i>
-                        <i class="fas fa-clock" style="font-size: 0.9rem; color: #fdfbf7; margin-left:-10px; margin-bottom:2px; filter:drop-shadow(0 0 2px #000);"></i>
-                    </button>
-                </div>
-                <div class="custom-live-hearts" style="display: flex; justify-content: center; gap: 40px; margin-top: 5px; width: 100%; padding-bottom: 10px; pointer-events:auto !important;">${heartHTML}</div>
-            </div>
-            
-            <div class="modal-interaction-box" id="m-comment-area" style="width: 100%; margin-bottom: 10px; pointer-events:auto !important;">
-                <div style="font-weight: 600; color: #f4c542; font-size: 1.3rem; margin-bottom: 18px; font-family: 'Poppins', sans-serif;"><i class="fas fa-comments"></i> Yorumlar <span class="de-sub" style="color:inherit; font-size:0.85em;">(Kommentare)</span></div>
-                <div id="m-comment-list" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; color: #e2e8f0; text-align:left; padding-right:8px; pointer-events:auto !important;"></div>
-                <div style="display: flex; gap: 12px; align-items:center;">
-                    <input type="text" id="m-comment-input" class="edel-comment-input" placeholder="${langIsDe ? 'Schreibe deine Gedanken...' : 'Düşüncelerini yaz... (Schreibe deine Gedanken...)'}" style="flex-grow: 1; margin-bottom: 0; pointer-events:auto !important;" onclick="event.stopPropagation()" onkeypress="if(event.key === 'Enter') window.m_addComment(event)">
-                    <button class="reset-btn" onclick="window.m_addComment(event)" style="margin-top: 0; width: 55px; height: 50px; padding: 0; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size: 1.4rem; pointer-events:auto !important;"><i class="fas fa-paper-plane" style="pointer-events:none; color:#000;"></i></button>
-                </div>
-            </div>` + copyrightText;
-
-        secureSignatureColors(container); // Anti-Flicker anwenden
-        setTimeout(() => window.renderCommentsV57(poemId), 50);
-    };
-
     window.renderCommentsV57 = function(poemId) {
         let container = document.getElementById('m-comment-list');
         if (!container) return;
