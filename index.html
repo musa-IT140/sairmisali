@@ -169,12 +169,36 @@
         .high-z-modal { z-index: 100010; }
         #modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99998; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
 
-        .modal-content { background: linear-gradient(145deg, #0a192f, #000000); color: #f8fafc; border-radius: 20px; width: 100%; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; position: relative; border: 1px solid rgba(244, 197, 66, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.9); margin: 0 auto; overflow: hidden; transform: translateY(20px); opacity: 0; animation: slideUp 0.3s ease-out forwards; }
-        #weatherModal .modal-content { background: var(--modal-bg); border: 1px solid var(--accent-color); box-shadow: 0 0 40px rgba(0,0,0,1); }
-        @media (min-width: 600px) { .modal-content { max-width: 500px; } }
-        #contentModal .modal-content { max-width: 800px; }
-        #leaderboardModal .modal-content { max-width: 950px; }
-        #eventsModal .modal-content { overflow: visible !important; } 
+        /* Ändere das in deinem CSS */
+.modal-content { 
+    background: linear-gradient(145deg, #0a192f, #000000); 
+    color: #f8fafc; 
+    border-radius: 20px; 
+    width: 100%; 
+    max-width: 90vw; 
+    max-height: 85vh; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+    border: 1px solid rgba(244, 197, 66, 0.4); 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9); 
+    margin: 0 auto; 
+    
+    /* FIX: overflow visible statt hidden, damit Menüs rausgucken dürfen */
+    overflow: visible !important; 
+    /* FIX: transform entfernen, damit Stacking Context nicht bricht */
+    transform: none !important; 
+    margin-top: 20px;
+}
+
+/* FIX: Zwinge Dropdowns immer in den absoluten Vordergrund */
+.select-items {
+    position: fixed !important;
+    z-index: 9999999 !important;
+    overflow-y: auto !important;
+    max-height: 200px !important;
+    background: #0a192f !important;
+}
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -21113,6 +21137,570 @@ setInterval(function() {
             styleTag.innerHTML = cssRules;
         }
     };
+})();
+</script>
+
+<style id="v90-fix-css">
+    /* 1. Admin-Dropdown Fix: Verhindert Überlappungen */
+    .admin-eval-container .select-items, .admin-rating-box .select-items { 
+        position: fixed !important; 
+        z-index: 99999999 !important; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important;
+    }
+
+    /* 2. Modal-Fix: Button-Überlappung */
+    .modal-bookmark-wrapper { position: absolute !important; top: 15px !important; left: 15px !important; z-index: 100005 !important; }
+    .close-wrapper { position: absolute !important; top: 15px !important; right: 15px !important; z-index: 100005 !important; }
+
+    /* 3. Kompakter Header (Güllerim Badge) */
+    #header-my-roses-badge-container { display: flex !important; align-items: center !important; z-index: 99999 !important; cursor: pointer !important; }
+    
+    /* Studio Pro & Buttons Fix */
+    .bottom-btn { display: flex !important; align-items: center !important; }
+</style>
+
+<script>
+(function() {
+    console.log("🛠️ Patch V90 wird geladen...");
+
+    // 1. ZENTRALER KOMMENTAR-FIX (Verhindert Blockaden)
+    window.m_addComment = function(e) {
+        if (e) e.stopPropagation();
+        if (!window.currentUser) { if(window.openFastModal) window.openFastModal('m-login-modal'); return; }
+        const input = document.getElementById('m-comment-input') || document.querySelector('.edel-comment-input');
+        if (!input || !input.value.trim()) return;
+        
+        let text = input.value.trim();
+        const poemId = window.currentPoemData?.id;
+        if (!poemId) return;
+
+        try {
+            window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+            if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
+            if (!Array.isArray(window.poemDataStore[poemId].comments)) window.poemDataStore[poemId].comments = Object.values(window.poemDataStore[poemId].comments).filter(Boolean);
+
+            window.poemDataStore[poemId].comments.push({ 
+                id: 'c_' + Date.now(), username: window.currentUser.username, 
+                text: text, ts: Date.now(), likes: [], replies: [], likeTimes: {} 
+            });
+
+            input.value = '';
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            if(window.updateHeartsUI) window.updateHeartsUI();
+            if(window.syncToCloud) window.syncToCloud();
+        } catch(err) { console.error("Kommentar-Fehler:", err); alert("Hata oluştu, tekrar deneyin."); }
+    };
+
+    // 2. LIKE/ROSE FIX (Sicherer Zähler)
+    window.toggleRoseLikeV57 = function(poemId, cIdx, rIdx = null, btnEl) {
+        if (!window.currentUser) return;
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+        let comment = db[poemId]?.comments[cIdx];
+        let target = rIdx !== null ? comment.replies[rIdx] : comment;
+        if (!target) return;
+        
+        if (!target.likes) target.likes = [];
+        let uName = window.currentUser.username;
+        if (target.likes.includes(uName)) target.likes = target.likes.filter(u => u !== uName);
+        else target.likes.push(uName);
+        
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(db));
+        window.poemDataStore = db;
+        if(window.renderCommentsV57) window.renderCommentsV57(poemId);
+        if(window.updateRosesBadgeV57) window.updateRosesBadgeV57();
+    };
+
+    // 3. ADMIN DROPDOOWN TELEPORT FIX
+    document.addEventListener('click', function(e) {
+        let box = e.target.closest('.admin-eval-container, .admin-rating-box');
+        if (box) {
+            let drop = box.querySelector('.select-items');
+            if (drop) {
+                document.body.appendChild(drop);
+                let rect = box.getBoundingClientRect();
+                drop.style.position = 'fixed';
+                drop.style.left = rect.left + 'px';
+                drop.style.top = (rect.bottom + 5) + 'px';
+                drop.style.width = rect.width + 'px';
+                drop.style.display = 'block';
+            }
+        } else {
+            document.querySelectorAll('body > .select-items').forEach(d => d.style.display = 'none');
+        }
+    }, true);
+
+    // 4. HEADER SYNC FIX
+    window.updateRosesBadgeV57 = function() {
+        let badgeEl = document.getElementById('header-my-roses-badge');
+        if(!badgeEl || !window.currentUser) return;
+        let uName = window.currentUser.username;
+        let isAdmin = (window.currentUser.role === 'admin');
+        let count = 0;
+        let db = window.poemDataStore || {};
+        for(let pid in db) {
+            if(db[pid].comments) db[pid].comments.forEach(c => {
+                if((c.username === uName || isAdmin) && c.likes) count += c.likes.length;
+            });
+        }
+        badgeEl.innerText = count;
+    };
+})();
+</script>
+
+<style id="v92-dropdown-fix">
+    /* Das "Portal"-Element: Schwebt über allem */
+    #admin-dropdown-portal {
+        position: fixed !important;
+        z-index: 2147483647 !important;
+        background: #0a192f !important;
+        border: 2px solid #f4c542 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.9) !important;
+        display: none;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+    }
+    .select-items-hidden { display: none !important; }
+</style>
+
+<div id="admin-dropdown-portal" class="teleported-dropdown"></div>
+
+<script>
+(function() {
+    const portal = document.getElementById('admin-dropdown-portal');
+    
+    // Fängt Klicks auf alle Admin-Auswahlfelder ab
+    document.addEventListener('click', function(e) {
+        // Suche die Admin-Box, die man anklickt
+        let box = e.target.closest('.admin-eval-container, .admin-rating-box');
+        let originalList = box ? box.querySelector('.select-items') : null;
+
+        if (box && originalList) {
+            e.preventDefault(); e.stopPropagation();
+            
+            // Wenn das Menü schon offen ist, schließen
+            if (portal.style.display === 'block' && portal.dataset.origin === box.id) {
+                portal.style.display = 'none';
+                return;
+            }
+
+            // Menü in das Portal "beamen"
+            portal.innerHTML = originalList.innerHTML;
+            portal.dataset.origin = box.id;
+            
+            // Positionierung am Bildschirm
+            let rect = box.getBoundingClientRect();
+            portal.style.left = rect.left + 'px';
+            portal.style.top = (rect.bottom + 5) + 'px';
+            portal.style.width = rect.width + 'px';
+            portal.style.display = 'block';
+
+            // Klicks innerhalb des Portals an das Original-Menü weiterleiten
+            portal.querySelectorAll('.select-item').forEach((item, index) => {
+                item.onclick = function() {
+                    let realItems = originalList.querySelectorAll('.select-item');
+                    if (realItems[index]) realItems[index].click();
+                    portal.style.display = 'none';
+                };
+            });
+        } else {
+            // Klick außerhalb: Schließen
+            portal.style.display = 'none';
+        }
+    }, true);
+
+    // Schließen bei Scroll oder Fenster-Resize
+    window.addEventListener('scroll', () => portal.style.display = 'none', { passive: true });
+    window.addEventListener('resize', () => portal.style.display = 'none', { passive: true });
+})();
+</script>
+
+<style id="v99-teleport-fix">
+    /* Das gebeamte Dropdown-Menü */
+    .teleported-dropdown {
+        position: fixed !important;
+        z-index: 2147483647 !important;
+        background: #0a192f !important;
+        border: 2px solid #f4c542 !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.9) !important;
+        border-radius: 8px !important;
+        display: none;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain !important;
+    }
+    .teleported-dropdown .select-item { 
+        padding: 10px !important; 
+        color: #fff !important; 
+        cursor: pointer !important; 
+        border-bottom: 1px solid rgba(244,197,66,0.1) !important;
+    }
+    .teleported-dropdown .select-item:hover { background: rgba(244,197,66,0.2) !important; }
+</style>
+
+<script>
+(function() {
+    // Zentrales Portal-Element erstellen
+    let portal = document.createElement('div');
+    portal.id = 'admin-dropdown-portal';
+    portal.className = 'teleported-dropdown';
+    document.body.appendChild(portal);
+
+    document.addEventListener('click', function(e) {
+        // Suche nach den Admin-Boxen
+        let box = e.target.closest('.admin-eval-container, .admin-rating-box, .custom-select');
+        let originalList = box ? box.querySelector('.select-items') : null;
+
+        // Wenn wir in einer Admin-Box klicken
+        if (box && originalList) {
+            e.preventDefault(); 
+            e.stopPropagation();
+            
+            // Wenn schon offen, schließen
+            if (portal.style.display === 'block' && portal.dataset.origin === box.id) {
+                portal.style.display = 'none';
+                return;
+            }
+
+            // Inhalt ins Portal kopieren
+            portal.innerHTML = originalList.innerHTML;
+            portal.dataset.origin = box.id;
+            
+            // Position berechnen (View-Port basiert)
+            let rect = box.getBoundingClientRect();
+            portal.style.left = rect.left + 'px';
+            portal.style.top = (rect.bottom + 5) + 'px';
+            portal.style.width = rect.width + 'px';
+            portal.style.display = 'block';
+
+            // Click-Logik auf die kopierten Items übertragen
+            portal.querySelectorAll('.select-item').forEach((item, index) => {
+                item.onclick = function() {
+                    let realItems = originalList.querySelectorAll('.select-item');
+                    if (realItems[index]) realItems[index].click();
+                    portal.style.display = 'none';
+                };
+            });
+        } else {
+            // Überall sonst klicken schließt das Portal
+            if (!e.target.closest('.teleported-dropdown')) {
+                portal.style.display = 'none';
+            }
+        }
+    }, true);
+
+    // Schließen bei Scroll oder Resize
+    window.addEventListener('scroll', () => portal.style.display = 'none', { passive: true });
+    window.addEventListener('resize', () => portal.style.display = 'none', { passive: true });
+})();
+</script>
+
+<script>
+(function() {
+    // 1. Portal für das Dropdown im Body erstellen
+    const portal = document.createElement('div');
+    portal.id = 'misali-final-portal';
+    portal.style.cssText = 'position: absolute; top: 0; left: 0; z-index: 2147483647 !important; pointer-events: none;';
+    document.body.appendChild(portal);
+
+    document.addEventListener('click', function(e) {
+        // Suche nach den Admin-Feldern
+        let box = e.target.closest('.admin-eval-container, .admin-rating-box');
+        
+        // Schließe das Portal, wenn woanders geklickt wird
+        if (!box) {
+            portal.innerHTML = '';
+            portal.style.display = 'none';
+            return;
+        }
+
+        let originalList = box.querySelector('.select-items');
+        if (originalList) {
+            e.preventDefault(); e.stopPropagation();
+
+            // Inhalt ins Portal kopieren
+            portal.innerHTML = originalList.innerHTML;
+            portal.style.display = 'block';
+
+            // Berechnung außerhalb des transform-Containers
+            let rect = box.getBoundingClientRect();
+            portal.style.position = 'fixed';
+            portal.style.left = rect.left + 'px';
+            portal.style.top = (rect.bottom + 5) + 'px';
+            portal.style.width = rect.width + 'px';
+            portal.style.pointerEvents = 'auto';
+
+            // Klick-Logik der Items übertragen
+            portal.querySelectorAll('.select-item').forEach((item, index) => {
+                item.onclick = function() {
+                    let realItems = originalList.querySelectorAll('.select-item');
+                    if (realItems[index]) realItems[index].click();
+                    portal.style.display = 'none';
+                };
+            });
+        }
+    }, true);
+
+    // Aufräumen bei Scroll/Resize
+    window.addEventListener('scroll', () => portal.style.display = 'none', { passive: true });
+    window.addEventListener('resize', () => portal.style.display = 'none', { passive: true });
+})();
+</script>
+
+<style>
+    #misali-final-portal {
+        background: #0a192f !important;
+        border: 2px solid #f4c542 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.95) !important;
+        max-height: 250px !important;
+        overflow-y: auto !important;
+        padding: 5px !important;
+    }
+    #misali-final-portal .select-item {
+        color: #fff !important;
+        padding: 8px !important;
+        cursor: pointer !important;
+    }
+    #misali-final-portal .select-item:hover {
+        background: rgba(244,197,66,0.2) !important;
+    }
+</style>
+
+<script>
+(function() {
+    document.addEventListener('click', function(e) {
+        let box = e.target.closest('.admin-eval-container, .admin-rating-box');
+        if (box) {
+            let drop = box.querySelector('.select-items');
+            if (drop) {
+                // Dropdown in den Body umziehen, um Modal-Käfig zu verlassen
+                if (drop.parentElement !== document.body) {
+                    document.body.appendChild(drop);
+                }
+                
+                // Positionierung absolut am Screen-Viewport
+                let rect = box.getBoundingClientRect();
+                drop.style.position = 'fixed';
+                drop.style.left = rect.left + 'px';
+                drop.style.top = (rect.bottom + 5) + 'px';
+                drop.style.width = rect.width + 'px';
+                drop.style.display = 'block';
+                e.stopPropagation();
+            }
+        } else {
+            // Dropdown schließen, wenn woanders geklickt wird
+            document.querySelectorAll('body > .select-items').forEach(d => d.style.display = 'none');
+        }
+    }, true);
+})();
+</script>
+
+<style id="gemini-pro-dropdown-fix">
+    /* 1. Menü nach unten aufklappen & internen Scrollbalken töten */
+    #custom-cat-list {
+        top: 100% !important;
+        bottom: auto !important;
+        margin-top: 5px !important;
+        margin-bottom: 0 !important;
+        border: 2px solid #f4c542 !important;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.95) !important;
+        z-index: 999999 !important;
+        max-height: none !important; /* Hierdurch musst du im Menü nicht mehr scrollen! */
+        overflow: visible !important;
+    }
+
+    /* 2. Rahmen der Admin-Box sanft vergrößern */
+    .admin-box-expanded {
+        padding-bottom: 180px !important; /* Gibt dem Menü Platz innerhalb des Rahmens */
+        transition: padding-bottom 0.2s ease-in-out !important; /* Weiche Animation */
+    }
+</style>
+
+<script>
+(function() {
+    // 3. Der Stacking- & Rahmen-Wächter
+    setInterval(() => {
+        let catBtn = document.getElementById('custom-cat-btn');
+        let catList = document.getElementById('custom-cat-list');
+
+        if (catBtn && catList) {
+            // Finde die Haupt-Box (Admin Değerlendirmesi)
+            let adminBox = catBtn.closest('.modal-interaction-box');
+            
+            if (adminBox) {
+                // Z-Index in den Vordergrund zwingen
+                if (adminBox.style.zIndex !== '999999') {
+                    adminBox.style.setProperty('position', 'relative', 'important');
+                    adminBox.style.setProperty('z-index', '999999', 'important');
+                }
+                
+                // Rahmen vergrößern, wenn das Menü offen ist
+                if (catList.style.display !== 'none') {
+                    adminBox.classList.add('admin-box-expanded');
+                } else {
+                    adminBox.classList.remove('admin-box-expanded');
+                }
+            }
+            
+            // Wrapper des Buttons ebenfalls absichern
+            let wrapper = catBtn.parentElement;
+            if (wrapper && wrapper.style.zIndex !== '999999') {
+                wrapper.style.setProperty('position', 'relative', 'important');
+                wrapper.style.setProperty('z-index', '999999', 'important');
+            }
+        }
+    }, 200);
+})();
+</script>
+
+<style id="gemini-master-fix">
+    /* 1. Admin Menü: Fällt nach UNTEN ohne Limit, überlappt perfekt */
+    #custom-cat-list {
+        top: 100% !important;
+        bottom: auto !important;
+        margin-top: 5px !important;
+        margin-bottom: 0 !important;
+        border: 2px solid #f4c542 !important;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.95) !important;
+        z-index: 9999999 !important;
+        max-height: none !important; /* Kein Scrollen im Menü nötig */
+        overflow: visible !important;
+    }
+
+    /* 2. Admin Box Expansion: Sanfte Vergrößerung des Rahmens nach unten */
+    .modal-interaction-box.admin-box-expanded {
+        padding-bottom: 170px !important; /* Vergrößert die Box, drückt Kommentare weich runter */
+        transition: padding-bottom 0.25s ease-in-out !important;
+        z-index: 99999 !important;
+        position: relative !important;
+    }
+    
+    /* Basis Transition für weiches Einklappen der Box */
+    .modal-interaction-box {
+        transition: padding-bottom 0.25s ease-in-out !important;
+    }
+
+    /* 3. Sicherheits-Fix für Karten & Kommentare (Stellt Klickbarkeit wieder her) */
+    .card, .game-card, .sahsiyet-card, .poem-card, .section-box {
+        pointer-events: auto !important;
+    }
+    
+    #m-comment-area, #m-comment-input, .edel-comment-input, .reset-btn {
+        pointer-events: auto !important;
+    }
+</style>
+
+<script>
+(function() {
+    // A. Zerstöre alle alten, flackernden Skripte (räumt das System auf)
+    document.querySelectorAll('style[id*="gemini-pro-dropdown-fix"], script[id*="gemini-pro"]').forEach(el => el.remove());
+    
+    // B. Hebt mögliche Blockaden (Body-Locks) auf, die Karten eingefroren haben
+    document.body.classList.remove('modal-scroll-lock');
+    
+    // C. Reines Event-Delegation (Kein Flackern mehr!)
+    document.addEventListener('click', function(e) {
+        
+        let catBtn = e.target.closest('#custom-cat-btn');
+        let adminBox = catBtn ? catBtn.closest('.modal-interaction-box') : null;
+        let catList = document.getElementById('custom-cat-list');
+
+        // 1. Wenn wir auf den Admin-Button klicken
+        if (catBtn && adminBox && catList) {
+            // Wir warten 10 Millisekunden, damit dein eigenes Inline-Skript das Display auf "flex" oder "none" schalten kann
+            setTimeout(() => {
+                if (catList.style.display !== 'none') {
+                    // Box vergrößern
+                    adminBox.classList.add('admin-box-expanded');
+                } else {
+                    // Box verkleinern
+                    adminBox.classList.remove('admin-box-expanded');
+                }
+            }, 10);
+        } 
+        else {
+            // 2. Wenn wir IRGENDWO ANDERS klicken (Menü schließen und Rahmen zurücksetzen)
+            let openBox = document.querySelector('.admin-box-expanded');
+            
+            // Wenn der Klick nicht IM Dropdown selbst gelandet ist
+            if (!e.target.closest('#custom-cat-list')) {
+                if (catList) catList.style.display = 'none';
+                if (openBox) openBox.classList.remove('admin-box-expanded');
+            } 
+            // Wenn auf eine Option (z.B. "Super Elite") geklickt wurde
+            else if (e.target.closest('.custom-select-item')) {
+                if (catList) catList.style.display = 'none';
+                if (openBox) openBox.classList.remove('admin-box-expanded');
+            }
+        }
+    }, true);
+})();
+</script>
+
+<style id="gemini-mega-fix">
+    /* 1. MODAL BORDER & HÖHE (Mobil) FIX */
+    @media (max-width: 768px) {
+        body .modal-content, 
+        body .game-modal-content, 
+        body .auth-modal-content {
+            /* dvh (Dynamic Viewport Height) berücksichtigt die Browser-Leiste! */
+            height: auto !important; 
+            max-height: 85dvh !important; 
+            margin: 7.5dvh auto !important; /* Zentriert es perfekt im sichtbaren Bereich */
+            border-bottom: 2px solid var(--theme-acc, #f4c542) !important; /* Zwingt den Rand sichtbar */
+        }
+        
+        body .modal-body {
+            padding-bottom: 40px !important; /* Etwas Puffer nach unten im Scrollbereich */
+        }
+    }
+
+    /* 2. ENDLOS-KOMMENTARE (Kein Scrollen mehr in der Box) */
+    html body #m-comment-list {
+        max-height: none !important; /* Hebt die 250px Grenze auf */
+        height: auto !important;
+        overflow: visible !important; /* Lässt die Box nach unten wachsen */
+    }
+
+    /* 3. KARTEN-KLICKS RETTEN (Zwingt Karten in den Vordergrund) */
+    .card, .game-card, .sahsiyet-card, .poem-card, .section-box {
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 50 !important; /* Hebt sie über unsichtbare Overlays */
+    }
+
+    /* Blockiert Klicks auf unsichtbare Geister-Ebenen */
+    .wild-bg-container, 
+    .stu-overlay, 
+    #misali-portal-root {
+        pointer-events: none !important;
+    }
+</style>
+
+<script>
+(function() {
+    // Wächter: Verhindert, dass dein MasterLoop die Kommentare wieder zusammenquetscht
+    // oder Karten blockiert.
+    setInterval(() => {
+        // Kommentare entsperren
+        let commList = document.getElementById('m-comment-list');
+        if (commList) {
+            commList.style.setProperty('max-height', 'none', 'important');
+            commList.style.setProperty('overflow', 'visible', 'important');
+        }
+
+        // Klicks auf Karten garantieren
+        document.querySelectorAll('.card, .game-card, .sahsiyet-card').forEach(c => {
+            c.style.setProperty('pointer-events', 'auto', 'important');
+        });
+        
+        // Zwingt den Hintergrund-Verdunkler (Backdrop) dazu, Klicks wirklich durchzulassen, wenn er unsichtbar ist
+        let bd = document.getElementById('modal-backdrop');
+        if (bd && bd.style.opacity === "0") {
+            bd.style.setProperty('pointer-events', 'none', 'important');
+        }
+    }, 500);
 })();
 </script>
 
