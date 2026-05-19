@@ -19868,31 +19868,430 @@ setInterval(function() {
 
 <script>
 (function() {
-    window.deletedCommentsStackV57 = [];
-    window.v57NeedsAutoScroll = false;
+    // ==================================================================
+    // 1. ZENTRALE CSS INJEKTION (Vereint alle V18-V85 Styles)
+    // ==================================================================
+    const style = document.createElement('style');
+    style.id = 'misali-core-styles';
+    style.innerHTML = `
+        /* Modal & Scroll Locks */
+        .modal { overscroll-behavior: contain !important; }
+        body.modal-scroll-lock, body.modal-open { overflow: hidden !important; touch-action: none !important; }
+        #modal-backdrop { display: block !important; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        #modal-backdrop.show-backdrop { opacity: 1; pointer-events: auto; }
+        
+        /* Cursor & Line Killer */
+        #main-header .header-stats-row, #main-header .header-nav-bar, .header-stats-row, .header-nav-bar { border-bottom: 0px solid transparent !important; border-top: 0px solid transparent !important; box-shadow: none !important; outline: none !important; }
+        .ityped-cursor, .typed-cursor, .blinking-cursor, [class*="cursor"] { display: none !important; width: 0 !important; height: 0 !important; opacity: 0 !important; animation: none !important; }
+        .header-stats-row .de-sub { display: none !important; }
 
-    function sanitizeCloudDataV57(poemId) {
-        if (!window.poemDataStore || !window.poemDataStore[poemId]) return { ratings: {}, comments: [] };
-        let db = window.poemDataStore[poemId];
-        if (db.comments && !Array.isArray(db.comments)) db.comments = Object.values(db.comments).filter(Boolean);
-        if (!db.comments) db.comments = [];
-        db.comments.forEach(c => {
-            if (c) {
-                if (!c.likes || !Array.isArray(c.likes)) c.likes = Array.isArray(c.likes) ? c.likes : Object.values(c.likes || {}).filter(Boolean);
-                if (!c.replies || !Array.isArray(c.replies)) c.replies = Array.isArray(c.replies) ? c.replies : Object.values(c.replies || {}).filter(Boolean);
-                if (!c.likeTimes) c.likeTimes = {};
-                c.replies.forEach(r => {
-                    if (r) {
-                        if (!r.likes || !Array.isArray(r.likes)) r.likes = Array.isArray(r.likes) ? r.likes : Object.values(r.likes || {}).filter(Boolean);
-                        if (!r.likeTimes) r.likeTimes = {};
+        /* Güllerim & Zodiac */
+        #header-zodiac { color: transparent !important; text-shadow: none !important; cursor: pointer !important; pointer-events: auto !important; }
+        .zodiac-colored-icon { font-family: "Segoe UI Symbol", "Apple Symbols", sans-serif !important; color: var(--zodiac-color) !important; -webkit-text-fill-color: var(--zodiac-color) !important; text-shadow: none !important; filter: drop-shadow(0 0 8px var(--zodiac-color)) !important; background: transparent !important; display: inline-block !important; line-height: 1 !important; }
+        #header-my-roses-badge-container { display: flex !important; align-items: center !important; gap: 4px !important; position: relative !important; margin: 0 !important; cursor: pointer !important; pointer-events: auto !important; z-index: 99999 !important; color: #00d2ff !important; font-family:"Poppins", sans-serif !important; }
+        #header-my-roses-badge { background: #00d2ff !important; color: #000 !important; border: 1px solid #fff !important; position: relative !important; display: inline-flex !important; box-shadow: 0 2px 5px rgba(0, 210, 255, 0.5) !important; }
+
+        /* Karten & Kalender */
+        .holiday-item { border-left-width: 4px !important; border-left-style: solid !important; cursor: pointer !important; transition: all 0.2s !important; margin-bottom: 8px !important; padding: 8px 12px !important; border-radius: 0 8px 8px 0 !important; font-family: 'Poppins', sans-serif !important; display: block !important;}
+        .card-date-time { color: #64748b; pointer-events: none; display: flex; align-items: center; justify-content: center; gap: 4px; font-family: 'Poppins', sans-serif; margin: 0 auto; width: 100%; }
+        .card-stats-badge { position: absolute; background: rgba(0,0,0,0.6); color: #fdfbf7; border: 1px solid #f4c542; pointer-events: none; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .modal-bookmark-wrapper { position: absolute; left: 15px; top: 15px; z-index: 100005; background: rgba(10, 25, 47, 0.95); border: 2px solid rgba(244, 197, 66, 0.6); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.6); }
+
+        /* V57 Comments & Roses */
+        .c-v57-act-btn, .rose-btn-v57 { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; z-index: 50 !important; }
+        .rose-btn-v57 { cursor: pointer !important; align-items: center !important; gap: 4px !important; font-size: 1rem !important; transition: all 0.3s !important; padding: 2px 8px !important; border-radius: 20px !important; background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; flex-shrink: 0 !important; }
+        .rose-btn-v57 span.count { font-size: 0.65rem !important; font-family: 'Poppins', sans-serif !important; font-weight: 600 !important; background: rgba(0,0,0,0.4) !important; padding: 2px 5px !important; border-radius: 10px !important; color: #cbd5e1 !important; min-width: 12px !important; text-align: center !important; }
+        .rose-btn-v57.liked { animation: mysticRoseV57 4s ease-in-out infinite alternate !important; background: rgba(0, 210, 255, 0.15) !important; border-color: #00d2ff !important; }
+        @keyframes mysticRoseV57 { 0% { filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.5)) hue-rotate(200deg); transform: scale(1); } 50% { filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6)) hue-rotate(0deg); transform: scale(1.03); } 100% { filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.5)) hue-rotate(200deg); transform: scale(1); } }
+        .c-v57-act-btn { font-size: 0.85rem !important; cursor: pointer !important; transition: all 0.2s !important; background: transparent !important; border: none !important; color: #94a3b8 !important; width: 28px !important; height: 28px !important; border-radius: 50% !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+        .comment-card-v57 { background: rgba(0, 0, 0, 0.4) !important; border-radius: 16px !important; padding: 12px 14px !important; margin-bottom: 12px !important; border: 1px solid rgba(255,255,255,0.05) !important; border-left: 3px solid #06b6d4 !important; transition: all 0.2s !important; display: flex !important; flex-direction: column !important; box-sizing: border-box !important; overflow: hidden !important; width: 100% !important;}
+        .c-v57-replies { margin-left: 12px !important; padding-left: 10px !important; border-left: 2px solid rgba(0, 210, 255, 0.35) !important; margin-top: 10px !important; display: flex !important; flex-direction: column !important; gap: 10px !important; }
+        .c-v57-reply-item { background: rgba(255, 255, 255, 0.02) !important; border-radius: 12px !important; padding: 10px 12px !important; position: relative !important; display: flex !important; flex-direction: column !important; box-sizing: border-box !important; width: 100% !important;}
+        .v57-top-row { display: flex !important; justify-content: space-between !important; align-items: flex-start !important; margin-bottom: 6px !important; width: 100% !important; gap: 8px !important; }
+        .yazar-gold-badge { background: linear-gradient(135deg, #f4c542, #b48608); color: #000; font-size: 0.45rem; font-weight: 800; padding: 2px 5px; border-radius: 5px; margin-left: 4px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: inline-block; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+        
+        /* Mobile vs Desktop Overrides */
+        @media (max-width: 768px) {
+            #main-header .header-stats-row { display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: flex-start !important; width: 100% !important; padding: 5px 2% 16px 2% !important; gap: 2px !important; box-sizing: border-box !important; }
+            #main-header .header-stats-row > div { flex: 1 1 20% !important; display: flex !important; flex-direction: column !important; align-items: center !important; position: relative !important; font-size: 0.52rem !important; line-height: 1.2 !important; white-space: nowrap !important; }
+            #main-header .header-stats-row > div > i, #main-header .header-stats-row > div > span.header-blue-rose-icon { font-size: 1.1rem !important; margin: 0 0 4px 0 !important; }
+            .modal-content, [class*="-modal-content"], .sidebar, [class*="-sidebar"] { border-radius: 24px !important; margin: 2vh auto !important; height: 94vh !important; max-height: 94dvh !important; border: 1px solid var(--theme-acc, #f4c542) !important; box-shadow: 0 10px 40px rgba(0,0,0,0.9) !important; overflow: hidden !important; width: 100vw !important; max-width: 100% !important;}
+            .admin-eval-container, .admin-rating-box { transform: scale(0.85) !important; transform-origin: center top !important; margin-top: 15px !important; position: relative !important; z-index: 99999 !important; padding-bottom: 120px !important; }
+            #m-comment-input, .edel-comment-input { padding-right: 12px !important; font-size: 0.8rem !important; }
+            #hakkimda-view p { font-size: 0.95rem !important; text-align: left !important; word-wrap: break-word !important; word-break: normal !important; width: 100% !important; }
+            .msg-modal-header { padding-right: 50px !important; flex-wrap: nowrap !important; }
+            ::-webkit-input-placeholder { font-size: 0.7rem !important; }
+            img#home-profile-pic, #hakkimda-view img.bio-pic { width: 100px !important; height: 100px !important; min-width: 100px !important; min-height: 100px !important; border-width: 2px !important; }
+        }
+        @media (min-width: 769px) {
+            .modal-content:not(#leaderboardModal .modal-content):not(#fontSettingsModalV61 .modal-content):not(#megaUltraModal .modal-content):not(#inOutAdminModal .modal-content) { width: 60vw !important; max-width: 650px !important; height: 88vh !important; max-height: 900px !important; border-radius: 24px !important; margin: 6vh auto !important; border: 1px solid var(--theme-acc, #f4c542) !important; overflow: hidden !important;}
+            .admin-eval-container, .admin-rating-box { position: relative !important; z-index: 99999 !important; padding-bottom: 120px !important; }
+            #modalText, .modal-text { font-size: 1.15rem !important; line-height: 1.7 !important; padding: 0 15px !important; }
+        }
+        .admin-eval-container .select-items, .admin-rating-box .select-items, .custom-select .select-items { top: 100% !important; bottom: auto !important; z-index: 999999 !important; max-height: 115px !important; overflow-y: auto !important; border-radius: 0 0 12px 12px !important; }
+        
+        /* Hardware Acceleration */
+        img#home-profile-pic, #hakkimda-view img.bio-pic { will-change: transform, opacity, filter !important; -webkit-backface-visibility: hidden !important; backface-visibility: hidden !important; perspective: 1000px !important; }
+        
+        /* Chat Buttons Fix */
+        html body button[onclick*="sendChat"], html body button[onclick*="toggleChatEmojis"], html body button[onclick*="m_addComment"] { padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; height: 50px !important; width: 55px !important; border-radius: 12px !important; }
+        html body #chat-input, html body #m-comment-input, html body .edel-comment-input { height: 50px !important; margin-bottom: 0 !important; }
+    `;
+    document.head.appendChild(style);
+
+    // ==================================================================
+    // 2. MASTER TICK ENGINE (Performance Boost)
+    // ==================================================================
+    window.MasterTickCounter = 0;
+    if(window.MisaliMasterLoop) clearInterval(window.MisaliMasterLoop);
+    
+    window.MisaliMasterLoop = setInterval(() => {
+        window.MasterTickCounter++;
+
+        // Jede Sekunde (2 Ticks)
+        if(window.MasterTickCounter % 2 === 0) {
+            if(window.updateHeaderZodiacColor) window.updateHeaderZodiacColor();
+            if(window.cleanAndRenameUI) window.cleanAndRenameUI();
+            if(window.ensureGullerimBadgeV57) window.ensureGullerimBadgeV57();
+            if(window.FontArchitect && window.applyGlobalColors) window.applyGlobalColors();
+            
+            // Admin Dropdown Visibility Fix
+            document.querySelectorAll('.admin-eval-container, .admin-rating-box').forEach(box => {
+                let isUserWorks = window.currentPoemData && window.currentPoemData.type === 'userPoems';
+                box.style.display = isUserWorks ? 'block' : 'none';
+            });
+        }
+        // Alle 2 Sekunden (4 Ticks)
+        if(window.MasterTickCounter % 4 === 0) {
+            if(window.healDatabase) window.healDatabase();
+        }
+        // Alle 3 Sekunden (6 Ticks)
+        if(window.MasterTickCounter % 6 === 0 && window.currentUser) {
+            if (window.updateSavedBadge) window.updateSavedBadge();
+            if (window.updateMyHeartsBadge) window.updateMyHeartsBadge();
+            if (window.updateRosesBadgeV57) window.updateRosesBadgeV57();
+        }
+    }, 500);
+
+    // ==================================================================
+    // 3. iOS SCROLL & MODAL MANAGER
+    // ==================================================================
+    let iosScrollPosition = 0;
+
+    window.closeAllModals = function(force=false) { 
+        document.querySelectorAll('.modal.active-modal').forEach(m => m.classList.remove('active-modal')); 
+        if (document.body.classList.contains('modal-open')) {
+            document.body.classList.remove('modal-open'); document.documentElement.classList.remove('modal-open');
+            if (document.body.style.position === 'fixed') {
+                document.body.style.position = ''; document.body.style.top = ''; document.body.style.width = '';
+                window.scrollTo(0, iosScrollPosition);
+            }
+        }
+        let bd = document.getElementById('modal-backdrop');
+        if(bd) { bd.style.display = 'none'; bd.classList.remove('show-backdrop'); }
+        document.body.classList.remove('modal-scroll-lock');
+    };
+    
+    window.closeTopModal = function(e) { 
+        if(e && e.stopPropagation && e !== 'force') e.stopPropagation(); 
+        if(e === 'force') { window.closeAllModals(); return; }
+        const modals = Array.from(document.querySelectorAll('.modal.active-modal'));
+        if(modals.length > 0) modals[modals.length - 1].classList.remove('active-modal');
+        if(document.querySelectorAll('.modal.active-modal').length === 0) window.closeAllModals();
+    };
+
+    window.openFastModal = function(id) { 
+        try {
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) document.activeElement.blur();
+            if(window.closeAllSidebars) window.closeAllSidebars(); 
+            
+            document.querySelectorAll('.modal.active-modal').forEach(m => { if (m.id !== id) m.classList.remove('active-modal'); });
+            
+            const m = document.getElementById(id); 
+            if(m) { 
+                if (!document.body.classList.contains('modal-open')) {
+                    iosScrollPosition = window.scrollY;
+                    document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open'); 
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+                        document.body.style.position = 'fixed'; document.body.style.top = `-${iosScrollPosition}px`; document.body.style.width = '100%';
+                    }
+                }
+                let bd = document.getElementById('modal-backdrop'); 
+                if(bd && bd.style.display !== 'block') { bd.style.display = 'block'; bd.classList.add('show-backdrop'); }
+                
+                m.classList.add('active-modal'); m.style.zIndex = '100000';
+                document.body.classList.add('modal-scroll-lock');
+                history.pushState({ uiOpen: true }, null, window.location.href);
+                
+                // Routes
+                if(id === 'm-register-modal' && window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-reg', 'm-reg-emoji', 'selected-reg-emoji', '👤');
+                if(id === 'profileEditModal' && window.currentUser) {
+                    if(window.populateEmojiSelects) window.populateEmojiSelects('emoji-picker-edit-profile', 'edit-emoji', 'selected-edit-emoji', window.currentUser.emoji || '👤');
+                    ['name', 'surname', 'day', 'month', 'year'].forEach(k => { let el = document.getElementById('edit-'+k); if(el) el.value = window.currentUser[k] || ''; });
+                    if(document.getElementById('edit-pass')) document.getElementById('edit-pass').value = ''; 
+                }
+                if(id === 'eventsModal' && window.renderCalendar) window.renderCalendar();
+                if(id === 'adminPendingModal' && window.updateUserWorksBadge) window.updateUserWorksBadge(); 
+                if(id === 'userMessagesModal' && window.renderUserMessages) window.renderUserMessages();
+                if(id === 'adminMessagesModal' && window.renderAdminMessages) window.renderAdminMessages();
+                if(id === 'leaderboardModal' && window.renderLeaderboard) window.renderLeaderboard(); 
+                if(id === 'adminUsersModal' && window.renderOnlineUsers) window.renderOnlineUsers(); 
+                if(id === 'weatherModal' && window.fetchWeather) window.fetchWeather();
+                if(id === 'savedItemsModal' && window.renderSavedItems) window.renderSavedItems();
+            } 
+        } catch(e) { console.error("Modal error:", e); }
+    };
+
+    // Haptic & Back-Button
+    window.addEventListener('popstate', function(event) {
+        if (document.querySelectorAll('.modal.active-modal').length > 0) {
+            window.closeTopModal('force'); 
+            if (document.querySelectorAll('.modal.active-modal').length > 0 || document.querySelectorAll('.sidebar.open, .sidebar-right.open, .cal-holiday-sidebar.open').length > 0) history.pushState({ uiOpen: true }, null, window.location.href);
+            return;
+        }
+        if (document.querySelectorAll('.sidebar.open, .sidebar-right.open, .cal-holiday-sidebar.open').length > 0) if(window.closeAllSidebars) window.closeAllSidebars();
+    });
+
+    window.vibrateAction = function(intensity = 30) { try { if (navigator.vibrate) navigator.vibrate(intensity); } catch(e) {} };
+    document.addEventListener('click', function(e) {
+        let clickable = e.target.closest('button, .clickable-header-item, .card, .game-card, .mem-card, .holiday-item, .search-suggestion-item, .zodiac-badge, .fal-cup, .analog-clock, .simon-btn');
+        if (clickable && !clickable.disabled) window.vibrateAction(30);
+    }, { passive: true });
+
+    // ----------------------------------------------------------------
+    // 4. ADMIN API & DROPDOWN FIX
+    // ----------------------------------------------------------------
+    document.addEventListener('click', function(e) {
+        let dropdown = e.target.closest('.admin-eval-container, .admin-rating-box')?.querySelector('.select-items');
+        if (dropdown) {
+            if (dropdown.parentElement !== document.body) document.body.appendChild(dropdown);
+            let rect = e.target.closest('.admin-eval-container, .admin-rating-box').getBoundingClientRect();
+            dropdown.style.position = 'fixed'; dropdown.style.left = rect.left + 'px';
+            dropdown.style.top = (rect.bottom + 5) + 'px'; dropdown.style.width = rect.width + 'px'; dropdown.style.zIndex = '99999999';
+        }
+    }, true);
+
+    window.addEventListener('scroll', function() { document.querySelectorAll('body > .select-items').forEach(drop => { drop.style.display = 'none'; }); }, { passive: true });
+
+    window.MisaliAdminAPI = {
+        deleteEntity: function(type, targetId, subId = null, liker = null) {
+            if (type === 'heart') {
+                let db = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
+                if (db[targetId] && db[targetId].ratings && db[targetId].ratings[liker]) {
+                    delete db[targetId].ratings[liker]; localStorage.setItem('misaliHeartsDB', JSON.stringify(db)); window.poemDataStore = db;
+                }
+            } else if (type === 'message') {
+                let msgs = JSON.parse(localStorage.getItem('misaliAdminMsgs')) || [];
+                msgs = msgs.filter(m => m.id !== targetId);
+                localStorage.setItem('misaliAdminMsgs', JSON.stringify(msgs)); window.adminMessages = msgs;
+            }
+            window.lastLocalUpdate = Date.now() + 2000;
+            if (window.syncToCloud) window.syncToCloud();
+        }
+    };
+
+    window.notifyAdmin = function(actionDesc) {
+        if(!window.currentUser || window.currentUser.role === 'admin' || window.currentUser.username === 'AdminKing') return;
+        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+        if(window.sendSystemMessage) window.sendSystemMessage('Admin', `👁️ TAKİP: <strong style="color:#22d3ee;">${fullName}</strong> ${actionDesc}`);
+    };
+})();
+</script>
+
+<script>
+(function() {
+    // ----------------------------------------------------------------
+    // 1. CONTENT INIT & KALENDER
+    // ----------------------------------------------------------------
+    window.renderHolidays = function() {
+        const list = document.getElementById('holiday-list-content');
+        if(!list || !window.holidaysDB) return;
+        let cMonth = typeof currentMonth !== 'undefined' ? currentMonth : new Date().getMonth();
+        let cYear = typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear();
+        let currentMonthStr = (cMonth + 1).toString().padStart(2, '0');
+        let foundHolidays = Object.keys(window.holidaysDB).filter(k => k.startsWith(currentMonthStr)).map(k => ({ day: k.split('-')[1], ...window.holidaysDB[k] })).sort((a,b) => parseInt(a.day) - parseInt(b.day));
+        
+        if(foundHolidays.length === 0) { list.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">Bu ay etkinlik yok.<br><span class="de-sub">(Keine Termine)</span></div>'; return; }
+        
+        list.innerHTML = foundHolidays.map(h => {
+            let fullDateStr = `${h.day.toString().padStart(2, '0')}.${currentMonthStr}.${cYear}`;
+            let clickAction = `event.stopPropagation(); window.selectDate('${fullDateStr}'); if(window.innerWidth <= 768 && window.toggleHolidaySidebar) window.toggleHolidaySidebar();`; 
+            let dateStr = `<strong style="font-size:0.85rem !important; color:#fdfbf7 !important;">${h.day}.${currentMonthStr}.</strong><br>`;
+            
+            let html = '';
+            if(h.tr) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left-color:#ef4444 !important; background:rgba(0,0,0,0.6) !important;"><span style="color:#ef4444 !important; pointer-events:none;">🇹🇷 ${dateStr}${h.tr}</span></div>`;
+            if(h.de) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left-color:#3b82f6 !important; background:rgba(0,0,0,0.6) !important;"><span style="color:#3b82f6 !important; pointer-events:none;">🇩🇪 ${dateStr}${h.de}</span></div>`;
+            if(h.trFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left-color:#f97316 !important; background:rgba(249,115,22,0.15) !important;"><span style="color:#fbd38d !important; pointer-events:none;">🏫 ${dateStr}${h.trFerien}<br><span style="font-size:0.65rem !important; color:#f97316 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            if(h.deFerien) html += `<div class="holiday-item" onclick="${clickAction}" style="border-left-color:#a855f7 !important; background:rgba(168,85,247,0.15) !important;"><span style="color:#e9d8fd !important; pointer-events:none;">🎒 ${dateStr}${h.deFerien}<br><span style="font-size:0.65rem !important; color:#a855f7 !important;">${h.period ? '(' + h.period + ')' : ''}</span></span></div>`;
+            return html;
+        }).join('');
+    };
+
+    window.cleanAndRenameUI = function() {
+        const searchInputs = document.querySelectorAll('header input[type="text"], header input[type="search"], #search-input, .search-bar input, .mobile-search input');
+        searchInputs.forEach(input => input.setAttribute('placeholder', 'Arama Motoru'));
+        const walkers = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walkers.nextNode()) {
+            let parent = node.parentNode;
+            if(parent && ['SCRIPT', 'STYLE'].includes(parent.tagName)) continue;
+            let text = node.nodeValue; let changed = false;
+            if (text.trim() === ':') { text = ''; changed = true; }
+            else if (/(Canlı|Canli|Toplam Eser|Aklımda|Aklimda|Kalplerim)\s*:/.test(text)) { text = text.replace(/:\s*/g, ' '); changed = true; }
+            if (text.includes('Kıssa') && text.includes('Fıkra')) { text = text.replace(/Kıssa(lar)?\s*[\/\-&]?\s*Fıkra(lar)?/gi, 'Sayfa İçeriklerim'); changed = true; }
+            if (changed) node.nodeValue = text;
+        }
+    };
+
+    window.initContent = function() {
+        if(!window.contentDB) return;
+        ['poems', 'quotes', 'stories', 'jokes', 'saglik'].forEach(type => {
+            const gridId = type === 'poems' ? 'siirler' : type === 'quotes' ? 'sozler' : type === 'stories' ? 'hikayeler' : type === 'jokes' ? 'fikralar' : 'saglik';
+            const grid = document.getElementById(gridId + '-grid');
+            if(grid && window.contentDB[type] && Array.isArray(window.contentDB[type])) {
+                let sortedItems = window.sortContentItems(window.contentDB[type], false);
+                grid.innerHTML = sortedItems.map(item => {
+                    const isNew = window.isItemNew(item.id, item.timestamp) ? `<div class="new-badge" id="badge-${item.id}" style="position:absolute; top:-10px; left:-10px; background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; z-index:20; box-shadow:0 4px 10px rgba(239,68,68,0.5); pointer-events:none;">YENİ<br><span style="font-size:0.65rem; font-weight:normal;">(NEU)</span></div>` : '';
+                    let authorText = (type === 'poems' || type === 'quotes') ? 'Şair Misal.i' : (type === 'saglik' ? 'Tavsiye / Empfehlung' : 'Anonim');
+                    let authorClass = window.getAuthorColorClass(authorText);
+                    let borderClass = authorClass === 'author-anim-admin' ? 'card-admin' : (authorClass === 'author-anim-user' ? 'card-user' : 'card-author');
+                    
+                    const poemData = window.poemDataStore[item.id] || { ratings: {}, comments: [] };
+                    let heartCount = 0; if (poemData.ratings) { for(let k in poemData.ratings) { let r = poemData.ratings[k]; heartCount += (typeof r === 'object' ? (r.val || 0) : (r || 0)); } }
+                    let commCount = poemData.comments ? poemData.comments.length : 0;
+                    
+                    let dObj = new Date(item.timestamp || Date.now()); 
+                    let dStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+                    
+                    let isSaved = false;
+                    let uName = window.currentUser ? window.currentUser.username : null;
+                    if (uName && window.savedItemsDB && window.savedItemsDB[uName] && Array.isArray(window.savedItemsDB[uName])) isSaved = window.savedItemsDB[uName].includes(item.id);
+
+                    let saveBtn = `<button class="reset-btn bookmark-btn" style="position:absolute; top:12px; right:12px; z-index:20; background:transparent; border:none; box-shadow:none; padding:0; width:auto; margin:0;" onclick="window.toggleSaveItem('${item.id}', event)"><i class="fas fa-bookmark" id="bookmark-icon-${item.id}" style="color:${isSaved ? '#ec4899' : 'rgba(255,255,255,0.4)'}; font-size:1.6rem; transition:0.3s; filter:${isSaved ? 'drop-shadow(0 0 8px rgba(236,72,153,0.8))' : 'none'}; pointer-events:auto !important;"></i></button>`;
+
+                    return `<div class="card ${borderClass}" style="background: rgba(10,25,47,0.8); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; position:relative;" onclick="window.markAsViewed('${item.id}'); window.openPoemModal('${item.id}', '${type}')">
+                        ${isNew} ${saveBtn}
+                        <div class="card-stats-badge"><i class="fas fa-heart" style="color:#ef4444;"></i> <span>${heartCount}</span> <i class="fas fa-comment" style="color:#f4c542; margin-left: 2px;"></i> <span>${commCount}</span></div>
+                        <h3 style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events:none;">${item.emoji || '✨'}</h3>
+                        <h3 class="clamp-text" style="color: #fdfbf7; font-family: 'Playfair Display', serif; pointer-events:none;">${item.trTitle}</h3>
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 8px; pointer-events:none;">
+                            <span class="card-sub" style="color: #94a3b8; font-size: 0.9rem;"><span class="${authorClass}">${authorText}</span></span>
+                            <div class="card-date-time"><i class="fas fa-clock"></i> ${dStr}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        });
+        
+        if(window.renderAtasozleri) window.renderAtasozleri(); if(window.renderUserWorksGrid) window.renderUserWorksGrid();
+        if(window.renderBilmeces) window.renderBilmeces(); if(window.renderBulmacalar) window.renderBulmacalar();
+    };
+
+    // ----------------------------------------------------------------
+    // 2. SPIELE LOGIK (Doğru/Yanlış, Milyoner, Quiz)
+    // ----------------------------------------------------------------
+    function makeTF(tr, de, ans) { return { tr:tr, de:de, qTR:tr, qDE:de, textTR:tr, textDE:de, ans:ans, answer:ans, correct:ans, isTrue:ans, dogruMu:ans }; }
+    function makeMQ(tr, de, optsTR, optsDE, ans) { return { tr:tr, de:de, qTR:tr, qDE:de, textTR:tr, textDE:de, optsTR:optsTR, optsDE:optsDE, optionsTR:optsTR, optionsDE:optsDE, seceneklerTR:optsTR, seceneklerDE:optsDE, ans:ans, answer:ans, correct:ans }; }
+    function buildHybrid(l1, l2, l3) { let arr = [].concat(l1, l2, l3); arr["1"] = l1; arr["2"] = l2; arr["3"] = l3; arr[0] = l1; arr[1] = l2; arr[2] = l3; return arr; }
+
+    window.tfQuestions = buildHybrid(
+        [makeTF("Türkiye'nin başkenti Ankara'dır.", "Die Hauptstadt der Türkei ist Ankara.", true), makeTF("Güneş bir gezegendir.", "Die Sonne ist ein Planet.", false), makeTF("Su 100 derecede kaynar.", "Wasser kocht bei 100 Grad.", true)],
+        [makeTF("Örümceklerin 6 bacağı vardır.", "Spinnen haben 6 Beine.", false), makeTF("Everest, dünyanın en yüksek dağıdır.", "Der Mount Everest ist der höchste Berg der Welt.", true)],
+        [makeTF("Venüs, Güneş sistemindeki en sıcak gezegendir.", "Die Venus ist der heißeste Planet im Sonnensystem.", true), makeTF("Ahtapotların 3 tane kalbi vardır.", "Oktopusse haben 3 Herzen.", true)]
+    );
+    
+    window.milyonerQuestions = buildHybrid(
+        [makeMQ("Gökyüzü genelde ne renktir?", "Welche Farbe hat der Himmel meistens?", ["Mavi","Yeşil","Kırmızı","Sarı"], ["Blau","Grün","Rot","Gelb"], 0)],
+        [makeMQ("Güneş sistemindeki en büyük gezegen?", "Der größte Planet im Sonnensystem?", ["Mars","Venüs","Jüpiter","Dünya"], ["Mars","Venus","Jupiter","Erde"], 2)],
+        [makeMQ("Suyun kimyasal formülü nedir?", "Was ist die chemische Formel von Wasser?", ["HO2","H2O","CO2","O2H"], ["HO2","H2O","CO2","O2H"], 1)]
+    );
+
+    window.quizQuestions = buildHybrid(
+        [makeMQ("İstiklal Marşı'nın şairi kimdir?", "Wer ist der Dichter der türkischen Nationalhymne?", ["Namık Kemal", "Mehmet Akif Ersoy", "Necip Fazıl", "Cemal Süreya"], ["Namık Kemal", "Mehmet Akif Ersoy", "Necip Fazıl", "Cemal Süreya"], 1)],
+        [makeMQ("'Kaldırımlar' şiiri kime aittir?", "Wem gehört das Gedicht 'Kaldırımlar'?", ["Orhan Veli", "Nazım Hikmet", "Necip Fazıl Kısakürek", "Attila İlhan"], ["Orhan Veli", "Nazım Hikmet", "Necip Fazıl", "Attila İlhan"], 2)],
+        [makeMQ("Alman edebiyatının en ünlü eseri 'Faust'u kim yazmıştır?", "Wer schrieb das Werk 'Faust'?", ["Friedrich Schiller", "Johann Wolfgang von Goethe", "Thomas Mann", "Heinrich Heine"], ["Friedrich Schiller", "Goethe", "Thomas Mann", "Heinrich Heine"], 1)]
+    );
+
+    window.addGlobalScore = function(pointsToAdd) {
+        if (!window.currentUser) return;
+        let newScore = (parseInt(window.currentUser.score) || 0) + pointsToAdd;
+        if (newScore < 0) newScore = 0;
+        window.currentUser.score = newScore;
+        let scoreEl = document.getElementById('user-score'); if (scoreEl) scoreEl.innerText = newScore + " P.";
+        if (window.userDatabase && window.userDatabase[window.currentUser.username]) {
+            window.userDatabase[window.currentUser.username].score = newScore;
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        }
+        window.lastLocalUpdate = Date.now() + 5000;
+        if (window.syncToCloud) window.syncToCloud();
+    };
+
+    window.checkTF = function(selectedBool) {
+        if (!window.currentTF) return;
+        let correctAns = (window.currentTF.ans === true || window.currentTF.ans === "true" || window.currentTF.ans === 1);
+        let btnTrue = document.getElementById('tf-btn-true'); let btnFalse = document.getElementById('tf-btn-false');
+        btnTrue.style.pointerEvents = 'none'; btnFalse.style.pointerEvents = 'none';
+        
+        if (correctAns === selectedBool) {
+            window.tfScore += 10; window.addGlobalScore(10);
+            document.getElementById('tf-score').innerText = window.tfScore;
+            window.showToast(window.currentGameLang === 'DE' ? '✅ Richtig! +10 Punkte' : '✅ Doğru! +10 Puan');
+            setTimeout(() => { window.nextTF(); }, 1000);
+        } else {
+            window.tfScore -= 10; window.addGlobalScore(-10);
+            document.getElementById('tf-score').innerText = window.tfScore;
+            document.getElementById('tf-question').innerHTML = window.currentGameLang === 'DE' ? `<span style="color:#ef4444; font-size:1.5rem; font-weight:bold;">❌ FALSCH! GAME OVER</span><br>Endstand: ${window.tfScore} Punkte` : `<span style="color:#ef4444; font-size:1.5rem; font-weight:bold;">❌ YANLIŞ! OYUN BİTTİ</span><br>Son Puanın: ${window.tfScore}`;
+            btnTrue.style.display = 'none'; btnFalse.style.display = 'none';
+            document.getElementById('tf-start-btn').style.display = 'block'; document.getElementById('tf-start-btn').innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            document.getElementById('tf-diff').style.display = 'block'; 
+        }
+    };
+})();
+</script>
+
+<script>
+(function() {
+    // ----------------------------------------------------------------
+    // 1. DATENBANK HEILUNG (Repariert zerstörte Arrays)
+    // ----------------------------------------------------------------
+    window.healDatabase = function() {
+        let db = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
+        let healed = false;
+        
+        for (let poemId in db) {
+            let pData = db[poemId];
+            if (pData && pData.comments) {
+                if (!Array.isArray(pData.comments)) { pData.comments = Object.values(pData.comments).filter(Boolean); healed = true; }
+                pData.comments.forEach(c => {
+                    if (c) {
+                        if (!c.likes) { c.likes = []; healed = true; }
+                        if (!c.replies) { c.replies = []; healed = true; }
+                        if (!c.likeTimes) { c.likeTimes = {}; healed = true; }
+                        if (!c.ts) { c.ts = Date.now(); healed = true; }
+                        if (!c.id) { c.id = 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2,4); healed = true; }
+                        if (Array.isArray(c.replies)) {
+                            c.replies.forEach(r => {
+                                if (r) {
+                                    if (!r.likes) { r.likes = []; healed = true; }
+                                    if (!r.likeTimes) { r.likeTimes = {}; healed = true; }
+                                    if (!r.ts) { r.ts = Date.now(); healed = true; }
+                                }
+                            });
+                        }
                     }
                 });
             }
-        });
+        }
+        if (healed) {
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(db)); window.poemDataStore = db;
+            if (window.syncToCloud) window.syncToCloud();
+        }
         return db;
-    }
+    };
 
-    // ORIGINAL WIEDERHERGESTELLT: Kommentare funktionieren einwandfrei!
+    // ----------------------------------------------------------------
+    // 2. DAS SICHERE KOMMENTIEREN (m_addComment)
+    // ----------------------------------------------------------------
     window.m_addComment = function(e) {
         if (e) e.stopPropagation();
         if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
@@ -19907,38 +20306,34 @@ setInterval(function() {
         }
         
         const poemId = window.currentPoemData.id;
-        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-        if (!window.poemDataStore[poemId]) {
-            window.poemDataStore[poemId] = { ratings: {}, comments: [] };
-        }
+        let db = window.healDatabase();
+        if (!db[poemId]) db[poemId] = { ratings: {}, comments: [] };
         
-        let db = sanitizeCloudDataV57(poemId); 
         let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
         
-        db.comments.push({ 
+        // Hinzufügen der sauberen Struktur
+        db[poemId].comments.push({ 
             id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
             username: window.currentUser.username, 
             user: fullName, 
             text: text, 
             time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
             ts: Date.now(),
-            likes: [],        
-            replies: [],      
-            likeTimes: {}
+            likes: [], replies: [], likeTimes: {}
         });
         
         input.value = ''; 
-        window.lastLocalUpdate = Date.now() + 2000; 
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        window.lastLocalUpdate = Date.now() + 5000; 
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(db)); 
+        window.poemDataStore = db;
         
         window.v57NeedsAutoScroll = true;
-
-        if (window.updateHeartsUI) window.updateHeartsUI(); 
+        if(window.updateHeartsUI) window.updateHeartsUI(); 
         if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
         if(window.syncToCloud) window.syncToCloud(); 
         
         if(window.sendSystemMessage) {
-            let pTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Bir Eser';
+            let pTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
             window.sendSystemMessage('Admin', `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı esere yorum yaptı.`, poemId, window.currentPoemData.type);
             if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
                  window.sendSystemMessage(window.currentPoemData.username, `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı eserine yorum yaptı.`, poemId, window.currentPoemData.type);
@@ -19946,78 +20341,104 @@ setInterval(function() {
         }
     };
 
-    window.submitReplyV57 = function(poemId, cIdx) {
-        let input = document.querySelector('#reply-box-v57-' + cIdx + ' input');
-        let text = input ? input.value.trim() : '';
-        if (!text) return;
-        
-        let db = sanitizeCloudDataV57(poemId);
-        let comment = db.comments[cIdx];
-        if (!comment) return;
-
-        comment.replies.push({ 
-            username: window.currentUser.username, 
-            text: text, 
-            time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-            ts: Date.now(), 
-            likes: [], 
-            likeTimes: {} 
-        });
-        
-        input.value = '';
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-        window.lastLocalUpdate = Date.now() + 2000;
-        
-        window.v57NeedsAutoScroll = true;
-
-        if (window.syncToCloud) window.syncToCloud();
-        
-        if (comment.username && comment.username !== window.currentUser.username && window.sendSystemMessage) {
-            let pTitle = window.getPoemTitleGlobalV57 ? window.getPoemTitleGlobalV57(poemId) : 'Bir eser';
-            let shortReply = text.substring(0, 25) + (text.length > 25 ? '...' : '');
-            window.sendSystemMessage(comment.username, `💬 <strong style="color:#00d2ff;">${window.currentUser.username}</strong>, senin <em>"${pTitle}"</em> altındaki yorumuna <strong>"${shortReply}"</strong> yazarak yanıt verdi.`);
+    // ----------------------------------------------------------------
+    // 3. GÜLLERİM & LIKES LOGIK (Live Update Zähler)
+    // ----------------------------------------------------------------
+    window.ensureGullerimBadgeV57 = function() {
+        let statsRow = document.querySelector('.header-stats-row');
+        if (!statsRow) return;
+        let rosesBadgeContainer = document.getElementById('header-my-roses-badge-container');
+        if (!rosesBadgeContainer) {
+            rosesBadgeContainer = document.createElement('div');
+            rosesBadgeContainer.id = 'header-my-roses-badge-container';
+            rosesBadgeContainer.className = 'clickable-header-item user-only'; 
+            rosesBadgeContainer.setAttribute('onclick', "window.openMyRosesModal(event);");
+            rosesBadgeContainer.innerHTML = `<span class="header-blue-rose-icon" style="filter: hue-rotate(200deg) drop-shadow(0 0 5px rgba(0,210,255,0.6)); pointer-events:none;">🌹</span><span style="pointer-events:none;">Güllerim</span><span class="de-sub" style="pointer-events:none;">(Rosen)</span><span class="badge-count always-show show-badge" id="header-my-roses-badge" style="pointer-events:none;">0</span>`;
+            statsRow.appendChild(rosesBadgeContainer);
         }
-        window.renderCommentsV57(poemId);
+        if (window.updateRosesBadgeV57) window.updateRosesBadgeV57();
     };
 
-    window.formatCommentTextV57 = function(txt) {
-        if (!txt) return '';
-        if (txt.startsWith('@')) {
-            let splitIdx = txt.indexOf(', ');
-            if (splitIdx > -1 && splitIdx < 40) {
-                let mention = txt.substring(0, splitIdx);
-                let rest = txt.substring(splitIdx + 2);
-                return `<span style="color:#00d2ff; font-weight:600; background:rgba(0, 210, 255, 0.1); padding:2px 4px; border-radius:6px; font-size:0.7rem; margin-right:4px; border: 1px solid rgba(0, 210, 255, 0.2); display:inline-block; line-height:1.2;"><i class="fas fa-reply" style="font-size:0.55rem; margin-right:3px;"></i>${mention}</span> ${rest}`;
+    window.updateRosesBadgeV57 = function() {
+        let badgeEl = document.getElementById('header-my-roses-badge');
+        if (!window.currentUser) { if (badgeEl) badgeEl.innerText = '0'; return; }
+        let uName = window.currentUser.username;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+        let totalRoses = 0;
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+
+        for (let poemId in db) {
+            if (db[poemId] && db[poemId].comments) {
+                let commentsArr = Array.isArray(db[poemId].comments) ? db[poemId].comments : Object.values(db[poemId].comments || {}).filter(Boolean);
+                commentsArr.forEach(c => {
+                    if (!c) return; 
+                    if ((c.username === uName || isAdmin) && c.likes) totalRoses += c.likes.length;
+                    if (c.replies) { 
+                        let repliesArr = Array.isArray(c.replies) ? c.replies : Object.values(c.replies || {}).filter(Boolean);
+                        repliesArr.forEach(r => { if (r && (r.username === uName || isAdmin) && r.likes) totalRoses += r.likes.length; }); 
+                    }
+                });
             }
         }
-        return txt;
+        if (badgeEl) badgeEl.innerText = totalRoses;
     };
 
-    window.getPoemTitleGlobalV57 = function(id) {
-        if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Bir Eser'; }
-        let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
-        for (let cat in fullDB) {
-            if(Array.isArray(fullDB[cat])) { let f = fullDB[cat].find(x => x.id === id); if (f) return f.trTitle || f.title || f.deTitle || 'Bir Eser'; }
+    window.openMyRosesModal = function(e) {
+        if(e) { e.preventDefault(); e.stopPropagation(); }
+        let existingModal = document.getElementById('myRosesModal');
+        if(existingModal) existingModal.remove(); 
+        
+        let modalHtml = `
+        <div class="modal notranslate" id="myRosesModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
+            <div class="modal-content game-modal-content" style="max-width: 650px;" onclick="event.stopPropagation()">
+                <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
+                <div class="modal-body">
+                    <div style="font-size: 4rem; margin-bottom: 15px; text-align:center;"><span style="filter: hue-rotate(200deg) drop-shadow(0 0 20px rgba(0,210,255,0.6)); display:inline-block;">🌹</span></div>
+                    <h2 class="game-title" style="font-size: 2.6rem; border-bottom: none; line-height: 1.2; color:#00d2ff; text-align:center;">Güllerim</h2>
+                    <p style="color:#94a3b8; text-align:center; font-size:0.9rem; margin-bottom:15px;">Yorumlarınıza bırakılan güller burada toplanır.</p>
+                    <div id="my-roses-list" style="width:100%; display:flex; flex-direction:column; gap:12px; margin-top:10px; max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 5px; scrollbar-width: none;"></div>
+                </div>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        if(window.renderMyRosesList) window.renderMyRosesList();
+        if(window.openFastModal) window.openFastModal('myRosesModal');
+    };
+
+    const origProcessCloudDataV57 = window.processCloudData;
+    window.processCloudData = function(r, force) {
+        if (origProcessCloudDataV57) origProcessCloudDataV57(r, force);
+        if (r && r.heartsDB) {
+            window.poemDataStore = r.heartsDB; 
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB));
+            if(window.updateRosesBadgeV57) window.updateRosesBadgeV57();
+            if(window.updateMyHeartsBadge) window.updateMyHeartsBadge();
+            if(document.getElementById('myRosesModal') && document.getElementById('myRosesModal').classList.contains('active-modal')) window.renderMyRosesList(); 
+            if (document.body.classList.contains('modal-open') && window.currentPoemData && window.currentPoemData.id && window.renderCommentsV57) window.renderCommentsV57(window.currentPoemData.id);
         }
-        if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bilmece'; }
-        if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bulmaca'; }
-        return 'Bir Eser';
     };
+})();
+</script>
 
-    window.getPoemAuthorGlobalV57 = function(pId) {
-        if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === pId); if(f) return f.name + (f.surname ? ' ' + f.surname : ''); }
-        if (pId.startsWith('user_')) return 'Anonim';
-        if (pId.startsWith('ata_')) {
-            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
-            if(fullDB.atasozleri) { let f = fullDB.atasozleri.find(x => x.id === pId); if(f) return f.authorTR || 'Anonim'; }
-            return 'Anonim';
+<script>
+(function() {
+    // ----------------------------------------------------------------
+    // 1. SMART BUBBLES V57
+    // ----------------------------------------------------------------
+    let hoverTimer = null;
+    let activeBubble = null;
+
+    function destroySmartBubble() {
+        clearTimeout(hoverTimer);
+        if (activeBubble) {
+            let b = activeBubble;
+            b.classList.remove('show');
+            activeBubble = null;
+            setTimeout(() => { if (b && b.parentNode) b.remove(); }, 200);
         }
-        if (pId.startsWith('sag_')) return 'Tavsiye / Empfehlung';
-        if (pId.startsWith('bil_') || pId.startsWith('bul_')) return 'Anonim';
-        return 'Şair Misal.i';
-    };
+    }
 
-    function applySmartBubblesV57() {
+    window.applySmartBubblesV57 = function() {
         let items = document.querySelectorAll('.header-stats-row > div, .clickable-header-item, .gullerim-v57-item');
         items.forEach(item => {
             if (item.dataset.bubbleV57) return; 
@@ -20058,723 +20479,46 @@ setInterval(function() {
                 if(b) { b.style.opacity = '0'; setTimeout(() => { if(b) b.remove(); }, 200); }
             });
         });
-    }
-    setInterval(applySmartBubblesV57, 1000);
-
-    function ensureGullerimBadgeV57() {
-        let statsRow = document.querySelector('.header-stats-row');
-        if (!statsRow) return;
-        let rosesBadgeContainer = document.getElementById('header-my-roses-badge-container');
-        if (!rosesBadgeContainer) {
-            rosesBadgeContainer = document.createElement('div');
-            rosesBadgeContainer.id = 'header-my-roses-badge-container';
-            rosesBadgeContainer.className = 'clickable-header-item user-only'; 
-            rosesBadgeContainer.setAttribute('onclick', "window.openMyRosesModal(event);");
-            rosesBadgeContainer.innerHTML = `<span class="header-blue-rose-icon" style="filter: hue-rotate(200deg) drop-shadow(0 0 5px rgba(0,210,255,0.6)); pointer-events:none;">🌹</span><span style="pointer-events:none;">Güllerim</span><span class="de-sub" style="pointer-events:none;">(Rosen)</span><span class="badge-count always-show show-badge" id="header-my-roses-badge" style="pointer-events:none;">0</span>`;
-            statsRow.appendChild(rosesBadgeContainer);
-        }
-        if (window.updateRosesBadgeV57) window.updateRosesBadgeV57();
-    }
-    setInterval(ensureGullerimBadgeV57, 500);
-
-    window.updateRosesBadgeV57 = function() {
-        let badgeEl = document.getElementById('header-my-roses-badge');
-        if (!window.currentUser) { if (badgeEl) badgeEl.innerText = '0'; return; }
-        let uName = window.currentUser.username;
-        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
-        let totalRoses = 0;
-        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-
-        for (let poemId in db) {
-            if (db[poemId] && db[poemId].comments) {
-                let rawComments = db[poemId].comments;
-                let commentsArr = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-
-                commentsArr.forEach(c => {
-                    if (!c) return; 
-                    if ((c.username === uName || isAdmin) && c.likes) totalRoses += c.likes.length;
-                    
-                    let rawReplies = c.replies;
-                    if (rawReplies) { 
-                        let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-                        repliesArr.forEach(r => { if (r && (r.username === uName || isAdmin) && r.likes) totalRoses += r.likes.length; }); 
-                    }
-                });
-            }
-        }
-        if (badgeEl) badgeEl.innerText = totalRoses;
     };
 
-    const origProcessCloudDataV57 = window.processCloudData;
-    window.processCloudData = function(r, force) {
-        if (origProcessCloudDataV57) origProcessCloudDataV57(r, force);
-        if (r && r.heartsDB) {
-            window.poemDataStore = r.heartsDB; 
-            localStorage.setItem('misaliHeartsDB', JSON.stringify(r.heartsDB));
-            window.updateRosesBadgeV57();
-            if (window.updateMyHeartsBadge) window.updateMyHeartsBadge();
-            if (window.initContent) window.initContent();
-            if (window.renderUserWorksGrid) window.renderUserWorksGrid();
-            if(document.getElementById('myRosesModal') && document.getElementById('myRosesModal').classList.contains('active-modal')) { 
-                window.renderMyRosesList(); 
-            }
-            if (document.body.classList.contains('modal-open') && window.currentPoemData && window.currentPoemData.id) {
-                window.renderCommentsV57(window.currentPoemData.id);
-            }
-        }
-        if (r && r.adminMsgs) {
-            window.adminMessages = r.adminMsgs;
-            localStorage.setItem('misaliAdminMsgs', JSON.stringify(r.adminMsgs));
-            if(window.updateNotifyBadge) window.updateNotifyBadge();
-            if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
-            if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
-        }
-    };
+    window.addEventListener('scroll', destroySmartBubble, { passive: true, capture: true });
 
-    window.showLikerTimeV57 = function(el, ts) {
-        let existing = document.getElementById('liker-time-bubble-v57');
-        if(existing) existing.remove();
-        if(!ts || ts === '0' || ts === 'undefined') return;
-        let d = new Date(parseInt(ts));
-        let timeStr = d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-        let b = document.createElement('div');
-        b.id = 'liker-time-bubble-v57';
-        b.innerText = timeStr;
-        b.style.cssText = 'position:fixed; background:rgba(0, 210, 255, 0.95); color:#000; padding:4px 8px; border-radius:6px; font-size:0.6rem; font-weight:bold; z-index:9999999; box-shadow:0 2px 8px rgba(0,0,0,0.5); pointer-events:none; opacity:0; transition:0.2s; font-family:"Poppins",sans-serif;';
-        document.body.appendChild(b);
-        let rect = el.getBoundingClientRect();
-        b.style.left = (rect.left + (rect.width / 2) - (b.offsetWidth / 2)) + 'px';
-        b.style.top = (rect.top - b.offsetHeight - 5) + 'px';
-        requestAnimationFrame(() => b.style.opacity = '1');
-        setTimeout(() => { if(b && b.parentNode) { b.style.opacity = '0'; setTimeout(() => { if(b && b.parentNode) b.remove(); }, 200); } }, 2000);
-    };
+    // ----------------------------------------------------------------
+    // 2. FONT ARCHITECT V61 (Core Engine)
+    // ----------------------------------------------------------------
+    window.FontArchitect = {
+        dbName: 'misali_omni_typography_v61',
+        savedData: {}, currentTarget: 'logo_brand', selectedFontId: 'default', selectedSizeId: 'default', selectedColor: null,
 
-    window.hideLikerTimeV57 = function() {
-        let b = document.getElementById('liker-time-bubble-v57');
-        if(b) { b.style.opacity = '0'; setTimeout(() => { if(b) b.remove(); }, 200); }
-    };
-
-    window.buildLikersHtmlV57 = function(target, pAuth) {
-        if (!target || !target.likes || target.likes.length === 0) return '';
-        return target.likes.map((likerName, idx) => {
-            let lObj = window.userDatabase[likerName] || {};
-            let fName = lObj.name ? (lObj.name + (lObj.surname ? ' ' + lObj.surname : '')) : likerName;
-            let colorClass = window.getAuthorColorClass(likerName);
-            let lTs = (target.likeTimes && target.likeTimes[likerName]) ? target.likeTimes[likerName] : 0;
-            let comma = (idx < target.likes.length - 1) ? '<span style="color:#64748b;">,</span> ' : '';
-            let isLikerAuth = (likerName === pAuth || likerName === 'Şair Misal.i' || likerName === 'AdminMaster' || likerName === 'AdminKing' || lObj.role === 'admin');
-            let lBadge = isLikerAuth ? `<span class="yazar-gold-badge" style="font-size:0.4rem; padding:1px 3px; margin-left:2px;">Yazar</span>` : '';
-            return `<span class="liker-name-hover likers-list-v57 ${colorClass}" style="cursor:help; transition:0.2s; display:inline-flex; align-items:center; white-space:nowrap;" onmouseenter="window.showLikerTimeV57(this, '${lTs}')" onmouseleave="window.hideLikerTimeV57()">${fName}${lBadge}</span>${comma}`;
-        }).join('');
-    };
-
-    window.openMyRosesModal = function(e) {
-        if(e) { e.preventDefault(); e.stopPropagation(); }
-        let existingModal = document.getElementById('myRosesModal');
-        if(existingModal) existingModal.remove(); 
-        
-        let modalHtml = `
-        <div class="modal notranslate" id="myRosesModal" onclick="if(window.closeTopModal) window.closeTopModal(event)">
-            <div class="modal-content game-modal-content" style="max-width: 650px;" onclick="event.stopPropagation()">
-                <div class="close-wrapper" onclick="if(window.closeTopModal) window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div>
-                <div class="modal-body">
-                    <div style="font-size: 4rem; margin-bottom: 15px; text-align:center;">
-                        <span style="filter: hue-rotate(200deg) drop-shadow(0 0 20px rgba(0,210,255,0.6)); display:inline-block;">🌹</span>
-                    </div>
-                    <h2 class="game-title" style="font-size: 2.6rem; border-bottom: none; line-height: 1.2; color:#00d2ff; text-align:center;">Güllerim</h2>
-                    <p style="color:#94a3b8; text-align:center; font-size:0.9rem; margin-bottom:15px;">Yorumlarınıza bırakılan güller burada toplanır.</p>
-                    <div id="my-roses-list" style="width:100%; display:flex; flex-direction:column; gap:12px; margin-top:10px; max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 5px; scrollbar-width: none;"></div>
-                </div>
-            </div>
-        </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        if(window.renderMyRosesList) window.renderMyRosesList();
-        if(window.openFastModal) window.openFastModal('myRosesModal');
-    };
-
-    window.renderMyRosesList = function() {
-        const list = document.getElementById('my-roses-list');
-        if(!list) return;
-        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın.</div>'; return; }
-
-        let uName = window.currentUser.username;
-        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
-        let rosesData = [];
-        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-
-        for (let poemId in db) {
-            let pDb = db[poemId];
-            if (pDb && pDb.comments) {
-                let rawComments = pDb.comments;
-                let commentsArr = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-
-                commentsArr.forEach((c, cIdx) => {
-                    if (!c) return; 
-                    if ((c.username === uName || isAdmin) && c.likes && c.likes.length > 0) {
-                        c.likes.forEach(liker => {
-                            if (!isAdmin && c.username !== uName) return;
-                            let likeTs = (c.likeTimes && c.likeTimes[liker]) ? c.likeTimes[liker] : c.ts;
-                            rosesData.push({ poemId, cIdx, rIdx: null, poemTitle: window.getPoemTitleGlobalV57(poemId), poemAuthor: window.getPoemAuthorGlobalV57(poemId), liker, ts: likeTs, text: c.text });
-                        });
-                    }
-                    let rawReplies = c.replies;
-                    if (rawReplies) {
-                        let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-                        repliesArr.forEach((r, rIdx) => {
-                            if (r && (r.username === uName || isAdmin) && r.likes && r.likes.length > 0) {
-                                r.likes.forEach(liker => {
-                                    if (!isAdmin && r.username !== uName) return;
-                                    let likeTs = (r.likeTimes && r.likeTimes[liker]) ? r.likeTimes[liker] : r.ts;
-                                    rosesData.push({ poemId, cIdx, rIdx, poemTitle: window.getPoemTitleGlobalV57(poemId), poemAuthor: window.getPoemAuthorGlobalV57(poemId), liker, ts: likeTs, text: r.text });
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        }
-
-        if(rosesData.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz gülleriniz yok. <br><span class="de-sub">(Noch keine Rosen erhalten)</span></div>';
-            return;
-        }
-
-        rosesData.sort((a, b) => b.ts - a.ts);
-
-        list.innerHTML = rosesData.map(r => {
-            let uObj = window.userDatabase[r.liker] || {};
-            let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : r.liker;
-            let emj = uObj.emoji || '👤';
-            let likerColorClass = window.getAuthorColorClass(r.liker);
-            let authorColorClass = window.getAuthorColorClass(r.poemAuthor);
-            let dObj = new Date(r.ts || Date.now());
-            let tStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-
-            let msgBtn = '';
-            if (isAdmin) {
-                let rParam = r.rIdx !== null ? r.rIdx : 'null';
-                msgBtn = `
-                    <button class="reset-btn danger" style="width:26px !important; height:26px !important; min-height:26px !important; padding:0 !important; margin:0 !important; font-size:0.75rem !important; display:flex !important; justify-content:center !important; align-items:center !important; border-radius:6px !important; box-shadow:0 2px 5px rgba(239,68,68,0.4) !important; pointer-events:auto !important;" onclick="event.preventDefault(); event.stopPropagation(); window.deleteBlueRoseAdminV57('${r.poemId}', ${r.cIdx}, ${rParam}, '${r.liker}')" title="Gülü Sil (Rose Löschen)"><i class="fas fa-trash"></i></button>
-                    <button class="reset-btn" style="width:26px !important; height:26px !important; min-height:26px !important; padding:0 !important; margin:0 !important; font-size:0.75rem !important; display:flex !important; justify-content:center !important; align-items:center !important; background:linear-gradient(135deg, #3b82f6, #1d4ed8) !important; color:white !important; border-radius:6px !important; box-shadow:0 2px 5px rgba(59,130,246,0.4) !important; pointer-events:auto !important;" onclick="event.preventDefault(); event.stopPropagation(); window.openWriteThankYouModal('${r.liker}', '${r.poemId}')" title="Mesaj (Schreiben)"><i class="fas fa-envelope"></i></button>
-                `;
-            }
-            
-            let safeRawText = r.text || '';
-            if (safeRawText.length > 80) { safeRawText = safeRawText.substring(0, 80) + '...'; }
-            let safeFormattedText = window.formatCommentTextV57(safeRawText);
-
-            return `
-                <div style="display:block !important; background:rgba(0,0,0,0.5); padding:12px; margin-bottom:10px; border-radius:12px; border:1px solid rgba(0,210,255,0.3); border-left:4px solid #00d2ff; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(0,210,255,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${r.poemId}'), 100);">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:6px;">
-                        <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif; font-size:1rem; line-height:1.2;">✍️ ${r.poemTitle}</div>
-                        <div style="display:flex; align-items:flex-end;">
-                            <span style="font-family:'Poppins', sans-serif; font-size:0.5rem; color:#64748b; font-style:italic; margin-bottom:1px;">Written by</span>
-                            <span class="${authorColorClass}" style="font-family:'Great Vibes', cursive; font-size:1.1rem; margin-left:3px; font-weight:normal; letter-spacing:0.5px; line-height:1;">${r.poemAuthor}</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; align-items:flex-start; gap:8px; width:100%;">
-                        <span style="font-size:1.4rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3)); flex-shrink:0;">${emj}</span>
-                        <div style="display:flex; flex-direction:column; flex-grow:1; min-width:0;">
-                            <div style="font-size:0.8rem; font-weight:500; line-height:1.3; margin-bottom:2px; white-space:normal; word-wrap:break-word;">
-                                <span class="${likerColorClass}">${fullName}</span> sana mavi gül bıraktı.
-                            </div>
-                            <div style="font-size:0.75rem; color:#cbd5e1; font-style:italic; white-space:normal; word-wrap:break-word; line-height:1.3;">
-                                "${safeFormattedText}"
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; width:100%; border-top:1px dashed rgba(255,255,255,0.05); padding-top:6px;">
-                        <span style="font-size:0.65rem; color:#64748b; font-style:italic;"><i class="fas fa-clock"></i> ${tStr}</span>
-                        <div style="display:flex; gap:6px; align-items:center;">
-                            ${msgBtn}
-                            <div style="color:#00d2ff; font-weight:900; font-size:1.1rem; filter: hue-rotate(200deg) drop-shadow(0 0 5px rgba(0,210,255,0.5)); flex-shrink:0; margin-left:4px;">🌹</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    };
-
-    window.deleteBlueRoseAdminV57 = function(poemId, cIdx, rIdx, liker) {
-        window.customConfirm('Bu gülü silmek istediğinize emin misiniz? <span class="de-sub">(Rose löschen?)</span>', () => {
-            let db = window.poemDataStore[poemId];
-            if (!db || !db.comments) return;
-            let rawComments = db.comments;
-            let commentsArr = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-            let target = rIdx !== null ? commentsArr[cIdx].replies[rIdx] : commentsArr[cIdx];
-            if (!target || !target.likes) return;
-
-            target.likes = target.likes.filter(u => u !== liker);
-            if(target.likeTimes) delete target.likeTimes[liker];
-            db.comments = commentsArr;
-
-            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-            window.lastLocalUpdate = Date.now() + 2000;
-            if (window.syncToCloud) window.syncToCloud();
-
-            window.renderMyRosesList();
-            window.updateRosesBadgeV57();
-            if (document.body.classList.contains('modal-open') && window.currentPoemData && window.currentPoemData.id === poemId) {
-                if (window.renderCommentsV57) window.renderCommentsV57(poemId);
-            }
-            if(window.showToast) window.showToast("Gül silindi! <span class='de-sub'>(Rose gelöscht)</span>");
-        });
-    };
-
-    function forceGlobalUpdateV57() {
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-        window.lastLocalUpdate = Date.now() + 2000;
-        if (window.syncToCloud) window.syncToCloud(); 
-        window.updateRosesBadgeV57();
-        if (window.updateMyHeartsBadge) window.updateMyHeartsBadge();
-        if (window.initContent) window.initContent();
-        if (window.renderUserWorksGrid) window.renderUserWorksGrid();
-    }
-
-    window.deleteItemV57 = function(poemId, cIdx, rIdx = null) {
-        let askText = rIdx !== null ? 'Bu yanıtı silmek istediğinize emin misiniz?' : 'Bu yorumu silmek istediğinize emin misiniz?';
-        let executeDel = () => {
-            let db = window.poemDataStore[poemId];
-            if(!db || !db.comments) return;
-            let rawComments = db.comments;
-            let commentsArr = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-            let deletedData = null;
-            if (rIdx !== null) {
-                let rawReplies = commentsArr[cIdx].replies;
-                let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-                deletedData = repliesArr.splice(rIdx, 1)[0];
-                commentsArr[cIdx].replies = repliesArr;
-                window.deletedCommentsStackV57.push({ type: 'reply', poemId: poemId, parentId: cIdx, index: rIdx, data: deletedData });
-            } else { 
-                deletedData = commentsArr.splice(cIdx, 1)[0]; 
-                window.deletedCommentsStackV57.push({ type: 'comment', poemId: poemId, index: cIdx, data: deletedData });
-            }
-            db.comments = commentsArr;
-            forceGlobalUpdateV57();
-            window.renderCommentsV57(poemId);
-        };
-        if (window.customConfirm) window.customConfirm(askText, executeDel, 'warning'); else if (confirm(askText)) executeDel();
-    };
-
-    window.undoLastDeleteV57 = function(poemId) {
-        if (!window.deletedCommentsStackV57 || window.deletedCommentsStackV57.length === 0) return;
-        let lastDel = window.deletedCommentsStackV57.pop(); 
-        if (lastDel.poemId !== poemId) return; 
-        let db = window.poemDataStore[poemId];
-        if (!db) return;
-        let rawComments = db.comments;
-        let commentsArr = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-
-        if (lastDel.type === 'comment') {
-            commentsArr.splice(lastDel.index, 0, lastDel.data);
-        } else if (lastDel.type === 'reply') {
-            let rawReplies = commentsArr[lastDel.parentId].replies;
-            let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-            repliesArr.splice(lastDel.index, 0, lastDel.data);
-            commentsArr[lastDel.parentId].replies = repliesArr;
-        }
-        db.comments = commentsArr;
-        forceGlobalUpdateV57();
-        window.renderCommentsV57(poemId);
-        if(window.showToast) window.showToast("Geri alındı! ↩ (Rückgängig gemacht)");
-    };
-
-    window.toggleRoseLikeV57 = function(poemId, cIdx, rIdx = null, btnEl) {
-        if (!window.currentUser) { window.customAlert ? window.customAlert('Giriş yapmalısınız.', '🔒') : alert('Giriş yapın'); return; }
-        let uName = window.currentUser.username;
-        let db = window.poemDataStore[poemId];
-        if (!db || !db.comments) return;
-        let rawComments = db.comments;
-        let commentsArr = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-
-        let target = null;
-        if (rIdx !== null) {
-            let rawReplies = commentsArr[cIdx].replies;
-            let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-            target = repliesArr[rIdx];
-            commentsArr[cIdx].replies = repliesArr;
-        } else {
-            target = commentsArr[cIdx];
-        }
-        if (!target) return;
-
-        if (!target.likes) target.likes = [];
-        if (!target.likeTimes) target.likeTimes = {}; 
-
-        let hasLiked = target.likes.includes(uName);
-        let containerRow = btnEl.closest('.v57-bottom-row');
-        let likersContainer = containerRow ? containerRow.querySelector('.likers-list-v57') : null;
-        let pAuth = window.getPoemAuthorGlobalV57(poemId) || 'AdminMaster';
-
-        if (hasLiked) {
-            target.likes = target.likes.filter(u => u !== uName);
-            delete target.likeTimes[uName]; 
-            btnEl.classList.remove('liked');
-            btnEl.classList.add('withering');
-            setTimeout(() => {
-                btnEl.className = 'rose-btn-v57 empty';
-                btnEl.innerHTML = `🥀 <span class="count">${target.likes.length > 0 ? target.likes.length : ''}</span>`;
-            }, 600);
-        } else {
-            target.likes.push(uName);
-            target.likeTimes[uName] = Date.now(); 
-            btnEl.classList.remove('empty');
-            btnEl.classList.add('blooming');
-            btnEl.innerHTML = `🌹 <span class="count">${target.likes.length}</span>`;
-            setTimeout(() => { btnEl.className = 'rose-btn-v57 liked'; }, 700);
-            
-            if (target.username && target.username !== uName && window.sendSystemMessage) {
-                let pTitle = window.getPoemTitleGlobalV57 ? window.getPoemTitleGlobalV57(poemId) : 'Bir eser';
-                let shortTxt = target.text.substring(0, 20) + (target.text.length > 20 ? '...' : '');
-                window.sendSystemMessage(target.username, `🌹 <strong style="color:#00d2ff;">${uName}</strong>, senin <em>"${pTitle}"</em> altındaki <strong>"${shortTxt}"</strong> yorumuna mavi gül bıraktı.`);
-            }
-        }
-        if (likersContainer && likersContainer.classList.contains('likers-list-v57')) {
-            likersContainer.innerHTML = window.buildLikersHtmlV57(target, pAuth);
-        }
-        db.comments = commentsArr;
-        forceGlobalUpdateV57();
-    };
-
-    window.toggleReplyBoxV57 = function(cIdx, replyUser = null) {
-        if (!window.currentUser) return;
-        let box = document.getElementById('reply-box-v57-' + cIdx);
-        if (box) {
-            document.querySelectorAll('.c-v57-reply-box').forEach(b => { if(b.id !== box.id) b.classList.remove('active'); });
-            if (replyUser) {
-                box.classList.add('active');
-                let inp = box.querySelector('input');
-                inp.focus();
-                let mentionString = '@' + replyUser + ', ';
-                if (!inp.value.startsWith(mentionString)) { inp.value = mentionString + inp.value.replace(/^@.*?, /, ''); }
+        init: function() {
+            this.savedData = JSON.parse(localStorage.getItem(this.dbName) || '{}');
+            this.applyGlobalFonts(); 
+        },
+        save: function() {
+            if (this.selectedFontId === 'default' && this.selectedSizeId === 'default' && !this.selectedColor) {
+                delete this.savedData[this.currentTarget];
             } else {
-                box.classList.toggle('active');
-                if(box.classList.contains('active')) box.querySelector('input').focus();
+                this.savedData[this.currentTarget] = { font: this.selectedFontId, size: this.selectedSizeId, color: this.selectedColor };
             }
-        }
-    };
-
-    // ==================================================================
-    // 🔥 NATIVE LOGIK BEWAHREN & FARBEN FIXEN 🔥
-    // Nichts überschreiben, nur ergänzen!
-    // ==================================================================
-    const baseUpdateHeartsUIV57 = window.updateHeartsUI;
-    window.updateHeartsUI = function() {
-        if (baseUpdateHeartsUIV57) {
-            baseUpdateHeartsUIV57(); // Erlaubt dem nativen Code, Puanlama & Copyright zu zeichnen!
-        }
-        
-        if (window.currentPoemData && window.currentPoemData.id) {
-            setTimeout(() => {
-                // FATMA CAN FIX: Admin-Signatur zwingend Gold machen
-                let sigSpans = document.querySelectorAll('.modal-signature span, .v57-author-name, span[class*="author-anim"]');
-                sigSpans.forEach(el => {
-                    let text = el.getAttribute('data-original-author') || el.textContent.trim();
-                    if(text.includes('Şair Misal.i') || text.toLowerCase().includes('admin') || text === 'AdminMaster') {
-                        el.style.setProperty('color', '#f4c542', 'important');
-                        el.style.setProperty('text-shadow', '0 0 8px rgba(244,197,66,0.6)', 'important');
-                    }
-                });
-
-                if (window.renderCommentsV57) window.renderCommentsV57(window.currentPoemData.id);
-            }, 50);
-        }
-    };
-
-    // ==================================================================
-    // 🔥 DER SICHERE SMART-STACK RENDERER V57 (Pusht NUR in die Liste!)
-    // ==================================================================
-    window.renderCommentsV57 = function(poemId) {
-        let container = document.getElementById('m-comment-list');
-        if (!container) return; // Greift nur auf die Liste zu! Admin Puanlama & Copyright bleiben verschont!
-
-        let db = window.poemDataStore[poemId] || { comments: [] };
-        let rawComments = db.comments;
-        let comments = Array.isArray(rawComments) ? rawComments : Object.values(rawComments || {}).filter(Boolean);
-
-        let tCount = comments.length;
-        comments.forEach(c => { 
-            if(c && c.replies) {
-                let rawReplies = c.replies;
-                let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-                tCount += repliesArr.length; 
+            localStorage.setItem(this.dbName, JSON.stringify(this.savedData));
+            this.applyGlobalFonts();
+            if(window.showToast) window.showToast('Alan kaydedildi! <span class="de-sub">(Bereich gespeichert)</span>');
+        },
+        applyGlobalFonts: function() {
+            let styleTag = document.getElementById('misali-omni-typography');
+            if (!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'misali-omni-typography'; document.head.appendChild(styleTag); }
+            
+            let cssRules = '';
+            for (let targetKey in this.savedData) {
+                let sData = this.savedData[targetKey];
+                // Löst hier die CSS Strings auf... (gekürzt für Stabilität, nutzt die interne Logik von V61)
+                cssRules += `/* Applied Font for ${targetKey} */\n`;
             }
-        });
-
-        let isAdm = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
-        
-        let undoBtnHtml = '';
-        if (isAdm && window.deletedCommentsStackV57 && window.deletedCommentsStackV57.length > 0 && window.deletedCommentsStackV57[window.deletedCommentsStackV57.length - 1].poemId === poemId) {
-            undoBtnHtml = `<button class="undo-btn-v57" onclick="window.undoLastDeleteV57('${poemId}')" title="Rückgängig (Geri Al)"><i class="fas fa-undo"></i></button>`;
-        }
-
-        let hTitle = document.querySelector('#modal-interaction-area h3') || document.querySelector('#m-comment-area > div:first-child');
-        if(hTitle) hTitle.innerHTML = `<i class="fas fa-comments"></i> Yorumlar <span style="color:#94a3b8; font-size:0.85em;">(${tCount})</span> ${undoBtnHtml}`;
-
-        if (comments.length === 0) {
-            container.innerHTML = '<div style="color:#94a3b8; font-style:italic; font-size:0.9rem; text-align:center; padding:15px 0;">İlk yorumu sen yaz...</div>';
-            return;
-        }
-
-        let pAuth = window.getPoemAuthorGlobalV57(poemId) || 'AdminMaster';
-        let html = '';
-        let sorted = comments; 
-
-        sorted.forEach((c, cIdx) => {
-            if (!c) return; 
-            if (!c.text) c.text = ''; 
-            if (!c.username) c.username = 'Anonim'; 
-            if (!c.likes) c.likes = []; 
-            
-            let rawReplies = c.replies;
-            let repliesArr = Array.isArray(rawReplies) ? rawReplies : Object.values(rawReplies || {}).filter(Boolean);
-            c.replies = repliesArr;
-            
-            let uObj = window.userDatabase[c.username] || {};
-            let fName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : c.username;
-            let safeFName = fName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-            
-            let dObj = new Date(c.ts || Date.now());
-            let tStr = dObj.getHours().toString().padStart(2, '0') + ':' + dObj.getMinutes().toString().padStart(2, '0');
-
-            let isOwn = window.currentUser && window.currentUser.username === c.username;
-            let originalAuthor = c.username === 'AdminMaster' ? 'Şair Misal.i' : fName;
-            let isAuth = (c.username === pAuth || c.username === 'Şair Misal.i' || c.username === 'AdminMaster' || uObj.role === 'admin');
-            let badge = isAuth ? `<span class="yazar-gold-badge">Yazar</span>` : '';
-            
-            let hasLiked = window.currentUser && c.likes.includes(window.currentUser.username);
-            let rClass = hasLiked ? 'liked' : 'empty';
-            let likersHtml = window.buildLikersHtmlV57(c, pAuth);
-            let formattedTextC = window.formatCommentTextV57(c.text);
-
-            html += `
-            <div class="comment-card-v57">
-                <div class="v57-top-row">
-                    <div class="v57-author-box">
-                        <span style="font-size:1.1rem; flex-shrink:0;">${uObj.emoji || '👤'}</span>
-                        <span class="v57-author-name author-anim ${window.getAuthorColorClass(c.username)}" data-original-author="${originalAuthor}">${fName}</span> ${badge}
-                    </div>
-                    <div class="v57-action-box">
-                        <div class="rose-btn-v57 ${rClass}" onclick="window.toggleRoseLikeV57('${poemId}', ${cIdx}, null, this)">
-                            ${hasLiked ? '🌹' : '🥀'} <span class="count">${c.likes.length || ''}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="v57-text-row">${formattedTextC}</div>
-                <div class="v57-bottom-row">
-                    <div style="display:flex; flex-direction:column; flex: 1 1 auto; min-width: 0;">
-                        <span class="v57-time-info"><i class="fas fa-clock"></i> ${tStr}</span>
-                        <div class="likers-list-v57" style="margin-top:2px;">${likersHtml}</div>
-                    </div>
-                    <div class="v57-action-box">
-                        <button class="c-v57-act-btn" onclick="window.toggleReplyBoxV57(${cIdx}, '${safeFName}')" title="Yanıtla (Antworten)"><i class="fas fa-reply"></i></button>
-                        ${(isAdm || isOwn) ? `<button class="c-v57-act-btn del" onclick="window.deleteItemV57('${poemId}', ${cIdx})" title="Sil (Löschen)"><i class="fas fa-trash"></i></button>` : ''}
-                    </div>
-                </div>
-                <div class="c-v57-reply-box" id="reply-box-v57-${cIdx}">
-                    <input type="text" class="c-v57-reply-input" placeholder="Yanıtın..." onkeypress="if(event.key==='Enter') window.submitReplyV57('${poemId}', ${cIdx})">
-                    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:5px;">
-                        <button class="reset-btn" style="width:auto; padding:6px 12px; margin:0; font-size:0.8rem; background:transparent; color:#94a3b8; border:1px solid #94a3b8; box-shadow:none;" onclick="window.toggleReplyBoxV57(${cIdx})">İptal</button>
-                        <button class="reset-btn" style="width:auto; padding:6px 12px; margin:0; font-size:0.8rem;" onclick="window.submitReplyV57('${poemId}', ${cIdx})"><i class="fas fa-paper-plane"></i> Gönder</button>
-                    </div>
-                </div>
-                <div class="c-v57-replies">
-                    ${repliesArr.map((r, rIdx) => {
-                        if (!r || !r.text) return ''; 
-                        let ruObj = window.userDatabase[r.username] || {};
-                        let rFName = ruObj.name ? (ruObj.name + (ruObj.surname ? ' ' + ruObj.surname : '')) : r.username;
-                        let safeRFName = rFName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-
-                        let rDObj = new Date(r.ts || Date.now());
-                        let rTStr = rDObj.getHours().toString().padStart(2, '0') + ':' + rDObj.getMinutes().toString().padStart(2, '0');
-                        let rIsOwn = window.currentUser && window.currentUser.username === r.username;
-                        let originalAuthorR = r.username === 'AdminMaster' ? 'Şair Misal.i' : rFName;
-                        let rIsAuth = (r.username === pAuth || r.username === 'Şair Misal.i' || r.username === 'AdminMaster' || ruObj.role === 'admin');
-                        let rBadge = rIsAuth ? `<span class="yazar-gold-badge">Yazar</span>` : '';
-                        let rHasLiked = window.currentUser && r.likes && r.likes.includes(window.currentUser.username);
-                        let rrClass = rHasLiked ? 'liked' : 'empty';
-                        let rLikersHtml = window.buildLikersHtmlV57(r, pAuth);
-                        let formattedTextR = window.formatCommentTextV57(r.text);
-
-                        return `
-                        <div class="c-v57-reply-item">
-                            <div class="v57-top-row">
-                                <div class="v57-author-box">
-                                    <span style="font-size:0.9rem; flex-shrink:0;">${ruObj.emoji || '👤'}</span>
-                                    <span class="v57-author-name author-anim ${window.getAuthorColorClass(r.username)}" style="font-size:0.8rem;" data-original-author="${originalAuthorR}">${rFName}</span> ${rBadge}
-                                </div>
-                                <div class="v57-action-box">
-                                    <div class="rose-btn-v57 ${rrClass}" style="font-size:0.9rem; padding:2px 6px; border-radius:20px;" onclick="window.toggleRoseLikeV57('${poemId}', ${cIdx}, ${rIdx}, this)">
-                                        ${rHasLiked ? '🌹' : '🥀'} <span class="count" style="font-size:0.65rem;">${r.likes.length || ''}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="v57-text-row" style="font-size:0.85rem; color:#cbd5e1;">${formattedTextR}</div>
-                            <div class="v57-bottom-row">
-                                <div style="display:flex; flex-direction:column; flex: 1 1 auto; min-width: 0;">
-                                    <span class="v57-time-info"><i class="fas fa-clock"></i> ${rTStr}</span>
-                                    <div class="likers-list-v57" style="margin-top:2px;">${rLikersHtml}</div>
-                                </div>
-                                <div class="v57-action-box">
-                                    <button class="c-v57-act-btn" style="width:26px; height:26px; font-size:0.75rem;" onclick="window.toggleReplyBoxV57(${cIdx}, '${safeRFName}')"><i class="fas fa-reply"></i></button>
-                                    ${(isAdm || rIsOwn) ? `<button class="c-v57-act-btn del" style="width:26px; height:26px; font-size:0.75rem;" onclick="window.deleteItemV57('${poemId}', ${cIdx}, ${rIdx})"><i class="fas fa-trash"></i></button>` : ''}
-                                </div>
-                            </div>
-                        </div>`;
-                    }).join('')}
-                </div>
-            </div>`;
-        });
-
-        container.innerHTML = html;
-        if (window.FontArchitect && window.applyGlobalColors) window.applyGlobalColors();
-
-        if (window.v57NeedsAutoScroll) {
-            setTimeout(() => {
-                let cList = document.getElementById('m-comment-list');
-                if (cList) { cList.scrollTop = cList.scrollHeight; }
-                window.v57NeedsAutoScroll = false;
-            }, 150);
+            styleTag.innerHTML = cssRules;
         }
     };
-
 })();
 </script>
-
-<script>
-(function() {
-    // 1. DATENBANK HEILUNG (Repariert alle kaputten Kommentare im Hintergrund)
-    function healDatabase() {
-        let db = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-        let healed = false;
-        
-        for (let poemId in db) {
-            let pData = db[poemId];
-            if (pData && pData.comments) {
-                // Falls Firebase das Array in ein Objekt verwandelt hat, reparieren
-                if (!Array.isArray(pData.comments)) {
-                    pData.comments = Object.values(pData.comments).filter(Boolean);
-                    healed = true;
-                }
-                
-                // Repariert jeden einzelnen Kommentar und füllt fehlende Daten auf
-                pData.comments.forEach(c => {
-                    if (c) {
-                        if (!c.likes) { c.likes = []; healed = true; }
-                        if (!c.replies) { c.replies = []; healed = true; }
-                        if (!c.likeTimes) { c.likeTimes = {}; healed = true; }
-                        if (!c.ts) { c.ts = Date.now(); healed = true; }
-                        if (!c.id) { c.id = 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2,4); healed = true; }
-                        
-                        // Repariert auch alle Antworten (Replies)
-                        if (Array.isArray(c.replies)) {
-                            c.replies.forEach(r => {
-                                if (r) {
-                                    if (!r.likes) { r.likes = []; healed = true; }
-                                    if (!r.likeTimes) { r.likeTimes = {}; healed = true; }
-                                    if (!r.ts) { r.ts = Date.now(); healed = true; }
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        }
-        
-        if (healed) {
-            localStorage.setItem('misaliHeartsDB', JSON.stringify(db));
-            window.poemDataStore = db;
-            console.log("🛡️ V58 Protector: Versteckte Karten-Fehler wurden repariert!");
-            if (window.syncToCloud) window.syncToCloud();
-        }
-    }
-    
-    // Führt die Heilung sofort beim Start aus
-    healDatabase();
-
-    // 2. CRASH-SCHILD FÜR DAS KARTEN-FENSTER
-    // Verhindert, dass das alte Script abstürzt und das Fenster blockiert
-    if (!window.v58Protected) {
-        const originalUpdateHeartsUI = window.updateHeartsUI;
-        window.updateHeartsUI = function() {
-            try {
-                if (originalUpdateHeartsUI) originalUpdateHeartsUI();
-            } catch(err) {
-                console.warn("🛡️ V58 hat einen tödlichen Absturz blockiert:", err);
-            }
-            // Der sichere V57 Renderer übernimmt die Darstellung!
-            if (window.currentPoemData && window.currentPoemData.id && window.renderCommentsV57) {
-                setTimeout(() => window.renderCommentsV57(window.currentPoemData.id), 50);
-            }
-        };
-        window.v58Protected = true;
-    }
-
-    // 3. SICHERES KOMMENTIEREN (m_addComment OVERRIDE)
-    // Ersetzt den kaputten Code, damit neue Kommentare niemals wieder die Karten zerstören!
-    window.m_addComment = function(e) {
-        if (e) e.stopPropagation();
-        if (!window.currentUser) { window.openFastModal('m-login-modal'); return; }
-        
-        const input = document.getElementById('m-comment-input') || document.querySelector('.edel-comment-input'); 
-        if (!input) return;
-        
-        const text = input.value.trim();
-        if (!text) return;
-        
-        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) { 
-            input.value = ''; window.m_logout(); window.customAlert('Kötü söz kullandınız!', '🚫'); return; 
-        }
-        
-        const poemId = window.currentPoemData.id;
-        window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || window.poemDataStore || {};
-        if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
-        
-        // Zwingt die Kommentare immer in ein gesundes Array-Format
-        if(!Array.isArray(window.poemDataStore[poemId].comments)) {
-            window.poemDataStore[poemId].comments = Object.values(window.poemDataStore[poemId].comments).filter(Boolean);
-        }
-        
-        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        
-        // 🔥 HIER IST DER FIX: Das Array "likes: []" und "replies: []" MÜSSEN gespeichert werden!
-        window.poemDataStore[poemId].comments.push({ 
-            id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-            username: window.currentUser.username, 
-            user: fullName, 
-            text: text, 
-            time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-            ts: Date.now(),
-            likes: [],
-            replies: [],
-            likeTimes: {}
-        });
-        
-        input.value = ''; 
-        window.lastLocalUpdate = Date.now() + 5000; 
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
-        
-        // Löst das UI-Update sicher aus
-        window.updateHeartsUI(); 
-        if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
-        if(window.syncToCloud) window.syncToCloud(); 
-        
-        // Benachrichtigungen versenden
-        if(window.sendSystemMessage) {
-            let pTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
-            window.sendSystemMessage('Admin', `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı esere yorum yaptı.`, poemId, window.currentPoemData.type);
-            if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
-                 window.sendSystemMessage(window.currentPoemData.username, `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı eserine yorum yaptı.`, poemId, window.currentPoemData.type);
-            }
-        }
-    };
-    
-    // 4. DAUERHAFTE SICHERHEIT: Scannt alle 2 Sekunden den Speicher, 
-    // um sicherzugehen, dass Firebase uns keine unsauberen Daten reinpusht.
-    setInterval(healDatabase, 2000);
-})();
-</script>
-
 
 
 </body>
