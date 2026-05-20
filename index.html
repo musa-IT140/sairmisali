@@ -22012,5 +22012,131 @@ setInterval(function() {
 })();
 </script>
 
+<script>
+(function() {
+    // 1. NATIVE ALERTS TÖTEN
+    // Verhindert, dass der Browser jemals wieder dieses hässliche Standard-Fenster auswirft.
+    // Stattdessen wird es an dein edles Toast-System oder dein Custom-Modal weitergeleitet.
+    window.alert = function(msg) {
+        console.warn("Abgefangener Alert:", msg);
+        if (window.showToast) {
+            window.showToast(msg);
+        } else if (window.customAlert) {
+            window.customAlert(msg, '⚠️');
+        } else {
+            console.log(msg); // Stille Vernichtung, falls alles andere fehlt
+        }
+    };
+
+    // 2. DIE BULLETPROOF KOMMENTAR-FUNKTION
+    window.m_addComment = function(e) {
+        // Events sauber stoppen
+        if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+
+        // Login-Check
+        if (!window.currentUser) { 
+            if(window.openFastModal) window.openFastModal('m-login-modal'); 
+            return; 
+        }
+
+        // Input finden und säubern
+        const input = document.getElementById('m-comment-input') || document.querySelector('.edel-comment-input');
+        if (!input || !input.value.trim()) return;
+        
+        let text = input.value.trim();
+        const poemId = window.currentPoemData?.id;
+        
+        if (!poemId) {
+            if(window.showToast) window.showToast('Hata: Eser bulunamadı! <span class="de-sub">(Werk nicht gefunden)</span>');
+            return;
+        }
+
+        // Schimpfwort-Filter
+        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) {
+            input.value = ''; 
+            if(window.m_logout) window.m_logout(); 
+            if(window.customAlert) window.customAlert('Kötü söz kullandınız!', '🚫'); 
+            return;
+        }
+
+        // --- SCHRITT A: DATEN SPEICHERN (100% ISOLIERT) ---
+        try {
+            window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+            if (!window.poemDataStore[poemId]) {
+                window.poemDataStore[poemId] = { ratings: {}, comments: [] };
+            }
+            
+            // Repariere kaputte Arrays sofort
+            if (!Array.isArray(window.poemDataStore[poemId].comments)) {
+                window.poemDataStore[poemId].comments = Object.values(window.poemDataStore[poemId].comments || {}).filter(Boolean);
+            }
+
+            let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+            let nowStr = new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+
+            // Kommentar in die Datenbank pushen
+            window.poemDataStore[poemId].comments.push({ 
+                id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), 
+                username: window.currentUser.username, 
+                user: fullName,
+                text: text, 
+                ts: Date.now(), 
+                time: nowStr,
+                likes: [], 
+                replies: [], 
+                likeTimes: {} 
+            });
+
+            // Feld leeren & sofort lokal sichern!
+            input.value = '';
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            window.lastLocalUpdate = Date.now() + 5000;
+
+        } catch(err) { 
+            console.error("Kritischer Fehler beim Speichern des Kommentars:", err); 
+            if(window.showToast) window.showToast("Kayıt hatası! (Speicherfehler)");
+            return; // Harter Abbruch, wenn schon das Speichern fehlschlägt
+        }
+
+        // --- SCHRITT B: CLOUD-SYNC & UI UPDATE (ISOLIERT) ---
+        // Wenn hier ein Fehler passiert, ist der Kommentar trotzdem schon sicher gespeichert!
+        try {
+            // Ab in die Cloud!
+            if(window.syncToCloud) window.syncToCloud();
+            
+            // Benachrichtigung an Admin/Besitzer senden
+            if(window.sendSystemMessage) {
+                let pTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
+                let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+                
+                window.sendSystemMessage('Admin', `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı esere yorum yaptı.`, poemId, window.currentPoemData.type);
+                
+                if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
+                     window.sendSystemMessage(window.currentPoemData.username, `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı eserine yorum yaptı.`, poemId, window.currentPoemData.type);
+                }
+            }
+
+            // Die Optik neu laden
+            if(window.renderCommentsV57) window.renderCommentsV57(poemId);
+            else if(window.updateHeartsUI) window.updateHeartsUI();
+            
+            // 🔥 Das smarte Auto-Scrolling 🔥
+            setTimeout(() => {
+                let list = document.getElementById('m-comment-list');
+                if (list) list.scrollTop = list.scrollHeight;
+                
+                // Wir scrollen auch das Hauptfenster ein Stück runter, damit der frische Kommentar im Blick ist
+                let modalBody = document.querySelector('.modal.active-modal .modal-body');
+                if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
+            }, 100);
+
+        } catch(err) {
+            console.error("Fehler beim UI-Update nach dem Kommentar, Kommentar wurde aber gespeichert!", err);
+        }
+    };
+})();
+</script>
+
 </body>
 </html>
