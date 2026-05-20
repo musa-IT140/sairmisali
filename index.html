@@ -2559,6 +2559,8 @@ body:not(.user-mode):not(.admin-mode) #main-header .user-profile-group { display
         border-color: transparent transparent rgba(244, 197, 66, 0.6) transparent;
     }
 
+    
+
 </style>
     <script>
 
@@ -22221,6 +22223,222 @@ setInterval(function() {
             console.error("Kommentar-Fehler:", err); 
             if(window.customAlert) window.customAlert('Bir hata oluştu. (Fehler beim Speichern)', '❌');
         }
+    };
+})();
+</script>
+
+<script id="v4-final-stable-patch">
+(function() {
+    // 1. ADMIN-PANEL RENDERER (Nutz deine Custom-Modals)
+    window.renderAdminManagement = function() {
+        const list = document.getElementById('admin-all-comments-list');
+        if (!list) return;
+        
+        let allComments = [];
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+
+        for (let poemId in db) {
+            if (db[poemId] && db[poemId].comments) {
+                db[poemId].comments.forEach((c, cIdx) => {
+                    allComments.push({ poemId, cIdx, comment: c, type: 'Yorum' });
+                    if (c.replies) {
+                        c.replies.forEach((r, rIdx) => {
+                            allComments.push({ poemId, cIdx, rIdx, comment: r, type: 'Yanıt' });
+                        });
+                    }
+                });
+            }
+        }
+
+        list.innerHTML = allComments.map(item => `
+            <div style="background:rgba(0,0,0,0.5); padding:10px; margin-bottom:8px; border-radius:8px; border-left:3px solid #f4c542; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:0.85rem; color:#fff; flex:1; padding-right:10px;">
+                    <strong style="color:#f4c542;">${item.comment.user}:</strong> ${item.comment.text.substring(0,30)}...
+                    <div style="font-size:0.7rem; color:#64748b;">${item.type} | ${item.comment.time}</div>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="reset-btn warning" style="padding:4px 8px; font-size:0.75rem; margin:0;" onclick="window.adminEditFromPanel('${item.poemId}', ${item.cIdx}, ${item.rIdx ?? 'null'})">Düzenle</button>
+                    <button class="reset-btn danger" style="padding:4px 8px; font-size:0.75rem; margin:0;" onclick="window.adminDeleteFromPanel('${item.poemId}', ${item.cIdx}, ${item.rIdx ?? 'null'})">Sil</button>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    // 2. LÖSCHEN (Nutzt dein customConfirm)
+    window.adminDeleteFromPanel = function(pid, cIdx, rIdx) {
+        window.customConfirm("Bu yorumu silmek istiyor musunuz?", () => {
+            let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+            if (db[pid] && db[pid].comments) {
+                if (rIdx !== null && rIdx !== undefined) db[pid].comments[cIdx].replies.splice(rIdx, 1);
+                else db[pid].comments.splice(cIdx, 1);
+                
+                localStorage.setItem('misaliHeartsDB', JSON.stringify(db));
+                window.poemDataStore = db;
+                
+                window.dispatchEvent(new CustomEvent('misaliDataSync'));
+                if(window.syncToCloud) window.syncToCloud();
+            }
+        }, 'warning');
+    };
+
+    // 3. BEARBEITEN (Nutzt dein customDualPrompt)
+    window.adminEditFromPanel = function(pid, cIdx, rIdx) {
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+        let comment = (rIdx !== null && rIdx !== undefined) ? db[pid].comments[cIdx].replies[rIdx] : db[pid].comments[cIdx];
+        
+        window.customDualPrompt("Yorumu Düzenle", "✍️", comment.text, (title, newText) => {
+            if(!newText.trim()) return;
+            comment.text = newText;
+            comment.editTime = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+            
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(db));
+            window.poemDataStore = db;
+            
+            window.dispatchEvent(new CustomEvent('misaliDataSync'));
+            if(window.syncToCloud) window.syncToCloud();
+        });
+    };
+
+    // 4. LIVE-KOMMENTAR FIX: Überschreibt m_addComment für sofortiges UI-Update
+    const original_addComment = window.m_addComment;
+    window.m_addComment = function(e) {
+        if (original_addComment) original_addComment(e);
+        // Event feuern, damit alle Fenster sofort aktualisieren
+        window.dispatchEvent(new CustomEvent('misaliDataSync'));
+    };
+
+    // 5. EVENT-WÄCHTER (Updates sofort in allen Fenstern)
+    window.addEventListener('misaliDataSync', () => {
+        // A) Admin Panel Update
+        window.renderAdminManagement();
+        
+        // B) Kommentar-Karte Update
+        let pid = window.currentPoemData?.id;
+        if(pid) {
+            if(window.renderCommentsV57) window.renderCommentsV57(pid);
+            else if(window.renderCommentsV18) window.renderCommentsV18(pid);
+        }
+    });
+
+    // Injektor für das Admin-Panel
+    let injectTab = setInterval(() => {
+        let body = document.querySelector('#inOutAdminModal .modal-body');
+        if (body && !document.getElementById('admin-all-comments-list')) {
+            let div = document.createElement('div');
+            div.innerHTML = `<div style="margin-top:20px; border-top:2px solid #f4c542; padding-top:15px;">
+                                <h3 style="color:#f4c542; margin-bottom:10px;">Tüm Yorumları Yönet</h3>
+                                <div id="admin-all-comments-list"></div>
+                             </div>`;
+            body.appendChild(div);
+            window.renderAdminManagement();
+        }
+    }, 1000);
+})();
+</script>
+
+<script id="surgical-sync-patch">
+(function() {
+    // 1. Sichere die Original-Sende-Funktion
+    const original_addComment = window.m_addComment;
+
+    // 2. Überschreibe den Sende-Vorgang nur für den Render-Trigger
+    window.m_addComment = function(e) {
+        // Führe deine Original-Logik aus (diese ist für das Speichern/Daten-Update verantwortlich)
+        if (original_addComment) {
+            original_addComment(e);
+        }
+
+        // Trigger das Neu-Rendern mit DEINER Original-Funktion
+        // Das ist 100% sicher, da es dein eigenes Design/CSS verwendet
+        setTimeout(() => {
+            const pid = window.currentPoemData?.id;
+            if (pid && typeof window.renderCommentsV57 === 'function') {
+                console.log("Live-Render für:", pid);
+                window.renderCommentsV57(pid);
+                
+                // Admin Panel synchronisieren, falls offen
+                if (typeof window.renderAdminManagement === 'function') {
+                    window.renderAdminManagement();
+                }
+            }
+        }, 300); // 300ms ist der "Sweet Spot", damit Firebase die Daten lokal geschrieben hat
+    };
+
+    // 3. Admin-Panel Injection (Isoliert, stört nicht das UI)
+    setInterval(() => {
+        let modalBody = document.querySelector('#inOutAdminModal .modal-body');
+        if (modalBody && !document.getElementById('admin-all-comments-list')) {
+            let div = document.createElement('div');
+            div.id = 'admin-all-comments-list';
+            modalBody.appendChild(div);
+            if(window.renderAdminManagement) window.renderAdminManagement();
+        }
+    }, 2000);
+})();
+</script>
+
+<script id="clean-isolation-patch">
+(function() {
+    // Nur das Admin-Panel injizieren (als eigenständiges UI-Element)
+    // Wir lassen "m_addComment" und "renderCommentsV57" komplett in Ruhe!
+    let adminInterval = setInterval(() => {
+        let modalBody = document.querySelector('#inOutAdminModal .modal-body');
+        if (modalBody && !document.getElementById('admin-all-comments-list')) {
+            let div = document.createElement('div');
+            div.id = 'admin-all-comments-list';
+            modalBody.appendChild(div);
+            
+            // Initiales Rendering
+            if(window.renderAdminManagement) window.renderAdminManagement();
+        }
+    }, 1000);
+
+    // Eigene Render-Funktion für das Admin-Panel
+    window.renderAdminManagement = function() {
+        const list = document.getElementById('admin-all-comments-list');
+        if (!list) return;
+
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+        let html = '<div style="margin-top:15px; border-top:1px solid #444;">';
+        
+        for (let pid in db) {
+            if (db[pid].comments) {
+                db[pid].comments.forEach((c, i) => {
+                    html += `
+                    <div style="padding:8px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.8rem; color:#fff;">${(c.text || '').substring(0,20)}...</span>
+                        <div>
+                            <button onclick="window.adminEditLogic('${pid}', ${i})" style="color:orange; background:none; border:none; cursor:pointer;">Düzenle</button>
+                            <button onclick="window.adminDeleteLogic('${pid}', ${i})" style="color:red; background:none; border:none; cursor:pointer;">Sil</button>
+                        </div>
+                    </div>`;
+                });
+            }
+        }
+        list.innerHTML = html + '</div>';
+    };
+
+    // Admin Logik (nutzt deine existierenden Modals, kein DOM-Eingriff)
+    window.adminDeleteLogic = function(pid, i) {
+        if (!window.customConfirm) return alert("Hata");
+        window.customConfirm("Silmek istediğinize emin misiniz?", () => {
+            window.poemDataStore[pid].comments.splice(i, 1);
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            window.renderAdminManagement();
+            if(window.renderCommentsV57) window.renderCommentsV57(pid);
+            if(window.syncToCloud) window.syncToCloud();
+        }, 'warning');
+    };
+
+    window.adminEditLogic = function(pid, i) {
+        if (!window.customDualPrompt) return;
+        window.customDualPrompt("Düzenle", "✍️", window.poemDataStore[pid].comments[i].text, (title, val) => {
+            window.poemDataStore[pid].comments[i].text = val;
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            window.renderAdminManagement();
+            window.renderCommentsV57(pid);
+            if(window.syncToCloud) window.syncToCloud();
+        });
     };
 })();
 </script>
