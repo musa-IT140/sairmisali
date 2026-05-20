@@ -22138,5 +22138,92 @@ setInterval(function() {
 })();
 </script>
 
+<style id="gemini-comment-unlock">
+    /* 1. Erzwingt, dass das Kommentarfeld und der Sende-Button für ALLE sichtbar sind */
+    .modal-interaction-box #m-comment-area, 
+    .modal-interaction-box .edel-comment-input, 
+    .modal-interaction-box button[onclick*="m_addComment"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+</style>
+
+<script>
+(function() {
+    // 2. JS-Fix: Entfernt jede Admin-Sperre in der m_addComment Funktion
+    window.m_addComment = function(e) {
+        if (e) e.stopPropagation();
+        
+        // LOGIN-CHECK BEIBEHALTEN (Damit nur Registrierte schreiben können)
+        if (!window.currentUser) { 
+            if(window.openFastModal) window.openFastModal('m-login-modal'); 
+            return; 
+        }
+
+        const input = document.getElementById('m-comment-input') || document.querySelector('.edel-comment-input');
+        if (!input || !input.value.trim()) return;
+        
+        let text = input.value.trim();
+        const poemId = window.currentPoemData?.id;
+        if (!poemId) return;
+
+        // badWords-Filter (Dein Sicherheitsstandard bleibt erhalten)
+        if (window.badWords && window.badWords.some(w => text.toLowerCase().includes(w))) {
+            input.value = '';
+            if(window.m_logout) window.m_logout();
+            if(window.customAlert) window.customAlert('Kötü söz kullandınız!', '🚫');
+            return;
+        }
+
+        try {
+            // Datenbank laden (und heilen)
+            window.poemDataStore = JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+            if (!window.poemDataStore[poemId]) window.poemDataStore[poemId] = { ratings: {}, comments: [] };
+            if (!Array.isArray(window.poemDataStore[poemId].comments)) {
+                window.poemDataStore[poemId].comments = Object.values(window.poemDataStore[poemId].comments || {}).filter(Boolean);
+            }
+
+            let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+            
+            // NEU: Kommentar pushen
+            window.poemDataStore[poemId].comments.push({ 
+                id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), 
+                username: window.currentUser.username, 
+                user: fullName, 
+                text: text, 
+                ts: Date.now(),
+                time: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+                likes: [], replies: [], likeTimes: {} 
+            });
+
+            input.value = '';
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            window.lastLocalUpdate = Date.now() + 5000;
+
+            // --- PROFESSIOELLE UI-UPDATES ---
+            if(window.updateHeartsUI) window.updateHeartsUI(); 
+            if(window.renderUserWorksGrid) window.renderUserWorksGrid(); 
+            if(window.syncToCloud) window.syncToCloud(); 
+            
+            // Benachrichtigung an Admin UND User (Nur wenn Werk ein User-Werk ist)
+            if(window.sendSystemMessage) {
+                let pTitle = window.currentPoemData.title || window.currentPoemData.trTitle || 'Eser';
+                window.sendSystemMessage('Admin', `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı esere yorum yaptı.`, poemId, window.currentPoemData.type);
+                
+                // Nur senden, wenn es nicht das eigene Werk ist
+                if(window.currentPoemData.type === 'userPoems' && window.currentPoemData.username !== window.currentUser.username) {
+                     window.sendSystemMessage(window.currentPoemData.username, `<strong style="color:#00d2ff;">${fullName}</strong>, "${pTitle}" adlı eserine yorum yaptı.`, poemId, window.currentPoemData.type);
+                }
+            }
+        } catch(err) { 
+            console.error("Kommentar-Fehler:", err); 
+            if(window.customAlert) window.customAlert('Bir hata oluştu. (Fehler beim Speichern)', '❌');
+        }
+    };
+})();
+</script>
+
 </body>
 </html>
