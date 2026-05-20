@@ -21859,5 +21859,158 @@ setInterval(function() {
 })();
 </script>
 
+<style id="gemini-omni-patch">
+    /* 1. MODAL BORDER & HÖHE (Mobil) FIX - Rand unten sichtbar! */
+    @media (max-width: 768px) {
+        body .modal-content, 
+        body .game-modal-content, 
+        body .auth-modal-content {
+            height: auto !important; 
+            max-height: 85dvh !important; /* dVh respektiert die iOS/Android Adressleiste */
+            margin: 7.5dvh auto !important;
+            border-bottom: 2px solid var(--theme-acc, #f4c542) !important;
+        }
+        body .modal-body {
+            padding-bottom: 50px !important;
+        }
+    }
+
+    /* 2. ENDLOS-KOMMENTARE (Kein inneres Scrollen mehr) */
+    html body #m-comment-list,
+    html body #my-roses-list {
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* 3. KARTEN-KLICKS RETTEN */
+    .card, .game-card, .sahsiyet-card, .poem-card, .section-box {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        position: relative !important;
+        z-index: 100 !important; 
+    }
+
+    /* Geister-Elemente töten, die Klicks abfangen */
+    .wild-bg-container, .stu-overlay, #misali-portal-root, #admin-dropdown-portal {
+        pointer-events: none !important;
+    }
+
+    /* 4. FARB-SCHUTZ: ADMIN VS. USER */
+    .is-admin-comment .comment-name,
+    .is-admin-comment .author-anim-admin,
+    .is-admin-comment .v57-author-name {
+        color: #F4C542 !important; 
+        font-weight: bold !important;
+        -webkit-text-fill-color: #F4C542 !important;
+        text-shadow: 0 0 5px rgba(244, 197, 66, 0.6) !important;
+    }
+    .is-user-comment .comment-name,
+    .is-user-comment .author-anim-user,
+    .is-user-comment .v57-author-name {
+        color: #75D8FF !important; 
+        -webkit-text-fill-color: #75D8FF !important;
+    }
+    
+    /* Eigene Farbe für Elite-User respektieren */
+    .modal-interaction-box [style*="--user-custom-color-name"] {
+        color: var(--user-custom-color-name) !important;
+        -webkit-text-fill-color: var(--user-custom-color-name) !important;
+    }
+
+    /* 5. SENDE-WARNUNGEN VERSTECKEN */
+    #m-comment-warning, .comment-limit-hint, .rate-limit-msg {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+</style>
+
+<script>
+(function() {
+    // -----------------------------------------------------------------
+    // 1. FOKUS-RETTER (Damit man tippen kann, ohne rauszufliegen)
+    // -----------------------------------------------------------------
+    window.isTyping = false;
+    
+    document.addEventListener('focusin', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            window.isTyping = true;
+        }
+    }, true);
+
+    document.addEventListener('focusout', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            setTimeout(() => { window.isTyping = false; }, 300); // Kurz warten, falls er Button drückt
+        }
+    }, true);
+
+    // Blockiert das Neu-Rendern der UI (was den Cursor killt), während der User tippt!
+    const originalUpdateHeartsUI = window.updateHeartsUI;
+    window.updateHeartsUI = function() {
+        if (window.isTyping) return; // Halt Stop! Der User tippt gerade!
+        if (originalUpdateHeartsUI) originalUpdateHeartsUI();
+    };
+
+    const originalRenderCommentsV57 = window.renderCommentsV57;
+    window.renderCommentsV57 = function(poemId) {
+        if (window.isTyping) return; // Halt Stop! Der User tippt gerade!
+        if (originalRenderCommentsV57) originalRenderCommentsV57(poemId);
+    };
+
+    // -----------------------------------------------------------------
+    // 2. KARTEN-KLICKS ERZWINGEN (Der "Bir Rengim Var" Fix)
+    // -----------------------------------------------------------------
+    document.addEventListener('click', function(e) {
+        let card = e.target.closest('.game-card, .poem-card, .sahsiyet-card, .card');
+        
+        // Verhindern, dass Klicks auf Lesezeichen/Teilen die Karte ungewollt triggern
+        if (card && !e.target.closest('.bookmark-btn') && !e.target.closest('.reset-btn') && !e.target.closest('a')) {
+            let targetAction = card.getAttribute('onclick');
+            if (targetAction) {
+                try {
+                    // Wir zwingen das Script zur Ausführung, egal ob Pointer-Events gestört sind
+                    eval(targetAction);
+                    e.preventDefault();
+                    e.stopPropagation();
+                } catch(err) { console.error("Karten-Klick Fix Fehler:", err); }
+            }
+        }
+    }, true);
+
+    // -----------------------------------------------------------------
+    // 3. FARB-POLIZEI & ANTI-BLOCKADE WÄCHTER
+    // -----------------------------------------------------------------
+    setInterval(() => {
+        // A. Sende-Blockaden aufheben (Zwingt Buttons und Felder immer aktiv)
+        document.querySelectorAll('input, textarea, .reset-btn').forEach(el => {
+            if (el.hasAttribute('disabled')) el.removeAttribute('disabled');
+        });
+
+        if (window.isTyping) return; // Stört den Nutzer nicht beim Tippen
+
+        // B. Farben auf Admins vs Users zwingen
+        document.querySelectorAll('#m-comment-list > div, .c-v57-reply-item, .comment-card-v57').forEach(item => {
+            let nameSpans = item.querySelectorAll('.author-anim-admin, .author-anim-user, .v57-author-name, .comment-name');
+            
+            nameSpans.forEach(nameSpan => {
+                let textContent = nameSpan.textContent.toLowerCase();
+                let isAdmin = textContent.includes('şair misal.i') || textContent.includes('admin') || nameSpan.classList.contains('author-anim-admin');
+
+                if (isAdmin) {
+                    item.classList.add('is-admin-comment');
+                    item.classList.remove('is-user-comment');
+                } else {
+                    item.classList.add('is-user-comment');
+                    item.classList.remove('is-admin-comment');
+                }
+            });
+        });
+    }, 400);
+
+})();
+</script>
+
 </body>
 </html>
