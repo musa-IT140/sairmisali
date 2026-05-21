@@ -20047,72 +20047,462 @@ setInterval(function() {
 })();
 </script>
 
-<style id="v22-mobile-layout-fix">
-    /* Kompakte Antwort-Box */
-    .c-v57-reply-box { 
-        display: none !important; 
-        margin-top: 8px !important; 
-        padding: 10px !important; 
-        background: rgba(255,255,255,0.03) !important; 
-        border-radius: 10px !important; 
+<style id="gemini-addon-fix-css">
+    /* ----------------------------------------------------
+       1. FARB-BUG FIX (Admin Farbe für normale User blockieren)
+       Wir zwingen das CSS, wieder deine Original-Klassen zu nutzen!
+       ---------------------------------------------------- */
+    .is-admin-comment .v57-author-name,
+    .is-admin-comment .comment-name {
+        color: inherit !important;
+        -webkit-text-fill-color: inherit !important;
+        text-shadow: inherit !important;
+        font-weight: inherit !important;
     }
-    .c-v57-reply-box.active { display: flex !important; flex-direction: column !important; gap: 8px !important; }
 
-    /* Button-Container in der Antwort-Box */
-    .reply-action-row { 
-        display: flex !important; 
-        gap: 8px !important; 
-        justify-content: flex-end !important; 
+    /* ----------------------------------------------------
+       2. HEADER SYMMETRIE (Güllerim-Badge anpassen)
+       ---------------------------------------------------- */
+    #header-my-roses-badge-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        position: relative !important;
+        font-size: 0.52rem !important;
+        line-height: 1.2 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    @media (min-width: 769px) {
+        #header-my-roses-badge-container {
+            flex-direction: row !important;
+            font-size: 0.70rem !important;
+            padding: 2px 6px !important;
+        }
+    }
+
+    /* ----------------------------------------------------
+       3. KOMPAKTE KOMMENTAR-BUTTONS (Nur Icons!)
+       ---------------------------------------------------- */
+    .c-v57-act-btn, .c-v18-act-btn {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        display: inline-flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0 !important;
+        color: #00d2ff !important;
+        font-size: 0 !important; /* Versteckt den Text 'Yanıtla' / 'Sil' */
+        transition: all 0.2s ease !important;
+    }
+    .c-v57-act-btn i, .c-v18-act-btn i { font-size: 0.95rem !important; }
+    
+    .c-v57-act-btn.del, .c-v18-act-btn.del {
+        color: #ef4444 !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* ----------------------------------------------------
+       4. GÖNDER / IPTAL BUTTONS (Mobile Fix)
+       ---------------------------------------------------- */
+    .c-v57-reply-box, .c-v18-reply-box {
+        background: rgba(0,0,0,0.3) !important;
+        padding: 10px !important;
+        border-radius: 10px !important;
+        margin-top: 10px !important;
+        border: 1px solid rgba(0, 210, 255, 0.2) !important;
+    }
+    /* Zwingt die Buttons in eine Reihe rechts */
+    .c-v57-reply-box > div:last-child, .c-v18-reply-box > div:last-child {
+        display: flex !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        margin-top: 8px !important;
     }
     
-    /* Buttons in der Antwort-Box: Schlank und klein */
-    .reply-action-row button {
-        padding: 4px 10px !important;
-        font-size: 0.7rem !important;
-        min-height: 28px !important;
+    @media (max-width: 768px) {
+        /* Auf dem Handy machen wir aus Gönder/İptal quadratische Icon-Buttons */
+        .c-v57-reply-box > div:last-child button, 
+        .c-v18-reply-box > div:last-child button {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            font-size: 0 !important; /* Text weg */
+            border-radius: 8px !important;
+        }
+        /* İptal Icon */
+        .c-v57-reply-box > div:last-child button:first-child::before,
+        .c-v18-reply-box > div:last-child button:first-child::before {
+            content: "\f00d"; /* FontAwesome 'X' */
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: #cbd5e1;
+        }
+        /* Gönder Icon bleibt, da es schon ein <i> Tag hat, wir machen es nur größer */
+        .c-v57-reply-box > div:last-child button:last-child i,
+        .c-v18-reply-box > div:last-child button:last-child i {
+            font-size: 1.2rem !important;
+            margin: 0 !important;
+        }
     }
 
-    /* Header Konsistenz: Exakt wie die anderen Badges */
-    .clickable-header-item {
+    /* ----------------------------------------------------
+       5. KOMMENTAR-SPERRE AUFHEBEN
+       ---------------------------------------------------- */
+    .modal-interaction-box #m-comment-area, 
+    .modal-interaction-box .edel-comment-input, 
+    .modal-interaction-box button[onclick*="m_addComment"] {
         display: flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        padding: 0 5px !important;
-        font-size: 0.65rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
-    .header-blue-rose-icon { font-size: 0.9rem !important; }
 </style>
 
-// Innerhalb deiner renderCommentsV57 - beim Mapping der repliesArr:
-return `
-<div class="c-v57-reply-item">
-    <div class="v57-top-row">
-        <div class="v57-author-box">
-            <span style="font-size:0.8rem;">${ruObj.emoji || '👤'}</span>
-            <span class="${window.getAuthorColorClass(r.username)}" style="font-size:0.75rem;">${rFName}</span> ${rBadge}
-        </div>
-        <div class="v57-action-box">
-            <div class="rose-btn-v57 ${rrClass}" style="font-size:0.8rem; padding:1px 4px;" onclick="window.toggleRoseLikeV57('${poemId}', ${cIdx}, ${rIdx}, this)">
-                🌹 <span class="count" style="font-size:0.6rem;">${r.likes?.length || ''}</span>
-            </div>
-        </div>
-    </div>
-    <div style="font-size:0.85rem; color:#cbd5e1; margin: 4px 0;">${formattedTextR}</div>
-    <div class="v57-bottom-row" style="display:flex; justify-content:flex-end; gap:6px;">
-        <button class="c-v57-act-btn" onclick="window.toggleReplyBoxV57(${cIdx}, '${safeRFName}')"><i class="fas fa-reply"></i></button>
-        ${(isAdm || rIsOwn) ? `<button class="c-v57-act-btn del" onclick="window.deleteItemV57('${poemId}', ${cIdx}, ${rIdx})"><i class="fas fa-trash"></i></button>` : ''}
-    </div>
-</div>`;
+<script id="gemini-addon-fix-js">
+(function() {
+    // ==================================================================
+    // 1. UNTERKOMMENTARE "YANITLA" FIX (Fokussiert das Feld richtig)
+    // ==================================================================
+    window.toggleReplyBoxV57 = function(cIdx, replyUser = null) {
+        if (!window.currentUser) {
+            if(window.openFastModal) window.openFastModal('m-login-modal');
+            return;
+        }
+        let box = document.getElementById('reply-box-v57-' + cIdx) || document.getElementById('reply-box-v18-' + cIdx);
+        if (box) {
+            // Alle anderen schließen
+            document.querySelectorAll('.c-v57-reply-box, .c-v18-reply-box').forEach(b => { 
+                if(b.id !== box.id) b.classList.remove('active'); 
+            });
+            
+            box.classList.add('active'); // Öffnen
+            
+            let inp = box.querySelector('input');
+            if (inp) {
+                inp.focus();
+                // Wenn auf ein Unterkommentar geklickt wurde, "@Name" einfügen
+                if (replyUser) {
+                    let mentionString = '@' + replyUser + ', ';
+                    if (!inp.value.startsWith(mentionString)) {
+                        inp.value = mentionString + inp.value.replace(/^@.*?, /, ''); 
+                    }
+                }
+            }
+        }
+    };
 
-// Ersetze den .c-v57-reply-box Teil durch das hier:
-html += `
-<div class="c-v57-reply-box" id="reply-box-v57-${cIdx}">
-    <input type="text" class="c-v57-reply-input" placeholder="Yanıtın...">
-    <div class="reply-action-row">
-        <button class="reset-btn" onclick="window.toggleReplyBoxV57(${cIdx})" style="background:transparent; border:1px solid #64748b;">İptal</button>
-        <button class="reset-btn" onclick="window.submitReplyV57('${poemId}', ${cIdx})" style="background:#06b6d4; color:#fff;">Gönder</button>
-    </div>
-</div>`;
+    // ==================================================================
+    // 2. DETAILLIERTE GÜLLERİM LISTE WIEDERHERSTELLEN
+    // ==================================================================
+    window.renderMyRosesList = function() {
+        const list = document.getElementById('my-roses-list');
+        if(!list) return;
+        if(!window.currentUser) { list.innerHTML = '<div style="text-align:center; color:#94a3b8;">Lütfen giriş yapın.</div>'; return; }
+
+        let uName = window.currentUser.username;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+        let rosesData = [];
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+
+        const getPoemTitle = (id) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Eser'; }
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            for (let cat in fullDB) {
+                if(Array.isArray(fullDB[cat])) { let f = fullDB[cat].find(x => x.id === id); if (f) return f.trTitle || f.title || f.deTitle || 'Eser'; }
+            }
+            return 'Eser';
+        };
+
+        const getPoemAuthorStr = (pId) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === pId); if(f) return f.name + (f.surname ? ' ' + f.surname : ''); }
+            if (pId.startsWith('user_')) return 'Anonim';
+            if (pId.startsWith('ata_')) return 'Anonim';
+            if (pId.startsWith('sag_')) return 'Tavsiye / Empfehlung';
+            return 'Şair Misal.i';
+        };
+
+        for (let poemId in db) {
+            let pDb = db[poemId];
+            if (pDb && pDb.comments) {
+                let commentsArr = Array.isArray(pDb.comments) ? pDb.comments : Object.values(pDb.comments || {}).filter(Boolean);
+
+                commentsArr.forEach((c, cIdx) => {
+                    if (!c) return; 
+                    // Hauptkommentare sammeln
+                    if ((c.username === uName || isAdmin) && c.likes && c.likes.length > 0) {
+                        c.likes.forEach(liker => {
+                            if (!isAdmin && c.username !== uName) return;
+                            let likeTs = (c.likeTimes && c.likeTimes[liker]) ? c.likeTimes[liker] : c.ts;
+                            rosesData.push({ poemId: poemId, cIdx: cIdx, rIdx: null, poemTitle: getPoemTitle(poemId), poemAuthor: getPoemAuthorStr(poemId), liker: liker, ts: likeTs, text: c.text });
+                        });
+                    }
+                    // Antworten sammeln
+                    let repliesArr = Array.isArray(c.replies) ? c.replies : Object.values(c.replies || {}).filter(Boolean);
+                    repliesArr.forEach((r, rIdx) => {
+                        if (r && (r.username === uName || isAdmin) && r.likes && r.likes.length > 0) {
+                            r.likes.forEach(liker => {
+                                if (!isAdmin && r.username !== uName) return;
+                                let likeTs = (r.likeTimes && r.likeTimes[liker]) ? r.likeTimes[liker] : r.ts;
+                                rosesData.push({ poemId: poemId, cIdx: cIdx, rIdx: rIdx, poemTitle: getPoemTitle(poemId), poemAuthor: getPoemAuthorStr(poemId), liker: liker, ts: likeTs, text: r.text });
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        if(rosesData.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz gülleriniz yok. <br><span class="de-sub">(Noch keine Rosen erhalten)</span></div>';
+            return;
+        }
+
+        rosesData.sort((a, b) => b.ts - a.ts);
+
+        list.innerHTML = rosesData.map(r => {
+            let uObj = window.userDatabase[r.liker] || {};
+            let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : r.liker;
+            let emj = uObj.emoji || '👤';
+            let likerColorClass = window.getAuthorColorClass ? window.getAuthorColorClass(r.liker) : '';
+            let authorColorClass = window.getAuthorColorClass ? window.getAuthorColorClass(r.poemAuthor) : '';
+
+            let dObj = new Date(r.ts || Date.now());
+            let tStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+
+            let adminActions = '';
+            if (isAdmin) {
+                let rParam = r.rIdx !== null ? r.rIdx : 'null';
+                adminActions = `
+                    <button class="reset-btn danger" style="width:28px !important; height:28px !important; min-height:28px !important; padding:0 !important; margin:0 !important; font-size:0.85rem !important; display:flex !important; justify-content:center !important; align-items:center !important; border-radius:6px !important; box-shadow:0 2px 5px rgba(239,68,68,0.4) !important; pointer-events:auto !important;" onclick="event.preventDefault(); event.stopPropagation(); window.deleteBlueRoseAdminV57('${r.poemId}', ${r.cIdx}, ${rParam}, '${r.liker}')" title="Gülü Sil">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="reset-btn" style="width:28px !important; height:28px !important; min-height:28px !important; padding:0 !important; margin:0 !important; font-size:0.85rem !important; display:flex !important; justify-content:center !important; align-items:center !important; background:linear-gradient(135deg, #3b82f6, #1d4ed8) !important; color:white !important; border-radius:6px !important; box-shadow:0 2px 5px rgba(59,130,246,0.4) !important; pointer-events:auto !important;" onclick="event.preventDefault(); event.stopPropagation(); window.openWriteThankYouModal('${r.liker}', '${r.poemId}')" title="Mesaj">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                `;
+            }
+            
+            let safeRawText = r.text || '';
+            if (safeRawText.length > 80) safeRawText = safeRawText.substring(0, 80) + '...';
+
+            return `
+                <div style="background:rgba(0,0,0,0.5); padding:15px; margin-bottom:12px; border-radius:12px; border:1px solid rgba(0,210,255,0.3); border-left:4px solid #00d2ff; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" onclick="window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${r.poemId}'), 100);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:8px;">
+                        <div style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif; font-size:1.1rem; line-height:1.2;">✍️ ${r.poemTitle}</div>
+                        <div style="display:flex; align-items:flex-end; margin-left:8px;">
+                            <span style="font-family:'Poppins', sans-serif; font-size:0.55rem; color:#64748b; font-style:italic; margin-bottom:2px;">Written by</span>
+                            <span class="${authorColorClass}" style="font-family:'Great Vibes', cursive; font-size:1.15rem; margin-left:4px; font-weight:normal;">${r.poemAuthor}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:flex-start; gap:10px; width:100%;">
+                        <span style="font-size:1.6rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3)); flex-shrink:0;">${emj}</span>
+                        <div style="display:flex; flex-direction:column; flex-grow:1; min-width:0;">
+                            <div style="font-size:0.85rem; font-weight:500; line-height:1.3; margin-bottom:4px;">
+                                <span class="${likerColorClass}">${fullName}</span> sana mavi gül bıraktı.
+                            </div>
+                            <div style="font-size:0.8rem; color:#cbd5e1; font-style:italic; line-height:1.4; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; border-left: 2px solid rgba(0,210,255,0.4);">
+                                "${safeRawText}"
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top:1px dashed rgba(255,255,255,0.05); padding-top:8px;">
+                        <span style="font-size:0.7rem; color:#64748b; font-weight:600;"><i class="fas fa-clock" style="color:#00d2ff;"></i> ${tStr}</span>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            ${adminActions}
+                            <div style="color:#00d2ff; font-weight:900; font-size:1.2rem; filter: hue-rotate(200deg) drop-shadow(0 0 5px rgba(0,210,255,0.5));">🌹</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    // ==================================================================
+    // 3. SICHERHEITS-WÄCHTER (Stellt sicher, dass das Senden klappt)
+    // ==================================================================
+    setInterval(() => {
+        // Entsperrt Eingabefelder und Buttons
+        document.querySelectorAll('#m-comment-input, .edel-comment-input, button[onclick*="m_addComment"]').forEach(el => {
+            if (el.hasAttribute('disabled')) el.removeAttribute('disabled');
+            el.style.pointerEvents = 'auto';
+        });
+    }, 1000);
+
+})();
+</script>
+
+<style>
+    /* Das Dropdown-Menü wird in den Body "gebeamt", damit es nie wieder abgeschnitten wird */
+    .teleported-select-items {
+        position: fixed !important;
+        z-index: 2147483647 !important; /* Absolut im Vordergrund */
+        background: #0a192f !important;
+        border: 2px solid #f4c542 !important;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.95) !important;
+        border-radius: 8px !important;
+        max-height: 220px !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain !important;
+    }
+    .teleported-select-items div {
+        padding: 12px 15px !important;
+        color: #fff !important;
+        cursor: pointer !important;
+        border-bottom: 1px solid rgba(244,197,66,0.1) !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 0.9rem !important;
+        transition: 0.2s !important;
+    }
+    .teleported-select-items div:hover {
+        background: rgba(244,197,66,0.2) !important;
+        color: #f4c542 !important;
+        padding-left: 20px !important; /* Cooles Hover-Detail */
+    }
+</style>
+
+<script>
+(function() {
+    // -----------------------------------------------------------------
+    // 1. DROPDOWN-FIX: Zwingt "Admin Değerlendirmesi" aus dem Fenster
+    // -----------------------------------------------------------------
+    document.addEventListener('click', function(e) {
+        let selectContainer = e.target.closest('.admin-eval-container, .admin-rating-box, .custom-select');
+        let allTeleported = document.querySelectorAll('body > .select-items');
+
+        if (selectContainer) {
+            let itemsList = selectContainer.querySelector('.select-items');
+            let selectedBtn = selectContainer.querySelector('.select-selected');
+            
+            if (itemsList && selectedBtn) {
+                e.preventDefault(); e.stopPropagation();
+
+                // Wenn es schon offen ist, schließe es
+                if (itemsList.style.display === 'block') {
+                    itemsList.style.display = 'none';
+                    return;
+                }
+
+                // Schließe alle anderen offenen Dropdowns
+                allTeleported.forEach(el => el.style.display = 'none');
+
+                // 🔥 DER FIX: Wir verschieben die Liste in den <body>, damit sie dem Rahmen entkommt! 🔥
+                if (itemsList.parentElement !== document.body) {
+                    document.body.appendChild(itemsList);
+                    itemsList.classList.add('teleported-select-items');
+                }
+
+                // Exakte Position des Buttons berechnen
+                let rect = selectedBtn.getBoundingClientRect();
+                itemsList.style.position = 'fixed';
+                itemsList.style.left = rect.left + 'px';
+                itemsList.style.top = (rect.bottom + 4) + 'px'; // Klappt strikt nach UNTEN auf
+                itemsList.style.width = rect.width + 'px';
+                itemsList.style.display = 'block';
+
+                // Die Klick-Funktion der Auswahlen reparieren, da sie nun im Body leben
+                itemsList.querySelectorAll('div').forEach((itemDiv, index) => {
+                    itemDiv.onclick = function(ev) {
+                        ev.stopPropagation();
+                        selectedBtn.innerHTML = this.innerHTML;
+                        itemsList.style.display = 'none';
+                        
+                        // Finde das versteckte echte <select> und aktualisiere es
+                        let hiddenSelect = selectContainer.querySelector('select');
+                        if (hiddenSelect) {
+                            hiddenSelect.selectedIndex = index;
+                            hiddenSelect.dispatchEvent(new Event('change')); // Triggert deine Original-Speicherlogik
+                        }
+                    };
+                });
+            }
+        } else {
+            // Ein Klick irgendwo anders schließt das Dropdown
+            allTeleported.forEach(el => el.style.display = 'none');
+        }
+    }, true);
+
+    // Scrollen im Fenster schließt das Menü (verhindert freischwebende Menüs)
+    window.addEventListener('scroll', () => { document.querySelectorAll('body > .select-items').forEach(el => el.style.display = 'none'); }, true);
+
+    // -----------------------------------------------------------------
+    // 2. NACHRICHTEN-FIX: "AŞK" wird zum klickbaren Button
+    // -----------------------------------------------------------------
+    // Sucht aggressiv nach Wörtern in Anführungszeichen (z.B. "AŞK") und macht sie klickbar
+    function makePoemClickable(html, poemId, poemType) {
+        if (!poemId || !html) return html;
+        
+        let action = `window.closeTopModal('force'); setTimeout(() => { window.openPoemModal ? window.openPoemModal('${poemId}', '${poemType}') : window.openUserPoemModal('${poemId}'); }, 100);`;
+        let clickableSpan = `"<span onclick="${action}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold; font-size: 1.05em; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#f4c542'">$1</span>"`;
+
+        // Szenario 1: Der Titel ist in "Titel" (Doppelte Anführungszeichen)
+        if (html.includes('"')) {
+            // Ersetzt alles zwischen den Anführungszeichen durch den Button
+            html = html.replace(/"([^"]+)"/, clickableSpan);
+            // Entfernt den redundanten "[Eser]"-Anhang, falls er von deinem Original-System gesetzt wurde
+            html = html.replace(/<span onclick=".*?" style=".*Color:#f4c542;.*?">\[.*?\]<\/span>/g, '');
+            return html;
+        } 
+        
+        // Szenario 2: Wenn aus irgendeinem Grund keine Anführungszeichen da sind, bleibt dein Standard erhalten
+        return html;
+    }
+
+    // Wir klinken uns in deine Original-Render-Funktionen ein
+    const origRenderAdmin = window.renderAdminMessages;
+    window.renderAdminMessages = function() {
+        if (origRenderAdmin) origRenderAdmin();
+        
+        // Unmittelbar nach dem dein System die HTML gezeichnet hat, überschreiben wir die Texte
+        setTimeout(() => {
+            let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin' || m.to === 'AdminKing').slice().reverse();
+            let cards = document.querySelectorAll('#admin-msg-list .notif-card, #admin-msg-list > div[style*="background"]');
+            
+            cards.forEach((card, i) => {
+                let msgData = msgs[i];
+                if (msgData && msgData.poemId) {
+                    let textDiv = card.querySelector('div[style*="line-height:1.5"]');
+                    if (textContainer) textDiv.innerHTML = makePoemClickable(textDiv.innerHTML, msgData.poemId, msgData.poemType || 'poems');
+                }
+            });
+        }, 50);
+    };
+
+    const origRenderUser = window.renderUserMessages;
+    window.renderUserMessages = function() {
+        if (origRenderUser) origRenderUser();
+        
+        setTimeout(() => {
+            if(!window.currentUser) return;
+            let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username).slice().reverse();
+            let cards = document.querySelectorAll('#user-msg-list .notif-card, #user-msg-list > div[style*="background"]');
+            
+            cards.forEach((card, i) => {
+                let msgData = msgs[i];
+                if (msgData && msgData.poemId) {
+                    let textDiv = card.querySelector('div[style*="line-height:1.5"]');
+                    if (textDiv) textDiv.innerHTML = makePoemClickable(textDiv.innerHTML, msgData.poemId, msgData.poemType || 'poems');
+                }
+            });
+        }, 50);
+    };
+
+    // Führt das Skript beim ersten Laden einmal aus, falls die Fenster schon offen sind
+    setTimeout(() => {
+        if (document.getElementById('adminMessagesModal')?.classList.contains('active-modal')) window.renderAdminMessages();
+        if (document.getElementById('userMessagesModal')?.classList.contains('active-modal')) window.renderUserMessages();
+    }, 500);
+
+})();
+</script>
 
 </body>
 </html>
