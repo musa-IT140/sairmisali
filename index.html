@@ -20597,5 +20597,260 @@ setInterval(function() {
 
 
 
+<style id="misali-notif-fix-css">
+    /* Stil-Definitionen außerhalb des JS-Strings halten, damit nichts beim Rendern bricht */
+    .notif-card { background: rgba(0,0,0,0.5); padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 4px solid #f4c542; border: 1px solid rgba(255,255,255,0.05); }
+    .notif-header { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px; }
+    .notif-poem-link { color: #f4c542 !important; cursor: pointer !important; text-decoration: underline !important; font-weight: bold !important; padding: 2px 4px; }
+    .notif-btn { background: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-left: 5px; }
+    .notif-btn.del { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+</style>
+
+<script id="misali-notif-fix-js">
+(function() {
+    // 1. Sichere URL-Generierung & Link-Erzeugung
+    window.makePoemClickable = function(msg, poemId, poemType) {
+        if (!poemId || !msg) return msg;
+
+        // Wir nutzen eine sichere Funktion zum Erzeugen der Links
+        let action = `window.closeTopModal('force'); setTimeout(() => { window.openPoemModal ? window.openPoemModal('${poemId}', '${poemType}') : window.openUserPoemModal('${poemId}'); }, 100);`;
+        
+        // Regex findet den Titel in Anführungszeichen (z.B. "AŞK")
+        return msg.replace(/"([^"]+)"/g, function(match, title) {
+            return `<span class="notif-poem-link" onclick="${action} event.stopPropagation();">${title}</span>`;
+        });
+    };
+
+    // 2. Admin Messages Render-Logik (Bereinigt)
+    window.renderAdminMessages = function() {
+        const list = document.getElementById('admin-msg-list');
+        if(!list) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin' || m.to === 'AdminKing').slice().reverse();
+        
+        if(msgs.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Mesaj kutusu boş.</div>';
+            return;
+        }
+        
+        list.innerHTML = msgs.map(m => {
+            let uObj = window.userDatabase ? window.userDatabase[m.from] : {};
+            let emj = (m.from === 'Sistem' || m.from === 'Admin') ? '🤖' : (uObj.emoji || '👤');
+            let colorClass = window.getAuthorColorClass ? window.getAuthorColorClass(m.from) : '';
+            
+            // Fix: Der Text wird nun durch die saubere Funktion gejagt
+            let msgContent = window.makePoemClickable(m.msg, m.poemId, m.poemType || 'poems');
+            
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? '' : m.from;
+            let replyBtn = replyTarget ? `<button class="notif-btn" onclick="window.replyToMessage('${replyTarget}')"><i class="fas fa-reply"></i> Yanıtla</button>` : '';
+
+            return `
+            <div class="notif-card">
+                <div class="notif-header">
+                    <span><span style="font-size:1.3rem; margin-right:8px;">${emj}</span> <strong class="${colorClass}">${m.from || 'Sistem'}</strong></span>
+                    <span style="font-size:0.75rem; color:#64748b;">${m.time || ''}</span>
+                </div>
+                <div style="font-size:0.9rem; color:#fdfbf7; line-height:1.5; margin-bottom:12px;">${msgContent}</div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    ${replyBtn}
+                    <button class="notif-btn del" onclick="window.deleteSingleMessage('${m.id}')"><i class="fas fa-trash"></i> Sil</button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    // 3. User Messages Render-Logik (Bereinigt)
+    window.renderUserMessages = function() {
+        const list = document.getElementById('user-msg-list');
+        if(!list || !window.currentUser) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username).slice().reverse();
+        
+        if(msgs.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Mesaj kutusu boş.</div>';
+            return;
+        }
+        
+        list.innerHTML = msgs.map(m => {
+            let uObj = window.userDatabase ? window.userDatabase[m.from] : {};
+            let emj = (m.from === 'Sistem' || m.from === 'Admin') ? '🤖' : (uObj.emoji || '👤');
+            let colorClass = window.getAuthorColorClass ? window.getAuthorColorClass(m.from) : '';
+            let msgContent = window.makePoemClickable(m.msg, m.poemId, m.poemType || 'poems');
+            
+            return `
+            <div class="notif-card" style="border-left: 3px solid #00d2ff !important;">
+                <div class="notif-header">
+                    <span><span style="font-size:1.3rem;">${emj}</span> <strong class="${colorClass}">${m.from || 'Sistem'}</strong></span>
+                    <span style="font-size:0.75rem; color:#64748b;">${m.time || ''}</span>
+                </div>
+                <div style="font-size:0.9rem; color:#fdfbf7; line-height:1.5; margin-bottom:12px;">${msgContent}</div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button class="notif-btn" onclick="window.replyToMessage('AdminKing')"><i class="fas fa-reply"></i> Yanıtla</button>
+                    <button class="notif-btn del" onclick="window.deleteSingleMessage('${m.id}')"><i class="fas fa-trash"></i> Sil</button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+})();
+</script>
+
+<script id="misali-notif-fix-pro">
+(function() {
+    // ----------------------------------------------------
+    // PROFI-ENGINE: Müll entfernen & Links korrekt setzen
+    // ----------------------------------------------------
+    window.renderMessageWithLinks = function(msg, poemId, poemType) {
+        if (!msg) return "";
+
+        // 1. Müll entfernen (Farb-Codes und HTML-Fragmente)
+        // Wir nehmen den Text-Inhalt, um sicherzustellen, dass keine CSS-Fragmente gerendert werden
+        let tempDiv = document.createElement('div');
+        tempDiv.innerHTML = msg;
+        let cleanText = tempDiv.textContent || tempDiv.innerText || "";
+
+        // 2. Jetzt den Werktitel (in Anführungszeichen) finden und klickbar machen
+        if (!poemId) return cleanText;
+
+        let action = `window.closeTopModal('force'); setTimeout(() => { window.openPoemModal ? window.openPoemModal('${poemId}', '${poemType}') : window.openUserPoemModal('${poemId}'); }, 100);`;
+        
+        // Regex für Anführungszeichen (auch mit Leerzeichen, wie in deinem Bild: " BEN'ZERSİZ B'AŞKA ")
+        let regex = /["«]\s*([^"»]+)\s*["»]/g;
+        
+        return cleanText.replace(regex, function(match, title) {
+            return `<span class="notif-poem-link" onclick="${action} event.stopPropagation();">${title.trim()}</span>`;
+        });
+    };
+
+    // ----------------------------------------------------
+    // ADMIN MESSAGES
+    // ----------------------------------------------------
+    window.renderAdminMessages = function() {
+        const list = document.getElementById('admin-msg-list');
+        if(!list) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin' || m.to === 'AdminKing').slice().reverse();
+        
+        if(msgs.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Mesaj kutusu boş.</div>';
+            return;
+        }
+        
+        list.innerHTML = msgs.map(m => {
+            let uObj = window.userDatabase ? window.userDatabase[m.from] : {};
+            let emj = (m.from === 'Sistem' || m.from === 'Admin') ? '🤖' : (uObj.emoji || '👤');
+            let colorClass = window.getAuthorColorClass ? window.getAuthorColorClass(m.from) : '';
+            
+            // Fix: Anwendung der neuen, sauberen Engine
+            let msgContent = window.renderMessageWithLinks(m.msg, m.poemId, m.poemType || 'poems');
+            
+            let replyBtn = m.from !== 'Sistem' ? `<button style="background: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; font-family: 'Poppins', sans-serif;" onclick="window.replyToMessage('${m.from}')" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff';" onmouseout="this.style.background='rgba(59,130,246,0.1)'; this.style.color='#3b82f6';"><i class="fas fa-reply"></i> Yanıtla</button>` : '';
+            let delBtn = `<button style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; font-family: 'Poppins', sans-serif;" onclick="window.deleteSingleMessage('${m.id}')" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#ef4444';"><i class="fas fa-trash"></i> Sil</button>`;
+
+            return `
+            <div class="notif-card" style="background: rgba(0,0,0,0.5); border-left: 3px solid #f4c542; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: left;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span><span style="font-size:1.3rem; margin-right:8px;">${emj}</span> <strong class="${colorClass}" style="font-size:0.95rem;">${m.from || 'Sistem'}</strong></span>
+                    <span style="font-size:0.75rem; color:#64748b; font-style:italic;">${m.time || ''}</span>
+                </div>
+                <div style="font-size:0.9rem; color:#fdfbf7; line-height:1.5; margin-bottom: 12px;">${msgContent}</div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    ${replyBtn}
+                    ${delBtn}
+                </div>
+            </div>`;
+        }).join('');
+    };
+})();
+</script>
+
+(function() {
+    window.renderMessageWithLinks = function(msg, poemId, poemType) {
+        if (!msg) return "";
+        
+        // REINIGUNG: Wir erstellen ein Dummy-Element, um den Müll-Code als Text zu extrahieren
+        let tmp = document.createElement("div");
+        tmp.innerHTML = msg;
+        let cleanText = tmp.textContent || tmp.innerText || "";
+
+        if (!poemId) return cleanText;
+
+        // Sicherer Link-Aufbau
+        let action = `window.closeTopModal('force'); setTimeout(() => { window.openPoemModal ? window.openPoemModal('${poemId}', '${poemType}') : window.openUserPoemModal('${poemId}'); }, 100);`;
+        
+        // Regex findet Werktitel in Anführungszeichen
+        return cleanText.replace(/["«]([^"»]+)["»]/g, function(match, title) {
+            return `<span class="notif-poem-link" onclick="${action} event.stopPropagation();" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${title.trim()}</span>`;
+        });
+    };
+})();
+
+<style>
+@media (max-width: 768px) {
+    /* Portal für Admin-Dropdowns auf dem Handy */
+    .teleported-dropdown-mobile {
+        position: fixed !important;
+        z-index: 2147483647 !important;
+        background: #0a192f !important;
+        border: 2px solid #f4c542 !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.9) !important;
+        border-radius: 8px !important;
+        display: none;
+        max-height: 250px !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain !important;
+    }
+    .teleported-dropdown-mobile div {
+        padding: 12px 15px !important;
+        color: #fff !important;
+        cursor: pointer !important;
+        border-bottom: 1px solid rgba(244,197,66,0.1) !important;
+    }
+}
+</style>
+
+<script>
+(function() {
+    let portal = document.getElementById('admin-dropdown-portal-mobile');
+    if (!portal) {
+        portal = document.createElement('div');
+        portal.id = 'admin-dropdown-portal-mobile';
+        portal.className = 'teleported-dropdown-mobile';
+        document.body.appendChild(portal);
+    }
+
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth > 768) return; // Nur auf Mobile aktiv
+
+        let box = e.target.closest('.admin-eval-container, .admin-rating-box');
+        if (box) {
+            let originalList = box.querySelector('.select-items');
+            let triggerBtn = box.querySelector('.select-selected');
+            
+            if (originalList && triggerBtn) {
+                e.preventDefault(); e.stopPropagation();
+                
+                portal.innerHTML = originalList.innerHTML;
+                let rect = triggerBtn.getBoundingClientRect();
+                portal.style.left = rect.left + 'px';
+                portal.style.top = (rect.bottom + 5) + 'px';
+                portal.style.width = rect.width + 'px';
+                portal.style.display = 'block';
+
+                portal.querySelectorAll('.select-item').forEach((item, index) => {
+                    item.onclick = function() {
+                        originalList.querySelectorAll('.select-item')[index].click();
+                        portal.style.display = 'none';
+                    };
+                });
+            }
+        } else {
+            if (!e.target.closest('#admin-dropdown-portal-mobile')) portal.style.display = 'none';
+        }
+    }, true);
+})();
+</script>
+
+
+
 </body>
 </html>
