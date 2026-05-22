@@ -4256,6 +4256,12 @@ Blühe, deutsches Vaterland!</p>
 
     <div class="modal notranslate" id="diceModal" onclick="if(window.closeTopModal) window.closeTopModal(event)"><div class="modal-content game-modal-content" style="max-width: 400px;" onclick="event.stopPropagation()"><div class="close-wrapper" onclick="window.closeTopModal(event)"><span class="close-btn"><i class="fas fa-times"></i></span></div><div class="modal-body"><h2 class="game-title" style="font-size: 2.2rem; line-height: 1.3;">Zar At <span class="de-sub">(Würfeln)</span></h2><div class="dice-container" id="dice-display" style="font-size: 8rem; display: flex; justify-content: center; margin: 20px 0; color: #f4c542;">🎲</div><div id="dice-msg" style="color:#cbd5e1; font-size: 1.1rem; text-align: center; margin-bottom: 15px;">Zarı atmak için butona bas. <span class="de-sub" style="color:#94a3b8;">(Drücke den Button.)</span></div><button class="reset-btn" onclick="if(window.rollDice) window.rollDice()" style="padding: 12px; border-radius: 12px;" id="dice-btn">Zar At <span class="de-sub" style="color:inherit;">(Würfeln)</span></button></div></div></div>
 
+    <div id="custom-cat-list" style="display:none;">
+    <div class="dropdown-item-fix">🏆🏆🏆 Super Elite</div>
+    <div class="dropdown-item-fix">🏆🏆 Elite</div>
+    <div class="dropdown-item-fix">🏆 Normal</div>
+</div>
+
     <script type="text/javascript">
     document.documentElement.removeAttribute('translate');
     function googleTranslateElementInit() {
@@ -20809,6 +20815,22 @@ setInterval(function() {
         cursor: pointer !important;
         border-bottom: 1px solid rgba(244,197,66,0.1) !important;
     }
+    #custom-cat-btn {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    padding-right: 30px !important; /* Platz für den Pfeil */
+    display: flex !important;
+    align-items: center !important;
+}
+}
+
+#admin-dropdown-portal-mobile {
+    /* Flipping komplett verbieten */
+    bottom: auto !important;
+    transform: none !important;
+    max-height: 200px !important; /* Verkleinert die Liste, damit sie auch bei wenig Platz reinpasst */
 }
 </style>
 
@@ -20834,9 +20856,13 @@ setInterval(function() {
                 e.preventDefault(); e.stopPropagation();
                 
                 portal.innerHTML = originalList.innerHTML;
+                // Ersetze diesen Abschnitt in deinem Portal-Script:
                 let rect = triggerBtn.getBoundingClientRect();
+                
                 portal.style.left = rect.left + 'px';
-                portal.style.top = (rect.bottom + 5) + 'px';
+                // Zwingt das Menü IMMER unter den Button (Unterkante + 5px)
+                portal.style.top = (rect.bottom + window.scrollY + 5) + 'px'; 
+                portal.style.bottom = 'auto !important'; // Verhindert Flippen nach oben
                 portal.style.width = rect.width + 'px';
                 portal.style.display = 'block';
 
@@ -20853,6 +20879,113 @@ setInterval(function() {
     }, true);
 })();
 </script>
+
+<script>
+(function() {
+    // 1. Das Portal am Body erstellen, falls nicht vorhanden
+    let portal = document.getElementById('admin-dropdown-teleport');
+    if (!portal) {
+        portal = document.createElement('div');
+        portal.id = 'admin-dropdown-teleport';
+        portal.style.cssText = 'position: fixed !important; z-index: 999999999 !important; display: none; background: #0a192f; border: 2px solid #f4c542; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.95);';
+        document.body.appendChild(portal);
+    }
+
+    // 2. Klick-Abfänger
+    document.addEventListener('click', function(e) {
+        let trigger = e.target.closest('#custom-cat-btn');
+        let portalItem = e.target.closest('.dropdown-item-fix');
+
+        // Klick auf den Button: Öffnen/Schließen
+        if (trigger) {
+            e.preventDefault(); e.stopPropagation();
+            
+            // Inhalt aus dem versteckten Original-Div holen
+            let originalContent = document.getElementById('custom-cat-list');
+            
+            if (portal.style.display === 'block') {
+                portal.style.display = 'none';
+            } else {
+                // Portal mit Inhalten füllen
+                portal.innerHTML = originalContent.innerHTML;
+                portal.style.display = 'block';
+                
+                // Position berechnen (Zwingend nach UNTEN)
+                let rect = trigger.getBoundingClientRect();
+                portal.style.left = rect.left + 'px';
+                portal.style.top = (rect.bottom + 5) + 'px';
+                portal.style.width = rect.width + 'px';
+                
+                // Klick-Logik der Items übertragen
+                portal.querySelectorAll('.dropdown-item-fix').forEach((item, idx) => {
+                    item.onclick = function() {
+                        // Klick an das Original im Modal zurückgeben
+                        originalContent.querySelectorAll('.dropdown-item-fix')[idx].click();
+                        portal.style.display = 'none';
+                    };
+                });
+            }
+        } 
+        // Klick außerhalb: Schließen
+        else if (!portal.contains(e.target)) {
+            portal.style.display = 'none';
+        }
+    }, true);
+})();
+</script>
+
+<style>
+/* Zwingt den Button auf eine feste Breite, egal welcher Text drin steht */
+#custom-cat-btn {
+    display: flex !important;
+    justify-content: center !important; /* Zentriert den Text */
+    align-items: center !important;
+    width: 200px !important;    /* Feste Breite (etwas breiter als Super Elite) */
+    min-width: 200px !important;
+    max-width: 200px !important;
+    padding: 10px !important;
+    font-size: 0.95rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* Schneidet bei Überlänge sauber ab */
+    text-align: center !important;
+    margin: 0 auto !important; /* Zentriert den Button selbst */
+    box-sizing: border-box !important;
+}
+
+/* Dropdown-Liste muss sich anpassen */
+#custom-cat-list {
+    width: 200px !important; /* Gleiche Breite wie der Button */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+</style>
+
+// Ändere deine onclick-Funktionen im Dropdown-Menü (in deinem HTML) zu diesem Muster:
+function updateAdminCategory(name, val) {
+    const btn = document.getElementById('custom-cat-btn');
+    const input = document.getElementById('admin-rating-cat-val');
+    const list = document.getElementById('custom-cat-list');
+    
+    // Setzt den Text
+    btn.innerHTML = name; 
+    
+    // Setzt den Wert für die DB
+    input.value = val;
+    
+    // Schließt das Menü
+    list.style.display = 'none';
+}
+
+// Deine HTML-Struktur im Modal sollte nun so aussehen:
+/*
+<div id="custom-cat-btn" class="auth-input" onclick="...">🏆🏆🏆 Super Elite</div>
+<div id="custom-cat-list" style="display:none; ...">
+    <div class="dropdown-item-fix" onclick="updateAdminCategory('🏆🏆🏆 Super Elite', 'Super Elite')">🏆🏆🏆 Super Elite</div>
+    <div class="dropdown-item-fix" onclick="updateAdminCategory('🏆🏆 Elite', 'Elite')">🏆🏆 Elite</div>
+    <div class="dropdown-item-fix" onclick="updateAdminCategory('🏆 Normal', 'Normal')">🏆 Normal</div>
+</div>
+*/
 
 
 
