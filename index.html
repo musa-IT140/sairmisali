@@ -21170,17 +21170,45 @@ button:has(.fa-bell):hover,
     text-decoration: underline !important;
 }
 
-/* Nur für iOS (Safari/WebKit) auf mobilen Geräten */
+/* --- iOS SAFARI EXKLUSIV-FIX (Ohne Body-Skalierung) --- */
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 768px) {
-        body {
-            /* 0.95 entspricht einer Verkleinerung um 15% */
-            transform: scale(0.95) !important;
+        /* Wir skalieren nur den Inhaltsbereich, der zwischen Header und Footer liegt */
+        /* Passe den Selektor '#main-wrapper' an, falls dein Hauptcontainer anders heißt */
+        #main-wrapper, .page-view {
+            transform: scale(0.90) !important;
             transform-origin: top center !important;
-            
-           
+            width: 117.65% !important; 
+            margin-left: -8.8% !important;
+            margin-top: 0 !important;
+        }
+        
+        /* Das verhindert, dass das Skalieren den Footer oder Header beeinflusst */
+        #main-header, .mobile-bottom-bar, .floating-menu-wrapper {
+            transform: none !important;
         }
     }
+}
+
+/* Glocke stabilisieren: Größe und Sichtbarkeit in Stein gemeißelt */
+.header-notify, #user-notify-btn, button:has(.fa-bell) {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important; /* Wichtig: Keine Skalierung für die Glocke */
+    transition: none !important; /* Animationen für Sichtbarkeit abschalten */
+}
+
+/* Hover-Schutz: Verhindert, dass sie beim Tippen/Hovern ausblendet */
+.header-notify:hover, 
+#user-notify-btn:hover,
+button:has(.fa-bell):hover {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: transparent !important;
+    color: #f4c542 !important;
+    transform: none !important; /* Verhindert das Ruckeln */
 }
 
 </style>
