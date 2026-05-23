@@ -21034,23 +21034,117 @@ function updateAdminCategory(name, val) {
     text-align: left !important;
 }
 
-
-/* ==========================================================================
-   2. iOS WEATHER OVERLAP KILLER (Minimal nach oben geschoben)
-   ========================================================================== */
-   
+/* Android Wetter-Widget zentriert und schmal */
 @media (max-width: 768px) {
-    /* Schiebt das Wetter-Widget relativ zu seiner jetzigen Position 25 Pixel nach oben! */
     #main-header #weather-widget, 
     #main-header .weather-widget {
-        transform: translateY(10px) scale(0.75) !important; 
-        z-index: 1005 !important;
+        /* Zentrierung erzwingen */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 10px auto !important; /* 'auto' zentriert bei display: flex */
+        
+        /* Breite auf Textbreite begrenzen */
+        width: fit-content !important;
+        min-width: 120px !important;
+        max-width: 90% !important;
+        
+        /* Padding für schmaleres Design */
+        padding: 4px 15px !important;
+        border-radius: 20px !important;
+        
+        /* Positionierung */
+        left: auto !important;
+        right: auto !important;
     }
 }
 
+/* 2. iOS SPEZIAL-FIX (Behält deine Korrektur für iPhone bei) */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+        #main-header #weather-widget, 
+        #main-header .weather-widget {
+            /* iOS braucht hier wieder einen anderen Offset, da Safari anders skaliert */
+            transform: translateY(-5px) scale(0.85) !important; 
+        }
+    }
+}
 
+/* ==========================================================================
+   1. ŞAİRLER LİGİ (LEADERBOARD) - DESKTOP/LAPTOP FIX
+   Macht das Fenster und die Tabelle kompakter, damit alles aufs Bild passt
+   ========================================================================== */
+@media (min-width: 769px) {
+    #leaderboardModal .modal-content {
+        max-width: 800px !important; /* Schmaler */
+        max-height: 85vh !important; /* Passt sicher auf den Bildschirm */
+        transform: scale(0.9) !important; /* Verkleinert das gesamte Fenster um 10% */
+        transform-origin: top center !important;
+        margin: 2vh auto !important;
+    }
+    #leaderboardModal .modal-body {
+        padding: 15px 25px !important;
+    }
+    /* Tabelle selbst enger ziehen */
+    #leaderboard-table th, 
+    #leaderboard-table td {
+        padding: 8px 5px !important; 
+        font-size: 0.9rem !important;
+    }
+}
+
+/* ==========================================================================
+   2. GLOCKE (BELL) - DER ABSOLUTE SICHERHEITS-FIX
+   ========================================================================== */
+
+/* A) Glocke auf Desktop/Laptop ZWINGEND komplett vernichten */
+@media (min-width: 769px) {
+    #user-notify-btn, 
+    .header-notify,
+    button:has(.fa-bell) {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+/* B) Glocke auf Mobile (iOS/Android) anzeigen & positionieren */
+@media (max-width: 768px) {
+    #user-notify-btn, 
+    .header-notify,
+    button:has(.fa-bell) {
+        display: inline-flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        margin-right: 25px !important; /* ⬅️ Schiebt die Glocke nach links zur Feder */
+        pointer-events: auto !important;
+        animation: none !important; /* Killt eventuelle Ausblend-Animationen */
+        transition: transform 0.2s ease !important; /* Erlaubt nur Größenänderung, kein Ausblenden */
+    }
+    
+    /* C) HOVER-SCHUTZ: Verhindert das Verschwinden beim Antippen/Hovern kugelsicher */
+    #user-notify-btn:hover, 
+    .header-notify:hover,
+    button:has(.fa-bell):hover,
+    #user-notify-btn:active, 
+    .header-notify:active {
+        display: inline-flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: scale(1.15) !important; /* Wird beim Tippen leicht größer, statt zu verschwinden */
+        background: transparent !important;
+        color: #f4c542 !important; /* Farbe bleibt stabil */
+    }
+}
 
 </style>
+
+
 
 </body>
 </html>
