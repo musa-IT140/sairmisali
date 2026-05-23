@@ -21760,26 +21760,29 @@ button:has(.fa-bell):hover {
 </style>
 
 <style id="misali-user-visitor-style">
-    /* 1. Sehr kleiner, dezenter Button an freier Position */
-    .fake-visitor-badge {
+    /* 1. EINZIGER Live-Button, fest in der linken oberen Ecke */
+    #misali-single-live-badge {
+        position: fixed !important;
+        top: 15px !important;
+        left: 15px !important; /* Feste Position oben links */
+        z-index: 999999 !important;
         cursor: pointer !important;
-        display: inline-flex !important;
+        display: none; /* Wird vom JS gesteuert */
         align-items: center !important;
-        justify-content: center !important;
-        gap: 4px !important;
-        padding: 3px 8px !important; /* Minimales Padding */
-        margin: 5px auto !important; /* Freier Abstand nach oben/unten */
-        background: rgba(0, 210, 255, 0.08) !important;
-        border-radius: 8px !important;
-        border: 1px solid rgba(0, 210, 255, 0.3) !important;
+        gap: 6px !important;
+        padding: 5px 12px !important;
+        background: rgba(0, 210, 255, 0.1) !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(0, 210, 255, 0.4) !important;
         color: #00d2ff !important;
-        font-size: 0.7rem !important; /* Sehr kleine Schrift */
-        line-height: 1 !important;
+        font-size: 0.75rem !important;
+        font-weight: bold !important;
+        backdrop-filter: blur(5px) !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
         transition: all 0.3s ease !important;
-        pointer-events: auto !important;
     }
-    .fake-visitor-badge:hover {
-        background: rgba(0, 210, 255, 0.2) !important;
+    #misali-single-live-badge:hover {
+        background: rgba(0, 210, 255, 0.25) !important;
         transform: scale(1.05) !important;
     }
 
@@ -21801,9 +21804,9 @@ button:has(.fa-bell):hover {
         pointer-events: auto; 
     }
 
-    /* 3. Schriftgrößen im Fenster deutlich reduziert */
+    /* 3. Kompakte, edle Schriftgrößen für das Fenster */
     .visitor-emoji-crowd {
-        font-size: 2.5rem; /* Kleiner */
+        font-size: 2.2rem;
         animation: crowdBounce 1s infinite alternate ease-in-out;
         margin-bottom: 5px;
     }
@@ -21813,11 +21816,11 @@ button:has(.fa-bell):hover {
     }
 
     .visitor-real-number {
-        font-size: 1.8rem; /* Kleiner */
+        font-size: 1.6rem;
         color: #ffffff;
         font-weight: 900;
         background: rgba(255, 255, 255, 0.05);
-        padding: 8px 20px; /* Kleiner */
+        padding: 8px 20px; 
         border-radius: 15px;
         border-left: 3px solid #00d2ff;
         border-right: 3px solid #00d2ff;
@@ -21826,7 +21829,7 @@ button:has(.fa-bell):hover {
 
     .visitor-record-text {
         color: #f4c542;
-        font-size: 1.2rem; /* Kleiner */
+        font-size: 1.1rem;
         font-family: 'Playfair Display', serif;
         text-align: center;
         margin: 10px 0;
@@ -21840,10 +21843,9 @@ button:has(.fa-bell):hover {
 
 <script id="misali-user-visitor-script">
 (function() {
-    // Globale Variable speichert immer den aktuellsten Live-Wert
     window.misaliLiveVisitorCount = "1";
 
-    // 1. Fenster im Hintergrund anlegen
+    // 1. Overlay-Fenster anlegen
     const overlay = document.createElement('div');
     overlay.className = 'visitor-celebration-overlay';
     overlay.innerHTML = `
@@ -21860,59 +21862,62 @@ button:has(.fa-bell):hover {
         this.classList.remove('active');
     });
 
-    // 2. Intelligenter Live-Scanner
+    // 2. Kontrollschleife für die Live-Synchronisation
     setInterval(() => {
         let currentUser = window.currentUser;
         let isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin');
 
+        // Garantiert, dass der Button nur EINMAL auf der ganzen Seite existiert
+        let singleBadge = document.getElementById('misali-single-live-badge');
+        if (!singleBadge) {
+            singleBadge = document.createElement('div');
+            singleBadge.id = 'misali-single-live-badge';
+            
+            // Klick-Aktion für das Fenster
+            singleBadge.onclick = (e) => {
+                e.stopPropagation();
+                let numEl = document.getElementById('hidden-real-visitor-count');
+                if (numEl) numEl.innerText = window.misaliLiveVisitorCount + " Aktif Ziyaretçi";
+                document.querySelector('.visitor-celebration-overlay').classList.add('active');
+            };
+            document.body.appendChild(singleBadge);
+        }
+
+        // Suche den Admin-Zähler im Hintergrund
         let allElements = document.querySelectorAll('div, span, p, b, strong');
         
         allElements.forEach(el => {
-            // textContent ist sicherer als innerText, da es auch versteckte Elemente liest
-            if (!el.textContent) return;
+            if (!el.textContent || el.id === 'misali-single-live-badge' || el.id === 'hidden-real-visitor-count') return;
+            
             let text = el.textContent.toLowerCase();
             
             if (text.includes('kayıtlı') && text.includes('ziyaret')) {
                 
-                // Live-Zahl synchronisieren
+                // Zieht die Live-Zahl aus dem Code
                 let match = el.textContent.match(/\d+/);
                 if (match) window.misaliLiveVisitorCount = match[0];
 
-                if (!currentUser) {
-                    el.style.display = 'none';
-                    return; 
-                }
-
+                // Versteckt den Original-Text IMMER, außer für Admins
                 if (isAdmin) {
                     el.style.display = '';
-                    return;
-                }
-
-                // FÜR NORMALE USER:
-                // Wir verstecken den echten Text, behalten ihn aber im Code, 
-                // damit das System ihn im Hintergrund weiter updaten kann!
-                el.style.display = 'none';
-
-                // Wir fügen unseren Fake-Button nur ein, wenn er nicht schon direkt daneben existiert
-                if (!el.nextElementSibling || !el.nextElementSibling.classList.contains('fake-visitor-badge')) {
-                    let badge = document.createElement('span');
-                    badge.className = 'fake-visitor-badge';
-                    badge.innerHTML = '&#128100; 1 Ziyaret&#231;i';
-                    
-                    // Beim Klick laden wir die allerneueste Live-Zahl ins Fenster
-                    badge.onclick = (e) => {
-                        e.stopPropagation();
-                        let numEl = document.getElementById('hidden-real-visitor-count');
-                        if (numEl) numEl.innerText = window.misaliLiveVisitorCount + " Aktif Ziyaretçi";
-                        document.querySelector('.visitor-celebration-overlay').classList.add('active');
-                    };
-                    
-                    // Fügt den Button genau an die freie Stelle nach dem originalen Element ein
-                    el.parentNode.insertBefore(badge, el.nextSibling);
+                } else {
+                    el.style.display = 'none';
                 }
             }
         });
-    }, 1000); // Checkt jede Sekunde den Live-Status
+
+        // 3. Sichtbarkeit und Text des neuen Buttons steuern
+        if (!currentUser) {
+            singleBadge.style.display = 'none'; // Ausgeloggt: Unsichtbar
+        } else if (isAdmin) {
+            singleBadge.style.display = 'none'; // Admin: Unsichtbar (sieht den Originaltext)
+        } else {
+            singleBadge.style.display = 'flex'; // Eingeloggter User: Sichtbar
+            // Button Live-Update (z.B. "👤 Ziyaretçi: 218")
+            singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
+        }
+
+    }, 1000); 
 })();
 </script>
 
