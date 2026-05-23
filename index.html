@@ -21760,12 +21760,12 @@ button:has(.fa-bell):hover {
 </style>
 
 <style id="misali-user-visitor-style">
-    /* 1. Button auf Wetter/Profil-Zeile verschoben */
+    /* 1. Button Position (Weiter unten, neben der Suchleiste) */
     #misali-single-live-badge {
         position: fixed !important; 
-        top: 230px !important; /* Exakt auf Höhe Profilbild/Wetter */
+        top: 255px !important; /* Schiebt den Button genau auf Höhe der Suchleiste */
         left: 15px !important; 
-        z-index: 99999999 !important; /* Garantiert IMMER im Vordergrund & anklickbar */
+        z-index: 99999999 !important; 
         cursor: pointer !important;
         display: none; 
         align-items: center !important;
@@ -21773,28 +21773,30 @@ button:has(.fa-bell):hover {
         gap: 6px !important;
         padding: 5px 12px !important;
         background: rgba(0, 210, 255, 0.1) !important;
-        border-radius: 12px !important;
+        border-radius: 20px !important; /* Runderes Design für Pillen-Look */
         border: 1px solid rgba(0, 210, 255, 0.4) !important;
         color: #00d2ff !important;
-        font-size: 0.75rem !important;
+        font-size: 0.8rem !important;
         font-weight: bold !important;
         backdrop-filter: blur(5px) !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        transition: all 0.3s ease !important;
-        pointer-events: auto !important; /* Erzwingt Klickbarkeit */
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; /* Weiche Ausfahr-Animation */
+        pointer-events: auto !important;
+        white-space: nowrap !important;
+        min-width: 60px !important;
     }
     #misali-single-live-badge:hover {
         background: rgba(0, 210, 255, 0.25) !important;
         transform: scale(1.05) !important;
     }
 
-    /* 2. Fullscreen-Overlay (Maximaler Z-Index) */
+    /* 2. Fullscreen-Overlay (Unverändert starker Z-Index) */
     .visitor-celebration-overlay {
         position: fixed; top: 0; left: 0; 
         width: 100vw; height: 100vh;
         background: rgba(2, 6, 23, 0.95);
         backdrop-filter: blur(8px);
-        z-index: 2147483647 !important; /* Absolutes Limit für Browser */
+        z-index: 2147483647 !important; 
         display: flex; flex-direction: column;
         justify-content: center; align-items: center;
         opacity: 0; visibility: hidden;
@@ -21806,16 +21808,14 @@ button:has(.fa-bell):hover {
         pointer-events: auto; 
     }
 
-    /* 3. Kompaktes Fenster-Design */
+    /* 3. Overlay Inneres */
     .visitor-emoji-crowd { font-size: 2.2rem; animation: crowdBounce 1s infinite alternate ease-in-out; margin-bottom: 5px; }
     @keyframes crowdBounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-10px) scale(1.05); } }
-    
     .visitor-real-number {
         font-size: 1.6rem; color: #ffffff; font-weight: 900;
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px; 
         border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px;
     }
-    
     .visitor-record-text {
         color: #f4c542; font-size: 1.1rem; font-family: 'Playfair Display', serif;
         text-align: center; margin: 10px 0; animation: textGlow 1.5s infinite alternate;
@@ -21825,9 +21825,9 @@ button:has(.fa-bell):hover {
 
 <script id="misali-user-visitor-script">
 (function() {
-    window.misaliLiveVisitorCount = 0; // Speichert ab jetzt echte Zahlen, keinen Text
+    window.misaliLiveVisitorCount = 0; 
+    let badgeClickState = 0; // 0 = Minimiert, 1 = Ausgefahren
 
-    // 1. Overlay-Fenster anlegen
     const overlay = document.createElement('div');
     overlay.className = 'visitor-celebration-overlay';
     overlay.innerHTML = `
@@ -21842,77 +21842,114 @@ button:has(.fa-bell):hover {
 
     overlay.addEventListener('click', function() {
         this.classList.remove('active');
+        // Setzt den Button beim Schließen des Fensters wieder auf klein zurück
+        badgeClickState = 0; 
     });
 
-    // 2. Kontrollschleife für Live-Sync
     setInterval(() => {
         let currentUser = window.currentUser;
         let isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin');
 
-        // Garantiert, dass der Button existiert und Events hat
         let singleBadge = document.getElementById('misali-single-live-badge');
         if (!singleBadge) {
             singleBadge = document.createElement('div');
             singleBadge.id = 'misali-single-live-badge';
             
-            // Klickschutz-Bypass
+            // DIE NEUE 2-KLICK-LOGIK
             singleBadge.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                let numEl = document.getElementById('hidden-real-visitor-count');
-                if (numEl) {
-                    numEl.innerText = window.misaliLiveVisitorCount + " Ziyaretçi";
+                
+                if (badgeClickState === 0) {
+                    // 1. Klick: Button fährt aus
+                    badgeClickState = 1;
+                    this.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
+                    
+                    // Automatisches Zuklappen nach 4 Sekunden
+                    setTimeout(() => {
+                        if (badgeClickState === 1) {
+                            badgeClickState = 0;
+                            singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
+                        }
+                    }, 4000);
+                    
+                } else {
+                    // 2. Klick: Fenster öffnet sich
+                    let numEl = document.getElementById('hidden-real-visitor-count');
+                    if (numEl) {
+                        numEl.innerText = window.misaliLiveVisitorCount + " Ziyaretçi";
+                    }
+                    document.querySelector('.visitor-celebration-overlay').classList.add('active');
                 }
-                document.querySelector('.visitor-celebration-overlay').classList.add('active');
             });
             document.body.appendChild(singleBadge);
         }
 
-        // --- DIE MAGIE: HÖCHSTWERT-FILTERUNG ---
+        // Live-Daten erfassen
         let allElements = document.querySelectorAll('div, span, p, b, strong');
         let highestFound = 0; 
         
         allElements.forEach(el => {
             if (!el.textContent || el.id === 'misali-single-live-badge' || el.id === 'hidden-real-visitor-count') return;
-            
             let text = el.textContent.toLowerCase();
             
-            // Sucht nach "ziyaret" nur in kurzen Textblöcken (verhindert das Erfassen von Gedicht-Texten)
             if (text.includes('ziyaret') && text.length < 40) {
-                
                 let match = el.textContent.match(/\d+/);
                 if (match) {
                     let val = parseInt(match[0], 10);
-                    // Überschreibt den Wert nur, wenn er HÖHER ist als der bisher gefundene
-                    // Damit erwischen wir IMMER die Gesamtbesucherzahl (218) und nie die 0!
-                    if (val > highestFound) {
-                        highestFound = val;
-                    }
+                    if (val > highestFound) highestFound = val;
                 }
-
-                // Versteckt die Original-Texte für normale User (Admin sieht alles)
-                if (!isAdmin) {
-                    el.style.display = 'none'; 
-                }
+                if (!isAdmin) el.style.display = 'none'; 
             }
         });
 
-        // Live-Variable updaten, falls ein gültiger Wert gefunden wurde
-        if (highestFound > 0) {
-            window.misaliLiveVisitorCount = highestFound;
-        }
+        if (highestFound > 0) window.misaliLiveVisitorCount = highestFound;
 
-        // 3. Sichtbarkeit steuern
+        // Button Sichtbarkeit & Text-Update (behält Status bei)
         if (!currentUser || isAdmin) {
             singleBadge.style.display = 'none'; 
         } else {
             singleBadge.style.display = 'flex'; 
-            singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
+            if (badgeClickState === 0) {
+                singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
+            } else {
+                singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
+            }
         }
-
     }, 1000); 
 })();
 </script>
+
+<style>
+
+/* ========================================================== */
+/* FIX: SIGNATUREN / AUTOREN-NAMEN IN KARTEN VERGRÖSSERN      */
+/* ========================================================== */
+@supports (-webkit-touch-callout: none) {
+    
+    /* Zielt extrem präzise auf die Autor-Klassen in den Modals ab */
+    .modal-content .author-anim,
+    .modal-content [class*="author"],
+    .modal-content [class*="yazar"],
+    .modal-content .card-sub,
+    .v57-author-name {
+        font-size: 1.45rem !important; /* Macht den Namen massiv größer */
+        font-weight: 900 !important;
+        line-height: 1.5 !important;
+        display: inline-block !important;
+        padding: 5px 0 !important;
+        text-shadow: 0 0 8px rgba(0,0,0,0.5) !important; /* Hebt den geschwungenen Text besser ab */
+    }
+
+    /* Zielt speziell auf die Emojis neben dem Namen (z.B. den Schmetterling) ab */
+    .modal-content .author-anim i,
+    .modal-content .author-anim span,
+    .modal-content [class*="author"] i,
+    .modal-content [class*="author"] span {
+        font-size: 1.2rem !important; 
+    }
+}
+</style>
 
 </body>
 </html>
