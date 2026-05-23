@@ -21677,7 +21677,7 @@ button:has(.fa-bell):hover {
         return;
     }
 
-    // ASCII-sichere Symbole generieren
+    // ASCII-sichere Symbole (No Unicode Text!)
     const symbols = [
         String.fromCodePoint(0x2712), String.fromCodePoint(0x1F4D6), 
         String.fromCodePoint(0x1F4DC), String.fromCodePoint(0x2728), 
@@ -21685,7 +21685,15 @@ button:has(.fa-bell):hover {
         String.fromCodePoint(0x1F31F), String.fromCodePoint(0x1F3A8)
     ];
     
-    const particleCount = 55;
+    // 🔥 NEU: Prüfen, ob wir auf Desktop/Laptop sind (Breite > 768px)
+    const isDesktop = window.innerWidth > 768;
+
+    // 🔥 NEU: Dynamische Einstellungen basierend auf Bildschirmgröße
+    const particleCount = isDesktop ? 80 : 55;   // Mehr Partikel auf Desktop für Dichte
+    const minDist = isDesktop ? 150 : 100;       // Mindestflugdistanz vom Zentrum
+    const distRange = isDesktop ? 650 : 320;     // 🔥 Desktop fliegt viel weiter nach außen!
+    const minSize = isDesktop ? 20 : 16;         // Minimale Schriftgröße Symbole
+    const sizeRange = isDesktop ? 30 : 24;       // Größenvarianz Symbole
 
     for (let i = 0; i < particleCount; i++) {
         let p = document.createElement('div');
@@ -21693,7 +21701,10 @@ button:has(.fa-bell):hover {
         p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
         
         let angle = Math.random() * Math.PI * 2;
-        let distance = 100 + Math.random() * 320; 
+        
+        // 🔥 NEU: Berechnung der Flugdistanz mit Desktop-Werten
+        let distance = minDist + Math.random() * distRange; 
+        
         let dx = Math.cos(angle) * distance;
         let dy = Math.sin(angle) * distance;
         let rot = (Math.random() - 0.5) * 600; 
@@ -21703,21 +21714,19 @@ button:has(.fa-bell):hover {
         p.style.setProperty('--rot', rot + 'deg');
         
         p.style.animationDelay = (Math.random() * 0.2) + 's';
-        p.style.fontSize = (16 + Math.random() * 24) + 'px';
+        
+        // 🔥 NEU: Dynamische Größe
+        p.style.fontSize = (minSize + Math.random() * sizeRange) + 'px';
         
         overlay.appendChild(p);
     }
 
-    // Das große Finale
+    // Das große Finale bleibt gleich
     setTimeout(() => {
-        // 1. SCHLOSS ÖFFNEN: Die normale Seite im Hintergrund wieder einblenden
         document.documentElement.classList.remove('misali-lock');
-        
-        // 2. Overlay sanft ausblenden (die Seite wird jetzt erst sichtbar)
         overlay.style.opacity = '0';
         overlay.style.visibility = 'hidden';
         
-        // 3. Müll entfernen
         setTimeout(() => { 
             if(overlay.parentNode) overlay.parentNode.removeChild(overlay); 
         }, 1000);
