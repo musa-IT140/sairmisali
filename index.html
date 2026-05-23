@@ -21760,18 +21760,22 @@ button:has(.fa-bell):hover {
 </style>
 
 <style id="misali-user-visitor-style">
-    /* 1. Der Fake-Button für normale User */
+    /* 1. Kompakter Fake-Button für den Header (Alle Geräte) */
     .fake-visitor-badge {
         cursor: pointer !important;
         display: inline-flex !important;
         align-items: center !important;
-        gap: 8px !important;
-        padding: 6px 12px !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        padding: 4px 8px !important; /* Deutlich kleiner */
         background: rgba(0, 210, 255, 0.1) !important;
         border-radius: 12px !important;
         border: 1px solid rgba(0, 210, 255, 0.4) !important;
         color: #00d2ff !important;
         font-weight: bold !important;
+        font-size: 0.75rem !important; /* Kleine, edle Schrift */
+        line-height: 1 !important;
+        white-space: nowrap !important; /* Verhindert Zeilenumbrüche im Header */
         transition: all 0.3s ease !important;
         pointer-events: auto !important;
     }
@@ -21780,13 +21784,11 @@ button:has(.fa-bell):hover {
         transform: scale(1.05) !important;
     }
 
-    /* 2. Das edle Animations-Overlay (Fullscreen) */
+    /* 2. Sicheres Fullscreen-Overlay (Blockiert nichts im Hintergrund) */
     .visitor-celebration-overlay {
         position: fixed;
-        top: 0; 
-        left: 0; 
-        width: 100vw; 
-        height: 100vh;
+        top: 0; left: 0; 
+        width: 100vw; height: 100vh;
         background: rgba(2, 6, 23, 0.95);
         backdrop-filter: blur(8px);
         z-index: 99999999;
@@ -21796,16 +21798,18 @@ button:has(.fa-bell):hover {
         align-items: center;
         opacity: 0; 
         visibility: hidden;
+        pointer-events: none; /* WICHTIG: Klicks gehen durch, solange es unsichtbar ist */
         transition: opacity 0.4s ease, visibility 0.4s;
     }
     .visitor-celebration-overlay.active {
         opacity: 1; 
         visibility: visible;
+        pointer-events: auto; /* Aktiviert Klicks erst, wenn es sichtbar ist */
     }
 
-    /* 3. Emojis & Animationen */
+    /* 3. Animationen für das Innere */
     .visitor-emoji-crowd {
-        font-size: 5rem;
+        font-size: 4rem;
         animation: crowdBounce 1s infinite alternate ease-in-out;
         margin-bottom: 10px;
     }
@@ -21816,7 +21820,7 @@ button:has(.fa-bell):hover {
 
     .visitor-record-text {
         color: #f4c542;
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-family: 'Playfair Display', serif;
         text-align: center;
         margin: 15px 0;
@@ -21829,7 +21833,7 @@ button:has(.fa-bell):hover {
     }
 
     .visitor-real-number {
-        font-size: 3rem;
+        font-size: 2.5rem;
         color: #ffffff;
         font-weight: 900;
         background: rgba(255, 255, 255, 0.05);
@@ -21843,11 +21847,9 @@ button:has(.fa-bell):hover {
 
 <script id="misali-user-visitor-script">
 (function() {
-    // 1. Das unsichtbare Overlay in die Seite einbauen
+    // 1. Overlay generieren (Startet unsichtbar & deaktiviert)
     const overlay = document.createElement('div');
     overlay.className = 'visitor-celebration-overlay';
-    
-    // ASCII-Entitäten für saubere Darstellung online
     overlay.innerHTML = `
         <div class="visitor-emoji-crowd">
             ${String.fromCodePoint(0x1F465)} ${String.fromCodePoint(0x1F389)}
@@ -21860,44 +21862,57 @@ button:has(.fa-bell):hover {
     `;
     document.body.appendChild(overlay);
 
-    // Klick ins Leere schließt das Fenster wieder
     overlay.addEventListener('click', function() {
         this.classList.remove('active');
     });
 
-    // 2. Intelligenter Text-Scanner (läuft alle 1,5 Sekunden)
+    // 2. Scanner-Logik mit Login-Weiche
     let visitorScanner = setInterval(() => {
-        // ADMIN-SCHUTZ: Wenn der Nutzer Admin ist, wird das Skript hier sofort gestoppt.
-        let isAdmin = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'AdminKing' || window.currentUser.role === 'co-admin');
-        if (isAdmin) return; 
+        let currentUser = window.currentUser;
+        
+        // Prüft, ob es sich um einen Admin handelt
+        let isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin');
 
-        // Sucht nach allen Text-Elementen auf der Seite
         let allElements = document.querySelectorAll('div, span, p, b, strong');
         
         allElements.forEach(el => {
             if (!el.innerText) return;
-            
             let text = el.innerText.toLowerCase();
             
-            // Wenn der Text "kayıtlı" und "ziyaretçi" enthält, haben wir den Zähler gefunden
-            if (text.includes('kayıtlı') && text.includes('ziyaret') && !el.hasAttribute('data-secret-active')) {
+            // Wenn der Text den Zähler enthält
+            if (text.includes('kayıtlı') && text.includes('ziyaret')) {
                 
-                // Wir filtern nur die reine Zahl aus dem Text (z.B. "124")
-                let match = el.innerText.match(/\d+/);
-                let realCount = match ? match[0] : "0";
+                // FALL A: AUSGELOGGT (Gast)
+                // -> Text komplett von der Seite entfernen (blockiert keinen Platz im Header)
+                if (!currentUser) {
+                    el.style.display = 'none';
+                    return; 
+                }
 
-                // Markieren, damit wir es nicht doppelt umbauen
-                el.setAttribute('data-secret-active', 'true');
+                // FALL B: ADMIN EINGELOGGT
+                // -> Sicherstellen, dass es sichtbar ist, aber Original-Text lassen
+                if (isAdmin) {
+                    el.style.display = '';
+                    return;
+                }
 
-                // Aktualisiere die echte Zahl im versteckten Overlay
-                document.getElementById('hidden-real-visitor-count').innerText = realCount + ' Aktif Ziyaretçi';
+                // FALL C: NORMALER USER EINGELOGGT
+                // -> In den kleinen Fake-Button für den Header verwandeln
+                if (!el.hasAttribute('data-secret-active')) {
+                    el.style.display = ''; // Falls es vorher als Gast versteckt war
+                    
+                    let match = el.innerText.match(/\d+/);
+                    let realCount = match ? match[0] : "0";
 
-                // Ersetze den langen Text auf der Seite durch den Fake-Button
-                el.innerHTML = `
-                    <span class="fake-visitor-badge" onclick="event.stopPropagation(); document.querySelector('.visitor-celebration-overlay').classList.add('active');">
-                        ${String.fromCodePoint(0x1F464)} 1 Ziyaret&#231;i
-                    </span>
-                `;
+                    el.setAttribute('data-secret-active', 'true');
+                    document.getElementById('hidden-real-visitor-count').innerText = realCount + ' Aktif Ziyaretçi';
+
+                    el.innerHTML = `
+                        <span class="fake-visitor-badge" onclick="event.stopPropagation(); document.querySelector('.visitor-celebration-overlay').classList.add('active');">
+                            ${String.fromCodePoint(0x1F464)} 1 Ziyaret&#231;i
+                        </span>
+                    `;
+                }
             }
         });
     }, 1500); 
