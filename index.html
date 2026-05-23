@@ -21170,46 +21170,50 @@ button:has(.fa-bell):hover,
     text-decoration: underline !important;
 }
 
-/* --- iOS SAFARI ZENTRIERUNGS- & KOMPAKTHEITS-FIX --- */
+/* --- iOS SAFARI ZENTRIERUNGS- & KOMPAKTHEITS-FIX (GEFIXT) --- */
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 768px) {
         
-        /* 1. Modal-Parent: Zwingt alles in die Mitte */
-        .modal {
+        /* 1. Modal-Parent: Nur flexen, wenn .active-modal vorhanden ist! */
+        .modal.active-modal {
             display: flex !important;
-            align-items: center !important; /* Vertikal mittig */
-            justify-content: center !important; /* Horizontal mittig */
+            align-items: center !important;
+            justify-content: center !important;
             background: rgba(0,0,0,0.7) !important;
             padding: 0 !important;
             overscroll-behavior: contain !important;
         }
 
-        /* 2. Modal-Fenster: Kompakter und weniger Leerstellen */
+        /* Verstecke das Modal, wenn es NICHT aktiv ist (damit JS es schließen kann) */
+        .modal:not(.active-modal) {
+            display: none !important;
+        }
+
+        /* 2. Modal-Fenster: Kompakter */
         .modal-content {
             width: 92% !important;
             max-width: 400px !important;
             max-height: 85vh !important;
             margin: 0 !important;
-            padding: 10px !important; /* Kompakter */
+            padding: 10px !important;
             border-radius: 12px !important;
             overflow-y: auto !important;
-            transform: scale(0.9) !important; /* Die 15% Verkleinerung für Übersichtlichkeit */
+            transform: scale(0.9) !important;
         }
 
-        /* 3. Schriftgrad im Modal 15% kleiner */
-        .modal-content, .modal-body, .game-title, p, span {
-            font-size: 85% !important; /* 15% weniger als Standard */
+        /* 3. Schriftgrad */
+        .modal-content, .modal-body, .game-title, .modal-content p, .modal-content span {
+            font-size: 85% !important;
             line-height: 1.2 !important;
         }
 
-        /* 4. Button-Größen im Modal anpassen */
+        /* 4. Button-Größen */
         .modal-content button {
             padding: 6px 10px !important;
             font-size: 0.8rem !important;
         }
 
-        
-        /* 5.Das verhindert, dass das Skalieren den Footer oder Header beeinflusst */
+        /* 5. Header/Footer Fix (Keine Skalierung hier!) */
         #main-header, .mobile-bottom-bar, .floating-menu-wrapper {
             transform: none !important;
         }
