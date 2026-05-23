@@ -20935,23 +20935,6 @@ setInterval(function() {
 </script>
 
 <style>
-/* Zwingt den Button auf eine feste Breite, egal welcher Text drin steht */
-#custom-cat-btn {
-    display: flex !important;
-    justify-content: center !important; /* Zentriert den Text */
-    align-items: center !important;
-    width: 200px !important;    /* Feste Breite (etwas breiter als Super Elite) */
-    min-width: 200px !important;
-    max-width: 200px !important;
-    padding: 10px !important;
-    font-size: 0.95rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important; /* Schneidet bei Überlänge sauber ab */
-    text-align: center !important;
-    margin: 0 auto !important; /* Zentriert den Button selbst */
-    box-sizing: border-box !important;
-}
 
 /* Dropdown-Liste muss sich anpassen */
 #custom-cat-list {
@@ -20959,11 +20942,27 @@ setInterval(function() {
     left: 50% !important;
     transform: translateX(-50%) !important;
 }
+
+/* ---------------------------------------------------
+       2. iOS WETTER OVERLAP FIX (Kugelsicher nach oben!)
+       --------------------------------------------------- */
+    @media (max-width: 768px) {
+        body.user-mode #main-header #weather-widget, 
+        body.admin-mode #main-header #weather-widget,
+        body.user-mode #main-header .weather-widget, 
+        body.admin-mode #main-header .weather-widget {
+            top: 145px !important; /* Radikal nach oben gezogen! */
+            transform: scale(0.8) !important; /* 20% kleiner, damit es nicht wuchtig wirkt */
+            transform-origin: right top !important;
+            margin-top: -5px !important;
+        }
+    }
+    
 </style>
 
 <script>
 
-// Ändere deine onclick-Funktionen im Dropdown-Menü (in deinem HTML) zu diesem Muster:
+
 function updateAdminCategory(name, val) {
     const btn = document.getElementById('custom-cat-btn');
     const input = document.getElementById('admin-rating-cat-val');
@@ -20987,6 +20986,72 @@ function updateAdminCategory(name, val) {
     <div class="dropdown-item-fix" onclick="updateAdminCategory('🏆 Normal', 'Normal')">🏆 Normal</div>
 </div>
 
+<style>
+/* ==========================================================================
+   1. EDLES LESE-LAYOUT: Impressum, Cookies, Datenschutz
+   ========================================================================== */
+
+/* Zwingt die Info-Container auf eine schmale, professionelle Lesebreite (Desktop & Laptop) */
+#impressum-view > div, 
+#cookie-view > div, 
+#datenschutz-view > div {
+    max-width: 600px !important; /* Vorher 800px - jetzt edel und kompakt */
+    margin: 0 auto !important;
+    padding: 35px 40px !important;
+    text-align: left !important;
+}
+
+/* Titel der Abschnitte sauber abtrennen */
+#impressum-view h3, 
+#cookie-view h3, 
+#datenschutz-view h3 {
+    text-align: left !important;
+    border-bottom: 1px dashed rgba(244,197,66,0.3) !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 15px !important;
+}
+
+/* TR: Der türkische Originaltext (Klar und präsent) */
+#impressum-view p:not([style*="italic"]),
+#cookie-view p:not([style*="italic"]),
+#datenschutz-view p:not([style*="italic"]) {
+    font-size: 1.05rem !important;
+    line-height: 1.6 !important;
+    color: #fdfbf7 !important;
+    margin-bottom: 5px !important; /* Zieht die deutsche Übersetzung direkt darunter */
+    text-align: left !important;
+}
+
+/* DE: Die deutsche Übersetzung (Kompakter, eingerückt, edler Goldstrich) */
+#impressum-view p[style*="italic"],
+#cookie-view p[style*="italic"],
+#datenschutz-view p[style*="italic"] {
+    font-size: 0.85rem !important; /* Etwas kleiner für die Hierarchie */
+    line-height: 1.45 !important;
+    color: #94a3b8 !important;
+    margin-bottom: 30px !important;
+    padding: 10px 15px !important;
+    background: rgba(0, 0, 0, 0.3) !important; /* Dezenter Hintergrund */
+    border-left: 3px solid rgba(244, 197, 66, 0.6) !important; /* Goldene Markierung */
+    border-radius: 0 8px 8px 0 !important;
+    text-align: left !important;
+}
+
+
+/* ==========================================================================
+   2. iOS WEATHER OVERLAP KILLER (Minimal nach oben geschoben)
+   ========================================================================== */
+   
+@media (max-width: 768px) {
+    /* Schiebt das Wetter-Widget relativ zu seiner jetzigen Position 25 Pixel nach oben! */
+    #main-header #weather-widget, 
+    #main-header .weather-widget {
+        transform: translateY(-25px) scale(0.85) !important; 
+        z-index: 1005 !important;
+    }
+}
+
+</style>
 
 
 
