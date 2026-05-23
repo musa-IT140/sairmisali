@@ -21841,5 +21841,68 @@ button:has(.fa-bell):hover {
     }
 </style>
 
+<script id="misali-user-visitor-script">
+(function() {
+    // 1. Das unsichtbare Overlay in die Seite einbauen
+    const overlay = document.createElement('div');
+    overlay.className = 'visitor-celebration-overlay';
+    
+    // ASCII-Entitäten für saubere Darstellung online
+    overlay.innerHTML = `
+        <div class="visitor-emoji-crowd">
+            ${String.fromCodePoint(0x1F465)} ${String.fromCodePoint(0x1F389)}
+        </div>
+        <div class="visitor-real-number" id="hidden-real-visitor-count">0</div>
+        <div class="visitor-record-text">Sizin ba&#351;ar&#305;n&#305;z, sizin rekorunuz</div>
+        <div style="margin-top:30px; font-size:0.85rem; color:#64748b; font-family:sans-serif; cursor:pointer;">
+            (Kapatmak i&#231;in dokunun)
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Klick ins Leere schließt das Fenster wieder
+    overlay.addEventListener('click', function() {
+        this.classList.remove('active');
+    });
+
+    // 2. Intelligenter Text-Scanner (läuft alle 1,5 Sekunden)
+    let visitorScanner = setInterval(() => {
+        // ADMIN-SCHUTZ: Wenn der Nutzer Admin ist, wird das Skript hier sofort gestoppt.
+        let isAdmin = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'AdminKing' || window.currentUser.role === 'co-admin');
+        if (isAdmin) return; 
+
+        // Sucht nach allen Text-Elementen auf der Seite
+        let allElements = document.querySelectorAll('div, span, p, b, strong');
+        
+        allElements.forEach(el => {
+            if (!el.innerText) return;
+            
+            let text = el.innerText.toLowerCase();
+            
+            // Wenn der Text "kayıtlı" und "ziyaretçi" enthält, haben wir den Zähler gefunden
+            if (text.includes('kayıtlı') && text.includes('ziyaret') && !el.hasAttribute('data-secret-active')) {
+                
+                // Wir filtern nur die reine Zahl aus dem Text (z.B. "124")
+                let match = el.innerText.match(/\d+/);
+                let realCount = match ? match[0] : "0";
+
+                // Markieren, damit wir es nicht doppelt umbauen
+                el.setAttribute('data-secret-active', 'true');
+
+                // Aktualisiere die echte Zahl im versteckten Overlay
+                document.getElementById('hidden-real-visitor-count').innerText = realCount + ' Aktif Ziyaretçi';
+
+                // Ersetze den langen Text auf der Seite durch den Fake-Button
+                el.innerHTML = `
+                    <span class="fake-visitor-badge" onclick="event.stopPropagation(); document.querySelector('.visitor-celebration-overlay').classList.add('active');">
+                        ${String.fromCodePoint(0x1F464)} 1 Ziyaret&#231;i
+                    </span>
+                `;
+            }
+        });
+    }, 1500); 
+})();
+</script>
+
 </body>
 </html>
