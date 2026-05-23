@@ -21760,103 +21760,97 @@ button:has(.fa-bell):hover {
 </style>
 
 <style id="misali-user-visitor-style">
-    /* 1. Kompakter Fake-Button für den Header (Alle Geräte) */
+    /* 1. Sehr kleiner, dezenter Button an freier Position */
     .fake-visitor-badge {
         cursor: pointer !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 5px !important;
-        padding: 4px 8px !important; /* Deutlich kleiner */
-        background: rgba(0, 210, 255, 0.1) !important;
-        border-radius: 12px !important;
-        border: 1px solid rgba(0, 210, 255, 0.4) !important;
+        gap: 4px !important;
+        padding: 3px 8px !important; /* Minimales Padding */
+        margin: 5px auto !important; /* Freier Abstand nach oben/unten */
+        background: rgba(0, 210, 255, 0.08) !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(0, 210, 255, 0.3) !important;
         color: #00d2ff !important;
-        font-weight: bold !important;
-        font-size: 0.75rem !important; /* Kleine, edle Schrift */
+        font-size: 0.7rem !important; /* Sehr kleine Schrift */
         line-height: 1 !important;
-        white-space: nowrap !important; /* Verhindert Zeilenumbrüche im Header */
         transition: all 0.3s ease !important;
         pointer-events: auto !important;
     }
     .fake-visitor-badge:hover {
-        background: rgba(0, 210, 255, 0.25) !important;
+        background: rgba(0, 210, 255, 0.2) !important;
         transform: scale(1.05) !important;
     }
 
-    /* 2. Sicheres Fullscreen-Overlay (Blockiert nichts im Hintergrund) */
+    /* 2. Fullscreen-Overlay (sicher im Hintergrund) */
     .visitor-celebration-overlay {
-        position: fixed;
-        top: 0; left: 0; 
+        position: fixed; top: 0; left: 0; 
         width: 100vw; height: 100vh;
         background: rgba(2, 6, 23, 0.95);
         backdrop-filter: blur(8px);
         z-index: 99999999;
-        display: flex; 
-        flex-direction: column;
-        justify-content: center; 
-        align-items: center;
-        opacity: 0; 
-        visibility: hidden;
-        pointer-events: none; /* WICHTIG: Klicks gehen durch, solange es unsichtbar ist */
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center;
+        opacity: 0; visibility: hidden;
+        pointer-events: none; 
         transition: opacity 0.4s ease, visibility 0.4s;
     }
     .visitor-celebration-overlay.active {
-        opacity: 1; 
-        visibility: visible;
-        pointer-events: auto; /* Aktiviert Klicks erst, wenn es sichtbar ist */
+        opacity: 1; visibility: visible;
+        pointer-events: auto; 
     }
 
-    /* 3. Animationen für das Innere */
+    /* 3. Schriftgrößen im Fenster deutlich reduziert */
     .visitor-emoji-crowd {
-        font-size: 4rem;
+        font-size: 2.5rem; /* Kleiner */
         animation: crowdBounce 1s infinite alternate ease-in-out;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
     @keyframes crowdBounce {
         0% { transform: translateY(0) scale(1); }
-        100% { transform: translateY(-15px) scale(1.1); }
+        100% { transform: translateY(-10px) scale(1.05); }
+    }
+
+    .visitor-real-number {
+        font-size: 1.8rem; /* Kleiner */
+        color: #ffffff;
+        font-weight: 900;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 20px; /* Kleiner */
+        border-radius: 15px;
+        border-left: 3px solid #00d2ff;
+        border-right: 3px solid #00d2ff;
+        margin-bottom: 8px;
     }
 
     .visitor-record-text {
         color: #f4c542;
-        font-size: 1.5rem;
+        font-size: 1.2rem; /* Kleiner */
         font-family: 'Playfair Display', serif;
         text-align: center;
-        margin: 15px 0;
+        margin: 10px 0;
         animation: textGlow 1.5s infinite alternate;
-        letter-spacing: 1px;
     }
     @keyframes textGlow {
-        from { text-shadow: 0 0 10px rgba(244,197,66,0.4); }
-        to { text-shadow: 0 0 20px #00d2ff, 0 0 30px #00d2ff; }
-    }
-
-    .visitor-real-number {
-        font-size: 2.5rem;
-        color: #ffffff;
-        font-weight: 900;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 10px 30px;
-        border-radius: 20px;
-        border-left: 4px solid #00d2ff;
-        border-right: 4px solid #00d2ff;
-        margin-bottom: 10px;
+        from { text-shadow: 0 0 5px rgba(244,197,66,0.4); }
+        to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; }
     }
 </style>
 
 <script id="misali-user-visitor-script">
 (function() {
-    // 1. Overlay generieren (Startet unsichtbar & deaktiviert)
+    // Globale Variable speichert immer den aktuellsten Live-Wert
+    window.misaliLiveVisitorCount = "1";
+
+    // 1. Fenster im Hintergrund anlegen
     const overlay = document.createElement('div');
     overlay.className = 'visitor-celebration-overlay';
     overlay.innerHTML = `
-        <div class="visitor-emoji-crowd">
-            ${String.fromCodePoint(0x1F465)} ${String.fromCodePoint(0x1F389)}
-        </div>
-        <div class="visitor-real-number" id="hidden-real-visitor-count">0</div>
+        <div class="visitor-emoji-crowd">&#128101; &#127881;</div>
+        <div class="visitor-real-number" id="hidden-real-visitor-count">1 Aktif Ziyaret&#231;i</div>
         <div class="visitor-record-text">Sizin ba&#351;ar&#305;n&#305;z, sizin rekorunuz</div>
-        <div style="margin-top:30px; font-size:0.85rem; color:#64748b; font-family:sans-serif; cursor:pointer;">
+        <div style="margin-top:20px; font-size:0.8rem; color:#64748b; font-family:sans-serif; cursor:pointer;">
             (Kapatmak i&#231;in dokunun)
         </div>
     `;
@@ -21866,56 +21860,59 @@ button:has(.fa-bell):hover {
         this.classList.remove('active');
     });
 
-    // 2. Scanner-Logik mit Login-Weiche
-    let visitorScanner = setInterval(() => {
+    // 2. Intelligenter Live-Scanner
+    setInterval(() => {
         let currentUser = window.currentUser;
-        
-        // Prüft, ob es sich um einen Admin handelt
         let isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin');
 
         let allElements = document.querySelectorAll('div, span, p, b, strong');
         
         allElements.forEach(el => {
-            if (!el.innerText) return;
-            let text = el.innerText.toLowerCase();
+            // textContent ist sicherer als innerText, da es auch versteckte Elemente liest
+            if (!el.textContent) return;
+            let text = el.textContent.toLowerCase();
             
-            // Wenn der Text den Zähler enthält
             if (text.includes('kayıtlı') && text.includes('ziyaret')) {
                 
-                // FALL A: AUSGELOGGT (Gast)
-                // -> Text komplett von der Seite entfernen (blockiert keinen Platz im Header)
+                // Live-Zahl synchronisieren
+                let match = el.textContent.match(/\d+/);
+                if (match) window.misaliLiveVisitorCount = match[0];
+
                 if (!currentUser) {
                     el.style.display = 'none';
                     return; 
                 }
 
-                // FALL B: ADMIN EINGELOGGT
-                // -> Sicherstellen, dass es sichtbar ist, aber Original-Text lassen
                 if (isAdmin) {
                     el.style.display = '';
                     return;
                 }
 
-                // FALL C: NORMALER USER EINGELOGGT
-                // -> In den kleinen Fake-Button für den Header verwandeln
-                if (!el.hasAttribute('data-secret-active')) {
-                    el.style.display = ''; // Falls es vorher als Gast versteckt war
+                // FÜR NORMALE USER:
+                // Wir verstecken den echten Text, behalten ihn aber im Code, 
+                // damit das System ihn im Hintergrund weiter updaten kann!
+                el.style.display = 'none';
+
+                // Wir fügen unseren Fake-Button nur ein, wenn er nicht schon direkt daneben existiert
+                if (!el.nextElementSibling || !el.nextElementSibling.classList.contains('fake-visitor-badge')) {
+                    let badge = document.createElement('span');
+                    badge.className = 'fake-visitor-badge';
+                    badge.innerHTML = '&#128100; 1 Ziyaret&#231;i';
                     
-                    let match = el.innerText.match(/\d+/);
-                    let realCount = match ? match[0] : "0";
-
-                    el.setAttribute('data-secret-active', 'true');
-                    document.getElementById('hidden-real-visitor-count').innerText = realCount + ' Aktif Ziyaretçi';
-
-                    el.innerHTML = `
-                        <span class="fake-visitor-badge" onclick="event.stopPropagation(); document.querySelector('.visitor-celebration-overlay').classList.add('active');">
-                            ${String.fromCodePoint(0x1F464)} 1 Ziyaret&#231;i
-                        </span>
-                    `;
+                    // Beim Klick laden wir die allerneueste Live-Zahl ins Fenster
+                    badge.onclick = (e) => {
+                        e.stopPropagation();
+                        let numEl = document.getElementById('hidden-real-visitor-count');
+                        if (numEl) numEl.innerText = window.misaliLiveVisitorCount + " Aktif Ziyaretçi";
+                        document.querySelector('.visitor-celebration-overlay').classList.add('active');
+                    };
+                    
+                    // Fügt den Button genau an die freie Stelle nach dem originalen Element ein
+                    el.parentNode.insertBefore(badge, el.nextSibling);
                 }
             }
         });
-    }, 1500); 
+    }, 1000); // Checkt jede Sekunde den Live-Status
 })();
 </script>
 
