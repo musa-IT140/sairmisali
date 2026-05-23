@@ -21376,5 +21376,79 @@ button:has(.fa-bell):hover,
 })();
 </script>
 
+<script id="notif-smart-link-fix">
+(function() {
+    window.renderMessageWithLinks = function(msg, poemId, poemType) {
+        if (!msg) return "";
+        
+        
+        let finalMsg = msg;
+        let poemTitle = 'Eser';
+        let actionPoem = '';
+        
+        // 1. Wenn ein Werk verknüpft ist, suchen wir den echten Titel aus der Datenbank!
+        if (poemId) {
+            actionPoem = `event.stopPropagation(); window.closeTopModal('force'); setTimeout(() => { window.openPoemModal ? window.openPoemModal('${poemId}', '${poemType||'poems'}') : window.openUserPoemModal('${poemId}'); }, 100);`;
+            
+            let found = false;
+            // Suche in User-Gedichten
+            if (window.userPoemsDB) { 
+                let f = window.userPoemsDB.find(x => x.id === poemId); 
+                if(f) { poemTitle = f.title || f.trTitle || 'Eser'; found = true; } 
+            }
+            // Suche in Haupt-Kategorien (Gedichte, Sprüche, etc.)
+            if (!found) {
+                let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || {};
+                for (let cat in fullDB) { 
+                    if(Array.isArray(fullDB[cat])) { 
+                        let f = fullDB[cat].find(x => x.id === poemId); 
+                        if(f) { poemTitle = f.trTitle || f.title || f.deTitle || 'Eser'; found = true; break; } 
+                    } 
+                }
+            }
+            // Suche in Rätseln
+            if (!found && window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===poemId); if(f) poemTitle = f.trTitle || 'Bilmece'; }
+            if (!found && window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===poemId); if(f) poemTitle = f.trTitle || 'Bulmaca'; }
+
+            // Den goldenen, klickbaren HTML-Link für den Titel bauen
+            let linkHtml = `<span class="notif-poem-link misali-hover-link" onclick="${actionPoem}" style="color:#f4c542; cursor:pointer; text-decoration:underline; font-weight:bold;">${poemTitle}</span>`;
+            
+            // Die unschönen Platzhalter-Wörter durch den echten Titel ersetzen
+            if (finalMsg.includes('eserine')) finalMsg = finalMsg.replace('eserine', `${linkHtml} adlı eserine`);
+            else if (finalMsg.includes('eserini')) finalMsg = finalMsg.replace('eserini', `${linkHtml} adlı eserini`);
+            else if (finalMsg.includes('esere')) finalMsg = finalMsg.replace('esere', `${linkHtml} adlı esere`);
+            else if (finalMsg.includes('eseri')) finalMsg = finalMsg.replace('eseri', `${linkHtml} adlı eseri`);
+        }
+
+        // 2. Usernamen im Text KLICKBAR machen (für direkte Nachrichten)
+        // Das Skript sucht nach <strong> Tags (dort sind die Namen gespeichert) und macht sie klickbar.
+        finalMsg = finalMsg.replace(/<strong([^>]*)>(.*?)<\/strong>/g, function(match, attrs, name) {
+            let cleanName = name.replace(/<[^>]*>?/gm, '').trim();
+            
+            // "Admin" oder "Sistem" schließen wir aus, da dies keine echten User-Profile sind
+            if (cleanName === 'Admin' || cleanName === 'Sistem' || cleanName === 'Yazar') return match;
+            
+            let actionUser = `event.stopPropagation(); window.replyToMessage('${cleanName}')`;
+            return `<strong ${attrs} class="misali-hover-link" onclick="${actionUser}" title="Mesaj Gönder (Nachricht senden)" style="cursor:pointer;">${name}</strong>`;
+        });
+
+        return finalMsg;
+    };
+    
+    // Auto-Refresh: Wenn das Posteingangs-Fenster gerade offen ist, sofort neu zeichnen!
+    if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) {
+        if(window.renderAdminMessages) window.renderAdminMessages();
+    }
+    if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) {
+        if(window.renderUserMessages) window.renderUserMessages();
+    }
+    
+})();
+
+
+</script>
+
+
+
 </body>
 </html>
