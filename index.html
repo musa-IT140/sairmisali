@@ -21759,36 +21759,81 @@ button:has(.fa-bell):hover {
 
 </style>
 
-<style id="misali-user-visitor-style">
-    /* 1. Button Position (Weiter unten, neben der Suchleiste) */
+<style id="misali-ios-ultimate-fixes">
+/* ========================================================== */
+/* iOS SAFARI EXKLUSIV-FIX: YANITLA TEXT & SCROLL-ZÄHLER      */
+/* ========================================================== */
+@supports (-webkit-touch-callout: none) {
+
+    /* ------------------------------------------------------ */
+    /* 1. ZIYARETÇİ-BADGE: FEST IM HEADER (KEIN MITSCROLLEN)  */
+    /* ------------------------------------------------------ */
     #misali-single-live-badge {
-        position: fixed !important; 
-        top: 255px !important; /* Schiebt den Button genau auf Höhe der Suchleiste */
+        /* WICHTIG: absolute statt fixed -> wandert beim Scrollen nach oben weg */
+        position: absolute !important; 
+        top: 255px !important; /* Exakt neben der Suchleiste im roten Kreis */
         left: 15px !important; 
-        z-index: 99999999 !important; 
+        z-index: 999999 !important; 
         cursor: pointer !important;
-        display: none; 
+        display: flex !important; 
         align-items: center !important;
         justify-content: center !important;
         gap: 6px !important;
         padding: 5px 12px !important;
         background: rgba(0, 210, 255, 0.1) !important;
-        border-radius: 20px !important; /* Runderes Design für Pillen-Look */
+        border-radius: 20px !important;
         border: 1px solid rgba(0, 210, 255, 0.4) !important;
         color: #00d2ff !important;
         font-size: 0.8rem !important;
         font-weight: bold !important;
         backdrop-filter: blur(5px) !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; /* Weiche Ausfahr-Animation */
-        pointer-events: auto !important;
         white-space: nowrap !important;
         min-width: 60px !important;
+        pointer-events: auto !important;
     }
-    #misali-single-live-badge:hover {
-        background: rgba(0, 210, 255, 0.25) !important;
-        transform: scale(1.05) !important;
+
+    /* ------------------------------------------------------ */
+    /* 2. YANITLA-TEXT RADIERER (100% KUGELSICHER FÜR SAFARI) */
+    /* ------------------------------------------------------ */
+    .c-v57-act-btn,
+    .reply-button,
+    .comment-actions button,
+    [onclick*="reply"] {
+        position: relative !important;
+        font-size: 0 !important;          /* Für moderne Browser */
+        color: transparent !important;    /* Macht den Text unsichtbar */
+        text-indent: -9999px !important;  /* Schiebt den Text "Yanıtla" meilenweit aus dem Bild */
+        line-height: 0 !important;
+        width: 36px !important;
+        height: 36px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        overflow: hidden !important;
     }
+
+    /* Holt NUR das Icon (den Pfeil) wieder zurück in die Mitte des Buttons */
+    .c-v57-act-btn i,
+    .reply-button i,
+    .comment-actions button i,
+    [onclick*="reply"] i,
+    .fa-reply {
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important; /* Zentriert das Icon exakt */
+        text-indent: 0 !important;                    /* Verhindert, dass das Icon mitverschoben wird */
+        font-size: 1.1rem !important;
+        color: #00d2ff !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+}
+
 
     /* 2. Fullscreen-Overlay (Unverändert starker Z-Index) */
     .visitor-celebration-overlay {
