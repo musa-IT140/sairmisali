@@ -21765,72 +21765,101 @@ button:has(.fa-bell):hover {
 /* ========================================================== */
 @supports (-webkit-touch-callout: none) {
 
-    /* ------------------------------------------------------ */
-    /* 1. ZIYARETÇİ-BADGE: FEST IM HEADER (KEIN MITSCROLLEN)  */
-    /* ------------------------------------------------------ */
-    #misali-single-live-badge {
-        /* WICHTIG: absolute statt fixed -> wandert beim Scrollen nach oben weg */
-        position: absolute !important; 
-        top: 255px !important; /* Exakt neben der Suchleiste im roten Kreis */
-        left: 15px !important; 
-        z-index: 999999 !important; 
-        cursor: pointer !important;
-        display: flex !important; 
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 6px !important;
-        padding: 5px 12px !important;
-        background: rgba(0, 210, 255, 0.1) !important;
-        border-radius: 20px !important;
-        border: 1px solid rgba(0, 210, 255, 0.4) !important;
-        color: #00d2ff !important;
-        font-size: 0.8rem !important;
-        font-weight: bold !important;
-        backdrop-filter: blur(5px) !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        white-space: nowrap !important;
-        min-width: 60px !important;
-        pointer-events: auto !important;
-    }
+    /* ========================================================== */
+/* 1. UNIVERSAL-FIX: ZIYARETÇI ZÄHLER (ANDROID & iOS)         */
+/* ========================================================== */
 
-    /* ------------------------------------------------------ */
-    /* 2. YANITLA-TEXT RADIERER (100% KUGELSICHER FÜR SAFARI) */
-    /* ------------------------------------------------------ */
+/* Der Button selbst */
+#misali-single-live-badge {
+    position: absolute !important; 
+    top: 255px !important; 
+    left: 15px !important; 
+    
+    /* WICHTIG: Z-Index auf 990 gesenkt! 
+       Dadurch liegen geöffnete Karten/Modals (meist Z-Index 1000+) 
+       sauber über dem Button, ohne dass er durchscheint. */
+    z-index: 990 !important; 
+    
+    cursor: pointer !important;
+    display: none; 
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 5px 12px !important;
+    background: rgba(0, 210, 255, 0.1) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(0, 210, 255, 0.4) !important;
+    color: #00d2ff !important;
+    font-size: 0.8rem !important;
+    font-weight: bold !important;
+    backdrop-filter: blur(5px) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+    white-space: nowrap !important;
+    min-width: 60px !important;
+    pointer-events: auto !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#misali-single-live-badge:hover {
+    background: rgba(0, 210, 255, 0.25) !important;
+    transform: scale(1.05) !important;
+}
+
+/* Das dazugehörige Fullscreen-Overlay (Bleibt ganz vorne) */
+.visitor-celebration-overlay {
+    position: fixed; top: 0; left: 0; 
+    width: 100vw; height: 100vh;
+    background: rgba(2, 6, 23, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 2147483647 !important; 
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    opacity: 0; visibility: hidden;
+    pointer-events: none; 
+    transition: opacity 0.4s ease, visibility 0.4s;
+}
+.visitor-celebration-overlay.active {
+    opacity: 1; visibility: visible;
+    pointer-events: auto; 
+}
+
+    /* ========================================================== */
+/* 2. iOS SAFARI EXKLUSIV: YANITLA TEXT RADIKAL ENTFERNEN     */
+/* ========================================================== */
     .c-v57-act-btn,
     .reply-button,
-    .comment-actions button,
     [onclick*="reply"] {
-        position: relative !important;
-        font-size: 0 !important;          /* Für moderne Browser */
-        color: transparent !important;    /* Macht den Text unsichtbar */
-        text-indent: -9999px !important;  /* Schiebt den Text "Yanıtla" meilenweit aus dem Bild */
-        line-height: 0 !important;
         width: 36px !important;
         height: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 0 !important;
-        border-radius: 50% !important;
         background: rgba(255, 255, 255, 0.08) !important;
+        
+        /* Die radikale Methode: */
+        font-size: 0px !important; 
+        color: transparent !important; 
         overflow: hidden !important;
     }
 
-    /* Holt NUR das Icon (den Pfeil) wieder zurück in die Mitte des Buttons */
+    /* Tötet eventuell versteckte <span> Elemente ab, die den Text halten */
+    .c-v57-act-btn span,
+    [onclick*="reply"] span {
+        display: none !important;
+    }
+
+    /* Holt das reine Icon zurück ins Leben und zentriert es */
     .c-v57-act-btn i,
     .reply-button i,
-    .comment-actions button i,
     [onclick*="reply"] i,
     .fa-reply {
-        position: absolute !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important; /* Zentriert das Icon exakt */
-        text-indent: 0 !important;                    /* Verhindert, dass das Icon mitverschoben wird */
+        display: block !important;
         font-size: 1.1rem !important;
         color: #00d2ff !important;
         visibility: visible !important;
-        display: block !important;
+        margin: 0 !important;
     }
 }
 
