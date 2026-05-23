@@ -21133,7 +21133,248 @@ button:has(.fa-bell):hover,
     color: #f4c542 !important;
 }
 
+/* ==========================================================================
+   1. GÜLLERİM & NOTIFICATIONS FIX (Kompakt & Unabgeschnitten)
+   ========================================================================== */
+
+/* Zwingt den Text, in die nächste Zeile zu fließen, anstatt "..." zu erzeugen */
+.gullerim-text-wrap {
+    white-space: normal !important; 
+    word-wrap: break-word !important; 
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.4 !important;
+}
+
+/* Macht die Benachrichtigungskarten etwas kompakter in den Rändern */
+.gullerim-card-compact {
+    padding: 12px 15px !important;
+    margin-bottom: 10px !important;
+}
+
+/* ==========================================================================
+   2. HOVER-LINKS (Für anklickbare Titel und Namen)
+   ========================================================================== */
+.misali-hover-link {
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: inline-block;
+    position: relative;
+    z-index: 10;
+}
+
+.misali-hover-link:hover {
+    color: #f4c542 !important; /* Goldener Hover */
+    text-shadow: 0 0 8px rgba(244, 197, 66, 0.6) !important;
+    transform: scale(1.03) !important;
+    text-decoration: underline !important;
+}
+
 </style>
+
+<script>
+(function() {
+    // ----------------------------------------------------------------------
+    // 1. GÜLLERİM LISTE (Vollständiger Text & Klickbare Namen/Titel)
+    // ----------------------------------------------------------------------
+    const origRenderMyRoses = window.renderMyRosesList;
+    window.renderMyRosesList = function() {
+        const list = document.getElementById('my-roses-list');
+        if(!list || !window.currentUser) return;
+
+        let uName = window.currentUser.username;
+        let isAdmin = (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+        let rosesData = [];
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+
+        // Hilfsfunktionen (Titel & Autor holen)
+        const getPoemTitle = (id) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f.title || f.trTitle || 'Eser'; }
+            let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {};
+            for (let cat in fullDB) { if(Array.isArray(fullDB[cat])) { let f = fullDB[cat].find(x => x.id === id); if (f) return f.trTitle || f.title || f.deTitle || 'Eser'; } }
+            if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bilmece'; }
+            if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f.trTitle || 'Bulmaca'; }
+            return 'Eser';
+        };
+
+        const getPoemAuthorStr = (pId) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === pId); if(f) return f.name + (f.surname ? ' ' + f.surname : ''); }
+            if (pId.startsWith('user_')) return 'Anonim';
+            if (pId.startsWith('ata_')) { let fullDB = JSON.parse(localStorage.getItem('misaliFullDB')) || window.contentDB || {}; if(fullDB.atasozleri) { let f = fullDB.atasozleri.find(x => x.id === pId); if(f) return f.authorTR || 'Anonim'; } return 'Anonim'; }
+            if (pId.startsWith('sag_')) return 'Tavsiye / Empfehlung';
+            if (pId.startsWith('bil_') || pId.startsWith('bul_')) return 'Anonim';
+            return 'Şair Misal.i';
+        };
+
+        for (let poemId in db) {
+            let pDb = db[poemId];
+            if (pDb && pDb.comments) {
+                let commentsArr = Array.isArray(pDb.comments) ? pDb.comments : Object.values(pDb.comments || {}).filter(Boolean);
+                commentsArr.forEach((c, cIdx) => {
+                    if (!c) return; 
+                    if ((c.username === uName || isAdmin) && c.likes && c.likes.length > 0) {
+                        c.likes.forEach(liker => {
+                            if (!isAdmin && c.username !== uName) return;
+                            let likeTs = (c.likeTimes && c.likeTimes[liker]) ? c.likeTimes[liker] : c.ts;
+                            rosesData.push({ poemId: poemId, cIdx: cIdx, rIdx: null, poemTitle: getPoemTitle(poemId), poemAuthor: getPoemAuthorStr(poemId), liker: liker, ts: likeTs, text: c.text });
+                        });
+                    }
+                    let repliesArr = Array.isArray(c.replies) ? c.replies : Object.values(c.replies || {}).filter(Boolean);
+                    repliesArr.forEach((r, rIdx) => {
+                        if (r && (r.username === uName || isAdmin) && r.likes && r.likes.length > 0) {
+                            r.likes.forEach(liker => {
+                                if (!isAdmin && r.username !== uName) return;
+                                let likeTs = (r.likeTimes && r.likeTimes[liker]) ? r.likeTimes[liker] : r.ts;
+                                rosesData.push({ poemId: poemId, cIdx: cIdx, rIdx: rIdx, poemTitle: getPoemTitle(poemId), poemAuthor: getPoemAuthorStr(poemId), liker: liker, ts: likeTs, text: r.text });
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        if(rosesData.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-style:italic; padding:20px;">Henüz gülleriniz yok. <br><span class="de-sub">(Noch keine Rosen erhalten)</span></div>';
+            return;
+        }
+
+        rosesData.sort((a, b) => b.ts - a.ts);
+
+        list.innerHTML = rosesData.map(r => {
+            let uObj = window.userDatabase[r.liker] || {};
+            let fullName = uObj.name ? (uObj.name + (uObj.surname ? ' ' + uObj.surname : '')) : r.liker;
+            let emj = uObj.emoji || '👤';
+            let likerColorClass = window.getAuthorColorClass(r.liker);
+            let authorColorClass = window.getAuthorColorClass(r.poemAuthor);
+
+            let dObj = new Date(r.ts || Date.now());
+            let tStr = dObj.toLocaleDateString('tr-TR') + ' ' + dObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+
+            // HIER IST DER KLICK-BEFEHL, der das Gedicht öffnet
+            let openPoemAction = `event.stopPropagation(); window.closeTopModal('force'); setTimeout(() => window.openPoemOrUserModal('${r.poemId}'), 100);`;
+
+            let adminActions = '';
+            if (isAdmin) {
+                let rParam = r.rIdx !== null ? r.rIdx : 'null';
+                adminActions = `
+                    <button class="c-v57-act-btn del" onclick="event.preventDefault(); event.stopPropagation(); window.deleteBlueRoseAdminV57('${r.poemId}', ${r.cIdx}, ${rParam}, '${r.liker}')" title="Gülü Sil (Rose Löschen)"><i class="fas fa-trash"></i></button>
+                    <button class="c-v57-act-btn" onclick="event.preventDefault(); event.stopPropagation(); window.openWriteThankYouModal('${r.liker}', '${r.poemId}')" title="Mesaj (Schreiben)"><i class="fas fa-envelope"></i></button>
+                `;
+            }
+            
+            // 🔥 FIX: Text wird NICHT MEHR ABGESCHNITTEN! 🔥
+            let safeRawText = r.text || '';
+            let safeFormattedText = window.formatCommentTextV57 ? window.formatCommentTextV57(safeRawText) : safeRawText;
+
+            return `
+                <div class="gullerim-card-compact" style="display:block !important; background:rgba(0,0,0,0.5); border-radius:12px; border:1px solid rgba(0,210,255,0.3); border-left:4px solid #00d2ff; cursor:pointer; transition:0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" onmouseover="this.style.background='rgba(0,210,255,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'" onclick="${openPoemAction}">
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:6px;">
+                        <div class="misali-hover-link" onclick="${openPoemAction}" style="color:#fdfbf7; font-weight:bold; font-family:'Playfair Display', serif; font-size:1.05rem; line-height:1.2;">✍️ ${r.poemTitle}</div>
+                        <div style="display:flex; align-items:flex-end; margin-left:8px; text-align:right;">
+                            <span style="font-family:'Poppins', sans-serif; font-size:0.55rem; color:#64748b; font-style:italic; margin-bottom:2px;">Written by</span>
+                            <span class="${authorColorClass} misali-hover-link" onclick="${openPoemAction}" style="font-family:'Great Vibes', cursive; font-size:1.15rem; margin-left:4px; font-weight:normal; letter-spacing:0.5px; line-height:1;">${r.poemAuthor}</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; align-items:flex-start; gap:10px; width:100%;">
+                        <span style="font-size:1.5rem; filter:drop-shadow(0 0 5px rgba(244,197,66,0.3)); flex-shrink:0;">${emj}</span>
+                        <div style="display:flex; flex-direction:column; flex-grow:1; min-width:0;">
+                            <div class="gullerim-text-wrap" style="font-size:0.85rem; font-weight:500;">
+                                <span class="${likerColorClass}">${fullName}</span> sana mavi gül bıraktı.
+                            </div>
+                            <div class="gullerim-text-wrap" style="font-size:0.8rem; color:#cbd5e1; font-style:italic; background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 8px; border-left: 2px solid rgba(0,210,255,0.4); margin-top:4px;">
+                                "${safeFormattedText}"
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; width:100%; border-top:1px dashed rgba(255,255,255,0.05); padding-top:6px;">
+                        <span style="font-size:0.7rem; color:#64748b; font-weight:600;"><i class="fas fa-clock" style="color:#00d2ff;"></i> ${tStr}</span>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            ${adminActions}
+                            <div style="color:#00d2ff; font-weight:900; font-size:1.2rem; filter: hue-rotate(200deg) drop-shadow(0 0 5px rgba(0,210,255,0.5)); flex-shrink:0; margin-left:6px;">🌹</div>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }).join('');
+    };
+
+    // ----------------------------------------------------------------------
+    // 2. ADMIN MESSAGES (Klickbare Namen, die direkt auf Antworten springen)
+    // ----------------------------------------------------------------------
+    window.renderAdminMessages = function() {
+        const list = document.getElementById('admin-msg-list');
+        if(!list) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => !m.to || m.to === 'admin' || m.to === 'AdminKing').slice().reverse();
+        if(msgs.length === 0) { list.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Mesaj kutusu boş.</div>'; return; }
+        
+        list.innerHTML = msgs.map(m => {
+            let uObj = window.userDatabase ? window.userDatabase[m.from] : {};
+            let emj = (m.from === 'Sistem' || m.from === 'Admin') ? '🤖' : (uObj.emoji || '👤');
+            let colorClass = window.getAuthorColorClass ? window.getAuthorColorClass(m.from) : '';
+            let msgContent = window.renderMessageWithLinks ? window.renderMessageWithLinks(m.msg, m.poemId, m.poemType || 'poems') : m.msg;
+            let replyTarget = (m.from === 'Sistem' || m.from === 'admin' || m.from === 'Admin') ? '' : m.from;
+
+            // Klickbarer Name öffnet die Antwort-Box
+            let nameHtml = replyTarget 
+                ? `<strong class="${colorClass} misali-hover-link" onclick="event.stopPropagation(); window.replyToMessage('${replyTarget}')" style="font-size:0.95rem;">${m.from}</strong>` 
+                : `<strong class="${colorClass}" style="font-size:0.95rem;">${m.from || 'Sistem'}</strong>`;
+
+            return `
+            <div class="notif-card gullerim-card-compact" style="background: rgba(0,0,0,0.5); border-left: 3px solid #f4c542; border: 1px solid rgba(255,255,255,0.05); text-align: left;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span><span style="font-size:1.3rem; margin-right:8px;">${emj}</span> ${nameHtml}</span>
+                    <span style="font-size:0.75rem; color:#64748b; font-style:italic;">${m.time || ''}</span>
+                </div>
+                <div class="gullerim-text-wrap" style="font-size:0.9rem; color:#fdfbf7; margin-bottom: 12px;">${msgContent}</div>
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    ${replyTarget ? `<button class="c-v57-act-btn" onclick="window.replyToMessage('${replyTarget}')" title="Yanıtla"><i class="fas fa-reply"></i></button>` : ''}
+                    <button class="c-v57-act-btn del" onclick="window.deleteSingleMessage('${m.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    // ----------------------------------------------------------------------
+    // 3. USER MESSAGES (Klickbare Admin-Namen)
+    // ----------------------------------------------------------------------
+    window.renderUserMessages = function() {
+        const list = document.getElementById('user-msg-list');
+        if(!list || !window.currentUser) return;
+        
+        let msgs = (window.adminMessages || []).filter(m => m.to === window.currentUser.username).slice().reverse();
+        if(msgs.length === 0) { list.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Mesaj kutusu boş.</div>'; return; }
+        
+        list.innerHTML = msgs.map(m => {
+            let uObj = window.userDatabase ? window.userDatabase[m.from] : {};
+            let emj = (m.from === 'Sistem' || m.from === 'Admin') ? '🤖' : (uObj.emoji || '👤');
+            let colorClass = window.getAuthorColorClass ? window.getAuthorColorClass(m.from) : '';
+            let msgContent = window.renderMessageWithLinks ? window.renderMessageWithLinks(m.msg, m.poemId, m.poemType || 'poems') : m.msg;
+            
+            // Name klickbar machen -> Öffnet Antwort an AdminKing
+            let nameHtml = `<strong class="${colorClass} misali-hover-link" onclick="event.stopPropagation(); window.replyToMessage('AdminKing')" style="font-size:0.95rem;">${m.from || 'Sistem'}</strong>`;
+
+            return `
+            <div class="notif-card gullerim-card-compact" style="border-left: 3px solid #00d2ff !important; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); text-align: left;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span><span style="font-size:1.3rem; margin-right:8px;">${emj}</span> ${nameHtml}</span>
+                    <span style="font-size:0.75rem; color:#64748b; font-style:italic;">${m.time || ''}</span>
+                </div>
+                <div class="gullerim-text-wrap" style="font-size:0.9rem; color:#fdfbf7; margin-bottom: 12px;">${msgContent}</div>
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    <button class="c-v57-act-btn" onclick="window.replyToMessage('AdminKing')" title="Yanıtla"><i class="fas fa-reply"></i></button>
+                    <button class="c-v57-act-btn del" onclick="window.deleteSingleMessage('${m.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+})();
+</script>
 
 </body>
 </html>
