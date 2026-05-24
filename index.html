@@ -21761,17 +21761,16 @@ button:has(.fa-bell):hover {
 
 <style id="misali-master-styles">
     /* ========================================================== */
-    /* 1. ZÄHLER DESIGN (UNIVERSAL)                               */
+    /* 1. ZÄHLER DESIGN & BASIC LAYOUT                            */
     /* ========================================================== */
     #misali-single-live-badge {
         position: fixed !important; 
-        z-index: 990 !important; /* Sicher hinter Karten, aber über dem Hintergrund */
+        z-index: 990 !important; 
         cursor: pointer !important;
-        display: none; /* JS steuert das */
+        display: none; 
         align-items: center !important;
         justify-content: center !important;
         gap: 6px !important;
-        padding: 5px 12px !important;
         background: rgba(0, 210, 255, 0.1) !important;
         border-radius: 20px !important;
         border: 1px solid rgba(0, 210, 255, 0.4) !important;
@@ -21784,40 +21783,35 @@ button:has(.fa-bell):hover {
     #misali-single-live-badge:hover { transform: scale(1.05) !important; }
     .badge-hidden-on-scroll { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
 
-    /* ========================================================== */
-    /* 2. GERÄTE-TRENNUNG (DESKTOP VS. MOBILE POSITIONEN)         */
-    /* ========================================================== */
-    
-    /* --- DESKTOP & TABLET --- */
+    /* Desktop-Positionierung */
     @media (min-width: 769px) {
         #misali-single-live-badge {
-            top: 250px !important; 
-            left: 20px !important; 
-            font-size: 0.85rem !important;
-            min-width: 60px !important;
+            top: 250px !important; left: 20px !important; 
+            font-size: 0.85rem !important; padding: 5px 12px !important; min-width: 60px !important;
+        }
+    }
+    /* Mobile-Positionierung (Handy) */
+    @media (max-width: 768px) {
+        #misali-single-live-badge {
+            top: 150px !important; left: 10px !important; 
+            font-size: 0.75rem !important; padding: 4px 10px !important; min-width: 50px !important;
+            z-index: 2147483640 !important;
         }
     }
 
-    /* --- MOBILE (HANDY) --- */
-    @media (max-width: 768px) {
-        #misali-single-live-badge {
-            top: 180px !important; /* Etwas höher auf dem Handy, damit es nicht in die Buttons rutscht */
-            left: 10px !important; 
-            font-size: 0.75rem !important; /* Etwas kleiner für Handys */
-            padding: 4px 10px !important;
-            min-width: 50px !important;
-        }
+    /* Absolute Unsichtbarkeit für Gäste (Unterbindet jegliches Blinken) */
+    body.misali-guest-mode #misali-single-live-badge {
+        display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
     }
 
     /* ========================================================== */
-    /* 3. FEIER-OVERLAY (2. KLICK)                                */
+    /* 2. FEIER-OVERLAY                                           */
     /* ========================================================== */
     .visitor-celebration-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
         z-index: 2147483647 !important; display: flex; flex-direction: column;
-        justify-content: center; align-items: center; opacity: 0; visibility: hidden;
-        pointer-events: none; transition: opacity 0.3s ease;
+        justify-content: center; align-items: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.3s ease;
     }
     .visitor-celebration-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
     .visitor-emoji-crowd { font-size: 2.2rem; margin-bottom: 5px; }
@@ -21825,52 +21819,64 @@ button:has(.fa-bell):hover {
     .visitor-record-text { color: #f4c542; font-size: 1.1rem; }
 
     /* ========================================================== */
-    /* 4. iOS SAFARI (WEBKIT) EXKLUSIV-FIXES                      */
+    /* 3. iOS SAFARI (WEBKIT) EXKLUSIV-FIXES                      */
     /* ========================================================== */
     @supports (-webkit-touch-callout: none) {
         
-        /* A. Kommentare & Benachrichtigungen extrem verkleinern */
-        .v57-comment-text, .yorum-text, .comment-body, .notif-item, .notification-text { 
-            font-size: 0.75rem !important; 
-            line-height: 1.2 !important; 
+        /* Korrektur für Überlappungen im ausgeloggten Zustand */
+        body.misali-guest-mode #weather-container, 
+        body.misali-guest-mode .weather-container, 
+        body.misali-guest-mode .header-weather {
+            position: relative !important; 
+            display: flex !important; 
+            justify-content: center !important;
+            width: 100% !important; 
+            margin-top: 45px !important; /* Erzeugt sauberen Abstand zu den Login-Buttons */
+            margin-bottom: 15px !important; 
+            clear: both !important; 
+            float: none !important;
         }
-        .v57-author-name { 
-            font-size: 0.8rem !important; 
-            white-space: nowrap !important; 
-            padding: 2px 0 !important;
+        body.misali-guest-mode .site-title, 
+        body.misali-guest-mode .header-title, 
+        body.misali-guest-mode .logo-text, 
+        body.misali-guest-mode .v57-author-name {
+            position: relative !important; 
+            z-index: 10 !important; 
+            display: inline-block !important; 
+            margin-bottom: 8px !important;
         }
 
-        /* B. Der endgültige Yanıtla-Killer für iOS */
-        .c-v57-act-btn, .reply-button, [onclick*="reply"] {
-            display: block !important; /* Safari ignoriert Text-Indent oft bei Flexbox, also Block! */
+        /* Kommentare kompakter darstellen */
+        .v57-comment-text, .yorum-text, .comment-body, .notif-item, .notification-text { font-size: 0.75rem !important; line-height: 1.2 !important; }
+        .v57-author-name { font-size: 0.8rem !important; white-space: nowrap !important; padding: 2px 0 !important; }
+
+        /* Kugelsicherer "Yanıtla"-Button-Fix */
+        .c-v57-act-btn, .reply-button, [onclick*="reply"], .comment-reply-link {
+            display: inline-block !important; 
             width: 32px !important; 
-            height: 32px !important;
+            height: 32px !important; 
             border-radius: 50% !important;
-            background: rgba(255,255,255,0.08) !important;
+            background: rgba(255, 255, 255, 0.08) !important; 
             position: relative !important;
-            
-            /* Text zerstören */
             font-size: 0px !important; 
-            color: transparent !important;
-            text-indent: -9999px !important; /* Schießt das Wort aus dem Button */
-            overflow: hidden !important;
-            border: none !important;
+            color: transparent !important; 
+            text-indent: -9999px !important; 
+            overflow: hidden !important; 
+            border: none !important; 
             padding: 0 !important;
+            vertical-align: middle !important;
         }
-        
         .c-v57-act-btn span, [onclick*="reply"] span { display: none !important; }
-
-        /* C. Das Icon isoliert zurückholen */
         .c-v57-act-btn i, .reply-button i, [onclick*="reply"] i, .fa-reply {
-            position: absolute !important;
+            position: absolute !important; 
             top: 50% !important; 
-            left: 50% !important;
+            left: 50% !important; 
             transform: translate(-50%, -50%) !important;
-            font-size: 1.1rem !important;
-            color: #00d2ff !important;
-            text-indent: 0 !important; /* WICHTIG: Holt das Icon zurück ins Sichtfeld */
-            visibility: visible !important;
-            display: block !important;
+            font-size: 1.1rem !important; 
+            color: #00d2ff !important; 
+            text-indent: 0 !important; 
+            visibility: visible !important; 
+            display: block !important; 
             line-height: 1 !important;
         }
     }
@@ -21881,7 +21887,7 @@ button:has(.fa-bell):hover {
     window.misaliLiveVisitorCount = 0; 
     let badgeClickState = 0; 
 
-    // 1. Overlay generieren
+    // 1. Overlay initialisieren
     let overlay = document.querySelector('.visitor-celebration-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -21896,7 +21902,7 @@ button:has(.fa-bell):hover {
         overlay.addEventListener('click', () => { overlay.classList.remove('active'); badgeClickState = 0; });
     }
 
-    // 2. Button generieren
+    // 2. Einmalige Badge-Generierung (Verhindert mehrfaches Erstellen)
     let singleBadge = document.getElementById('misali-single-live-badge');
     if (!singleBadge) {
         singleBadge = document.createElement('div');
@@ -21921,15 +21927,37 @@ button:has(.fa-bell):hover {
         document.body.appendChild(singleBadge);
     }
 
-    // 3. Scroll-Ausblendung
+    // 3. Scroll-Wächter
     window.addEventListener('scroll', () => {
         if (window.scrollY > 150) singleBadge.classList.add('badge-hidden-on-scroll');
         else singleBadge.classList.remove('badge-hidden-on-scroll');
     });
 
-    // 4. KUGELSICHERE LOGIK (Handy & Desktop gleich)
+    // 4. Strikte Synchronisations-Schleife
     setInterval(() => {
-        let isAdmin = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'AdminKing' || window.currentUser.role === 'co-admin');
+        // Login-Verifizierung über die Existenz von Benutzerkomponenten
+        let hasLogout = document.querySelector('.fa-sign-out, [href*="logout"], .fa-bell, [class*="bell"]') !== null;
+        
+        // Gegenprüfung über sichtbare Login-Schaltflächen
+        let hasGirisButton = false;
+        document.querySelectorAll('a, button, span, div').forEach(el => {
+            if (el.offsetParent !== null) {
+                let t = el.textContent.trim().toLowerCase();
+                if (t === 'giriş' || t === 'giriş yap' || t === 'kayıt ol') {
+                    hasGirisButton = true;
+                }
+            }
+        });
+
+        let isLoggedIn = hasLogout && !hasGirisButton;
+
+        // Zustandsklasse am Body für CSS-Regeln setzen
+        if (!isLoggedIn) {
+            document.body.classList.add('misali-guest-mode');
+        } else {
+            document.body.classList.remove('misali-guest-mode');
+        }
+
         let highest = 0;
         let allElements = document.querySelectorAll('div, span, p, b, strong');
 
@@ -21939,17 +21967,17 @@ button:has(.fa-bell):hover {
             let text = el.textContent.toLowerCase();
             if (text.includes('ziyaret') && text.length < 80) {
                 
-                // Extrahiert die reine Zahl
                 let match = el.textContent.match(/\d+/g);
                 if (match) {
                     match.forEach(n => {
                         let val = parseInt(n, 10);
-                        if (val > highest && val < 50000) highest = val; 
+                        // Filtert die höchste Zahl heraus (218 ist immer höher als 13 oder 1)
+                        if (val > highest && val < 500000) highest = val; 
                     });
                 }
                 
-                // Versteckt den Originaltext für User (Layout-Schutz)
-                if (!isAdmin && ['SPAN', 'B', 'STRONG'].includes(el.tagName)) {
+                // Versteckt den originalen Counter-Text im Header für normale Benutzer
+                if (isLoggedIn && ['SPAN', 'B', 'STRONG'].includes(el.tagName)) {
                     el.style.setProperty('display', 'none', 'important');
                 }
             }
@@ -21957,11 +21985,8 @@ button:has(.fa-bell):hover {
 
         if (highest > 0) window.misaliLiveVisitorCount = highest;
 
-        // --- DIE ENTSCHEIDUNG ---
-        // Wenn wir eine Zahl gefunden haben (highest > 0), hat der Server den Zähler geladen.
-        // Das bedeutet zu 100%: Jemand ist eingeloggt. (Gäste sehen den Text vom Server gar nicht erst).
-        // Ist diese Person KEIN Admin, wird der Button sofort gezeigt.
-        if (highest > 0 && !isAdmin) {
+        // Sichtbarkeitssteuerung der Badge
+        if (isLoggedIn && window.misaliLiveVisitorCount > 0) {
             singleBadge.style.setProperty('display', 'flex', 'important');
             if (badgeClickState === 0) singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
             else singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
@@ -21969,91 +21994,9 @@ button:has(.fa-bell):hover {
             singleBadge.style.setProperty('display', 'none', 'important');
         }
 
-    }, 1000);
-
+    }, 500);
 })();
 </script>
-
-<style id="misali-mobile-counter-fix">
-    /* ========================================================== */
-    /* SEPERATER FIX: ZÄHLER FÜR HANDYS UND iOS SAFARI ZWINGEN    */
-    /* ========================================================== */
-    
-    /* Zwingt den Zähler auf allen Handys in den Vordergrund */
-    @media (max-width: 768px) {
-        #misali-single-live-badge {
-            top: 120px !important; /* Schiebt ihn auf dem Handy etwas weiter runter ins freie Feld */
-            left: 10px !important;
-            z-index: 2147483640 !important; /* Fast maximaler Browser-Wert, liegt über allem */
-        }
-    }
-
-    /* Extra-Sicherheit: Spezifisch für iPhones (WebKit Touch) */
-    @supports (-webkit-touch-callout: none) {
-        #misali-single-live-badge {
-            top: 120px !important;
-            z-index: 2147483640 !important;
-        }
-    }
-</style>
-
-<script id="misali-guest-hider-fix-v2">
-(function() {
-    setInterval(() => {
-        let isGuestVisible = false;
-        // Sucht nach Login-Links oder Buttons
-        let loginElements = document.querySelectorAll('a[href*="login"], .fa-sign-in, button');
-        
-        loginElements.forEach(el => {
-            let text = el.textContent.toLowerCase();
-            // Die Magie: offsetParent !== null prüft, ob der Button WIRKLICH auf dem Bildschirm zu sehen ist
-            if ((text.includes('giriş') || (el.href && el.href.includes('login'))) && el.offsetParent !== null) {
-                isGuestVisible = true;
-            }
-        });
-
-        // Wenn der Button physisch sichtbar ist (Gast), wird der Zähler stummgeschaltet
-        if (isGuestVisible) {
-            let singleBadge = document.getElementById('misali-single-live-badge');
-            if (singleBadge) {
-                singleBadge.style.setProperty('display', 'none', 'important');
-            }
-        }
-    }, 200); // Checkt extrem schnell, damit nichts aufblitzt
-})();
-</script>
-
-<style id="misali-ios-guest-layout-fix">
-    /* ========================================================== */
-    /* EXTRA FIX: ÜBERLAPPUNGEN BEI AUSGELOGGTEN USER (iOS)       */
-    /* ========================================================== */
-    @supports (-webkit-touch-callout: none) {
-        
-        /* Zwingt das Wetter eine Etage tiefer und macht Platz */
-        #weather-container, 
-        .weather-container, 
-        .header-weather, 
-        .weather-widget {
-            position: relative !important;
-            display: flex !important;
-            justify-content: center !important;
-            width: 100% !important; 
-            margin-top: 30px !important; /* Drückt das Wetter 30 Pixel nach unten */
-            margin-bottom: 10px !important;
-            clear: both !important; /* Verhindert, dass es in andere Elemente rutscht */
-        }
-
-        /* Hält den Namen und die Feder stabil oben */
-        .site-title, 
-        .header-title,
-        .logo-text,
-        .v57-author-name {
-            position: relative !important;
-            z-index: 10 !important;
-            display: inline-block !important;
-        }
-    }
-</style>
 
 </body>
 </html>
