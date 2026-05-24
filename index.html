@@ -21997,5 +21997,63 @@ button:has(.fa-bell):hover {
     }
 </style>
 
+<script id="misali-guest-hider-fix-v2">
+(function() {
+    setInterval(() => {
+        let isGuestVisible = false;
+        // Sucht nach Login-Links oder Buttons
+        let loginElements = document.querySelectorAll('a[href*="login"], .fa-sign-in, button');
+        
+        loginElements.forEach(el => {
+            let text = el.textContent.toLowerCase();
+            // Die Magie: offsetParent !== null prüft, ob der Button WIRKLICH auf dem Bildschirm zu sehen ist
+            if ((text.includes('giriş') || (el.href && el.href.includes('login'))) && el.offsetParent !== null) {
+                isGuestVisible = true;
+            }
+        });
+
+        // Wenn der Button physisch sichtbar ist (Gast), wird der Zähler stummgeschaltet
+        if (isGuestVisible) {
+            let singleBadge = document.getElementById('misali-single-live-badge');
+            if (singleBadge) {
+                singleBadge.style.setProperty('display', 'none', 'important');
+            }
+        }
+    }, 200); // Checkt extrem schnell, damit nichts aufblitzt
+})();
+</script>
+
+<style id="misali-ios-guest-layout-fix">
+    /* ========================================================== */
+    /* EXTRA FIX: ÜBERLAPPUNGEN BEI AUSGELOGGTEN USER (iOS)       */
+    /* ========================================================== */
+    @supports (-webkit-touch-callout: none) {
+        
+        /* Zwingt das Wetter eine Etage tiefer und macht Platz */
+        #weather-container, 
+        .weather-container, 
+        .header-weather, 
+        .weather-widget {
+            position: relative !important;
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important; 
+            margin-top: 30px !important; /* Drückt das Wetter 30 Pixel nach unten */
+            margin-bottom: 10px !important;
+            clear: both !important; /* Verhindert, dass es in andere Elemente rutscht */
+        }
+
+        /* Hält den Namen und die Feder stabil oben */
+        .site-title, 
+        .header-title,
+        .logo-text,
+        .v57-author-name {
+            position: relative !important;
+            z-index: 10 !important;
+            display: inline-block !important;
+        }
+    }
+</style>
+
 </body>
 </html>
