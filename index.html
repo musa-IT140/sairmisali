@@ -21764,12 +21764,12 @@ button:has(.fa-bell):hover {
     /* 1. ZÄHLER DESIGN & SCROLL-VERHALTEN                        */
     /* ========================================================== */
     #misali-single-live-badge {
-        position: fixed !important; /* Startet fixiert im Header */
-        top: 255px !important; /* Exakte Höhe neben der Suchleiste */
+        position: fixed !important; /* Bleibt beim Start stabil im Header */
+        top: 255px !important; /* Exakte Höhe links neben der Suchleiste */
         left: 15px !important; 
-        z-index: 990 !important; /* Sicher HINTER geöffneten Inhaltskarten */
+        z-index: 990 !important; /* Sicher HINTER geöffneten Karten/Fenstern */
         cursor: pointer !important;
-        display: none; 
+        display: none; /* Wird vom JavaScript präzise gesteuert */
         align-items: center !important;
         justify-content: center !important;
         gap: 6px !important;
@@ -21784,15 +21784,16 @@ button:has(.fa-bell):hover {
         box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
         white-space: nowrap !important;
         min-width: 60px !important;
-        /* Steuert das weiche Ein- und Ausblenden beim Scrollen */
+        /* Weiches Ein-/Ausblenden beim Scrollen */
         transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.3s ease !important;
     }
+    
     #misali-single-live-badge:hover {
         transform: scale(1.05) !important;
         background: rgba(0, 210, 255, 0.25) !important;
     }
     
-    /* Diese Klasse wird vom Skript aktiviert, wenn der User nach unten scrollt */
+    /* Macht den Zähler unsichtbar, sobald man aus dem Header scrollt */
     .badge-hidden-on-scroll {
         opacity: 0 !important;
         visibility: hidden !important;
@@ -21800,7 +21801,7 @@ button:has(.fa-bell):hover {
     }
 
     /* ========================================================== */
-    /* 2. DAS FEIER-OVERLAY (2. Klick)                            */
+    /* 2. DAS FEIER-OVERLAY (Für den 2. Klick)                    */
     /* ========================================================== */
     .visitor-celebration-overlay {
         position: fixed; top: 0; left: 0; 
@@ -21814,10 +21815,7 @@ button:has(.fa-bell):hover {
         pointer-events: none; 
         transition: opacity 0.4s ease, visibility 0.4s;
     }
-    .visitor-celebration-overlay.active {
-        opacity: 1; visibility: visible;
-        pointer-events: auto; 
-    }
+    .visitor-celebration-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
     .visitor-emoji-crowd { font-size: 2.2rem; animation: crowdBounce 1s infinite alternate ease-in-out; margin-bottom: 5px; }
     @keyframes crowdBounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-10px) scale(1.05); } }
     .visitor-real-number { font-size: 1.6rem; color: #ffffff; font-weight: 900; background: rgba(255, 255, 255, 0.05); padding: 8px 20px; border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px; }
@@ -21825,11 +21823,29 @@ button:has(.fa-bell):hover {
     @keyframes textGlow { from { text-shadow: 0 0 5px rgba(244,197,66,0.4); } to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; } }
 
     /* ========================================================== */
-    /* 3. iOS SAFARI EXKLUSIV-FIXES (Yanıtla & Namen)             */
+    /* 3. GLOCKE & FEDER ÜBERLAPPUNGS-FIX (Alle Geräte)           */
+    /* ========================================================== */
+    .fa-bell, [class*="bell"], .notification-icon {
+        margin-left: 12px !important; /* Schafft Distanz zur Feder */
+        position: relative !important;
+        z-index: 10 !important;
+    }
+
+    /* ========================================================== */
+    /* 4. iOS SAFARI (WEBKIT) EXKLUSIV-FIXES                      */
     /* ========================================================== */
     @supports (-webkit-touch-callout: none) {
         
-        /* Namen in Inhaltskarten vergrößern */
+        /* A. Wetter/Header Überlappung bei ausgeloggten Usern beheben */
+        #weather-container, .weather-container, .header-weather, .weather-widget {
+            position: relative !important;
+            display: inline-flex !important;
+            margin: 15px auto !important;
+            clear: both !important; /* Zwingt das Element auf eine eigene freie Zeile */
+            z-index: 99 !important;
+        }
+
+        /* B. Namen in Inhaltskarten vergrößern */
         .modal-content .author-anim, .modal-content [class*="author"], 
         .modal-content [class*="yazar"], .modal-content .card-sub, .v57-author-name {
             font-size: 1.45rem !important; 
@@ -21844,22 +21860,23 @@ button:has(.fa-bell):hover {
             font-size: 1.2rem !important; 
         }
 
-        /* RADIKALER YANITLA-FIX FÜR iOS */
+        /* C. RADIKALER YANITLA-FIX (100% Text-Zerstörung für Safari) */
         .c-v57-act-btn, .reply-button, [onclick*="reply"] {
-            display: inline-block !important; /* Zwingend nötig für den Einzug-Trick */
+            display: inline-block !important; /* MUSS inline-block sein für Safari-Trick! */
             position: relative !important;
             width: 36px !important;
             height: 36px !important;
             padding: 0 !important;
             border-radius: 50% !important;
             background: rgba(255, 255, 255, 0.08) !important;
+            /* Die 4 Reiter der Text-Apokalypse für Safari: */
             font-size: 0 !important;
             color: transparent !important;
-            text-indent: -9999px !important; /* Schiebt das Wort physisch aus dem Bildschirm */
+            -webkit-text-fill-color: transparent !important; 
+            text-indent: -9999px !important; 
             overflow: hidden !important; 
-            white-space: nowrap !important;
+            vertical-align: middle !important;
         }
-        
         .c-v57-act-btn span, [onclick*="reply"] span {
             display: none !important;
         }
@@ -21872,6 +21889,7 @@ button:has(.fa-bell):hover {
             transform: translate(-50%, -50%) !important;
             font-size: 1.1rem !important;
             color: #00d2ff !important;
+            -webkit-text-fill-color: #00d2ff !important; 
             text-indent: 0 !important; /* Holt das Icon zurück ins Sichtfeld */
             visibility: visible !important;
             display: block !important;
@@ -21905,11 +21923,12 @@ button:has(.fa-bell):hover {
         });
     }
 
-    // 2. Der Scroll-Wächter (Blendet Zähler weich aus, wenn man nach unten scrollt)
+    // 2. Der Scroll-Wächter (Blendet Zähler aus, sobald man nach unten scrollt)
     window.addEventListener('scroll', function() {
         let singleBadge = document.getElementById('misali-single-live-badge');
         if (singleBadge) {
-            if (window.scrollY > 120) {
+            // Verstecken, wenn mehr als 150px gescrollt wurde
+            if (window.scrollY > 150) {
                 singleBadge.classList.add('badge-hidden-on-scroll');
             } else {
                 singleBadge.classList.remove('badge-hidden-on-scroll');
@@ -21919,12 +21938,10 @@ button:has(.fa-bell):hover {
 
     // 3. Sichere Live-Synchronisation
     setInterval(() => {
-        let hasLogout = document.querySelector('[href*="logout"]') || document.querySelector('.fa-sign-out') || document.querySelector('.fa-sign-out-alt');
-        let hasProfile = document.querySelector('.fa-bell') || document.getElementById('weather-container');
-        
-        // Strikte Login-Prüfung
-        let isLoggedIn = !!(window.currentUser || hasLogout || hasProfile);
-        let isAdmin = !!(window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'AdminKing' || window.currentUser.role === 'co-admin'));
+        // Kugelsichere Rollen-Erkennung
+        let isGuest = !!document.querySelector('[href*="login"], .fa-sign-in, [onclick*="login"]');
+        let currentUser = window.currentUser;
+        let isAdmin = !!(currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin'));
 
         let singleBadge = document.getElementById('misali-single-live-badge');
         if (!singleBadge) {
@@ -21960,8 +21977,7 @@ button:has(.fa-bell):hover {
             let text = el.textContent.toLowerCase();
             
             if (text.includes('ziyaret') && text.length < 80) {
-                
-                // Zieht die Zahl heraus
+                // Zieht die Live-Zahl heraus
                 let parts = el.textContent.split(/ziyaret&#231;i|ziyaretçi/i);
                 if (parts.length > 1) {
                     let numMatch = parts[1].match(/\d+/);
@@ -21979,13 +21995,10 @@ button:has(.fa-bell):hover {
                     });
                 }
 
-                // === HEADER-SCHUTZ ===
-                // Versteckt das Element NUR, wenn es ein reines Text-Element ist (span, b, p) 
-                // oder ein div, das KEINE weiteren Layout-Elemente in sich trägt.
+                // Header-Schutz: Versteckt den Original-Text nur, wenn man eingeloggt, aber kein Admin ist
                 let isSafeToHide = ['SPAN', 'B', 'STRONG', 'I', 'P', 'LI'].includes(el.tagName) || (el.tagName === 'DIV' && el.children.length === 0);
-                
                 if (isSafeToHide) {
-                    if (isLoggedIn && !isAdmin) {
+                    if (!isGuest && !isAdmin) {
                         el.style.setProperty('display', 'none', 'important');
                     } else {
                         el.style.display = ''; 
@@ -21993,8 +22006,8 @@ button:has(.fa-bell):hover {
                 }
             }
             
-            // Versteckt "Kayıtlı: 13" bei Usern ebenfalls mit Schutzschild
-            if (text.includes('kayıtlı') && text.includes('ziyaret') && isLoggedIn && !isAdmin) {
+            // Versteckt auch die registrierten User (z.B. "Kayıtlı 13") für normale User
+            if (text.includes('kayıtlı') && text.includes('ziyaret') && !isGuest && !isAdmin) {
                 let isSafeToHide = ['SPAN', 'B', 'STRONG', 'I', 'P', 'LI'].includes(el.tagName) || (el.tagName === 'DIV' && el.children.length === 0);
                 if (isSafeToHide) {
                     el.style.setProperty('display', 'none', 'important');
@@ -22004,8 +22017,9 @@ button:has(.fa-bell):hover {
 
         if (highestFound > 0) window.misaliLiveVisitorCount = highestFound;
 
-        // Button nur zeigen, wenn eingeloggt und kein Admin
-        if (isLoggedIn && !isAdmin) {
+        // --- DER ULTIMATIVE SICHTBARKEITS-CHECK ---
+        // Button nur zeigen, wenn man NICHT ausgeloggt und KEIN Admin ist
+        if (!isGuest && !isAdmin) {
             singleBadge.style.setProperty('display', 'flex', 'important');
             if (badgeClickState === 0) {
                 singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
@@ -22019,78 +22033,6 @@ button:has(.fa-bell):hover {
     }, 1000);
 })();
 </script>
-
-<style id="misali-ios-safari-fixes">
-/* ========================================================== */
-/* iOS SAFARI (WEBKIT) EXKLUSIV-FIXES                         */
-/* ========================================================== */
-@supports (-webkit-touch-callout: none) {
-    
-    /* ------------------------------------------------------ */
-    /* 1. YANITLA BUTTON (Nur Icon, Text weg)                 */
-    /* ------------------------------------------------------ */
-    .c-v57-act-btn,
-    .reply-button,
-    .comment-actions button,
-    [onclick*="reply"] {
-        font-size: 0 !important; /* Macht den Text "Yanıtla" unsichtbar */
-        color: transparent !important; /* Doppelte Sicherheit gegen Text */
-        width: 34px !important;
-        height: 34px !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-        border-radius: 50% !important; /* Macht den Button kreisrund */
-        background: rgba(255, 255, 255, 0.05) !important; /* Leichter Hintergrundrahmen */
-        overflow: hidden !important;
-        vertical-align: middle !important;
-    }
-
-    /* Das Reply-Icon (Pfeil) selbst wieder in Farbe und Größe sichtbar machen */
-    .c-v57-act-btn i,
-    .c-v57-act-btn span,
-    .reply-button i,
-    .comment-actions button i,
-    [onclick*="reply"] i,
-    .fa-reply {
-        font-size: 1.1rem !important; /* Icon-Größe */
-        color: #00d2ff !important;    /* Deine Cyan-Farbe */
-        margin: 0 !important;
-        visibility: visible !important;
-    }
-
-    /* ------------------------------------------------------ */
-    /* 2. NAMENS-UMBRUCH VERHINDERN (Şair Misal.i)            */
-    /* ------------------------------------------------------ */
-    .v57-author-name,
-    .comment-author,
-    .author-name {
-        white-space: nowrap !important; /* Zwingt den Namen in EINE Zeile */
-        display: inline-block !important;
-    }
-
-    /* ------------------------------------------------------ */
-    /* 3. WETTER-WIDGET ÜBERLAPPUNGS-FIX (Ausgeloggter Modus) */
-    /* ------------------------------------------------------ */
-    .weather-widget,
-    .header-weather,
-    #weather-container,
-    .weather-container {
-        position: relative !important; /* Zwingt das Widget in den normalen Textfluss */
-        top: auto !important;
-        bottom: auto !important;
-        margin: 15px auto !important; /* 15px Sicherheitsabstand nach oben und unten */
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        clear: both !important; /* Verhindert das Hineinrutschen in andere Bereiche */
-        z-index: 99 !important;
-    }
-}
-</style>
-
-
 
 </body>
 </html>
