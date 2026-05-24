@@ -21993,51 +21993,120 @@ button:has(.fa-bell):hover {
 
 <style id="misali-ios-yanitla-fix">
     /* ========================================================== */
-    /* iOS SAFARI EXKLUSIV-FIX: YANITLA TEXT RESTLOS ENTFERNEN     */
+    /* iOS SAFARI: YANITLA TEXT RESTLOS ENTFERNEN (ULTIMATE)      */
     /* ========================================================== */
     @supports (-webkit-touch-callout: none) {
         .c-v57-act-btn,
         .reply-button,
         [onclick*="reply"] {
-            visibility: hidden !important; /* Versteckt den kompletten Textknoten im Button */
-            position: relative !important;
+            font-size: 0 !important;
+            letter-spacing: -9999px !important;
+            text-indent: -9999px !important;
+            color: transparent !important; 
+            -webkit-text-fill-color: transparent !important; /* Die Safari-Geheimwaffe */
             width: 36px !important;
             height: 36px !important;
             display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             padding: 0 !important;
             border-radius: 50% !important;
             background: rgba(255, 255, 255, 0.08) !important;
             overflow: hidden !important;
         }
 
-        /* Macht NUR das Icon wieder sichtbar und zentriert es perfekt */
+        /* Macht NUR das Icon (den Pfeil) wieder sichtbar */
         .c-v57-act-btn i,
         .reply-button i,
         [onclick*="reply"] i,
         .fa-reply {
-            visibility: visible !important; 
-            position: absolute !important;
-            left: 50% !important;
-            top: 50% !important;
-            transform: translate(-50%, -50%) !important;
             font-size: 1.1rem !important;
+            letter-spacing: 0 !important;
+            text-indent: 0 !important;
             color: #00d2ff !important;
-            margin: 0 !important;
+            -webkit-text-fill-color: #00d2ff !important; /* Bringt die blaue Farbe zum Icon zurück */
             display: block !important;
-        }
-        
-        .c-v57-act-btn span, [onclick*="reply"] span {
-            display: none !important;
+            margin: 0 !important;
         }
     }
 </style>
 
 <script id="misali-live-visitor-sync-script">
 (function() {
-    window.misaliLiveVisitorCount = 218; // Sicherheits-Startwert
+    window.misaliLiveVisitorCount = 218; 
     let badgeClickState = 0; 
 
-    // 1. Feier-Overlay erstellen
+    // =========================================================================
+    // 1. CSS GENERIEREN (Garantiert fehlerfrei auf allen Geräten)
+    // =========================================================================
+    if (!document.getElementById('misali-auto-visitor-styles')) {
+        const style = document.createElement('style');
+        style.id = 'misali-auto-visitor-styles';
+        style.innerHTML = `
+            #misali-single-live-badge {
+                position: fixed !important; /* Bleibt beim Start exakt stehen */
+                top: 255px !important; /* Höhe neben der Suchleiste */
+                left: 15px !important; 
+                z-index: 990 !important; /* Sicher hinter Inhalts-Karten */
+                cursor: pointer !important;
+                display: none; 
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 6px !important;
+                padding: 5px 12px !important;
+                background: rgba(0, 210, 255, 0.1) !important;
+                border-radius: 20px !important;
+                border: 1px solid rgba(0, 210, 255, 0.4) !important;
+                color: #00d2ff !important;
+                font-size: 0.8rem !important;
+                font-weight: bold !important;
+                backdrop-filter: blur(5px) !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+                white-space: nowrap !important;
+                min-width: 60px !important;
+                /* Weicher Übergang beim Scrollen und Hovern */
+                transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.3s ease !important;
+            }
+            #misali-single-live-badge:hover {
+                background: rgba(0, 210, 255, 0.25) !important;
+                transform: scale(1.05) !important;
+            }
+            /* Die Klasse, die per JS beim Scrollen hinzugefügt wird */
+            .badge-hidden-on-scroll {
+                opacity: 0 !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+            }
+
+            /* Das Feier-Overlay */
+            .visitor-celebration-overlay {
+                position: fixed; top: 0; left: 0; 
+                width: 100vw; height: 100vh;
+                background: rgba(2, 6, 23, 0.95);
+                backdrop-filter: blur(8px);
+                z-index: 2147483647 !important; 
+                display: flex; flex-direction: column;
+                justify-content: center; align-items: center;
+                opacity: 0; visibility: hidden;
+                pointer-events: none; 
+                transition: opacity 0.4s ease, visibility 0.4s;
+            }
+            .visitor-celebration-overlay.active {
+                opacity: 1; visibility: visible;
+                pointer-events: auto; 
+            }
+            .visitor-emoji-crowd { font-size: 2.2rem; animation: crowdBounce 1s infinite alternate ease-in-out; margin-bottom: 5px; }
+            @keyframes crowdBounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-10px) scale(1.05); } }
+            .visitor-real-number { font-size: 1.6rem; color: #ffffff; font-weight: 900; background: rgba(255, 255, 255, 0.05); padding: 8px 20px; border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px; }
+            .visitor-record-text { color: #f4c542; font-size: 1.1rem; font-family: 'Playfair Display', serif; text-align: center; margin: 10px 0; animation: textGlow 1.5s infinite alternate; }
+            @keyframes textGlow { from { text-shadow: 0 0 5px rgba(244,197,66,0.4); } to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; } }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // =========================================================================
+    // 2. DAS OVERLAY GENERIEREN
+    // =========================================================================
     let overlay = document.querySelector('.visitor-celebration-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -22051,24 +22120,38 @@ button:has(.fa-bell):hover {
             </div>
         `;
         document.body.appendChild(overlay);
-
         overlay.addEventListener('click', function() {
             this.classList.remove('active');
             badgeClickState = 0; 
         });
     }
 
-    // 2. Live-Synchronisations-Schleife
+    // =========================================================================
+    // 3. DER SCROLL-WÄCHTER (Blendet aus, wenn der Header verschwindet)
+    // =========================================================================
+    window.addEventListener('scroll', function() {
+        let singleBadge = document.getElementById('misali-single-live-badge');
+        if (singleBadge) {
+            // Sobald man 150 Pixel nach unten scrollt, verschwindet der Button
+            if (window.scrollY > 150) {
+                singleBadge.classList.add('badge-hidden-on-scroll');
+            } else {
+                singleBadge.classList.remove('badge-hidden-on-scroll');
+            }
+        }
+    });
+
+    // =========================================================================
+    // 4. LIVE SYNCHRONISATION (Filtert exakt die Gesamtbesucherzahl heraus)
+    // =========================================================================
     setInterval(() => {
-        // Unabhängige Login-Erkennung für Stabilität auf allen OS
-        let hasLogout = document.querySelector('[href*="logout"]') || document.querySelector('.fa-sign-out') || document.querySelector('.fa-sign-out-alt') || document.querySelector('[onclick*="logout"]');
-        let hasProfile = document.querySelector('.fa-bell') || document.getElementById('weather-container') || document.querySelector('.weather-container');
+        let hasLogout = document.querySelector('[href*="logout"]') || document.querySelector('.fa-sign-out');
+        let hasProfile = document.querySelector('.fa-bell') || document.getElementById('weather-container');
         let isLoggedIn = !!(window.currentUser || hasLogout || hasProfile);
         
         let currentUser = window.currentUser;
         let isAdmin = !!(currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin'));
 
-        // Badge generieren falls nicht existent
         let singleBadge = document.getElementById('misali-single-live-badge');
         if (!singleBadge) {
             singleBadge = document.createElement('div');
@@ -22077,11 +22160,9 @@ button:has(.fa-bell):hover {
             singleBadge.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
                 if (badgeClickState === 0) {
                     badgeClickState = 1;
                     this.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
-                    
                     setTimeout(() => {
                         if (badgeClickState === 1) {
                             badgeClickState = 0;
@@ -22097,7 +22178,6 @@ button:has(.fa-bell):hover {
             document.body.appendChild(singleBadge);
         }
 
-        // --- DATA-MINING LOGIK ---
         let allElements = document.querySelectorAll('div, span, p, b, strong');
         let highestFound = 0;
 
@@ -22105,9 +22185,8 @@ button:has(.fa-bell):hover {
             if (!el.textContent || el.id === 'misali-single-live-badge' || el.classList.contains('visitor-real-number')) return;
             let text = el.textContent.toLowerCase();
             
+            // Sucht präzise nach dem Wert der Live-Besucher
             if (text.includes('ziyaret') && text.length < 60) {
-                
-                // Extrahiere gezielt die Zahl nach dem Wort "Ziyaretçi"
                 let parts = el.textContent.split(/ziyaret&#231;i|ziyaretçi/i);
                 if (parts.length > 1) {
                     let numMatch = parts[1].match(/\d+/);
@@ -22117,7 +22196,6 @@ button:has(.fa-bell):hover {
                     }
                 }
                 
-                // Fallback-Sicherung
                 let allNums = el.textContent.match(/\d+/g);
                 if (allNums) {
                     allNums.forEach(numStr => {
@@ -22126,7 +22204,6 @@ button:has(.fa-bell):hover {
                     });
                 }
 
-                // Verberge originalen Admin-Counter für normale User
                 if (isLoggedIn && !isAdmin) {
                     el.style.setProperty('display', 'none', 'important');
                 } else {
@@ -22139,11 +22216,8 @@ button:has(.fa-bell):hover {
             }
         });
 
-        if (highestFound > 0) {
-            window.misaliLiveVisitorCount = highestFound;
-        }
+        if (highestFound > 0) window.misaliLiveVisitorCount = highestFound;
 
-        // 3. Sichtbarkeit steuern
         if (isLoggedIn && !isAdmin) {
             singleBadge.style.setProperty('display', 'flex', 'important');
             if (badgeClickState === 0) {
