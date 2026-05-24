@@ -21897,168 +21897,68 @@ button:has(.fa-bell):hover {
     @keyframes textGlow { from { text-shadow: 0 0 5px rgba(244,197,66,0.4); } to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; } }
 </style>
 
-<script id="misali-ultimate-visitor-script">
-(function() {
-    window.misaliLiveVisitorCount = 0; 
-    let badgeClickState = 0; 
-
-    // =========================================================================
-    // 1. AUTOMATISCHES CSS (Schützt vor Android-Fehlern und Klammer-Chaos)
-    // =========================================================================
-    if (!document.getElementById('misali-auto-styles')) {
-        const style = document.createElement('style');
-        style.id = 'misali-auto-styles';
-        style.innerHTML = `
-            #misali-single-live-badge {
-                position: absolute !important; 
-                top: 235px !important; /* Perfekte Höhe neben der Suchleiste */
-                left: 15px !important; 
-                z-index: 990 !important; /* Liegt sicher unter geöffneten Karten */
-                cursor: pointer !important;
-                display: none; 
-                align-items: center !important;
-                justify-content: center !important;
-                gap: 6px !important;
-                padding: 5px 12px !important;
-                background: rgba(0, 210, 255, 0.1) !important;
-                border-radius: 20px !important;
-                border: 1px solid rgba(0, 210, 255, 0.4) !important;
-                color: #00d2ff !important;
-                font-size: 0.8rem !important;
-                font-weight: bold !important;
-                backdrop-filter: blur(5px) !important;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-                white-space: nowrap !important;
-                min-width: 60px !important;
-                pointer-events: auto !important;
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            }
-            #misali-single-live-badge:hover {
-                background: rgba(0, 210, 255, 0.25) !important;
-                transform: scale(1.05) !important;
-            }
-            .visitor-celebration-overlay {
-                position: fixed; top: 0; left: 0; 
-                width: 100vw; height: 100vh;
-                background: rgba(2, 6, 23, 0.95);
-                backdrop-filter: blur(8px);
-                z-index: 2147483647 !important; /* Ganz vorne */
-                display: flex; flex-direction: column;
-                justify-content: center; align-items: center;
-                opacity: 0; visibility: hidden;
-                pointer-events: none; 
-                transition: opacity 0.4s ease, visibility 0.4s;
-            }
-            .visitor-celebration-overlay.active {
-                opacity: 1; visibility: visible;
-                pointer-events: auto; 
-            }
-            .visitor-emoji-crowd { font-size: 2.2rem; animation: crowdBounce 1s infinite alternate ease-in-out; margin-bottom: 5px; }
-            @keyframes crowdBounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-10px) scale(1.05); } }
-            .visitor-real-number {
-                font-size: 1.6rem; color: #ffffff; font-weight: 900;
-                background: rgba(255, 255, 255, 0.05); padding: 8px 20px; 
-                border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px;
-            }
-            .visitor-record-text {
-                color: #f4c542; font-size: 1.1rem; font-family: 'Playfair Display', serif;
-                text-align: center; margin: 10px 0; animation: textGlow 1.5s infinite alternate;
-            }
-            @keyframes textGlow { from { text-shadow: 0 0 5px rgba(244,197,66,0.4); } to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; } }
-        `;
-        document.head.appendChild(style);
+<style id="misali-main-visitor-styles">
+    /* 1. Der kompakte Live-Button (Absolut stabil auf allen Geräten) */
+    #misali-single-live-badge {
+        position: absolute !important; 
+        top: 255px !important; /* Perfekte Position links neben der Suchleiste */
+        left: 15px !important; 
+        z-index: 990 !important; /* Liegt sicher UNTER geöffneten Karten/Inhalten */
+        cursor: pointer !important;
+        display: none; /* Wird per JS gesteuert */
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 5px 12px !important;
+        background: rgba(0, 210, 255, 0.1) !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(0, 210, 255, 0.4) !important;
+        color: #00d2ff !important;
+        font-size: 0.8rem !important;
+        font-weight: bold !important;
+        backdrop-filter: blur(5px) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        white-space: nowrap !important;
+        min-width: 60px !important;
+        pointer-events: auto !important;
+        transition: all 0.3s ease-in-out !important;
+    }
+    #misali-single-live-badge:hover {
+        background: rgba(0, 210, 255, 0.25) !important;
+        transform: scale(1.05) !important;
     }
 
-    // =========================================================================
-    // 2. DAS FENSTER GENERIEREN
-    // =========================================================================
-    if (!document.querySelector('.visitor-celebration-overlay')) {
-        const overlay = document.createElement('div');
-        overlay.className = 'visitor-celebration-overlay';
-        overlay.innerHTML = `
-            <div class="visitor-emoji-crowd">&#128101; &#127881;</div>
-            <div class="visitor-real-number" id="hidden-real-visitor-count">0 Ziyaret&#231;i</div>
-            <div class="visitor-record-text">Sizin ba&#351;ar&#305;n&#305;z, sizin rekorunuz</div>
-            <div style="margin-top:20px; font-size:0.8rem; color:#64748b; font-family:sans-serif; cursor:pointer;">
-                (Kapatmak i&#231;in dokunun)
-            </div>
-        `;
-        document.body.appendChild(overlay);
-
-        overlay.addEventListener('click', function() {
-            this.classList.remove('active');
-            badgeClickState = 0; // Setzt den Button beim Schließen zurück
-        });
+    /* 2. Das edle Fullscreen-Overlay beim 2. Klick */
+    .visitor-celebration-overlay {
+        position: fixed; top: 0; left: 0; 
+        width: 100vw; height: 100vh;
+        background: rgba(2, 6, 23, 0.95);
+        backdrop-filter: blur(8px);
+        z-index: 2147483647 !important; /* Absolut im Vordergrund */
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center;
+        opacity: 0; visibility: hidden;
+        pointer-events: none; 
+        transition: opacity 0.4s ease, visibility 0.4s;
     }
-
-    // =========================================================================
-    // 3. LIVE SCAN & KLICK-LOGIK
-    // =========================================================================
-    setInterval(() => {
-        let currentUser = window.currentUser;
-        let isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'AdminKing' || currentUser.role === 'co-admin');
-
-        let singleBadge = document.getElementById('misali-single-live-badge');
-        if (!singleBadge) {
-            singleBadge = document.createElement('div');
-            singleBadge.id = 'misali-single-live-badge';
-            
-            // Die smarte 2-Klick-Funktion
-            singleBadge.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                if (badgeClickState === 0) {
-                    badgeClickState = 1;
-                    this.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
-                    
-                    setTimeout(() => {
-                        if (badgeClickState === 1) {
-                            badgeClickState = 0;
-                            singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
-                        }
-                    }, 4000);
-                } else {
-                    let numEl = document.getElementById('hidden-real-visitor-count');
-                    if (numEl) numEl.innerText = window.misaliLiveVisitorCount + " Ziyaretçi";
-                    document.querySelector('.visitor-celebration-overlay').classList.add('active');
-                }
-            });
-            document.body.appendChild(singleBadge);
-        }
-
-        let allElements = document.querySelectorAll('div, span, p, b, strong');
-        let highestFound = 0; 
-        
-        allElements.forEach(el => {
-            if (!el.textContent || el.id === 'misali-single-live-badge' || el.id === 'hidden-real-visitor-count') return;
-            let text = el.textContent.toLowerCase();
-            
-            if (text.includes('ziyaret') && text.length < 50) {
-                let match = el.textContent.match(/\d+/);
-                if (match) {
-                    let val = parseInt(match[0], 10);
-                    if (val > highestFound) highestFound = val;
-                }
-                if (!isAdmin) el.style.display = 'none'; 
-            }
-        });
-
-        if (highestFound > 0) window.misaliLiveVisitorCount = highestFound;
-
-        if (!currentUser || isAdmin) {
-            singleBadge.style.display = 'none'; 
-        } else {
-            singleBadge.style.display = 'flex'; 
-            if (badgeClickState === 0) {
-                singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
-            } else {
-                singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
-            }
-        }
-    }, 1000); 
-})();
-</script>
+    .visitor-celebration-overlay.active {
+        opacity: 1; visibility: visible;
+        pointer-events: auto; 
+    }
+    .visitor-emoji-crowd { font-size: 2.2rem; animation: crowdBounce 1s infinite alternate ease-in-out; margin-bottom: 5px; }
+    @keyframes crowdBounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-10px) scale(1.05); } }
+    
+    .visitor-real-number {
+        font-size: 1.6rem; color: #ffffff; font-weight: 900;
+        background: rgba(255, 255, 255, 0.05); padding: 8px 20px; 
+        border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px;
+    }
+    .visitor-record-text {
+        color: #f4c542; font-size: 1.1rem; font-family: 'Playfair Display', serif;
+        text-align: center; margin: 10px 0; animation: textGlow 1.5s infinite alternate;
+    }
+    @keyframes textGlow { from { text-shadow: 0 0 5px rgba(244,197,66,0.4); } to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; } }
+</style>
 
 <style>
 
