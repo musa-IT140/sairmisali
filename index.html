@@ -21959,5 +21959,51 @@ button:has(.fa-bell):hover {
 })();
 </script>
 
+<style id="misali-fixed-final">
+    /* iOS Safari: Yanıtla-Wort killen */
+    @supports (-webkit-touch-callout: none) {
+        /* Versteckt den Button-Inhalt radikal */
+        .c-v57-act-btn, .reply-button, [onclick*="reply"] {
+            font-size: 0px !important; 
+            color: transparent !important;
+            text-indent: -9999px !important;
+        }
+        /* Zeigt nur das Icon */
+        .c-v57-act-btn i, .reply-button i, [onclick*="reply"] i {
+            display: block !important;
+            font-size: 1rem !important;
+            color: #00d2ff !important;
+            text-indent: 0 !important;
+        }
+        /* Şair Misal.i Logo Fix bei Gästen auf iOS */
+        body.is-guest .logo-text { margin-top: 40px !important; }
+    }
+</style>
+
+<script id="misali-fixed-final-js">
+(function() {
+    function runFixes() {
+        // 1. Zähler-Logik: Nur anzeigen, wenn Profil-Icon da ist (Eingeloggt)
+        let isUserLoggedIn = document.querySelector('.header-mini-profile, #user-avatar') !== null;
+        let badge = document.getElementById('misali-single-live-badge');
+        
+        if (badge) {
+            badge.style.display = isUserLoggedIn ? 'flex' : 'none';
+        }
+
+        // 2. Guest-Klasse für iOS-Layouts (ohne Login-Buttons zu berühren)
+        if (!isUserLoggedIn) {
+            document.body.classList.add('is-guest');
+        } else {
+            document.body.classList.remove('is-guest');
+        }
+    }
+
+    // Nur beim Laden und kurz danach prüfen
+    window.addEventListener('load', runFixes);
+    setInterval(runFixes, 2000); // Sehr seltener Check, spart Ressourcen & verhindert Flackern
+})();
+</script>
+
 </body>
 </html>
