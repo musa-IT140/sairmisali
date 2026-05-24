@@ -21761,15 +21761,13 @@ button:has(.fa-bell):hover {
 
 <style id="misali-master-styles">
     /* ========================================================== */
-    /* 1. ZÄHLER DESIGN & SCROLL-VERHALTEN                        */
+    /* 1. ZÄHLER DESIGN (UNIVERSAL)                               */
     /* ========================================================== */
     #misali-single-live-badge {
         position: fixed !important; 
-        top: 255px !important; 
-        left: 15px !important; 
-        z-index: 990 !important; 
+        z-index: 990 !important; /* Sicher hinter Karten, aber über dem Hintergrund */
         cursor: pointer !important;
-        display: none; 
+        display: none; /* JS steuert das */
         align-items: center !important;
         justify-content: center !important;
         gap: 6px !important;
@@ -21778,120 +21776,124 @@ button:has(.fa-bell):hover {
         border-radius: 20px !important;
         border: 1px solid rgba(0, 210, 255, 0.4) !important;
         color: #00d2ff !important;
-        font-size: 0.8rem !important;
         font-weight: bold !important;
         backdrop-filter: blur(5px) !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
         white-space: nowrap !important;
-        min-width: 60px !important;
-        transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.3s ease !important;
+        transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease !important;
     }
-    #misali-single-live-badge:hover { transform: scale(1.05) !important; background: rgba(0, 210, 255, 0.25) !important; }
+    #misali-single-live-badge:hover { transform: scale(1.05) !important; }
     .badge-hidden-on-scroll { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
 
     /* ========================================================== */
-    /* 2. DAS FEIER-OVERLAY (2. Klick)                            */
+    /* 2. GERÄTE-TRENNUNG (DESKTOP VS. MOBILE POSITIONEN)         */
+    /* ========================================================== */
+    
+    /* --- DESKTOP & TABLET --- */
+    @media (min-width: 769px) {
+        #misali-single-live-badge {
+            top: 250px !important; 
+            left: 20px !important; 
+            font-size: 0.85rem !important;
+            min-width: 60px !important;
+        }
+    }
+
+    /* --- MOBILE (HANDY) --- */
+    @media (max-width: 768px) {
+        #misali-single-live-badge {
+            top: 180px !important; /* Etwas höher auf dem Handy, damit es nicht in die Buttons rutscht */
+            left: 10px !important; 
+            font-size: 0.75rem !important; /* Etwas kleiner für Handys */
+            padding: 4px 10px !important;
+            min-width: 50px !important;
+        }
+    }
+
+    /* ========================================================== */
+    /* 3. FEIER-OVERLAY (2. KLICK)                                */
     /* ========================================================== */
     .visitor-celebration-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px);
         z-index: 2147483647 !important; display: flex; flex-direction: column;
         justify-content: center; align-items: center; opacity: 0; visibility: hidden;
-        pointer-events: none; transition: opacity 0.4s ease, visibility 0.4s;
+        pointer-events: none; transition: opacity 0.3s ease;
     }
     .visitor-celebration-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-    .visitor-emoji-crowd { font-size: 2.2rem; animation: crowdBounce 1s infinite alternate ease-in-out; margin-bottom: 5px; }
-    @keyframes crowdBounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-10px) scale(1.05); } }
-    .visitor-real-number { font-size: 1.6rem; color: #ffffff; font-weight: 900; background: rgba(255, 255, 255, 0.05); padding: 8px 20px; border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px; }
-    .visitor-record-text { color: #f4c542; font-size: 1.1rem; font-family: 'Playfair Display', serif; text-align: center; margin: 10px 0; animation: textGlow 1.5s infinite alternate; }
-    @keyframes textGlow { from { text-shadow: 0 0 5px rgba(244,197,66,0.4); } to { text-shadow: 0 0 15px #00d2ff, 0 0 20px #00d2ff; } }
+    .visitor-emoji-crowd { font-size: 2.2rem; margin-bottom: 5px; }
+    .visitor-real-number { font-size: 1.6rem; color: #ffffff; font-weight: 900; background: rgba(255,255,255,0.05); padding: 8px 20px; border-radius: 15px; border-left: 3px solid #00d2ff; border-right: 3px solid #00d2ff; margin-bottom: 8px; }
+    .visitor-record-text { color: #f4c542; font-size: 1.1rem; }
 
     /* ========================================================== */
-    /* 3. iOS SAFARI EXKLUSIV-FIXES                               */
+    /* 4. iOS SAFARI (WEBKIT) EXKLUSIV-FIXES                      */
     /* ========================================================== */
     @supports (-webkit-touch-callout: none) {
         
-        /* A. KOMMENTARE & BENACHRICHTIGUNGEN NOCH KLEINER MACHEN */
-        .modal-content, .comment-content, .notif-item, .v57-comment-text, .card-sub, .notification-text, .yorum-text, .comment-body {
-            font-size: 0.75rem !important; /* Sehr kleine, kompakte Schrift */
-            line-height: 1.2 !important;
+        /* A. Kommentare & Benachrichtigungen extrem verkleinern */
+        .v57-comment-text, .yorum-text, .comment-body, .notif-item, .notification-text { 
+            font-size: 0.75rem !important; 
+            line-height: 1.2 !important; 
         }
-        
-        .modal-content .author-anim, .modal-content [class*="author"], .v57-author-name {
-            font-size: 0.85rem !important; /* Namen entsprechend verkleinert */
-            font-weight: 800 !important;
+        .v57-author-name { 
+            font-size: 0.8rem !important; 
+            white-space: nowrap !important; 
             padding: 2px 0 !important;
-            white-space: nowrap !important;
         }
 
-        .modal-content .author-anim i, .modal-content .author-anim span, .v57-author-name i {
-            font-size: 0.8rem !important;
-        }
-
-        /* B. RADIKALER YANITLA-FIX (Text endgültig zerstören) */
+        /* B. Der endgültige Yanıtla-Killer für iOS */
         .c-v57-act-btn, .reply-button, [onclick*="reply"] {
-            width: 36px !important;
-            height: 36px !important;
+            display: block !important; /* Safari ignoriert Text-Indent oft bei Flexbox, also Block! */
+            width: 32px !important; 
+            height: 32px !important;
             border-radius: 50% !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-            
-            /* Text unlesbar machen und verschieben */
-            color: transparent !important;
-            -webkit-text-fill-color: transparent !important;
-            font-size: 0px !important;
-            line-height: 0 !important;
-            text-indent: -9999px !important; 
-            overflow: hidden !important;
-            white-space: nowrap !important;
-            
-            display: inline-flex !important;
+            background: rgba(255,255,255,0.08) !important;
             position: relative !important;
-            padding: 0 !important;
-            border: none !important;
-        }
-        
-        /* Das Icon isoliert zurückholen */
-        .c-v57-act-btn i, .reply-button i, [onclick*="reply"] i, .fa-reply {
-            color: #00d2ff !important;
-            -webkit-text-fill-color: #00d2ff !important;
-            font-size: 1.1rem !important;
-            text-indent: 0 !important; /* Schützt das Icon vor dem Verschieben */
             
-            position: absolute !important;
-            left: 50% !important;
-            top: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            display: block !important;
-            visibility: visible !important;
+            /* Text zerstören */
+            font-size: 0px !important; 
+            color: transparent !important;
+            text-indent: -9999px !important; /* Schießt das Wort aus dem Button */
+            overflow: hidden !important;
+            border: none !important;
+            padding: 0 !important;
         }
         
         .c-v57-act-btn span, [onclick*="reply"] span { display: none !important; }
+
+        /* C. Das Icon isoliert zurückholen */
+        .c-v57-act-btn i, .reply-button i, [onclick*="reply"] i, .fa-reply {
+            position: absolute !important;
+            top: 50% !important; 
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            font-size: 1.1rem !important;
+            color: #00d2ff !important;
+            text-indent: 0 !important; /* WICHTIG: Holt das Icon zurück ins Sichtfeld */
+            visibility: visible !important;
+            display: block !important;
+            line-height: 1 !important;
+        }
     }
 </style>
 
 <script id="misali-live-visitor-sync-script">
 (function() {
-    window.misaliLiveVisitorCount = 218; 
+    window.misaliLiveVisitorCount = 0; 
     let badgeClickState = 0; 
 
-    // 1. Overlay generieren (falls nicht da)
+    // 1. Overlay generieren
     let overlay = document.querySelector('.visitor-celebration-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.className = 'visitor-celebration-overlay';
         overlay.innerHTML = `
             <div class="visitor-emoji-crowd">&#128101; &#127881;</div>
-            <div class="visitor-real-number" id="hidden-real-visitor-count">218 Ziyaret&#231;i</div>
+            <div class="visitor-real-number" id="hidden-real-visitor-count">0 Ziyaret&#231;i</div>
             <div class="visitor-record-text">Sizin ba&#351;ar&#305;n&#305;z, sizin rekorunuz</div>
-            <div style="margin-top:20px; font-size:0.8rem; color:#64748b; font-family:sans-serif; cursor:pointer;">
-                (Kapatmak i&#231;in dokunun)
-            </div>
+            <div style="margin-top:20px; font-size:0.8rem; color:#64748b; cursor:pointer;">(Kapatmak i&#231;in dokunun)</div>
         `;
         document.body.appendChild(overlay);
-        overlay.addEventListener('click', function() {
-            this.classList.remove('active');
-            badgeClickState = 0; 
-        });
+        overlay.addEventListener('click', () => { overlay.classList.remove('active'); badgeClickState = 0; });
     }
 
     // 2. Button generieren
@@ -21899,10 +21901,8 @@ button:has(.fa-bell):hover {
     if (!singleBadge) {
         singleBadge = document.createElement('div');
         singleBadge.id = 'misali-single-live-badge';
-        
         singleBadge.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             if (badgeClickState === 0) {
                 badgeClickState = 1;
                 this.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
@@ -21921,24 +21921,17 @@ button:has(.fa-bell):hover {
         document.body.appendChild(singleBadge);
     }
 
-    // 3. Scroll-Wächter
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 150) {
-            singleBadge.classList.add('badge-hidden-on-scroll');
-        } else {
-            singleBadge.classList.remove('badge-hidden-on-scroll');
-        }
+    // 3. Scroll-Ausblendung
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 150) singleBadge.classList.add('badge-hidden-on-scroll');
+        else singleBadge.classList.remove('badge-hidden-on-scroll');
     });
 
-    // 4. Live-Sync und Login-Check (DOM-basiert, unzerstörbar)
+    // 4. KUGELSICHERE LOGIK (Handy & Desktop gleich)
     setInterval(() => {
-        // KUGELSICHERER LOGIN-CHECK: 
-        // Wenn eine Glocke, ein Logout-Button oder das Wetter existiert, IST der User eingeloggt!
-        let isLoggedIn = document.querySelector('.fa-bell, .fa-sign-out, [href*="logout"], #weather-container, .weather-widget') !== null;
-        let isGuest = document.querySelector('.fa-sign-in, [href*="login"]') !== null;
-
+        let isAdmin = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.role === 'AdminKing' || window.currentUser.role === 'co-admin');
+        let highest = 0;
         let allElements = document.querySelectorAll('div, span, p, b, strong');
-        let highestFound = 0;
 
         allElements.forEach(el => {
             if (!el.textContent || el.id === 'misali-single-live-badge' || el.classList.contains('visitor-real-number')) return;
@@ -21946,37 +21939,33 @@ button:has(.fa-bell):hover {
             let text = el.textContent.toLowerCase();
             if (text.includes('ziyaret') && text.length < 80) {
                 
+                // Extrahiert die reine Zahl
                 let match = el.textContent.match(/\d+/g);
                 if (match) {
-                    match.forEach(numStr => {
-                        let val = parseInt(numStr, 10);
-                        if (val > highestFound && val < 1000000) highestFound = val;
+                    match.forEach(n => {
+                        let val = parseInt(n, 10);
+                        if (val > highest && val < 50000) highest = val; 
                     });
                 }
-
-                // Versteckt die Original-Texte (wie "Kayıtlı: 13 | Ziyaretçi: 218"), 
-                // um Platz im Header zu sparen.
-                let isSafeToHide = ['SPAN', 'B', 'STRONG', 'I', 'P', 'LI'].includes(el.tagName);
-                if (isSafeToHide && text.includes('kayıtlı')) {
+                
+                // Versteckt den Originaltext für User (Layout-Schutz)
+                if (!isAdmin && ['SPAN', 'B', 'STRONG'].includes(el.tagName)) {
                     el.style.setProperty('display', 'none', 'important');
                 }
             }
         });
 
-        // Übernimmt die gefundene Höchstzahl
-        if (highestFound > 0) window.misaliLiveVisitorCount = highestFound;
+        if (highest > 0) window.misaliLiveVisitorCount = highest;
 
-        // SICHTBARKEIT DES BUTTONS ERZWINGEN
-        // Wenn eingeloggt (oder kein klarer Gast), wird der Button IMMER angezeigt.
-        if (isLoggedIn || !isGuest) {
+        // --- DIE ENTSCHEIDUNG ---
+        // Wenn wir eine Zahl gefunden haben (highest > 0), hat der Server den Zähler geladen.
+        // Das bedeutet zu 100%: Jemand ist eingeloggt. (Gäste sehen den Text vom Server gar nicht erst).
+        // Ist diese Person KEIN Admin, wird der Button sofort gezeigt.
+        if (highest > 0 && !isAdmin) {
             singleBadge.style.setProperty('display', 'flex', 'important');
-            if (badgeClickState === 0) {
-                singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
-            } else {
-                singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
-            }
+            if (badgeClickState === 0) singleBadge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
+            else singleBadge.innerHTML = `&#128100; Ziyaret&#231;i: ${window.misaliLiveVisitorCount}`;
         } else {
-            // Nur wenn man definitiv Gast ist (Login-Button sichtbar), verschwindet er.
             singleBadge.style.setProperty('display', 'none', 'important');
         }
 
@@ -21984,6 +21973,29 @@ button:has(.fa-bell):hover {
 
 })();
 </script>
+
+<style id="misali-mobile-counter-fix">
+    /* ========================================================== */
+    /* SEPERATER FIX: ZÄHLER FÜR HANDYS UND iOS SAFARI ZWINGEN    */
+    /* ========================================================== */
+    
+    /* Zwingt den Zähler auf allen Handys in den Vordergrund */
+    @media (max-width: 768px) {
+        #misali-single-live-badge {
+            top: 150px !important; /* Schiebt ihn auf dem Handy etwas weiter runter ins freie Feld */
+            left: 10px !important;
+            z-index: 2147483640 !important; /* Fast maximaler Browser-Wert, liegt über allem */
+        }
+    }
+
+    /* Extra-Sicherheit: Spezifisch für iPhones (WebKit Touch) */
+    @supports (-webkit-touch-callout: none) {
+        #misali-single-live-badge {
+            top: 150px !important;
+            z-index: 2147483640 !important;
+        }
+    }
+</style>
 
 </body>
 </html>
