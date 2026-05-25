@@ -22005,5 +22005,185 @@ button:has(.fa-bell):hover {
 })();
 </script>
 
+<style id="misali-final-rescue-css">
+    /* ========================================================== */
+    /* 1. YANITLA BUTTON iOS KILLER (Das Wort restlos vernichten) */
+    /* ========================================================== */
+    @supports (-webkit-touch-callout: none) {
+        .c-v57-act-btn, .c-v18-act-btn, .reply-button, [onclick*="reply"] {
+            display: inline-block !important; /* Block zwingt Safari zur Gehorsamkeit */
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            font-size: 0px !important;
+            color: transparent !important;
+            text-indent: 200vw !important; /* Schießt den Text aus dem Bildschirm */
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 4px !important;
+            vertical-align: middle !important;
+            position: relative !important;
+        }
+        
+        /* Das Icon isoliert zurückholen und perfekt zentrieren */
+        .c-v57-act-btn i, .c-v18-act-btn i, .reply-button i, [onclick*="reply"] i {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            font-size: 1.1rem !important;
+            color: #00d2ff !important;
+            text-indent: 0 !important; /* Schützt das Icon vor dem 200vw Schub */
+            visibility: visible !important;
+            display: block !important;
+        }
+        .c-v57-act-btn span, .c-v18-act-btn span, [onclick*="reply"] span {
+            display: none !important;
+        }
+
+        /* ========================================================== */
+        /* 2. iOS AUSGELOGGT (GUEST) HEADER ÜBERLAPPUNGS-FIX          */
+        /* ========================================================== */
+        @media (max-width: 768px) {
+            body:not(.user-mode):not(.admin-mode) header#main-header {
+                height: 145px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+            }
+            body:not(.user-mode):not(.admin-mode) header#main-header .logo {
+                margin-top: 55px !important; /* Schiebt Logo & Feder nach unten, weg von den Buttons */
+                font-size: 1.5rem !important;
+            }
+            body:not(.user-mode):not(.admin-mode) header#main-header #header-weather-widget {
+                top: 10px !important; /* Hält das Wetter sicher oben rechts */
+                right: 10px !important;
+            }
+        }
+    }
+
+    /* ========================================================== */
+    /* 3. ZIYARETÇI ZÄHLER (Dauerhaft stabil für ALLE Geräte)     */
+    /* ========================================================== */
+    #misali-single-live-badge {
+        position: fixed !important;
+        z-index: 99990 !important; /* Sicher über dem Body, aber UNTER geöffneten Modals (100000+) */
+        background: rgba(0, 210, 255, 0.15) !important;
+        border: 1px solid rgba(0, 210, 255, 0.4) !important;
+        color: #00d2ff !important;
+        border-radius: 20px !important;
+        display: flex !important; /* Standardmäßig immer Flex */
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        font-weight: bold !important;
+        backdrop-filter: blur(5px) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+        white-space: nowrap !important;
+        transition: opacity 0.3s ease, transform 0.3s ease !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        transform: translateZ(0) !important; /* Hardware-Beschleunigung für iOS */
+    }
+    #misali-single-live-badge:hover { transform: scale(1.05) translateZ(0) !important; }
+
+    /* Skalierung nach Gerät (Dein System-Grid) */
+    @media (min-width: 1100px) {
+        #misali-single-live-badge { top: 250px !important; left: 20px !important; font-size: 0.85rem !important; padding: 5px 12px !important; }
+    }
+    @media (min-width: 769px) and (max-width: 1099px) {
+        #misali-single-live-badge { top: 160px !important; left: 15px !important; font-size: 0.8rem !important; padding: 4px 10px !important; }
+    }
+    @media (max-width: 768px) {
+        #misali-single-live-badge { top: 130px !important; left: 10px !important; font-size: 0.75rem !important; padding: 4px 10px !important; }
+    }
+
+    /* KUGELSICHERE AUSBLEND-LOGIK (Macht JavaScript überflüssig) */
+    /* Wenn NICHT eingeloggt ODER Modal offen ODER gescrollt -> Ausblenden! */
+    body:not(.user-mode):not(.admin-mode) #misali-single-live-badge,
+    body.modal-open #misali-single-live-badge,
+    body.modal-scroll-lock #misali-single-live-badge,
+    .badge-hidden-on-scroll {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+</style>
+
+<script id="misali-final-rescue-js">
+(function() {
+    window.misaliLiveVisitorCount = 218; // Sicherheits-Fallback
+
+    // 1. Zähler-Element erschaffen (Sichtbarkeit wird 100% vom CSS oben gesteuert)
+    function ensureVisitorBadge() {
+        let badge = document.getElementById('misali-single-live-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'misali-single-live-badge';
+            badge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
+            document.body.appendChild(badge);
+
+            // Feier-Overlay Klick
+            badge.addEventListener('click', function(e) {
+                e.preventDefault(); e.stopPropagation();
+                let overlay = document.querySelector('.visitor-celebration-overlay');
+                if (overlay) {
+                    let numEl = document.getElementById('hidden-real-visitor-count');
+                    if (numEl) numEl.innerText = window.misaliLiveVisitorCount + " Ziyaretçi";
+                    overlay.classList.add('active');
+                }
+            });
+        }
+    }
+
+    // 2. Weiches Ausblenden beim Scrollen (Fügt nur die Klasse hinzu, CSS macht den Rest)
+    window.addEventListener('scroll', () => {
+        let badge = document.getElementById('misali-single-live-badge');
+        if(badge) {
+            if (window.scrollY > 150) badge.classList.add('badge-hidden-on-scroll');
+            else badge.classList.remove('badge-hidden-on-scroll');
+        }
+    }, { passive: true });
+
+    // 3. Simple Synchronisation der Zahl (Fasst niemals wieder display:none an!)
+    setInterval(() => {
+        ensureVisitorBadge();
+        let highest = window.misaliLiveVisitorCount;
+        
+        // Findet die echte Besucherzahl aus den Admin-Texten
+        document.querySelectorAll('div, span, p, b, strong').forEach(el => {
+            if (el.id === 'misali-single-live-badge' || el.classList.contains('visitor-real-number')) return;
+            let text = (el.textContent || "").toLowerCase();
+            
+            if (text.includes('ziyaret') && text.length < 80) {
+                let match = text.match(/\d+/g);
+                if (match) {
+                    match.forEach(n => {
+                        let val = parseInt(n, 10);
+                        if (val > highest && val < 500000) highest = val; 
+                    });
+                }
+                
+                // Versteckt den unschönen Original-Text im Header für normale User (Layout-Schutz)
+                let isLoggedIn = document.body.classList.contains('user-mode') || document.body.classList.contains('admin-mode');
+                if (isLoggedIn && ['SPAN', 'B', 'STRONG'].includes(el.tagName)) {
+                    el.style.setProperty('display', 'none', 'important');
+                }
+            }
+        });
+        
+        // Zahl updaten
+        window.misaliLiveVisitorCount = highest;
+        let badge = document.getElementById('misali-single-live-badge');
+        if (badge) {
+            badge.innerHTML = `&#128100; ${window.misaliLiveVisitorCount}`;
+        }
+    }, 1000);
+})();
+</script>
+
 </body>
 </html>
