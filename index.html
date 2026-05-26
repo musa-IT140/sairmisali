@@ -13158,7 +13158,8 @@ setTimeout(() => {
 
 (function() {
     // 🌌 ASTRO-DATENBANK (Türkçe & Deutsch)
-    // 🌌 ASTRO-DATENBANK MEGA-EXPANSION (5 Jahre / 60 Variationen Rotation)
+    // 12 UNABHÄNGIGE Sternzeichen, jedes mit eigenen 3er-Blöcken (Intro, Liebe, Karriere).
+    // Mit jeweils 3 Variationen rotiert der Text jeden Monat otomatik!
     const astroData = {
         TR: {
             aries: {
@@ -13717,36 +13718,80 @@ setTimeout(() => {
             }
         }
     };
+    
+    // 📆 DATUMS-DATENBANK FÜR JEDES STERNZEICHEN
+    const zodiacDates = {
+        'aries': '21.03. - 19.04.', 'taurus': '20.04. - 20.05.', 'gemini': '21.05. - 20.06.',
+        'cancer': '21.06. - 22.07.', 'leo': '23.07. - 22.08.', 'virgo': '23.08. - 22.09.',
+        'libra': '23.09. - 22.10.', 'scorpio': '23.10. - 21.11.', 'sagittarius': '22.11. - 21.12.',
+        'capricorn': '22.12. - 19.01.', 'aquarius': '20.01. - 18.02.', 'pisces': '19.02. - 20.03.'
+    };
 
+    // 🎨 FARB-DATENBANK FÜR JEDES STERNZEICHEN
+    const zColors = {
+        'aries': '#ef4444', 'taurus': '#22c55e', 'gemini': '#facc15', 'cancer': '#cbd5e1',
+        'leo': '#f97316', 'virgo': '#84cc16', 'libra': '#ec4899', 'scorpio': '#991b1b',
+        'sagittarius': '#a855f7', 'capricorn': '#64748b', 'aquarius': '#06b6d4', 'pisces': '#3b82f6'
+    };
+
+    // Mathematischer Index için jedes Sternzeichen
+    const zodiacIndex = {
+        'aries': 1, 'taurus': 2, 'gemini': 3, 'cancer': 4,
+        'leo': 5, 'virgo': 6, 'libra': 7, 'scorpio': 8,
+        'sagittarius': 9, 'capricorn': 10, 'aquarius': 11, 'pisces': 12
+    };
+
+    // 🚀 Die Algorithmus-Magie: Generiert jeden Monat automatisch einen neuen Code!
+    function getAstroSeed(zId) {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1; // 1-12
+        const zNum = zodiacIndex[zId] || 1;
+        // Formel: Jahr * Monat + Sternzeichen = Einzigartiger, monatlicher Code
+        return (year * 12) + month + zNum; 
+    }
+
+    // ÜBERSCHREIBT DIE ALTE FUNKTION MIT DER NEUEN LIVE-ENGINE
     window.showHoro = function(id, trName, deName) {
         document.getElementById('zodiac-grid').style.display = 'none';
         document.getElementById('horoscope-result').style.display = 'block';
         
-        let zColor = window.zColors[id] || (window.zodiacColors ? window.zodiacColors[id] : '#f4c542') || '#f4c542';
-        let dateText = window.zodiacDates[id] || '';
+        // 🎨 Holt sich die magische Farbe für das aktuelle Sternzeichen (oder Gold als Ersatz)
+        let zColor = zColors[id] || (window.zodiacColors ? window.zodiacColors[id] : '#f4c542') || '#f4c542';
+        
+        // 🌟 Der stylische Datums-Badge (Nimmt nun exakt die Farbe des Sternzeichens an!)
+        // '1A' am Ende des Hex-Codes macht den Hintergrund zu 10% durchsichtig, '66' macht den Rand zu 40% durchsichtig
+        let dateText = zodiacDates[id] || '';
         let dateBadge = `<span style="font-size:0.55em; color:${zColor}; background:${zColor}1A; padding:3px 8px; border-radius:12px; margin-left:10px; border: 1px solid ${zColor}66; white-space:nowrap; vertical-align:middle; display:inline-block;">(${dateText})</span>`;
         
+        // Den Titel zusammenbauen (Die Haupt-Überschrift wird ebenfalls in der passenden Sternzeichen-Farbe eingefärbt)
         let titleHtml = window.currentGameLang === 'DE' 
             ? (`<span style="color:${zColor};">${deName} Horoskop</span> ` + dateBadge) 
             : (`<span style="color:${zColor};">${trName} Burcu</span> ` + dateBadge + `<span class="de-sub" style="font-size:0.45em; display:block; margin-top:5px; color:rgba(255,255,255,0.5);">(${deName})</span>`);
             
         document.getElementById('horo-title').innerHTML = titleHtml;
         
-        // Magischer Rotations-Algorithmus (Jeden Monat neu)
-        let seed = window.getAstroSeed(id);
+        // Holt den einzigartigen Code für genau DIESEN Monat ve DIESES Sternzeichen
+        let seed = getAstroSeed(id);
+        
+        // Wir verschieben die Indizes hafifçe, damit sie sauber zwischen 0, 1 und 2 rotieren
+        // Intro, Liebe und Karriere laufen so in leicht anderen Zyklen für maximale Abwechslung
+        let idx1 = (seed) % 3;
+        let idx2 = (seed + 1) % 3;
+        let idx3 = (seed + 2) % 3;
+        
         let lang = window.currentGameLang === 'DE' ? 'DE' : 'TR';
+        
+        // Sicherheitshalber Fallback auf "aries", falls die ID mal nicht stimmen sollte
         let zData = astroData[lang][id] || astroData[lang]['aries'];
         
-        // 🚀 DYNAMISCHE ROTATION basierend auf der tatsächlichen Array-Länge (5)
-        let idx1 = (seed) % zData.intro.length;
-        let idx2 = (seed + 1) % zData.love.length;
-        let idx3 = (seed + 2) % zData.career.length;
-        
+        // Setzt das Horoskop zusammen
         let finalHoroText = 
             "<span style='color:#f4c542;'>✨</span> " + zData.intro[idx1] + "<br><br>" + 
             "<span style='color:#ef4444;'>❤️</span> " + zData.love[idx2] + "<br><br>" + 
             "<span style='color:#22c55e;'>💼</span> " + zData.career[idx3];
 
+        // Sanfte Einblend-Animation für den neuen Text
         const txtEl = document.getElementById('horo-text');
         txtEl.style.opacity = 0;
         txtEl.innerHTML = finalHoroText;
@@ -13756,6 +13801,7 @@ setTimeout(() => {
             txtEl.style.opacity = 1;
         }, 50);
     };
+})();
 
 (function() {
     // ----------------------------------------------------
