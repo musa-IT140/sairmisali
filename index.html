@@ -6,6 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google" content="notranslate">
     <title>Şair Misal.i - Şiir ve Söz Dünyası</title>
+
+    <script id="misali-antiblink-login">
+(function() {
+    try {
+        // Prüft sofort beim Laden des HTML-Dokuments den Speicher
+        let user = JSON.parse(sessionStorage.getItem('misaliUser')) || JSON.parse(localStorage.getItem('misaliUser'));
+        if (user) {
+            let role = user.role || '';
+            // Setzt die Klasse direkt auf das <html> Tag
+            document.documentElement.classList.add((role === 'admin' || role === 'co-admin') ? 'admin-mode' : 'user-mode');
+        }
+    } catch(e) {}
+})();
+</script>
+
+<style id="misali-antiblink-css">
+    /* Wenn das html-Tag den User-Modus hat, werden die Buttons absolut unsichtbar gemacht, noch bevor die Seite rendert */
+    html.user-mode .guest-only, 
+    html.admin-mode .guest-only,
+    html.user-mode .auth-view-btn,
+    html.admin-mode .auth-view-btn {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+</style>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪶</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -9127,23 +9154,57 @@ window.bilmecelerDB = baseBilmeceler.map((b, i) => ({ id: 'bil_' + i, trTitle: b
     };
 
     window.updateGameStats = function(points, result, gameName) {
-        if(!window.currentUser) return;
-        window.lastLocalUpdate = Date.now() + 5000; 
-        let u = window.userDatabase[window.currentUser.username]; if(!u) return;
-        u.score = (u.score || 0) + points; u.played = (u.played || 0) + 1;
-        if(result === 'win') u.wins = (u.wins || 0) + 1; else if(result === 'loss') u.losses = (u.losses || 0) + 1; else u.draws = (u.draws || 0) + 1;
-        window.userDatabase[window.currentUser.username] = u; window.currentUser = u;
-        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        if (localStorage.getItem('misaliAutoFill')) { localStorage.setItem('misaliAutoFill', JSON.stringify({u: u.username, p: u.pass})); }
-        const scoreEl = document.getElementById('user-score'); if(scoreEl) scoreEl.innerText = u.score + ' P.';
-        let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
-        let dt = new Date(); let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-        window.adminLogs.push({ time: dFmt, action: gameName + ' Oynadı (' + (points > 0 ? '+'+points : points) + ' Puan)', user: fullName });
-        localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); 
-        if(window.renderOnlineUsers) window.renderOnlineUsers(); 
-        if(window.renderLeaderboard && document.getElementById('leaderboardModal').classList.contains('active-modal')) window.renderLeaderboard();
-        if(window.syncToCloud) window.syncToCloud(); window.sendSystemMessage('Admin', `OYUN: ${fullName} oyun oynadı: ${gameName}`);
-    };
+    if(!window.currentUser) return;
+    
+    // 🚀 SKALIERUNGS-LOGIK: Punkte durch 10 teilen
+    let scaledPoints = Math.round(points / 10);
+    
+    // Harte Grenzen setzen (Min 1, Max 10)
+    if (scaledPoints === 0 && points > 0) scaledPoints = 1;
+    if (scaledPoints > 10) scaledPoints = 10;
+    if (scaledPoints < -10) scaledPoints = -10;
+
+    window.lastLocalUpdate = Date.now() + 5000; 
+    let u = window.userDatabase[window.currentUser.username]; 
+    if(!u) return;
+    
+    // Punkte anwenden (Verhindert, dass der Score unter 0 fällt)
+    u.score = Math.max(0, (u.score || 0) + scaledPoints); 
+    u.played = (u.played || 0) + 1;
+    
+    if(result === 'win') u.wins = (u.wins || 0) + 1; 
+    else if(result === 'loss') u.losses = (u.losses || 0) + 1; 
+    else u.draws = (u.draws || 0) + 1;
+    
+    window.userDatabase[window.currentUser.username] = u; 
+    window.currentUser = u;
+    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); 
+    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+    
+    if (localStorage.getItem('misaliAutoFill')) { 
+        localStorage.setItem('misaliAutoFill', JSON.stringify({u: u.username, p: u.pass})); 
+    }
+    
+    // UI Zwangsupdate
+    const scoreEl = document.getElementById('user-score'); 
+    if(scoreEl) scoreEl.innerText = u.score + ' P.';
+    
+    let fullName = window.currentUser.name + (window.currentUser.surname ? ' ' + window.currentUser.surname : '');
+    let dt = new Date(); 
+    let dFmt = "<i>" + dt.toLocaleDateString('tr-TR') + "</i>&nbsp;&nbsp;" + dt.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+    
+    // Logbuch speichert jetzt die skalierten Punkte
+    window.adminLogs.push({ time: dFmt, action: gameName + ' Oynadı (' + (scaledPoints > 0 ? '+'+scaledPoints : scaledPoints) + ' Puan)', user: fullName });
+    localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs)); 
+    
+    if(window.renderOnlineUsers) window.renderOnlineUsers(); 
+    if(window.renderLeaderboard && document.getElementById('leaderboardModal')?.classList.contains('active-modal')) window.renderLeaderboard();
+    if(window.syncToCloud) window.syncToCloud(); 
+    
+    if(window.sendSystemMessage) {
+        window.sendSystemMessage('Admin', `OYUN: ${fullName} oyun oynadı: ${gameName} (${scaledPoints > 0 ? '+'+scaledPoints : scaledPoints} Puan)`);
+    }
+};
 
     window.memCards=[]; window.firstCard=null; window.secondCard=null; window.lockBoard=false; window.memPairs=0;
     window.fcTime=5.0; window.fcScore=0; window.fcTimer=null; window.fcActive=false;
