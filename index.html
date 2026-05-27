@@ -22744,5 +22744,280 @@ button:has(.fa-bell):hover {
     }
 </style>
 
+<style id="misali-peeker-css">
+    /* ========================================================== */
+    /* PEEKER KARTEN (Nur für eingeloggte User sichtbar)          */
+    /* ========================================================== */
+    
+    /* 🚀 SECURITY: Wenn Gast, dann Karten komplett löschen */
+    body:not(.user-mode):not(.admin-mode) .misali-peeker {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .misali-peeker {
+        position: fixed;
+        background: linear-gradient(135deg, rgba(10,25,47,0.35), rgba(2,6,23,0.55));
+        border: 1px solid rgba(0, 210, 255, 0.5);
+        color: #fdfbf7;
+        padding: 6px 12px;
+        opacity: 0.4;
+        cursor: pointer;
+        z-index: 45;
+        transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        max-width: 145px;
+        pointer-events: auto;
+        backdrop-filter: blur(4px);
+        transform: translateZ(0);
+    }
+    
+    .misali-peeker:hover {
+        opacity: 1 !important;
+        z-index: 99999 !important;
+        transform: scale(1.08) !important;
+        border-color: #f4c542;
+        box-shadow: 0 0 25px rgba(244, 197, 66, 0.7), inset 0 0 10px rgba(244, 197, 66, 0.3) !important;
+    }
+
+    .misali-peeker-left { left: -180px; border-left: none; border-radius: 0 12px 12px 0; }
+    .misali-peeker-right { right: -180px; border-right: none; border-radius: 12px 0 0 12px; }
+    
+    .peeker-title {
+        font-size: 0.75rem;
+        font-family: 'Playfair Display', serif;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #fff;
+    }
+    
+    .peeker-stats {
+        display: flex;
+        gap: 10px;
+        font-size: 0.65rem;
+        color: #f4c542;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .misali-peeker { max-width: 115px; padding: 5px 8px; }
+    }
+</style>
+
+<style id="misali-ultra-modal-anim">
+    /* ========================================================== */
+    /* ULTRA 3D REVEAL ANIMATION (Einschweben der Fenster)        */
+    /* ========================================================== */
+    
+    @keyframes ultraRevealV120 {
+        0% {
+            opacity: 0;
+            transform: scale(0.7) translateY(100px) rotateX(-25deg);
+            filter: blur(15px);
+        }
+        60% {
+            transform: scale(1.05) translateY(-10px) rotateX(5deg);
+            filter: blur(0px);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0) rotateX(0deg);
+            filter: blur(0px);
+        }
+    }
+
+    /* Diese Klasse wird auf deine Modal-Inhalte angewendet */
+    .modal.active-modal .modal-content {
+        animation: ultraRevealV120 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
+        perspective: 1200px;
+        backface-visibility: hidden;
+        will-change: transform, opacity;
+    }
+
+    /* Wenn das Modal geschlossen wird (optional für sanften Abgang) */
+    .modal:not(.active-modal) .modal-content {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+</style>
+
+
+
+<style id="misali-ultra-random-anims">
+    /* 15 UNTERSCHIEDLICHE MODAL-ANIMATIONEN */
+    @keyframes anim1 { 0% { opacity:0; transform: scale(0.5) rotate(-10deg); } 100% { opacity:1; transform: scale(1) rotate(0); } }
+    @keyframes anim2 { 0% { opacity:0; transform: translateY(100px) skewY(10deg); } 100% { opacity:1; transform: translateY(0) skewY(0); } }
+    @keyframes anim3 { 0% { opacity:0; transform: translateX(-200px) rotate(-5deg); } 100% { opacity:1; transform: translateX(0) rotate(0); } }
+    @keyframes anim4 { 0% { opacity:0; transform: scale(1.5) rotateX(30deg); filter: blur(10px); } 100% { opacity:1; transform: scale(1) rotateX(0); filter: blur(0); } }
+    @keyframes anim5 { 0% { opacity:0; transform: perspective(1000px) rotateY(-90deg); } 100% { opacity:1; transform: perspective(1000px) rotateY(0); } }
+    @keyframes anim6 { 0% { opacity:0; transform: scale(0) translateY(-200px); } 60% { transform: scale(1.1) translateY(10px); } 100% { opacity:1; transform: scale(1) translateY(0); } }
+    @keyframes anim7 { 0% { opacity:0; transform: rotate(180deg) scale(0.2); } 100% { opacity:1; transform: rotate(0) scale(1); } }
+    @keyframes anim8 { 0% { opacity:0; filter: contrast(0); transform: scale(0.8); } 100% { opacity:1; filter: contrast(1); transform: scale(1); } }
+    @keyframes anim9 { 0% { opacity:0; transform: translateY(-100%) rotateX(-45deg); } 100% { opacity:1; transform: translateY(0) rotateX(0); } }
+    @keyframes anim10 { 0% { opacity:0; transform: scale(0.5); filter: brightness(5); } 100% { opacity:1; transform: scale(1); filter: brightness(1); } }
+    @keyframes anim11 { 0% { opacity:0; clip-path: circle(0% at 50% 50%); } 100% { opacity:1; clip-path: circle(100% at 50% 50%); } }
+    @keyframes anim12 { 0% { opacity:0; transform: perspective(1000px) translateZ(-500px); } 100% { opacity:1; transform: perspective(1000px) translateZ(0); } }
+    @keyframes anim13 { 0% { opacity:0; transform: rotate(-20deg) translateX(100px); } 100% { opacity:1; transform: rotate(0) translateX(0); } }
+    @keyframes anim14 { 0% { opacity:0; transform: skewX(-20deg) scale(0.8); } 100% { opacity:1; transform: skewX(0) scale(1); } }
+    @keyframes anim15 { 0% { opacity:0; transform: translateY(50px); filter: grayscale(1); } 100% { opacity:1; transform: translateY(0); filter: grayscale(0); } }
+
+    /* Container für die Animation */
+    .modal.active-modal .modal-content {
+        animation-duration: 0.6s !important;
+        animation-fill-mode: forwards !important;
+        animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        perspective: 1000px;
+    }
+</style>
+
+<script id="misali-ultimate-engine">
+(function() {
+    // 1. ZUFALLS-ANIMATION GENERATOR
+    const origOpenFastModal = window.openFastModal;
+    window.openFastModal = function(id) {
+        if (origOpenFastModal) origOpenFastModal(id);
+        
+        let modal = document.getElementById(id);
+        if (modal) {
+            let content = modal.querySelector('.modal-content');
+            if (content) {
+                // Wählt eine der 15 Animationen aus dem CSS zufällig aus
+                let rand = Math.floor(Math.random() * 15) + 1;
+                content.style.animationName = 'anim' + rand;
+            }
+        }
+    };
+
+    // 2. GHOST-KILLER & PEEKER SPAWNER
+    const ySlots = [30, 45, 60, 75];
+    let activeSlots = { left: [], right: [] };
+
+    function getLikedWorksPool() {
+        let liked = [];
+        let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
+        
+        // Sucht das ECHTE Werk. Wenn es gelöscht wurde, gibt es null zurück!
+        const getRealWork = (id) => {
+            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f; }
+            let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || {};
+            for (let cat in fullDB) {
+                if(Array.isArray(fullDB[cat])) {
+                    let f = fullDB[cat].find(x => x.id === id);
+                    if (f) return f;
+                }
+            }
+            if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f; }
+            if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f; }
+            return null;
+        };
+
+        for (let poemId in db) {
+            let realWork = getRealWork(poemId);
+            // 🚀 GHOST-KILLER: Ignoriert Geister-Likes von bereits gelöschten Werken!
+            if (!realWork) continue; 
+
+            let pDb = db[poemId];
+            let hearts = 0;
+            let comms = pDb.comments ? (Array.isArray(pDb.comments) ? pDb.comments.length : Object.keys(pDb.comments).length) : 0;
+            
+            if (pDb.ratings) {
+                for(let k in pDb.ratings) {
+                    let r = pDb.ratings[k];
+                    hearts += (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
+                }
+            }
+            if (hearts > 0) {
+                // Findet den korrekten Titel
+                let displayTitle = realWork.trTitle || realWork.title || realWork.deTitle || realWork.trText || "Eser";
+                
+                // Falls der Titel (z.B. bei Sprüchen ohne echten Namen) zu lang ist, kürzen wir ihn ab
+                if (displayTitle.length > 25) displayTitle = displayTitle.substring(0, 25) + '...';
+                
+                liked.push({ id: poemId, title: displayTitle, hearts: hearts, comms: comms });
+            }
+        }
+        return liked;
+    }
+
+    function spawnPeeker() {
+        // Login-Check: Nur wenn eingeloggt
+        if (!document.body.classList.contains('user-mode') && !document.body.classList.contains('admin-mode')) return;
+
+        let works = getLikedWorksPool();
+        if (works.length === 0) return;
+
+        let isLeft = Math.random() > 0.5;
+        let side = isLeft ? 'left' : 'right';
+        let availableSlots = ySlots.filter(s => !activeSlots[side].includes(s));
+        
+        if (availableSlots.length === 0) {
+            isLeft = !isLeft; side = isLeft ? 'left' : 'right';
+            availableSlots = ySlots.filter(s => !activeSlots[side].includes(s));
+            if (availableSlots.length === 0) return; // Kein Platz frei, warte auf nächste Runde
+        }
+
+        let topPos = availableSlots[Math.floor(Math.random() * availableSlots.length)];
+        activeSlots[side].push(topPos); // Parkplatz belegen
+
+        let workData = works[Math.floor(Math.random() * works.length)];
+
+        let peeker = document.createElement('div');
+        peeker.className = `misali-peeker ${isLeft ? 'misali-peeker-left' : 'misali-peeker-right'}`;
+        peeker.style.top = topPos + '%';
+        peeker.style.pointerEvents = 'auto'; // Zwingend für Klick!
+        
+        peeker.innerHTML = `
+            <div class="peeker-title">${workData.title}</div>
+            <div class="peeker-stats">
+                <span><i class="fas fa-heart" style="color:#ef4444; filter: drop-shadow(0 0 3px #ef4444);"></i> ${workData.hearts}</span>
+                <span><i class="fas fa-comment" style="color:#00d2ff; filter: drop-shadow(0 0 3px #00d2ff);"></i> ${workData.comms}</span>
+            </div>
+        `;
+
+        // Klick öffnet das verknüpfte Modal
+        peeker.onclick = function(e) {
+            e.stopPropagation();
+            window.closeTopModal('force');
+            setTimeout(() => {
+                if (window.openPoemOrUserModal) window.openPoemOrUserModal(workData.id);
+            }, 100);
+        };
+
+        document.body.appendChild(peeker);
+        
+        // Animation: Ausklappen
+        setTimeout(() => {
+            peeker.style.setProperty('transform', isLeft ? 'translateX(160px)' : 'translateX(-160px)', 'important');
+            peeker.style.opacity = '0.4';
+        }, 100);
+
+
+        // Animation: Wieder einklappen und löschen
+        let stayDuration = 8000 + (Math.random() * 4000);
+        setTimeout(() => {
+            peeker.style.setProperty('transform', 'translateX(0)', 'important');
+            peeker.style.opacity = '0';
+            setTimeout(() => {
+                if(peeker && peeker.parentNode) peeker.remove();
+                // Parkplatz wieder freigeben
+                activeSlots[side] = activeSlots[side].filter(s => s !== topPos);
+            }, 600);
+        }, stayDuration);
+    }
+
+    // Spawner Loop
+    setInterval(() => {
+        if (document.querySelectorAll('.misali-peeker').length < 5) spawnPeeker();
+    }, 4000);
+})();
+</script>
+
 </body>
 </html>
