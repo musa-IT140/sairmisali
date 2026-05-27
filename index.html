@@ -22744,76 +22744,137 @@ button:has(.fa-bell):hover {
     }
 </style>
 
-<style id="misali-peeker-css">
+<style id="misali-peeker-ultra-css">
     /* ========================================================== */
-    /* PEEKER KARTEN (Nur für eingeloggte User sichtbar)          */
+    /* ULTRA-TRANSPARENTE PEEKER KARTEN (50% Ghost-Effect)        */
     /* ========================================================== */
-    
-    /* 🚀 SECURITY: Wenn Gast, dann Karten komplett löschen */
-    body:not(.user-mode):not(.admin-mode) .misali-peeker {
-        display: none !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
 
     .misali-peeker {
-        position: fixed;
-        background: linear-gradient(135deg, rgba(10,25,47,0.85), rgba(2,6,23,0.95));
-        border: 1px solid #f4c542;
+        position: fixed !important;
+        /* 🚀 Hintergrund noch weiter reduziert */
+        background: linear-gradient(135deg, rgba(10, 25, 47, 0.2), rgba(2, 6, 23, 0.3)) !important; 
+        border: 1px solid rgba(0, 210, 255, 0.3);
         color: #fdfbf7;
-        padding: 8px 16px !important;
-        opacity: 0.5;
+        padding: 18px 18px 12px 18px !important; 
+        
+        /* 🚀 EXAKT 50% TRANSPARENZ (Die gesamte Karte inkl. Text) */
+        opacity: 0.5 !important; 
+        
         cursor: pointer;
-        z-index: 45;
-        transition: opacity 0.3s, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 45; 
+        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s, border-color 0.3s, opacity 0.3s, background 0.3s;
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        box-shadow: 0 0 15px rgba(244, 197, 66, 0.3);
+        gap: 6px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         
-        /* 🚀 DER SCHLÜSSEL: Flexibler Breiten-Flow */
-        width: max-content !important; 
-        max-width: 320px !important; /* Maximale Grenze, damit es nicht "endlos" wird */
-        min-width: 120px !important;
+        width: auto !important; 
+        max-width: 260px !important; 
+        min-width: 140px !important;
         
         pointer-events: auto;
-        backdrop-filter: blur(8px);
-        transform: translateZ(0);
+        /* Blur-Effekt hält das Glas-Gefühl aufrecht */
+        backdrop-filter: blur(8px) !important; 
+        -webkit-backdrop-filter: blur(8px) !important;
+        transform-style: preserve-3d;
+        perspective: 1500px; 
     }
     
-   .misali-peeker:hover {
+    /* 🚀 BEI HOVER: Volle Kraft, 100% Sichtbarkeit und leuchtend! */
+    .misali-peeker:hover {
         opacity: 1 !important;
         z-index: 99999 !important;
-        transform: scale(1.05) !important;
-        box-shadow: 0 0 25px rgba(244, 197, 66, 0.6) !important;
+        border-color: #f4c542 !important;
+        box-shadow: 0 0 25px rgba(244, 197, 66, 0.7) !important;
+        background: linear-gradient(135deg, rgba(10, 25, 47, 0.7), rgba(2, 6, 23, 0.85)) !important;
     }
 
-    .misali-peeker-left { left: -170px; border-left: none; border-radius: 0 12px 12px 0; }
-    .misali-peeker-right { right: -170px; border-right: none; border-radius: 12px 0 0 12px; }
+    .misali-peeker-left { 
+        left: 0; 
+        border-left: none; 
+        border-radius: 0 16px 16px 0; 
+        transform: translateX(-120%); 
+    }
+    .misali-peeker-right { 
+        right: 0; 
+        border-right: none; 
+        border-radius: 16px 0 0 16px; 
+        transform: translateX(120%); 
+    }
+    
+    .misali-peeker.peeker-show {
+        transform: translateX(0) !important;
+    }
     
     .peeker-title {
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
         font-family: 'Playfair Display', serif;
         font-weight: bold;
-        /* Kein Überlauf mehr, die Karte wächst mit dem Text mit */
-        white-space: normal !important; 
+        white-space: pre-wrap !important; 
         word-wrap: break-word !important;
         line-height: 1.3 !important;
         color: #fff;
+        padding-top: 10px !important; 
     }
-    
-   .peeker-stats {
+
+    .peeker-stats {
         display: flex;
-        gap: 12px;
-        font-size: 0.7rem;
+        gap: 16px;
+        font-size: 0.75rem;
         font-family: 'Poppins', sans-serif;
         color: #f4c542;
         align-items: center;
-        margin-top: 4px;
+        margin-top: 2px;
     }
 
-    @media (max-width: 768px) {
-        .misali-peeker { max-width: 115px; padding: 5px 8px; }
+    /* ========================================================== */
+    /* GLITZERNES RANK-BADGE                                      */
+    /* ========================================================== */
+    .peeker-rank {
+        position: absolute;
+        top: -12px; 
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 900;
+        font-size: 0.65rem !important; 
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        pointer-events: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        white-space: nowrap;
+        animation: rankGlitter 2s infinite linear alternate;
+    }
+
+    .misali-peeker-left .peeker-rank { right: 12px; }
+    .misali-peeker-right .peeker-rank { left: 12px; }
+
+    .rank-top1 { background: linear-gradient(135deg, #ffd700, #ffec8b, #b8860b); color: #000; border: 1px solid #fff; }
+    .rank-top2 { background: linear-gradient(135deg, #e0e0e0, #ffffff, #808080); color: #000; border: 1px solid #fff; }
+    .rank-top3 { background: linear-gradient(135deg, #cd7f32, #ffdab9, #8b4513); color: #fff; border: 1px solid #fff; }
+    .rank-other { background: rgba(0, 150, 255, 0.6); color: #fff; border: 1px solid #fff; }
+
+    @keyframes rankGlitter {
+        0% { filter: brightness(1) drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
+        50% { filter: brightness(1.2) drop-shadow(0 0 8px rgba(255,255,255,0.6)); }
+        100% { filter: brightness(1) drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
+    }
+
+    .peeker-flying-heart {
+        position: absolute !important;
+        color: #ef4444;
+        opacity: 0.5; /* Herzen leicht sichtbar lassen */
+        font-size: 1.3rem;
+        pointer-events: none;
+        z-index: -1; 
+        animation: heartFloat 2s forwards ease-out;
+        will-change: transform, opacity;
+    }
+
+    @keyframes heartFloat {
+        0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+        20% { opacity: 0.8; transform: scale(1.2) rotate(15deg); }
+        100% { opacity: 0; transform: scale(1) translate(0, -100px) rotate(-15deg); }
     }
 </style>
 
@@ -22884,81 +22945,77 @@ button:has(.fa-bell):hover {
     }
 </style>
 
-<script id="misali-ultimate-engine">
+<script id="misali-peeker-ultra-js">
 (function() {
-    // 1. ZUFALLS-ANIMATION GENERATOR
-    const origOpenFastModal = window.openFastModal;
-    window.openFastModal = function(id) {
-        if (origOpenFastModal) origOpenFastModal(id);
-        
-        let modal = document.getElementById(id);
-        if (modal) {
-            let content = modal.querySelector('.modal-content');
-            if (content) {
-                // Wählt eine der 15 Animationen aus dem CSS zufällig aus
-                let rand = Math.floor(Math.random() * 15) + 1;
-                content.style.animationName = 'anim' + rand;
-            }
-        }
-    };
-
-    // 2. GHOST-KILLER & PEEKER SPAWNER
-    const ySlots = [30, 45, 60, 75];
+    const ySlots = [30, 45, 60, 75]; 
     let activeSlots = { left: [], right: [] };
 
-    function getLikedWorksPool() {
-        let liked = [];
+    // 🚀 DER GHOST-KILLER: Sucht das echte Werk. Wenn gelöscht -> Rückgabe null!
+    function getRealWork(id) {
+        if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f; }
+        let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || {};
+        for (let cat in fullDB) {
+            if(Array.isArray(fullDB[cat])) {
+                let f = fullDB[cat].find(x => x.id === id);
+                if (f) return f;
+            }
+        }
+        if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f; }
+        if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f; }
+        return null; 
+    }
+
+    function getRankedWorksPool() {
+        let pool = [];
         let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
         
-        // Sucht das ECHTE Werk. Wenn es gelöscht wurde, gibt es null zurück!
-        const getRealWork = (id) => {
-            if (window.userPoemsDB) { let f = window.userPoemsDB.find(x => x.id === id); if(f) return f; }
-            let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || {};
-            for (let cat in fullDB) {
-                if(Array.isArray(fullDB[cat])) {
-                    let f = fullDB[cat].find(x => x.id === id);
-                    if (f) return f;
-                }
-            }
-            if (window.bilmecelerDB) { let f = window.bilmecelerDB.find(x=>x.id===id); if(f) return f; }
-            if (window.bulmacalarDB) { let f = window.bulmacalarDB.find(x=>x.id===id); if(f) return f; }
-            return null;
-        };
-
         for (let poemId in db) {
             let realWork = getRealWork(poemId);
-            // 🚀 GHOST-KILLER: Ignoriert Geister-Likes von bereits gelöschten Werken!
-            if (!realWork) continue; 
+            if (!realWork) continue; // 🚀 WENN WERK GELÖSCHT WURDE, SOFORT ÜBERSPRINGEN!
 
             let pDb = db[poemId];
-            let hearts = 0;
+            let h = 0; 
             let comms = pDb.comments ? (Array.isArray(pDb.comments) ? pDb.comments.length : Object.keys(pDb.comments).length) : 0;
             
             if (pDb.ratings) {
-                for(let k in pDb.ratings) {
+                for(let k in pDb.ratings) { 
                     let r = pDb.ratings[k];
-                    hearts += (typeof r === 'object' && r !== null) ? parseInt(r.val || 0) : parseInt(r || 0);
+                    h += (typeof r === 'object' && r !== null ? parseInt(r.val || 0) : parseInt(r || 0)); 
                 }
             }
-            if (hearts > 0) {
-                // Findet den korrekten Titel
-                let displayTitle = realWork.trTitle || realWork.title || realWork.deTitle || realWork.trText || "Eser";
-                
-                // Falls der Titel (z.B. bei Sprüchen ohne echten Namen) zu lang ist, kürzen wir ihn ab
-                if (displayTitle.length > 25) displayTitle = displayTitle.substring(0, 25) + '...';
-                
-                liked.push({ id: poemId, title: displayTitle, hearts: hearts, comms: comms });
+            if (h > 0) { 
+                // Zieht den echten Namen direkt aus dem gefundenen Objekt
+                let title = realWork.trTitle || realWork.title || realWork.deTitle || realWork.trText || "Bilinmeyen Eser";
+                pool.push({ id: poemId, h: h, c: comms, title: title }); 
             }
         }
-        return liked;
+
+        pool.sort((a, b) => b.h - a.h);
+        return pool.map((work, index) => ({ ...work, rank: index + 1 }));
+    }
+
+    function spawnHearts(workData, peekerEl) {
+        let numHearts = Math.min(12, Math.ceil(workData.h / 5)); 
+        if (numHearts < 2 && workData.h > 0) numHearts = 2; 
+
+        for (let i = 0; i < numHearts; i++) {
+            let heart = document.createElement('i');
+            heart.className = 'fas fa-heart peeker-flying-heart';
+            heart.style.left = (Math.random() * 80 + 10) + '%';
+            heart.style.top = (Math.random() * 80 + 10) + '%';
+            heart.style.animationDelay = (Math.random() * 0.4) + 's';
+            heart.style.animationDuration = (1.5 + Math.random() * 1) + 's';
+
+            peekerEl.appendChild(heart);
+            setTimeout(() => { if(heart && heart.parentNode) heart.remove(); }, 2500);
+        }
     }
 
     function spawnPeeker() {
-        // Login-Check: Nur wenn eingeloggt
         if (!document.body.classList.contains('user-mode') && !document.body.classList.contains('admin-mode')) return;
 
-        let works = getLikedWorksPool();
-        if (works.length === 0) return;
+        let worksPool = getRankedWorksPool();
+        if (worksPool.length === 0) return;
 
         let isLeft = Math.random() > 0.5;
         let side = isLeft ? 'left' : 'right';
@@ -22967,28 +23024,35 @@ button:has(.fa-bell):hover {
         if (availableSlots.length === 0) {
             isLeft = !isLeft; side = isLeft ? 'left' : 'right';
             availableSlots = ySlots.filter(s => !activeSlots[side].includes(s));
-            if (availableSlots.length === 0) return; // Kein Platz frei, warte auf nächste Runde
+            if (availableSlots.length === 0) return; 
         }
 
         let topPos = availableSlots[Math.floor(Math.random() * availableSlots.length)];
-        activeSlots[side].push(topPos); // Parkplatz belegen
+        activeSlots[side].push(topPos);
 
-        let workData = works[Math.floor(Math.random() * works.length)];
+        let workData = worksPool[Math.floor(Math.random() * worksPool.length)];
 
         let peeker = document.createElement('div');
         peeker.className = `misali-peeker ${isLeft ? 'misali-peeker-left' : 'misali-peeker-right'}`;
         peeker.style.top = topPos + '%';
-        peeker.style.pointerEvents = 'auto'; // Zwingend für Klick!
         
+        let rankHtml = '';
+        let rankClass = 'rank-other';
+        if (workData.rank === 1) rankClass = 'rank-top1';
+        else if (workData.rank === 2) rankClass = 'rank-top2';
+        else if (workData.rank === 3) rankClass = 'rank-top3';
+
+        rankHtml = `<div class="peeker-rank ${rankClass}"><i class="fas fa-crown"></i> Platz ${workData.rank}</div>`;
+
         peeker.innerHTML = `
+            ${rankHtml}
             <div class="peeker-title">${workData.title}</div>
             <div class="peeker-stats">
-                <span><i class="fas fa-heart" style="color:#ef4444; filter: drop-shadow(0 0 3px #ef4444);"></i> ${workData.hearts}</span>
-                <span><i class="fas fa-comment" style="color:#00d2ff; filter: drop-shadow(0 0 3px #00d2ff);"></i> ${workData.comms}</span>
+                <span><i class="fas fa-heart" style="color:#ef4444;"></i> ${workData.h}</span>
+                <span><i class="fas fa-comment" style="color:#00d2ff;"></i> ${workData.c}</span>
             </div>
         `;
 
-        // Klick öffnet das verknüpfte Modal
         peeker.onclick = function(e) {
             e.stopPropagation();
             window.closeTopModal('force');
@@ -22998,33 +23062,73 @@ button:has(.fa-bell):hover {
         };
 
         document.body.appendChild(peeker);
-        
-        // Animation: Ausklappen
-        setTimeout(() => {
-            peeker.style.setProperty('transform', isLeft ? 'translateX(160px)' : 'translateX(-160px)', 'important');
-            peeker.style.opacity = '0.4';
-        }, 100);
+        spawnHearts(workData, peeker);
 
+        // 🚀 NEUE SLIDE-LOGIK (Keine Pixel-Rechnung mehr!)
+        setTimeout(() => { peeker.classList.add('peeker-show'); }, 100);
 
-        // Animation: Wieder einklappen und löschen
-        let stayDuration = 8000 + (Math.random() * 4000);
+        let stayDuration = 8000 + (Math.random() * 4000); 
         setTimeout(() => {
-            peeker.style.setProperty('transform', 'translateX(0)', 'important');
-            peeker.style.opacity = '0';
+            peeker.classList.remove('peeker-show');
             setTimeout(() => {
                 if(peeker && peeker.parentNode) peeker.remove();
-                // Parkplatz wieder freigeben
-                activeSlots[side] = activeSlots[side].filter(s => s !== topPos);
+                activeSlots[side] = activeSlots[side].filter(s => s !== topPos); 
             }, 600);
         }, stayDuration);
     }
 
-    // Spawner Loop
     setInterval(() => {
         if (document.querySelectorAll('.misali-peeker').length < 5) spawnPeeker();
     }, 4000);
 })();
 </script>
+
+<style id="misali-compact-modals">
+    /* ========================================================== */
+    /* DYNAMISCHE FENSTERGRÖSSE (Kompakt NUR ab Laptop-Größe)     */
+    /* ========================================================== */
+    .modal.active-modal {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 12px !important;
+        background: rgba(0, 0, 0, 0.75) !important; 
+    }
+
+    /* 📱 MOBILE STANDARD-ANSICHT (Breit und lesbar) */
+    .modal.active-modal .modal-content {
+        margin: auto !important;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 95% !important; 
+        max-width: 600px !important;
+        max-height: 85vh !important; 
+        padding: 15px !important; 
+        overflow-y: auto !important; 
+        border-radius: 16px !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.9) !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 💻 DESKTOP & LAPTOP ANSICHT (Kompakt und zentriert) */
+    @media (min-width: 769px) {
+        .modal.active-modal .modal-content {
+            width: fit-content !important; 
+            min-width: 290px !important; 
+            max-width: 420px !important; 
+            padding: 22px !important; 
+        }
+    }
+
+    .modal.active-modal .modal-content::-webkit-scrollbar {
+        width: 4px;
+    }
+    .modal.active-modal .modal-content::-webkit-scrollbar-thumb {
+        background: rgba(244, 197, 66, 0.8);
+        border-radius: 10px;
+    }
+</style>
 
 </body>
 </html>
