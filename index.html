@@ -23222,30 +23222,71 @@ button:has(.fa-bell):hover {
     function runAudioEngineForCard(cardId, modalElement) {
         if (!modalElement) return;
 
-        let activePlayer = modalElement.querySelector('.misali-audio-wrapper, .admin-audio-upload-zone');
-        if (activePlayer) activePlayer.remove();
+        // 🚀 DIE ZONEN-KONTROLLE (Absolut fehlerfrei)
+        function isAudioAllowed() {
+            // 1. GLOBALE SPIELE-SPERRE (Prüft nur die URL)
+            let pageUrl = window.location.href.toLowerCase();
+            if (pageUrl.includes('eglence') || pageUrl.includes('eğlence') || pageUrl.includes('mega') || pageUrl.includes('ultra')) {
+                return false; // Auf Spiele-Seiten komplett deaktiviert
+            }
 
+            // 2. SYSTEM-FENSTER SPERRE (Prüft NUR die ID, ignoriert den Text/Titel)
+            let techId = (String(cardId) + " " + (modalElement.id || "")).toLowerCase();
+            
+            // Die exakten System-Begriffe (Wörter wie 'user' oder 'admin' wurden gelöscht, damit deine Werke nicht blockieren!)
+            let systemKeywords = [
+                'aklimda', 'aklımda', 'kalplerim', 'gullerim', 'güllerim', 'favori',
+                'bildirim', 'notif', 'mesaj', 'inbox', 'duyuru', 'glocke', 'bell', 'iletisim', 'iletişim',
+                'profil', 'profile', 'ayar', 'setting', 'hesap', 'login', 'kayit', 'kayıt', 'sifre', 'şifre',
+                'hava', 'weather', 'saat', 'clock', 'takvim', 'calendar', 'tarih', 'burc', 'burç', 'fal', 'astroloji',
+                'oyun', 'game', 'puan', 'score', 'skor', 'quiz', 'cark', 'çark', 'zar', 'hafiza', 'hafıza', 'tablo', 'derece'
+            ];
+
+            for (let keyword of systemKeywords) {
+                if (techId.includes(keyword)) {
+                    console.log(`[Audio] Blockiert: System-Fenster (${keyword})`);
+                    return false; // System-Fenster erkannt -> Blockieren
+                }
+            }
+
+            // Wenn es kein Systemfenster und kein Spiel ist, ist es ein Gedicht/Werk!
+            console.log(`[Audio] Erlaubt für Karte: ${cardId}`);
+            return true; 
+        }
+
+        // Sicherheitsabbruch
+        if (!isAudioAllowed()) return;
+
+        // ==========================================
+        // PLAYER START
+        // ==========================================
         let container = modalElement.querySelector('.modal-content') || modalElement.querySelector('.modal-body') || modalElement;
         let isAdmin = document.body.classList.contains('admin-mode') || document.documentElement.classList.contains('admin-mode');
 
         if (typeof firebase !== 'undefined' && firebase.database) {
             firebase.database().ref('misaliAudioDB/' + cardId).once('value')
                 .then(snap => buildInterface(snap.val()))
-                .catch(() => buildInterface(null));
+                .catch(err => {
+                    console.error("[Audio] Firebase Fehler:", err);
+                    buildInterface(null);
+                });
         } else {
             let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
             buildInterface(db[cardId] || null);
         }
 
         function buildInterface(audioSource) {
+            // Alte Elemente bereinigen
+            modalElement.querySelectorAll('.misali-audio-wrapper, .admin-audio-upload-zone').forEach(el => el.remove());
+
             if (audioSource) {
                 let playerBox = document.createElement('div');
                 playerBox.className = 'misali-audio-wrapper';
                 
                 let adminControlsHtml = isAdmin ? `
                     <div class="admin-audio-management">
-                        <i class="fas fa-sync-alt audio-admin-icon replace" id="btn-replace-${cardId}" title="Değiştir"></i>
-                        <i class="fas fa-trash-alt audio-admin-icon delete" id="btn-delete-${cardId}" title="Sil"></i>
+                        <i class="fas fa-sync-alt audio-admin-icon replace" id="btn-replace-${cardId}" title="Değiştir (Ersetzen)"></i>
+                        <i class="fas fa-trash-alt audio-admin-icon delete" id="btn-delete-${cardId}" title="Sil (Löschen)"></i>
                     </div>
                     <input type="file" id="input-file-${cardId}" accept="audio/*" style="display:none;" />
                 ` : '';
@@ -23258,7 +23299,7 @@ button:has(.fa-bell):hover {
                     <div class="audio-progress-container" id="track-${cardId}"><div class="audio-progress-bar" id="bar-${cardId}"></div></div>
                     <div class="audio-time-display" id="time-${cardId}">0:00</div>
                     ${adminControlsHtml}
-                    <audio id="core-audio-${cardId}" src="${audioSource}" preload="auto"></audio>
+                    <audio id="core-audio-${cardId}" src="${audioSource}" preload="metadata"></audio>
                 `;
 
                 container.insertAdjacentElement('afterbegin', playerBox);
@@ -23271,7 +23312,7 @@ button:has(.fa-bell):hover {
                 const timeText = playerBox.querySelector(`#time-${cardId}`);
 
                 function convertTime(seconds) {
-                    if (isNaN(seconds)) return "0:00";
+                    if (isNaN(seconds) || seconds === Infinity) return "0:00";
                     let mins = Math.floor(seconds / 60);
                     let secs = Math.floor(seconds % 60);
                     return mins + ":" + (secs < 10 ? "0" : "") + secs;
@@ -23281,8 +23322,15 @@ button:has(.fa-bell):hover {
                     e.stopPropagation(); e.preventDefault();
                     if (audio.paused) {
                         document.querySelectorAll('audio').forEach(el => { if(el !== audio) el.pause(); });
-                        audio.play(); playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    } else { audio.pause(); playBtn.innerHTML = '<i class="fas fa-play"></i>'; }
+                        let playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(_ => {
+                                playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                            }).catch(error => console.error("[Audio] Autoplay blockiert:", error));
+                        }
+                    } else { 
+                        audio.pause(); playBtn.innerHTML = '<i class="fas fa-play"></i>'; 
+                    }
                 };
 
                 stopBtn.onclick = function(e) {
@@ -23291,53 +23339,66 @@ button:has(.fa-bell):hover {
                     progressBar.style.width = '0%'; timeText.innerText = `0:00 / ${convertTime(audio.duration)}`;
                 };
 
-                audio.onloadedmetadata = function() { timeText.innerText = `0:00 / ${convertTime(audio.duration)}`; };
-                audio.ontimeupdate = function() {
-                    if (audio.duration) {
+                audio.onloadedmetadata = () => { timeText.innerText = `0:00 / ${convertTime(audio.duration)}`; };
+                audio.ondurationchange = () => { timeText.innerText = `0:00 / ${convertTime(audio.duration)}`; };
+                audio.ontimeupdate = () => {
+                    if (audio.duration && audio.duration !== Infinity) {
                         progressBar.style.width = ((audio.currentTime / audio.duration) * 100) + '%';
                         timeText.innerText = `${convertTime(audio.currentTime)} / ${convertTime(audio.duration)}`;
                     }
                 };
-                audio.onended = function() { playBtn.innerHTML = '<i class="fas fa-play"></i>'; progressBar.style.width = '0%'; };
+                audio.onended = () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; progressBar.style.width = '0%'; };
+                
                 progressTrack.onclick = function(e) {
                     e.stopPropagation(); let rect = progressTrack.getBoundingClientRect();
-                    audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+                    if (audio.duration && audio.duration !== Infinity) {
+                        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+                    }
                 };
 
                 if (isAdmin) {
                     playerBox.querySelector(`#btn-delete-${cardId}`).onclick = function(e) {
                         e.stopPropagation(); e.preventDefault();
                         if (confirm("Sesi silmek istediğinize emin misiniz?")) {
-                            playerBox.innerHTML = `<span style="font-size:0.6rem; color:#ef4444;"><i class="fas fa-spinner fa-spin"></i> Siliniyor...</span>`;
-                            executeDataSave(cardId, null, modalElement, playerBox);
+                            playerBox.innerHTML = `<span style="font-size:0.7rem; color:#ef4444; padding: 4px;"><i class="fas fa-spinner fa-spin"></i> Siliniyor...</span>`;
+                            if (typeof firebase !== 'undefined' && firebase.database) {
+                                firebase.database().ref('misaliAudioDB/' + cardId).remove().then(() => buildInterface(null));
+                            } else {
+                                let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
+                                delete db[cardId]; localStorage.setItem('misaliCardAudioDB', JSON.stringify(db));
+                                buildInterface(null);
+                            }
                         }
                     };
+                    
                     let fileInputEl = playerBox.querySelector(`#input-file-${cardId}`);
                     playerBox.querySelector(`#btn-replace-${cardId}`).onclick = function(e) { e.stopPropagation(); e.preventDefault(); fileInputEl.click(); };
-                    fileInputEl.onchange = function(e) { handleFileProcessing(e.target.files[0], playerBox); };
+                    fileInputEl.onchange = function(e) { processAndUploadFile(e.target.files[0], playerBox); };
                 }
 
             } else if (isAdmin) {
-                // 🚀 DER FIX: Ein natives HTML-Label statt eines divs. HTML öffnet das Dateifenster jetzt sofort und zu 100% ohne JS-Loop!
+                // Upload Feld
                 let uploadZone = document.createElement('label');
                 uploadZone.className = 'admin-audio-upload-zone';
                 uploadZone.style.display = 'block'; 
-                uploadZone.innerHTML = `<span><i class="fas fa-cloud-upload-alt"></i> Ses Dosyası Yükle</span><input type="file" id="input-file-${cardId}" accept="audio/*" style="display:none;" />`;
-                
+                uploadZone.innerHTML = `
+                    <span><i class="fas fa-cloud-upload-alt"></i> Ses Dosyası Yükle</span>
+                    <input type="file" id="input-file-${cardId}" accept="audio/*" style="display:none;" />
+                `;
                 container.insertAdjacentElement('afterbegin', uploadZone);
 
                 let fileInputEl = uploadZone.querySelector('input');
-                // Das Onclick-Event wurde hier komplett gelöscht, da das <label> den Klick nativ an das <input> weitergibt.
-                fileInputEl.onchange = function(e) { handleFileProcessing(e.target.files[0], uploadZone); };
+                fileInputEl.onchange = function(e) { processAndUploadFile(e.target.files[0], uploadZone); };
             }
         }
 
-        function handleFileProcessing(file, uiElement) {
+        // Datei Upload
+        function processAndUploadFile(file, uiElement) {
             if (!file) return;
 
             if (file.size > 4 * 1024 * 1024) {
                 uiElement.innerHTML = `<span style="color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Hata: Dosya çok büyük (Max 4MB)!</span>`;
-                setTimeout(() => runAudioEngineForCard(cardId, modalElement), 3000);
+                setTimeout(() => buildInterface(null), 3000);
                 return;
             }
 
@@ -23346,63 +23407,68 @@ button:has(.fa-bell):hover {
             setTimeout(() => {
                 let reader = new FileReader();
                 reader.onload = function(event) {
+                    let base64Data = event.target.result;
                     uiElement.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Sunucuya yükleniyor...</span>`;
-                    executeDataSave(cardId, event.target.result, modalElement, uiElement);
+                    
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        firebase.database().ref('misaliAudioDB/' + cardId).set(base64Data)
+                        .then(() => {
+                            uiElement.innerHTML = `<span style="color:#22c55e;"><i class="fas fa-check"></i> Başarılı!</span>`;
+                            setTimeout(() => buildInterface(base64Data), 500); 
+                        })
+                        .catch(err => {
+                            uiElement.innerHTML = `<span style="color:#ef4444;">Firebase Hatası, lokal kaydediliyor...</span>`;
+                            fallbackLocalSave(cardId, base64Data, uiElement);
+                        });
+                    } else {
+                        fallbackLocalSave(cardId, base64Data, uiElement);
+                    }
                 };
                 reader.onerror = function() {
                     uiElement.innerHTML = `<span style="color:#ef4444;">Okuma hatası!</span>`;
-                    setTimeout(() => runAudioEngineForCard(cardId, modalElement), 2000);
+                    setTimeout(() => buildInterface(null), 2000);
                 };
                 reader.readAsDataURL(file);
-            }, 50);
+            }, 100);
         }
 
-        function executeDataSave(id, data, modal, uiElement) {
-            if (typeof firebase !== 'undefined' && firebase.database) {
-                firebase.database().ref('misaliAudioDB/' + id).set(data)
-                    .then(() => {
-                        uiElement.innerHTML = `<span style="color:#22c55e;"><i class="fas fa-check"></i> Başarılı!</span>`;
-                        setTimeout(() => runAudioEngineForCard(id, modal), 1000);
-                    })
-                    .catch(err => {
-                        uiElement.innerHTML = `<span style="color:#ef4444;">Firebase Hatası, lokal kaydediliyor...</span>`;
-                        fallbackLocalSave(id, data, modal, uiElement);
-                    });
-            } else {
-                fallbackLocalSave(id, data, modal, uiElement);
-            }
-        }
-
-        function fallbackLocalSave(id, data, modal, uiElement) {
+        function fallbackLocalSave(id, data, uiElement) {
             try {
                 let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
                 if (data) db[id] = data; else delete db[id];
                 localStorage.setItem('misaliCardAudioDB', JSON.stringify(db));
                 uiElement.innerHTML = `<span style="color:#22c55e;"><i class="fas fa-check"></i> Başarılı!</span>`;
-                setTimeout(() => runAudioEngineForCard(id, modal), 1000);
+                setTimeout(() => buildInterface(data), 500);
             } catch(e) {
-                uiElement.innerHTML = `<span style="color:#ef4444;">Tarayıcı limitine ulaşıldı!</span>`;
-                setTimeout(() => runAudioEngineForCard(id, modal), 3000);
+                uiElement.innerHTML = `<span style="color:#ef4444;">Hafıza dolu! (Tarayıcı limiti)</span>`;
+                setTimeout(() => buildInterface(null), 3000);
             }
         }
+    }
+
+    // Modal Sucher
+    function attachAudioSafely(id) {
+        let retries = 0;
+        let finder = setInterval(() => {
+            let modal = document.querySelector('.modal.active-modal') || document.getElementById(id);
+            if (modal) {
+                clearInterval(finder);
+                runAudioEngineForCard(id, modal);
+            }
+            if (++retries > 10) clearInterval(finder); 
+        }, 100);
     }
 
     const interceptPoemModal = window.openPoemOrUserModal;
     window.openPoemOrUserModal = function(id) {
         if (interceptPoemModal) interceptPoemModal(id);
-        setTimeout(() => {
-            let modal = document.querySelector('.modal.active-modal') || document.getElementById(id);
-            if (modal) runAudioEngineForCard(id, modal);
-        }, 320);
+        attachAudioSafely(id);
     };
 
     const interceptFastModal = window.openFastModal;
     window.openFastModal = function(id) {
         if (interceptFastModal) interceptFastModal(id);
-        setTimeout(() => {
-            let modal = document.querySelector('.modal.active-modal') || document.getElementById(id);
-            if (modal) runAudioEngineForCard(id, modal);
-        }, 320);
+        attachAudioSafely(id);
     };
 })();
 </script>
