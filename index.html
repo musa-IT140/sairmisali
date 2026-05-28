@@ -22904,32 +22904,22 @@ button:has(.fa-bell):hover {
 
 <script id="misali-peeker-js-safe">
 (function() {
-    // 🚀 FIX: Karten weiter nach unten geschoben, weg vom Header
     const ySlots = [40, 55, 70, 85]; 
     let activeSlots = { left: [], right: [] };
 
     function isAllowedPage() {
         let isAllowed = false;
         let keywords = ['siir', 'şiir', 'soz', 'söz', 'kalem', 'eser'];
-
         let url = window.location.href.toLowerCase();
         if (keywords.some(k => url.includes(k))) return true;
-
         let title = document.title.toLowerCase();
         if (keywords.some(k => title.includes(k))) return true;
-
         document.querySelectorAll('h1, h2, .active').forEach(el => {
             if (el.offsetWidth > 0 && el.offsetHeight > 0) {
-                if (keywords.some(k => el.innerText.toLowerCase().includes(k))) {
-                    isAllowed = true;
-                }
+                if (keywords.some(k => el.innerText.toLowerCase().includes(k))) isAllowed = true;
             }
         });
-
-        if (window.currentCategory && keywords.some(k => window.currentCategory.toLowerCase().includes(k))) {
-            return true;
-        }
-
+        if (window.currentCategory && keywords.some(k => window.currentCategory.toLowerCase().includes(k))) return true;
         return isAllowed;
     }
 
@@ -22948,7 +22938,6 @@ button:has(.fa-bell):hover {
         let pool = [];
         let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
         let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || window.userPoemsDB || {};
-        
         for (let poemId in db) {
             let h = 0; 
             if (db[poemId].ratings) { for(let k in db[poemId].ratings) h += parseInt(db[poemId].ratings[k].val || db[poemId].ratings[k] || 0); }
@@ -22968,13 +22957,24 @@ button:has(.fa-bell):hover {
         return pool.map((w, i) => ({ ...w, rank: i + 1 }));
     }
 
-    function clearAllPeekers() {
-        document.querySelectorAll('.misali-peeker').forEach(p => p.remove());
+    // 🚀 HILFSFUNKTION ZUM WEICHEN AUSBLENDEN
+    function hideAllPeekersSmoothly() {
+        document.querySelectorAll('.misali-peeker.peeker-show').forEach(p => {
+            p.classList.remove('peeker-show');
+            setTimeout(() => {
+                if(p.parentNode) p.remove();
+            }, 600); // Wartet die CSS-Animation ab
+        });
         activeSlots = { left: [], right: [] };
     }
 
+    // 🚀 DER SCROLL-SENSOR
+    window.addEventListener('scroll', function() {
+        hideAllPeekersSmoothly();
+    }, { passive: true });
+
     function spawnPeeker() {
-        if (isModalOpen() || !isAllowedPage()) { clearAllPeekers(); return; }
+        if (isModalOpen() || !isAllowedPage()) { hideAllPeekersSmoothly(); return; }
 
         let pool = getRankedWorksPool();
         if (pool.length === 0) return;
@@ -23019,7 +23019,7 @@ button:has(.fa-bell):hover {
         setTimeout(() => peeker.classList.add('peeker-show'), 50);
 
         setTimeout(() => {
-            if(peeker.parentNode) {
+            if(peeker.parentNode && peeker.classList.contains('peeker-show')) {
                 peeker.classList.remove('peeker-show');
                 setTimeout(() => { if(peeker.parentNode) peeker.remove(); activeSlots[side] = activeSlots[side].filter(s => s !== topPos); }, 500);
             }
@@ -23205,7 +23205,6 @@ button:has(.fa-bell):hover {
         let oldWrapper = modalElement.querySelector('.misali-audio-wrapper, .admin-audio-upload-zone');
         if (oldWrapper) oldWrapper.remove();
 
-        // Findet die Box zuverlässig
         let contentContainer = modalElement.querySelector('.modal-content') || modalElement.querySelector('.modal-body') || modalElement;
         let isAdmin = document.body.classList.contains('admin-mode') || document.documentElement.classList.contains('admin-mode');
 
@@ -23215,8 +23214,8 @@ button:has(.fa-bell):hover {
                 playerHtml.className = 'misali-audio-wrapper';
                 
                 let adminTools = isAdmin ? `
-                    <i class="fas fa-sync-alt admin-action-btn replace" id="audio-replace-btn" title="Ersetzen"></i>
-                    <i class="fas fa-trash-alt admin-action-btn delete" id="audio-delete-btn" title="Löschen"></i>
+                    <i class="fas fa-sync-alt admin-action-btn replace" id="audio-replace-btn" title="Ses Değiştir (Ersetzen)"></i>
+                    <i class="fas fa-trash-alt admin-action-btn delete" id="audio-delete-btn" title="Sil (Löschen)"></i>
                     <input type="file" id="hidden-audio-input" accept="audio/*" style="display:none;" />
                 ` : '';
 
@@ -23228,7 +23227,6 @@ button:has(.fa-bell):hover {
                     <audio id="native-audio" src="${audioSrc}"></audio>
                 `;
                 
-                // 🚀 FIX: Platziert den Player sicher als Erstes in die Karte
                 contentContainer.insertBefore(playerHtml, contentContainer.firstChild);
 
                 const audio = playerHtml.querySelector('#native-audio');
@@ -23251,10 +23249,10 @@ button:has(.fa-bell):hover {
 
                 if (isAdmin) {
                     playerHtml.querySelector('#audio-delete-btn').onclick = () => {
-                        if(confirm("Bu sesi silmek istediğinize emin misiniz?")) {
-                            try {
-                                if (typeof firebase !== 'undefined') firebase.database().ref('misaliAudioDB/' + cardId).remove().then(() => initAudioForCard(cardId, modalElement));
-                            } catch(e) {
+                        if(confirm("Bu sesi silmek istediğinize emin misiniz? (Audio wirklich löschen?)")) {
+                            if (typeof firebase !== 'undefined' && firebase.database) {
+                                firebase.database().ref('misaliAudioDB/' + cardId).remove().then(() => initAudioForCard(cardId, modalElement));
+                            } else {
                                 let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
                                 delete db[cardId]; localStorage.setItem('misaliCardAudioDB', JSON.stringify(db));
                                 initAudioForCard(cardId, modalElement);
@@ -23263,54 +23261,79 @@ button:has(.fa-bell):hover {
                     };
                     let fileIn = playerHtml.querySelector('#hidden-audio-input');
                     playerHtml.querySelector('#audio-replace-btn').onclick = () => fileIn.click();
-                    fileIn.onchange = (e) => handleUpload(e.target.files[0]);
+                    fileIn.onchange = (e) => handleUpload(e.target.files[0], playerHtml);
                 }
             } else if (isAdmin) {
                 let uploadZone = document.createElement('div');
                 uploadZone.className = 'admin-audio-upload-zone';
-                uploadZone.innerHTML = `<span><i class="fas fa-cloud-upload-alt"></i> Ses Ekle (Audio Upload)</span><input type="file" id="hidden-audio-input" accept="audio/*" style="display:none;" />`;
+                uploadZone.innerHTML = `<span><i class="fas fa-cloud-upload-alt"></i> Ses Ekle (Audio auswählen)</span><input type="file" id="hidden-audio-input" accept="audio/*" style="display:none;" />`;
                 
                 contentContainer.insertBefore(uploadZone, contentContainer.firstChild);
                 
                 let fileIn = uploadZone.querySelector('input');
                 uploadZone.onclick = () => fileIn.click();
-                fileIn.onchange = (e) => handleUpload(e.target.files[0]);
+                fileIn.onchange = (e) => handleUpload(e.target.files[0], uploadZone);
             }
         }
 
-        function handleUpload(file) {
+        function handleUpload(file, uiElement) {
             if (!file) return;
-            let reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    if (typeof firebase !== 'undefined') {
-                        firebase.database().ref('misaliAudioDB/' + cardId).set(evt.target.result).then(() => initAudioForCard(cardId, modalElement));
-                    } else {
-                        throw "no firebase";
+
+            // 🚀 VISUELLES FEEDBACK (Ladeanzeige)
+            if (uiElement.classList.contains('admin-audio-upload-zone')) {
+                uiElement.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Yükleniyor... Lütfen bekleyin. (Lädt...)</span>`;
+            } else {
+                let replaceBtn = uiElement.querySelector('#audio-replace-btn');
+                if (replaceBtn) replaceBtn.className = "fas fa-spinner fa-spin admin-action-btn replace";
+            }
+
+            // Kurzer Timeout, damit der Browser die Ladeanzeige rendern kann, bevor er einfriert
+            setTimeout(() => {
+                let reader = new FileReader();
+                reader.onload = (evt) => {
+                    let base64Data = evt.target.result;
+
+                    // Hilfsfunktion zum lokalen Speichern
+                    function saveLocal() {
+                        try {
+                            let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
+                            db[cardId] = base64Data; 
+                            localStorage.setItem('misaliCardAudioDB', JSON.stringify(db));
+                            alert("✅ Ses başarıyla yüklendi! (Audio erfolgreich geladen!)");
+                            initAudioForCard(cardId, modalElement);
+                        } catch(e) {
+                            alert("❌ HATA: Dosya çok büyük! Tarayıcı hafızası doldu. (FEHLER: Datei zu groß für den Browser-Speicher! Bitte wähle eine kleinere Datei.)");
+                            initAudioForCard(cardId, modalElement); // UI zurücksetzen
+                        }
                     }
-                } catch(e) {
-                    let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
-                    db[cardId] = evt.target.result; localStorage.setItem('misaliCardAudioDB', JSON.stringify(db));
-                    initAudioForCard(cardId, modalElement);
-                }
-            };
-            reader.readAsDataURL(file);
+
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        firebase.database().ref('misaliAudioDB/' + cardId).set(base64Data)
+                        .then(() => {
+                            alert("✅ Ses başarıyla yüklendi! (Audio erfolgreich in Firebase geladen!)");
+                            initAudioForCard(cardId, modalElement);
+                        })
+                        .catch(err => {
+                            console.error("Firebase Upload fehlerhaft, wechsle zu lokal.", err);
+                            saveLocal();
+                        });
+                    } else {
+                        saveLocal();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }, 100);
         }
 
-        // Firebase Abruf sicher gemacht
-        try {
-            if (typeof firebase !== 'undefined') {
-                firebase.database().ref('misaliAudioDB/' + cardId).once('value').then(snap => renderPlayer(snap.val())).catch(() => renderPlayer(null));
-            } else {
-                throw "no firebase";
-            }
-        } catch(e) {
+        // Initiale Daten holen
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            firebase.database().ref('misaliAudioDB/' + cardId).once('value').then(snap => renderPlayer(snap.val())).catch(() => renderPlayer(null));
+        } else {
             let db = JSON.parse(localStorage.getItem('misaliCardAudioDB')) || {};
             renderPlayer(db[cardId]);
         }
     }
 
-    // 🚀 BEIDE EVENT-LISTENER SIND ZURÜCK
     const origOpenPoemModal = window.openPoemOrUserModal;
     window.openPoemOrUserModal = function(id) {
         if (origOpenPoemModal) origOpenPoemModal(id);
