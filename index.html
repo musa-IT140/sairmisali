@@ -23328,7 +23328,6 @@ button:has(.fa-bell):hover {
     .audio-core-btn:hover { transform: scale(1.2) !important; color: #ffdf73 !important; }
     .audio-core-btn.stop-btn:hover { color: #ef4444 !important; }
     
-    /* 🚀 PREMIUM ZEITLEISTE (Die Variante, die endlich funktionierte!) */
     .audio-progress-container { flex-grow: 1 !important; height: 6px !important; background: #1e293b !important; border-radius: 6px !important; cursor: pointer !important; position: relative !important; margin: 0 12px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8) !important; overflow: visible !important; }
     .audio-progress-bar { height: 100% !important; background: linear-gradient(90deg, #d49f00, #f4c542) !important; width: 0%; border-radius: 6px !important; box-shadow: 0 0 10px rgba(244, 197, 66, 0.9) !important; position: relative !important; transition: width 0.1s linear !important; }
     .audio-progress-bar::after { content: '' !important; position: absolute !important; right: -6px !important; top: 50% !important; transform: translateY(-50%) !important; width: 12px !important; height: 12px !important; background: #fff !important; border-radius: 50% !important; box-shadow: 0 0 6px #fff, 0 0 10px #f4c542 !important; pointer-events: none !important; }
@@ -23341,6 +23340,7 @@ button:has(.fa-bell):hover {
     .audio-like-btn { display: flex !important; align-items: center !important; gap: 6px !important; color: #94a3b8 !important; cursor: pointer !important; font-size: 0.8rem !important; transition: all 0.3s !important; position: relative !important; background: rgba(0,0,0,0.4) !important; padding: 4px 12px !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.1) !important; }
     .audio-like-btn:hover, .audio-like-btn.liked { color: #f4c542 !important; border-color: rgba(244, 197, 66, 0.4) !important; background: rgba(244, 197, 66, 0.1) !important; }
     .like-count { font-family: monospace !important; font-size: 0.75rem !important; font-weight: bold !important; }
+    .flying-note { position: absolute !important; color: #f4c542 !important; font-size: 12px !important; pointer-events: none !important; opacity: 0 !important; animation: floatUp 1s ease-out forwards !important; z-index: 50 !important; }
 
     /* Admin Upload Formular */
     .admin-publish-btn { background: rgba(16, 185, 129, 0.15) !important; border: 1px solid #10b981 !important; color: #10b981 !important; border-radius: 12px !important; padding: 4px 12px !important; font-size: 0.65rem !important; font-weight: bold !important; cursor: pointer !important; margin-top: 6px !important; transition: all 0.2s !important; }
@@ -23383,13 +23383,6 @@ button:has(.fa-bell):hover {
     .inbox-item-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 6px !important; }
     .inbox-item-time { font-size: 0.65rem !important; color: #94a3b8 !important; font-family: monospace !important; }
     .inbox-item-text { font-size: 0.85rem !important; color: #e2e8f0 !important; line-height: 1.5 !important; pointer-events: auto !important; }
-
-    /* 🚀 RÜCKWIRKENDE FARBEN FÜR ALLE ALTEN UND NEUEN BENACHRICHTIGUNGEN */
-    .inbox-item-text b:first-of-type, .misali-like-toast b:first-of-type { color: #00e5ff !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; pointer-events: auto !important; }
-    .inbox-item-text b:first-of-type:hover, .misali-like-toast b:first-of-type:hover { text-shadow: 0 0 8px #00e5ff !important; text-decoration: underline !important; }
-
-    .inbox-item-text b:nth-of-type(2), .misali-like-toast b:nth-of-type(2) { color: #f4c542 !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; pointer-events: auto !important; }
-    .inbox-item-text b:nth-of-type(2):hover, .misali-like-toast b:nth-of-type(2):hover { text-shadow: 0 0 8px #f4c542 !important; text-decoration: underline !important; }
     
     .inbox-content .misali-audio-badge { display: none !important; }
 
@@ -23438,8 +23431,48 @@ button:has(.fa-bell):hover {
 (function() {
     "use strict";
 
-    if (window.misaliEngineFinalCombinedV2) return;
-    window.misaliEngineFinalCombinedV2 = true;
+    if (window.misaliEngineFinalBruteForce) return;
+    window.misaliEngineFinalBruteForce = true;
+
+    // ==========================================================
+    // 🚀 DIE ALLZWECK-WAFFE FÜR KLICKS (Öffnet IMMER das Fenster)
+    // ==========================================================
+    window.bruteForceOpen = function(targetId) {
+        console.log("Misali Engine: Versuche Fenster zu öffnen -> " + targetId);
+        
+        // 1. Zuerst das Inbox-Overlay schließen, damit der Bildschirm frei ist!
+        let inbox = document.getElementById('misali-inbox-overlay');
+        if (inbox) inbox.classList.remove('open');
+
+        setTimeout(() => {
+            let clicked = false;
+            
+            // Methode A: Sucht physisch die Karte auf der Webseite und simuliert einen Klick!
+            let cards = document.querySelectorAll('[onclick]');
+            for (let i = 0; i < cards.length; i++) {
+                let oc = cards[i].getAttribute('onclick') || "";
+                if (oc.includes(targetId)) {
+                    cards[i].click();
+                    clicked = true;
+                    break;
+                }
+            }
+            
+            // Methode B: Fallbacks (Falls die Karte gerade nicht sichtbar ist)
+            if (!clicked) {
+                if (typeof window.openPoem === 'function') { window.openPoem(targetId); }
+                else if (typeof window.openFastModal === 'function') { window.openFastModal(targetId); }
+                else if (typeof window.openPoemOrUserModal === 'function') { window.openPoemOrUserModal(targetId); }
+                else {
+                    let directModal = document.getElementById(targetId);
+                    if (directModal) {
+                        directModal.classList.add('active-modal');
+                        directModal.style.display = 'block';
+                    }
+                }
+            }
+        }, 50); // Kurze Pause, damit die Inbox sicher geschlossen ist
+    };
 
     // ==========================================================
     // 🚀 1. SICHERS LÖSCH-FENSTER
@@ -23459,7 +23492,6 @@ button:has(.fa-bell):hover {
 
         function closeDialog() { 
             overlay.classList.remove('active'); 
-            overlay.style.pointerEvents = 'none'; 
             setTimeout(() => { if (overlay) overlay.remove(); }, 300); 
         }
         
@@ -23473,7 +23505,7 @@ button:has(.fa-bell):hover {
     };
 
     // ==========================================================
-    // 🚀 2. INBOX-SENDER (Die unzerstörbare Original-Version)
+    // 🚀 2. INBOX-SENDER (Mit Data-ID und festen Farben)
     // ==========================================================
     function makeSlug(text) {
         if (!text) return "";
@@ -23500,9 +23532,13 @@ button:has(.fa-bell):hover {
             let icon = contentType === 'audio' ? '🎵' : (contentType === 'comment' ? '💬' : '❤️');
             let actionText = contentType === 'audio' ? 'adlı müziği beğendi!' : 'adlı eseri beğendi!';
             
-            // 🚀 WIR SPEICHERN WIEDER DEIN REINES ORIGINAL-HTML: <b>Name</b>
-            // Das CSS kümmert sich vollautomatisch um Farben und das JS um die Klicks! So werden alle alten DB Einträge repariert.
-            let notifText = `${icon} <b>${likerName}</b>, <b>${contentName}</b> ${actionText}`;
+            let safeLiker = likerName.replace(/["']/g, '');
+            let safeContent = contentName.replace(/["']/g, '');
+            let likerSlug = makeSlug(safeLiker);
+            let contentSlug = makeSlug(safeContent);
+
+            // Reines HTML mit integrierten Farben und Daten-Markierungen für den Wachhund
+            let notifText = `${icon} <b class="misali-link" style="color:#00e5ff; cursor:pointer; text-decoration:underline;" data-id="${likerSlug}">${likerName}</b>, <b class="misali-link" style="color:#f4c542; cursor:pointer; text-decoration:underline;" data-id="track_${contentSlug}">${contentName}</b> ${actionText}`;
 
             let payload = { type: contentType, time: Date.now(), displayTime: `${dateStr} - ${timeStr}`, text: notifText, isRead: false };
             firebase.database().ref('misaliGlobalNotifs').push().set(payload);
@@ -23525,7 +23561,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 3. AUDIO ENGINE & LEISTEN FIX
+    // 🚀 3. AUDIO ENGINE
     // ==========================================================
     const audioDB = {
         name: 'MisaliMegaAudioDB', store: 'audioFiles',
@@ -23622,7 +23658,6 @@ button:has(.fa-bell):hover {
                         return mins + ":" + (secs < 10 ? "0" : "") + secs;
                     }
 
-                    // 🚀 LEISTE BEWEGT SICH & CSS WIRD ZWANGSÜBERSCHRIEBEN (Der Fix, der funktioniert hat!)
                     audio.addEventListener('timeupdate', function() {
                         try {
                             let dur = audio.duration;
@@ -23774,8 +23809,8 @@ button:has(.fa-bell):hover {
 
     function attachAudioSafely(id) { let retries = 0; let finder = setInterval(() => { let modal = document.querySelector('.modal.active-modal') || document.getElementById(id); if (modal) { clearInterval(finder); runAudioEngineForCard(id, modal); } if (++retries > 10) clearInterval(finder); }, 100); }
     
-    if (!window.misaliModalsInterceptedVFinal) {
-        window.misaliModalsInterceptedVFinal = true;
+    if (!window.misaliModalsInterceptedFinal) {
+        window.misaliModalsInterceptedFinal = true;
         const interceptPoemModal = window.openPoemOrUserModal;
         window.openPoemOrUserModal = function(id) { if (interceptPoemModal) interceptPoemModal(id); attachAudioSafely(id); };
         const interceptFastModal = window.openFastModal;
@@ -23813,7 +23848,7 @@ button:has(.fa-bell):hover {
     initAudioBadges(); setInterval(applyBadges, 3000); 
 
     // ==========================================================
-    // 🚀 5. INBOX SYSTEM (DER 100% GARANTIERTE KLICK-FIX!)
+    // 🚀 5. INBOX SYSTEM (DER UNZERSTÖRBARE WACHHUND)
     // ==========================================================
     let oldTrigger = document.getElementById('misali-inbox-trigger'); if(oldTrigger) oldTrigger.remove();
     let oldPanel = document.getElementById('misali-inbox-overlay'); if(oldPanel) oldPanel.remove();
@@ -23876,35 +23911,37 @@ button:has(.fa-bell):hover {
                 let delBtnHtml = isAdminLive ? `<i class="fas fa-trash-alt delete-notif-btn" title="Sil" style="color:#ef4444; cursor:pointer; font-size:0.8rem; padding:4px;"></i>` : '';
 
                 let safeText = item.text || item.message || "Yeni bir bildiriminiz var.";
-                if (safeText.includes('{"')) { safeText = `🎵 <b>Şair Misal.i</b>, <b>Bilinmeyen Eser</b> adlı müziği beğendi!`; }
+                
+                // Repariert alte und defekte Einträge, die kein "data-id" haben
+                if (safeText.includes('{"')) { safeText = `🎵 <b class="misali-link" style="color:#00e5ff; cursor:pointer; text-decoration:underline;" data-id="sairmisali">Şair Misal.i</b> bir eseri beğendi!`; }
 
                 div.innerHTML = `<div class="inbox-item-header"><span class="inbox-item-time">${item.displayTime || "Bilinmeyen Tarih"}</span>${delBtnHtml}</div><div class="inbox-item-text">${safeText}</div>`;
                 
-                // 🚀 DIE ZENTRALE LOGIK DIE ALT UND NEU REPARIERT! (Event Delegation auf die B-Tags)
-                div.onclick = function(e) {
+                // 🚀 DER WACHHUND FÜR DEN INBOX-KLICK
+                div.addEventListener('click', function(e) {
                     let bTag = e.target.closest('b');
                     
                     if (bTag) {
                         e.stopPropagation();
-                        // Erkennt an der Position, ob User (Cyan) oder Gedicht (Gold) geklickt wurde!
-                        let allBs = Array.from(div.querySelectorAll('b'));
-                        let isPoem = (allBs.indexOf(bTag) === 1); 
                         
-                        let slugText = makeSlug(bTag.innerText.trim());
-                        let finalSlug = isPoem ? 'track_' + slugText : slugText;
+                        let targetId = bTag.getAttribute('data-id');
                         
-                        if (typeof openPoemOrUserModal !== 'undefined') { openPoemOrUserModal(finalSlug); }
-                        else if (window.openPoemOrUserModal) { window.openPoemOrUserModal(finalSlug); }
-                        
-                        // Das Modale Fenster schließt sich direkt, damit du das Resultat siehst!
-                        let ov = document.getElementById('misali-inbox-overlay');
-                        if(ov) ov.classList.remove('open');
+                        // Fallback für alte Einträge in der Datenbank, die das data-id noch nicht haben
+                        if (!targetId) {
+                            let allBs = Array.from(div.querySelectorAll('b'));
+                            let isPoem = (allBs.indexOf(bTag) === 1); 
+                            let rawSlug = makeSlug(bTag.innerText);
+                            targetId = isPoem ? 'track_' + rawSlug : rawSlug;
+                        }
+
+                        // FEUERT DEN BRUTE-FORCE KLICK AB UND SCHLIESST DAS FENSTER!
+                        window.bruteForceOpen(targetId);
                         return;
                     }
 
                     if (e.target.closest('.delete-notif-btn')) return; 
                     if (!item.isRead) firebase.database().ref('misaliInbox/' + item.id + '/isRead').set(true);
-                };
+                });
 
                 if (isAdminLive) {
                     let delBtn = div.querySelector('.delete-notif-btn');
@@ -23928,17 +23965,16 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (DIREKTER KLICK AUF TITEL)
+    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (Direkter Aufruf)
     // ==========================================================
     let oldFloat = document.getElementById('misali-floating-player'); if(oldFloat) oldFloat.remove();
     let floatPlayer = document.createElement('div'); floatPlayer.id = 'misali-floating-player';
     
-    // 🚀 INLINE-KLICK FÜR DEN TITEL DIREKT INS HTML GESCHRIEBEN!
     floatPlayer.innerHTML = `
         <div class="floating-player-content">
             <i class="fas fa-compact-disc fa-spin" style="color:#f4c542; font-size: 1.5rem;"></i>
             <div class="floating-player-info">
-                <span class="floating-player-title" id="fp-title" title="Eseri Aç" onclick="event.stopPropagation(); let tid = this.getAttribute('data-target-id'); let finalId = tid || ('track_' + makeSlug(this.innerText)); if(typeof openPoemOrUserModal !== 'undefined'){ openPoemOrUserModal(finalId); } else if(window.openPoemOrUserModal){ window.openPoemOrUserModal(finalId); }">Bilinmiyor</span>
+                <span class="floating-player-title" id="fp-title" title="Eseri Aç" style="color:#f4c542; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:0.85rem;">Bilinmiyor</span>
                 <span class="floating-player-author" id="fp-author">Şair Misal.i</span>
             </div>
             <div class="floating-player-controls">
@@ -23953,6 +23989,14 @@ button:has(.fa-bell):hover {
     document.body.appendChild(floatPlayer);
 
     let activeGlobalAudio = null; let fpTitle = document.getElementById('fp-title'); let fpAuthor = document.getElementById('fp-author'); let fpPlayBtn = document.getElementById('fp-play'); let fpStopBtn = document.getElementById('fp-stop'); let fpProgressBar = document.getElementById('fp-bar'); let fpTrack = document.getElementById('fp-track');
+
+    // 🚀 DER KLICK AUF DEN TITEL IM PLAYER (BRUTE FORCE)
+    fpTitle.onclick = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        let targetId = this.getAttribute('data-target-id');
+        if (!targetId) targetId = 'track_' + makeSlug(this.innerText);
+        window.bruteForceOpen(targetId);
+    };
 
     setInterval(() => {
         let allAudios = document.querySelectorAll('audio');
@@ -23988,7 +24032,6 @@ button:has(.fa-bell):hover {
         } else { floatPlayer.classList.remove('show'); activeGlobalAudio = null; }
     }, 500);
 
-    // 🚀 SCHWEBENDE LEISTE CSS-BUSTER FIX!
     requestAnimationFrame(function updateLoop() {
         if (activeGlobalAudio && floatPlayer.classList.contains('show')) { 
             let dur = activeGlobalAudio.duration;
