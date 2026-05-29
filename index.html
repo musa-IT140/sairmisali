@@ -23436,18 +23436,23 @@ button:has(.fa-bell):hover {
 (function() {
     "use strict";
 
-    if (window.misaliEngineFinalBossV1) return;
-    window.misaliEngineFinalBossV1 = true;
+    if (window.misaliEngineFinalBruteForce) return;
+    window.misaliEngineFinalBruteForce = true;
 
     // ==========================================================
-    // 🚀 BRUTE FORCE OPENER (Öffnet garantiert!)
+    // 🚀 DIE ALLZWECK-WAFFE FÜR KLICKS (Öffnet IMMER das Fenster)
     // ==========================================================
     window.bruteForceOpen = function(targetId) {
+        console.log("Misali Engine: Versuche Fenster zu öffnen -> " + targetId);
+        
+        // 1. Zuerst das Inbox-Overlay schließen, damit der Bildschirm frei ist!
         let inbox = document.getElementById('misali-inbox-overlay');
         if (inbox) inbox.classList.remove('open');
 
         setTimeout(() => {
             let clicked = false;
+            
+            // Methode A: Sucht physisch die Karte auf der Webseite und simuliert einen Klick!
             let cards = document.querySelectorAll('[onclick]');
             for (let i = 0; i < cards.length; i++) {
                 let oc = cards[i].getAttribute('onclick') || "";
@@ -23457,12 +23462,21 @@ button:has(.fa-bell):hover {
                     break;
                 }
             }
+            
+            // Methode B: Fallbacks (Falls die Karte gerade nicht sichtbar ist)
             if (!clicked) {
                 if (typeof window.openPoem === 'function') { window.openPoem(targetId); }
                 else if (typeof window.openFastModal === 'function') { window.openFastModal(targetId); }
                 else if (typeof window.openPoemOrUserModal === 'function') { window.openPoemOrUserModal(targetId); }
+                else {
+                    let directModal = document.getElementById(targetId);
+                    if (directModal) {
+                        directModal.classList.add('active-modal');
+                        directModal.style.display = 'block';
+                    }
+                }
             }
-        }, 50); 
+        }, 50); // Kurze Pause, damit die Inbox sicher geschlossen ist
     };
 
     // ==========================================================
@@ -23471,20 +23485,32 @@ button:has(.fa-bell):hover {
     window.misaliConfirm = function(message, callback) {
         let old = document.getElementById('misali-master-confirm');
         if (old) old.remove();
+        
         let overlay = document.createElement('div');
         overlay.id = 'misali-master-confirm';
         overlay.className = 'misali-confirm-overlay';
         overlay.innerHTML = `<div class="misali-confirm-box"><h3><i class="fas fa-exclamation-triangle"></i> Uyarı</h3><p>${message}</p><div class="misali-confirm-btns"><button class="misali-confirm-btn misali-confirm-cancel">İptal</button><button class="misali-confirm-btn misali-confirm-ok">Sil</button></div></div>`;
         document.body.appendChild(overlay);
-        void overlay.offsetWidth; overlay.classList.add('active');
-        function closeDialog() { overlay.classList.remove('active'); setTimeout(() => { if (overlay) overlay.remove(); }, 300); }
+        
+        void overlay.offsetWidth; 
+        overlay.classList.add('active');
+
+        function closeDialog() { 
+            overlay.classList.remove('active'); 
+            setTimeout(() => { if (overlay) overlay.remove(); }, 300); 
+        }
+        
         overlay.onclick = function(e) { if (e.target === overlay) closeDialog(); };
         overlay.querySelector('.misali-confirm-cancel').onclick = (e) => { e.preventDefault(); e.stopPropagation(); closeDialog(); };
-        overlay.querySelector('.misali-confirm-ok').onclick = (e) => { e.preventDefault(); e.stopPropagation(); closeDialog(); if(typeof callback === 'function') callback(); };
+        overlay.querySelector('.misali-confirm-ok').onclick = (e) => { 
+            e.preventDefault(); e.stopPropagation(); 
+            closeDialog(); 
+            if(typeof callback === 'function') callback(); 
+        };
     };
 
     // ==========================================================
-    // 🚀 2. INBOX-SENDER (Speichert reines HTML für die Zukunft)
+    // 🚀 2. INBOX-SENDER (Mit Data-ID und festen Farben)
     // ==========================================================
     function makeSlug(text) {
         if (!text) return "";
@@ -23513,9 +23539,11 @@ button:has(.fa-bell):hover {
             
             let safeLiker = likerName.replace(/["']/g, '');
             let safeContent = contentName.replace(/["']/g, '');
+            let likerSlug = makeSlug(safeLiker);
+            let contentSlug = makeSlug(safeContent);
 
-            // 🚀 REINES HTML IN DIE DATENBANK: Blockiert garantiert keine Security Policy!
-            let notifText = `${icon} <strong data-id="${makeSlug(safeLiker)}">${likerName}</strong>, <strong data-id="track_${makeSlug(safeContent)}">${contentName}</strong> ${actionText}`;
+            // Reines HTML mit integrierten Farben und Daten-Markierungen für den Wachhund
+            let notifText = `${icon} <b class="misali-link" style="color:#00e5ff; cursor:pointer; text-decoration:underline;" data-id="${likerSlug}">${likerName}</b>, <b class="misali-link" style="color:#f4c542; cursor:pointer; text-decoration:underline;" data-id="track_${contentSlug}">${contentName}</b> ${actionText}`;
 
             let payload = { type: contentType, time: Date.now(), displayTime: `${dateStr} - ${timeStr}`, text: notifText, isRead: false };
             firebase.database().ref('misaliGlobalNotifs').push().set(payload);
@@ -23786,8 +23814,8 @@ button:has(.fa-bell):hover {
 
     function attachAudioSafely(id) { let retries = 0; let finder = setInterval(() => { let modal = document.querySelector('.modal.active-modal') || document.getElementById(id); if (modal) { clearInterval(finder); runAudioEngineForCard(id, modal); } if (++retries > 10) clearInterval(finder); }, 100); }
     
-    if (!window.misaliModalsInterceptedV10) {
-        window.misaliModalsInterceptedV10 = true;
+    if (!window.misaliModalsInterceptedFinal) {
+        window.misaliModalsInterceptedFinal = true;
         const interceptPoemModal = window.openPoemOrUserModal;
         window.openPoemOrUserModal = function(id) { if (interceptPoemModal) interceptPoemModal(id); attachAudioSafely(id); };
         const interceptFastModal = window.openFastModal;
@@ -23808,7 +23836,7 @@ button:has(.fa-bell):hover {
     function applyBadges() {
         document.querySelectorAll('.misali-audio-badge').forEach(el => el.remove());
         document.querySelectorAll('[onclick*="openPoem"], [onclick*="openFastModal"], .card, .poem-card, .masonry-item').forEach(card => {
-            if (card.tagName.toUpperCase() === 'SPAN' || card.tagName.toUpperCase() === 'STRONG' || card.tagName.toUpperCase() === 'B' || card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-inbox-overlay')) return; 
+            if (card.tagName.toUpperCase() === 'SPAN' || card.tagName.toUpperCase() === 'B' || card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-inbox-overlay')) return; 
             let fullCardText = (card.innerText || card.textContent || "").trim();
             if (fullCardText.length < 2) return;
             let cardSlug = makeSlug(fullCardText); let onclickSlug = makeSlug(card.getAttribute('onclick') || ""); let targetKey = null;
@@ -23825,7 +23853,7 @@ button:has(.fa-bell):hover {
     initAudioBadges(); setInterval(applyBadges, 3000); 
 
     // ==========================================================
-    // 🚀 5. INBOX SYSTEM (DER UNZERSTÖRBARE KLICK-WACHHUND)
+    // 🚀 5. INBOX SYSTEM (DER UNZERSTÖRBARE WACHHUND)
     // ==========================================================
     let oldTrigger = document.getElementById('misali-inbox-trigger'); if(oldTrigger) oldTrigger.remove();
     let oldPanel = document.getElementById('misali-inbox-overlay'); if(oldPanel) oldPanel.remove();
@@ -23889,34 +23917,36 @@ button:has(.fa-bell):hover {
 
                 let safeText = item.text || item.message || "Yeni bir bildiriminiz var.";
                 
-                // Repariert alte Einträge
-                if (safeText.includes('{"')) { safeText = `🎵 <strong>Şair Misal.i</strong> bir eseri beğendi!`; }
+                // Repariert alte und defekte Einträge, die kein "data-id" haben
+                if (safeText.includes('{"')) { safeText = `🎵 <b class="misali-link" style="color:#00e5ff; cursor:pointer; text-decoration:underline;" data-id="sairmisali">Şair Misal.i</b> bir eseri beğendi!`; }
 
                 div.innerHTML = `<div class="inbox-item-header"><span class="inbox-item-time">${item.displayTime || "Bilinmeyen Tarih"}</span>${delBtnHtml}</div><div class="inbox-item-text">${safeText}</div>`;
                 
-                // 🚀 DER WACHHUND FÜR KLICKS (Repariert ALLE alten und neuen Notifications)
-                div.onclick = function(e) {
-                    let targetEl = e.target.closest('b, strong, span[class*="user"], span[class*="poem"], span[style*="color"]');
+                // 🚀 DER WACHHUND FÜR DEN INBOX-KLICK
+                div.addEventListener('click', function(e) {
+                    let bTag = e.target.closest('b');
                     
-                    if (targetEl && targetEl.tagName !== 'DIV' && !targetEl.classList.contains('inbox-item-time')) {
+                    if (bTag) {
                         e.stopPropagation();
                         
-                        let targetId = targetEl.getAttribute('data-id') || targetEl.getAttribute('data-slug');
+                        let targetId = bTag.getAttribute('data-id');
                         
+                        // Fallback für alte Einträge in der Datenbank, die das data-id noch nicht haben
                         if (!targetId) {
-                            let allTags = Array.from(div.querySelectorAll('b, strong, span[style*="color"]'));
-                            let isPoem = (allTags.indexOf(targetEl) === 1); 
-                            let rawSlug = makeSlug(targetEl.innerText);
+                            let allBs = Array.from(div.querySelectorAll('b'));
+                            let isPoem = (allBs.indexOf(bTag) === 1); 
+                            let rawSlug = makeSlug(bTag.innerText);
                             targetId = isPoem ? 'track_' + rawSlug : rawSlug;
                         }
 
-                        if (window.bruteForceOpen) window.bruteForceOpen(targetId);
+                        // FEUERT DEN BRUTE-FORCE KLICK AB UND SCHLIESST DAS FENSTER!
+                        window.bruteForceOpen(targetId);
                         return;
                     }
 
                     if (e.target.closest('.delete-notif-btn')) return; 
                     if (!item.isRead) firebase.database().ref('misaliInbox/' + item.id + '/isRead').set(true);
-                };
+                });
 
                 if (isAdminLive) {
                     let delBtn = div.querySelector('.delete-notif-btn');
@@ -23926,6 +23956,7 @@ button:has(.fa-bell):hover {
             });
         });
 
+        // Live Toast Pop-Up
         let initTime = Date.now();
         firebase.database().ref('misaliGlobalNotifs').orderByChild('time').startAt(initTime).on('child_added', snap => {
             let data = snap.val(); 
@@ -23939,7 +23970,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 6. SCHWEBENDER PREMIUM PLAYER
+    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (Direkter Aufruf)
     // ==========================================================
     let oldFloat = document.getElementById('misali-floating-player'); if(oldFloat) oldFloat.remove();
     let floatPlayer = document.createElement('div'); floatPlayer.id = 'misali-floating-player';
@@ -23948,7 +23979,7 @@ button:has(.fa-bell):hover {
         <div class="floating-player-content">
             <i class="fas fa-compact-disc fa-spin" style="color:#f4c542; font-size: 1.5rem;"></i>
             <div class="floating-player-info">
-                <span class="floating-player-title" id="fp-title" title="Eseri Aç">Bilinmiyor</span>
+                <span class="floating-player-title" id="fp-title" title="Eseri Aç" style="color:#f4c542; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:0.85rem;">Bilinmiyor</span>
                 <span class="floating-player-author" id="fp-author">Şair Misal.i</span>
             </div>
             <div class="floating-player-controls">
@@ -23964,10 +23995,12 @@ button:has(.fa-bell):hover {
 
     let activeGlobalAudio = null; let fpTitle = document.getElementById('fp-title'); let fpAuthor = document.getElementById('fp-author'); let fpPlayBtn = document.getElementById('fp-play'); let fpStopBtn = document.getElementById('fp-stop'); let fpProgressBar = document.getElementById('fp-bar'); let fpTrack = document.getElementById('fp-track');
 
+    // 🚀 DER KLICK AUF DEN TITEL IM PLAYER (BRUTE FORCE)
     fpTitle.onclick = function(e) {
         e.preventDefault(); e.stopPropagation();
-        let targetId = this.getAttribute('data-target-id') || ('track_' + makeSlug(this.innerText));
-        if (window.bruteForceOpen) window.bruteForceOpen(targetId);
+        let targetId = this.getAttribute('data-target-id');
+        if (!targetId) targetId = 'track_' + makeSlug(this.innerText);
+        window.bruteForceOpen(targetId);
     };
 
     setInterval(() => {
@@ -23984,6 +24017,10 @@ button:has(.fa-bell):hover {
                     floatPlayer.classList.add('show');
                     
                     let exactId = activeGlobalAudio.getAttribute('data-passed-id') || (modal ? modal.id : '');
+                    if(!exactId) {
+                        let tempT = modal ? modal.querySelector('h1, h2, h3, .title, .modal-title, .card-title, header, .poem-name') : null;
+                        if(tempT) exactId = 'track_' + makeSlug(tempT.innerText.trim());
+                    }
                     fpTitle.setAttribute('data-target-id', exactId);
 
                     let titleNode = modal ? modal.querySelector('h1, h2, h3, .title, .modal-title, .card-title, header, .poem-name') : null;
