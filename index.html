@@ -23328,8 +23328,9 @@ button:has(.fa-bell):hover {
     .audio-core-btn:hover { transform: scale(1.2) !important; color: #ffdf73 !important; }
     .audio-core-btn.stop-btn:hover { color: #ef4444 !important; }
     
-    /* 🚀 PREMIUM ZEITLEISTE (Gold + Punkt) */
+    /* 🚀 PREMIUM ZEITLEISTE (Mit Playhead und beweglicher Leiste) */
     .audio-progress-container { flex-grow: 1 !important; height: 6px !important; background: #1e293b !important; border-radius: 6px !important; cursor: pointer !important; position: relative !important; margin: 0 12px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8) !important; overflow: visible !important; }
+    /* WICHTIG: width: 0% OHNE !important, damit JS es bewegen kann! */
     .audio-progress-bar { height: 100% !important; background: linear-gradient(90deg, #d49f00, #f4c542) !important; width: 0%; border-radius: 6px !important; box-shadow: 0 0 10px rgba(244, 197, 66, 0.9) !important; position: relative !important; transition: width 0.1s linear !important; }
     .audio-progress-bar::after { content: '' !important; position: absolute !important; right: -6px !important; top: 50% !important; transform: translateY(-50%) !important; width: 12px !important; height: 12px !important; background: #fff !important; border-radius: 50% !important; box-shadow: 0 0 6px #fff, 0 0 10px #f4c542 !important; pointer-events: none !important; }
     
@@ -23341,6 +23342,7 @@ button:has(.fa-bell):hover {
     .audio-like-btn { display: flex !important; align-items: center !important; gap: 6px !important; color: #94a3b8 !important; cursor: pointer !important; font-size: 0.8rem !important; transition: all 0.3s !important; position: relative !important; background: rgba(0,0,0,0.4) !important; padding: 4px 12px !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.1) !important; }
     .audio-like-btn:hover, .audio-like-btn.liked { color: #f4c542 !important; border-color: rgba(244, 197, 66, 0.4) !important; background: rgba(244, 197, 66, 0.1) !important; }
     .like-count { font-family: monospace !important; font-size: 0.75rem !important; font-weight: bold !important; }
+    .flying-note { position: absolute !important; color: #f4c542 !important; font-size: 12px !important; pointer-events: none !important; opacity: 0 !important; animation: floatUp 1s ease-out forwards !important; z-index: 50 !important; }
 
     /* Admin Upload Formular */
     .admin-publish-btn { background: rgba(16, 185, 129, 0.15) !important; border: 1px solid #10b981 !important; color: #10b981 !important; border-radius: 12px !important; padding: 4px 12px !important; font-size: 0.65rem !important; font-weight: bold !important; cursor: pointer !important; margin-top: 6px !important; transition: all 0.2s !important; }
@@ -23355,7 +23357,7 @@ button:has(.fa-bell):hover {
     .admin-audio-management i:hover.delete { color: #ef4444 !important; transform: scale(1.1) !important; }
 
     /* ========================================================== */
-    /* 4. INBOX & NEON CYAN ZÄHLER                                */
+    /* 3. POSTEINGANG (INBOX) & NEON ZÄHLER                       */
     /* ========================================================== */
     #misali-inbox-trigger { position: fixed !important; top: 15px !important; right: 90px !important; width: 42px !important; height: 42px !important; background: linear-gradient(135deg, #1e293b, #0f172a) !important; border: 2px solid rgba(244, 197, 66, 0.6) !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #f4c542 !important; font-size: 1.2rem !important; box-shadow: 0 5px 15px rgba(0,0,0,0.6) !important; cursor: pointer !important; z-index: 1000 !important; transition: transform 0.3s !important; }
     #misali-inbox-trigger:hover { transform: scale(1.1) !important; }
@@ -23383,18 +23385,26 @@ button:has(.fa-bell):hover {
     .inbox-item-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 6px !important; }
     .inbox-item-time { font-size: 0.65rem !important; color: #94a3b8 !important; font-family: monospace !important; }
     .inbox-item-text { font-size: 0.85rem !important; color: #e2e8f0 !important; line-height: 1.5 !important; pointer-events: auto !important; }
+    
+    /* 🚀 DIE RÜCKWIRKENDE FARB-LOGIK: Färbt IMMER den Liker (1. Wort) Cyan und das Gedicht (2. Wort) Gold! */
+    .inbox-item-text b:first-of-type, .misali-like-toast b:first-of-type { color: #00e5ff !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; pointer-events: auto !important; border-bottom: 1px dashed transparent; }
+    .inbox-item-text b:first-of-type:hover, .misali-like-toast b:first-of-type:hover { text-shadow: 0 0 8px #00e5ff !important; border-bottom: 1px dashed #00e5ff !important; }
 
+    .inbox-item-text b:nth-of-type(2), .misali-like-toast b:nth-of-type(2) { color: #f4c542 !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; pointer-events: auto !important; border-bottom: 1px dashed transparent; }
+    .inbox-item-text b:nth-of-type(2):hover, .misali-like-toast b:nth-of-type(2):hover { text-shadow: 0 0 8px #f4c542 !important; border-bottom: 1px dashed #f4c542 !important; }
+
+    /* Blocker: Audio-Icons erscheinen NICHT im Posteingang */
     .inbox-content .misali-audio-badge { display: none !important; }
 
     /* ========================================================== */
-    /* 5. SCHWEBENDER MINI-PLAYER (Spotify Style)                 */
+    /* 4. SCHWEBENDER MINI-PLAYER (Spotify Style)                 */
     /* ========================================================== */
     #misali-floating-player { position: fixed !important; bottom: -120px !important; left: 50% !important; transform: translateX(-50%) !important; width: 90% !important; max-width: 380px !important; background: rgba(10, 15, 30, 0.95) !important; backdrop-filter: blur(15px) !important; border: 1px solid rgba(244, 197, 66, 0.5) !important; border-radius: 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important; display: flex !important; flex-direction: column !important; z-index: 2147483646 !important; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; pointer-events: auto !important; overflow: visible !important; }
     #misali-floating-player.show { bottom: 20px !important; }
     .floating-player-content { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 10px 15px !important; gap: 15px !important; }
     .floating-player-info { flex-grow: 1 !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; }
     
-    .floating-player-title { color: #f4c542 !important; font-family: 'Segoe UI', sans-serif !important; font-size: 0.85rem !important; font-weight: bold !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; cursor: pointer !important; transition: color 0.2s !important; pointer-events: auto !important; border-bottom: 1px dashed transparent; display: inline-block;}
+    .floating-player-title { color: #f4c542 !important; font-family: 'Segoe UI', sans-serif !important; font-size: 0.85rem !important; font-weight: bold !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; cursor: pointer !important; transition: color 0.2s !important; border-bottom: 1px dashed transparent; display: inline-block;}
     .floating-player-title:hover { text-shadow: 0 0 8px #f4c542 !important; border-bottom: 1px dashed #f4c542; }
     .floating-player-author { color: #cbd5e1 !important; font-size: 0.65rem !important; font-family: monospace !important; }
     .floating-player-controls { display: flex !important; align-items: center !important; gap: 15px !important; }
@@ -23403,12 +23413,13 @@ button:has(.fa-bell):hover {
     .floating-btn:hover { transform: scale(1.2) !important; color: #ffdf73 !important; }
     .floating-btn.stop { color: #ef4444 !important; font-size: 1rem !important; }
     
+    /* 🚀 PREMIUM ZEITLEISTE FÜR DEN FLOATING PLAYER (Ohne !important Bug) */
     .floating-progress-track { width: 100% !important; height: 6px !important; background: #1e293b !important; position: relative !important; cursor: pointer !important; border-top: 1px solid rgba(255,255,255,0.05) !important; overflow: visible !important; border-radius: 0 0 16px 16px !important;}
     .floating-progress-bar { height: 100% !important; background: linear-gradient(90deg, #d49f00, #f4c542) !important; width: 0%; position: relative !important; transition: width 0.1s linear !important; box-shadow: 0 0 10px rgba(244, 197, 66, 0.8) !important; border-radius: 0 0 0 16px !important; }
     .floating-progress-bar::after { content: '' !important; position: absolute !important; right: -6px !important; top: 50% !important; transform: translateY(-50%) !important; width: 12px !important; height: 12px !important; background: #fff !important; border-radius: 50% !important; box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 10px #f4c542 !important; pointer-events: none !important; }
 
     /* ========================================================== */
-    /* 6. LIVE TOAST & CRASH-SAFE CONFIRM MODAL                   */
+    /* 5. LIVE TOAST & CRASH-SAFE CONFIRM MODAL (OVAL)            */
     /* ========================================================== */
     .misali-like-toast { position: fixed !important; top: 20px !important; left: 50% !important; transform: translateX(-50%) translateY(-150%) !important; background: rgba(10, 15, 30, 0.95) !important; backdrop-filter: blur(10px) !important; border-bottom: 3px solid #00e5ff !important; border-radius: 12px !important; padding: 12px 20px !important; color: #fff !important; font-family: 'Segoe UI', sans-serif !important; font-size: 0.85rem !important; box-shadow: 0 8px 20px rgba(0,0,0,0.8) !important; z-index: 2147483647 !important; display: flex !important; align-items: center !important; gap: 12px !important; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; max-width: 90% !important; text-align: center !important;}
     .misali-like-toast.show { transform: translateX(-50%) translateY(0) !important; }
@@ -23431,8 +23442,8 @@ button:has(.fa-bell):hover {
 (function() {
     "use strict";
 
-    if (window.misaliEngineFinalCombined) return;
-    window.misaliEngineFinalCombined = true;
+    if (window.misaliEngineFinalLoaded) return;
+    window.misaliEngineFinalLoaded = true;
 
     // ==========================================================
     // 🚀 1. SICHERS LÖSCH-FENSTER
@@ -23452,7 +23463,6 @@ button:has(.fa-bell):hover {
 
         function closeDialog() { 
             overlay.classList.remove('active'); 
-            overlay.style.pointerEvents = 'none'; 
             setTimeout(() => { if (overlay) overlay.remove(); }, 300); 
         }
         
@@ -23466,7 +23476,7 @@ button:has(.fa-bell):hover {
     };
 
     // ==========================================================
-    // 🚀 2. INBOX-SENDER (DER "REVEAL"-FIX: Schließt die Inbox beim Klick!)
+    // 🚀 2. INBOX-SENDER (Nur reines HTML für die Datenbank)
     // ==========================================================
     function makeSlug(text) {
         if (!text) return "";
@@ -23493,13 +23503,8 @@ button:has(.fa-bell):hover {
             let icon = contentType === 'audio' ? '🎵' : (contentType === 'comment' ? '💬' : '❤️');
             let actionText = contentType === 'audio' ? 'adlı müziği beğendi!' : 'adlı eseri beğendi!';
             
-            let safeLiker = likerName.replace(/["']/g, '');
-            let safeContent = contentName.replace(/["']/g, '');
-            let likerSlug = makeSlug(safeLiker);
-            let contentSlug = makeSlug(safeContent);
-
-            // 🚀 DER FIX: Klick öffnet das Modal UND schließt zeitgleich die Inbox, damit du das geöffnete Fenster auch SIEHST!
-            let notifText = `${icon} <b style="color:#00e5ff; cursor:pointer; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="event.stopPropagation(); if(typeof openPoemOrUserModal !== 'undefined') { openPoemOrUserModal('${likerSlug}'); } else if(window.openPoemOrUserModal) { window.openPoemOrUserModal('${likerSlug}'); } let ov = document.getElementById('misali-inbox-overlay'); if(ov) ov.classList.remove('open');">${likerName}</b>, <b style="color:#f4c542; cursor:pointer; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="event.stopPropagation(); if(typeof openPoemOrUserModal !== 'undefined') { openPoemOrUserModal('track_${contentSlug}'); } else if(window.openPoemOrUserModal) { window.openPoemOrUserModal('track_${contentSlug}'); } let ov2 = document.getElementById('misali-inbox-overlay'); if(ov2) ov2.classList.remove('open');">${contentName}</b> ${actionText}`;
+            // 🚀 ABSOLUT SICHERER PAYLOAD: Keine Javascript Befehle im Text!
+            let notifText = `${icon} <b>${likerName}</b>, <b>${contentName}</b> ${actionText}`;
 
             let payload = { type: contentType, time: Date.now(), displayTime: `${dateStr} - ${timeStr}`, text: notifText, isRead: false };
             firebase.database().ref('misaliGlobalNotifs').push().set(payload);
@@ -23522,7 +23527,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 3. AUDIO ENGINE (Mit überschreibbarer Leiste)
+    // 🚀 3. AUDIO ENGINE & LEISTEN FIX
     // ==========================================================
     const audioDB = {
         name: 'MisaliMegaAudioDB', store: 'audioFiles',
@@ -23619,13 +23624,13 @@ button:has(.fa-bell):hover {
                         return mins + ":" + (secs < 10 ? "0" : "") + secs;
                     }
 
-                    // 🚀 LEISTE BEWEGT SICH UND ÜBERSCHREIBT DAS CSS
+                    // 🚀 LEISTE BEWEGT SICH PERFEKT IN GOLD
                     audio.addEventListener('timeupdate', function() {
                         try {
                             let dur = audio.duration;
                             if (dur && dur !== Infinity && !isNaN(dur)) {
                                 let pct = (audio.currentTime / dur) * 100;
-                                progressBar.style.setProperty('width', pct + '%', 'important');
+                                progressBar.style.width = pct + '%';
                                 timeText.innerText = `${convertTime(audio.currentTime)} / ${convertTime(dur)}`;
                             } else {
                                 timeText.innerText = `${convertTime(audio.currentTime)}`;
@@ -23646,10 +23651,10 @@ button:has(.fa-bell):hover {
                     stopBtn.onclick = function(e) {
                         e.stopPropagation(); e.preventDefault();
                         audio.pause(); audio.currentTime = 0; playBtn.innerHTML = '<i class="fas fa-play"></i>';
-                        progressBar.style.setProperty('width', '0%', 'important'); updateProgress();
+                        progressBar.style.width = '0%'; updateProgress();
                     };
 
-                    audio.onended = () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; progressBar.style.setProperty('width', '0%', 'important'); timeText.innerText = "0:00"; };
+                    audio.onended = () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; progressBar.style.width = '0%'; timeText.innerText = "0:00"; };
                     progressCont.onclick = function(e) { e.stopPropagation(); let rect = progressCont.getBoundingClientRect(); if (audio.duration) audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration; };
 
                     if (isAdminGlobal) {
@@ -23746,7 +23751,6 @@ button:has(.fa-bell):hover {
 
                 uploadForm.querySelector('.input-file-element').onchange = function(e) { 
                     if (!e.target.files[0]) return;
-                    
                     let finalAuthor = uploadForm.querySelector('.input-author') ? uploadForm.querySelector('.input-author').value.trim() : "Şair Misal.i";
                     let finalReader = uploadForm.querySelector('.input-reader') ? uploadForm.querySelector('.input-reader').value.trim() : "Şair Misal.i";
                     let finalMusic = uploadForm.querySelector('.input-music') ? uploadForm.querySelector('.input-music').value.trim() : "Bilinmiyor";
@@ -23772,8 +23776,8 @@ button:has(.fa-bell):hover {
 
     function attachAudioSafely(id) { let retries = 0; let finder = setInterval(() => { let modal = document.querySelector('.modal.active-modal') || document.getElementById(id); if (modal) { clearInterval(finder); runAudioEngineForCard(id, modal); } if (++retries > 10) clearInterval(finder); }, 100); }
     
-    if (!window.misaliModalsInterceptedVFinal) {
-        window.misaliModalsInterceptedVFinal = true;
+    if (!window.misaliModalsInterceptedV10) {
+        window.misaliModalsInterceptedV10 = true;
         const interceptPoemModal = window.openPoemOrUserModal;
         window.openPoemOrUserModal = function(id) { if (interceptPoemModal) interceptPoemModal(id); attachAudioSafely(id); };
         const interceptFastModal = window.openFastModal;
@@ -23794,7 +23798,7 @@ button:has(.fa-bell):hover {
     function applyBadges() {
         document.querySelectorAll('.misali-audio-badge').forEach(el => el.remove());
         document.querySelectorAll('[onclick*="openPoem"], [onclick*="openFastModal"], .card, .poem-card, .masonry-item').forEach(card => {
-            if (card.tagName.toUpperCase() === 'SPAN' || card.tagName.toUpperCase() === 'B' || card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-inbox-overlay')) return; 
+            if (card.tagName.toUpperCase() === 'SPAN' || card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-inbox-overlay')) return; 
             let fullCardText = (card.innerText || card.textContent || "").trim();
             if (fullCardText.length < 2) return;
             let cardSlug = makeSlug(fullCardText); let onclickSlug = makeSlug(card.getAttribute('onclick') || ""); let targetKey = null;
@@ -23811,7 +23815,7 @@ button:has(.fa-bell):hover {
     initAudioBadges(); setInterval(applyBadges, 3000); 
 
     // ==========================================================
-    // 🚀 5. INBOX SYSTEM (Live & Administrativ)
+    // 🚀 5. INBOX SYSTEM (DIE 100% GARANTIERTE KLICK-LOGIK)
     // ==========================================================
     let oldTrigger = document.getElementById('misali-inbox-trigger'); if(oldTrigger) oldTrigger.remove();
     let oldPanel = document.getElementById('misali-inbox-overlay'); if(oldPanel) oldPanel.remove();
@@ -23836,15 +23840,7 @@ button:has(.fa-bell):hover {
 
     inboxTrigger.onclick = () => inboxOverlay.classList.add('open');
     let icBtn = document.getElementById('inbox-close'); if(icBtn) icBtn.onclick = () => inboxOverlay.classList.remove('open');
-    
-    // Globale Auto-Close Regel für JEDEN Klick auf ein <b> in der Inbox (garantiert das Schließen!)
-    inboxOverlay.addEventListener('click', function(e) {
-        if (e.target.tagName.toLowerCase() === 'b' || e.target.closest('b')) {
-            inboxOverlay.classList.remove('open');
-        } else if (e.target === inboxOverlay) {
-            inboxOverlay.classList.remove('open');
-        }
-    });
+    inboxOverlay.onclick = (e) => { if (e.target === inboxOverlay) inboxOverlay.classList.remove('open'); };
 
     if (typeof firebase !== 'undefined' && firebase.database) {
         let inboxRef = firebase.database().ref('misaliInbox');
@@ -23882,12 +23878,30 @@ button:has(.fa-bell):hover {
                 let delBtnHtml = isAdminLive ? `<i class="fas fa-trash-alt delete-notif-btn" title="Sil" style="color:#ef4444; cursor:pointer; font-size:0.8rem; padding:4px;"></i>` : '';
 
                 let safeText = item.text || item.message || "Yeni bir bildiriminiz var.";
-                if (safeText.includes('{"')) { safeText = `🎵 <b style="color:#00e5ff; cursor:pointer;" onclick="if(window.openPoemOrUserModal) openPoemOrUserModal('sairmisali');">Şair Misal.i</b> bir eseri beğendi!`; }
+                if (safeText.includes('{"')) { safeText = `🎵 <b>Şair Misal.i</b>, <b>Bilinmeyen Eser</b> adlı müziği beğendi!`; }
 
-                div.innerHTML = `<div class="inbox-item-header"><span class="inbox-item-time">${item.displayTime || "Bilinmeyen Tarih"}</span>${delBtnHtml}</div><div class="inbox-item-text" style="pointer-events:auto;">${safeText}</div>`;
+                div.innerHTML = `<div class="inbox-item-header"><span class="inbox-item-time">${item.displayTime || "Bilinmeyen Tarih"}</span>${delBtnHtml}</div><div class="inbox-item-text">${safeText}</div>`;
                 
+                // 🚀 DER WACHHUND FÜR KLICKS (Repariert ALLE alten und neuen Notifications)
                 div.onclick = function(e) {
-                    if (e.target.closest('.delete-notif-btn') || e.target.tagName.toLowerCase() === 'b') return; 
+                    let bTag = e.target.closest('b');
+                    
+                    if (bTag) {
+                        e.stopPropagation();
+                        let allBs = Array.from(div.querySelectorAll('b'));
+                        let isPoem = (allBs.indexOf(bTag) === 1); 
+                        
+                        let slugText = makeSlug(bTag.innerText.trim());
+                        let finalSlug = isPoem ? 'track_' + slugText : slugText;
+                        
+                        if (window.openPoemOrUserModal) {
+                            window.openPoemOrUserModal(finalSlug);
+                            document.getElementById('misali-inbox-overlay').classList.remove('open');
+                        }
+                        return;
+                    }
+
+                    if (e.target.closest('.delete-notif-btn')) return; 
                     if (!item.isRead) firebase.database().ref('misaliInbox/' + item.id + '/isRead').set(true);
                 };
 
@@ -23913,17 +23927,17 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (Direkter Aufruf)
+    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (KLICKBARER TITEL)
     // ==========================================================
     let oldFloat = document.getElementById('misali-floating-player'); if(oldFloat) oldFloat.remove();
     let floatPlayer = document.createElement('div'); floatPlayer.id = 'misali-floating-player';
     
-    // 🚀 HIER IST DEIN BEFEHL FÜR DEN TITEL-KLICK!
+    // 🚀 KLICKBARER TITEL (Direkt via onclick)
     floatPlayer.innerHTML = `
         <div class="floating-player-content">
             <i class="fas fa-compact-disc fa-spin" style="color:#f4c542; font-size: 1.5rem;"></i>
             <div class="floating-player-info">
-                <span class="floating-player-title" id="fp-title" title="Eseri Aç" onclick="event.stopPropagation(); let tid = this.getAttribute('data-target-id'); let finalId = tid || ('track_' + makeSlug(this.innerText)); if(typeof openPoemOrUserModal !== 'undefined'){ openPoemOrUserModal(finalId); } else if(window.openPoemOrUserModal){ window.openPoemOrUserModal(finalId); }">Bilinmiyor</span>
+                <span class="floating-player-title" id="fp-title" title="Eseri Aç" onclick="event.stopPropagation(); let tid = this.getAttribute('data-target-id'); if(tid && window.openPoemOrUserModal) { window.openPoemOrUserModal(tid); } else if (window.openPoemOrUserModal) { window.openPoemOrUserModal('track_' + makeSlug(this.innerText)); }">Bilinmiyor</span>
                 <span class="floating-player-author" id="fp-author">Şair Misal.i</span>
             </div>
             <div class="floating-player-controls">
@@ -23969,14 +23983,14 @@ button:has(.fa-bell):hover {
         } else { floatPlayer.classList.remove('show'); activeGlobalAudio = null; }
     }, 500);
 
-    // 🚀 SCHWEBENDE LEISTE FÜLLT SICH SICHER MIT GOLD
+    // 🚀 SCHWEBENDE LEISTE FÜLLT SICH MIT GOLD
     requestAnimationFrame(function updateLoop() {
         if (activeGlobalAudio && floatPlayer.classList.contains('show')) { 
             let dur = activeGlobalAudio.duration;
             if (dur && dur !== Infinity && !isNaN(dur) && dur > 0) {
                 let pct = (activeGlobalAudio.currentTime / dur) * 100; 
                 if (pct > 100) pct = 100;
-                fpProgressBar.style.setProperty('width', pct + '%', 'important');
+                fpProgressBar.style.width = pct + '%'; 
             }
         }
         requestAnimationFrame(updateLoop);
@@ -24005,7 +24019,7 @@ button:has(.fa-bell):hover {
         if (activeGlobalAudio) {
             try { activeGlobalAudio.pause(); activeGlobalAudio.currentTime = 0; }catch(err){}
             let wrapper = activeGlobalAudio.closest('.misali-audio-wrapper');
-            if (wrapper) { let mainBtn = wrapper.querySelector('.play-btn'); let mainBar = wrapper.querySelector('.audio-progress-bar'); if (mainBtn) mainBtn.innerHTML = '<i class="fas fa-play"></i>'; if (mainBar) mainBar.style.setProperty('width', '0%', 'important'); }
+            if (wrapper) { let mainBtn = wrapper.querySelector('.play-btn'); let mainBar = wrapper.querySelector('.audio-progress-bar'); if (mainBtn) mainBtn.innerHTML = '<i class="fas fa-play"></i>'; if (mainBar) mainBar.style.width = '0%'; }
             activeGlobalAudio = null;
         }
         floatPlayer.classList.remove('show');
