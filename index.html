@@ -23436,48 +23436,8 @@ button:has(.fa-bell):hover {
 (function() {
     "use strict";
 
-    if (window.misaliEngineFinalBruteForce) return;
-    window.misaliEngineFinalBruteForce = true;
-
-    // ==========================================================
-    // 🚀 DIE ALLZWECK-WAFFE FÜR KLICKS (Öffnet IMMER das Fenster)
-    // ==========================================================
-    window.bruteForceOpen = function(targetId) {
-        console.log("Misali Engine: Versuche Fenster zu öffnen -> " + targetId);
-        
-        // 1. Zuerst das Inbox-Overlay schließen, damit der Bildschirm frei ist!
-        let inbox = document.getElementById('misali-inbox-overlay');
-        if (inbox) inbox.classList.remove('open');
-
-        setTimeout(() => {
-            let clicked = false;
-            
-            // Methode A: Sucht physisch die Karte auf der Webseite und simuliert einen Klick!
-            let cards = document.querySelectorAll('[onclick]');
-            for (let i = 0; i < cards.length; i++) {
-                let oc = cards[i].getAttribute('onclick') || "";
-                if (oc.includes(targetId)) {
-                    cards[i].click();
-                    clicked = true;
-                    break;
-                }
-            }
-            
-            // Methode B: Fallbacks (Falls die Karte gerade nicht sichtbar ist)
-            if (!clicked) {
-                if (typeof window.openPoem === 'function') { window.openPoem(targetId); }
-                else if (typeof window.openFastModal === 'function') { window.openFastModal(targetId); }
-                else if (typeof window.openPoemOrUserModal === 'function') { window.openPoemOrUserModal(targetId); }
-                else {
-                    let directModal = document.getElementById(targetId);
-                    if (directModal) {
-                        directModal.classList.add('active-modal');
-                        directModal.style.display = 'block';
-                    }
-                }
-            }
-        }, 50); // Kurze Pause, damit die Inbox sicher geschlossen ist
-    };
+    if (window.misaliEngineFinalDone) return;
+    window.misaliEngineFinalDone = true;
 
     // ==========================================================
     // 🚀 1. SICHERS LÖSCH-FENSTER
@@ -23497,6 +23457,7 @@ button:has(.fa-bell):hover {
 
         function closeDialog() { 
             overlay.classList.remove('active'); 
+            overlay.style.pointerEvents = 'none'; 
             setTimeout(() => { if (overlay) overlay.remove(); }, 300); 
         }
         
@@ -23510,7 +23471,7 @@ button:has(.fa-bell):hover {
     };
 
     // ==========================================================
-    // 🚀 2. INBOX-SENDER (Mit Data-ID und festen Farben)
+    // 🚀 2. INBOX-SENDER (Sichere Data-Slugs für Klicks)
     // ==========================================================
     function makeSlug(text) {
         if (!text) return "";
@@ -23542,8 +23503,8 @@ button:has(.fa-bell):hover {
             let likerSlug = makeSlug(safeLiker);
             let contentSlug = makeSlug(safeContent);
 
-            // Reines HTML mit integrierten Farben und Daten-Markierungen für den Wachhund
-            let notifText = `${icon} <b class="misali-link" style="color:#00e5ff; cursor:pointer; text-decoration:underline;" data-id="${likerSlug}">${likerName}</b>, <b class="misali-link" style="color:#f4c542; cursor:pointer; text-decoration:underline;" data-id="track_${contentSlug}">${contentName}</b> ${actionText}`;
+            // 🚀 PERFEKTES HTML: Die Namen bekommen "data-slug", was der Browser niemals blockiert!
+            let notifText = `${icon} <b data-slug="${likerSlug}" style="color:#00e5ff; cursor:pointer; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${likerName}</b>, <b data-slug="track_${contentSlug}" style="color:#f4c542; cursor:pointer; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${contentName}</b> ${actionText}`;
 
             let payload = { type: contentType, time: Date.now(), displayTime: `${dateStr} - ${timeStr}`, text: notifText, isRead: false };
             firebase.database().ref('misaliGlobalNotifs').push().set(payload);
@@ -23566,7 +23527,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 3. AUDIO ENGINE
+    // 🚀 3. AUDIO ENGINE (Mit Fortschrittsleiste)
     // ==========================================================
     const audioDB = {
         name: 'MisaliMegaAudioDB', store: 'audioFiles',
@@ -23853,7 +23814,7 @@ button:has(.fa-bell):hover {
     initAudioBadges(); setInterval(applyBadges, 3000); 
 
     // ==========================================================
-    // 🚀 5. INBOX SYSTEM (DER UNZERSTÖRBARE WACHHUND)
+    // 🚀 5. INBOX SYSTEM (DER UNZERSTÖRBARE KLICK-FIX!)
     // ==========================================================
     let oldTrigger = document.getElementById('misali-inbox-trigger'); if(oldTrigger) oldTrigger.remove();
     let oldPanel = document.getElementById('misali-inbox-overlay'); if(oldPanel) oldPanel.remove();
@@ -23916,37 +23877,46 @@ button:has(.fa-bell):hover {
                 let delBtnHtml = isAdminLive ? `<i class="fas fa-trash-alt delete-notif-btn" title="Sil" style="color:#ef4444; cursor:pointer; font-size:0.8rem; padding:4px;"></i>` : '';
 
                 let safeText = item.text || item.message || "Yeni bir bildiriminiz var.";
-                
-                // Repariert alte und defekte Einträge, die kein "data-id" haben
-                if (safeText.includes('{"')) { safeText = `🎵 <b class="misali-link" style="color:#00e5ff; cursor:pointer; text-decoration:underline;" data-id="sairmisali">Şair Misal.i</b> bir eseri beğendi!`; }
+                if (safeText.includes('{"')) { safeText = `🎵 <b data-slug="sairmisali" style="color:#00e5ff; cursor:pointer;">Şair Misal.i</b> bir eseri beğendi!`; }
 
                 div.innerHTML = `<div class="inbox-item-header"><span class="inbox-item-time">${item.displayTime || "Bilinmeyen Tarih"}</span>${delBtnHtml}</div><div class="inbox-item-text">${safeText}</div>`;
                 
-                // 🚀 DER WACHHUND FÜR DEN INBOX-KLICK
-                div.addEventListener('click', function(e) {
+                // 🚀 DER WACHHUND: Fängt jeden Klick auf "<b>" (die Namen) ab, liest die Daten und öffnet das Fenster.
+                // Und vor allem: ER SCHLIESST DIE INBOX, damit du das Fenster sehen kannst!
+                div.onclick = function(e) {
                     let bTag = e.target.closest('b');
                     
                     if (bTag) {
                         e.stopPropagation();
                         
-                        let targetId = bTag.getAttribute('data-id');
+                        // 1. Slug sichern (für neue Benachrichtigungen mit data-slug)
+                        let slug = bTag.getAttribute('data-slug');
                         
-                        // Fallback für alte Einträge in der Datenbank, die das data-id noch nicht haben
-                        if (!targetId) {
+                        // 2. Fallback: Falls es alte Benachrichtigungen sind, generieren wir den Slug!
+                        if (!slug) {
                             let allBs = Array.from(div.querySelectorAll('b'));
                             let isPoem = (allBs.indexOf(bTag) === 1); 
-                            let rawSlug = makeSlug(bTag.innerText);
-                            targetId = isPoem ? 'track_' + rawSlug : rawSlug;
+                            let slugText = makeSlug(bTag.innerText.trim());
+                            slug = isPoem ? 'track_' + slugText : slugText;
                         }
-
-                        // FEUERT DEN BRUTE-FORCE KLICK AB UND SCHLIESST DAS FENSTER!
-                        window.bruteForceOpen(targetId);
+                        
+                        // 3. FENSTER ÖFFNEN!
+                        if (typeof openPoemOrUserModal !== 'undefined') { 
+                            openPoemOrUserModal(slug); 
+                        } else if (window.openPoemOrUserModal) { 
+                            window.openPoemOrUserModal(slug); 
+                        }
+                        
+                        // 4. INBOX SOFORT VERSTECKEN, DAMIT DAS FENSTER SICHTBAR WIRD!
+                        let ov = document.getElementById('misali-inbox-overlay');
+                        if(ov) ov.classList.remove('open');
+                        
                         return;
                     }
 
                     if (e.target.closest('.delete-notif-btn')) return; 
                     if (!item.isRead) firebase.database().ref('misaliInbox/' + item.id + '/isRead').set(true);
-                });
+                };
 
                 if (isAdminLive) {
                     let delBtn = div.querySelector('.delete-notif-btn');
@@ -23970,7 +23940,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (Direkter Aufruf)
+    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (KLICKBARER TITEL)
     // ==========================================================
     let oldFloat = document.getElementById('misali-floating-player'); if(oldFloat) oldFloat.remove();
     let floatPlayer = document.createElement('div'); floatPlayer.id = 'misali-floating-player';
@@ -23979,7 +23949,7 @@ button:has(.fa-bell):hover {
         <div class="floating-player-content">
             <i class="fas fa-compact-disc fa-spin" style="color:#f4c542; font-size: 1.5rem;"></i>
             <div class="floating-player-info">
-                <span class="floating-player-title" id="fp-title" title="Eseri Aç" style="color:#f4c542; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:0.85rem;">Bilinmiyor</span>
+                <span class="floating-player-title" id="fp-title" title="Eseri Aç" style="cursor:pointer;">Bilinmiyor</span>
                 <span class="floating-player-author" id="fp-author">Şair Misal.i</span>
             </div>
             <div class="floating-player-controls">
@@ -23995,12 +23965,18 @@ button:has(.fa-bell):hover {
 
     let activeGlobalAudio = null; let fpTitle = document.getElementById('fp-title'); let fpAuthor = document.getElementById('fp-author'); let fpPlayBtn = document.getElementById('fp-play'); let fpStopBtn = document.getElementById('fp-stop'); let fpProgressBar = document.getElementById('fp-bar'); let fpTrack = document.getElementById('fp-track');
 
-    // 🚀 DER KLICK AUF DEN TITEL IM PLAYER (BRUTE FORCE)
+    // 🚀 FENSTER ÖFFNEN VOM PLAYER AUS
     fpTitle.onclick = function(e) {
         e.preventDefault(); e.stopPropagation();
-        let targetId = this.getAttribute('data-target-id');
-        if (!targetId) targetId = 'track_' + makeSlug(this.innerText);
-        window.bruteForceOpen(targetId);
+        let exactId = this.getAttribute('data-target-id');
+        let fallbackSlug = 'track_' + makeSlug(this.innerText);
+        let finalId = exactId ? exactId : fallbackSlug;
+        
+        if (typeof openPoemOrUserModal !== 'undefined') {
+            openPoemOrUserModal(finalId);
+        } else if (window.openPoemOrUserModal) {
+            window.openPoemOrUserModal(finalId);
+        }
     };
 
     setInterval(() => {
