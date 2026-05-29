@@ -23465,11 +23465,11 @@ button:has(.fa-bell):hover {
 (function() {
     "use strict";
 
-    if (window.misaliEnginePremiumUltima) return;
-    window.misaliEnginePremiumUltima = true;
+    if (window.misaliEngineFinalPremiumV2) return;
+    window.misaliEngineFinalPremiumV2 = true;
 
     // ==========================================================
-    // 🚀 BRUTE FORCE OPENER
+    // 🚀 BRUTE FORCE OPENER (Öffnet Fenster und schließt Inbox)
     // ==========================================================
     window.bruteForceOpen = function(targetId) {
         let inbox = document.getElementById('misali-inbox-overlay');
@@ -23822,7 +23822,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 4. BADGE SYSTEM (Strikte Firewall für den Posteingang)
+    // 🚀 4. BADGE SYSTEM
     // ==========================================================
     let globalAudioKeys = []; let globalAudioLikes = {};
     async function initAudioBadges() {
@@ -23835,9 +23835,7 @@ button:has(.fa-bell):hover {
     function applyBadges() {
         document.querySelectorAll('.misali-audio-badge').forEach(el => el.remove());
         document.querySelectorAll('[onclick*="openPoem"], [onclick*="openFastModal"], .card, .poem-card, .masonry-item').forEach(card => {
-            // 🔥 DIE FIREWALL: Ignoriert alles, was in der Inbox oder ein Text-Tag ist!
-            if (card.closest('#misali-inbox-overlay') || card.classList.contains('inbox-item') || card.closest('.inbox-content') || card.tagName === 'SPAN' || card.tagName === 'STRONG' || card.tagName === 'B' || card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-bgm-bar')) return; 
-            
+            if (card.tagName.toUpperCase() === 'SPAN' || card.tagName.toUpperCase() === 'STRONG' || card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-inbox-overlay') || card.closest('#misali-bgm-bar')) return; 
             let fullCardText = (card.innerText || card.textContent || "").trim();
             if (fullCardText.length < 2) return;
             let cardSlug = makeSlug(fullCardText); let onclickSlug = makeSlug(card.getAttribute('onclick') || ""); let targetKey = null;
@@ -23961,10 +23959,116 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 6. NEU: HINTERGRUNDMUSIK (BGM SYSTEM MIT MINIMIZER)
+    // 🚀 6. SCHWEBENDER MINI PLAYER (Gedichte) - RESTORED!
     // ==========================================================
+    let oldFloat = document.getElementById('misali-floating-player'); if(oldFloat) oldFloat.remove();
+    let floatPlayer = document.createElement('div'); floatPlayer.id = 'misali-floating-player';
     
-    // 🚀 DER SCHWEBENDE ADMIN BUTTON (BGM Ayarları)
+    floatPlayer.innerHTML = `
+        <div class="floating-player-content">
+            <i class="fas fa-compact-disc fa-spin" style="color:#f4c542; font-size: 1.5rem;"></i>
+            <div class="floating-player-info">
+                <span class="floating-player-title" id="fp-title" title="Eseri Aç" style="cursor:pointer; text-decoration:underline;">Bilinmiyor</span>
+                <span class="floating-player-author" id="fp-author">Şair Misal.i</span>
+            </div>
+            <div class="floating-player-controls">
+                <button class="floating-btn" id="fp-play"><i class="fas fa-pause"></i></button>
+                <button class="floating-btn stop" id="fp-stop"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="floating-progress-track" id="fp-track">
+            <div class="floating-progress-bar" id="fp-bar"></div>
+        </div>
+    `;
+    document.body.appendChild(floatPlayer);
+
+    let activeGlobalAudio = null; let fpTitle = document.getElementById('fp-title'); let fpAuthor = document.getElementById('fp-author'); let fpPlayBtn = document.getElementById('fp-play'); let fpStopBtn = document.getElementById('fp-stop'); let fpProgressBar = document.getElementById('fp-bar'); let fpTrack = document.getElementById('fp-track');
+
+    fpTitle.onclick = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        let targetId = this.getAttribute('data-target-id') || ('track_' + makeSlug(this.innerText));
+        if (window.bruteForceOpen) window.bruteForceOpen(targetId);
+    };
+
+    setInterval(() => {
+        let allAudios = document.querySelectorAll('audio');
+        // IGNORIERT BGM AUDIO HIER!
+        let newlyPlaying = Array.from(allAudios).find(a => a.currentTime > 0 && !a.ended && !a.hasAttribute('data-bgm'));
+        if (newlyPlaying) activeGlobalAudio = newlyPlaying;
+
+        if (activeGlobalAudio && document.body.contains(activeGlobalAudio)) {
+            if (activeGlobalAudio.currentTime > 0) {
+                let modal = activeGlobalAudio.closest('.modal');
+                let isModalVisible = modal && (modal.classList.contains('active-modal') || window.getComputedStyle(modal).display === 'block');
+
+                if (!isModalVisible) {
+                    floatPlayer.classList.add('show');
+                    
+                    let exactId = activeGlobalAudio.getAttribute('data-passed-id') || (modal ? modal.id : '');
+                    if(!exactId) {
+                        let tempT = modal ? modal.querySelector('h1, h2, h3, .title, .modal-title, .card-title, header, .poem-name') : null;
+                        if(tempT) exactId = 'track_' + makeSlug(tempT.innerText.trim());
+                    }
+                    fpTitle.setAttribute('data-target-id', exactId);
+
+                    let titleNode = modal ? modal.querySelector('h1, h2, h3, .title, .modal-title, .card-title, header, .poem-name') : null;
+                    if (titleNode) { fpTitle.innerText = titleNode.innerText.trim(); }
+
+                    let outerBox = activeGlobalAudio.closest('.misali-audio-outer-container');
+                    if (outerBox) { let sig = outerBox.querySelector('.misali-audio-signature'); if (sig) fpAuthor.innerHTML = sig.innerHTML.split('<br>')[0] || "Şair Misal.i"; }
+                    
+                    fpPlayBtn.innerHTML = activeGlobalAudio.paused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+                    let discIcon = floatPlayer.querySelector('.fa-compact-disc');
+                    if (activeGlobalAudio.paused) discIcon.classList.remove('fa-spin'); else discIcon.classList.add('fa-spin');
+                } else { floatPlayer.classList.remove('show'); }
+            } else { floatPlayer.classList.remove('show'); }
+        } else { floatPlayer.classList.remove('show'); activeGlobalAudio = null; }
+    }, 500);
+
+    requestAnimationFrame(function updateLoop() {
+        if (activeGlobalAudio && floatPlayer.classList.contains('show')) { 
+            let dur = activeGlobalAudio.duration;
+            if (dur && dur !== Infinity && !isNaN(dur) && dur > 0) {
+                let pct = (activeGlobalAudio.currentTime / dur) * 100; 
+                if (pct > 100) pct = 100;
+                fpProgressBar.style.setProperty('width', pct + '%', 'important');
+            }
+        }
+        requestAnimationFrame(updateLoop);
+    });
+
+    fpTrack.onclick = function(e) {
+        e.stopPropagation();
+        if (activeGlobalAudio && activeGlobalAudio.duration && !isNaN(activeGlobalAudio.duration)) {
+            let rect = fpTrack.getBoundingClientRect();
+            activeGlobalAudio.currentTime = ((e.clientX - rect.left) / rect.width) * activeGlobalAudio.duration;
+        }
+    };
+
+    fpPlayBtn.onclick = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        if (activeGlobalAudio) {
+            if (activeGlobalAudio.paused) activeGlobalAudio.play(); else activeGlobalAudio.pause();
+            fpPlayBtn.innerHTML = activeGlobalAudio.paused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+            let wrapper = activeGlobalAudio.closest('.misali-audio-wrapper');
+            if (wrapper) { let mainBtn = wrapper.querySelector('.play-btn'); if (mainBtn) mainBtn.innerHTML = activeGlobalAudio.paused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>'; }
+        }
+    };
+    
+    fpStopBtn.onclick = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        if (activeGlobalAudio) {
+            try { activeGlobalAudio.pause(); activeGlobalAudio.currentTime = 0; }catch(err){}
+            let wrapper = activeGlobalAudio.closest('.misali-audio-wrapper');
+            if (wrapper) { let mainBtn = wrapper.querySelector('.play-btn'); let mainBar = wrapper.querySelector('.audio-progress-bar'); if (mainBtn) mainBtn.innerHTML = '<i class="fas fa-play"></i>'; if (mainBar) mainBar.style.setProperty('width', '0%', 'important'); }
+            activeGlobalAudio = null;
+        }
+        floatPlayer.classList.remove('show');
+    };
+
+    // ==========================================================
+    // 🚀 7. BGM (Hintergrundmusik) SYSTEM
+    // ==========================================================
     if (isAdminGlobal && !document.getElementById('misali-global-bgm-admin-btn')) {
         let globalAdminBtn = document.createElement('div');
         globalAdminBtn.id = 'misali-global-bgm-admin-btn';
@@ -24067,7 +24171,6 @@ button:has(.fa-bell):hover {
         };
     }
 
-    // 🚀 BGM PLAYER FÜR DIE USER (Mit Minimizer-Tab)
     let bgmBar = document.getElementById('misali-bgm-bar'); if(bgmBar) bgmBar.remove();
     bgmBar = document.createElement('div'); bgmBar.id = 'misali-bgm-bar';
     bgmBar.innerHTML = `
@@ -24095,7 +24198,6 @@ button:has(.fa-bell):hover {
     let bgmDisc = document.getElementById('bgm-disc');
     let bgmVolSlider = document.getElementById('bgm-vol-slider');
     
-    // 🚀 MINIMIZER LOGIK (Zusammenklappen!)
     document.getElementById('bgm-minimizer').onclick = function(e) {
         e.stopPropagation();
         let bar = document.getElementById('misali-bgm-bar');
@@ -24149,9 +24251,7 @@ button:has(.fa-bell):hover {
 
             if (bgmTracks.length > 0) {
                 bgmBar.classList.add('show');
-                // Nur Body-Klasse setzen, wenn der Player NICHT eingeklappt ist
                 if(!bgmBar.classList.contains('collapsed')) document.body.classList.add('bgm-active');
-                
                 if(!bgmAudio.src || bgmAudio.src === '') loadBGMTrack(0);
             } else {
                 bgmBar.classList.remove('show');
