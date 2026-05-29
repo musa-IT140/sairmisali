@@ -23315,36 +23315,41 @@ button:has(.fa-bell):hover {
     .admin-audio-management i:hover.delete { color: #ef4444 !important; }
 
     /* ========================================================== */
-    /* AUDIO BADGE (Das kleine Symbol auf den Karten)             */
+    /* AUDIO BADGE (Links unten, eckig, auffällig)                */
     /* ========================================================== */
     .misali-audio-badge {
         position: absolute !important;
-        top: 10px !important;
-        right: 10px !important;
-        background: linear-gradient(135deg, #f4c542, #ff9f00) !important;
-        color: #020617 !important;
-        border-radius: 50% !important;
-        width: 26px !important;
-        height: 26px !important;
+        bottom: 12px !important;
+        left: 12px !important;
+        background: linear-gradient(135deg, #f4c542, #d49f00) !important;
+        color: #050505 !important;
+        border-radius: 4px !important; /* Eckiges, modernes Design */
+        padding: 4px 8px !important;
         display: flex !important;
-        justify-content: center !important;
         align-items: center !important;
-        font-size: 0.75rem !important;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.6) !important;
+        gap: 5px !important;
+        font-size: 0.65rem !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.5px !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
         z-index: 20 !important;
-        pointer-events: none !important; /* Blockiert keine Klicks auf die Karte */
+        pointer-events: none !important; 
         animation: badgePulse 2s infinite;
+        border: 1px solid rgba(255,255,255,0.3) !important;
     }
     
     @keyframes badgePulse {
         0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 197, 66, 0.7); }
-        70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(244, 197, 66, 0); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(244, 197, 66, 0); }
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 197, 66, 0); }
     }
+    
 </style>
 
 <script id="misali-audio-js-safe">
 (function() {
+    // 🚀 MEGA-DB
     const audioDB = {
         name: 'MisaliMegaAudioDB', store: 'audioFiles',
         init() {
@@ -23390,6 +23395,7 @@ button:has(.fa-bell):hover {
     function runAudioEngineForCard(passedId, modalElement) {
         if (!modalElement) return;
 
+        // Eindeutige ID generieren (Slug aus Titel ODER Original-ID)
         function generateUniqueCardId() {
             let titleEl = modalElement.querySelector('h1, h2, h3, .title, .modal-title, .card-title, header');
             if (titleEl && titleEl.innerText.trim().length > 1) {
@@ -23469,7 +23475,6 @@ button:has(.fa-bell):hover {
                     </div>
                 ` : '';
 
-                // 🚀 FIX: preload="auto" und playsinline für Apple (iOS) hinzugefügt!
                 playerBox.innerHTML = `
                     <button class="audio-core-btn" id="btn-play-${cardId}"><i class="fas fa-play"></i></button>
                     <div class="audio-progress-container" id="track-${cardId}"><div class="audio-progress-bar" id="bar-${cardId}"></div></div>
@@ -23501,15 +23506,9 @@ button:has(.fa-bell):hover {
                             buildInterface(publishedPayload); 
                             initAudioBadges(); 
                             
-                            // 🚀 FIX: Firebase Warnsystem
                             if (typeof firebase !== 'undefined' && firebase.database) {
-                                firebase.database().ref('misaliAudioDB/' + cardId).set(publishedPayload)
-                                .then(() => {
-                                    firebase.database().ref('misaliAudioIndex/' + cardId).set(true);
-                                })
-                                .catch(err => {
-                                    alert("HATA: Firebase yüklemeyi reddetti! Sadece siz duyabilirsiniz. Lütfen Firebase kurallarını '.write: true' yapın.");
-                                });
+                                firebase.database().ref('misaliAudioDB/' + cardId).set(publishedPayload);
+                                firebase.database().ref('misaliAudioIndex/' + cardId).set(true);
                             }
                         });
                     };
@@ -23571,14 +23570,6 @@ button:has(.fa-bell):hover {
                             });
                         }
                     };
-                    
-                    let fileInputEl = playerBox.querySelector(`#input-file-${cardId}`);
-                    // Trigger für das Versteckte File-Input (Ersetzen)
-                    let replaceBtn = playerBox.querySelector(`#btn-replace-${cardId}`);
-                    if(replaceBtn) {
-                        replaceBtn.onclick = function(e) { e.stopPropagation(); e.preventDefault(); fileInputEl.click(); };
-                    }
-                    fileInputEl.onchange = function(e) { processAndUploadFile(e.target.files[0], outerBox, authorName, musicName); };
                 }
 
             } else if (isAdmin) {
@@ -23605,6 +23596,7 @@ button:has(.fa-bell):hover {
             }
         }
 
+        // UPLOAD 
         function processAndUploadFile(file, uiElement, authorData, musicData) {
             if (!file) return;
 
@@ -23626,14 +23618,8 @@ button:has(.fa-bell):hover {
                     initAudioBadges(); 
                     
                     if (typeof firebase !== 'undefined' && firebase.database) {
-                        firebase.database().ref('misaliAudioDB/' + cardId).set(draftPayload)
-                        .then(() => {
-                            firebase.database().ref('misaliAudioIndex/' + cardId).remove(); 
-                        })
-                        .catch(err => {
-                            // 🚀 WICHTIG: Warnt dich, wenn Firebase das Speichern verbietet!
-                            alert("HATA: Firebase taslağı reddetti! Lütfen kuralları '.write: true' yapın.");
-                        });
+                        firebase.database().ref('misaliAudioDB/' + cardId).set(draftPayload);
+                        firebase.database().ref('misaliAudioIndex/' + cardId).remove(); 
                     }
                 });
             };
@@ -23656,6 +23642,9 @@ button:has(.fa-bell):hover {
     const interceptFastModal = window.openFastModal;
     window.openFastModal = function(id) { if (interceptFastModal) interceptFastModal(id); attachAudioSafely(id); };
 
+    // ==========================================
+    // 🚀 DAS MASTER SYMBOL-SYSTEM (Doppelter Scanner)
+    // ==========================================
     let globalAudioKeys = [];
     
     async function initAudioBadges() {
@@ -23674,30 +23663,53 @@ button:has(.fa-bell):hover {
     }
 
     function applyBadges() {
+        // Alte Badges säubern
         document.querySelectorAll('.misali-audio-badge').forEach(el => el.remove());
-        let allCards = document.querySelectorAll('.card, .poem-card, [onclick*="openPoem"], [onclick*="openFastModal"]');
         
-        allCards.forEach(card => {
-            if (card.closest('.modal')) return; 
+        // Sucht JEDES Element, das klickbar ist (Karten, Listen, etc.)
+        let triggers = document.querySelectorAll('.card, .poem-card, [onclick*="openPoem"], [onclick*="openFastModal"]');
+        
+        triggers.forEach(card => {
+            if (card.closest('.modal')) return; // Niemals IM großen Fenster ein Symbol zeigen
             
-            let titleEl = card.querySelector('h1, h2, h3, .title, .card-title');
+            let matchFound = false;
+
+            // 1. Suche über den Titel (Slug)
+            let titleEl = card.querySelector('h1, h2, h3, h4, h5, .title, .card-title, strong, b');
             if (titleEl && titleEl.innerText.trim().length > 1) {
                 let text = titleEl.innerText.trim().toLowerCase();
                 let slug = text.replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
                                .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
                                .replace(/[^a-z0-9]/g, '');
-                let expectedId = "track_" + slug;
-                
-                if (globalAudioKeys.includes(expectedId)) {
-                    let comp = window.getComputedStyle(card);
-                    if (comp.position === 'static') card.style.position = 'relative';
-                    
-                    let badge = document.createElement('div');
-                    badge.className = 'misali-audio-badge';
-                    badge.innerHTML = '<i class="fas fa-headphones"></i>';
-                    badge.title = "Ses kaydı mevcut";
-                    card.appendChild(badge);
+                let expectedSlugId = "track_" + slug;
+                if (globalAudioKeys.includes(expectedSlugId)) matchFound = true;
+            }
+
+            // 2. Suche über die technische Klick-ID (Rettungsanker)
+            if (!matchFound) {
+                let onclickStr = card.getAttribute('onclick') || "";
+                let match = onclickStr.match(/(?:openPoemOrUserModal|openPoem|openFastModal)\s*\(\s*['"]?([^'"\)]+)['"]?\s*\)/);
+                if (match && match[1]) {
+                    let rawId = String(match[1]);
+                    if (globalAudioKeys.includes(rawId)) matchFound = true;
+                } else if (card.id && globalAudioKeys.includes(String(card.id))) {
+                    matchFound = true;
                 }
+            }
+
+            // Wenn es eine Übereinstimmung gibt -> Symbol links unten einsetzen!
+            if (matchFound) {
+                // Verhindert doppelte Symbole bei verschachtelten Karten
+                if (card.querySelector('.misali-audio-badge')) return; 
+
+                let comp = window.getComputedStyle(card);
+                if (comp.position === 'static') card.style.position = 'relative';
+                
+                let badge = document.createElement('div');
+                badge.className = 'misali-audio-badge';
+                badge.innerHTML = '<i class="fas fa-volume-up"></i> SES';
+                badge.title = "Ses kaydı mevcut";
+                card.appendChild(badge);
             }
         });
     }
@@ -23707,7 +23719,6 @@ button:has(.fa-bell):hover {
 
 })();
 </script>
-
 
 
 </body>
