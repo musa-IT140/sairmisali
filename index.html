@@ -23159,17 +23159,17 @@ button:has(.fa-bell):hover {
 
 <style id="misali-card-audio-css">
    /* ========================================================== */
-    /* ULTRA COMPACT PREMIUM AUDIO & SIGNATUR                     */
+    /* ULTRA COMPACT PREMIUM AUDIO & SIGNATUR (Zentriert)         */
     /* ========================================================== */
     .misali-audio-outer-container {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        /* Hält das Audio exakt in der Mitte fern von den X- und Aklımda-Symbolen */
-        width: 65% !important; 
-        max-width: 250px !important;
-        min-width: 180px !important;
-        margin: 15px auto 10px auto !important; 
+        /* 🚀 Hält das Audio exakt in der Mitte fern von den X-Symbolen */
+        margin: 45px auto 15px auto !important; 
+        width: 75% !important; 
+        max-width: 280px !important;
+        min-width: 200px !important;
     }
     
     .misali-audio-wrapper {
@@ -23229,7 +23229,7 @@ button:has(.fa-bell):hover {
         font-family: monospace !important;
     }
 
-    /* 🚀 DIE NEUE SIGNATUR (Druckschrift, winzig) */
+    /* Die Druckschrift-Signatur */
     .misali-audio-signature {
         margin-top: 6px !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; 
@@ -23260,19 +23260,24 @@ button:has(.fa-bell):hover {
     }
     .admin-publish-btn:hover { background: #10b981 !important; color: #fff !important; }
 
-    /* Admin-Upload Zone */
+    /* 🚀 Admin-Upload Zone (Jetzt zentriert unter den Buttons!) */
     .admin-upload-form {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         gap: 6px !important;
-        background: rgba(0, 0, 0, 0.2) !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
         border: 1px dashed rgba(244, 197, 66, 0.4) !important;
         border-radius: 15px !important;
-        padding: 8px 12px !important;
-        margin-top: 15px !important;
+        padding: 10px 15px !important;
+        
+        /* WICHTIG: 45px Abstand nach oben, zentriert */
+        margin: 45px auto 15px auto !important;
         width: 80% !important;
-        max-width: 250px !important;
+        max-width: 260px !important;
+        box-sizing: border-box !important;
     }
     .admin-input-row {
         display: flex !important;
@@ -23297,7 +23302,7 @@ button:has(.fa-bell):hover {
         color: #f4c542 !important;
         border: 1px solid rgba(244, 197, 66, 0.5) !important;
         border-radius: 10px !important;
-        padding: 3px 12px !important;
+        padding: 4px 14px !important;
         font-size: 0.65rem !important;
         cursor: pointer !important;
         margin-top: 4px !important;
@@ -23340,7 +23345,6 @@ button:has(.fa-bell):hover {
 
 <script id="misali-audio-js-safe">
 (function() {
-    // 🚀 MEGA-DB
     const audioDB = {
         name: 'MisaliMegaAudioDB', store: 'audioFiles',
         init() {
@@ -23465,12 +23469,13 @@ button:has(.fa-bell):hover {
                     </div>
                 ` : '';
 
+                // 🚀 FIX: preload="auto" und playsinline für Apple (iOS) hinzugefügt!
                 playerBox.innerHTML = `
                     <button class="audio-core-btn" id="btn-play-${cardId}"><i class="fas fa-play"></i></button>
                     <div class="audio-progress-container" id="track-${cardId}"><div class="audio-progress-bar" id="bar-${cardId}"></div></div>
                     <div class="audio-time-display" id="time-${cardId}">0:00</div>
                     ${adminControlsHtml}
-                    <audio id="core-audio-${cardId}" src="${audioSource}" preload="metadata"></audio>
+                    <audio id="core-audio-${cardId}" src="${audioSource}" preload="auto" playsinline></audio>
                 `;
 
                 outerBox.appendChild(playerBox);
@@ -23480,7 +23485,7 @@ button:has(.fa-bell):hover {
                 signatureBox.innerHTML = `Yazan: <span>${authorName}</span> &nbsp;|&nbsp; Müzik: <span>${musicName}</span>`;
                 outerBox.appendChild(signatureBox);
 
-                // 🚀 TURBO VERÖFFENTLICHEN BUTTON
+                // VERÖFFENTLICHEN BUTTON
                 if (isAdmin && !isPublished) {
                     let pubBtn = document.createElement('button');
                     pubBtn.className = 'admin-publish-btn';
@@ -23492,15 +23497,19 @@ button:has(.fa-bell):hover {
                         
                         let publishedPayload = { src: audioSource, published: true, author: authorName, music: musicName };
                         
-                        // 1. Sofort lokal speichern & UI blitzschnell updaten (Kein Warten!)
                         audioDB.save(cardId, publishedPayload).then(() => {
                             buildInterface(publishedPayload); 
                             initAudioBadges(); 
                             
-                            // 2. Im Hintergrund lautlos zu Firebase schicken
+                            // 🚀 FIX: Firebase Warnsystem
                             if (typeof firebase !== 'undefined' && firebase.database) {
-                                firebase.database().ref('misaliAudioDB/' + cardId).set(publishedPayload);
-                                firebase.database().ref('misaliAudioIndex/' + cardId).set(true);
+                                firebase.database().ref('misaliAudioDB/' + cardId).set(publishedPayload)
+                                .then(() => {
+                                    firebase.database().ref('misaliAudioIndex/' + cardId).set(true);
+                                })
+                                .catch(err => {
+                                    alert("HATA: Firebase yüklemeyi reddetti! Sadece siz duyabilirsiniz. Lütfen Firebase kurallarını '.write: true' yapın.");
+                                });
                             }
                         });
                     };
@@ -23562,6 +23571,14 @@ button:has(.fa-bell):hover {
                             });
                         }
                     };
+                    
+                    let fileInputEl = playerBox.querySelector(`#input-file-${cardId}`);
+                    // Trigger für das Versteckte File-Input (Ersetzen)
+                    let replaceBtn = playerBox.querySelector(`#btn-replace-${cardId}`);
+                    if(replaceBtn) {
+                        replaceBtn.onclick = function(e) { e.stopPropagation(); e.preventDefault(); fileInputEl.click(); };
+                    }
+                    fileInputEl.onchange = function(e) { processAndUploadFile(e.target.files[0], outerBox, authorName, musicName); };
                 }
 
             } else if (isAdmin) {
@@ -23588,7 +23605,6 @@ button:has(.fa-bell):hover {
             }
         }
 
-        // 🚀 TURBO UPLOAD ALS ENTWURF (Kein langes Laden mehr!)
         function processAndUploadFile(file, uiElement, authorData, musicData) {
             if (!file) return;
 
@@ -23605,15 +23621,19 @@ button:has(.fa-bell):hover {
                 let base64Data = event.target.result;
                 let draftPayload = { src: base64Data, published: false, author: authorData, music: musicData };
                 
-                // 1. Sofort lokal speichern & UI bauen
                 audioDB.save(cardId, draftPayload).then(() => {
                     buildInterface(draftPayload); 
                     initAudioBadges(); 
                     
-                    // 2. Im Hintergrund zu Firebase schicken (Nutzer merkt nichts davon)
                     if (typeof firebase !== 'undefined' && firebase.database) {
-                        firebase.database().ref('misaliAudioDB/' + cardId).set(draftPayload);
-                        firebase.database().ref('misaliAudioIndex/' + cardId).remove(); 
+                        firebase.database().ref('misaliAudioDB/' + cardId).set(draftPayload)
+                        .then(() => {
+                            firebase.database().ref('misaliAudioIndex/' + cardId).remove(); 
+                        })
+                        .catch(err => {
+                            // 🚀 WICHTIG: Warnt dich, wenn Firebase das Speichern verbietet!
+                            alert("HATA: Firebase taslağı reddetti! Lütfen kuralları '.write: true' yapın.");
+                        });
                     }
                 });
             };
@@ -23636,9 +23656,6 @@ button:has(.fa-bell):hover {
     const interceptFastModal = window.openFastModal;
     window.openFastModal = function(id) { if (interceptFastModal) interceptFastModal(id); attachAudioSafely(id); };
 
-    // ==========================================
-    // 🚀 SYMBOL-SYSTEM
-    // ==========================================
     let globalAudioKeys = [];
     
     async function initAudioBadges() {
