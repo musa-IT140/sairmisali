@@ -23328,6 +23328,7 @@ button:has(.fa-bell):hover {
     .audio-core-btn:hover { transform: scale(1.2) !important; color: #ffdf73 !important; }
     .audio-core-btn.stop-btn:hover { color: #ef4444 !important; }
     
+    /* 🚀 PREMIUM ZEITLEISTE (Die Variante, die endlich funktionierte!) */
     .audio-progress-container { flex-grow: 1 !important; height: 6px !important; background: #1e293b !important; border-radius: 6px !important; cursor: pointer !important; position: relative !important; margin: 0 12px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8) !important; overflow: visible !important; }
     .audio-progress-bar { height: 100% !important; background: linear-gradient(90deg, #d49f00, #f4c542) !important; width: 0%; border-radius: 6px !important; box-shadow: 0 0 10px rgba(244, 197, 66, 0.9) !important; position: relative !important; transition: width 0.1s linear !important; }
     .audio-progress-bar::after { content: '' !important; position: absolute !important; right: -6px !important; top: 50% !important; transform: translateY(-50%) !important; width: 12px !important; height: 12px !important; background: #fff !important; border-radius: 50% !important; box-shadow: 0 0 6px #fff, 0 0 10px #f4c542 !important; pointer-events: none !important; }
@@ -23363,6 +23364,7 @@ button:has(.fa-bell):hover {
     .inbox-badge { position: absolute !important; top: -6px !important; right: -6px !important; background: #00e5ff !important; color: #000 !important; font-size: 0.65rem !important; font-weight: 900 !important; font-family: monospace !important; width: 20px !important; height: 20px !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 50% !important; border: 2px solid #0f172a !important; opacity: 0 !important; transition: opacity 0.3s !important; box-shadow: 0 0 10px rgba(0, 229, 255, 0.8) !important; }
     .inbox-badge.show { opacity: 1 !important; }
 
+    /* OVALES FENSTER */
     #misali-inbox-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(0,0,0,0.7) !important; backdrop-filter: blur(5px) !important; z-index: 2147483647 !important; display: flex !important; align-items: center !important; justify-content: center !important; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s !important; }
     #misali-inbox-overlay.open { opacity: 1 !important; visibility: visible !important; }
     
@@ -23380,15 +23382,15 @@ button:has(.fa-bell):hover {
     .inbox-item.read { border-left-color: #475569 !important; opacity: 0.65 !important; }
     .inbox-item-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 6px !important; }
     .inbox-item-time { font-size: 0.65rem !important; color: #94a3b8 !important; font-family: monospace !important; }
-    
-    /* WICHTIG: Die pointer-events aktivieren, damit Klicks auf den Text reagieren! */
     .inbox-item-text { font-size: 0.85rem !important; color: #e2e8f0 !important; line-height: 1.5 !important; pointer-events: auto !important; }
 
-    /* 🚀 RÜCKWIRKENDE FARBEN (Fängt alle alten b, strong, span tags ein) */
-    .inbox-item-text strong:first-of-type, .inbox-item-text b:first-of-type, .inbox-item-text span[class*="user"], .inbox-item-text span[style*="#00e5ff"] { color: #00e5ff !important; cursor: pointer !important; font-weight: bold !important; text-decoration: none !important; pointer-events: auto !important; }
-    .inbox-item-text strong:nth-of-type(2), .inbox-item-text b:nth-of-type(2), .inbox-item-text span[class*="poem"], .inbox-item-text span[style*="#f4c542"] { color: #f4c542 !important; cursor: pointer !important; font-weight: bold !important; text-decoration: none !important; pointer-events: auto !important; }
+    /* 🚀 RÜCKWIRKENDE FARBEN FÜR ALLE ALTEN UND NEUEN BENACHRICHTIGUNGEN */
+    .inbox-item-text b:first-of-type, .misali-like-toast b:first-of-type { color: #00e5ff !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; pointer-events: auto !important; }
+    .inbox-item-text b:first-of-type:hover, .misali-like-toast b:first-of-type:hover { text-shadow: 0 0 8px #00e5ff !important; text-decoration: underline !important; }
+
+    .inbox-item-text b:nth-of-type(2), .misali-like-toast b:nth-of-type(2) { color: #f4c542 !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; pointer-events: auto !important; }
+    .inbox-item-text b:nth-of-type(2):hover, .misali-like-toast b:nth-of-type(2):hover { text-shadow: 0 0 8px #f4c542 !important; text-decoration: underline !important; }
     
-    .inbox-item-text strong:hover, .inbox-item-text b:hover, .inbox-item-text span:hover { text-decoration: underline !important; }
     .inbox-content .misali-audio-badge { display: none !important; }
 
     /* ========================================================== */
@@ -23436,8 +23438,8 @@ button:has(.fa-bell):hover {
 (function() {
     "use strict";
 
-    if (window.misaliEngineFinalDone) return;
-    window.misaliEngineFinalDone = true;
+    if (window.misaliEngineFinalCombinedV2) return;
+    window.misaliEngineFinalCombinedV2 = true;
 
     // ==========================================================
     // 🚀 1. SICHERS LÖSCH-FENSTER
@@ -23471,7 +23473,7 @@ button:has(.fa-bell):hover {
     };
 
     // ==========================================================
-    // 🚀 2. INBOX-SENDER (Sichere Data-Slugs für Klicks)
+    // 🚀 2. INBOX-SENDER (Die unzerstörbare Original-Version)
     // ==========================================================
     function makeSlug(text) {
         if (!text) return "";
@@ -23498,13 +23500,9 @@ button:has(.fa-bell):hover {
             let icon = contentType === 'audio' ? '🎵' : (contentType === 'comment' ? '💬' : '❤️');
             let actionText = contentType === 'audio' ? 'adlı müziği beğendi!' : 'adlı eseri beğendi!';
             
-            let safeLiker = likerName.replace(/["']/g, '');
-            let safeContent = contentName.replace(/["']/g, '');
-            let likerSlug = makeSlug(safeLiker);
-            let contentSlug = makeSlug(safeContent);
-
-            // 🚀 PERFEKTES HTML: Die Namen bekommen "data-slug", was der Browser niemals blockiert!
-            let notifText = `${icon} <b data-slug="${likerSlug}" style="color:#00e5ff; cursor:pointer; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${likerName}</b>, <b data-slug="track_${contentSlug}" style="color:#f4c542; cursor:pointer; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${contentName}</b> ${actionText}`;
+            // 🚀 WIR SPEICHERN WIEDER DEIN REINES ORIGINAL-HTML: <b>Name</b>
+            // Das CSS kümmert sich vollautomatisch um Farben und das JS um die Klicks! So werden alle alten DB Einträge repariert.
+            let notifText = `${icon} <b>${likerName}</b>, <b>${contentName}</b> ${actionText}`;
 
             let payload = { type: contentType, time: Date.now(), displayTime: `${dateStr} - ${timeStr}`, text: notifText, isRead: false };
             firebase.database().ref('misaliGlobalNotifs').push().set(payload);
@@ -23527,7 +23525,7 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 3. AUDIO ENGINE (Mit Fortschrittsleiste)
+    // 🚀 3. AUDIO ENGINE & LEISTEN FIX
     // ==========================================================
     const audioDB = {
         name: 'MisaliMegaAudioDB', store: 'audioFiles',
@@ -23624,6 +23622,7 @@ button:has(.fa-bell):hover {
                         return mins + ":" + (secs < 10 ? "0" : "") + secs;
                     }
 
+                    // 🚀 LEISTE BEWEGT SICH & CSS WIRD ZWANGSÜBERSCHRIEBEN (Der Fix, der funktioniert hat!)
                     audio.addEventListener('timeupdate', function() {
                         try {
                             let dur = audio.duration;
@@ -23775,8 +23774,8 @@ button:has(.fa-bell):hover {
 
     function attachAudioSafely(id) { let retries = 0; let finder = setInterval(() => { let modal = document.querySelector('.modal.active-modal') || document.getElementById(id); if (modal) { clearInterval(finder); runAudioEngineForCard(id, modal); } if (++retries > 10) clearInterval(finder); }, 100); }
     
-    if (!window.misaliModalsInterceptedFinal) {
-        window.misaliModalsInterceptedFinal = true;
+    if (!window.misaliModalsInterceptedVFinal) {
+        window.misaliModalsInterceptedVFinal = true;
         const interceptPoemModal = window.openPoemOrUserModal;
         window.openPoemOrUserModal = function(id) { if (interceptPoemModal) interceptPoemModal(id); attachAudioSafely(id); };
         const interceptFastModal = window.openFastModal;
@@ -23814,7 +23813,7 @@ button:has(.fa-bell):hover {
     initAudioBadges(); setInterval(applyBadges, 3000); 
 
     // ==========================================================
-    // 🚀 5. INBOX SYSTEM (DER UNZERSTÖRBARE KLICK-FIX!)
+    // 🚀 5. INBOX SYSTEM (DER 100% GARANTIERTE KLICK-FIX!)
     // ==========================================================
     let oldTrigger = document.getElementById('misali-inbox-trigger'); if(oldTrigger) oldTrigger.remove();
     let oldPanel = document.getElementById('misali-inbox-overlay'); if(oldPanel) oldPanel.remove();
@@ -23877,40 +23876,29 @@ button:has(.fa-bell):hover {
                 let delBtnHtml = isAdminLive ? `<i class="fas fa-trash-alt delete-notif-btn" title="Sil" style="color:#ef4444; cursor:pointer; font-size:0.8rem; padding:4px;"></i>` : '';
 
                 let safeText = item.text || item.message || "Yeni bir bildiriminiz var.";
-                if (safeText.includes('{"')) { safeText = `🎵 <b data-slug="sairmisali" style="color:#00e5ff; cursor:pointer;">Şair Misal.i</b> bir eseri beğendi!`; }
+                if (safeText.includes('{"')) { safeText = `🎵 <b>Şair Misal.i</b>, <b>Bilinmeyen Eser</b> adlı müziği beğendi!`; }
 
                 div.innerHTML = `<div class="inbox-item-header"><span class="inbox-item-time">${item.displayTime || "Bilinmeyen Tarih"}</span>${delBtnHtml}</div><div class="inbox-item-text">${safeText}</div>`;
                 
-                // 🚀 DER WACHHUND: Fängt jeden Klick auf "<b>" (die Namen) ab, liest die Daten und öffnet das Fenster.
-                // Und vor allem: ER SCHLIESST DIE INBOX, damit du das Fenster sehen kannst!
+                // 🚀 DIE ZENTRALE LOGIK DIE ALT UND NEU REPARIERT! (Event Delegation auf die B-Tags)
                 div.onclick = function(e) {
                     let bTag = e.target.closest('b');
                     
                     if (bTag) {
                         e.stopPropagation();
+                        // Erkennt an der Position, ob User (Cyan) oder Gedicht (Gold) geklickt wurde!
+                        let allBs = Array.from(div.querySelectorAll('b'));
+                        let isPoem = (allBs.indexOf(bTag) === 1); 
                         
-                        // 1. Slug sichern (für neue Benachrichtigungen mit data-slug)
-                        let slug = bTag.getAttribute('data-slug');
+                        let slugText = makeSlug(bTag.innerText.trim());
+                        let finalSlug = isPoem ? 'track_' + slugText : slugText;
                         
-                        // 2. Fallback: Falls es alte Benachrichtigungen sind, generieren wir den Slug!
-                        if (!slug) {
-                            let allBs = Array.from(div.querySelectorAll('b'));
-                            let isPoem = (allBs.indexOf(bTag) === 1); 
-                            let slugText = makeSlug(bTag.innerText.trim());
-                            slug = isPoem ? 'track_' + slugText : slugText;
-                        }
+                        if (typeof openPoemOrUserModal !== 'undefined') { openPoemOrUserModal(finalSlug); }
+                        else if (window.openPoemOrUserModal) { window.openPoemOrUserModal(finalSlug); }
                         
-                        // 3. FENSTER ÖFFNEN!
-                        if (typeof openPoemOrUserModal !== 'undefined') { 
-                            openPoemOrUserModal(slug); 
-                        } else if (window.openPoemOrUserModal) { 
-                            window.openPoemOrUserModal(slug); 
-                        }
-                        
-                        // 4. INBOX SOFORT VERSTECKEN, DAMIT DAS FENSTER SICHTBAR WIRD!
+                        // Das Modale Fenster schließt sich direkt, damit du das Resultat siehst!
                         let ov = document.getElementById('misali-inbox-overlay');
                         if(ov) ov.classList.remove('open');
-                        
                         return;
                     }
 
@@ -23940,16 +23928,17 @@ button:has(.fa-bell):hover {
     }
 
     // ==========================================================
-    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (KLICKBARER TITEL)
+    // 🚀 6. SCHWEBENDER PREMIUM PLAYER (DIREKTER KLICK AUF TITEL)
     // ==========================================================
     let oldFloat = document.getElementById('misali-floating-player'); if(oldFloat) oldFloat.remove();
     let floatPlayer = document.createElement('div'); floatPlayer.id = 'misali-floating-player';
     
+    // 🚀 INLINE-KLICK FÜR DEN TITEL DIREKT INS HTML GESCHRIEBEN!
     floatPlayer.innerHTML = `
         <div class="floating-player-content">
             <i class="fas fa-compact-disc fa-spin" style="color:#f4c542; font-size: 1.5rem;"></i>
             <div class="floating-player-info">
-                <span class="floating-player-title" id="fp-title" title="Eseri Aç" style="cursor:pointer;">Bilinmiyor</span>
+                <span class="floating-player-title" id="fp-title" title="Eseri Aç" onclick="event.stopPropagation(); let tid = this.getAttribute('data-target-id'); let finalId = tid || ('track_' + makeSlug(this.innerText)); if(typeof openPoemOrUserModal !== 'undefined'){ openPoemOrUserModal(finalId); } else if(window.openPoemOrUserModal){ window.openPoemOrUserModal(finalId); }">Bilinmiyor</span>
                 <span class="floating-player-author" id="fp-author">Şair Misal.i</span>
             </div>
             <div class="floating-player-controls">
@@ -23964,20 +23953,6 @@ button:has(.fa-bell):hover {
     document.body.appendChild(floatPlayer);
 
     let activeGlobalAudio = null; let fpTitle = document.getElementById('fp-title'); let fpAuthor = document.getElementById('fp-author'); let fpPlayBtn = document.getElementById('fp-play'); let fpStopBtn = document.getElementById('fp-stop'); let fpProgressBar = document.getElementById('fp-bar'); let fpTrack = document.getElementById('fp-track');
-
-    // 🚀 FENSTER ÖFFNEN VOM PLAYER AUS
-    fpTitle.onclick = function(e) {
-        e.preventDefault(); e.stopPropagation();
-        let exactId = this.getAttribute('data-target-id');
-        let fallbackSlug = 'track_' + makeSlug(this.innerText);
-        let finalId = exactId ? exactId : fallbackSlug;
-        
-        if (typeof openPoemOrUserModal !== 'undefined') {
-            openPoemOrUserModal(finalId);
-        } else if (window.openPoemOrUserModal) {
-            window.openPoemOrUserModal(finalId);
-        }
-    };
 
     setInterval(() => {
         let allAudios = document.querySelectorAll('audio');
@@ -24013,6 +23988,7 @@ button:has(.fa-bell):hover {
         } else { floatPlayer.classList.remove('show'); activeGlobalAudio = null; }
     }, 500);
 
+    // 🚀 SCHWEBENDE LEISTE CSS-BUSTER FIX!
     requestAnimationFrame(function updateLoop() {
         if (activeGlobalAudio && floatPlayer.classList.contains('show')) { 
             let dur = activeGlobalAudio.duration;
