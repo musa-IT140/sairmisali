@@ -23994,16 +23994,17 @@ button:has(.fa-bell):hover {
         } else { globalAudioKeys = localKeys; applyBadges(); }
     }
     
+    // 🚀 FIX SNIPPET: Unzerstörbare Badge-Logik
     function applyBadges() {
         document.querySelectorAll('.misali-audio-badge').forEach(el => el.remove());
-        document.querySelectorAll('[onclick*="openPoem"], [onclick*="openFastModal"], .card, .poem-card, .masonry-item').forEach(card => {
+        document.querySelectorAll('.card, .poem-card, .masonry-item, [onclick*="openPoem"], [onclick*="openFastModal"]').forEach(card => {
+            // Ignoriere Modals und Player selbst
             if (card.closest('.modal') || card.closest('.misali-audio-wrapper') || card.closest('#misali-inbox-overlay') || card.closest('.misali-float-widget')) return; 
             
-            let fullCardText = (card.textContent || card.innerText || "").trim();
-            if (fullCardText.length < 2) {
-                let titleEl = card.querySelector('h1, h2, h3, h4, .title, .poem-title, .card-title');
-                if (titleEl) fullCardText = titleEl.innerText;
-            }
+            // Smartere Titelsuche (greift Überschriften und fette Texte)
+            let titleEl = card.querySelector('h1, h2, h3, h4, .title, .poem-title, .card-title, strong, b');
+            let fullCardText = titleEl ? titleEl.innerText.trim() : (card.textContent || card.innerText || "").trim();
+            
             if (!fullCardText || fullCardText.length < 2) return;
             let cardSlug = makeSlug(fullCardText); 
             let onclickSlug = makeSlug(card.getAttribute('onclick') || ""); 
@@ -24011,14 +24012,18 @@ button:has(.fa-bell):hover {
             
             for (let key of globalAudioKeys) { 
                 let pureName = key.replace('track_', ''); 
-                if (pureName.length > 3) { 
-                    if (cardSlug.includes(pureName) || onclickSlug.includes(pureName)) { targetKey = key; break; } 
+                // Flexible Such-Logik: Erkennt auch Teilnamen
+                if (pureName.length > 1 && (cardSlug.includes(pureName) || onclickSlug.includes(pureName) || pureName.includes(cardSlug))) { 
+                    targetKey = key; break; 
                 } 
             }
             if (targetKey) {
                 if (card.querySelector('.misali-audio-badge')) return; 
-                let comp = window.getComputedStyle(card); if (comp.position === 'static') card.style.position = 'relative';
-                let badge = document.createElement('div'); badge.className = 'misali-audio-badge';
+                let comp = window.getComputedStyle(card); 
+                if (comp.position === 'static') card.style.position = 'relative';
+                
+                let badge = document.createElement('div'); 
+                badge.className = 'misali-audio-badge';
                 badge.innerHTML = `<i class="fas fa-volume-up"></i><div class="badge-likes-wrap"><i class="fas fa-music"></i> <span class="badge-like-num">${globalAudioLikes[targetKey] || 0}</span></div>`;
                 card.appendChild(badge);
             }
@@ -24570,6 +24575,122 @@ button:has(.fa-bell):hover {
         });
     }
     setInterval(adjustElements, 400); setTimeout(adjustElements, 100);
+})();
+</script>
+
+<!-- 🚀 NEW SNIPPET: Misali App Installer & Native Push Notifications -->
+<style id="misali-pwa-css">
+    .misali-app-promo { position: fixed; bottom: -120px; left: 50%; transform: translateX(-50%); background: rgba(5, 8, 15, 0.98); backdrop-filter: blur(25px); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 20px; padding: 16px 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); z-index: 2147483647; display: flex; align-items: center; gap: 16px; width: 90%; max-width: 400px; transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .misali-app-promo.show { bottom: 25px; }
+    .promo-icon { font-size: 2.5rem; color: #00e5ff; animation: pulseGlow 2s infinite; text-shadow: 0 0 10px rgba(0,229,255,0.6); }
+    .promo-text { flex-grow: 1; }
+    .promo-text h4 { color: #fff; margin: 0 0 4px 0; font-size: 1rem; font-family: 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
+    .promo-text p { color: #cbd5e1; margin: 0; font-size: 0.75rem; line-height: 1.4; }
+    .promo-btns { display: flex; flex-direction: column; gap: 8px; }
+    .btn-install { background: linear-gradient(135deg, #0088cc, #00e5ff); border: none; padding: 8px 14px; border-radius: 10px; color: #000; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(0,229,255,0.3); transition: transform 0.2s; }
+    .btn-install:active { transform: scale(0.95); }
+    .btn-dismiss { background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 8px; color: #94a3b8; font-size: 0.7rem; cursor: pointer; transition: color 0.2s; }
+    .btn-dismiss:hover { color: #fff; border-color: #fff; }
+</style>
+
+<script id="misali-pwa-js">
+(function() {
+    "use strict";
+
+    // 1. NATIVE OS NOTIFICATIONS (Für Herzen, Rosen, Uploads)
+    function triggerNativeNotification(title, body) {
+        if (!("Notification" in window)) return;
+        if (Notification.permission === "granted") {
+            // Sende die echte Handy/Windows Benachrichtigung
+            new Notification(title, { 
+                body: body, 
+                icon: "https://cdn-icons-png.flaticon.com/512/3233/3233024.png" // App-Icon für die Benachrichtigung
+            });
+        }
+    }
+
+    // Fange den Firebase Notif-Stream ab, um Native Pushs zu senden
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        let isFirstLoad = true;
+        firebase.database().ref('misaliGlobalNotifs').orderByChild('time').limitToLast(1).on('child_added', snap => {
+            if (isFirstLoad) { isFirstLoad = false; return; }
+            let data = snap.val();
+            if (data && data.text) {
+                // Wandelt den HTML-Text (die Herzen/Rosen) in sauberen Text für das Handy um
+                let plainText = data.text.replace(/<[^>]*>?/gm, ''); 
+                triggerNativeNotification("Misal.i", plainText);
+            }
+        });
+    }
+
+    // 2. PWA INSTALL PROMPT (APP auf Startbildschirm speichern)
+    let deferredPrompt;
+    let installPromo = document.createElement('div');
+    installPromo.className = 'misali-app-promo';
+    installPromo.innerHTML = `
+        <i class="fas fa-mobile-alt promo-icon"></i>
+        <div class="promo-text">
+            <h4>Uygulamayı İndir</h4>
+            <p>Ana ekrana ekle, anında bildirimleri aç ve tam ekran deneyimi yaşa!</p>
+        </div>
+        <div class="promo-btns">
+            <button class="btn-install" id="pwa-install-btn">Yükle</button>
+            <button class="btn-dismiss" id="pwa-dismiss-btn">Sonra</button>
+        </div>
+    `;
+    document.body.appendChild(installPromo);
+
+    // Der Browser signalisiert, ob die Seite installierbar ist
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Zeige Banner nur, wenn der User nicht auf "Sonra" geklickt hat
+        if (!localStorage.getItem('misaliPwaDismissed')) {
+            setTimeout(() => installPromo.classList.add('show'), 3000);
+        }
+    });
+
+    document.getElementById('pwa-install-btn').onclick = async () => {
+        // Frag parallel nach Benachrichtigungs-Rechten für das Handy!
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    triggerNativeNotification("Harika!", "Bildirimler başarıyla açıldı.");
+                }
+            });
+        }
+        
+        // Führe die App-Installation aus
+        if (deferredPrompt) {
+            installPromo.classList.remove('show');
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') { console.log('Misal.i App installiert'); }
+            deferredPrompt = null;
+        } else {
+            // Spezieller Fallback für iPhones (iOS Safari blockiert die Automatik, muss manuell gemacht werden)
+            alert("iPhone'da uygulamayı yüklemek için alttaki 'Paylaş' (Kare ve Ok) ikonuna tıklayıp 'Ana Ekrana Ekle'yi seçin.");
+            installPromo.classList.remove('show');
+        }
+    };
+
+    document.getElementById('pwa-dismiss-btn').onclick = () => {
+        installPromo.classList.remove('show');
+        localStorage.setItem('misaliPwaDismissed', 'true');
+    };
+
+    // Klickt man auf das Glocken-Symbol der Inbox, frage zur Sicherheit auch nach Push-Rechten
+    setTimeout(() => {
+        let notifTrigger = document.getElementById('bgm-inbox-trigger');
+        if(notifTrigger) {
+            notifTrigger.addEventListener('click', () => {
+                if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    Notification.requestPermission();
+                }
+            });
+        }
+    }, 1500);
+
 })();
 </script>
 
