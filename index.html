@@ -4377,31 +4377,52 @@ Blühe, deutsches Vaterland!</p>
 
     // 🚀 FIREBASE UPLOAD
 window.syncToCloud = async function() {
-        if (window.isUploading || !navigator.onLine) return; 
-        window.isUploading = true;
-        window.lastLocalUpdate = Date.now(); 
-        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
+    if (window.isUploading || !navigator.onLine) return; 
+    window.isUploading = true;
+    window.lastLocalUpdate = Date.now(); 
+    localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
+    
+    try { 
+        const updates = {};
+        updates['timestamp'] = window.lastLocalUpdate;
         
-        try { 
-            const updates = {};
-            updates['timestamp'] = window.lastLocalUpdate;
-            if(window.userDatabase) updates['users'] = window.userDatabase;
-            if(window.userPoemsDB) updates['userPoems'] = window.userPoemsDB;
-            
-            // LÖSUNG: Wenn ein Array leer gelöscht wurde, MUSS es als "null" an Firebase 
-            // gesendet werden, damit die Löschung auch bei anderen Usern ankommt!
-            updates['chat_v0'] = (window.chatDB && window.chatDB.length > 0) ? window.chatDB : null;
-            updates['adminMsgs'] = (window.adminMessages && window.adminMessages.length > 0) ? window.adminMessages : null;
-            
-            if(window.adminLogs) updates['logs'] = window.adminLogs;
-            if(window.poemDataStore) updates['heartsDB'] = window.poemDataStore;
-            if(window.calNotesDB) updates['calNotes'] = window.calNotesDB;
-            if(window.savedItemsDB) updates['savedItems'] = window.savedItemsDB;
-            
-            await database.ref('misaliData').update(updates);
-        } catch(e) { console.error("Sync Error", e); } 
-        finally { setTimeout(() => { window.isUploading = false; }, 300); }
-    };
+        if(window.userDatabase) updates['users'] = window.userDatabase;
+        if(window.userPoemsDB) updates['userPoems'] = window.userPoemsDB;
+        
+        // 🚀 DER FIX: Jetzt werden Admin-Inhalte (Gedichte, Sprüche, etc.) endlich in die Cloud geladen!
+        if(window.contentDB) updates['contentDB'] = window.contentDB;
+        
+        // LÖSUNG: Wenn ein Array leer gelöscht wurde, MUSS es als "null" an Firebase 
+        // gesendet werden, damit die Löschung auch bei anderen Usern ankommt!
+        updates['chat_v0'] = (window.chatDB && window.chatDB.length > 0) ? window.chatDB : null;
+        updates['adminMsgs'] = (window.adminMessages && window.adminMessages.length > 0) ? window.adminMessages : null;
+        
+        if(window.adminLogs) updates['logs'] = window.adminLogs;
+        if(window.poemDataStore) updates['heartsDB'] = window.poemDataStore;
+        if(window.calNotesDB) updates['calNotes'] = window.calNotesDB;
+        if(window.savedItemsDB) updates['savedItems'] = window.savedItemsDB;
+        
+        await database.ref('misaliData').update(updates);
+    } catch(e) { 
+        console.error("Sync Error", e); 
+    } finally { 
+        setTimeout(() => { window.isUploading = false; }, 300); 
+    }
+};
+
+// 🚀 NATIVE PUSH ENGINE FÜR DESKTOP & MOBILE
+window.triggerNativeNotification = function(title, body) {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+        // HTML-Tags aus dem Body entfernen, damit der Push sauber aussieht
+        let cleanBody = body ? body.replace(/<[^>]*>?/gm, '') : '';
+        new Notification(title, { 
+            body: cleanBody, 
+            icon: "https://cdn-icons-png.flaticon.com/512/3233/3233024.png",
+            vibrate: [200, 100, 200]
+        });
+    }
+};
 
 // ==================================================================
 // ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
@@ -4443,20 +4464,52 @@ window.processCloudData = function(r, force = false) {
             if(window.updateTopWorksTicker) window.updateTopWorksTicker();
         }
         
-        // LÖSUNG GHOST-CHATS: Wenn r.chat_v0 fehlt, bedeutet das, alle wurden gelöscht!
+        // --- 1. CHAT MESSAGES & NATIVE PUSH ---
+        let oldChatLength = window.chatDB ? window.chatDB.length : 0;
         window.chatDB = r.chat_v0 ? (Array.isArray(r.chat_v0) ? r.chat_v0 : Object.values(r.chat_v0)) : [];
         localStorage.setItem('misaliChatDB_V0', JSON.stringify(window.chatDB)); 
+        
         if(document.getElementById('sohbet-view') && document.getElementById('sohbet-view').classList.contains('active-view')) {
             if(window.renderChat) window.renderChat(); 
         }
         if(window.updateChatBadge) window.updateChatBadge();
+
+        // 🚀 Prüfen, ob NEUE Chat-Nachrichten FÜR DICH reinkamen
+        if (window.chatDB.length > oldChatLength && window.currentUser) {
+            let newChats = window.chatDB.slice(oldChatLength);
+            newChats.forEach(c => {
+                if (c.toUser === window.currentUser.username && c.username !== window.currentUser.username) {
+                    window.triggerNativeNotification("Yeni Chat Mesajı: " + c.name, c.text);
+                }
+            });
+        }
         
-        // Das Gleiche für den Posteingang (Glocke)
+        // --- 2. INBOX / SYSTEM MESSAGES & NATIVE PUSH ---
+        let oldAdminMsgsLength = window.adminMessages ? window.adminMessages.length : 0;
         window.adminMessages = r.adminMsgs ? (Array.isArray(r.adminMsgs) ? r.adminMsgs : Object.values(r.adminMsgs)) : [];
         localStorage.setItem('misaliAdminMsgs', JSON.stringify(window.adminMessages)); 
+        
         if(window.updateNotifyBadge) window.updateNotifyBadge(); 
         if(document.getElementById('adminMessagesModal') && document.getElementById('adminMessagesModal').classList.contains('active-modal')) window.renderAdminMessages();
         if(document.getElementById('userMessagesModal') && document.getElementById('userMessagesModal').classList.contains('active-modal')) window.renderUserMessages();
+
+        // 🚀 Prüfen, ob NEUE System-Nachrichten FÜR DICH reinkamen
+        if (window.adminMessages.length > oldAdminMsgsLength && window.currentUser) {
+            let newMsgs = window.adminMessages.slice(oldAdminMsgsLength);
+            newMsgs.forEach(m => {
+                let isForMe = m.to === window.currentUser.username;
+                let isForAdmin = (m.to === 'admin' || m.to === 'AdminKing') && (window.currentUser.role === 'admin' || window.currentUser.role === 'co-admin');
+                
+                if ((isForMe || isForAdmin) && m.from !== window.currentUser.username) {
+                    // Verhindert mehrfaches Feuern der selben Nachricht
+                    if (window.lastNotifiedMsgTime !== m.time) {
+                        window.lastNotifiedMsgTime = m.time;
+                        let senderName = m.from === "Sistem" ? "Sistem Bildirimi" : m.from;
+                        window.triggerNativeNotification(senderName, m.msg);
+                    }
+                }
+            });
+        }
 
         // USER POEMS SYNC FIX
         if(r.userPoems) { 
