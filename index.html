@@ -25257,5 +25257,310 @@ button:has(.fa-bell):hover {
     }
 </style>
 
+<style id="misali-theme-master-css">
+    /* 1. Admin Theme Selector UI (Im Footer) */
+    #admin-theme-master-panel {
+        display: none; /* Standardmäßig aus, wird per JS für Admin aktiviert */
+        margin: 20px auto 0 auto;
+        padding: 15px;
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(5, 11, 20, 0.95));
+        border: 1px solid #f4c542;
+        border-radius: 12px;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(244,197,66,0.1);
+        text-align: center;
+        position: relative;
+        z-index: 100000;
+        backdrop-filter: blur(10px);
+    }
+    
+    .theme-master-header {
+        color: #f4c542;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        letter-spacing: 1px;
+    }
+
+    .theme-master-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .theme-select-box {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: 1px solid rgba(244, 197, 66, 0.5);
+        padding: 12px;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4c542' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 15px;
+        transition: all 0.3s ease;
+    }
+    .theme-select-box:hover, .theme-select-box:focus {
+        border-color: #f4c542;
+        box-shadow: 0 0 10px rgba(244, 197, 66, 0.3);
+    }
+    .theme-select-box option {
+        background: #0f172a;
+        color: #fff;
+    }
+
+    .theme-apply-btn {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #000;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 900;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+    .theme-apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        color: #fff;
+    }
+    .theme-apply-btn:active { transform: translateY(0); }
+</style>
+
+<script id="misali-theme-master-js">
+(function() {
+    "use strict";
+
+    // ==================================================================
+    // 🎨 50 PERFEKTE THEMES (Kugelsicherer Kontrast: Dunkel & Hell)
+    // bg = Main Background, cBg = Card Background, hBg = Header/Footer
+    // acc = Akzentfarbe (Titel, Rahmen), txt = Haupttext, sub = Untertitel
+    // ==================================================================
+    const globalThemes = [
+        // --- 🌑 DIE OBSIDIAN KLASSIKER (Dunkel) ---
+        { id: 'th1', n: '01. Orijinal Altın (Klasik)', bg: '#030712', cBg: '#0a192f', hBg: '#020617', acc: '#f4c542', txt: '#fdfbf7', sub: '#94a3b8' },
+        { id: 'th2', n: '02. Saf Siyah & Gümüş', bg: '#000000', cBg: '#111111', hBg: '#050505', acc: '#e2e8f0', txt: '#ffffff', sub: '#94a3b8' },
+        { id: 'th3', n: '03. Gece Yarısı Mavisi', bg: '#0f172a', cBg: '#1e293b', hBg: '#020617', acc: '#38bdf8', txt: '#f0f9ff', sub: '#cbd5e1' },
+        { id: 'th4', n: '04. Kanlı Ay (Kırmızı)', bg: '#1a0505', cBg: '#2a0a0a', hBg: '#0a0000', acc: '#ef4444', txt: '#fee2e2', sub: '#fca5a5' },
+        { id: 'th5', n: '05. Koyu Zümrüt (Yeşil)', bg: '#022c22', cBg: '#064e3b', hBg: '#011812', acc: '#10b981', txt: '#ecfdf5', sub: '#a7f3d0' },
+        { id: 'th6', n: '06. Mor Galaksi (Amethyst)', bg: '#2e1065', cBg: '#3b0764', hBg: '#1b053a', acc: '#d946ef', txt: '#fdf4ff', sub: '#e879f9' },
+        { id: 'th7', n: '07. Koyu Turuncu (Güneş Batımı)', bg: '#431407', cBg: '#7c2d12', hBg: '#2a0a04', acc: '#f97316', txt: '#fff7ed', sub: '#fdba74' },
+        { id: 'th8', n: '08. Çikolata & Kahve', bg: '#271c19', cBg: '#3f2b25', hBg: '#1a110f', acc: '#d97706', txt: '#fef3c7', sub: '#fed7aa' },
+        { id: 'th9', n: '09. Matrix (Neon Yeşil)', bg: '#000000', cBg: '#051205', hBg: '#000000', acc: '#22c55e', txt: '#ffffff', sub: '#86efac' },
+        { id: 'th10', n: '10. Derin Okyanus', bg: '#082f49', cBg: '#0f172a', hBg: '#041c2c', acc: '#0ea5e9', txt: '#e0f2fe', sub: '#7dd3fc' },
+
+        // --- 🔮 CYBERPUNK & NEON (Dunkel mit extremen Akzenten) ---
+        { id: 'th11', n: '11. Cyberpunk 2077 (Pembe/Mavi)', bg: '#09090b', cBg: '#18181b', hBg: '#000000', acc: '#ec4899', txt: '#f4f4f5', sub: '#a1a1aa' },
+        { id: 'th12', n: '12. Neon Cyan', bg: '#000000', cBg: '#083344', hBg: '#000000', acc: '#06b6d4', txt: '#cffafe', sub: '#67e8f9' },
+        { id: 'th13', n: '13. Toxic Neon (Sarı/Yeşil)', bg: '#141414', cBg: '#262626', hBg: '#0a0a0a', acc: '#84cc16', txt: '#f7fee7', sub: '#d9f99d' },
+        { id: 'th14', n: '14. Blood Neon (Saf Kırmızı)', bg: '#000000', cBg: '#1a0505', hBg: '#000000', acc: '#dc2626', txt: '#fef2f2', sub: '#fecaca' },
+        { id: 'th15', n: '15. Neon Purple', bg: '#170a2c', cBg: '#2e1065', hBg: '#0a0317', acc: '#a855f7', txt: '#faf5ff', sub: '#e9d8fd' },
+        { id: 'th16', n: '16. Hacker Terminal', bg: '#000000', cBg: '#050505', hBg: '#000000', acc: '#4ade80', txt: '#f0fdf4', sub: '#86efac' },
+        { id: 'th17', n: '17. Outrun (Retro 80s)', bg: '#1e1b4b', cBg: '#2e1065', hBg: '#0f0e2b', acc: '#f43f5e', txt: '#fff1f2', sub: '#fecdd3' },
+        { id: 'th18', n: '18. Gold Neon', bg: '#000000', cBg: '#1a1a1a', hBg: '#000000', acc: '#eab308', txt: '#fefce8', sub: '#fde047' },
+        { id: 'th19', n: '19. Buzlu Neon (Ice)', bg: '#020617', cBg: '#0f172a', hBg: '#000000', acc: '#38bdf8', txt: '#f0f9ff', sub: '#bae6fd' },
+        { id: 'th20', n: '20. Ultra Violet', bg: '#11001c', cBg: '#2b004a', hBg: '#05000a', acc: '#c084fc', txt: '#ffffff', sub: '#e9d8fd' },
+
+        // --- 💎 KÖNIGLICH & ELEGANT (Dunkel, weiche Kontraste) ---
+        { id: 'th21', n: '21. Royal Velvet', bg: '#31102e', cBg: '#4a154b', hBg: '#1c0819', acc: '#fbcfe8', txt: '#ffffff', sub: '#f9a8d4' },
+        { id: 'th22', n: '22. Koyu Elmas (Sapphire)', bg: '#0c1222', cBg: '#13203f', hBg: '#060a14', acc: '#60a5fa', txt: '#eff6ff', sub: '#93c5fd' },
+        { id: 'th23', n: '23. Yakut (Ruby)', bg: '#2a040d', cBg: '#440a15', hBg: '#140105', acc: '#fb7185', txt: '#fff1f2', sub: '#fda4af' },
+        { id: 'th24', n: '24. Osmanlı Yeşili', bg: '#012e1f', cBg: '#024731', hBg: '#001a11', acc: '#d1fae5', txt: '#ffffff', sub: '#6ee7b7' },
+        { id: 'th25', n: '25. Platin (Platinum)', bg: '#111827', cBg: '#1e293b', hBg: '#020617', acc: '#e2e8f0', txt: '#f8fafc', sub: '#cbd5e1' },
+        { id: 'th26', n: '26. Antik Bronz', bg: '#291b12', cBg: '#422a1b', hBg: '#1a100a', acc: '#fdba74', txt: '#fff7ed', sub: '#fed7aa' },
+        { id: 'th27', n: '27. Gece Yarısı Sisi', bg: '#171717', cBg: '#262626', hBg: '#0a0a0a', acc: '#9ca3af', txt: '#f3f4f6', sub: '#d1d5db' },
+        { id: 'th28', n: '28. Koyu Şarap (Bordo)', bg: '#29000a', cBg: '#4d0013', hBg: '#170005', acc: '#fda4af', txt: '#fff1f2', sub: '#fecdd3' },
+        { id: 'th29', n: '29. Siyah Inci (Black Pearl)', bg: '#000000', cBg: '#0a0a0a', hBg: '#000000', acc: '#ffffff', txt: '#f3f4f6', sub: '#9ca3af' },
+        { id: 'th30', n: '30. Zengin Lacivert', bg: '#031124', cBg: '#082346', hBg: '#010812', acc: '#bfdbfe', txt: '#ffffff', sub: '#93c5fd' },
+
+        // --- ☀️ HELL & CLEAN (Light Mode! Harter Wechsel, schwarzer Text) ---
+        { id: 'th31', n: '31. Gündüz (Pure White)', bg: '#f8fafc', cBg: '#ffffff', hBg: '#f1f5f9', acc: '#3b82f6', txt: '#0f172a', sub: '#475569' },
+        { id: 'th32', n: '32. Krem & Altın (Light Gold)', bg: '#fef3c7', cBg: '#fffbeb', hBg: '#fde68a', acc: '#b45309', txt: '#451a03', sub: '#78350f' },
+        { id: 'th33', n: '33. Kağıt & Mürekkep (Classic Kitap)', bg: '#f5f5f4', cBg: '#fafaf9', hBg: '#e7e5e4', acc: '#1c1917', txt: '#292524', sub: '#57534e' },
+        { id: 'th34', n: '34. Pembe Bulut (Soft Rose)', bg: '#fff1f2', cBg: '#ffe4e6', hBg: '#fecdd3', acc: '#be123c', txt: '#4c0519', sub: '#881337' },
+        { id: 'th35', n: '35. Su Yeşili (Mint Light)', bg: '#ecfdf5', cBg: '#d1fae5', hBg: '#a7f3d0', acc: '#047857', txt: '#022c22', sub: '#065f46' },
+        { id: 'th36', n: '36. Bebek Mavisi (Sky Light)', bg: '#f0f9ff', cBg: '#e0f2fe', hBg: '#bae6fd', acc: '#0369a1', txt: '#082f49', sub: '#0c4a6e' },
+        { id: 'th37', n: '37. Lavanta (Lavender Light)', bg: '#faf5ff', cBg: '#f3e8ff', hBg: '#e9d8fd', acc: '#7e22ce', txt: '#3b0764', sub: '#581c87' },
+        { id: 'th38', n: '38. Çöl Kumu (Sand Light)', bg: '#fff7ed', cBg: '#ffedd5', hBg: '#fed7aa', acc: '#c2410c', txt: '#431407', sub: '#7c2d12' },
+        { id: 'th39', n: '39. Limon Sarısı (Sun Light)', bg: '#fefce8', cBg: '#fef08a', hBg: '#fde047', acc: '#a16207', txt: '#422006', sub: '#713f12' },
+        { id: 'th40', n: '40. Gümüş Gündüz (Silver Light)', bg: '#f3f4f6', cBg: '#ffffff', hBg: '#e5e7eb', acc: '#1f2937', txt: '#111827', sub: '#4b5563' },
+
+        // --- 🌋 NATURE & ELEMENTS (Dunkel, satte Naturfarben) ---
+        { id: 'th41', n: '41. Orman Ateşi (Kızıl-Yeşil)', bg: '#14532d', cBg: '#166534', hBg: '#064e3b', acc: '#fb923c', txt: '#f8fafc', sub: '#fdba74' },
+        { id: 'th42', n: '42. Volkan (Lava)', bg: '#450a0a', cBg: '#7f1d1d', hBg: '#220505', acc: '#facc15', txt: '#fef2f2', sub: '#fde047' },
+        { id: 'th43', n: '43. Derin Mağara (Taş Gri)', bg: '#1f2937', cBg: '#374151', hBg: '#111827', acc: '#a78bfa', txt: '#f9fafb', sub: '#ddd6fe' },
+        { id: 'th44', n: '44. Zehirli Bataklık', bg: '#1a2e05', cBg: '#2b4d08', hBg: '#0d1a02', acc: '#a3e635', txt: '#f7fee7', sub: '#d9f99d' },
+        { id: 'th45', n: '45. Gün Batımı Okyanusu', bg: '#1e3a8a', cBg: '#1e40af', hBg: '#172554', acc: '#fbbf24', txt: '#eff6ff', sub: '#fcd34d' },
+        { id: 'th46', n: '46. Çöl Gecesi (Koyu Kum)', bg: '#3f2c15', cBg: '#5c411f', hBg: '#2b1c0c', acc: '#67e8f9', txt: '#fff7ed', sub: '#a5f3fc' },
+        { id: 'th47', n: '47. Kiraz Çiçeği (Koyu Pembe)', bg: '#4c0519', cBg: '#881337', hBg: '#22020b', acc: '#f472b6', txt: '#fff1f2', sub: '#fbcfe8' },
+        { id: 'th48', n: '48. Amazon Ormanı', bg: '#064e3b', cBg: '#047857', hBg: '#022c22', acc: '#fde047', txt: '#ecfdf5', sub: '#fef08a' },
+        { id: 'th49', n: '49. Ay Tutulması', bg: '#0f172a', cBg: '#1e293b', hBg: '#020617', acc: '#f43f5e', txt: '#f8fafc', sub: '#fb7185' },
+        { id: 'th50', n: '50. Şairin Gizemi (Ultra Siyah)', bg: '#000000', cBg: '#000000', hBg: '#000000', acc: '#a855f7', txt: '#e2e8f0', sub: '#64748b' }
+    ];
+
+    // ==================================================================
+    // ⚙️ DIE MASCHINE: Inject CSS Override to force colors globally
+    // ==================================================================
+    function applyGlobalTheme(themeObj) {
+        if (!themeObj) return;
+
+        let styleTag = document.getElementById('misali-global-theme-override');
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = 'misali-global-theme-override';
+            document.head.appendChild(styleTag);
+        }
+
+        // Wir überschreiben radikal ALLE Text- und Hintergrundfarben
+        let css = `
+            /* 1. HINTERGRÜNDE */
+            body, html, .page-view, #main-wrapper { background: ${themeObj.bg} !important; }
+            header#main-header, footer, .sidebar, .sidebar-right, .cal-holiday-sidebar, .weather-widget, .mobile-bottom-bar { background: ${themeObj.hBg} !important; }
+            .card, .game-card, .notif-card, .section-box, .poem-card, .sahsiyet-card, .modal-content, .chat-bubble, .message-box, .custom-modal .modal-content, .mu-modal-content, .stu-modal { background: ${themeObj.cBg} !important; }
+            
+            /* 2. TEXTFARBEN (Kontrast-Garantie) */
+            body, p, .card-text, .modal-text, .yorum-text, .notif-body, .card div:not(.card-stats-badge):not(.card-date-time):not(.yazar-gold-badge), .misali-welcome-text { color: ${themeObj.txt} !important; }
+            
+            /* 3. AKZENTFARBEN (Titel, Icons, Rahmen) */
+            h1, h2, h3, h4, .title, .card h3, .logo, .game-title, .bilingual-title, .author, .card-author, .list-user-name, #header-username, span[class*="author-anim"] { color: ${themeObj.acc} !important; -webkit-text-fill-color: ${themeObj.acc} !important; text-shadow: 0 0 5px ${themeObj.acc}50 !important;}
+            i.fas, i.fab, i.far { color: ${themeObj.acc} !important; }
+            .card, .game-card, .notif-card, .section-box, .poem-card, .sahsiyet-card, .modal-content, header#main-header, .mobile-bottom-bar, .sidebar { border-color: ${themeObj.acc} !important; }
+            button.reset-btn, .bottom-btn, .auth-view-btn, .admin-btn { border-color: ${themeObj.acc} !important; color: ${themeObj.acc} !important; }
+            
+            /* 4. SUBTEXTE (Gedimmt, Datum, Info) */
+            .de-sub, .card-sub, .time-info, .card-date-time, .notif-item-time, .cs-sub { color: ${themeObj.sub} !important; }
+
+            /* 5. AUSNAHMEN SCHÜTZEN (Herzen, Delete-Buttons bleiben rot/grün) */
+            i.fa-heart, .fa-heart, .rose-btn-v18, .rose-btn-v57, .fa-rose, .liked, .danger i, button.danger i, .fa-trash, .fa-trash-alt { color: #ef4444 !important; -webkit-text-fill-color: #ef4444 !important; }
+            button.success i, .fa-check { color: #22c55e !important; -webkit-text-fill-color: #22c55e !important; }
+            .header-score-badge, .yazar-gold-badge, #header-my-roses-badge { background: ${themeObj.acc} !important; color: ${themeObj.bg} !important; border-color: ${themeObj.txt} !important; }
+            
+            /* Eingabefelder */
+            input, textarea, select { background: ${themeObj.bg} !important; color: ${themeObj.txt} !important; border-color: ${themeObj.acc} !important; }
+            ::placeholder { color: ${themeObj.sub} !important; opacity: 0.8 !important; }
+        `;
+
+        styleTag.innerHTML = css;
+    }
+
+    // ==================================================================
+    // 🔌 ADMIN INJEKTION IN DEN FOOTER
+    // ==================================================================
+    function injectAdminThemeSelector() {
+        // Prüfen, ob der User Admin ist
+        let uName = window.currentUser?.username || '';
+        let isAdm = window.currentUser?.role === 'admin' || uName.toLowerCase().includes('admin') || document.body.classList.contains('admin-mode');
+        
+        if (!isAdm) return; // Wenn kein Admin, Skript hier abbrechen
+
+        let footer = document.querySelector('footer');
+        if (footer && !document.getElementById('admin-theme-master-panel')) {
+            
+            let panel = document.createElement('div');
+            panel.id = 'admin-theme-master-panel';
+            
+            let optionsHtml = globalThemes.map(t => `<option value="${t.id}">${t.n}</option>`).join('');
+            
+            panel.innerHTML = `
+                <div class="theme-master-header"><i class="fas fa-paint-brush"></i> GLOBAL THEME MASTER (Admin)</div>
+                <div class="theme-master-controls">
+                    <select id="admin-theme-dropdown" class="theme-select-box">
+                        ${optionsHtml}
+                    </select>
+                    <button class="theme-apply-btn" id="admin-theme-apply-btn">
+                        <i class="fas fa-globe"></i> Theme Tüm Kullanıcılara Uygula (Live Sync)
+                    </button>
+                </div>
+            `;
+            
+            // Ans Ende des Footers anhängen
+            footer.appendChild(panel);
+            panel.style.display = 'block';
+
+            // Klick-Logik zum Speichern in Firebase
+            document.getElementById('admin-theme-apply-btn').onclick = function() {
+                let selectedId = document.getElementById('admin-theme-dropdown').value;
+                let btn = this;
+                
+                // Sicherheitsabfrage
+                if(window.customConfirm) {
+                    window.customConfirm("Bu tasarımı <b>tüm kullanıcılar</b> için kalıcı olarak uygulamak istiyor musunuz?<br><span style='font-size:0.8rem;'>(Theme für alle live schalten?)</span>", executePublish);
+                } else {
+                    if(confirm("Tüm kullanıcılara uygulansın mı? (Live Sync?)")) executePublish();
+                }
+
+                function executePublish() {
+                    // In Firebase hochladen
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        firebase.database().ref('misaliGlobalThemeSelector').set(selectedId).then(() => {
+                            btn.innerHTML = '<i class="fas fa-check-double"></i> BAŞARILI! (Live)';
+                            btn.style.background = '#22c55e';
+                            setTimeout(() => {
+                                btn.innerHTML = '<i class="fas fa-globe"></i> Theme Tüm Kullanıcılara Uygula (Live Sync)';
+                                btn.style.background = '';
+                            }, 3000);
+                        });
+                    }
+                }
+            };
+        }
+    }
+
+    // ==================================================================
+    // 📡 FIREBASE LIVE-LISTENER FÜR ALLE USER
+    // ==================================================================
+    function listenToGlobalTheme() {
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            firebase.database().ref('misaliGlobalThemeSelector').on('value', snap => {
+                let themeId = snap.val();
+                if (themeId) {
+                    let themeObj = globalThemes.find(t => t.id === themeId);
+                    if (themeObj) {
+                        applyGlobalTheme(themeObj);
+                        // Falls der Admin das Dropdown offen hat, synchronisieren wir auch sein Auswahlfeld
+                        let dropdown = document.getElementById('admin-theme-dropdown');
+                        if(dropdown) dropdown.value = themeId;
+                    }
+                }
+            });
+        }
+    }
+
+    // ==================================================================
+    // 🚀 INITIALISIERUNG
+    // ==================================================================
+    // Versucht das Modul zu laden, sobald der DOM bereit ist
+    let initTimer = setInterval(() => {
+        if (document.querySelector('footer')) {
+            injectAdminThemeSelector();
+            listenToGlobalTheme();
+            clearInterval(initTimer);
+        }
+    }, 1000);
+
+})();
+</script>
+
 </body>
 </html>
