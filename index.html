@@ -4338,6 +4338,19 @@ Blühe, deutsches Vaterland!</p>
     window.bulmacaLang = 'TR'; 
     window.atasozleriLang = 'TR'; 
 
+    // 🚀 NATIVE PUSH ENGINE (Vibration & Desktop-Popup)
+    window.triggerNativeNotification = function(title, body) {
+        if (!("Notification" in window)) return;
+        if (Notification.permission === "granted") {
+            let cleanBody = body ? body.replace(/<[^>]*>?/gm, '') : '';
+            new Notification(title, { 
+                body: cleanBody, 
+                icon: "https://cdn-icons-png.flaticon.com/512/3233/3233024.png",
+                vibrate: [200, 100, 200]
+            });
+        }
+    };
+
     // ULTRASICHERHEIT: Prüfsummen-Generator
     window.generateHash = function(str) {
         let hash = 0;
@@ -4377,53 +4390,34 @@ Blühe, deutsches Vaterland!</p>
 
     // 🚀 FIREBASE UPLOAD
 window.syncToCloud = async function() {
-    if (window.isUploading || !navigator.onLine) return; 
-    window.isUploading = true;
-    window.lastLocalUpdate = Date.now(); 
-    localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
-    
-    try { 
-        const updates = {};
-        updates['timestamp'] = window.lastLocalUpdate;
+        if (window.isUploading || !navigator.onLine) return; 
+        window.isUploading = true;
+        window.lastLocalUpdate = Date.now(); 
+        localStorage.setItem('misaliLastUpdate', window.lastLocalUpdate.toString());
         
-        if(window.userDatabase) updates['users'] = window.userDatabase;
-        if(window.userPoemsDB) updates['userPoems'] = window.userPoemsDB;
-        
-        // 🚀 DER FIX: Jetzt werden Admin-Inhalte (Gedichte, Sprüche, etc.) endlich in die Cloud geladen!
-        if(window.contentDB) updates['contentDB'] = window.contentDB;
-        
-        // LÖSUNG: Wenn ein Array leer gelöscht wurde, MUSS es als "null" an Firebase 
-        // gesendet werden, damit die Löschung auch bei anderen Usern ankommt!
-        updates['chat_v0'] = (window.chatDB && window.chatDB.length > 0) ? window.chatDB : null;
-        updates['adminMsgs'] = (window.adminMessages && window.adminMessages.length > 0) ? window.adminMessages : null;
-        
-        if(window.adminLogs) updates['logs'] = window.adminLogs;
-        if(window.poemDataStore) updates['heartsDB'] = window.poemDataStore;
-        if(window.calNotesDB) updates['calNotes'] = window.calNotesDB;
-        if(window.savedItemsDB) updates['savedItems'] = window.savedItemsDB;
-        
-        await database.ref('misaliData').update(updates);
-    } catch(e) { 
-        console.error("Sync Error", e); 
-    } finally { 
-        setTimeout(() => { window.isUploading = false; }, 300); 
-    }
-};
-
-// 🚀 NATIVE PUSH ENGINE FÜR DESKTOP & MOBILE
-window.triggerNativeNotification = function(title, body) {
-    if (!("Notification" in window)) return;
-    if (Notification.permission === "granted") {
-        // HTML-Tags aus dem Body entfernen, damit der Push sauber aussieht
-        let cleanBody = body ? body.replace(/<[^>]*>?/gm, '') : '';
-        new Notification(title, { 
-            body: cleanBody, 
-            icon: "https://cdn-icons-png.flaticon.com/512/3233/3233024.png",
-            vibrate: [200, 100, 200]
-        });
-    }
-};
-
+        try { 
+            const updates = {};
+            updates['timestamp'] = window.lastLocalUpdate;
+            if(window.userDatabase) updates['users'] = window.userDatabase;
+            if(window.userPoemsDB) updates['userPoems'] = window.userPoemsDB;
+            
+            // 🚀 DER FIX: Diese Zeile hat gefehlt! Jetzt werden alle deine Inhalte permanent in Firebase gespeichert!
+            if(window.contentDB) updates['contentDB'] = window.contentDB;
+            
+            // LÖSUNG: Wenn ein Array leer gelöscht wurde, MUSS es als "null" an Firebase 
+            // gesendet werden, damit die Löschung auch bei anderen Usern ankommt!
+            updates['chat_v0'] = (window.chatDB && window.chatDB.length > 0) ? window.chatDB : null;
+            updates['adminMsgs'] = (window.adminMessages && window.adminMessages.length > 0) ? window.adminMessages : null;
+            
+            if(window.adminLogs) updates['logs'] = window.adminLogs;
+            if(window.poemDataStore) updates['heartsDB'] = window.poemDataStore;
+            if(window.calNotesDB) updates['calNotes'] = window.calNotesDB;
+            if(window.savedItemsDB) updates['savedItems'] = window.savedItemsDB;
+            
+            await database.ref('misaliData').update(updates);
+        } catch(e) { console.error("Sync Error", e); } 
+        finally { setTimeout(() => { window.isUploading = false; }, 300); }
+    };
 // ==================================================================
 // ULTIMATIVE LIVE-SYNC ENGINE (Für Chat, Herzen, Kommentare)
 // ==================================================================
@@ -24874,6 +24868,267 @@ button:has(.fa-bell):hover {
         }
     }, 1500);
 
+})();
+</script>
+
+<script>
+(function() {
+    // ==================================================================
+    // 🚀 FIX: KIM MILYONER OLMAK ISTER (Anti-Freeze & Puan Düzenlemesi)
+    // ==================================================================
+    
+    // 1. Sicheres Initialisieren des Spiels
+    window.initMilyoner = function() {
+        window.milScore = 0;
+        window.milCurrentLevel = 1;
+        window.usedMilQuestions = []; 
+        
+        document.getElementById('milyoner-msg').innerText = '';
+        document.getElementById('milyoner-next').style.display = 'none';
+        
+        // Joker zurücksetzen
+        let fiftyBtn = document.getElementById('mil-joker-fifty');
+        let phoneBtn = document.getElementById('mil-joker-phone');
+        if (fiftyBtn) { fiftyBtn.style.opacity = '1'; fiftyBtn.style.pointerEvents = 'auto'; }
+        if (phoneBtn) { phoneBtn.style.opacity = '1'; phoneBtn.style.pointerEvents = 'auto'; }
+        
+        window.loadMilyonerQ();
+    };
+
+    // 2. Anti-Crash beim Laden der Fragen
+    window.loadMilyonerQ = function() {
+        document.getElementById('milyoner-msg').innerText = '';
+        document.getElementById('milyoner-next').style.display = 'none';
+        
+        // 🚀 FIX: Verhindert den Crash nach 3 Fragen! Bleibt maximal auf Schwierigkeits-Level 3
+        let activeLevel = window.milCurrentLevel > 3 ? 3 : window.milCurrentLevel;
+        let levelData = window.milyonerQuestions[activeLevel] || window.milyonerQuestions[1];
+        
+        // Mischen und gegen Blacklist (bereits gefragte Fragen) filtern
+        let available = levelData.filter(q => !window.usedMilQuestions.includes(q.qTR));
+        if (available.length === 0) {
+            window.usedMilQuestions = []; // Reset, wenn alle durch sind
+            available = levelData;
+        }
+        
+        let randomQ = available[Math.floor(Math.random() * available.length)];
+        window.currentMil = randomQ;
+        window.usedMilQuestions.push(randomQ.qTR); 
+        
+        let qText = window.currentGameLang === 'DE' ? randomQ.qDE : randomQ.qTR;
+        let opts = window.currentGameLang === 'DE' ? randomQ.optsDE : randomQ.optsTR;
+        
+        document.getElementById('milyoner-q').innerHTML = `Soru ${window.milCurrentLevel}: <br><span style="font-size:1.1rem; font-weight:normal;">${qText}</span>`;
+        
+        let html = '';
+        opts.forEach((o, i) => {
+            let letter = ['A', 'B', 'C', 'D'][i];
+            html += `<button class="reset-btn" id="mil-opt-${i}" onclick="window.checkMilyoner(${i})" style="padding: 12px; margin: 0; text-align: left; justify-content: flex-start;"><strong>${letter})</strong> ${o}</button>`;
+        });
+        document.getElementById('milyoner-options').innerHTML = html;
+    };
+
+    // 3. Auswertung und neue Punkte-Logik (+10 / -5)
+    window.checkMilyoner = function(idx) {
+        if(!window.currentMil) return;
+        let isCorrect = (window.currentMil.ans === idx);
+        
+        // Blockiert erneutes Klicken
+        for(let i=0; i<4; i++) {
+            let b = document.getElementById('mil-opt-'+i);
+            if(b) b.style.pointerEvents = 'none';
+        }
+        
+        let selectedBtn = document.getElementById('mil-opt-'+idx);
+        let correctBtn = document.getElementById('mil-opt-'+window.currentMil.ans);
+        
+        if (isCorrect) {
+            selectedBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            selectedBtn.style.color = 'white';
+            
+            // 🚀 NEUES PUNKTE-SYSTEM: +10 Punkte statt übertriebener Zahlen
+            let earned = 10;
+            window.milScore += earned;
+            if(window.addGlobalScore) window.addGlobalScore(earned); // LIVE SYNC FÜRS PROFIL
+            
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#22c55e;">✅ ${window.currentGameLang === 'DE' ? 'Richtig!' : 'Doğru!'} Puan: ${window.milScore}</span>`;
+            
+            window.milCurrentLevel++;
+            
+            // 🚀 ANTI-FREEZE: Keine nervige Pause mehr! Einfach "Nächste Frage" Button anzeigen.
+            let nextBtn = document.getElementById('milyoner-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Nächste Frage' : 'Sonraki Soru';
+            nextBtn.onclick = function() { window.nextMilyoner(); };
+            
+        } else {
+            // ❌ FALSCH: -5 Punkte Abzug und GAME OVER
+            let loss = 5;
+            window.milScore -= loss; 
+            if(window.addGlobalScore) window.addGlobalScore(-loss); // LIVE SYNC FÜRS PROFIL
+            
+            selectedBtn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+            selectedBtn.style.color = 'white';
+            if(correctBtn) {
+                correctBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                correctBtn.style.color = 'white';
+            }
+            
+            document.getElementById('milyoner-msg').innerHTML = `<span style="color:#ef4444; font-size:1.3rem;">❌ ${window.currentGameLang === 'DE' ? 'GAME OVER!' : 'OYUN BİTTİ!'}</span><br>Son Puan: ${window.milScore}`;
+            
+            let nextBtn = document.getElementById('milyoner-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = window.currentGameLang === 'DE' ? 'Neues Spiel' : 'Yeniden Oyna';
+            nextBtn.onclick = function() { window.initMilyoner(); };
+        }
+    };
+    
+    window.nextMilyoner = function() { window.loadMilyonerQ(); };
+
+})();
+</script>
+
+<style id="misali-welcome-info-css">
+    .misali-welcome-box {
+        position: fixed;
+        top: 85px; /* Perfekt unter dem Header platziert */
+        right: -400px; /* Startet unsichtbar außerhalb des Bildschirms */
+        width: 90%;
+        max-width: 340px;
+        background: linear-gradient(145deg, rgba(10,25,47,0.95), rgba(5,11,20,0.98));
+        border-left: 4px solid #f4c542;
+        border-top: 1px solid rgba(244,197,66,0.3);
+        border-bottom: 1px solid rgba(244,197,66,0.3);
+        border-radius: 12px 0 0 12px;
+        padding: 20px;
+        box-shadow: -10px 15px 40px rgba(0,0,0,0.9);
+        z-index: 2147483640; /* Weit im Vordergrund, aber unter Modals */
+        transition: right 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        font-family: 'Poppins', sans-serif;
+        color: #fdfbf7;
+    }
+    
+    /* Die Klasse, die das Fenster hereinfahren lässt */
+    .misali-welcome-box.show {
+        right: 0;
+    }
+    
+    .m-welcome-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        border-bottom: 1px dashed rgba(244,197,66,0.3);
+        padding-bottom: 8px;
+    }
+    
+    .m-welcome-title {
+        color: #f4c542;
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .m-welcome-close {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    
+    .m-welcome-close:hover { 
+        color: #fff; 
+        background: #ef4444; 
+        border-color: #ef4444; 
+    }
+    
+    .m-welcome-text {
+        font-size: 0.85rem;
+        line-height: 1.6;
+        color: #e2e8f0;
+    }
+    
+    .m-welcome-text strong { 
+        color: #00d2ff; /* Cyan-Highlight für wichtige Wörter */
+        font-weight: 600;
+    }
+    
+    .m-welcome-de {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-style: italic;
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(255,255,255,0.1);
+        line-height: 1.5;
+    }
+</style>
+
+<script id="misali-welcome-info-js">
+(function() {
+    // Wartet, bis die Seite komplett geladen ist
+    window.addEventListener('load', function() {
+        
+        // Prüfen, ob die Info in dieser Browser-Sitzung schon gezeigt wurde
+        if (sessionStorage.getItem('misaliWelcomeShown')) return;
+
+        // 5 Sekunden warten (gibt der Intro-Animation Zeit, fertig zu werden)
+        setTimeout(() => {
+            
+            // Verhindern, dass es sich über ein offenes Menü/Modal legt
+            if(document.body.classList.contains('modal-open') || document.body.classList.contains('modal-scroll-lock')) {
+                return; // Wenn der User schon irgendwo draufgeklickt hat, brechen wir ab
+            }
+
+            let box = document.createElement('div');
+            box.className = 'misali-welcome-box';
+            
+            box.innerHTML = `
+                <div class="m-welcome-header">
+                    <h3 class="m-welcome-title"><i class="fas fa-feather-alt"></i> Şair Misal.i</h3>
+                    <button class="m-welcome-close" onclick="this.parentElement.parentElement.classList.remove('show');"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="m-welcome-text">
+                    ✨ Sayfamıza hoş geldiniz! <br><br>
+                    Geniş içeriklerimize ulaşmak için menüleri ve sekmeleri <strong>soldan sağa kaydırabileceğinizi</strong> unutmayın.<br><br>
+                    Özellikle <strong>"Şiirlerim"</strong> ve <strong>"Sözlerim"</strong> kısımlarında Şair Misal.i'nin kendi kaleminden olan eşsiz eserleri ve ona uygun, Yapay Zeka ile seslendirilmiş müzikleri bulunmaktadır. Keyfinizi artırmaktan kaçınmayınız!
+                </div>
+                <div class="m-welcome-de">
+                    ✨ Willkommen! Wischen Sie die Menüleisten von links nach rechts, um alle Bereiche zu entdecken. Unter "Meine Gedichte" & "Meine Sprüche" erwarten Sie einzigartige, vertonte Werke von Şair Misal.i. Viel Vergnügen!
+                </div>
+            `;
+            
+            document.body.appendChild(box);
+
+            // Reflow erzwingen und Animation starten
+            void box.offsetWidth;
+            box.classList.add('show');
+
+            // In der Session markieren, damit es nicht nochmal kommt
+            sessionStorage.setItem('misaliWelcomeShown', 'true');
+
+            // Nach 15 Sekunden automatisch wieder sanft ausblenden
+            setTimeout(() => {
+                if (box.classList.contains('show')) {
+                    box.classList.remove('show');
+                    // Element nach der Animation aus dem DOM löschen
+                    setTimeout(() => box.remove(), 700);
+                }
+            }, 15000);
+
+        }, 5000); // 5000 Millisekunden = 5 Sekunden Verzögerung
+    });
 })();
 </script>
 
