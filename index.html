@@ -25003,7 +25003,7 @@ button:has(.fa-bell):hover {
         padding: 20px;
         box-shadow: -10px 15px 40px rgba(0,0,0,0.9);
         z-index: 2147483640; /* Weit im Vordergrund, aber unter Modals */
-        transition: right 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: right 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         font-family: 'Poppins', sans-serif;
         color: #fdfbf7;
     }
@@ -25045,6 +25045,7 @@ button:has(.fa-bell):hover {
         font-size: 0.9rem;
         cursor: pointer;
         transition: 0.2s;
+        padding: 0;
     }
     
     .m-welcome-close:hover { 
@@ -25073,62 +25074,84 @@ button:has(.fa-bell):hover {
         border-top: 1px dashed rgba(255,255,255,0.1);
         line-height: 1.5;
     }
+    
+    @media (max-width: 768px) {
+        .misali-welcome-box { top: 75px; max-width: 320px; padding: 15px; }
+        .m-welcome-title { font-size: 1.05rem; }
+        .m-welcome-text { font-size: 0.75rem; line-height: 1.4; }
+        .m-welcome-de { font-size: 0.65rem; }
+    }
 </style>
 
 <script id="misali-welcome-info-js">
 (function() {
-    // Wartet, bis die Seite komplett geladen ist
-    window.addEventListener('load', function() {
-        
-        // Prüfen, ob die Info in dieser Browser-Sitzung schon gezeigt wurde
-        if (sessionStorage.getItem('misaliWelcomeShown')) return;
+    function fireWelcomePopup() {
+        // 1. Warte, bis die Seite entsperrt ist (Intro-Animation fertig)
+        let lockRadar = setInterval(() => {
+            if (!document.documentElement.classList.contains('misali-lock')) {
+                clearInterval(lockRadar); // Intro ist weg! Radar abschalten.
+                
+                // 2. Warte noch 1 Sekunde, damit der User die Seite kurz sieht, dann rein damit!
+                setTimeout(() => {
+                    // Abbrechen, falls der User schon ein Modal geöffnet hat
+                    if(document.body.classList.contains('modal-open') || document.body.classList.contains('modal-scroll-lock')) return;
 
-        // 5 Sekunden warten (gibt der Intro-Animation Zeit, fertig zu werden)
-        setTimeout(() => {
-            
-            // Verhindern, dass es sich über ein offenes Menü/Modal legt
-            if(document.body.classList.contains('modal-open') || document.body.classList.contains('modal-scroll-lock')) {
-                return; // Wenn der User schon irgendwo draufgeklickt hat, brechen wir ab
+                    // Lösche eventuelle alte Boxen (verhindert Doppelungen beim schnellen Klicken)
+                    let oldBox = document.getElementById('misali-welcome-box-id');
+                    if (oldBox) oldBox.remove();
+
+                    let box = document.createElement('div');
+                    box.id = 'misali-welcome-box-id';
+                    box.className = 'misali-welcome-box';
+                    
+                    box.innerHTML = `
+                        <div class="m-welcome-header">
+                            <h3 class="m-welcome-title"><i class="fas fa-feather-alt"></i> Şair Misal.i</h3>
+                            <button class="m-welcome-close"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="m-welcome-text">
+                            ✨ Sayfamıza hoş geldiniz! <br><br>
+                            Geniş içeriklerimize ulaşmak için menüleri ve sekmeleri <strong>soldan sağa kaydırabileceğinizi</strong> unutmayın.<br><br>
+                            Özellikle <strong>"Şiirlerim"</strong> ve <strong>"Sözlerim"</strong> kısımlarında Şair Misal.i'nin kendi kaleminden olan eşsiz eserleri ve ona uygun, Yapay Zeka ile seslendirilmiş müzikleri bulunmaktadır. Keyfinizi artırmaktan kaçınmayınız!
+                        </div>
+                        <div class="m-welcome-de">
+                            ✨ Willkommen! Wischen Sie die Menüleisten von links nach rechts, um alle Bereiche zu entdecken. Unter "Meine Gedichte" & "Meine Sprüche" erwarten Sie einzigartige Werke aus der Feder von Şair Misal.i, begleitet von speziell für diese Werke KI-generierten Musikstücken. Viel Vergnügen!
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(box);
+
+                    // Reflow erzwingen (zwingt den Browser, die Startposition zu berechnen)
+                    void box.offsetWidth;
+                    
+                    // Box sanft einfliegen lassen
+                    box.classList.add('show');
+
+                    // 3. Auto-Zerstörung nach 10 Sekunden
+                    let autoHideTimer = setTimeout(() => {
+                        if (box && box.classList.contains('show')) {
+                            box.classList.remove('show');
+                            setTimeout(() => { if (box && box.parentNode) box.remove(); }, 600);
+                        }
+                    }, 10000); // 10 Sekunden Anzeigezeit
+
+                    // 4. Manuelles Schließen durch das "X"
+                    let closeBtn = box.querySelector('.m-welcome-close');
+                    if (closeBtn) {
+                        closeBtn.onclick = function() {
+                            clearTimeout(autoHideTimer); // Stoppt den Auto-Timer
+                            box.classList.remove('show');
+                            setTimeout(() => { if (box && box.parentNode) box.remove(); }, 600);
+                        };
+                    }
+
+                }, 1000); // 1 Sekunde Pause nach dem schwarzen Bildschirm
             }
+        }, 500); // Überprüft jede halbe Sekunde, ob das Intro fertig ist
+    }
 
-            let box = document.createElement('div');
-            box.className = 'misali-welcome-box';
-            
-            box.innerHTML = `
-                <div class="m-welcome-header">
-                    <h3 class="m-welcome-title"><i class="fas fa-feather-alt"></i> Şair Misal.i</h3>
-                    <button class="m-welcome-close" onclick="this.parentElement.parentElement.classList.remove('show');"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="m-welcome-text">
-                    ✨ Sayfamıza hoş geldiniz! <br><br>
-                    Geniş içeriklerimize ulaşmak için menüleri ve sekmeleri <strong>soldan sağa kaydırabileceğinizi</strong> unutmayın.<br><br>
-                    Özellikle <strong>"Şiirlerim"</strong> ve <strong>"Sözlerim"</strong> kısımlarında Şair Misal.i'nin kendi kaleminden olan eşsiz eserleri ve ona uygun, Yapay Zeka ile seslendirilmiş müzikleri bulunmaktadır. Keyfinizi artırmaktan kaçınmayınız!
-                </div>
-                <div class="m-welcome-de">
-                    ✨ Willkommen! Wischen Sie die Menüleisten von links nach rechts, um alle Bereiche zu entdecken. Unter "Meine Gedichte" & "Meine Sprüche" erwarten Sie einzigartige, vertonte Werke von Şair Misal.i. Viel Vergnügen!
-                </div>
-            `;
-            
-            document.body.appendChild(box);
-
-            // Reflow erzwingen und Animation starten
-            void box.offsetWidth;
-            box.classList.add('show');
-
-            // In der Session markieren, damit es nicht nochmal kommt
-            sessionStorage.setItem('misaliWelcomeShown', 'true');
-
-            // Nach 15 Sekunden automatisch wieder sanft ausblenden
-            setTimeout(() => {
-                if (box.classList.contains('show')) {
-                    box.classList.remove('show');
-                    // Element nach der Animation aus dem DOM löschen
-                    setTimeout(() => box.remove(), 700);
-                }
-            }, 15000);
-
-        }, 5000); // 5000 Millisekunden = 5 Sekunden Verzögerung
-    });
+    // Das Skript sofort auslösen (der Radar übernimmt die Zeitsteuerung)
+    fireWelcomePopup();
 })();
 </script>
 
