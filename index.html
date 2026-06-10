@@ -13251,20 +13251,58 @@ Blühe, deutsches Vaterland!</p>
             document.getElementById('p-vol').oninput=function(){hidAud.volume=parseInt(this.value)/100;hidAud.muted=false;let ic=document.getElementById('p-vol-i'); window.updateSliderBG(this, '#f4c542'); ic.className=hidAud.volume===0?'fas fa-volume-mute':(hidAud.volume<0.5?'fas fa-volume-down':'fas fa-volume-up');};
             document.getElementById('p-time-bar').onclick=function(e){if(hidAud.duration) hidAud.currentTime=((e.clientX-this.getBoundingClientRect().left)/this.getBoundingClientRect().width)*hidAud.duration;};
 
-            // --- EVENT-DRIVEN POEM UI UPDATES (Flackerfrei) ---
-            const poemUI = () => {
-                if(hidAud.duration) { document.getElementById('p-fill').style.width=((hidAud.currentTime/hidAud.duration)*100)+'%'; document.getElementById('p-time').innerText=fmtTime(hidAud.currentTime)+' / '+fmtTime(hidAud.duration); }
-                if(hidAud && !hidAud.paused && hidAud.currentTime > 0) { 
-                    document.getElementById('p-play').classList.add('active-state'); document.getElementById('p-pause').classList.remove('active-state'); pWid.querySelector('.widget-mini-view').classList.add('spinning'); 
-                    if(!document.querySelector('.modal.active-modal') && !pWid.classList.contains('show-widget')) pWid.classList.add('show-widget'); 
+            // --- EVENT-DRIVEN POEM UI UPDATES (JETZT WIRKLICH FLACKERFREI) ---
+            
+            // 1. Nur für die Zeitleiste (Wird 4x pro Sekunde gefeuert - absolut leichtgewichtig!)
+            const updateTimeOnly = () => {
+                if(hidAud.duration) { 
+                    document.getElementById('p-fill').style.width=((hidAud.currentTime/hidAud.duration)*100)+'%'; 
+                    document.getElementById('p-time').innerText=fmtTime(hidAud.currentTime)+' / '+fmtTime(hidAud.duration); 
+                }
+            };
+
+            // 2. Nur für Status-Wechsel Play/Pause (Wird NUR beim tatsächlichen Klick gefeuert!)
+            const updateStateOnly = () => {
+                let isPlaying = !hidAud.paused && hidAud.currentTime > 0;
+                let pPlay = document.getElementById('p-play');
+                let pPause = document.getElementById('p-pause');
+                let miniView = pWid.querySelector('.widget-mini-view');
+                
+                if(isPlaying) { 
+                    if(pPlay && !pPlay.classList.contains('active-state')) pPlay.classList.add('active-state'); 
+                    if(pPause && pPause.classList.contains('active-state')) pPause.classList.remove('active-state'); 
+                    if(miniView && !miniView.classList.contains('spinning')) miniView.classList.add('spinning'); 
+                    
+                    // Widget einblenden, wenn es nicht minimiert oder von einem Modal verdeckt ist
+                    if(!document.querySelector('.modal.active-modal') && !pWid.classList.contains('show-widget') && !pWid.classList.contains('is-mini')) {
+                        pWid.classList.add('show-widget');
+                    }
                 } else { 
-                    document.getElementById('p-play').classList.remove('active-state'); document.getElementById('p-pause').classList.add('active-state'); pWid.querySelector('.widget-mini-view').classList.remove('spinning'); 
+                    if(pPlay && pPlay.classList.contains('active-state')) pPlay.classList.remove('active-state'); 
+                    if(pPause && !pPause.classList.contains('active-state')) pPause.classList.add('active-state'); 
+                    if(miniView && miniView.classList.contains('spinning')) miniView.classList.remove('spinning'); 
                 }
                 
+                // Grüne Badges auf den Karten updaten (Ressourcen-Fresser ist nun isoliert)
                 let cid = hidAud.getAttribute('data-passed-id');
-                document.querySelectorAll('.badge-play-btn').forEach(b=>{ let id=b.getAttribute('data-play-id'); let ic=b.querySelector('i'); if(cid===id && !hidAud.paused){b.classList.add('playing');ic.className='fas fa-pause';}else{b.classList.remove('playing');ic.className='fas fa-play';} });
+                document.querySelectorAll('.badge-play-btn').forEach(b => { 
+                    let id = b.getAttribute('data-play-id'); 
+                    let ic = b.querySelector('i'); 
+                    if(cid === id && isPlaying) {
+                        if(!b.classList.contains('playing')) b.classList.add('playing');
+                        if(ic && ic.className !== 'fas fa-pause') ic.className='fas fa-pause';
+                    } else {
+                        if(b.classList.contains('playing')) b.classList.remove('playing');
+                        if(ic && ic.className !== 'fas fa-play') ic.className='fas fa-play';
+                    } 
+                });
             };
-            hidAud.addEventListener('timeupdate', poemUI); hidAud.addEventListener('play', poemUI); hidAud.addEventListener('pause', poemUI); hidAud.addEventListener('ended', poemUI);
+
+            // Listener sauber getrennt zuweisen
+            hidAud.addEventListener('timeupdate', updateTimeOnly); 
+            hidAud.addEventListener('play', updateStateOnly); 
+            hidAud.addEventListener('pause', updateStateOnly); 
+            hidAud.addEventListener('ended', updateStateOnly);
 
             // --- DIRECT PLAY (Grüne Tasten Trigger) ---
             window.playAudioDirectly = function(tKey, cTitle) {
@@ -14277,6 +14315,64 @@ Blühe, deutsches Vaterland!</p>
         }
     };
 })();
+</script>
+
+<style id="misali-player-gpu-fix">
+    /* Hardwarebeschleunigung killt das Ruckeln und Flackern des Players */
+    #misali-poem-widget, #misali-bgm-widget {
+        will-change: transform, opacity, bottom !important;
+        -webkit-backface-visibility: hidden !important;
+        backface-visibility: hidden !important;
+        transform: translateZ(0) !important; /* Aktiviert 3D-GPU Rendering */
+    }
+</style>
+
+<style id="misali-emergency-login-rescue">
+    /* 🚀 NOTFALL-RETTUNG FÜR GIRIŞ UND KAYIT OL 🚀 */
+    body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn,
+    body:not(.user-mode):not(.admin-mode) .guest-only,
+    html:not(.user-mode):not(.admin-mode) .auth-view-btn {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 130px !important;
+        height: auto !important;
+        pointer-events: auto !important;
+        z-index: 999999 !important;
+        transform: none !important;
+    }
+
+    /* Auf Handys nebeneinander */
+    @media (max-width: 768px) {
+        body:not(.user-mode):not(.admin-mode) #main-header .auth-view-btn {
+            width: auto !important;
+            flex: 1 !important;
+            max-width: 48% !important;
+            margin-top: 5px !important;
+        }
+    }
+</style>
+
+<script>
+    // Stoppt das aggressive Verstecken-Skript, wenn man Gast ist
+    setInterval(() => {
+        let isUser = document.body.classList.contains('user-mode');
+        let isAdmin = document.body.classList.contains('admin-mode');
+        
+        if (!isUser && !isAdmin && !window.currentUser) {
+            document.querySelectorAll('.auth-view-btn').forEach(btn => {
+                btn.style.setProperty('display', 'flex', 'important');
+                btn.style.setProperty('opacity', '1', 'important');
+                btn.style.setProperty('visibility', 'visible', 'important');
+                btn.style.setProperty('position', 'relative', 'important');
+                btn.style.setProperty('top', 'auto', 'important');
+                btn.style.setProperty('pointer-events', 'auto', 'important');
+            });
+        }
+    }, 250);
 </script>
 
 </body>
