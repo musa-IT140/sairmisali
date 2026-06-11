@@ -23131,7 +23131,6 @@ button:has(.fa-bell):hover {
     </style>
 
     <style id="misali-header-fix-css">
-        /* Master Header Container */
         header#main-header, header.main-header, .header-wrapper {
             background: var(--m-theme-hBg, #020617) !important; 
             position: relative !important;
@@ -23140,84 +23139,71 @@ button:has(.fa-bell):hover {
             padding: 15px 20px 10px 20px !important;
             display: flex !important;
             flex-direction: column !important;
-            gap: 15px !important;
+            align-items: center !important;
+            justify-content: center !important;
             z-index: 1000 !important;
             box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
             border-bottom: 2px solid var(--m-theme-acc, #f4c542) !important;
             width: 100% !important;
             box-sizing: border-box !important;
-            overflow: visible !important;
         }
-
-        /* 🚀 1. Zeile (Top Header) - GRID SYSTEM */
+        
+        /* Zeile 1: Logo, Suche, Profil/Login */
         .top-header, .header-content {
-            display: grid !important;
-            /* 3 Spalten: Links (Logo), Mitte (Suche), Rechts (Profile/Wetter) */
-            grid-template-columns: minmax(auto, 1fr) auto minmax(auto, 1fr) !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
             align-items: center !important;
+            justify-content: space-between !important;
             gap: 15px !important;
             width: 100% !important;
             max-width: 1400px !important;
+            height: auto !important;
             margin: 0 auto !important;
             position: relative !important;
             transform: none !important;
         }
 
-        /* Container Links (Logo + Datum) */
         .header-logo-container {
+            flex: 1 1 auto !important;
             display: flex !important;
             align-items: center !important;
-            gap: 15px !important;
-            justify-content: flex-start !important;
         }
 
-        /* Container Mitte (Suche) */
         .search-container {
-            display: flex !important;
-            justify-content: center !important;
-            width: 100% !important;
-            max-width: 400px !important;
+            flex: 2 1 300px !important; /* Nimmt den meisten Platz ein */
+            max-width: 450px !important;
             margin: 0 auto !important;
-            position: relative !important;
+            order: 2 !important; 
         }
 
-        /* Container Rechts (Profil, Wetter, Login) */
         .header-right-actions, .user-profile-info, .weather-widget, .auth-buttons {
+            flex: 1 1 auto !important;
             display: flex !important;
             align-items: center !important;
-            gap: 10px !important;
             justify-content: flex-end !important;
-            position: relative !important;
-            transform: none !important;
+            gap: 10px !important;
+            order: 3 !important;
+            min-width: fit-content !important;
         }
 
-        /* 🚀 LAPTOP FIX (1000px - 1300px): Suche bricht in neue Zeile um */
-        @media (max-width: 1300px) {
+        /* 💻 INTELLIGENTER LAPTOP-UMBRUCH (verhindert das Quetschen!) */
+        @media (max-width: 1150px) {
             .top-header, .header-content {
-                grid-template-columns: 1fr 1fr !important; /* Nur noch 2 Spalten oben */
-                justify-content: space-between !important;
+                justify-content: center !important;
             }
-            .search-container {
-                grid-column: 1 / -1 !important; /* Suche nimmt die komplette 2. Zeile im Grid ein */
-                order: 3 !important;
-                margin-top: 10px !important;
-                max-width: 600px !important;
+            .header-logo-container { order: 1 !important; justify-content: center !important; flex-basis: 45% !important;}
+            .header-right-actions { order: 2 !important; justify-content: center !important; flex-basis: 45% !important;}
+            
+            /* Suchleiste bricht in eine neue, saubere Zeile um! */
+            .search-container { 
+                order: 3 !important; 
+                flex-basis: 100% !important; 
+                max-width: 600px !important; 
+                margin-top: 15px !important; 
             }
-            .header-right-actions { justify-content: flex-end !important; }
         }
 
-        /* MOBILE FIX */
-        @media (max-width: 768px) {
-            .top-header, .header-content {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                gap: 10px !important;
-            }
-            .header-logo-container, .header-right-actions { justify-content: center !important; }
-        }
-
-        /* 🚀 2. Zeile (Statistiken - Immer isoliert!) */
+        /* Zeile 2: Statistiken (Immer sicher getrennt) */
         .header-stats-row, .sub-stats-row {
             display: flex !important;
             flex-wrap: wrap !important;
@@ -23226,22 +23212,20 @@ button:has(.fa-bell):hover {
             gap: 20px !important;
             width: 100% !important; 
             max-width: 1400px !important;
-            margin: 0 auto !important;
+            margin: 10px auto 0 auto !important;
             padding: 15px 0 !important;
             border-top: 1px dashed rgba(255,255,255,0.15) !important; 
             border-bottom: 1px dashed rgba(255,255,255,0.15) !important; 
             box-sizing: border-box !important;
+            order: 4 !important;
         }
 
         .header-stats-row > div, .header-stats-row > span {
             white-space: nowrap !important;
-            flex-shrink: 0 !important;
             margin: 0 !important;
-            position: relative !important;
-            transform: none !important;
         }
 
-        /* 3. Zeile (Menü) */
+        /* Zeile 3: Menü */
         nav.main-nav, .nav-menu, .menu-bar {
             display: flex !important;
             flex-wrap: wrap !important;
@@ -23251,45 +23235,10 @@ button:has(.fa-bell):hover {
             max-width: 1400px !important;
             margin: 0 auto !important;
             padding: 5px 0 !important;
-            position: relative !important;
-            transform: none !important;
+            order: 5 !important;
         }
 
-        /* 🚀 MODERNE LOGIN BUTTONS (Giriş / Kayıt Ol) */
-        .auth-buttons {
-            display: flex !important;
-            gap: 10px !important;
-            align-items: center !important;
-        }
-        .auth-buttons a, .auth-buttons button, .btn-login, .btn-register {
-            background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-            color: #f4c542 !important;
-            border: 1px solid rgba(244,197,66,0.4) !important;
-            padding: 8px 18px !important;
-            border-radius: 20px !important;
-            font-family: 'Poppins', sans-serif !important;
-            font-size: 0.85rem !important;
-            font-weight: 700 !important;
-            text-decoration: none !important;
-            text-transform: uppercase !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 6px !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-            cursor: pointer !important;
-            white-space: nowrap !important;
-        }
-        .auth-buttons a:hover, .auth-buttons button:hover, .btn-login:hover, .btn-register:hover {
-            background: linear-gradient(135deg, #f4c542, #d49f00) !important;
-            color: #000 !important;
-            border-color: #f4c542 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 15px rgba(244,197,66,0.6) !important;
-        }
-
-        /* 🚀 KARTEN-DATUM FIX (Damit Platz für Audio-Badges bleibt) */
+        /* 🚀 KARTEN-DATUM FIX (Damit Platz für Badges bleibt) */
         .card [class*="time"], .card [class*="date"], .poem-card [class*="time"], .poem-card [class*="date"], .time-info {
             font-size: 0.65rem !important;
             opacity: 0.7 !important;
@@ -23310,16 +23259,12 @@ button:has(.fa-bell):hover {
                 let navMenu = document.querySelector('nav.main-nav') || document.querySelector('.nav-menu');
                 
                 // Zieht die Statistiken AUS verschachtelten Containern heraus
-                if(statsRow && statsRow.parentElement !== header) {
-                    header.appendChild(statsRow);
-                }
+                if(statsRow && statsRow.parentElement !== header) { header.appendChild(statsRow); }
                 // Zieht das Menü nach ganz unten
-                if(navMenu && navMenu.parentElement !== header) {
-                    header.appendChild(navMenu);
-                }
+                if(navMenu && navMenu.parentElement !== header) { header.appendChild(navMenu); }
             }
 
-            // 2. Login-Button Logik
+            // 2. Login-Button Logik (Erscheint nur, wenn ausgeloggt)
             let hasLogout = document.querySelector('.logout-btn, [href*="logout"], [onclick*="logout"]');
             let isLog = document.body.classList.contains('admin-mode') || document.body.classList.contains('user-mode') || window.currentUser?.username || localStorage.getItem('misaliUser') || hasLogout;
             
@@ -23332,6 +23277,7 @@ button:has(.fa-bell):hover {
                 } else {
                     if (isBtnWrapper) {
                         el.style.setProperty('display', 'flex', 'important');
+                        el.style.setProperty('gap', '10px', 'important');
                     } else if (isDirectBtn) {
                         el.style.setProperty('display', 'inline-flex', 'important');
                     }
@@ -23445,6 +23391,13 @@ button:has(.fa-bell):hover {
         .modal.active-modal .modal-content::-webkit-scrollbar-thumb { background: rgba(244, 197, 66, 0.8); border-radius: 10px; }
     </style>
 
+    <style id="misali-epic-notif-css">
+        @keyframes epicIconShake { 0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 0 rgba(244,197,66,0)); } 10% { transform: rotate(15deg) scale(1.2); filter: drop-shadow(0 0 8px rgba(244,197,66,0.9)); color: #f4c542; } 20% { transform: rotate(-10deg) scale(1.2); color: #f4c542; } 30% { transform: rotate(10deg) scale(1.2); color: #f4c542; } 40% { transform: rotate(-10deg) scale(1.2); filter: drop-shadow(0 0 8px rgba(244,197,66,0.9)); color: #f4c542; } 50% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 0 rgba(244,197,66,0)); } }
+        @keyframes epicBadgePulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); } 40% { transform: scale(1.3); box-shadow: 0 0 12px 6px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .epic-alert-active i.fa-bell, .epic-alert-active i.fa-heart, .epic-alert-active i.fa-rose, .epic-alert-active i { animation: epicIconShake 2.5s infinite ease-in-out !important; }
+        .epic-alert-active .badge, .epic-alert-active .notif-badge, .epic-alert-active span[class*="count"] { animation: epicBadgePulse 1.5s infinite cubic-bezier(0.66, 0, 0, 1) !important; transform-origin: center !important; }
+    </style>
+
     <style id="misali-master-audio-css">
         @keyframes pulseGreen { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); } 70% { box-shadow: 0 0 12px 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
         @keyframes vinylSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -23513,9 +23466,9 @@ button:has(.fa-bell):hover {
         .m-admin-btn-orange { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #000 !important; font-weight: bold !important; border: none !important; border-radius: 6px !important; padding: 8px !important; width: 100% !important; cursor: pointer !important; font-family: 'Poppins', sans-serif !important; transition: transform 0.2s !important;}
         .m-admin-btn-orange:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;}
 
-        /* 🚀 3. EXTERNE FLOATING PLAYERS (Gold & Cyan) - IMMER MINIMIERT & Klick-Drag-Fix */
-        .misali-float-widget { position: fixed !important; z-index: 2147483645 !important; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; opacity: 0; visibility: hidden; transform: scale(0.88); display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 !important; font-family: 'Poppins', sans-serif !important; pointer-events: none;}
-        .misali-float-widget.show-widget { opacity: 1 !important; visibility: visible !important; transform: scale(1) !important; pointer-events: auto; }
+        /* 🚀 3. EXTERNE FLOATING PLAYERS (Gold & Cyan) - IMMER MINIMIERT */
+        .misali-float-widget { position: fixed !important; z-index: 2147483645 !important; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; opacity: 0; visibility: hidden; transform: scale(0.8); display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 !important; font-family: 'Poppins', sans-serif !important; pointer-events: none;}
+        .misali-float-widget.show-widget { opacity: 1 !important; visibility: visible !important; transform: scale(0.88) !important; pointer-events: auto; }
         
         #misali-poem-widget { --theme-color: #f4c542; bottom: 25px !important; left: 25px !important; }
         #misali-bgm-widget { --theme-color: #00e5ff; bottom: 105px !important; left: 25px !important; }
@@ -23533,7 +23486,7 @@ button:has(.fa-bell):hover {
         .widget-mini-view i { font-size: 1.05rem !important; color: #000 !important; margin: 0 !important; position: relative !important; z-index: 5 !important; text-shadow: none !important;}
         .widget-mini-view.spinning { animation: vinylSpin 3s infinite linear !important; }
         
-        .widget-full-view { display: flex !important; flex-direction: column !important; background: linear-gradient(135deg, rgba(13, 20, 38, 0.97), rgba(6, 10, 22, 0.99)) !important; backdrop-filter: blur(25px) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 16px !important; box-shadow: 0 25px 50px rgba(0,0,0,0.95) !important; overflow: hidden !important; width: 330px !important; max-width: 90vw !important; border-bottom: 3px solid var(--theme-color) !important; pointer-events: auto !important;}
+        .widget-full-view { display: flex !important; flex-direction: column !important; background: linear-gradient(135deg, rgba(13, 20, 38, 0.97), rgba(6, 10, 22, 0.99)) !important; backdrop-filter: blur(25px) !important; -webkit-backdrop-filter: blur(25px) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 16px !important; box-shadow: 0 25px 50px rgba(0,0,0,0.95) !important; overflow: hidden !important; width: 330px !important; max-width: 90vw !important; border-bottom: 3px solid var(--theme-color) !important; pointer-events: auto !important;}
         #misali-bgm-widget .widget-full-view { width: 360px !important; }
 
         .misali-float-widget.is-mini .widget-full-view { display: none !important; }
@@ -23610,6 +23563,8 @@ button:has(.fa-bell):hover {
             if (window.misaliAudioV100) return;
             window.misaliAudioV100 = true;
 
+            window.poemPlayerWasExplicitlyClosed = false;
+
             function isAdmin() { return document.body.classList.contains('admin-mode') || document.documentElement.classList.contains('admin-mode'); }
             function makeSlug(t) { if(!t) return ""; let m = {'Ç':'c','ç':'c','Ğ':'g','ğ':'g','Ş':'s','ş':'s','Ü':'u','ü':'u','I':'i','ı':'i','Ö':'o','ö':'o','İ':'i'}; for(let k in m) t=t.split(k).join(m[k]); return t.toLowerCase().replace(/[^a-z0-9]/g, ''); }
             function fmtTime(s) { if(isNaN(s)||s===Infinity||s===0) return "0:00"; let m=Math.floor(s/60); let sc=Math.floor(s%60); return m+":"+(sc<10?"0":"")+sc; }
@@ -23622,7 +23577,7 @@ button:has(.fa-bell):hover {
                 async keys() { try{ let db=await this.init(); return new Promise(res=>{let req=db.transaction('files','readonly').objectStore('files').getAllKeys(); req.onsuccess=()=>res(req.result); req.onerror=()=>res([]);}); }catch(e){return [];} }
             };
 
-            // 🚀 DRAG ENGINE FIX (Erkennt Ziehen vs. Klicken perfekt!)
+            // 🚀 DRAG ENGINE FIX (Verhindert, dass der Player beim Loslassen aufspringt)
             function dragger(el, handle) {
                 let drag = false, sx, sy, ix, iy, isDragged = false;
                 const start = e => { 
@@ -23666,17 +23621,29 @@ button:has(.fa-bell):hover {
                     min.addEventListener('click', (e) => { 
                         if(isDragged) { e.preventDefault(); e.stopPropagation(); return; } 
                         el.classList.remove('is-mini'); 
+                        window.poemPlayerWasExplicitlyClosed = false;
                     }); 
                 }
             }
 
+            // --- INJECT SCHWEBENDE PLAYER ---
             let hidAud = document.createElement('audio'); hidAud.id = 'm-hid-aud'; document.body.appendChild(hidAud);
             window.activeGlobalAudio = hidAud;
 
             let pWid = document.createElement('div'); pWid.id = 'misali-poem-widget'; pWid.className = 'misali-float-widget poem-theme is-mini';
             pWid.innerHTML = `<div class="widget-mini-view" title="Büyüt"><div class="hole"></div><i class="fas fa-compact-disc"></i></div><div class="widget-full-view"><div class="widget-content"><div class="w-top"><div class="w-drag" id="p-drag"><i class="fas fa-arrows-alt"></i></div><div class="w-info"><div class="m-title" id="p-title">Eser</div><div class="m-sub" id="p-aut">Misal.i</div></div><button class="w-tool-btn w-min" id="p-min"><i class="fas fa-minus"></i></button></div><div class="w-mid"><div class="m-vol-slider-wrap"><i class="fas fa-volume-up" id="p-vol-i"></i><input type="range" class="m-slider" id="p-vol" min="0" max="100" step="10" value="100"></div><div class="w-controls"><button class="w-btn" id="p-play"><i class="fas fa-play"></i></button><button class="w-btn active-state" id="p-pause"><i class="fas fa-pause"></i></button><button class="w-btn stop" id="p-stop"><i class="fas fa-times"></i></button></div></div><div class="m-progress-row w-bot"><div class="m-time-text" id="p-time">0:00 / 0:00</div><div class="m-progress-track" id="p-time-bar"><div class="m-progress-fill" id="p-fill"></div></div></div></div></div>`;
             document.body.appendChild(pWid); dragger(pWid, document.getElementById('p-drag'));
-            document.getElementById('p-min').onclick=(e)=>{e.stopPropagation(); pWid.classList.add('is-mini');};
+            document.getElementById('p-min').onclick=(e)=>{e.stopPropagation(); pWid.classList.add('is-mini'); window.poemPlayerWasExplicitlyClosed = true;};
+            
+            // X-Button komplett killt den Track und versteckt den Player
+            document.getElementById('p-stop').onclick=(e)=>{
+                e.stopPropagation(); 
+                if(hidAud){hidAud.pause();hidAud.currentTime=0;} 
+                hidAud.removeAttribute('data-passed-id');
+                pWid.classList.add('is-mini');
+                pWid.classList.remove('show-widget');
+                window.poemPlayerWasExplicitlyClosed = true;
+            }; 
 
             let bWid = document.createElement('div'); bWid.id = 'misali-bgm-widget'; bWid.className = 'misali-float-widget bgm-theme is-mini show-widget';
             bWid.innerHTML = `<div class="widget-mini-view" title="BGM"><div class="hole"></div><i class="fas fa-headphones"></i></div><div class="widget-full-view"><div class="widget-content"><div class="w-top"><div class="w-drag" id="b-drag"><i class="fas fa-arrows-alt"></i></div><div class="w-info"><div class="m-title" id="b-title">BGM</div><div class="m-sub" id="b-aut">Arka Plan</div></div><div class="w-tools"><button class="w-gear" id="b-gear" style="display:none;"><i class="fas fa-cogs"></i></button><button class="w-tool-btn w-min" id="b-min"><i class="fas fa-minus"></i></button></div></div><div class="w-mid"><div class="m-vol-slider-wrap"><i class="fas fa-volume-up" id="b-vol-i"></i><input type="range" class="m-slider" id="b-vol" min="0" max="100" step="10" value="50"></div><div class="w-controls"><button class="w-btn" id="b-play"><i class="fas fa-play"></i></button><button class="w-btn active-state" id="b-pause"><i class="fas fa-pause"></i></button></div></div><div class="m-progress-row w-bot"><div class="m-time-text" id="b-time">0:00 / 0:00</div><div class="m-progress-track" id="b-time-bar"><div class="m-progress-fill" id="b-fill"></div></div></div></div></div><audio id="b-a1" data-bgm="1"></audio><audio id="b-a2" data-bgm="2"></audio>`;
@@ -23711,13 +23678,13 @@ button:has(.fa-bell):hover {
             // --- POEM ENGINE (Schwebend) ---
             document.getElementById('p-play').onclick=()=>{if(hidAud)hidAud.play();}; 
             document.getElementById('p-pause').onclick=()=>{if(hidAud)hidAud.pause();}; 
-            document.getElementById('p-stop').onclick=()=>{if(hidAud){hidAud.pause();hidAud.currentTime=0;} pWid.classList.add('is-mini');}; 
             
             document.getElementById('p-vol').oninput=function(){hidAud.volume=parseInt(this.value)/100;hidAud.muted=false;let ic=document.getElementById('p-vol-i'); window.updateSliderBG(this, '#f4c542'); ic.className=hidAud.volume===0?'fas fa-volume-mute':(hidAud.volume<0.5?'fas fa-volume-down':'fas fa-volume-up');};
             document.getElementById('p-time-bar').onclick=function(e){if(hidAud.duration) hidAud.currentTime=((e.clientX-this.getBoundingClientRect().left)/this.getBoundingClientRect().width)*hidAud.duration;};
 
             // --- DIRECT PLAY (Grüne Tasten Trigger) - Holt den RICHTIGEN Titel ---
             window.playAudioDirectly = function(tKey, cTitle) {
+                window.poemPlayerWasExplicitlyClosed = false;
                 document.querySelectorAll('audio').forEach(a=>a.pause());
                 window.mAudioDB.get(tKey).then(d=>{ if(d) fire(d); else if(typeof firebase!=='undefined') firebase.database().ref('misaliAudioDB/'+tKey).once('value').then(s=>{let f=s.val(); if(f){window.mAudioDB.save(tKey,f);fire(f);}}); });
                 function fire(d){ 
@@ -23750,7 +23717,6 @@ button:has(.fa-bell):hover {
                 if(isP) { 
                     document.getElementById('p-play').classList.add('active-state'); document.getElementById('p-pause').classList.remove('active-state'); 
                     pWid.querySelector('.widget-mini-view').classList.add('spinning'); 
-                    if(!document.querySelector('.modal.active-modal') && !pWid.classList.contains('show-widget')) pWid.classList.add('show-widget'); 
                 } else { 
                     document.getElementById('p-play').classList.remove('active-state'); document.getElementById('p-pause').classList.add('active-state'); 
                     pWid.querySelector('.widget-mini-view').classList.remove('spinning'); 
@@ -23776,8 +23742,21 @@ button:has(.fa-bell):hover {
             hidAud.addEventListener('pause', poemStateUI); 
             hidAud.addEventListener('ended', poemStateUI);
 
+            // 🚀 PERFEKTE SICHTBARKEIT (Versteckt nicht mehr aus Versehen)
+            setInterval(() => {
+                let adm = isAdmin(); let g = document.getElementById('b-gear'); if(g) g.style.display=adm?'flex':'none';
+                let modalOpen = document.querySelector('.modal.active-modal');
+                let hasTrack = hidAud && hidAud.hasAttribute('data-passed-id');
+                
+                if (hasTrack && !modalOpen && !window.poemPlayerWasExplicitlyClosed) {
+                    if (!pWid.classList.contains('show-widget')) pWid.classList.add('show-widget');
+                } else if (modalOpen || !hasTrack) {
+                    pWid.classList.remove('show-widget');
+                }
+            }, 500);
+
             // ==========================================================
-            // 🚀 IN-CARD PLAYER INJEKTION (Gedicht Ansicht)
+            // 🚀 IN-CARD PLAYER INJEKTION (Gedicht Ansicht) - MASTER CONTAINER
             // ==========================================================
             window.runAudioEngineForCard = function(pId, mEl) {
                 if(!mEl) return; let cId=pId; let tEl=mEl.querySelector('h1, h2, h3, .title'); if(tEl) {let sl=makeSlug(tEl.innerText); if(sl) cId="track_"+sl;}
@@ -23827,7 +23806,7 @@ button:has(.fa-bell):hover {
                             let cardTitle = h1El ? h1El.innerText.trim() : "Eser";
 
                             pb.onclick=(e)=>{
-                                e.stopPropagation(); 
+                                e.stopPropagation(); window.poemPlayerWasExplicitlyClosed = false;
                                 if(hidAud.getAttribute('data-passed-id') !== cId) hidAud.src=src; 
                                 document.getElementById('p-title').innerText = cardTitle; document.getElementById('p-aut').innerText = au;
                                 document.querySelectorAll('audio').forEach(a=>{if(!a.hasAttribute('data-bgm'))a.pause();}); hidAud.play(); 
@@ -24002,7 +23981,7 @@ button:has(.fa-bell):hover {
                 body, p:not(header p):not(.misali-float-widget *), .card-text, .modal-text, .yorum-text, .notif-body { color: var(--m-theme-txt) !important; }
                 .card:not(.misali-float-widget *):not(.misali-in-card-container *), .poem-card, .sahsiyet-card, .modal-content { border-color: var(--m-theme-acc) !important; }
                 
-                /* 🔥 ABSOLUTER SCHUTZ */
+                /* 🔥 ABSOLUTER SCHUTZ: Alles aus der Audio-Engine bleibt für IMMER original! */
                 header#main-header *, .badge-play-btn, .badge-play-btn *, .badge-likes-wrap, .badge-likes-wrap *, .misali-audio-badge, .misali-audio-badge *, .misali-float-widget, .misali-float-widget *, .misali-in-card-container, .misali-in-card-container * { 
                     color: inherit !important; background: inherit !important; border: inherit !important; 
                 }
