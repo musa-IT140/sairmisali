@@ -23130,26 +23130,263 @@ button:has(.fa-bell):hover {
         }
     </style>
 
-    <script id="misali-header-cleanup-js">
+    <style id="misali-header-fix-css">
+        /* Master Header Container */
+        header#main-header, header.main-header, .header-wrapper {
+            background: var(--m-theme-hBg, #020617) !important; 
+            position: relative !important;
+            height: auto !important;
+            min-height: unset !important;
+            padding: 15px 20px 10px 20px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 15px !important;
+            z-index: 1000 !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
+            border-bottom: 2px solid var(--m-theme-acc, #f4c542) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: visible !important;
+        }
+
+        /* 🚀 1. Zeile (Top Header) - GRID SYSTEM */
+        .top-header, .header-content {
+            display: grid !important;
+            /* 3 Spalten: Links (Logo), Mitte (Suche), Rechts (Profile/Wetter) */
+            grid-template-columns: minmax(auto, 1fr) auto minmax(auto, 1fr) !important;
+            align-items: center !important;
+            gap: 15px !important;
+            width: 100% !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            position: relative !important;
+            transform: none !important;
+        }
+
+        /* Container Links (Logo + Datum) */
+        .header-logo-container {
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
+            justify-content: flex-start !important;
+        }
+
+        /* Container Mitte (Suche) */
+        .search-container {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+            max-width: 400px !important;
+            margin: 0 auto !important;
+            position: relative !important;
+        }
+
+        /* Container Rechts (Profil, Wetter, Login) */
+        .header-right-actions, .user-profile-info, .weather-widget, .auth-buttons {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            justify-content: flex-end !important;
+            position: relative !important;
+            transform: none !important;
+        }
+
+        /* 🚀 LAPTOP FIX (1000px - 1300px): Suche bricht in neue Zeile um */
+        @media (max-width: 1300px) {
+            .top-header, .header-content {
+                grid-template-columns: 1fr 1fr !important; /* Nur noch 2 Spalten oben */
+                justify-content: space-between !important;
+            }
+            .search-container {
+                grid-column: 1 / -1 !important; /* Suche nimmt die komplette 2. Zeile im Grid ein */
+                order: 3 !important;
+                margin-top: 10px !important;
+                max-width: 600px !important;
+            }
+            .header-right-actions { justify-content: flex-end !important; }
+        }
+
+        /* MOBILE FIX */
+        @media (max-width: 768px) {
+            .top-header, .header-content {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 10px !important;
+            }
+            .header-logo-container, .header-right-actions { justify-content: center !important; }
+        }
+
+        /* 🚀 2. Zeile (Statistiken - Immer isoliert!) */
+        .header-stats-row, .sub-stats-row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 20px !important;
+            width: 100% !important; 
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 15px 0 !important;
+            border-top: 1px dashed rgba(255,255,255,0.15) !important; 
+            border-bottom: 1px dashed rgba(255,255,255,0.15) !important; 
+            box-sizing: border-box !important;
+        }
+
+        .header-stats-row > div, .header-stats-row > span {
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            position: relative !important;
+            transform: none !important;
+        }
+
+        /* 3. Zeile (Menü) */
+        nav.main-nav, .nav-menu, .menu-bar {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 12px !important;
+            width: 100% !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 5px 0 !important;
+            position: relative !important;
+            transform: none !important;
+        }
+
+        /* 🚀 MODERNE LOGIN BUTTONS (Giriş / Kayıt Ol) */
+        .auth-buttons {
+            display: flex !important;
+            gap: 10px !important;
+            align-items: center !important;
+        }
+        .auth-buttons a, .auth-buttons button, .btn-login, .btn-register {
+            background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+            color: #f4c542 !important;
+            border: 1px solid rgba(244,197,66,0.4) !important;
+            padding: 8px 18px !important;
+            border-radius: 20px !important;
+            font-family: 'Poppins', sans-serif !important;
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
+            text-decoration: none !important;
+            text-transform: uppercase !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+        }
+        .auth-buttons a:hover, .auth-buttons button:hover, .btn-login:hover, .btn-register:hover {
+            background: linear-gradient(135deg, #f4c542, #d49f00) !important;
+            color: #000 !important;
+            border-color: #f4c542 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 15px rgba(244,197,66,0.6) !important;
+        }
+
+        /* 🚀 KARTEN-DATUM FIX (Damit Platz für Audio-Badges bleibt) */
+        .card [class*="time"], .card [class*="date"], .poem-card [class*="time"], .poem-card [class*="date"], .time-info {
+            font-size: 0.65rem !important;
+            opacity: 0.7 !important;
+            line-height: 1.2 !important;
+            display: inline-block !important;
+            margin-bottom: 25px !important;
+        }
+    </style>
+
+    <script id="misali-header-automation-js">
     (function() {
         "use strict";
         setInterval(() => {
-            let uName = window.currentUser?.username || localStorage.getItem('misaliUser');
+            // 1. Physische Neuordnung des Headers (Gegen Squishing!)
+            let header = document.querySelector('header#main-header') || document.querySelector('header.main-header');
+            if(header) {
+                let statsRow = document.querySelector('.header-stats-row') || document.querySelector('.sub-stats-row');
+                let navMenu = document.querySelector('nav.main-nav') || document.querySelector('.nav-menu');
+                
+                // Zieht die Statistiken AUS verschachtelten Containern heraus
+                if(statsRow && statsRow.parentElement !== header) {
+                    header.appendChild(statsRow);
+                }
+                // Zieht das Menü nach ganz unten
+                if(navMenu && navMenu.parentElement !== header) {
+                    header.appendChild(navMenu);
+                }
+            }
+
+            // 2. Login-Button Logik
             let hasLogout = document.querySelector('.logout-btn, [href*="logout"], [onclick*="logout"]');
-            let isLog = document.body.classList.contains('admin-mode') || document.body.classList.contains('user-mode') || uName || hasLogout;
+            let isLog = document.body.classList.contains('admin-mode') || document.body.classList.contains('user-mode') || window.currentUser?.username || localStorage.getItem('misaliUser') || hasLogout;
             
             document.querySelectorAll('.auth-buttons, [href*="login"], [href*="kayit"], button:contains("Giriş"), button:contains("Kayıt")').forEach(el => {
+                let isBtnWrapper = el.classList.contains('auth-buttons');
+                let isDirectBtn = el.tagName === 'A' || el.tagName === 'BUTTON';
+                
                 if(isLog) {
                     el.style.setProperty('display', 'none', 'important');
-                    el.style.setProperty('opacity', '0', 'important');
-                    el.style.setProperty('pointer-events', 'none', 'important');
                 } else {
-                    el.style.setProperty('display', 'flex', 'important');
-                    el.style.setProperty('opacity', '1', 'important');
-                    el.style.setProperty('pointer-events', 'auto', 'important');
+                    if (isBtnWrapper) {
+                        el.style.setProperty('display', 'flex', 'important');
+                    } else if (isDirectBtn) {
+                        el.style.setProperty('display', 'inline-flex', 'important');
+                    }
                 }
             });
-        }, 500);
+        }, 1000);
+    })();
+    </script>
+    
+    <script id="misali-kollisions-js">
+    (function() {
+        "use strict";
+        function adjustContentForFloatingWidgets() {
+            let kw = ['siir', 'şiir', 'soz', 'söz', 'kalem', 'eser']; 
+            let ur = window.location.href.toLowerCase();
+            let isAllowedPage = kw.some(k => ur.includes(k));
+            
+            if (!isAllowedPage) {
+                document.querySelectorAll('h1, h2, .active').forEach(e => {
+                    if (e.offsetWidth > 0 && e.offsetHeight > 0 && kw.some(k => e.innerText.toLowerCase().includes(k))) isAllowedPage = true;
+                });
+            }
+            if (window.currentCategory && kw.some(k => window.currentCategory.toLowerCase().includes(k))) isAllowedPage = true;
+
+            let modOp = false;
+            document.querySelectorAll('.modal, .modal-backdrop').forEach(m => {
+                let s = window.getComputedStyle(m);
+                if (m.classList.contains('active-modal') || m.classList.contains('show') || (s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0')) {
+                    if (!m.classList.contains('misali-peeker')) modOp = true;
+                }
+            });
+
+            let targetContent = document.querySelector('.bottom-btn, #main-wrapper > main, [class*="content"]');
+            if (!targetContent) targetContent = document.body;
+            
+            if (isAllowedPage && !modOp) {
+                let hP = document.getElementById('misali-poem-widget');
+                let pOp = hP && hP.classList.contains('show-widget') && !hP.classList.contains('is-mini');
+                let pLift = pOp ? 85 : 0; 
+                
+                let hB = document.getElementById('misali-bgm-widget');
+                let bOp = hB && hB.classList.contains('show-widget') && !hB.classList.contains('is-mini');
+                let bLift = bOp ? 170 : 0; 
+                
+                let maxLift = Math.max(pLift, bLift);
+                if (maxLift > 0) {
+                    targetContent.style.setProperty('padding-bottom', (20 + maxLift) + 'px', 'important');
+                } else {
+                    targetContent.style.setProperty('padding-bottom', '20px', 'important');
+                }
+            } else {
+                targetContent.style.setProperty('padding-bottom', '20px', 'important');
+            }
+        }
+        setInterval(adjustContentForFloatingWidgets, 500);
     })();
     </script>
 
@@ -23160,79 +23397,41 @@ button:has(.fa-bell):hover {
             let activeSlots = { left: [], right: [] };
 
             function isAllowedPage() {
-                let isAllowed = false;
-                let keywords = ['siir', 'şiir', 'soz', 'söz', 'kalem', 'eser'];
-                let url = window.location.href.toLowerCase();
-                if (keywords.some(k => url.includes(k))) return true;
-                let title = document.title.toLowerCase();
-                if (keywords.some(k => title.includes(k))) return true;
-                document.querySelectorAll('h1, h2, .active').forEach(el => {
-                    if (el.offsetWidth > 0 && el.offsetHeight > 0 && keywords.some(k => el.innerText.toLowerCase().includes(k))) isAllowed = true;
-                });
-                if (window.currentCategory && keywords.some(k => window.currentCategory.toLowerCase().includes(k))) return true;
-                return isAllowed;
+                let isAllowed = false; let keywords = ['siir', 'şiir', 'soz', 'söz', 'kalem', 'eser'];
+                if (keywords.some(k => window.location.href.toLowerCase().includes(k))) return true;
+                if (keywords.some(k => document.title.toLowerCase().includes(k))) return true;
+                document.querySelectorAll('h1, h2, .active').forEach(el => { if (el.offsetWidth > 0 && el.offsetHeight > 0 && keywords.some(k => el.innerText.toLowerCase().includes(k))) isAllowed = true; });
+                if (window.currentCategory && keywords.some(k => window.currentCategory.toLowerCase().includes(k))) return true; return isAllowed;
             }
 
             function isModalOpen() {
                 let isOpen = false;
-                document.querySelectorAll('.modal, .modal-backdrop').forEach(m => {
-                    let style = window.getComputedStyle(m);
-                    if (m.classList.contains('active-modal') || m.classList.contains('show') || (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0')) {
-                        if (!m.classList.contains('misali-peeker')) isOpen = true;
-                    }
-                });
+                document.querySelectorAll('.modal, .modal-backdrop').forEach(m => { let style = window.getComputedStyle(m); if (m.classList.contains('active-modal') || m.classList.contains('show') || (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0')) { if (!m.classList.contains('misali-peeker')) isOpen = true; } });
                 return isOpen;
             }
 
             function getRankedWorksPool() {
-                let pool = [];
-                let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {};
-                let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || window.userPoemsDB || {};
-                for (let poemId in db) {
-                    let h = 0; 
-                    if (db[poemId].ratings) { for(let k in db[poemId].ratings) h += parseInt(db[poemId].ratings[k].val || db[poemId].ratings[k] || 0); }
-                    if (h > 0) { 
-                        let title = "Eser";
-                        if (Array.isArray(fullDB)) { let f = fullDB.find(x => x.id === poemId); if(f) title = f.trTitle || f.title; } 
-                        else { for (let c in fullDB) { if(Array.isArray(fullDB[c])) { let f = fullDB[c].find(x => x.id === poemId); if(f) title = f.trTitle || f.title; } } }
-                        pool.push({ id: poemId, h: h, c: (db[poemId].comments ? Object.keys(db[poemId].comments).length : 0), title: title }); 
-                    }
+                let pool = []; let db = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB')) || {}; let fullDB = window.contentDB || JSON.parse(localStorage.getItem('misaliFullDB')) || window.userPoemsDB || {};
+                for (let poemId in db) { let h = 0; if (db[poemId].ratings) { for(let k in db[poemId].ratings) h += parseInt(db[poemId].ratings[k].val || db[poemId].ratings[k] || 0); }
+                    if (h > 0) { let title = "Eser"; if (Array.isArray(fullDB)) { let f = fullDB.find(x => x.id === poemId); if(f) title = f.trTitle || f.title; } else { for (let c in fullDB) { if(Array.isArray(fullDB[c])) { let f = fullDB[c].find(x => x.id === poemId); if(f) title = f.trTitle || f.title; } } } pool.push({ id: poemId, h: h, c: (db[poemId].comments ? Object.keys(db[poemId].comments).length : 0), title: title }); }
                 }
-                pool.sort((a, b) => b.h - a.h);
-                return pool.map((w, i) => ({ ...w, rank: i + 1 }));
+                pool.sort((a, b) => b.h - a.h); return pool.map((w, i) => ({ ...w, rank: i + 1 }));
             }
 
-            function hideAllPeekersSmoothly() {
-                document.querySelectorAll('.misali-peeker.peeker-show').forEach(p => { p.classList.remove('peeker-show'); setTimeout(() => { if(p.parentNode) p.remove(); }, 600); });
-                activeSlots = { left: [], right: [] };
-            }
-
+            function hideAllPeekersSmoothly() { document.querySelectorAll('.misali-peeker.peeker-show').forEach(p => { p.classList.remove('peeker-show'); setTimeout(() => { if(p.parentNode) p.remove(); }, 600); }); activeSlots = { left: [], right: [] }; }
             window.addEventListener('scroll', function() { hideAllPeekersSmoothly(); }, { passive: true });
 
             function spawnPeeker() {
                 if (isModalOpen() || !isAllowedPage()) { hideAllPeekersSmoothly(); return; }
                 let pool = getRankedWorksPool(); if (pool.length === 0) return;
-
-                let isLeft = Math.random() > 0.5; let side = isLeft ? 'left' : 'right';
-                let avSlots = ySlots.filter(s => !activeSlots[side].includes(s)); if (avSlots.length === 0) return;
-
-                let topPos = avSlots[Math.floor(Math.random() * avSlots.length)];
-                activeSlots[side].push(topPos);
-                let work = pool[Math.floor(Math.random() * pool.length)];
-
-                let peeker = document.createElement('div'); peeker.className = `misali-peeker misali-peeker-${side}`; peeker.style.top = topPos + '%';
-                let rankClass = work.rank === 1 ? 'rank-top1' : (work.rank === 2 ? 'rank-top2' : (work.rank === 3 ? 'rank-top3' : 'rank-other'));
-
+                let isLeft = Math.random() > 0.5; let side = isLeft ? 'left' : 'right'; let avSlots = ySlots.filter(s => !activeSlots[side].includes(s)); if (avSlots.length === 0) return;
+                let topPos = avSlots[Math.floor(Math.random() * avSlots.length)]; activeSlots[side].push(topPos); let work = pool[Math.floor(Math.random() * pool.length)];
+                let peeker = document.createElement('div'); peeker.className = `misali-peeker misali-peeker-${side}`; peeker.style.top = topPos + '%'; let rankClass = work.rank === 1 ? 'rank-top1' : (work.rank === 2 ? 'rank-top2' : (work.rank === 3 ? 'rank-top3' : 'rank-other'));
                 peeker.innerHTML = `<div class="peeker-rank ${rankClass}"><i class="fas fa-crown"></i> Platz ${work.rank}</div><div class="peeker-title">${work.title.length > 35 ? work.title.substring(0,35)+'...' : work.title}</div><div class="peeker-stats"><span><i class="fas fa-heart"></i> ${work.h}</span><span><i class="fas fa-comment"></i> ${work.c}</span></div>`;
-
                 peeker.onclick = function(e) { e.stopPropagation(); if(window.closeTopModal) window.closeTopModal('force'); setTimeout(() => { if(window.openPoemOrUserModal) window.openPoemOrUserModal(work.id); }, 100); };
-                document.body.appendChild(peeker);
-                let hIcon = document.createElement('i'); hIcon.className = 'fas fa-heart peeker-flying-heart'; hIcon.style.left = '50%'; hIcon.style.top = '50%'; peeker.appendChild(hIcon);
-
-                setTimeout(() => peeker.classList.add('peeker-show'), 50);
-                setTimeout(() => { if(peeker.parentNode && peeker.classList.contains('peeker-show')) { peeker.classList.remove('peeker-show'); setTimeout(() => { if(peeker.parentNode) peeker.remove(); activeSlots[side] = activeSlots[side].filter(s => s !== topPos); }, 500); } }, 8000);
+                document.body.appendChild(peeker); let hIcon = document.createElement('i'); hIcon.className = 'fas fa-heart peeker-flying-heart'; hIcon.style.left = '50%'; hIcon.style.top = '50%'; peeker.appendChild(hIcon);
+                setTimeout(() => peeker.classList.add('peeker-show'), 50); setTimeout(() => { if(peeker.parentNode && peeker.classList.contains('peeker-show')) { peeker.classList.remove('peeker-show'); setTimeout(() => { if(peeker.parentNode) peeker.remove(); activeSlots[side] = activeSlots[side].filter(s => s !== topPos); }, 500); } }, 8000);
             }
-
             setInterval(spawnPeeker, 4000);
         } catch(e) {}
     })();
@@ -23246,144 +23445,140 @@ button:has(.fa-bell):hover {
         .modal.active-modal .modal-content::-webkit-scrollbar-thumb { background: rgba(244, 197, 66, 0.8); border-radius: 10px; }
     </style>
 
-    <style id="misali-epic-notif-css">
-        @keyframes epicIconShake { 0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 0 rgba(244,197,66,0)); } 10% { transform: rotate(15deg) scale(1.2); filter: drop-shadow(0 0 8px rgba(244,197,66,0.9)); color: #f4c542; } 20% { transform: rotate(-10deg) scale(1.2); color: #f4c542; } 30% { transform: rotate(10deg) scale(1.2); color: #f4c542; } 40% { transform: rotate(-10deg) scale(1.2); filter: drop-shadow(0 0 8px rgba(244,197,66,0.9)); color: #f4c542; } 50% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 0 rgba(244,197,66,0)); } }
-        @keyframes epicBadgePulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); } 40% { transform: scale(1.3); box-shadow: 0 0 12px 6px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        .epic-alert-active i.fa-bell, .epic-alert-active i.fa-heart, .epic-alert-active i.fa-rose, .epic-alert-active i { animation: epicIconShake 2.5s infinite ease-in-out !important; }
-        .epic-alert-active .badge, .epic-alert-active .notif-badge, .epic-alert-active span[class*="count"] { animation: epicBadgePulse 1.5s infinite cubic-bezier(0.66, 0, 0, 1) !important; transform-origin: center !important; }
-    </style>
-
     <style id="misali-master-audio-css">
         @keyframes pulseGreen { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); } 70% { box-shadow: 0 0 12px 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
         @keyframes vinylSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 🚀 1. KARTEN BADGES (Grüne Note & Likes) - Absolut immun gegen Themes */
-        .misali-audio-badge { position: absolute !important; bottom: 12px !important; left: 12px !important; display: flex !important; align-items: center !important; gap: 8px !important; z-index: 99 !important; pointer-events: none !important; }
+        /* 🚀 1. KARTEN BADGES (Grüne Note & Likes) */
+        .misali-audio-badge { position: absolute !important; bottom: 8px !important; left: 8px !important; display: flex !important; align-items: center !important; gap: 6px !important; z-index: 99 !important; pointer-events: none !important; }
         
-        .badge-play-btn { background: #10b981 !important; width: 34px !important; height: 34px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important; transition: all 0.2s ease !important; pointer-events: auto !important; border: 2px solid rgba(255,255,255,0.2) !important; }
+        .badge-play-btn { background: #10b981 !important; width: 32px !important; height: 32px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important; transition: all 0.2s ease !important; pointer-events: auto !important; border: 2px solid rgba(255,255,255,0.2) !important; }
         .badge-play-btn:hover { transform: scale(1.15) !important; background: #059669 !important; }
         .badge-play-btn.playing { animation: pulseGreen 1.5s infinite !important; background: #ef4444 !important; border-color: #fca5a5 !important; }
-        .badge-play-btn i { color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 1rem !important; margin-left: 2px !important; text-shadow: none !important;}
+        .badge-play-btn i { color: #fff !important; font-size: 0.95rem !important; margin-left: 2px !important; text-shadow: none !important;}
         .badge-play-btn.playing i { margin-left: 0 !important; }
 
-        .badge-likes-wrap { display: flex !important; align-items: center !important; gap: 6px !important; background: rgba(15, 23, 42, 0.85) !important; backdrop-filter: blur(5px) !important; color: #f4c542 !important; padding: 4px 12px !important; border-radius: 12px !important; border: 1px solid rgba(244, 197, 66, 0.4) !important; pointer-events: auto !important; cursor: pointer !important; transition: all 0.2s !important; box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;}
+        .badge-likes-wrap { display: flex !important; align-items: center !important; gap: 5px !important; background: rgba(15, 23, 42, 0.85) !important; backdrop-filter: blur(5px) !important; color: #f4c542 !important; padding: 3px 10px !important; border-radius: 10px !important; border: 1px solid rgba(244, 197, 66, 0.4) !important; pointer-events: auto !important; cursor: pointer !important; transition: all 0.2s !important; box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;}
         .badge-likes-wrap:hover { background: rgba(244, 197, 66, 0.15) !important; transform: scale(1.05) !important; }
-        .badge-likes-wrap.liked { background: linear-gradient(135deg, #f4c542, #d49f00) !important; color: #000 !important; -webkit-text-fill-color: #000 !important;}
-        .badge-likes-wrap i { color: inherit !important; -webkit-text-fill-color: inherit !important; font-size: 0.8rem !important; text-shadow: none !important; margin: 0 !important;}
-        .badge-like-num { font-family: 'Poppins', sans-serif !important; font-size: 0.9rem !important; font-weight: 800 !important; color: inherit !important; -webkit-text-fill-color: inherit !important; margin: 0 !important;}
+        .badge-likes-wrap.liked { background: linear-gradient(135deg, #f4c542, #d49f00) !important; color: #000 !important; }
+        .badge-likes-wrap i { color: inherit !important; font-size: 0.75rem !important; text-shadow: none !important; margin: 0 !important;}
+        .badge-like-num { font-family: 'Poppins', sans-serif !important; font-size: 0.85rem !important; font-weight: 800 !important; color: inherit !important; margin: 0 !important;}
 
-        /* 🚀 2. IN-CARD PLAYER (Der edle gelbe Player IN der Karte) */
-        .misali-in-card-container { display: flex !important; flex-direction: column !important; align-items: center !important; margin: 25px auto 10px auto !important; width: 100% !important; max-width: 460px !important; z-index: 100 !important; position: relative !important; font-family: 'Poppins', sans-serif !important;}
+        /* 🚀 2. IN-CARD PLAYER (Gelbe Box IN der Karte) */
+        .misali-in-card-container { display: flex !important; flex-direction: column !important; align-items: center !important; margin: 20px auto 10px auto !important; width: 100% !important; max-width: 440px !important; z-index: 100 !important; position: relative !important; font-family: 'Poppins', sans-serif !important; scale: 0.96; }
         
-        /* Die Pillen (Yazan, Okuyan, Müzik) - Perfekt in EINER Reihe */
-        .m-pill-row { display: flex !important; justify-content: center !important; gap: 8px !important; margin-bottom: 12px !important; width: 100% !important; flex-wrap: wrap !important;}
-        .m-pill { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 8px !important; padding: 6px 10px !important; font-size: 0.75rem !important; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; white-space: nowrap !important;}
-        .m-pill span { color: #f4c542 !important; -webkit-text-fill-color: #f4c542 !important; font-weight: 700 !important; margin-left: 4px !important;}
+        .m-pill-row { display: flex !important; justify-content: center !important; gap: 6px !important; margin-bottom: 10px !important; width: 100% !important; flex-wrap: nowrap !important; overflow: hidden; }
+        .m-pill { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 6px !important; padding: 4px 8px !important; font-size: 0.7rem !important; color: #cbd5e1 !important; white-space: nowrap !important;}
+        .m-pill span { color: #f4c542 !important; font-weight: 700 !important; margin-left: 3px !important;}
 
-        /* Der gelbe Player Kasten in der Karte */
-        .m-card-player-box { width: 100% !important; background: rgba(10, 15, 30, 0.6) !important; border: 1px solid #f4c542 !important; border-radius: 12px !important; padding: 15px !important; display: flex !important; flex-direction: column !important; box-sizing: border-box !important; position: relative !important; gap: 15px !important; margin-bottom: 10px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;}
+        .m-card-player-box { width: 100% !important; background: rgba(10, 15, 30, 0.6) !important; border: 1px solid #f4c542 !important; border-radius: 10px !important; padding: 12px 10px !important; display: flex !important; flex-direction: column !important; box-sizing: border-box !important; position: relative !important; gap: 10px !important; margin-bottom: 5px !important; box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;}
         
-        /* Fettes rotes X zum Schließen (Weißer Button gefixt) */
-        .m-card-close-btn { position: absolute !important; top: -10px !important; right: -10px !important; background: #ef4444 !important; color: #fff !important; -webkit-text-fill-color: #fff !important; border: 2px solid #0f172a !important; border-radius: 50% !important; width: 28px !important; height: 28px !important; display: flex !important; justify-content: center !important; align-items: center !important; cursor: pointer !important; font-size: 0.9rem !important; z-index: 20 !important; transition: transform 0.2s !important; padding: 0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;}
+        /* 🔥 Fettes rotes X zum Schließen (Clean Fix) */
+        .m-card-close-btn { 
+            all: initial !important; 
+            position: absolute !important; top: -10px !important; right: -10px !important; 
+            background: #ef4444 !important; color: #fff !important; 
+            border: 2px solid #0f172a !important; border-radius: 50% !important; 
+            width: 26px !important; height: 26px !important; 
+            display: flex !important; justify-content: center !important; align-items: center !important; 
+            cursor: pointer !important; font-size: 0.8rem !important; z-index: 20 !important; 
+            transition: transform 0.2s !important; padding: 0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+        }
         .m-card-close-btn:hover { transform: scale(1.15) !important; }
 
-        .audio-top-row { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; padding-right: 35px !important; box-sizing: border-box !important;}
-        .audio-btn-group { display: flex !important; gap: 10px !important; align-items: center !important; }
-        .audio-core-btn { background: rgba(255,255,255,0.05) !important; color: #f4c542 !important; -webkit-text-fill-color: #f4c542 !important; border: 1px solid rgba(244,197,66,0.3) !important; border-radius: 50% !important; cursor: pointer !important; font-size: 1.1rem !important; transition: all 0.2s !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 36px !important; height: 36px !important; flex-shrink: 0 !important; padding: 0 !important;}
-        .audio-core-btn:hover { transform: scale(1.15) !important; background: rgba(244,197,66,0.2) !important; border-color: #f4c542 !important; color: #fff !important; -webkit-text-fill-color: #fff !important; box-shadow: 0 0 15px rgba(244,197,66,0.5) !important;}
-        .audio-core-btn.active-state { background: #f4c542 !important; color: #000 !important; -webkit-text-fill-color: #000 !important; box-shadow: 0 0 20px rgba(244,197,66,0.8) !important; transform: scale(1.1) !important; border: none !important;}
-        .audio-core-btn.stop { color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; border-color: rgba(255,255,255,0.2) !important; }
-        .audio-core-btn.stop:hover { background: #ef4444 !important; color: #fff !important; -webkit-text-fill-color: #fff !important; border-color: #ef4444 !important; }
-        .audio-core-btn.del { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; -webkit-text-fill-color: #ef4444 !important; border-color: rgba(239,68,68,0.3) !important; margin-left: auto !important;}
+        .audio-top-row { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; padding-right: 30px !important; box-sizing: border-box !important;}
+        .audio-btn-group { display: flex !important; gap: 8px !important; align-items: center !important; }
+        .audio-core-btn { background: rgba(255,255,255,0.05) !important; color: #f4c542 !important; border: 1px solid rgba(244,197,66,0.3) !important; border-radius: 50% !important; cursor: pointer !important; font-size: 1rem !important; transition: all 0.2s !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 34px !important; height: 34px !important; flex-shrink: 0 !important; padding: 0 !important;}
+        .audio-core-btn:hover { transform: scale(1.1) !important; background: rgba(244,197,66,0.2) !important; border-color: #f4c542 !important; color: #fff !important; box-shadow: 0 0 15px rgba(244,197,66,0.5) !important;}
+        .audio-core-btn.active-state { background: #f4c542 !important; color: #000 !important; box-shadow: 0 0 20px rgba(244,197,66,0.8) !important; transform: scale(1.05) !important; border: none !important;}
+        .audio-core-btn.stop { color: #cbd5e1 !important; border-color: rgba(255,255,255,0.2) !important; }
+        .audio-core-btn.stop:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .audio-core-btn.del { background: rgba(239,68,68,0.1) !important; color: #ef4444 !important; border-color: rgba(239,68,68,0.3) !important; margin-left: auto !important;}
         
-        .card-volume-wrapper { display: flex !important; align-items: center !important; gap: 8px !important; z-index: 10 !important; position: relative !important; flex-shrink: 0 !important; }
-        .card-vol-icon { font-size: 0.95rem !important; cursor: pointer !important; transition: color 0.2s !important; width: 16px !important; text-align: center !important; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;}
-        .card-vol-icon:hover { color: #f4c542 !important; -webkit-text-fill-color: #f4c542 !important; }
+        .card-volume-wrapper { display: flex !important; align-items: center !important; gap: 6px !important; z-index: 10 !important; position: relative !important; flex-shrink: 0 !important; }
+        .card-vol-icon { font-size: 0.85rem !important; cursor: pointer !important; transition: color 0.2s !important; width: 14px !important; text-align: center !important; color: #cbd5e1 !important; }
+        .card-vol-icon:hover { color: #f4c542 !important; }
         
-        /* Volume Slider in 10er Schritten */
-        input[type=range].dynamic-slider { -webkit-appearance: none !important; appearance: none !important; width: 60px !important; height: 6px !important; border-radius: 4px !important; background: #1e293b !important; outline: none !important; margin: 0 !important; cursor: pointer !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8) !important; }
-        input[type=range].dynamic-slider::-webkit-slider-thumb { -webkit-appearance: none !important; appearance: none !important; width: 14px !important; height: 14px !important; border-radius: 50% !important; background: #fff !important; cursor: pointer !important; box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important; }
+        input[type=range].dynamic-slider { -webkit-appearance: none !important; appearance: none !important; width: 55px !important; height: 5px !important; border-radius: 4px !important; background: #1e293b !important; outline: none !important; margin: 0 !important; cursor: pointer !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8) !important; }
+        input[type=range].dynamic-slider::-webkit-slider-thumb { -webkit-appearance: none !important; appearance: none !important; width: 13px !important; height: 13px !important; border-radius: 50% !important; background: #fff !important; cursor: pointer !important; box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important; }
 
-        /* 🚀 DER FORTSCHRITTSBALKEN (Mittendrin & Klickbar) */
-        .m-progress-row { display: flex !important; align-items: center !important; gap: 12px !important; width: 100% !important; }
-        .m-time-text { font-family: monospace !important; font-size: 0.8rem !important; font-weight: bold !important; color: #fff !important; -webkit-text-fill-color: #fff !important; white-space: nowrap !important; width: 85px !important; text-align: right !important;}
-        .m-progress-track { flex-grow: 1 !important; height: 10px !important; background: rgba(0,0,0,0.6) !important; border-radius: 5px !important; cursor: pointer !important; position: relative !important; border: 1px solid rgba(255,255,255,0.1) !important; overflow: hidden !important;}
-        .m-progress-fill { height: 100% !important; background: linear-gradient(90deg, #d49f00, #f4c542) !important; width: 0%; border-radius: 5px !important; transition: width 0.1s linear !important; box-shadow: 0 0 10px rgba(244,197,66,0.8) !important; pointer-events: none !important;}
+        .m-progress-row { display: flex !important; align-items: center !important; gap: 10px !important; width: 100% !important; }
+        .m-time-text { font-family: monospace !important; font-size: 0.75rem !important; font-weight: bold !important; color: #fff !important; white-space: nowrap !important; width: 80px !important; text-align: right !important;}
+        .m-progress-track { flex-grow: 1 !important; height: 8px !important; background: rgba(0,0,0,0.6) !important; border-radius: 4px !important; cursor: pointer !important; position: relative !important; border: 1px solid rgba(255,255,255,0.1) !important; overflow: hidden !important;}
+        .m-progress-fill { height: 100% !important; background: linear-gradient(90deg, #d49f00, #f4c542) !important; width: 0%; border-radius: 4px !important; transition: width 0.1s linear !important; box-shadow: 0 0 10px rgba(244,197,66,0.8) !important; pointer-events: none !important;}
 
-        /* Admin Upload Box - Kompakt! */
-        .m-admin-upload-box { width: 100% !important; margin-top: 5px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 8px !important; background: rgba(0,0,0,0.4) !important; border: 1px dashed rgba(244,197,66,0.5) !important; border-radius: 12px !important; padding: 12px !important; box-sizing: border-box !important;}
-        .m-admin-input-row { display: flex !important; gap: 6px !important; width: 100% !important; justify-content: center !important; flex-wrap: wrap !important;}
-        .m-admin-input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(244, 197, 66, 0.3) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 0.75rem !important; padding: 6px !important; border-radius: 6px !important; flex: 1 !important; width: 30% !important; min-width: 80px !important; text-align: center !important; outline: none !important;}
-        .m-admin-btn-orange { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #000 !important; -webkit-text-fill-color: #000 !important; font-weight: bold !important; border: none !important; border-radius: 6px !important; padding: 8px !important; width: 100% !important; cursor: pointer !important; font-family: 'Poppins', sans-serif !important; transition: transform 0.2s !important;}
+        .m-admin-upload-box { width: 100% !important; margin-top: 5px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 8px !important; background: rgba(0,0,0,0.4) !important; border: 1px dashed rgba(244,197,66,0.5) !important; border-radius: 10px !important; padding: 10px !important; box-sizing: border-box !important;}
+        .m-admin-input-row { display: flex !important; gap: 5px !important; width: 100% !important; justify-content: center !important; flex-wrap: wrap !important;}
+        .m-admin-input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(244, 197, 66, 0.3) !important; color: #fff !important; font-size: 0.7rem !important; padding: 5px !important; border-radius: 5px !important; flex: 1 !important; width: 30% !important; min-width: 75px !important; text-align: center !important; outline: none !important;}
+        .m-admin-btn-orange { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #000 !important; font-weight: bold !important; border: none !important; border-radius: 6px !important; padding: 8px !important; width: 100% !important; cursor: pointer !important; font-family: 'Poppins', sans-serif !important; transition: transform 0.2s !important;}
         .m-admin-btn-orange:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;}
 
-        /* 🚀 3. EXTERNE FLOATING PLAYERS (Gold & Cyan) - IMMER MINIMIERT */
-        .misali-float-widget { position: fixed !important; z-index: 2147483645 !important; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; opacity: 0; visibility: hidden; transform: scale(0.85); display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 !important; font-family: 'Poppins', sans-serif !important; }
-        .misali-float-widget.show-widget { opacity: 1 !important; visibility: visible !important; transform: scale(1) !important; }
+        /* 🚀 3. EXTERNE FLOATING PLAYERS (Gold & Cyan) - IMMER MINIMIERT & Klick-Drag-Fix */
+        .misali-float-widget { position: fixed !important; z-index: 2147483645 !important; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; opacity: 0; visibility: hidden; transform: scale(0.88); display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 !important; font-family: 'Poppins', sans-serif !important; pointer-events: none;}
+        .misali-float-widget.show-widget { opacity: 1 !important; visibility: visible !important; transform: scale(1) !important; pointer-events: auto; }
         
-        #misali-poem-widget { --theme-color: #f4c542; bottom: 30px !important; left: 30px !important; }
-        #misali-bgm-widget { --theme-color: #00e5ff; bottom: 120px !important; left: 30px !important; }
+        #misali-poem-widget { --theme-color: #f4c542; bottom: 25px !important; left: 25px !important; }
+        #misali-bgm-widget { --theme-color: #00e5ff; bottom: 105px !important; left: 25px !important; }
 
-        .misali-float-widget.poem-theme .m-title, .misali-float-widget.poem-theme .widget-icon { color: #f4c542 !important; -webkit-text-fill-color: #f4c542 !important; text-shadow: 0 0 5px rgba(244,197,66,0.5) !important;}
+        .misali-float-widget.poem-theme .m-title, .misali-float-widget.poem-theme .widget-icon { color: #f4c542 !important; text-shadow: 0 0 5px rgba(244,197,66,0.5) !important;}
         .misali-float-widget.poem-theme .m-progress-fill { background: linear-gradient(90deg, #d49f00, #f4c542) !important; box-shadow: 0 0 10px rgba(244,197,66,0.8) !important; }
         
-        .misali-float-widget.bgm-theme .m-title, .misali-float-widget.bgm-theme .widget-icon { color: #00e5ff !important; -webkit-text-fill-color: #00e5ff !important; text-shadow: 0 0 5px rgba(0,229,255,0.5) !important;}
+        .misali-float-widget.bgm-theme .m-title, .misali-float-widget.bgm-theme .widget-icon { color: #00e5ff !important; text-shadow: 0 0 5px rgba(0,229,255,0.5) !important;}
         .misali-float-widget.bgm-theme .m-progress-fill { background: linear-gradient(90deg, #0088cc, #00e5ff) !important; box-shadow: 0 0 10px rgba(0,229,255,0.8) !important; }
 
-        .widget-mini-view { display: none !important; width: 70px !important; min-width: 70px !important; height: 70px !important; border-radius: 50% !important; background: #060a12 !important; border: 2px solid #1e293b !important; box-shadow: 0 12px 30px rgba(0,0,0,0.9), inset 0 0 15px #000 !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; position: relative !important; transition: transform 0.2s !important;}
+        .widget-mini-view { display: none !important; width: 66px !important; min-width: 66px !important; height: 66px !important; border-radius: 50% !important; background: #060a12 !important; border: 2px solid #1e293b !important; box-shadow: 0 12px 30px rgba(0,0,0,0.9), inset 0 0 15px #000 !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; position: relative !important; transition: transform 0.2s !important; pointer-events: auto;}
         .widget-mini-view:hover { transform: scale(1.05) !important; }
         .widget-mini-view::before { content: '' !important; position: absolute !important; top: 4px; left: 4px; right: 4px; bottom: 4px; border-radius: 50% !important; background: repeating-radial-gradient(circle, #181f2a, #181f2a 2px, #0f172a 3px, #0f172a 4px) !important; opacity: 0.95; pointer-events: none !important;}
-        .widget-mini-view::after { content: '' !important; position: absolute !important; top: 50%; left: 50%; transform: translate(-50%, -50%) !important; width: 26px !important; height: 26px !important; border-radius: 50% !important; background: var(--theme-color) !important; box-shadow: inset 0 0 5px rgba(0,0,0,0.5) !important; pointer-events: none !important;}
-        .widget-mini-view i { font-size: 1.1rem !important; color: #000 !important; margin: 0 !important; position: relative !important; z-index: 5 !important; -webkit-text-fill-color: #000 !important; text-shadow: none !important;}
+        .widget-mini-view::after { content: '' !important; position: absolute !important; top: 50%; left: 50%; transform: translate(-50%, -50%) !important; width: 24px !important; height: 24px !important; border-radius: 50% !important; background: var(--theme-color) !important; box-shadow: inset 0 0 5px rgba(0,0,0,0.5) !important; pointer-events: none !important;}
+        .widget-mini-view i { font-size: 1.05rem !important; color: #000 !important; margin: 0 !important; position: relative !important; z-index: 5 !important; text-shadow: none !important;}
         .widget-mini-view.spinning { animation: vinylSpin 3s infinite linear !important; }
         
-        .widget-full-view { display: flex !important; flex-direction: column !important; background: linear-gradient(135deg, rgba(13, 20, 38, 0.97), rgba(6, 10, 22, 0.99)) !important; backdrop-filter: blur(25px) !important; -webkit-backdrop-filter: blur(25px) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 16px !important; box-shadow: 0 25px 50px rgba(0,0,0,0.95) !important; overflow: hidden !important; width: 340px !important; max-width: 92vw !important; border-bottom: 3px solid var(--theme-color) !important; pointer-events: auto !important;}
-        #misali-bgm-widget .widget-full-view { width: 370px !important; }
+        .widget-full-view { display: flex !important; flex-direction: column !important; background: linear-gradient(135deg, rgba(13, 20, 38, 0.97), rgba(6, 10, 22, 0.99)) !important; backdrop-filter: blur(25px) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 16px !important; box-shadow: 0 25px 50px rgba(0,0,0,0.95) !important; overflow: hidden !important; width: 330px !important; max-width: 90vw !important; border-bottom: 3px solid var(--theme-color) !important; pointer-events: auto !important;}
+        #misali-bgm-widget .widget-full-view { width: 360px !important; }
 
-        /* Umschalter für den Mini-Zustand */
         .misali-float-widget.is-mini .widget-full-view { display: none !important; }
         .misali-float-widget.is-mini .widget-mini-view { display: flex !important; }
 
-        .w-top { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 15px 15px 0 15px !important; gap: 10px !important;}
-        .w-drag { cursor: grab !important; color: #475569 !important; -webkit-text-fill-color: #475569 !important; font-size: 1.3rem !important; }
-        .w-drag:active { color: #fff !important; -webkit-text-fill-color: #fff !important; cursor: grabbing !important; }
+        .w-top { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 14px 14px 0 14px !important; gap: 8px !important;}
+        .w-drag { cursor: grab !important; color: #475569 !important; font-size: 1.2rem !important; }
+        .w-drag:active { color: #fff !important; cursor: grabbing !important; }
         .w-info { flex-grow: 1 !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; text-align: left !important;}
-        .m-title { font-size: 0.95rem !important; font-weight: bold !important; color: var(--theme-color) !important; -webkit-text-fill-color: var(--theme-color) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-        .m-sub { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 0.8rem !important; font-family: monospace !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin-top: 2px !important;}
+        .m-title { font-size: 0.92rem !important; font-weight: bold !important; color: var(--theme-color) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+        .m-sub { color: #94a3b8 !important; font-size: 0.78rem !important; font-family: monospace !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin-top: 2px !important;}
         
-        .w-tools { display: flex !important; gap: 8px !important; align-items: center !important; }
-        .w-gear { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--theme-color) !important; border-radius: 50% !important; color: var(--theme-color) !important; -webkit-text-fill-color: var(--theme-color) !important; width: 32px !important; height: 32px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 0.9rem !important; cursor: pointer !important; transition: all 0.2s !important;}
-        .w-gear:hover { background: var(--theme-color) !important; color: #000 !important; -webkit-text-fill-color: #000 !important; }
-        .w-min { background: transparent !important; color: #64748b !important; -webkit-text-fill-color: #64748b !important; border: none !important; font-size: 1.2rem !important; cursor: pointer !important; padding: 0 !important; }
-        .w-min:hover { color: #fff !important; -webkit-text-fill-color: #fff !important; }
+        .w-tools { display: flex !important; gap: 6px !important; align-items: center !important; }
+        .w-gear { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--theme-color) !important; border-radius: 50% !important; color: var(--theme-color) !important; width: 30px !important; height: 30px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 0.85rem !important; cursor: pointer !important; transition: all 0.2s !important;}
+        .w-gear:hover { background: var(--theme-color) !important; color: #000 !important; }
+        .w-min { background: transparent !important; color: #64748b !important; border: none !important; font-size: 1.1rem !important; cursor: pointer !important; padding: 0 !important; }
+        .w-min:hover { color: #fff !important; }
 
-        .w-mid { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 12px 15px !important; border-top: 1px solid rgba(255,255,255,0.04) !important; margin-top: 12px !important;}
-        .w-controls { display: flex !important; gap: 12px !important; }
-        .w-btn { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 50% !important; width: 38px !important; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 1.1rem !important; cursor: pointer !important; transition: all 0.2s !important; padding: 0 !important;}
-        .w-btn:hover { background: rgba(255,255,255,0.1) !important; transform: scale(1.1) !important; color: var(--theme-color) !important; -webkit-text-fill-color: var(--theme-color) !important; border-color: var(--theme-color) !important; }
-        .w-btn.active-state { background: var(--theme-color) !important; color: #000 !important; -webkit-text-fill-color: #000 !important; box-shadow: 0 0 15px var(--theme-color) !important; border: none !important; transform: scale(1.1) !important;}
-        .w-btn.stop:hover { color: #ef4444 !important; -webkit-text-fill-color: #ef4444 !important; border-color: #ef4444 !important; }
+        .w-mid { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 10px 14px !important; border-top: 1px solid rgba(255,255,255,0.04) !important; margin-top: 10px !important;}
+        .w-controls { display: flex !important; gap: 10px !important; }
+        .w-btn { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 50% !important; width: 36px !important; height: 36px !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #e2e8f0 !important; font-size: 1.05rem !important; cursor: pointer !important; transition: all 0.2s !important; padding: 0 !important;}
+        .w-btn:hover { background: rgba(255,255,255,0.1) !important; transform: scale(1.1) !important; color: var(--theme-color) !important; border-color: var(--theme-color) !important; }
+        .w-btn.active-state { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 15px var(--theme-color) !important; border: none !important; transform: scale(1.05) !important;}
+        .w-btn.stop:hover { color: #ef4444 !important; border-color: #ef4444 !important; }
         
-        .w-bot { padding: 0 15px 15px 15px !important; }
+        .w-bot { padding: 0 14px 14px 14px !important; }
 
-        /* 🚀 4. BGM ADMIN MODAL (Perfekt Zentriert & Edel) */
-        #bgm-glass-panel { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) scale(0.9) !important; width: 92% !important; max-width: 420px !important; background: linear-gradient(145deg, rgba(10, 16, 32, 0.98), rgba(4, 8, 16, 0.99)) !important; backdrop-filter: blur(25px) !important; -webkit-backdrop-filter: blur(25px) !important; border: 1px solid rgba(0, 229, 255, 0.35) !important; border-radius: 24px !important; padding: 25px !important; box-shadow: 0 30px 70px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.05) !important; color: #fff !important; z-index: 2147483647 !important; opacity: 0 !important; visibility: hidden !important; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; max-height: 85vh !important; overflow-y: auto !important; box-sizing: border-box !important; font-family: 'Poppins', sans-serif !important;}
+        /* 🚀 4. BGM ADMIN MODAL */
+        #bgm-glass-panel { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) scale(0.9) !important; width: 92% !important; max-width: 420px !important; background: linear-gradient(145deg, rgba(10, 16, 32, 0.98), rgba(4, 8, 16, 0.99)) !important; backdrop-filter: blur(25px) !important; border: 1px solid rgba(0, 229, 255, 0.35) !important; border-radius: 24px !important; padding: 25px !important; box-shadow: 0 30px 70px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.05) !important; color: #fff !important; z-index: 2147483647 !important; opacity: 0 !important; visibility: hidden !important; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; max-height: 85vh !important; overflow-y: auto !important; box-sizing: border-box !important; font-family: 'Poppins', sans-serif !important;}
         #bgm-glass-panel.open { transform: translate(-50%, -50%) scale(1) !important; opacity: 1 !important; visibility: visible !important; }
-        .bgm-p-title { color: #00e5ff !important; -webkit-text-fill-color: #00e5ff !important; text-align: center !important; font-size: 1.2rem !important; margin: 0 0 20px 0 !important; font-weight: 800 !important; text-transform: uppercase !important; border-bottom: 1px dashed rgba(0,229,255,0.2) !important; padding-bottom: 12px !important; letter-spacing: 1px !important;}
+        .bgm-p-title { color: #00e5ff !important; text-align: center !important; font-size: 1.2rem !important; margin: 0 0 20px 0 !important; font-weight: 800 !important; text-transform: uppercase !important; border-bottom: 1px dashed rgba(0,229,255,0.2) !important; padding-bottom: 12px !important; letter-spacing: 1px !important;}
         .bgm-p-sec { background: rgba(255,255,255,0.02) !important; border: 1px solid rgba(255,255,255,0.05) !important; border-radius: 12px !important; padding: 15px !important; margin-bottom: 15px !important; text-align: center !important;}
-        .bgm-p-lab { display: block !important; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 0.85rem !important; font-weight: bold !important; margin-bottom: 10px !important; text-transform: uppercase !important; text-align: left !important;}
-        .bgm-p-in { width: 100% !important; background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(0,229,255,0.25) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; padding: 12px 14px !important; border-radius: 8px !important; box-sizing: border-box !important; margin-bottom: 10px !important; outline: none !important; font-size: 0.9rem !important; transition: all 0.2s !important; font-family: inherit !important;}
+        .bgm-p-lab { display: block !important; color: #94a3b8 !important; font-size: 0.85rem !important; font-weight: bold !important; margin-bottom: 10px !important; text-transform: uppercase !important; text-align: left !important;}
+        .bgm-p-in { width: 100% !important; background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(0,229,255,0.25) !important; color: #fff !important; padding: 12px 14px !important; border-radius: 8px !important; box-sizing: border-box !important; margin-bottom: 10px !important; outline: none !important; font-size: 0.9rem !important; transition: all 0.2s !important; font-family: inherit !important;}
         .bgm-p-in:focus { border-color: #00e5ff !important; box-shadow: 0 0 10px rgba(0,229,255,0.3) !important;}
         select.bgm-p-in { -webkit-appearance: none !important; appearance: none !important; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300e5ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important; background-repeat: no-repeat !important; background-position: right 14px center !important; background-size: 15px !important; padding-right: 35px !important; cursor: pointer !important; }
         select.bgm-p-in option { background-color: #0b0f19 !important; color: #fff !important; }
-        .bgm-p-btn { width: 100% !important; background: linear-gradient(135deg, #10b981, #059669) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; font-weight: bold !important; border: none !important; padding: 12px !important; border-radius: 8px !important; cursor: pointer !important; font-size: 0.95rem !important; transition: transform 0.2s !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;}
+        .bgm-p-btn { width: 100% !important; background: linear-gradient(135deg, #10b981, #059669) !important; color: #fff !important; font-weight: bold !important; border: none !important; padding: 12px !important; border-radius: 8px !important; cursor: pointer !important; font-size: 0.95rem !important; transition: transform 0.2s !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;}
         .bgm-p-btn:hover { transform: translateY(-2px) !important; }
-        .bgm-r-btn { width: 100% !important; background: rgba(0,0,0,0.5) !important; border: 1px solid #00e5ff !important; color: #00e5ff !important; -webkit-text-fill-color: #00e5ff !important; padding: 12px !important; border-radius: 8px !important; cursor: pointer !important; font-weight: bold !important; margin-bottom: 12px !important; font-size:0.9rem !important; transition: all 0.3s !important;}
-        .bgm-r-btn.active { background: linear-gradient(135deg, #0088cc, #00e5ff) !important; color: #000 !important; -webkit-text-fill-color: #000 !important; border: none !important; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5) !important;}
+        .bgm-r-btn { width: 100% !important; background: rgba(0,0,0,0.5) !important; border: 1px solid #00e5ff !important; color: #00e5ff !important; padding: 12px !important; border-radius: 8px !important; cursor: pointer !important; font-weight: bold !important; margin-bottom: 12px !important; font-size:0.9rem !important; transition: all 0.3s !important;}
+        .bgm-r-btn.active { background: linear-gradient(135deg, #0088cc, #00e5ff) !important; color: #000 !important; border: none !important; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5) !important;}
         .bgm-a-list { margin-top: 10px !important; max-height: 160px !important; overflow-y: auto !important; padding-right: 5px !important; display: flex; flex-direction: column; gap: 6px;}
         .bgm-a-list::-webkit-scrollbar { width: 4px; } .bgm-a-list::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.5); border-radius: 4px; }
         .bgm-a-item { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; font-size: 0.85rem !important; color: #cbd5e1 !important; background: rgba(0,0,0,0.4) !important; border: 1px solid rgba(0,229,255,0.15) !important; border-radius: 8px !important;}
-        .bgm-u-btn { display: block !important; background: rgba(0, 229, 255, 0.08) !important; color: #00e5ff !important; -webkit-text-fill-color: #00e5ff !important; border: 1px dashed rgba(0, 229, 255, 0.4) !important; border-radius: 8px !important; padding: 11px !important; font-size: 0.85rem !important; cursor: pointer !important; text-align: center !important; transition: all 0.2s !important; margin-bottom: 6px !important; font-weight: bold !important;}
+        .bgm-u-btn { display: block !important; background: rgba(0, 229, 255, 0.08) !important; color: #00e5ff !important; border: 1px dashed rgba(0, 229, 255, 0.4) !important; border-radius: 8px !important; padding: 11px !important; font-size: 0.85rem !important; cursor: pointer !important; text-align: center !important; transition: all 0.2s !important; margin-bottom: 6px !important; font-weight: bold !important;}
         .bgm-u-btn:hover { background: rgba(0, 229, 255, 0.15) !important; box-shadow: 0 0 12px rgba(0, 229, 255, 0.25) !important; }
         #bgm-close-modal { background: rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:10px 30px; border-radius:12px; cursor:pointer; font-weight:bold; transition:all 0.2s; font-family: 'Poppins', sans-serif;}
         #bgm-close-modal:hover { background: rgba(255,255,255,0.15); }
@@ -23402,7 +23597,8 @@ button:has(.fa-bell):hover {
     (function() {
         "use strict";
 
-        // Safe Boot: Wartet, bis der Browser den Body aufgebaut hat
+        window.mAudioLikes = window.mAudioLikes || {};
+
         let bootTimer = setInterval(() => {
             if(document.body) {
                 clearInterval(bootTimer);
@@ -23411,15 +23607,14 @@ button:has(.fa-bell):hover {
         }, 50);
 
         function initAudioSystem() {
-            if (window.misaliAudioV90) return;
-            window.misaliAudioV90 = true;
+            if (window.misaliAudioV100) return;
+            window.misaliAudioV100 = true;
 
             function isAdmin() { return document.body.classList.contains('admin-mode') || document.documentElement.classList.contains('admin-mode'); }
             function makeSlug(t) { if(!t) return ""; let m = {'Ç':'c','ç':'c','Ğ':'g','ğ':'g','Ş':'s','ş':'s','Ü':'u','ü':'u','I':'i','ı':'i','Ö':'o','ö':'o','İ':'i'}; for(let k in m) t=t.split(k).join(m[k]); return t.toLowerCase().replace(/[^a-z0-9]/g, ''); }
             function fmtTime(s) { if(isNaN(s)||s===Infinity||s===0) return "0:00"; let m=Math.floor(s/60); let sc=Math.floor(s%60); return m+":"+(sc<10?"0":"")+sc; }
             window.updateSliderBG = function(slider, color) { if(slider) slider.style.setProperty('background', `linear-gradient(to right, ${color} ${slider.value}%, #1e293b ${slider.value}%)`, 'important'); };
 
-            // --- INDEXED DB ---
             window.mAudioDB = {
                 init() { return new Promise((res, rej) => { let r=indexedDB.open('MisaliAudio',1); r.onupgradeneeded=e=>{let db=e.target.result; if(!db.objectStoreNames.contains('files')) db.createObjectStore('files');}; r.onsuccess=e=>res(e.target.result); r.onerror=e=>rej(e);}); },
                 async save(id, d) { try{ let db=await this.init(); let tx=db.transaction('files','readwrite'); if(d===null) tx.objectStore('files').delete(id); else tx.objectStore('files').put(d,id); return true; }catch(e){} },
@@ -23427,17 +23622,54 @@ button:has(.fa-bell):hover {
                 async keys() { try{ let db=await this.init(); return new Promise(res=>{let req=db.transaction('files','readonly').objectStore('files').getAllKeys(); req.onsuccess=()=>res(req.result); req.onerror=()=>res([]);}); }catch(e){return [];} }
             };
 
-            // --- DRAG ENGINE ---
+            // 🚀 DRAG ENGINE FIX (Erkennt Ziehen vs. Klicken perfekt!)
             function dragger(el, handle) {
-                let drag=false, sx, sy, ix, iy;
-                const start = e => { if(e.type==='touchstart') e=e.touches[0]; if(!el.classList.contains('is-mini') && !e.target.closest('#'+handle.id)) return; if(e.target.closest('button')||e.target.closest('input')||e.target.closest('.m-progress-track')) return; drag=true; sx=e.clientX; sy=e.clientY; let r=el.getBoundingClientRect(); el.style.setProperty('transition','none','important'); el.style.setProperty('bottom','auto','important'); el.style.setProperty('right','auto','important'); el.style.setProperty('transform','none','important'); el.style.setProperty('left',r.left+'px','important'); el.style.setProperty('top',r.top+'px','important'); ix=r.left; iy=r.top; document.addEventListener('mousemove',mv); document.addEventListener('touchmove',mv,{passive:false}); document.addEventListener('mouseup',end); document.addEventListener('touchend',end); };
-                const mv = e => { if(!drag) return; e.preventDefault(); let ev=e.type==='touchmove'?e.touches[0]:e; let nx=ix+(ev.clientX-sx); let ny=iy+(ev.clientY-sy); let mw=window.innerWidth-el.offsetWidth; let mh=window.innerHeight-el.offsetHeight; if(nx<0)nx=0; if(nx>mw)nx=mw; if(ny<0)ny=0; if(ny>mh)ny=mh; el.style.setProperty('left',nx+'px','important'); el.style.setProperty('top',ny+'px','important'); };
-                const end = () => { if(!drag) return; drag=false; document.removeEventListener('mousemove',mv); document.removeEventListener('touchmove',mv); el.style.setProperty('transition','opacity 0.3s ease','important'); };
-                handle.addEventListener('mousedown',start); handle.addEventListener('touchstart',start,{passive:false});
-                let min=el.querySelector('.widget-mini-view'); if(min) { min.addEventListener('mousedown',start); min.addEventListener('touchstart',start,{passive:false}); min.addEventListener('click',()=>el.classList.remove('is-mini')); }
+                let drag = false, sx, sy, ix, iy, isDragged = false;
+                const start = e => { 
+                    if(e.type==='touchstart') e=e.touches[0]; 
+                    if(!el.classList.contains('is-mini') && !e.target.closest('#'+handle.id)) return; 
+                    if(e.target.closest('button')||e.target.closest('input')||e.target.closest('.m-progress-track')) return; 
+                    
+                    drag = true; isDragged = false; 
+                    sx = e.clientX; sy = e.clientY; 
+                    let r = el.getBoundingClientRect(); 
+                    el.style.setProperty('transition','none','important'); 
+                    el.style.setProperty('bottom','auto','important'); 
+                    el.style.setProperty('right','auto','important'); 
+                    el.style.setProperty('transform','none','important'); 
+                    el.style.setProperty('left',r.left+'px','important'); 
+                    el.style.setProperty('top',r.top+'px','important'); 
+                    ix=r.left; iy=r.top; 
+                    document.addEventListener('mousemove',mv); document.addEventListener('touchmove',mv,{passive:false}); 
+                    document.addEventListener('mouseup',end); document.addEventListener('touchend',end); 
+                };
+                const mv = e => { 
+                    if(!drag) return; e.preventDefault(); 
+                    let ev = e.type==='touchmove'?e.touches[0]:e; 
+                    if (Math.abs(ev.clientX - sx) > 5 || Math.abs(ev.clientY - sy) > 5) isDragged = true;
+                    let nx = ix+(ev.clientX-sx); let ny = iy+(ev.clientY-sy); 
+                    let mw = window.innerWidth-el.offsetWidth; let mh = window.innerHeight-el.offsetHeight; 
+                    if(nx<0)nx=0; if(nx>mw)nx=mw; if(ny<0)ny=0; if(ny>mh)ny=mh; 
+                    el.style.setProperty('left',nx+'px','important'); el.style.setProperty('top',ny+'px','important'); 
+                };
+                const end = () => { 
+                    if(!drag) return; drag=false; 
+                    document.removeEventListener('mousemove',mv); document.removeEventListener('touchmove',mv); 
+                    el.style.setProperty('transition','opacity 0.3s ease','important'); 
+                    setTimeout(() => { isDragged = false; }, 100); 
+                };
+                
+                handle.addEventListener('mousedown',start); handle.addEventListener('touchstart',start,{passive:false}); 
+                let min = el.querySelector('.widget-mini-view'); 
+                if(min) { 
+                    min.addEventListener('mousedown',start); min.addEventListener('touchstart',start,{passive:false}); 
+                    min.addEventListener('click', (e) => { 
+                        if(isDragged) { e.preventDefault(); e.stopPropagation(); return; } 
+                        el.classList.remove('is-mini'); 
+                    }); 
+                }
             }
 
-            // --- INJECT SCHWEBENDE PLAYER (IMMER MINIMIERT) ---
             let hidAud = document.createElement('audio'); hidAud.id = 'm-hid-aud'; document.body.appendChild(hidAud);
             window.activeGlobalAudio = hidAud;
 
@@ -23467,62 +23699,85 @@ button:has(.fa-bell):hover {
             document.getElementById('b-play').onclick=()=>{bInter=true; aBgm.play();}; document.getElementById('b-pause').onclick=()=>{bInter=true; aBgm.pause();};
             document.getElementById('b-vol').oninput=function(){bInter=true;mVol=parseInt(this.value)/100;aBgm.volume=mVol;aBgm.muted=false; let ic=document.getElementById('b-vol-i'); window.updateSliderBG(this, '#00e5ff'); ic.className=mVol===0?'fas fa-volume-mute':(mVol<0.5?'fas fa-volume-down':'fas fa-volume-up');};
             
-            function syncB(){ if(aBgm.duration&&!cross){ document.getElementById('b-fill').style.width=((aBgm.currentTime/aBgm.duration)*100)+'%'; document.getElementById('b-time').innerText=fmtTime(aBgm.currentTime) + ' / ' + fmtTime(aBgm.duration); if(rmx.active){let s=aBgm.duration*(rmx.pct/100); if(aBgm.currentTime>=s+parseFloat(rmx.sec)&&s>0) ldBgm(bgmIdx+1);}else if(aBgm.currentTime>=aBgm.duration-3) ldBgm(bgmIdx+1); } }
+            function bgmUI(){
+                if(aBgm&&!aBgm.paused){document.getElementById('b-play').classList.add('active-state');document.getElementById('b-pause').classList.remove('active-state');bWid.querySelector('.widget-mini-view').classList.add('spinning');}
+                else{document.getElementById('b-play').classList.remove('active-state');document.getElementById('b-pause').classList.add('active-state');bWid.querySelector('.widget-mini-view').classList.remove('spinning');}
+            }
+            function syncB(){ bgmUI(); if(aBgm.duration&&!cross){ document.getElementById('b-fill').style.width=((aBgm.currentTime/aBgm.duration)*100)+'%'; document.getElementById('b-time').innerText=fmtTime(aBgm.currentTime) + ' / ' + fmtTime(aBgm.duration); if(rmx.active){let s=aBgm.duration*(rmx.pct/100); if(aBgm.currentTime>=s+parseFloat(rmx.sec)&&s>0) ldBgm(bgmIdx+1);}else if(aBgm.currentTime>=aBgm.duration-3) ldBgm(bgmIdx+1); } }
             ba1.addEventListener('timeupdate',syncB); ba2.addEventListener('timeupdate',syncB);
+            ba1.addEventListener('play',bgmUI); ba2.addEventListener('play',bgmUI); ba1.addEventListener('pause',bgmUI); ba2.addEventListener('pause',bgmUI);
             document.getElementById('b-time-bar').onclick=function(e){if(aBgm.duration) aBgm.currentTime=((e.clientX-this.getBoundingClientRect().left)/this.getBoundingClientRect().width)*aBgm.duration;};
 
             // --- POEM ENGINE (Schwebend) ---
-            document.getElementById('p-play').onclick=()=>{if(hidAud)hidAud.play();}; document.getElementById('p-pause').onclick=()=>{if(hidAud)hidAud.pause();}; document.getElementById('p-stop').onclick=()=>{if(hidAud){hidAud.pause();hidAud.currentTime=0;}pWid.classList.add('is-mini');pWid.classList.remove('show-widget');};
+            document.getElementById('p-play').onclick=()=>{if(hidAud)hidAud.play();}; 
+            document.getElementById('p-pause').onclick=()=>{if(hidAud)hidAud.pause();}; 
+            document.getElementById('p-stop').onclick=()=>{if(hidAud){hidAud.pause();hidAud.currentTime=0;} pWid.classList.add('is-mini');}; 
+            
             document.getElementById('p-vol').oninput=function(){hidAud.volume=parseInt(this.value)/100;hidAud.muted=false;let ic=document.getElementById('p-vol-i'); window.updateSliderBG(this, '#f4c542'); ic.className=hidAud.volume===0?'fas fa-volume-mute':(hidAud.volume<0.5?'fas fa-volume-down':'fas fa-volume-up');};
-            hidAud.addEventListener('timeupdate',()=>{if(hidAud.duration){document.getElementById('p-fill').style.width=((hidAud.currentTime/hidAud.duration)*100)+'%';document.getElementById('p-time').innerText=fmtTime(hidAud.currentTime)+' / '+fmtTime(hidAud.duration);}});
             document.getElementById('p-time-bar').onclick=function(e){if(hidAud.duration) hidAud.currentTime=((e.clientX-this.getBoundingClientRect().left)/this.getBoundingClientRect().width)*hidAud.duration;};
 
-            // --- DIRECT PLAY (Grüne Tasten Trigger) ---
+            // --- DIRECT PLAY (Grüne Tasten Trigger) - Holt den RICHTIGEN Titel ---
             window.playAudioDirectly = function(tKey, cTitle) {
                 document.querySelectorAll('audio').forEach(a=>a.pause());
                 window.mAudioDB.get(tKey).then(d=>{ if(d) fire(d); else if(typeof firebase!=='undefined') firebase.database().ref('misaliAudioDB/'+tKey).once('value').then(s=>{let f=s.val(); if(f){window.mAudioDB.save(tKey,f);fire(f);}}); });
                 function fire(d){ 
                     let s=typeof d==='string'?d:(d.tracks?d.tracks[0]:d.src); if(!s)return; 
                     hidAud.src=s; hidAud.setAttribute('data-passed-id',tKey); 
-                    document.getElementById('p-title').innerText=cTitle||"Eser"; 
+                    
+                    document.getElementById('p-title').innerText=cTitle && cTitle.length>1 ? cTitle : "Eser"; 
                     document.getElementById('p-aut').innerText=d.author||"Şair"; 
+                    
                     hidAud.play().then(()=>{pWid.classList.remove('is-mini');pWid.classList.add('show-widget');}); 
                 }
             };
 
-            // --- EVENT-DRIVEN UI UPDATES (Kein Flackern mehr) ---
-            function updateBgmUI() {
-                let adm = isAdmin(); let g = document.getElementById('b-gear'); if(g) g.style.display=adm?'flex':'none';
-                if(aBgm && !aBgm.paused) { document.getElementById('b-play').classList.add('active-state'); document.getElementById('b-pause').classList.remove('active-state'); bWid.querySelector('.widget-mini-view').classList.add('spinning'); }
-                else { document.getElementById('b-play').classList.remove('active-state'); document.getElementById('b-pause').classList.add('active-state'); bWid.querySelector('.widget-mini-view').classList.remove('spinning'); }
-            }
-            ba1.addEventListener('play', updateBgmUI); ba1.addEventListener('pause', updateBgmUI);
-            ba2.addEventListener('play', updateBgmUI); ba2.addEventListener('pause', updateBgmUI);
+            const poemUI = () => {
+                if(hidAud.duration) { 
+                    let pct = ((hidAud.currentTime/hidAud.duration)*100);
+                    document.getElementById('p-fill').style.width = pct + '%';
+                    document.getElementById('p-time').innerText = fmtTime(hidAud.currentTime)+' / '+fmtTime(hidAud.duration);
+                    
+                    let cId = hidAud.getAttribute('data-passed-id');
+                    let inCardBars = document.querySelectorAll('.m-card-player-box[data-playing-id="'+cId+'"] .audio-progress-bar');
+                    inCardBars.forEach(b => b.style.width = pct + '%');
+                    let inCardTimes = document.querySelectorAll('.m-card-player-box[data-playing-id="'+cId+'"] .audio-time-display');
+                    inCardTimes.forEach(t => t.innerText = fmtTime(hidAud.currentTime)+' / '+fmtTime(hidAud.duration));
+                }
+            };
 
-            function updatePoemUI() {
-                if(hidAud && !hidAud.paused && hidAud.currentTime > 0) { 
-                    document.getElementById('p-play').classList.add('active-state'); document.getElementById('p-pause').classList.remove('active-state'); pWid.querySelector('.widget-mini-view').classList.add('spinning'); 
+            const poemStateUI = () => {
+                let isP = !hidAud.paused && hidAud.currentTime > 0;
+                if(isP) { 
+                    document.getElementById('p-play').classList.add('active-state'); document.getElementById('p-pause').classList.remove('active-state'); 
+                    pWid.querySelector('.widget-mini-view').classList.add('spinning'); 
                     if(!document.querySelector('.modal.active-modal') && !pWid.classList.contains('show-widget')) pWid.classList.add('show-widget'); 
                 } else { 
-                    document.getElementById('p-play').classList.remove('active-state'); document.getElementById('p-pause').classList.add('active-state'); pWid.querySelector('.widget-mini-view').classList.remove('spinning'); 
+                    document.getElementById('p-play').classList.remove('active-state'); document.getElementById('p-pause').classList.add('active-state'); 
+                    pWid.querySelector('.widget-mini-view').classList.remove('spinning'); 
                 }
                 
-                let cid = hidAud.getAttribute('data-passed-id');
-                document.querySelectorAll('.badge-play-btn').forEach(b=>{ let id=b.getAttribute('data-play-id'); let ic=b.querySelector('i'); if(cid===id && !hidAud.paused){b.classList.add('playing');ic.className='fas fa-pause';}else{b.classList.remove('playing');ic.className='fas fa-play';} });
-            }
-            hidAud.addEventListener('play', updatePoemUI); hidAud.addEventListener('pause', updatePoemUI); hidAud.addEventListener('ended', updatePoemUI);
+                let cId = hidAud.getAttribute('data-passed-id');
+                document.querySelectorAll('.badge-play-btn').forEach(b=>{ 
+                    let id=b.getAttribute('data-play-id'); let ic=b.querySelector('i'); 
+                    if(cId===id && isP){ b.classList.add('playing'); ic.className='fas fa-pause'; }
+                    else{ b.classList.remove('playing'); ic.className='fas fa-play'; } 
+                });
 
-            // Modal visibility check for floating player (Nur Sichtbarkeit, keine UI-Render-Schleife)
-            setInterval(() => {
-                let adm = isAdmin(); let g = document.getElementById('b-gear'); if(g) g.style.display=adm?'flex':'none';
-                if(hidAud && !hidAud.paused && hidAud.currentTime > 0) {
-                    if(document.querySelector('.modal.active-modal')) { pWid.classList.remove('show-widget'); }
-                    else if(!pWid.classList.contains('show-widget') && !pWid.classList.contains('is-mini')) { pWid.classList.add('show-widget'); }
-                }
-            }, 500);
+                document.querySelectorAll('.m-card-player-box').forEach(box => {
+                    let id = box.getAttribute('data-playing-id');
+                    let pBtn = box.querySelector('.play-btn'); let paBtn = box.querySelector('.pause-btn');
+                    if(cId === id && isP) { pBtn.classList.add('active-state'); paBtn.classList.remove('active-state'); }
+                    else { pBtn.classList.remove('active-state'); paBtn.classList.add('active-state'); }
+                });
+            };
+
+            hidAud.addEventListener('timeupdate', poemUI); 
+            hidAud.addEventListener('play', poemStateUI); 
+            hidAud.addEventListener('pause', poemStateUI); 
+            hidAud.addEventListener('ended', poemStateUI);
 
             // ==========================================================
-            // 🚀 IN-CARD PLAYER INJEKTION (Gedicht Ansicht) - MASTER CONTAINER
+            // 🚀 IN-CARD PLAYER INJEKTION (Gedicht Ansicht)
             // ==========================================================
             window.runAudioEngineForCard = function(pId, mEl) {
                 if(!mEl) return; let cId=pId; let tEl=mEl.querySelector('h1, h2, h3, .title'); if(tEl) {let sl=makeSlug(tEl.innerText); if(sl) cId="track_"+sl;}
@@ -23531,18 +23786,14 @@ button:has(.fa-bell):hover {
                 window.mAudioDB.get(cId).then(d=>{ if(d) b(d); else if(typeof firebase!=='undefined') firebase.database().ref('misaliAudioDB/'+cId).once('value').then(s=>{let f=s.val(); if(f){window.mAudioDB.save(cId,f); b(f);}else b(null);}); else b(null); });
 
                 function b(d) {
-                    // Verhindert doppelte Pillen oder Formulare!
                     mEl.querySelectorAll('.misali-in-card-container').forEach(e=>e.remove());
-                    
                     let tr=[]; let pu=false; let au="Şair Misal.i", mu="Bilinmiyor", rd="Şair Misal.i";
                     if(typeof d==='string'){tr.push(d);pu=true;} else if(d){pu=d.published||false;if(d.author)au=d.author;if(d.music)mu=d.music;if(d.reader)rd=d.reader;if(d.tracks)tr=d.tracks;else if(d.src)tr.push(d.src);}
                     let isAd=isAdmin(); if(!isAd&&(!tr.length||!pu)) return;
 
-                    // Der neue Master-Container für ALLES innerhalb der Karte
                     let masterBox = document.createElement('div'); masterBox.className='misali-in-card-container';
 
                     if(tr.length>0){
-                        // PILL ROW (Wird nur EINMAL hinzugefügt)
                         let pills=document.createElement('div'); pills.className='m-pill-row';
                         pills.innerHTML=`<div class="m-pill">YAZAN: <span>${au}</span></div><div class="m-pill">OKUYAN: <span>${rd}</span></div><div class="m-pill">MÜZİK: <span>${mu}</span></div>`;
                         masterBox.appendChild(pills);
@@ -23569,40 +23820,63 @@ button:has(.fa-bell):hover {
 
                             vs.oninput=function(e){e.stopPropagation(); hidAud.volume=parseInt(this.value)/100; hidAud.muted=false; window.updateSliderBG(vs, '#f4c542'); vi.className=hidAud.volume===0?'fas fa-volume-mute card-vol-icon':(hidAud.volume<0.5?'fas fa-volume-down card-vol-icon':'fas fa-volume-up card-vol-icon');};
                             
-                            // Flackerfreie Event-Sync
-                            const cardUI = () => {
-                                if(!document.body.contains(bx)) return;
-                                if(hidAud.duration) { tm.innerText=fmtTime(hidAud.currentTime) + ' / ' + fmtTime(hidAud.duration); bar.style.width=((hidAud.currentTime/hidAud.duration)*100)+'%'; }
-                                if(!hidAud.paused && hidAud.getAttribute('data-passed-id')===cId) { pb.classList.add('active-state'); pab.classList.remove('active-state'); pWid.classList.remove('show-widget'); } else { pb.classList.remove('active-state'); pab.classList.add('active-state'); }
-                            };
-                            hidAud.addEventListener('timeupdate', cardUI); hidAud.addEventListener('play', cardUI); hidAud.addEventListener('pause', cardUI);
+                            if(hidAud.getAttribute('data-passed-id')===cId && !hidAud.paused) { pb.classList.add('active-state'); pab.classList.remove('active-state'); }
+                            if(hidAud.getAttribute('data-passed-id')===cId && hidAud.duration) { tm.innerText = fmtTime(hidAud.currentTime)+' / '+fmtTime(hidAud.duration); bar.style.width = ((hidAud.currentTime/hidAud.duration)*100)+'%'; }
 
-                            pb.onclick=(e)=>{e.stopPropagation(); if(hidAud.getAttribute('data-passed-id') !== cId) hidAud.src=src; document.querySelectorAll('audio').forEach(a=>{if(!a.hasAttribute('data-bgm'))a.pause();}); hidAud.play(); };
+                            let h1El = mEl.querySelector('h1, h2, h3, .title');
+                            let cardTitle = h1El ? h1El.innerText.trim() : "Eser";
+
+                            pb.onclick=(e)=>{
+                                e.stopPropagation(); 
+                                if(hidAud.getAttribute('data-passed-id') !== cId) hidAud.src=src; 
+                                document.getElementById('p-title').innerText = cardTitle; document.getElementById('p-aut').innerText = au;
+                                document.querySelectorAll('audio').forEach(a=>{if(!a.hasAttribute('data-bgm'))a.pause();}); hidAud.play(); 
+                            };
                             pab.onclick=(e)=>{e.stopPropagation(); hidAud.pause();}; 
                             sb.onclick=(e)=>{e.stopPropagation(); hidAud.pause(); hidAud.currentTime=0; tm.innerText='0:00 / 0:00'; bar.style.width='0%';}; 
-                            cb.onclick=(e)=>{e.stopPropagation(); hidAud.pause(); bx.remove(); hidAud.removeEventListener('timeupdate', cardUI);};
+                            cb.onclick=(e)=>{e.stopPropagation(); hidAud.pause(); bx.remove(); };
                             contBar.onclick=(e)=>{e.stopPropagation(); if(hidAud.duration) hidAud.currentTime=((e.clientX-contBar.getBoundingClientRect().left)/contBar.getBoundingClientRect().width)*hidAud.duration;};
                             
                             if(isAd) { let db=bx.querySelector('.delete-track'); if(db) db.onclick=(e)=>{e.stopPropagation(); if(confirm("Silinsin mi?")){let nt=tr.filter((_,i)=>i!==idx);let np=nt.length?{tracks:nt,published:isPub,author:au,music:mu,reader:rd}:null; b(np); window.initGrnBadges(); window.mAudioDB.save(cId,np).then(()=>{if(typeof firebase!=='undefined'){if(np)firebase.database().ref('misaliAudioDB/'+cId).set(np);else{firebase.database().ref('misaliAudioDB/'+cId).remove();firebase.database().ref('misaliAudioIndex/'+cId).remove();}}});}}; }
                         });
+                        
+                        // 🚀 LIKE BUTTON IM KARTEN-PLAYER
+                        let lDB = JSON.parse(localStorage.getItem('misaliLikedAudios')||'{}'); let uL = lDB[cId]||false;
+                        let likeWrap = document.createElement('div');
+                        likeWrap.innerHTML = `
+                            <div class="m-in-card-like-row" style="display:flex; justify-content:center; width:100%; margin-top:5px; margin-bottom:15px;">
+                                <div class="badge-likes-wrap ${uL ? 'liked' : ''}" style="pointer-events: auto !important; cursor:pointer;">
+                                    <i class="fas fa-music"></i> <span class="badge-like-num">${window.mAudioLikes?.[cId] || 0}</span>
+                                </div>
+                            </div>
+                        `;
+                        let lw = likeWrap.querySelector('.badge-likes-wrap');
+                        lw.onclick = function(e) {
+                            e.stopPropagation(); e.preventDefault();
+                            let d = JSON.parse(localStorage.getItem('misaliLikedAudios')||'{}');
+                            let hasL = d[cId]; let del = 0;
+                            let numEl = this.querySelector('.badge-like-num'); let cur = parseInt(numEl.innerText) || 0;
+                            if (hasL) { this.classList.remove('liked'); delete d[cId]; del = -1; numEl.innerText = Math.max(0, cur - 1); }
+                            else { this.classList.add('liked'); d[cId] = true; del = 1; numEl.innerText = cur + 1; }
+                            localStorage.setItem('misaliLikedAudios', JSON.stringify(d));
+                            if(typeof firebase !== 'undefined') firebase.database().ref('misaliAudioLikes/'+cId).transaction(c => Math.max(0, (c||0)+del));
+                        };
+                        masterBox.appendChild(likeWrap);
                     }
 
-                    // ADMIN UPLOAD BOX (Wird nur EINMAL ganz unten angeheftet)
                     if(isAd){
                         let frm=document.createElement('div'); frm.className='m-admin-upload-box';
                         frm.innerHTML=`<div class="m-admin-input-row"><input type="text" class="m-admin-input i-a" value="${au}" placeholder="Yazan"><input type="text" class="m-admin-input i-r" value="${rd}" placeholder="Okuyan"><input type="text" class="m-admin-input i-m" value="${mu}" placeholder="Müzik"></div><label class="m-admin-btn-orange"><i class="fas fa-plus-circle"></i> Yeni Ses Ekle<input type="file" class="i-f" accept="audio/*" style="display:none;"/></label>`;
                         masterBox.appendChild(frm);
                         frm.querySelector('.i-f').onchange=function(e){if(!e.target.files[0])return; frm.innerHTML=`<span style="color:#f4c542; font-weight:bold;"><i class="fas fa-spin fa-spinner"></i> İşleniyor...</span>`; let r=new FileReader(); r.onload=ev=>{let np={tracks:[...(tr||[]), ev.target.result],published:true,author:frm.querySelector('.i-a')?.value||au,music:frm.querySelector('.i-m')?.value||mu,reader:frm.querySelector('.i-r')?.value||rd}; b(np); window.initGrnBadges(); window.mAudioDB.save(cId,np).then(()=>{if(typeof firebase!=='undefined'){firebase.database().ref('misaliAudioDB/'+cId).set(np);firebase.database().ref('misaliAudioIndex/'+cId).set(true);}});}; r.readAsDataURL(e.target.files[0]);};
                     }
-
                     if(tEl) tEl.insertAdjacentElement('afterend', masterBox); else cont.insertAdjacentElement('afterbegin', masterBox);
                 }
             };
 
-            // Modal Trigger Fix
             if(!window.mModZ) { window.mModZ=true; const o1=window.openPoemOrUserModal; window.openPoemOrUserModal=id=>{if(o1)o1(id);w(id);}; const o2=window.openFastModal; window.openFastModal=id=>{if(o2)o2(id);w(id);}; function w(id){let r=0;let f=setInterval(()=>{let m=document.querySelector('.modal.active-modal')||document.getElementById(id);if(m){clearInterval(f);window.runAudioEngineForCard(id,m);}if(++r>10)clearInterval(f);},100);}}
 
-            // --- BGM ADMIN MODAL (Zahnrad Panel - Glassmorphism) ---
+            // --- BGM ADMIN MODAL ---
             document.body.addEventListener('click', (e) => {
                 if(e.target.closest('#b-gear')) {
                     e.stopPropagation(); let m=document.getElementById('bgm-glass-panel'); if(m){m.classList.add('open');return;}
@@ -23625,11 +23899,11 @@ button:has(.fa-bell):hover {
             });
 
             // ==========================================================
-            // 🚀 GRÜNE BADGES AUF KARTEN INJIZIEREN (Voll funktionsfähig)
+            // 🚀 GRÜNE BADGES AUF KARTEN INJIZIEREN
             // ==========================================================
             window.initGrnBadges = async function() {
                 try {
-                    let lk=await window.mAudioDB.keys(); let gk=lk; let lkDb={};
+                    let lk=await window.mAudioDB.keys(); let gk=lk; 
                     const rnd=()=>{
                         document.querySelectorAll('.misali-audio-badge').forEach(e=>e.remove());
                         document.querySelectorAll('.card, .poem-card, .masonry-item, [onclick*="openPoem"], [onclick*="openFastModal"]').forEach(c=>{
@@ -23645,8 +23919,7 @@ button:has(.fa-bell):hover {
                                 let cardTitle = tEl ? tEl.innerText.trim() : "Eser";
                                 let lDB = JSON.parse(localStorage.getItem('misaliLikedAudios')||'{}'); let uL = lDB[tk]||false;
                                 
-                                // Getrennte Klickbereiche für Play und Like
-                                b.innerHTML=`<div class="badge-play-btn" data-play-id="${tk}"><i class="fas fa-play"></i></div><div class="badge-likes-wrap ${uL?'liked':''}"><i class="fas fa-music"></i> <span class="badge-like-num">${lkDb[tk]||0}</span></div>`;
+                                b.innerHTML=`<div class="badge-play-btn" data-play-id="${tk}"><i class="fas fa-play"></i></div><div class="badge-likes-wrap ${uL?'liked':''}" style="pointer-events: auto !important; cursor:pointer;"><i class="fas fa-music"></i> <span class="badge-like-num">${window.mAudioLikes?.[tk]||0}</span></div>`;
                                 c.appendChild(b);
                                 
                                 b.querySelector('.badge-play-btn').onclick=(e)=>{e.stopPropagation();e.preventDefault();window.playAudioDirectly(tk,cardTitle);};
@@ -23661,7 +23934,7 @@ button:has(.fa-bell):hover {
                             }
                         });
                     };
-                    if(typeof firebase!=='undefined'&&firebase.database){ firebase.database().ref('misaliAudioIndex').on('value',s=>{let d=s.val()||{};gk=[...new Set([...lk,...Object.keys(d)])];rnd();}); firebase.database().ref('misaliAudioLikes').on('value',s=>{lkDb=s.val()||{};document.querySelectorAll('.misali-audio-badge').forEach(b=>{let id=b.getAttribute('data-badge-id');if(id){let n=b.querySelector('.badge-like-num');if(n)n.innerText=lkDb[id]||0;}});}); } else { rnd(); }
+                    if(typeof firebase!=='undefined'&&firebase.database){ firebase.database().ref('misaliAudioIndex').on('value',s=>{let d=s.val()||{};gk=[...new Set([...lk,...Object.keys(d)])];rnd();}); firebase.database().ref('misaliAudioLikes').on('value',s=>{window.mAudioLikes=s.val()||{};document.querySelectorAll('.misali-audio-badge').forEach(b=>{let id=b.getAttribute('data-badge-id');if(id){let n=b.querySelector('.badge-like-num');if(n)n.innerText=window.mAudioLikes[id]||0;}});}); } else { rnd(); }
                 } catch(e){}
             };
             window.initGrnBadges(); setInterval(window.initGrnBadges, 4000);
@@ -23729,7 +24002,7 @@ button:has(.fa-bell):hover {
                 body, p:not(header p):not(.misali-float-widget *), .card-text, .modal-text, .yorum-text, .notif-body { color: var(--m-theme-txt) !important; }
                 .card:not(.misali-float-widget *):not(.misali-in-card-container *), .poem-card, .sahsiyet-card, .modal-content { border-color: var(--m-theme-acc) !important; }
                 
-                /* 🔥 ABSOLUTER SCHUTZ: Alles aus der Audio-Engine bleibt für IMMER original! */
+                /* 🔥 ABSOLUTER SCHUTZ */
                 header#main-header *, .badge-play-btn, .badge-play-btn *, .badge-likes-wrap, .badge-likes-wrap *, .misali-audio-badge, .misali-audio-badge *, .misali-float-widget, .misali-float-widget *, .misali-in-card-container, .misali-in-card-container * { 
                     color: inherit !important; background: inherit !important; border: inherit !important; 
                 }
@@ -23761,26 +24034,6 @@ button:has(.fa-bell):hover {
     })();
     </script>
 
-    <style id="misali-kollisions-css">
-        :root { --ticker-offset: 0px; }
-        .misali-lift-target { transition: margin-bottom 0.4s ease !important; }
-    </style>
-
-    <script id="misali-kollisions-js">
-    (function() {
-        "use strict";
-        function adjustElements() {
-            let winH = window.innerHeight; let leftLift = 0;
-            let pWidget = document.getElementById('misali-poem-widget');
-            if (pWidget && pWidget.classList.contains('show-widget') && !pWidget.classList.contains('is-mini')) leftLift = 90;
-            let bWidget = document.getElementById('misali-bgm-widget');
-            if (bWidget && bWidget.classList.contains('show-widget') && !bWidget.classList.contains('is-mini')) leftLift = 180;
-            document.querySelectorAll('.bottom-btn, #admin-btn').forEach(el => { el.style.setProperty('margin-bottom', leftLift + 'px', 'important'); });
-        }
-        setInterval(adjustElements, 500);
-    })();
-    </script>
-    
     <script>
     (function() {
         window.initMilyoner = function() {
@@ -23860,7 +24113,7 @@ button:has(.fa-bell):hover {
 
         let deferredPrompt;
         let installPromo = document.createElement('div'); installPromo.className = 'misali-app-promo';
-        installPromo.innerHTML = `<i class="fas fa-mobile-alt promo-icon"></i><div class="promo-text"><h4>Uygulamayı İndir</h4><p>Ana ekrana ekle, anında bildirimleri aç ve tam ekran deneyimi yaşa!</p></div><div class="promo-btns"><button class="btn-install" id="pwa-install-btn">Yükle</button><button class="btn-dismiss" id="pwa-dismiss-btn">Sonra</button></div>`;
+        installPromo.innerHTML = `<i class="fas fa-mobile-alt promo-icon"></i><div class="promo-text"><h4>Uygulamayı İndir</h4><p>Ana ekrana ekle, anında bildirimleri aç und tam ekran deneyimi yaşa!</p></div><div class="promo-btns"><button class="btn-install" id="pwa-install-btn">Yükle</button><button class="btn-dismiss" id="pwa-dismiss-btn">Sonra</button></div>`;
         document.body.appendChild(installPromo);
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -23871,7 +24124,7 @@ button:has(.fa-bell):hover {
         document.getElementById('pwa-install-btn').onclick = async () => {
             if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") Notification.requestPermission();
             if (deferredPrompt) { installPromo.classList.remove('show'); deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null;
-            } else { alert("iPhone'da uygulamayı yüklemek için alttaki 'Paylaş' (Kare ve Ok) ikonuna tıklayıp 'Ana Ekrana Ekle'yi seçin."); installPromo.classList.remove('show'); }
+            } else { alert("iPhone'da uygulamayı yüklemek için alttaki 'Paylaş' (Kare und Ok) ikonuna tıklayıp 'Ana Ekrana Ekle'yi seçin."); installPromo.classList.remove('show'); }
         };
         document.getElementById('pwa-dismiss-btn').onclick = () => { installPromo.classList.remove('show'); localStorage.setItem('misaliPwaDismissed', 'true'); };
     })();
