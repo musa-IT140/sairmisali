@@ -15,6 +15,7 @@
     <!-- FIREBASE SDK (V8 Compat für einfaches Scripting) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBhcm2ch-3wbjmXPpKLmwTrozbcr8xrPTg",
@@ -999,7 +1000,63 @@ body.modal-open #mini-announcement-btn {
 #mini-info-btn:hover { right: 0px !important; opacity: 1 !important; padding-right: 25px; background: var(--accent-cyan) !important; color: #fff !important;}
 #mini-announcement-btn:hover { left: 0px !important; opacity: 1 !important; padding-left: 25px; background: var(--accent-cyan) !important; color: #fff !important; }
 
+@media (max-width: 768px) {
+            body { padding-top: 180px !important; padding-bottom: 40px !important; } 
+            .main-content { padding-top: 5px !important; }
+            .sec-title { font-size: 1.3rem !important; margin-top: 5px !important; margin-bottom: 10px !important; line-height: 1.3 !important; text-align: center !important; }
+            
+            /* Kompakter Header */
+            .h-row-1 { padding: 4px 10px !important; min-height: 45px !important; gap: 8px !important; }
+            .brand { font-size: 1.25rem !important; margin-bottom: 0 !important; }
+            .dt-box { padding: 4px 8px !important; font-size: 0.65rem !important; }
+            .user-prof-box { padding: 3px 10px !important; gap: 6px !important; }
+            .u-name { font-size: 1.1rem !important; }
+            .mini-avatar { width: 32px !important; height: 32px !important; min-width: 32px !important; }
+            
+            /* Ticker & Nav */
+            .h-row-ticker { height: 28px !important; }
+            .ticker-bar { height: 28px !important; }
+            .ticker-1 .ticker-txt, .ticker-2 .ticker-txt { font-size: 0.85rem !important; }
+            .h-row-2 { padding: 6px 10px !important; gap: 6px !important; justify-content: center !important; }
+            .s-pill { padding: 4px 8px !important; font-size: 0.7rem !important; border-radius: 12px !important; }
+            .h-row-3 { height: 38px !important; padding: 0 8px !important; gap: 8px !important; }
+            .nav-link { font-size: 0.75rem !important; padding: 8px 0 !important; }
+            
+            /* Modals & Grids */
+            .modal { width: 95% !important; max-width: 350px !important; border-radius: 16px !important; margin: 0 auto !important; }
+            .modal.modal-large { max-width: 98% !important; } 
+            .modal-body { padding: 15px !important; padding-top: 40px !important; max-height: 80vh !important; }
+            .c-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; padding: 0 5px !important; gap: 10px !important; }
+            .card { padding: 12px 10px !important; border-radius: 12px !important; }
+            
+            /* Admin Player & Audio */
+            .card-audio-player { padding: 10px !important; margin: 10px auto !important; width: 100% !important; border-radius: 10px !important; }
+            .inline-admin-audio { display: flex !important; } /* Zwingt Admin-Buttons immer auf sichtbar */
+        }
+        
+        /* Globaler Zwang für Admin-Sichtbarkeit des Players */
+        html.admin-mode .inline-admin-audio { display: flex !important; }
 
+        /* Ticker & Nav */
+            .h-row-ticker { height: auto !important; min-height: 56px !important; display: flex !important; flex-direction: column !important; }
+            .ticker-bar { height: 28px !important; min-height: 28px !important; line-height: 28px !important; }
+            .ticker-1 .ticker-txt, .ticker-2 .ticker-txt { font-size: 0.85rem !important; }
+
+                /* --- KESİN ÇÖZÜM: ÜBERLAPPUNG & HEADER FONT FIX --- */
+body { padding-top: 290px !important; }
+.main-content { margin-top: 20px !important; }
+
+@media (max-width: 768px) {
+    body { padding-top: 250px !important; }
+    .h-row-ticker { min-height: 56px !important; height: auto !important; }
+    .main-content { margin-top: 15px !important; }
+}
+
+/* User-Name und Signaturen zwingend auf Great Vibes setzen */
+.u-name, .misali-signature, .misali-signature-text, .author-signature-gold, .author-signature-white, #random-quote-popup div:last-child {
+    font-family: 'Great Vibes', cursive !important;
+    font-size: 1.8rem !important;
+}
     
     </style>
 
@@ -1976,6 +2033,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
     console.log("🚀 Şair Misal.i ATOMIC MEGA ULTRA Engine (Kusursuz Sürüm) başlatılıyor...");
 
+    // FIREBASE LIVE-SYNC: Online verileri anında herkese yansıt
+    firebase.database().ref('interactions').on('value', (snap) => {
+        if(snap.exists()) {
+            window.poemDataStore = snap.val();
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            if(typeof window.renderAllContent === 'function') window.renderAllContent();
+            if(typeof window.updateHeartsUI === 'function') window.updateHeartsUI();
+        }
+    });
+
+    firebase.database().ref('audioRatings').on('value', (snap) => {
+        if(snap.exists()) {
+            localStorage.setItem('misaliAudioRatingsDB', JSON.stringify(snap.val()));
+            if(typeof window.renderAllContent === 'function') window.renderAllContent();
+        }
+    });
+
     let animStyle = document.createElement('style');
     animStyle.innerHTML = `
         @keyframes spiralGiris {
@@ -2535,49 +2609,62 @@ window.renderUserMessages = function() {
         }
     };
 
-    window.adminUploadAudioCurrent = function(input) {
+window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
-        let file = input.files[0], reader = new FileReader();
-        window.toast("Müzik Yükleniyor...", "⏳");
-        reader.onload = async function(e) {
-            let data64 = e.target.result;
-            if(window.currentItemData) {
-                let type = window.currentItemData.type, id = window.currentItemData.id;
-                let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
-                let idx = source.findIndex(x => x.id === id);
-                let newName = file.name.replace(/\.[^/.]+$/, "");
-                
-                if (idx > -1) { 
-                    await window.audioStorage.save(id, data64);
-                    source[idx].hasAudio = true; 
-                    delete source[idx].audio;
-                    
-                    if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
-                    if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
-                    if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
-                    
-                    window.currentItemData = source[idx];
-                    try {
-                        if(type === 'userPoems') localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                        else localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                        window.toast("Müzik Başarıyla Kaydedildi!", "💾"); 
-                    } catch(err) { window.toast("Kayıt Hatası", "❌"); }
-                }
-                
-                let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
-                if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
-                
-                if(aud) { 
-                    await window.loadAudioSafely(aud, data64);
-                    aud.play().then(() => { 
-                        let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
-                        window.renderAllContent(); 
-                    }).catch(() => {}); 
-                }
-                window.updateAudioUI(window.currentItemData, true, id, type);
+        let file = input.files[0];
+        window.toast("Müzik Firebase'e yükleniyor (Online)...", "⏳");
+        
+        let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
+        let uploadTask = storageRef.put(file);
+        
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                document.getElementById('read-author').innerText = "Yükleniyor: %" + Math.round(progress);
+            }, 
+            (error) => { window.toast("Yükleme Hatası!", "❌"); console.error(error); }, 
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then(async (downloadURL) => {
+                    if(window.currentItemData) {
+                        let type = window.currentItemData.type, id = window.currentItemData.id;
+                        let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+                        let idx = source.findIndex(x => x.id === id);
+                        let newName = file.name.replace(/\.[^/.]+$/, "");
+                        
+                        if (idx > -1) { 
+                            source[idx].hasAudio = true; 
+                            source[idx].audio = downloadURL; // ONLINE URL KAYIT
+                            
+                            if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
+                            if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
+                            if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
+                            
+                            window.currentItemData = source[idx];
+                            try {
+                                if(type === 'userPoems') localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                                else localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                                // VERİTABANINI HERKES İÇİN GÜNCELLE
+                                firebase.database().ref('contentDB').set(window.DB);
+                                window.toast("Müzik Online Kaydedildi!", "🌍"); 
+                            } catch(err) { window.toast("Kayıt Hatası", "❌"); }
+                        }
+                        
+                        let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
+                        if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
+                        
+                        if(aud) { 
+                            aud.src = downloadURL;
+                            aud.play().then(() => { 
+                                let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
+                                window.renderAllContent(); 
+                            }).catch(() => {}); 
+                        }
+                        window.updateAudioUI(window.currentItemData, true, id, type);
+                        document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
+                    }
+                });
             }
-        };
-        reader.readAsDataURL(file);
+        );
     };
 
     window.adminDeleteAudioCurrent = async function() {
@@ -4091,17 +4178,22 @@ window.renderLeaderboard = function() {
 // ========================================================
     // ESER ETKİLEŞİMLERİ (LİNKLİ VE EMOJİLİ)
     // ========================================================
-    window.addGamePoints = function(pts, gameName, isWin) {
+window.addGamePoints = function(pts, gameName, isWin) {
         if (!window.currentUser) { window.toast("Puan kazanmak için giriş yapmalısın!", "🔒"); return; }
         let penalty = Math.max(1, Math.floor(pts / 2)); 
         let finalPts = isWin ? pts : -penalty;
+        
         window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
         window.userDatabase[window.currentUser.username] = window.currentUser;
+        
+        // LOKAL + ONLINE (Firebase) KAYIT
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        window.toast(isWin ? `+${pts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+        firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score });
         
-        window.logUserAction(`🎮 OYUN: ${window.currentUser.username}, "${gameName}" oyununu ${isWin ? "kazandı" : "kaybetti"}.`, 'games', 'nav');
+        window.toast(isWin ? `+${pts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+        window.logUserAction(`🎮 OYUN: ${window.currentUser.username}, "${gameName}" oyununu ${isWin ? "kazandı" : "kaybetti"}.`);
+        
         if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
         if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
     };
@@ -4147,7 +4239,7 @@ window.renderLeaderboard = function() {
         window.updateHeartsUI(); window.renderAllContent();
     };
 
-    window.rateCurrent = function(val) {
+window.rateCurrent = function(val) {
         if (!window.currentUser) return window.toast("Puan vermek için giriş yapmalısın!", "🔒");
         if (!window.currentItemData) return;
         
@@ -4167,7 +4259,9 @@ window.renderLeaderboard = function() {
         if (newVal === 0) delete window.poemDataStore[pId].ratings[window.currentUser.username];
         else window.poemDataStore[pId].ratings[window.currentUser.username] = { val: newVal, ts: Date.now() };
         
+        // LOKAL + ONLINE (Firebase) KAYIT
         localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+        firebase.database().ref('interactions/' + pId + '/ratings').set(window.poemDataStore[pId].ratings);
         
         let btnEl = document.getElementById('heart-' + (newVal > 0 ? newVal : oldVal)) || document.getElementById('heart-1');
         window.flyDovesRealistically(doveCount, btnEl, isReturning);
@@ -4183,12 +4277,8 @@ window.renderLeaderboard = function() {
                 if (authorObj) window.notifyUser(authorObj.username, `❤️ ${window.currentUser.name || window.currentUser.username}, "${titleHtml}" adlı eserine ${newVal} kalp verdi!`, pId, pType);
             }
         }
-        
         window.logUserAction(`❤️ BEĞENİ: ${window.currentUser.username}, ${pEmoji} "${titleHtml}" adlı esere ${newVal} kalp verdi.`, pId, pType);
-        
         window.updateHeartsUI(); 
-        if (typeof window.updateLiveBadges === 'function') window.updateLiveBadges();
-        if (typeof window.renderAllContent === 'function') window.renderAllContent();
     };
 
     const originalOpenReadModal = window.openReadModal;
@@ -4811,34 +4901,35 @@ window.audioStorage = {
 };
 
 window.adminRadioUpload = async function(input) {
-    if (!input.files || input.files.length === 0) return;
-    window.radioSettings = window.radioSettings || { playlist: [] };
-    window.radioSettings.playlist = window.radioSettings.playlist || [];
-    
-    window.toast("Radyo Müzikleri Yükleniyor...", "⏳");
-    
-    for(let i=0; i<input.files.length; i++) {
-        let file = input.files[i];
-        let reader = new FileReader();
+        if (!input.files || input.files.length === 0) return;
+        window.radioSettings = window.radioSettings || { playlist: [] };
+        window.radioSettings.playlist = window.radioSettings.playlist || [];
         
-        reader.onload = async function(e) {
+        window.toast("Şarkılar Firebase'e yükleniyor (Online)...", "⏳");
+        
+        for(let i = 0; i < input.files.length; i++) {
+            let file = input.files[i];
             let trackId = "radio_track_" + Date.now() + "_" + i;
             let trackName = file.name.replace(/\.[^/.]+$/, "");
             
-            await window.audioStorage.save(trackId, e.target.result);
+            let storageRef = firebase.storage().ref('radyo_muzikleri/' + trackId + '_' + file.name);
+            let uploadTask = storageRef.put(file);
             
-            window.radioSettings.playlist.push({ id: trackId, name: trackName });
-            localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
-            
-            if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
-            if(typeof window.updateRadioPlayerDisplay === 'function') window.updateRadioPlayerDisplay();
-            
-            window.toast(trackName + " radyoya eklendi!", "🎵");
-        };
-        reader.readAsDataURL(file);
-    }
-    input.value = ""; // Erlaubt das erneute Hochladen der gleichen Datei
-};
+            uploadTask.on('state_changed', null, (error) => { console.error(error); }, () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    // ONLINE URL'Yİ LİSTEYE EKLE
+                    window.radioSettings.playlist.push({ id: trackId, name: trackName, src: downloadURL });
+                    localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+                    
+                    if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
+                    if(typeof window.updateRadioPlayerDisplay === 'function') window.updateRadioPlayerDisplay();
+                    
+                    window.toast(trackName + " radyoya online eklendi!", "🌍");
+                });
+            });
+        }
+        input.value = ""; 
+    };
 
 window.applyRadioSettingsToPlayer = async function(settings) {
     let bgm = document.getElementById('global-bgm');
@@ -5763,46 +5854,61 @@ window.addGamePoints = function(pts, gameName, isWin) {
         window.renderAllContent(); window.updateLiveBadges(); window.nav('userPoems'); 
     };
 
-    window.addComment = function() {
+window.addComment = function() {
         if (!window.currentUser) return window.toast("Giriş yapın.", "🔒");
         let input = document.getElementById('modal-comment-input'), txt = input?.value.trim(); if (!txt) return;
         const pId = window.currentItemData.id; if (!window.poemDataStore[pId]) window.poemDataStore[pId] = { ratings: {}, comments: [], guller: {} };
         window.poemDataStore[pId].comments = window.poemDataStore[pId].comments || [];
         window.poemDataStore[pId].comments.push({ user: window.currentUser.name || window.currentUser.username, text: txt, roses: 0, time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) });
+        
+        // LOKAL + ONLINE (Firebase) KAYIT
         localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+        firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
+        
         if (input) input.value = ''; 
         
-        // ADMIN BİLDİRİMİ
-        window.logUserAction(`💬 YORUM: ${window.currentUser.username} bir esere yorum yaptı: "${txt}"`);
+        let pType = window.currentItemData.type;
+        let pEmoji = window.currentItemData.emoji || '📖';
+        let safeTitle = (window.currentItemData.title || window.currentItemData.trTitle || 'Eser').replace(/'/g, "\\'");
+        let titleHtml = `<span style='color:var(--accent-gold); text-decoration:underline;'>${safeTitle}</span>`;
         
-        window.updateHeartsUI(); window.renderAllContent();
+        let authorName = window.currentItemData.author || window.currentItemData.name;
+        if (authorName && authorName !== window.currentUser.username && authorName !== window.currentUser.name) {
+            let authorObj = Object.values(window.userDatabase).find(user => user.name === authorName || user.username === authorName);
+            if (authorObj) window.notifyUser(authorObj.username, `💬 ${window.currentUser.name || window.currentUser.username}, "${titleHtml}" adlı eserine yorum yaptı!`, pId, pType);
+        }
+        
+        window.logUserAction(`💬 YORUM: ${window.currentUser.username}, ${pEmoji} "${titleHtml}" adlı esere yorum yaptı: "${txt}"`, pId, pType);
+        window.updateHeartsUI(); 
     };
 
-    // 6. ESER SİLME
-    window.deleteAnyItem = function(id, type) {
-        let source = (type === 'userPoems') ? window.userPoemsDB : window.DB[type];
-        if (!source || !Array.isArray(source)) return window.toast("Veri kaynağı bulunamadı!", "❌");
+    window.roseComment = function(idx) {
+        if (!window.currentUser) return window.toast("Giriş yapın.", "🔒");
+        const pId = window.currentItemData.id;
+        if (!window.poemDataStore[pId]) window.poemDataStore[pId] = { ratings: {}, comments: [], guller: {} };
+        let c = window.poemDataStore[pId].comments[idx];
+        if (!c) return;
         
-        let idx = source.findIndex(item => String(item.id) === String(id));
-        let title = "Bilinmeyen Eser";
-        if (idx > -1) title = source[idx].title || source[idx].trTitle || "Eser";
-
-        window.showMisaliConfirm("Bu eseri kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.", function() {
-            if (idx > -1) {
-                source.splice(idx, 1);
-                if (type === 'userPoems') localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                else localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                
-                window.toast("Eser başarıyla silindi!", "🗑️");
-                
-                if (window.currentUser) window.logUserAction(`🗑️ ${window.currentUser.username}, "${title}" adlı eseri sildi.`);
-                
-                if (typeof window.renderAllContent === 'function') window.renderAllContent();
-                if (typeof window.closeTopModal === 'function') window.closeTopModal();
-            } else {
-                window.toast("Eser bulunamadı!", "⚠️");
-            }
-        });
+        c.roseUsers = c.roseUsers || [];
+        let uName = window.currentUser.username;
+        let uIdx = c.roseUsers.indexOf(uName);
+        
+        if (uIdx > -1) {
+            c.roseUsers.splice(uIdx, 1);
+            c.roses = Math.max(0, (c.roses || 1) - 1);
+            window.toast("Mavi gül geri çekildi", "🥀");
+        } else {
+            c.roseUsers.push(uName);
+            c.roses = (c.roses || 0) + 1;
+            window.toast("Yoruma mavi gül verdin!", "🌹");
+        }
+        
+        // LOKAL + ONLINE (Firebase) KAYIT
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
+        
+        window.updateHeartsUI(); 
+        window.updateLiveBadges(); 
     };
 
 // Aktualisierter Emoji Picker (Beinhaltet jetzt den Picker für Sizin Kaleminiz)
@@ -6331,11 +6437,9 @@ window.EMOJI_LIBRARY = [
 // ========================================================
 window.rateAudio = function(id, val) {
     if (!window.currentUser) return window.toast("Puanlamak için giriş yapın!", "🔒");
-    
     let audioRatings = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
     if (!audioRatings[id]) audioRatings[id] = {};
     
-    // Aynı notaya tekrar basılırsa puan silinir
     if(audioRatings[id][window.currentUser.username] === val) {
         delete audioRatings[id][window.currentUser.username];
         window.toast("Müzik notası geri çekildi.", "🗑️");
@@ -6344,7 +6448,10 @@ window.rateAudio = function(id, val) {
         window.toast(`${val} Nota verdin!`, "🎵");
     }
     
+    // LOKAL + ONLINE (Firebase) KAYIT
     localStorage.setItem('misaliAudioRatingsDB', JSON.stringify(audioRatings));
+    firebase.database().ref('audioRatings/' + id).set(audioRatings[id]);
+    
     window.renderAudioRatingUI(id); 
     window.renderAllContent(); 
 };
