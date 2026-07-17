@@ -1277,6 +1277,46 @@ body { padding-top: 310px !important; }
     .audio-rating-note { font-size: 1.3rem !important; }
 }
 
+/* --- KESİN ÇÖZÜM: İPHONE WEBKIT, KART SİMGELERİ VE SELECT TASARIMI --- */
+/* Dropdown (Select) Her Cihazda Aynı Dursun */
+select.inp { 
+    -webkit-appearance: none !important; appearance: none !important; 
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23d4af37' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); 
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 30px !important; 
+}
+[data-theme="light"] select.inp { background-image: url("data:image/svg+xml;utf8,<svg fill='%23b48608' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); }
+
+/* Light Mode Rastgele Söz Uyum Fixi */
+[data-theme="light"] #random-quote-popup { background: var(--bg-card) !important; border: 2px solid var(--accent-cyan) !important; box-shadow: 0 10px 30px rgba(0,206,209,0.2) !important; }
+[data-theme="light"] #random-quote-popup #rq-text { color: var(--text-main) !important; text-shadow: none !important; font-weight:500; }
+
+body { padding-top: 230px !important; }
+
+@media (max-width: 768px) {
+    body { padding-top: 155px !important; } /* Üst üste binmeyi bitirir */
+    .h-row-1 { padding: 4px !important; flex-wrap: nowrap !important; }
+    
+    /* Kart Altı Simgeleri ve Okuma Menüsü Tek Satır Zorlaması */
+    .card-footer { display: flex !important; flex-wrap: nowrap !important; justify-content: space-between !important; padding-top: 6px !important; gap: 2px !important; overflow: hidden !important; }
+    .c-stat { font-size: 0.55rem !important; gap: 2px !important; white-space: nowrap !important; }
+    .c-stat i, .c-stat .real-blue-rose { font-size: 0.75rem !important; }
+    .c-stat.music { font-size: 1rem !important; margin-left: auto; }
+    
+    #readModal .modal-body > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; padding: 4px !important; gap: 2px !important; }
+    #readModal .modal-body > div:first-child button { min-width: 26px !important; height: 26px !important; font-size: 0.7rem !important; margin: 0 !important; padding: 0 4px !important; }
+    .audio-rating-note { font-size: 1.4rem !important; padding: 0 4px !important; }
+}
+
+/* iPHONE (WebKit Touch Callout Büyüteç ve Metin Seçim Engeli) */
+@supports (-webkit-touch-callout: none) {
+    .card, .action-btn, .s-pill, .nav-link, .ptab-btn, .noble-btn, .hero-avatar, .card-ic, .c-stat, i {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+}
+
     </style>
 
 </head>
@@ -1473,18 +1513,17 @@ body { padding-top: 310px !important; }
 <div class="h-row-1">
            <div class="brand" onclick="window.nav('home')">Şair Misal.i <i class="fas fa-feather-alt anim-feather"></i></div>
            
-            <div class="dt-group">
+            <div class="dt-group" style="display:flex; flex-wrap:nowrap; align-items:center; gap:6px;">
                 <div class="dt-box" onclick="window.openModal('calModal'); window.renderCalendar();"><i class="far fa-calendar-alt" style="color:var(--accent-gold);"></i> <span id="ui-date">00.00.0000</span></div>
                 <div class="dt-box" onclick="window.openModal('clockModal')"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> <span id="ui-time-h">00</span><span class="time-colon">:</span><span id="ui-time-m">00</span></div>
                 <div class="dt-box" onclick="window.openModal('weatherModal')"><i class="fas fa-sun sun-anim" style="color:#fde047;"></i> <span id="ui-weather">Berlin --°C</span></div>
-                <!-- Tema Butonu Buraya Geldi -->
-                <button class="action-btn" onclick="window.toggleTheme()" style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-adjust" style="font-size:1rem;"></i></button>
+                <button class="action-btn" onclick="window.toggleTheme()" style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fas fa-adjust" style="font-size:0.85rem;"></i></button>
             </div>
             
-            <div class="h-right">
-                <div class="guest-only" style="display:flex; gap:10px;">
-                    <button class="noble-btn primary" style="width:auto; padding:5px 15px; margin:0;" onclick="window.openModal('loginModal')">Giriş Yap</button>
-                    <button class="noble-btn" style="width:auto; padding:5px 15px; margin:0; border-color:var(--accent-gold); color:var(--accent-gold);" onclick="window.openModal('registerModal')">Kayıt Ol</button>
+            <div class="h-right" style="display:flex; flex-wrap:nowrap; align-items:center;">
+                <div class="guest-only" style="display:flex; gap:5px;">
+                    <button class="noble-btn primary" style="padding:4px 10px; margin:0;" onclick="window.openModal('loginModal')">Giriş Yap</button>
+                    <button class="noble-btn" style="padding:4px 10px; margin:0; border-color:var(--accent-gold); color:var(--accent-gold);" onclick="window.openModal('registerModal')">Kayıt Ol</button>
                 </div>
 
                 <div class="auth-visible" style="display:flex; align-items:center; gap:8px;">
@@ -1493,13 +1532,12 @@ body { padding-top: 310px !important; }
                     </button>
                     <button class="action-btn admin-only" onclick="window.openModal('adminModal')"><i class="fas fa-user-shield" style="color:var(--accent-red);"></i></button>
                     
-                    <div class="user-prof-box">
-                        <span id="u-zodiac" style="font-size:1.1rem; font-weight:bold; color:#facc15; text-shadow:0 0 10px #facc15; cursor:pointer;" onclick="event.stopPropagation(); window.openModal('horoscopeModal'); window.renderHoroscopeGrid();">♊&#xFE0E;</span>
-                        <img id="u-avatar-img" src="image_01d1a0.png" class="mini-avatar" alt="Profil" onclick="event.stopPropagation(); window.showRandomQuote()">
-                        <span id="u-emj" class="anim-feather" style="font-size:1.2rem; display:none;" onclick="event.stopPropagation(); window.openModal('avatarModal')">🪶</span>
-                        <div class="name-info" style="display:flex; flex-direction:column; align-items:center; line-height:1.1;">
-                            <span class="u-name" id="u-name" onclick="document.getElementById('edit-name').value = window.currentUser.name || ''; document.getElementById('edit-color').value = window.currentUser.color || '#eab308'; window.openModal('userModal')">&nbsp;</span>
-                            <span class="u-score" id="u-score" title="Şairler Ligi" onclick="event.stopPropagation(); window.openModal('leaderboardModal'); window.renderLeaderboard();">&nbsp;</span>
+                    <div class="user-prof-box" style="padding:3px 10px; gap:5px;">
+                        <span id="u-zodiac" style="font-size:1.1rem; color:#facc15;" onclick="event.stopPropagation(); window.openModal('horoscopeModal'); window.renderHoroscopeGrid();">♊&#xFE0E;</span>
+                        <img id="u-avatar-img" src="image_01d1a0.png" class="mini-avatar" style="width:28px; height:28px;" alt="Profil" onclick="event.stopPropagation(); window.showRandomQuote()">
+                        <div class="name-info" style="display:flex; flex-direction:column; align-items:center;">
+                            <span class="u-name" id="u-name" onclick="document.getElementById('edit-name').value = window.currentUser.name || ''; window.openModal('userModal')">&nbsp;</span>
+                            <span class="u-score" id="u-score" onclick="event.stopPropagation(); window.openModal('leaderboardModal'); window.renderLeaderboard();">&nbsp;</span>
                         </div>
                     </div>
                     <button class="action-btn" onclick="window.triggerLogout()" style="color:var(--accent-red);"><i class="fas fa-sign-out-alt"></i></button>
@@ -2865,29 +2903,29 @@ window.clearLogs = function() {
 window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
         let file = input.files[0];
-        window.toast("Müzik Sisteme Yükleniyor...", "⏳");
+        window.toast("Müzik Hazırlanıyor...", "⏳");
+        document.getElementById('read-author').innerText = "İşleniyor: %0";
         
         let reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = function(e) {
             let base64Data = e.target.result;
             let newName = file.name.replace(/\.[^/.]+$/, "");
-            
-            if(window.currentItemData) {
+            let isDone = false;
+
+            const finishUpload = (audioUrl, isOnline) => {
+                if(!window.currentItemData) return;
                 let type = window.currentItemData.type, id = window.currentItemData.id;
                 let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
                 let idx = source.findIndex(x => x.id === id);
                 
                 if (idx > -1) { 
                     source[idx].hasAudio = true; 
-                    source[idx].audio = base64Data; // ONLINE DB KAYDI
-                    
+                    source[idx].audio = audioUrl;
                     if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
                     if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
                     if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
                     
                     window.currentItemData = source[idx];
-                    
-                    // LOKAL + ONLINE SENKRONİZASYON
                     try {
                         if(type === 'userPoems') {
                             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
@@ -2896,93 +2934,130 @@ window.adminUploadAudioCurrent = function(input) {
                             localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
                             firebase.database().ref('contentDB').set(window.DB);
                         }
-                        window.toast("Müzik Online Kaydedildi!", "🌍"); 
-                    } catch(err) { window.toast("Kayıt Hatası", "❌"); }
+                        window.toast(isOnline ? "Müzik Online Kaydedildi!" : "Güvenli Moda (Lokal) Kaydedildi!", "🎵"); 
+                    } catch(err) {}
                 }
                 
-                let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
+                let aud = document.getElementById('global-audio-element');
+                let audCont = document.getElementById('card-audio-container');
                 if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
+                if(aud) { aud.src = audioUrl; aud.play().catch(()=>{}); }
                 
-                if(aud) { 
-                    aud.src = base64Data;
-                    aud.play().then(() => { 
-                        let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
-                        window.renderAllContent(); 
-                    }).catch(() => {}); 
-                }
                 window.updateAudioUI(window.currentItemData, true, id, type);
-            }
-        };
-        reader.readAsDataURL(file);
-    };
-
-// ONLINE LIVE-SYNC: Herkes yüklenen müzikleri, eserleri ve puanları anında görür
-    firebase.database().ref('contentDB').on('value', (snap) => {
-        if(snap.exists()) {
-            window.DB = snap.val();
-            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-            if(typeof window.renderAllContent === 'function') window.renderAllContent();
-        }
-    });
-
-    firebase.database().ref('userPoemsDB').on('value', (snap) => {
-        if(snap.exists()) {
-            window.userPoemsDB = snap.val() || [];
-            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            if(typeof window.renderAllContent === 'function') window.renderAllContent();
-        }
-    });
+                document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
+            };
 
             try {
-                // Firebase Denemesi
                 let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
                 let uploadTask = storageRef.put(file);
                 
-                // 4 Saniye içinde cevap gelmezse (0% takılması), Base64 Veritabanına Zorla Geçiș Yap!
-                let fallbackTimer = setTimeout(() => {
-                    if (!isDone) {
-                        isDone = true;
-                        uploadTask.cancel();
-                        window.audioStorage.save(window.currentItemData.id, base64Data).then(() => {
-                            finishUpload(base64Data, false);
-                        });
-                    }
-                }, 4000);
-
                 uploadTask.on('state_changed', 
                     (snapshot) => {
-                        let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        document.getElementById('read-author').innerText = "Yükleniyor: %" + Math.round(progress);
+                        let p = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                        document.getElementById('read-author').innerText = "Yükleniyor: %" + p;
                     }, 
                     (error) => {
-                        clearTimeout(fallbackTimer);
+                        console.warn("Firebase Engeli, Lokal Moda Geçiliyor...", error);
                         if (!isDone) {
                             isDone = true;
-                            window.audioStorage.save(window.currentItemData.id, base64Data).then(() => {
-                                finishUpload(base64Data, false);
-                            });
+                            window.audioStorage.save(window.currentItemData.id, base64Data).then(() => processUpload(base64Data, false));
                         }
                     }, 
                     () => {
-                        clearTimeout(fallbackTimer);
                         if (!isDone) {
                             isDone = true;
-                            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                                finishUpload(downloadURL, true);
-                            });
+                            uploadTask.snapshot.ref.getDownloadURL().then((url) => finishUpload(url, true));
                         }
                     }
                 );
             } catch(e) {
                 if (!isDone) {
                     isDone = true;
-                    window.audioStorage.save(window.currentItemData.id, base64Data).then(() => { finishUpload(base64Data, false); });
+                    window.audioStorage.save(window.currentItemData.id, base64Data).then(() => finishUpload(base64Data, false));
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    };window.adminUploadAudioCurrent = function(input) {
+        if (!input.files || !input.files[0]) return;
+        let file = input.files[0];
+        window.toast("Müzik Hazırlanıyor...", "⏳");
+        document.getElementById('read-author').innerText = "İşleniyor: %0";
+        
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let base64Data = e.target.result;
+            let newName = file.name.replace(/\.[^/.]+$/, "");
+            let isDone = false;
+
+            const finishUpload = (audioUrl, isOnline) => {
+                if(!window.currentItemData) return;
+                let type = window.currentItemData.type, id = window.currentItemData.id;
+                let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+                let idx = source.findIndex(x => x.id === id);
+                
+                if (idx > -1) { 
+                    source[idx].hasAudio = true; 
+                    source[idx].audio = audioUrl;
+                    if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
+                    if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
+                    if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
+                    
+                    window.currentItemData = source[idx];
+                    try {
+                        if(type === 'userPoems') {
+                            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                            firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                        } else {
+                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                            firebase.database().ref('contentDB').set(window.DB);
+                        }
+                        window.toast(isOnline ? "Müzik Online Kaydedildi!" : "Güvenli Moda (Lokal) Kaydedildi!", "🎵"); 
+                    } catch(err) {}
+                }
+                
+                let aud = document.getElementById('global-audio-element');
+                let audCont = document.getElementById('card-audio-container');
+                if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
+                if(aud) { aud.src = audioUrl; aud.play().catch(()=>{}); }
+                
+                window.updateAudioUI(window.currentItemData, true, id, type);
+                document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
+            };
+
+            try {
+                let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
+                let uploadTask = storageRef.put(file);
+                
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        let p = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                        document.getElementById('read-author').innerText = "Yükleniyor: %" + p;
+                    }, 
+                    (error) => {
+                        console.warn("Firebase Engeli, Lokal Moda Geçiliyor...", error);
+                        if (!isDone) {
+                            isDone = true;
+                            window.audioStorage.save(window.currentItemData.id, base64Data).then(() => processUpload(base64Data, false));
+                        }
+                    }, 
+                    () => {
+                        if (!isDone) {
+                            isDone = true;
+                            uploadTask.snapshot.ref.getDownloadURL().then((url) => finishUpload(url, true));
+                        }
+                    }
+                );
+            } catch(e) {
+                if (!isDone) {
+                    isDone = true;
+                    window.audioStorage.save(window.currentItemData.id, base64Data).then(() => finishUpload(base64Data, false));
                 }
             }
         };
         reader.readAsDataURL(file);
     };
-
+    
     window.adminDeleteAudioCurrent = async function() {
         if(window.currentItemData) {
             let type = window.currentItemData.type, id = window.currentItemData.id;
@@ -4036,43 +4111,49 @@ let audCont = document.getElementById('card-audio-container');
     };
 
 window.changeFontSize = function(dir) {
-            window.fontSize = Math.min(Math.max(0.8, window.fontSize + dir * 0.15), 2.5);
-            let el = document.getElementById('read-text'); 
-            if (el) { 
-                el.style.fontSize = window.fontSize + 'rem';
-                let innerDivs = el.querySelectorAll('div');
-                innerDivs.forEach(d => d.style.fontSize = window.fontSize + 'rem');
-            }
-            window.toast("Yazı Boyutu: " + window.fontSize.toFixed(2), "🔠");
-        };
+        window.fontSize = Math.min(Math.max(0.8, window.fontSize + dir * 0.15), 2.5);
+        let el = document.getElementById('read-text'); 
+        if (el) { 
+            el.style.setProperty('font-size', window.fontSize + 'rem', 'important');
+            let innerElements = el.querySelectorAll('*');
+            innerElements.forEach(d => {
+                d.style.setProperty('font-size', window.fontSize + 'rem', 'important');
+                d.style.setProperty('line-height', '1.6', 'important');
+            });
+        }
+        window.toast("Yazı Boyutu: " + window.fontSize.toFixed(2), "🔠");
+    };
 
 window.readAloudText = function() {
-            let text = document.getElementById('read-text')?.innerText; if (!text) return;
-            if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
-            
-            // Noktalama işaretlerinden sonra boşluk bırakarak doğru tonlama/duraksama sağlar
-            let cleanText = text.replace("Cevabı Göster", "").replace(/([.?!,])/g, "$1 "); 
-            
-            let msg = new SpeechSynthesisUtterance(cleanText); 
-            msg.rate = 0.85; 
-            msg.pitch = window.currentLang === 'tr' ? 0.9 : 1.1; // TR için tok, DE için ince ses
-            
-            let voices = window.speechSynthesis.getVoices();
-            if(window.currentLang === 'tr') {
-                msg.lang = 'tr-TR';
-                // Türkçe için Erkek (Male/Tolga) veya bulduğu ilk Türk sesini seçer
-                let trVoice = voices.find(v => v.lang.includes('tr') && (v.name.includes('Male') || v.name.includes('Tolga'))) || voices.find(v => v.lang.includes('tr'));
-                if(trVoice) msg.voice = trVoice;
-            } else {
-                msg.lang = 'de-DE';
-                // Almanca için Kadın (Female/Marlene) veya bulduğu ilk Alman sesini seçer
-                let deVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Female') || v.name.includes('Marlene'))) || voices.find(v => v.lang.includes('de'));
-                if(deVoice) msg.voice = deVoice;
-            }
-            
-            window.speechSynthesis.speak(msg); 
-            window.toast("Sesli okuma başlatıldı", "🗣️");
-        };
+        let el = document.getElementById('read-text');
+        if (!el) return;
+        let text = el.innerText;
+        if (!text) return;
+        if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
+        
+        // Noktalama işaretlerini boşlukla destekleyip duraksama sağla (Örn: yumuşak okuma için)
+        let cleanText = text.replace(/Cevabı Göster/g, "").replace(/([.?!,;])/g, "$1  "); 
+        
+        let msg = new SpeechSynthesisUtterance(cleanText); 
+        msg.rate = 0.85; 
+        msg.pitch = window.currentLang === 'tr' ? 0.9 : 1.1; // TR için kalın, DE için ince
+        
+        let voices = window.speechSynthesis.getVoices();
+        if(window.currentLang === 'tr') {
+            msg.lang = 'tr-TR';
+            // Erkek sesi ara
+            let trVoice = voices.find(v => v.lang.includes('tr') && (v.name.includes('Male') || v.name.includes('Tolga') || v.name.includes('erkek'))) || voices.find(v => v.lang.includes('tr'));
+            if(trVoice) msg.voice = trVoice;
+        } else {
+            msg.lang = 'de-DE';
+            // Kadın sesi ara
+            let deVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Female') || v.name.includes('Marlene') || v.name.includes('Anna'))) || voices.find(v => v.lang.includes('de'));
+            if(deVoice) msg.voice = deVoice;
+        }
+        
+        window.speechSynthesis.speak(msg); 
+        window.toast("Sesli okuma başlatıldı", "🗣️");
+    };
 
         window.toggleLang = async function(lang) {
             let d = window.currentItemData, txtEl = document.getElementById('read-text'); if(!d) return;
