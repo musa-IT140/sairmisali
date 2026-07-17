@@ -2062,6 +2062,27 @@ document.addEventListener("DOMContentLoaded", function() {
 
     console.log("🚀 Şair Misal.i ATOMIC MEGA ULTRA Engine (Kusursuz Sürüm) başlatılıyor...");
 
+    // EKLENDİ: Fatma vb. gezindiğinde Admine anında canlı log düşür!
+    firebase.database().ref('adminOnlineLogs').on('child_added', (snap) => {
+        let newLog = snap.val();
+        // Sadece giriş yapmış bir Admin isek bu logları kabul et
+        if (newLog && window.currentUser && window.currentUser.role === 'admin') {
+            window.adminLogs = window.adminLogs || [];
+            
+            // Kendi yaptığımız bir işlemi çift göstermemek için kontrol:
+            let exists = window.adminLogs.some(l => l.ts === newLog.ts);
+            if (!exists) {
+                window.adminLogs.unshift(newLog);
+                if(window.adminLogs.length > 100) window.adminLogs.pop();
+                localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
+                
+                // Adminin ekranındaki zili ve Gelen Kutusu listesini anında güncelle
+                if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+            }
+        }
+    });
+
     // FIREBASE LIVE-SYNC: Online verileri anında herkese yansıt
     firebase.database().ref('interactions').on('value', (snap) => {
         if(snap.exists()) {
@@ -2313,17 +2334,25 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 350);
     };
 
-    window.logUserAction = function(msg, linkId = null, linkType = null) {
-        // Spam-Schutz: Gleiche Nachricht innerhalb von 2 Sekunden blockieren
-        if (msg === window.lastLogMsg && (Date.now() - window.lastLogTime < 2000)) return;
+window.logUserAction = function(msg, linkId = null, linkType = null) {
+        if (msg === window.lastLogMsg && (Date.now() - window.lastLogTimestamp < 3000)) return;
         window.lastLogMsg = msg;
-        window.lastLogTime = Date.now();
+        window.lastLogTimestamp = Date.now();
+
+        let timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+        let newLog = { time: timeStr, msg: msg, linkId: linkId, linkType: linkType, ts: Date.now() };
 
         window.adminLogs = window.adminLogs || [];
-        let timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-        window.adminLogs.unshift({ time: timeStr, msg: msg, linkId: linkId, linkType: linkType });
+        window.adminLogs.unshift(newLog);
+        
+        // 100'den fazla log birikmesini engelle
+        if(window.adminLogs.length > 100) window.adminLogs.pop();
+
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
         
+        // EKLENDİ: Logları anında Firebase'e (Online) gönder!
+        try { firebase.database().ref('adminOnlineLogs').push(newLog); } catch(e){}
+
         if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
         if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
     };
@@ -2500,9 +2529,16 @@ window.renderUserMessages = function() {
         }
     };
 
-    window.clearLogs = function() { 
-        window.adminLogs = []; localStorage.setItem('misaliAdminLogs', '[]'); 
-        window.renderAdminLogs(); window.updateHeaderUserUI(); window.toast('Raporlar Temizlendi', '🗑️'); 
+window.clearLogs = function() { 
+        window.adminLogs = []; 
+        localStorage.setItem('misaliAdminLogs', '[]'); 
+        
+        // EKLENDİ: Firebase (Online) üzerindeki geçmişi de tamamen temizle
+        try { firebase.database().ref('adminOnlineLogs').remove(); } catch(e){}
+        
+        window.renderAdminLogs(); 
+        window.updateHeaderUserUI(); 
+        window.toast('Raporlar Temizlendi', '🗑️'); 
     };
 
     // Giriş ekranı açıldığında şifreyi otomatik doldur
@@ -4245,7 +4281,7 @@ window.addGamePoints = function(pts, gameName, isWin) {
         localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
         // EKLENECEK SATIR:
         firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
-        
+
         document.getElementById('write-title').value = ''; document.getElementById('write-text').value = ''; document.getElementById('write-emoji-picker').style.display = 'none';
         
         window.logUserAction(`${emoji} YENİ ESER: ${window.currentUser.username}, "<span style='color:var(--accent-gold); text-decoration:underline;'>${title}</span>" adlı yeni bir eser paylaştı.`, newItem.id, 'userPoems');
