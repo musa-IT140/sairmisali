@@ -1057,6 +1057,35 @@ body { padding-top: 290px !important; }
     font-family: 'Great Vibes', cursive !important;
     font-size: 1.8rem !important;
 }
+
+/* --- KESİN ÇÖZÜM: WEBKIT, TAŞMA, HEADER VE FONT --- */
+body { padding-top: 290px !important; }
+.main-content { margin-top: 15px !important; }
+
+/* Mobilde butonların kart dışına taşmasını engelle */
+#readModal .modal-body > div:first-child { 
+    flex-wrap: wrap !important; 
+    justify-content: center !important; 
+    overflow-x: hidden !important; 
+}
+
+/* iPhone (Webkit) için Tıklama/Kopyalama Menüsü Engeli */
+.card, .action-btn, .s-pill, .nav-link, .ptab-btn, .noble-btn {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+}
+
+@media (max-width: 768px) {
+    body { padding-top: 280px !important; }
+    .h-row-ticker { height: auto !important; min-height: 56px !important; display: flex !important; flex-direction: column !important; }
+    .ticker-bar { height: 28px !important; min-height: 28px !important; line-height: 28px !important; }
+}
+
+/* Şair İsimleri ve İmzalar İçin Font Zorlaması */
+.u-name, .misali-signature, .misali-signature-text, .author-signature-gold, .author-signature-white, #random-quote-popup div:last-child {
+    font-family: 'Great Vibes', cursive !important;
+    font-size: 1.8rem !important;
+}
     
     </style>
 
@@ -2612,8 +2641,9 @@ window.renderUserMessages = function() {
 window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
         let file = input.files[0];
-        window.toast("Müzik Firebase'e yükleniyor (Online)...", "⏳");
+        window.toast("Firebase: Müzik Yükleniyor...", "⏳");
         
+        // Firebase Storage Online Kayıt
         let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
         let uploadTask = storageRef.put(file);
         
@@ -2622,9 +2652,13 @@ window.adminUploadAudioCurrent = function(input) {
                 let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 document.getElementById('read-author').innerText = "Yükleniyor: %" + Math.round(progress);
             }, 
-            (error) => { window.toast("Yükleme Hatası!", "❌"); console.error(error); }, 
+            (error) => { 
+                window.toast("Yükleme Hatası! Firebase Kurallarını kontrol et.", "❌"); 
+                document.getElementById('read-author').innerText = "~ Yazar";
+                console.error("Firebase Hatası:", error); 
+            }, 
             () => {
-                uploadTask.snapshot.ref.getDownloadURL().then(async (downloadURL) => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                     if(window.currentItemData) {
                         let type = window.currentItemData.type, id = window.currentItemData.id;
                         let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
@@ -2633,34 +2667,30 @@ window.adminUploadAudioCurrent = function(input) {
                         
                         if (idx > -1) { 
                             source[idx].hasAudio = true; 
-                            source[idx].audio = downloadURL; // ONLINE URL KAYIT
+                            source[idx].audio = downloadURL; // ONLINE LİNK KAYDI
                             
                             if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
                             if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
                             if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
                             
                             window.currentItemData = source[idx];
-                            try {
-                                if(type === 'userPoems') localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                                else localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                                // VERİTABANINI HERKES İÇİN GÜNCELLE
+                            // Veritabanını Online Güncelle
+                            if(type === 'userPoems') {
+                                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                                firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                            } else {
+                                localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
                                 firebase.database().ref('contentDB').set(window.DB);
-                                window.toast("Müzik Online Kaydedildi!", "🌍"); 
-                            } catch(err) { window.toast("Kayıt Hatası", "❌"); }
+                            }
+                            window.toast("Müzik Online Kaydedildi!", "🌍"); 
                         }
                         
                         let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
                         if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
+                        if(aud) { aud.src = downloadURL; aud.play().catch(()=>{}); }
                         
-                        if(aud) { 
-                            aud.src = downloadURL;
-                            aud.play().then(() => { 
-                                let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
-                                window.renderAllContent(); 
-                            }).catch(() => {}); 
-                        }
                         window.updateAudioUI(window.currentItemData, true, id, type);
-                        document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
+                        document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || "Şair Misal.i");
                     }
                 });
             }
@@ -4186,7 +4216,7 @@ window.addGamePoints = function(pts, gameName, isWin) {
         window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
         window.userDatabase[window.currentUser.username] = window.currentUser;
         
-        // LOKAL + ONLINE (Firebase) KAYIT
+        // ONLINE VE LOKAL KAYIT
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
         firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score });
@@ -4206,7 +4236,16 @@ window.addGamePoints = function(pts, gameName, isWin) {
         let newItem = { id: "user_poem_" + Date.now(), title: title, text: text, emoji: emoji, author: window.currentUser.name || window.currentUser.username, timestamp: Date.now() };
         window.userPoemsDB = window.userPoemsDB || []; window.userPoemsDB.unshift(newItem); 
         localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+        // EKLENECEK SATIR:
+        firebase.database().ref('interactions/' + pId + '/ratings').set(window.poemDataStore[pId].ratings);
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+        // EKLENECEK SATIR:
+        firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+        // EKLENECEK SATIR:
+        firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
+        
         document.getElementById('write-title').value = ''; document.getElementById('write-text').value = ''; document.getElementById('write-emoji-picker').style.display = 'none';
         
         window.logUserAction(`${emoji} YENİ ESER: ${window.currentUser.username}, "<span style='color:var(--accent-gold); text-decoration:underline;'>${title}</span>" adlı yeni bir eser paylaştı.`, newItem.id, 'userPoems');
