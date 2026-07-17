@@ -504,28 +504,36 @@
             font-size: 1.8rem !important;
         }
 
-/* Eser Okuma Ekranı Üst Menüsü - TEK SIRA (Taşma Yok) */
+/* --- KESİN ÇÖZÜM: LESE-MODAL TOOLBAR IN EINER REIHE --- */
             #readModal .modal-body > div:first-child { 
                 display: flex !important;
-                flex-wrap: nowrap !important; /* ZORLA TEK SIRA */
-                justify-content: space-between !important; 
+                flex-wrap: nowrap !important; /* Zwingt alles strikt in eine Zeile */
+                overflow-x: auto !important; /* Erlaubt sanftes Wischen (Swipe), falls nötig */
+                -webkit-overflow-scrolling: touch !important; /* WebKit/iPhone smooth scroll */
+                justify-content: flex-start !important; 
+                gap: 6px !important; 
+                padding: 6px !important; 
                 width: 100% !important; 
                 max-width: 100% !important;
-                overflow: hidden !important; 
-                padding: 4px !important;
-                border-radius: 12px !important;
-                gap: 2px !important;
                 box-sizing: border-box !important;
             }
-            #readModal .modal-body > div:first-child button {
-                flex: 1 !important;
-                min-width: 0 !important;
-                padding: 2px 0 !important;
-                font-size: 0.75rem !important; /* Simgeleri küçült */
-                height: 28px !important;
+            
+            /* Verstecke den Scrollbalken unter den Buttons für eine saubere Optik */
+            #readModal .modal-body > div:first-child::-webkit-scrollbar {
+                display: none !important;
             }
-            #readModal .modal-body > div:first-child div {
-                display: none !important; /* Aradaki ayırıcı çizgileri mobilde gizle yer açılsın */
+
+            #readModal .modal-body > div:first-child button {
+                flex: 0 0 auto !important; /* Verhindert das Quetschen der Buttons */
+                min-width: 32px !important; 
+                height: 32px !important; 
+                font-size: 0.9rem !important; 
+                margin: 0 !important; 
+                padding: 0 8px !important;
+            }
+            
+            #readModal .modal-body > div:first-child div { 
+                display: none !important; /* Versteckt die unnötigen Trennstriche (|) auf dem Handy */ 
             }
 
         @media (max-width: 768px) {
@@ -3016,91 +3024,32 @@ window.clearLogs = function() {
 window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
         let file = input.files[0];
-        window.toast("Firebase: Müzik Yükleniyor...", "⏳");
         
-        let authorEl = document.getElementById('read-author');
-        if(authorEl) authorEl.innerText = "Yükleniyor: %0";
-        
-        let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
-        let uploadTask = storageRef.put(file);
-        
-        uploadTask.on('state_changed', 
-            (snapshot) => {
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                if(authorEl) authorEl.innerText = "Yükleniyor: %" + Math.round(progress);
-            }, 
-            (error) => { 
-                window.toast("Yükleme Başarısız! (Kuralları kontrol et)", "❌"); 
-                console.error(error);
-                if(authorEl) authorEl.innerText = "~ " + (window.currentItemData.author || "Şair Misal.i");
-            }, 
-            () => {
-                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                    if(window.currentItemData) {
-                        let type = window.currentItemData.type, id = window.currentItemData.id;
-                        let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
-                        let idx = source.findIndex(x => x.id === id);
-                        let newName = file.name.replace(/\.[^/.]+$/, "");
-                        
-                        if (idx > -1) { 
-                            source[idx].hasAudio = true; 
-                            source[idx].audio = downloadURL;
-                            if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
-                            if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
-                            if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
-                            
-                            window.currentItemData = source[idx];
-                            // ONLINE KAYIT - Herkes anında görecek
-                            if(type === 'userPoems') {
-                                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                                firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
-                            } else {
-                                localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                                firebase.database().ref('contentDB').set(window.DB);
-                            }
-                            window.toast("Müzik Online Kaydedildi!", "🌍"); 
-                        }
-                        
-                        let aud = document.getElementById('global-audio-element');
-                        let audCont = document.getElementById('card-audio-container');
-                        if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
-                        if(aud) { aud.src = downloadURL; aud.play().catch(()=>{}); }
-                        
-                        window.updateAudioUI(window.currentItemData, true, id, type);
-                        if(authorEl) authorEl.innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
-                    }
-                });
-            }
-        );
-    };
-    
-    window.adminUploadAudioCurrent = function(input) {
-        if (!input.files || !input.files[0]) return;
-        let file = input.files[0];
-        window.toast("Müzik Hazırlanıyor...", "⏳");
-        document.getElementById('read-author').innerText = "İşleniyor: %0";
+        window.toast("Sisteme Yükleniyor (Online)...", "⏳");
+        document.getElementById('read-author').innerText = "Yükleniyor... Lütfen bekleyin.";
         
         let reader = new FileReader();
         reader.onload = function(e) {
             let base64Data = e.target.result;
             let newName = file.name.replace(/\.[^/.]+$/, "");
-            let isDone = false;
-
-            const finishUpload = (audioUrl, isOnline) => {
-                if(!window.currentItemData) return;
+            
+            if(window.currentItemData) {
                 let type = window.currentItemData.type, id = window.currentItemData.id;
                 let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
                 let idx = source.findIndex(x => x.id === id);
                 
                 if (idx > -1) { 
                     source[idx].hasAudio = true; 
-                    source[idx].audio = audioUrl;
+                    source[idx].audio = base64Data; // Direktes Speichern in die Online-Datenbank!
+                    
                     if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
                     if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
                     if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
                     
                     window.currentItemData = source[idx];
+                    
                     try {
+                        // Veritabanını Online Güncelle (Herkes için)
                         if(type === 'userPoems') {
                             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
                             firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
@@ -3108,49 +3057,28 @@ window.adminUploadAudioCurrent = function(input) {
                             localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
                             firebase.database().ref('contentDB').set(window.DB);
                         }
-                        window.toast(isOnline ? "Müzik Online Kaydedildi!" : "Güvenli Moda (Lokal) Kaydedildi!", "🎵"); 
-                    } catch(err) {}
-                }
-                
-                let aud = document.getElementById('global-audio-element');
-                let audCont = document.getElementById('card-audio-container');
-                if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
-                if(aud) { aud.src = audioUrl; aud.play().catch(()=>{}); }
-                
-                window.updateAudioUI(window.currentItemData, true, id, type);
-                document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
-            };
-
-            try {
-                let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
-                let uploadTask = storageRef.put(file);
-                
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        let p = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                        document.getElementById('read-author').innerText = "Yükleniyor: %" + p;
-                    }, 
-                    (error) => {
-                        console.warn("Firebase Engeli, Lokal Moda Geçiliyor...", error);
-                        if (!isDone) {
-                            isDone = true;
-                            window.audioStorage.save(window.currentItemData.id, base64Data).then(() => processUpload(base64Data, false));
-                        }
-                    }, 
-                    () => {
-                        if (!isDone) {
-                            isDone = true;
-                            uploadTask.snapshot.ref.getDownloadURL().then((url) => finishUpload(url, true));
-                        }
+                        window.toast("Müzik Online Kaydedildi!", "🌍"); 
+                        document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
+                    } catch(err) { 
+                        window.toast("Dosya çok büyük! (Max 5MB)", "❌"); 
+                        document.getElementById('read-author').innerText = "Hata: Dosya Boyutu";
                     }
-                );
-            } catch(e) {
-                if (!isDone) {
-                    isDone = true;
-                    window.audioStorage.save(window.currentItemData.id, base64Data).then(() => finishUpload(base64Data, false));
                 }
+                
+                let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
+                if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
+                
+                if(aud) { 
+                    aud.src = base64Data;
+                    aud.play().then(() => { 
+                        let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
+                        window.renderAllContent(); 
+                    }).catch(() => {}); 
+                }
+                window.updateAudioUI(window.currentItemData, true, id, type);
             }
         };
+        // Datei in Base64 umwandeln (Umgeht Firebase Storage Blockaden!)
         reader.readAsDataURL(file);
     };
 
