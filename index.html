@@ -999,6 +999,7 @@ body.modal-open #mini-announcement-btn {
 #mini-info-btn:hover { right: 0px !important; opacity: 1 !important; padding-right: 25px; background: var(--accent-cyan) !important; color: #fff !important;}
 #mini-announcement-btn:hover { left: 0px !important; opacity: 1 !important; padding-left: 25px; background: var(--accent-cyan) !important; color: #fff !important; }
 
+
     
     </style>
 
@@ -2247,10 +2248,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 
-    window.renderUserMessages = function() {
+window.renderUserMessages = function() {
         let msgBox = document.querySelector('#msgModal .theme-sub-panel');
         if (!msgBox) return;
-        
         if (!window.currentUser || !window.currentUser.notifications || window.currentUser.notifications.length === 0) {
             msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center;">Henüz yeni mesajınız yok.</div>';
             return;
@@ -2258,12 +2258,16 @@ document.addEventListener("DOMContentLoaded", function() {
         
         let html = '<button class="noble-btn" style="margin-bottom:15px; width:100%; border-color:var(--accent-red); color:var(--accent-red);" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
         html += window.currentUser.notifications.map(n => {
-            let isClickable = n.linkId && n.linkType;
-            let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer;"` : '';
-            return `<div style="padding:12px; background:var(--input-bg); border-left:3px solid var(--accent-cyan); margin-bottom:10px; border-radius:6px; text-align:left;" ${actionAttr}>
-                <small style="color:var(--accent-cyan); font-weight:bold;">${n.time}</small><br>
-                <span style="color:var(--text-main); font-size:0.95rem;">${n.msg}</span>
-            </div>`;
+            let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+            // KESİN ÇÖZÜM: Tırnak işaretlerini parçalayarak koruyoruz, böylece HTML asla bozulmaz.
+            let actionAttr = isClickable ? 'onclick="window.goToLink(\'' + n.linkId + '\', \'' + n.linkType + '\')" style="cursor:pointer;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 0 10px rgba(0,206,209,0.3)\'" onmouseout="this.style.transform=\'none\'; this.style.boxShadow=\'none\'"' : '';
+            let openIcon = isClickable ? '<i class="fas fa-external-link-square-alt" style="float:right; color:var(--accent-gold); margin-top:2px;" title="Görüntüle"></i>' : '';
+            
+            return '<div style="padding:12px; background:var(--input-bg); border-left:3px solid var(--accent-cyan); margin-bottom:10px; border-radius:6px; text-align:left; transition:0.3s;" ' + actionAttr + '>' + 
+                openIcon + 
+                '<small style="color:var(--accent-cyan); font-weight:bold;">' + n.time + '</small><br>' + 
+                '<span style="color:var(--text-main); font-size:0.95rem;">' + n.msg + '</span>' + 
+            '</div>';
         }).join('');
         msgBox.innerHTML = html;
     };
@@ -2272,16 +2276,26 @@ document.addEventListener("DOMContentLoaded", function() {
         let box = document.getElementById('adm-logs-box-panel');
         let inbox = document.getElementById('adm-logs-box-inbox'); 
         let html = window.adminLogs.map(l => {
-            let isClickable = l.linkId && l.linkType;
-            let actionAttr = isClickable ? `onclick="window.goToLink('${l.linkId}', '${l.linkType}')" style="cursor:pointer; padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"` : `style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"`;
-            return `<div ${actionAttr}>
-                <small style="color:var(--accent-gold);">${l.time}</small><br>
-                <span style="color:var(--text-main);">${l.msg}</span>
-            </div>`;
+            let isClickable = l.linkId && l.linkType && !String(l.linkId).includes('window.');
+            // KESİN ÇÖZÜM: Tırnak işaretlerini koruma
+            let actionAttr = isClickable ? 'onclick="window.goToLink(\'' + l.linkId + '\', \'' + l.linkType + '\')" style="cursor:pointer; padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); transition:0.3s;" onmouseover="this.style.background=\'rgba(255,255,255,0.08)\'" onmouseout="this.style.background=\'transparent\'"' : 'style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"';
+            let openIcon = isClickable ? '<i class="fas fa-external-link-square-alt" style="float:right; color:var(--accent-gold); margin-top:2px;" title="Görüntüle"></i>' : '';
+            
+            return '<div ' + actionAttr + '>' + 
+                openIcon + 
+                '<small style="color:var(--accent-gold);">' + l.time + '</small><br>' + 
+                '<span style="color:var(--text-main);">' + l.msg + '</span>' + 
+            '</div>';
         }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-sub);">Log kaydı yok.</div>';
         
         if (box) box.innerHTML = html;
         if (inbox) inbox.innerHTML = html;
+        
+        let bellBadge = document.getElementById('bell-counter');
+        if(bellBadge) { 
+            bellBadge.innerText = window.adminLogs.length; 
+            bellBadge.style.display = window.adminLogs.length > 0 ? 'flex' : 'none'; 
+        }
     };
 
     window.logUserAction = function(msg, linkId = null, linkType = null) {
@@ -3562,9 +3576,9 @@ window.openReadModal = async function(id, type) {
         let bm = document.getElementById('modal-bookmark-icon');
         if (bm) bm.style.color = (window.currentUser && window.savedItemsDB[window.currentUser.username]?.includes(id)) ? 'var(--accent-pink)' : 'rgba(255,255,255,0.35)';
 
-        let audCont = document.getElementById('card-audio-container'), aud = document.getElementById('global-audio-element');
+let audCont = document.getElementById('card-audio-container');
+        let aud = document.getElementById('global-audio-element');
         let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
-        let upAdmin = document.querySelector('.admin-only');
 
         let trackData = null;
         try {
@@ -3574,23 +3588,42 @@ window.openReadModal = async function(id, type) {
 
         document.querySelectorAll('#audio-rating-ui').forEach(el => el.remove());
 
-        if (trackData) { 
+        // KESİN ÇÖZÜM: Admin her zaman müzik yükleme ekranını görmeli!
+        let inlineAdmin = document.querySelector('#card-audio-container .inline-admin-audio');
+        if (inlineAdmin) inlineAdmin.style.setProperty('display', isAdminCheck ? 'flex' : 'none', 'important');
+
+        // Eğer müzik varsa VEYA kullanıcı Admin ise (yükleme yapabilmesi için) playerı göster
+        if (trackData || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type))) { 
             if (audCont) {
-                audCont.style.display = 'flex'; 
-                if(!document.getElementById('audio-rating-ui')) {
-                    audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center;"></div>`);
+                audCont.style.setProperty('display', 'flex', 'important'); 
+                
+                // Müzik yoksa oynatma tuşlarını gizle, sadece Admin Upload butonu kalsın
+                let pHeader = audCont.querySelector('.audio-player-header');
+                let pTimeRow = audCont.querySelector('.player-time-row');
+                let pControls = audCont.querySelector('.p-controls-row');
+                
+                if (trackData) {
+                    if(pHeader) pHeader.style.display = 'flex';
+                    if(pTimeRow) pTimeRow.style.display = 'flex';
+                    if(pControls) pControls.style.display = 'flex';
+
+                    if(!document.getElementById('audio-rating-ui')) {
+                        audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center;"></div>`);
+                    }
+                    window.renderAudioRatingUI(id);
+                } else {
+                    if(pHeader) pHeader.style.display = 'none';
+                    if(pTimeRow) pTimeRow.style.display = 'none';
+                    if(pControls) pControls.style.display = 'none';
                 }
-                window.renderAudioRatingUI(id);
             }
-            if (aud) { 
+            if (aud && trackData) { 
                 await window.loadAudioSafely(aud, trackData); 
                 let ic1 = document.getElementById('fp-play-icon');
                 if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
             } 
-            if(upAdmin) upAdmin.style.setProperty('display', isAdminCheck ? 'block' : 'none', 'important');
         } else { 
-            if (audCont) audCont.style.display = 'none'; 
-            if(upAdmin) upAdmin.style.setProperty('display', 'none', 'important');
+            if (audCont) audCont.style.setProperty('display', 'none', 'important'); 
         }
 
         if(typeof window.updateAudioUI === 'function') window.updateAudioUI(item, isAdminCheck, id, type);
