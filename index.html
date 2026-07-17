@@ -1438,6 +1438,19 @@ body { padding-top: 310px !important; }
     }
 }
 
+/* Sarı Player'ın her zaman en üstte durmasını sağla */
+#floating-player {
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+}
+
+/* Müzik İşareti Görünürlük Fix */
+.c-stat.music {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: flex !important;
+}
+
     </style>
 
 </head>
@@ -4149,35 +4162,47 @@ window.changeFontSize = function(dir) {
     };
 
 window.readAloudText = function() {
-        let el = document.getElementById('read-text');
-        if (!el) return;
-        let text = el.innerText;
+        let text = document.getElementById('read-text')?.innerText; 
         if (!text) return;
-        if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
         
-        // Noktalama işaretlerini boşlukla destekleyip duraksama sağla (Örn: yumuşak okuma için)
-        let cleanText = text.replace(/Cevabı Göster/g, "").replace(/([.?!,;])/g, "$1  "); 
+        if (window.speechSynthesis.speaking) { 
+            window.speechSynthesis.cancel(); 
+            return; 
+        }
+        
+        // Metni temizle ve noktalama işaretlerinden sonra boşluk bırakarak doğal duraksama sağla
+        let cleanText = text.replace("Cevabı Göster", "").replace(/([.,?!:;])/g, "$1 "); 
         
         let msg = new SpeechSynthesisUtterance(cleanText); 
-        msg.rate = 0.85; 
-        msg.pitch = window.currentLang === 'tr' ? 0.9 : 1.1; // TR için kalın, DE için ince
-        
         let voices = window.speechSynthesis.getVoices();
-        if(window.currentLang === 'tr') {
+        
+        if (window.currentLang === 'tr') {
             msg.lang = 'tr-TR';
-            // Erkek sesi ara
-            let trVoice = voices.find(v => v.lang.includes('tr') && (v.name.includes('Male') || v.name.includes('Tolga') || v.name.includes('erkek'))) || voices.find(v => v.lang.includes('tr'));
-            if(trVoice) msg.voice = trVoice;
+            msg.rate = 0.75; // Çok daha yavaş ve anlaşılır (Normali 1.0)
+            msg.pitch = 0.9; // Biraz daha tok bir ses
+            
+            // Telefonun kendi orijinal Türkçe sesini zorla bul
+            let trVoice = voices.find(v => v.lang === 'tr-TR' || v.lang === 'tr_TR' || v.lang === 'tr');
+            if (trVoice) msg.voice = trVoice;
+            
         } else {
             msg.lang = 'de-DE';
-            // Kadın sesi ara
-            let deVoice = voices.find(v => v.lang.includes('de') && (v.name.includes('Female') || v.name.includes('Marlene') || v.name.includes('Anna'))) || voices.find(v => v.lang.includes('de'));
-            if(deVoice) msg.voice = deVoice;
+            msg.rate = 0.80; // Almanca için yavaş ve net
+            msg.pitch = 1.1; // İnce ses
+            
+            // Telefonun kendi orijinal Almanca sesini zorla bul
+            let deVoice = voices.find(v => v.lang === 'de-DE' || v.lang === 'de_DE' || v.lang === 'de');
+            if (deVoice) msg.voice = deVoice;
         }
         
         window.speechSynthesis.speak(msg); 
-        window.toast("Sesli okuma başlatıldı", "🗣️");
+        window.toast(window.currentLang === 'tr' ? "Sesli okuma başlatıldı" : "Vorlesen gestartet", "🗣️");
     };
+
+    // BÖCEK DÜZELTİCİ (BUGFIX): Android ve iOS'un ses kütüphanesini geç yüklemesini engeller
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
+    }
 
         window.toggleLang = async function(lang) {
             let d = window.currentItemData, txtEl = document.getElementById('read-text'); if(!d) return;
@@ -5172,15 +5197,17 @@ window.fpToggle = function() {
     if (!aud || !aud.src || aud.src === window.location.href) return;
     
     if (aud.paused) { 
-        aud.play().then(() => {
-            if (ic1) ic1.className = 'fas fa-pause'; if (ic2) ic2.className = 'fas fa-pause';
-            // Pille öffnen, wenn das Lesefenster zu ist
-            if (pill && !pill.classList.contains('show')) { 
-                pill.style.setProperty('display', 'flex', 'important'); 
-                pill.classList.add('show'); 
-                pill.classList.remove('minimized'); 
-            }
-        }).catch(() => {});
+// window.fpToggle fonksiyonunun içindeki play.then kısmını şu şekilde güncelle:
+aud.play().then(() => { 
+    if (ic1) ic1.className = 'fas fa-pause'; if (ic2) ic2.className = 'fas fa-pause';
+    if (pill) { 
+        pill.style.setProperty('display', 'flex', 'important'); 
+        pill.style.setProperty('opacity', '1', 'important'); // Görünürlüğü zorla
+        pill.style.setProperty('transform', 'translateY(0)', 'important');
+        pill.classList.add('show'); 
+        pill.classList.remove('minimized'); 
+    }
+}).catch(() => {});
     } else { 
         aud.pause(); 
         if (ic1) ic1.className = 'fas fa-play'; if (ic2) ic2.className = 'fas fa-play';
