@@ -1372,6 +1372,64 @@ body { padding-top: 230px !important; }
     .audio-rating-note { font-size: 1.4rem !important; padding: 0 4px !important; }
 }
 
+/* ========================================================= */
+/* KESİN ÇÖZÜM: KART PİLLERİ (HAPLAR) VE HEADER BOŞLUĞU      */
+/* ========================================================= */
+/* Masaüstü için genel boşluk */
+body { padding-top: 310px !important; }
+.main-content { margin-top: 20px !important; }
+
+@media (max-width: 768px) {
+    /* 1. Resmi ve İçeriği Aşağı İt (Überlappung Fix - Sayfa başlık altına girmez) */
+    body { padding-top: 305px !important; } 
+
+    /* 2. Orta Menü (Canlı, Eserler vb.) - Tek sıra, taşma yok, sınır içi */
+    .h-row-2 { 
+        display: flex !important;
+        flex-wrap: nowrap !important; 
+        justify-content: space-between !important; 
+        gap: 3px !important; 
+        padding: 5px 2px !important; 
+        width: 100% !important;
+    }
+    .s-pill { 
+        flex: 1 !important; 
+        min-width: 0 !important; /* Çerçeve dışına taşmayı kesin engeller */
+        padding: 4px 2px !important; 
+        font-size: 0.55rem !important; /* Yazılar çerçeveye sığsın diye küçültüldü */
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 2px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        border: 1px solid var(--border-soft) !important;
+    }
+    .s-pill i, .s-pill .real-blue-rose { 
+        font-size: 0.65rem !important; 
+    }
+    .s-badge { 
+        font-size: 0.5rem !important; 
+        padding: 1px 3px !important; 
+        margin-left: 2px !important; 
+    }
+}
+
+/* iPhone/WebKit Özel (Daha fazla boşluk ve kopyalama engeli) */
+@supports (-webkit-touch-callout: none) {
+    .card, .action-btn, .s-pill, .nav-link, .ptab-btn, .noble-btn, .hero-avatar, .card-ic {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    body { padding-top: 320px !important; }
+    @media (max-width: 768px) {
+        body { padding-top: 315px !important; } /* iPhone çentiği için ekstra pay */
+    }
+}
+
     </style>
 
 </head>
@@ -2958,82 +3016,65 @@ window.clearLogs = function() {
 window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
         let file = input.files[0];
-        window.toast("Müzik Hazırlanıyor...", "⏳");
-        document.getElementById('read-author').innerText = "İşleniyor: %0";
+        window.toast("Firebase: Müzik Yükleniyor...", "⏳");
         
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let base64Data = e.target.result;
-            let newName = file.name.replace(/\.[^/.]+$/, "");
-            let isDone = false;
-
-            const finishUpload = (audioUrl, isOnline) => {
-                if(!window.currentItemData) return;
-                let type = window.currentItemData.type, id = window.currentItemData.id;
-                let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
-                let idx = source.findIndex(x => x.id === id);
-                
-                if (idx > -1) { 
-                    source[idx].hasAudio = true; 
-                    source[idx].audio = audioUrl;
-                    if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
-                    if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
-                    if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
-                    
-                    window.currentItemData = source[idx];
-                    try {
-                        if(type === 'userPoems') {
-                            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                            firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
-                        } else {
-                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                            firebase.database().ref('contentDB').set(window.DB);
+        let authorEl = document.getElementById('read-author');
+        if(authorEl) authorEl.innerText = "Yükleniyor: %0";
+        
+        let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
+        let uploadTask = storageRef.put(file);
+        
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                if(authorEl) authorEl.innerText = "Yükleniyor: %" + Math.round(progress);
+            }, 
+            (error) => { 
+                window.toast("Yükleme Başarısız! (Kuralları kontrol et)", "❌"); 
+                console.error(error);
+                if(authorEl) authorEl.innerText = "~ " + (window.currentItemData.author || "Şair Misal.i");
+            }, 
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    if(window.currentItemData) {
+                        let type = window.currentItemData.type, id = window.currentItemData.id;
+                        let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+                        let idx = source.findIndex(x => x.id === id);
+                        let newName = file.name.replace(/\.[^/.]+$/, "");
+                        
+                        if (idx > -1) { 
+                            source[idx].hasAudio = true; 
+                            source[idx].audio = downloadURL;
+                            if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
+                            if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
+                            if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
+                            
+                            window.currentItemData = source[idx];
+                            // ONLINE KAYIT - Herkes anında görecek
+                            if(type === 'userPoems') {
+                                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                                firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                            } else {
+                                localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                                firebase.database().ref('contentDB').set(window.DB);
+                            }
+                            window.toast("Müzik Online Kaydedildi!", "🌍"); 
                         }
-                        window.toast(isOnline ? "Müzik Online Kaydedildi!" : "Güvenli Moda (Lokal) Kaydedildi!", "🎵"); 
-                    } catch(err) {}
-                }
-                
-                let aud = document.getElementById('global-audio-element');
-                let audCont = document.getElementById('card-audio-container');
-                if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
-                if(aud) { aud.src = audioUrl; aud.play().catch(()=>{}); }
-                
-                window.updateAudioUI(window.currentItemData, true, id, type);
-                document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
-            };
-
-            try {
-                let storageRef = firebase.storage().ref('eser_muzikleri/' + Date.now() + '_' + file.name);
-                let uploadTask = storageRef.put(file);
-                
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        let p = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                        document.getElementById('read-author').innerText = "Yükleniyor: %" + p;
-                    }, 
-                    (error) => {
-                        console.warn("Firebase Engeli, Lokal Moda Geçiliyor...", error);
-                        if (!isDone) {
-                            isDone = true;
-                            window.audioStorage.save(window.currentItemData.id, base64Data).then(() => processUpload(base64Data, false));
-                        }
-                    }, 
-                    () => {
-                        if (!isDone) {
-                            isDone = true;
-                            uploadTask.snapshot.ref.getDownloadURL().then((url) => finishUpload(url, true));
-                        }
+                        
+                        let aud = document.getElementById('global-audio-element');
+                        let audCont = document.getElementById('card-audio-container');
+                        if(audCont) audCont.style.setProperty('display', 'flex', 'important'); 
+                        if(aud) { aud.src = downloadURL; aud.play().catch(()=>{}); }
+                        
+                        window.updateAudioUI(window.currentItemData, true, id, type);
+                        if(authorEl) authorEl.innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
                     }
-                );
-            } catch(e) {
-                if (!isDone) {
-                    isDone = true;
-                    window.audioStorage.save(window.currentItemData.id, base64Data).then(() => finishUpload(base64Data, false));
-                }
+                });
             }
-        };
-        reader.readAsDataURL(file);
-    };window.adminUploadAudioCurrent = function(input) {
+        );
+    };
+    
+    window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
         let file = input.files[0];
         window.toast("Müzik Hazırlanıyor...", "⏳");
@@ -5384,15 +5425,14 @@ window.audioStorage = {
     }
 };
 
-window.adminRadioUpload = async function(input) {
+window.adminRadioUpload = function(input) {
         if (!input.files || input.files.length === 0) return;
         window.radioSettings = window.radioSettings || { playlist: [] };
         window.radioSettings.playlist = window.radioSettings.playlist || [];
         
-        window.toast("Şarkılar Firebase'e yükleniyor (Online)...", "⏳");
+        window.toast("Şarkılar Firebase'e yükleniyor...", "⏳");
         
-        for(let i = 0; i < input.files.length; i++) {
-            let file = input.files[i];
+        Array.from(input.files).forEach((file, i) => {
             let trackId = "radio_track_" + Date.now() + "_" + i;
             let trackName = file.name.replace(/\.[^/.]+$/, "");
             
@@ -5408,10 +5448,10 @@ window.adminRadioUpload = async function(input) {
                     if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
                     if(typeof window.updateRadioPlayerDisplay === 'function') window.updateRadioPlayerDisplay();
                     
-                    window.toast(trackName + " radyoya online eklendi!", "🌍");
+                    window.toast(trackName + " online eklendi!", "🌍");
                 });
             });
-        }
+        });
         input.value = ""; 
     };
 
