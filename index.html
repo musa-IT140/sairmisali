@@ -2408,14 +2408,18 @@ body { padding-top: 310px !important; }
                     </div>
                     
                     <div style="background:var(--widget-bg); padding:12px; border-radius:8px; margin-bottom:15px; border:1px dashed var(--accent-gold);">
-                        <label style="color:var(--accent-gold); font-weight:bold; font-size:0.85rem; margin-bottom:8px; display:block;"><i class="fas fa-sliders-h"></i> Geçiş Ayarları</label>
-                        <div style="display:flex; gap:10px;">
-                            <select id="adm-bgm-transition" class="inp" style="margin:0; flex:2;">
-                                <option value="crossfade">Yumuşak Geçiş (Crossfade)</option><option value="direct">Keskin Geçiş</option><option value="fadein">Yavaş Giriş</option><option value="fadeout">Yavaş Çıkış</option>
+                        <label style="color:var(--accent-gold); font-weight:bold; font-size:0.85rem; margin-bottom:8px; display:block;"><i class="fas fa-sliders-h"></i> Geçiş ve Remix Ayarları</label>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <select id="adm-bgm-transition" class="inp" style="margin:0; flex:1.5;">
+                                <option value="crossfade">Yumuşak Geçiş (Crossfade)</option><option value="direct">Keskin Geçiş</option>
                             </select>
-                            <div style="flex:1; display:flex; align-items:center; background:var(--input-bg); border:1px solid var(--border-soft); border-radius:8px; padding-right:10px;">
-                                <input type="number" id="adm-bgm-fade-sec" class="inp" style="border:none; margin:0; flex:1; background:transparent;" placeholder="Sn" min="1" max="30" value="5">
-                                <span style="color:var(--text-sub); font-size:0.8rem; font-weight:bold;">Sn.</span>
+                            <div style="flex:1; display:flex; align-items:center; background:var(--input-bg); border:1px solid var(--border-soft); border-radius:8px; padding-left:10px;">
+                                <span style="color:var(--text-sub); font-size:0.75rem; white-space:nowrap;">Geçiş:</span>
+                                <input type="number" id="adm-bgm-fade-sec" class="inp" style="border:none; margin:0; flex:1; background:transparent; text-align:right;" placeholder="5" min="1" max="30" value="5"><span style="color:var(--text-sub); font-size:0.75rem; margin-right:10px;">sn</span>
+                            </div>
+                            <div style="flex:1; display:flex; align-items:center; background:rgba(236,72,153,0.1); border:1px solid var(--accent-pink); border-radius:8px; padding-left:10px;" title="Şarkı kaç saniye çalsın? (Sınırsız için 0 yapın)">
+                                <span style="color:var(--accent-pink); font-size:0.75rem; font-weight:bold; white-space:nowrap;">Remix:</span>
+                                <input type="number" id="adm-bgm-play-limit" class="inp" style="border:none; margin:0; flex:1; background:transparent; color:var(--accent-pink); font-weight:bold; text-align:right;" placeholder="0" min="0" max="600" value="0"><span style="color:var(--accent-pink); font-size:0.75rem; margin-right:10px;">sn</span>
                             </div>
                         </div>
                     </div>
@@ -5886,31 +5890,32 @@ window.adminRadioUpload = async function(input) {
     window.radioSettings = window.radioSettings || { playlist: [] };
     window.radioSettings.playlist = window.radioSettings.playlist || [];
     
-    window.toast("Şarkılar yükleniyor, lütfen bekleyin...", "⏳");
+    window.toast("Radyo Müzikleri Online Yükleniyor...", "⏳");
     
     for(let i = 0; i < input.files.length; i++) {
         let file = input.files[i];
         let reader = new FileReader();
         
         reader.onload = async function(e) {
+            let base64Data = e.target.result;
             let trackId = "radio_track_" + Date.now() + "_" + i;
             let trackName = file.name.replace(/\.[^/.]+$/, "");
             
-            // Speichert die Musikdatei (Egal wie groß) in der IndexedDB abseits vom Limit
-            await window.audioStorage.save(trackId, e.target.result);
+            // KESİN ÇÖZÜM: Radyo şarkıları Base64 formatıyla direkt Playlist içine gömülüyor.
+            // IndexedDB tamamen atlandı, herkes müziği online ve anında dinleyebilir.
+            window.radioSettings.playlist.push({ id: trackId, name: trackName, src: base64Data });
             
-            // Speichert nur die ID im LocalStorage
-            window.radioSettings.playlist.push({ id: trackId, name: trackName });
             localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+            try { firebase.database().ref('radioSettings').set(window.radioSettings); } catch(err){}
             
             if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
             if(typeof window.updateRadioPlayerDisplay === 'function') window.updateRadioPlayerDisplay();
             
-            window.toast(trackName + " radyoya eklendi!", "🎵");
+            window.toast(trackName + " radyoya online eklendi!", "🎵");
         };
         reader.readAsDataURL(file);
     }
-    input.value = ""; // Input leeren, damit man das gleiche Lied nochmal wählen kann, falls nötig
+    input.value = ""; 
 };
 
 // ========================================================================
@@ -5936,13 +5941,17 @@ window.saveGlobalBGM = function() {
     try {
         window.radioSettings.type = document.getElementById('adm-bgm-transition')?.value || 'crossfade';
         window.radioSettings.fadeSec = document.getElementById('adm-bgm-fade-sec')?.value || 5;
+        window.radioSettings.playLimit = document.getElementById('adm-bgm-play-limit')?.value || 0;
         window.radioSettings.icon = document.getElementById('adm-bgm-icon')?.value || '';
         window.radioSettings.customText = document.getElementById('adm-bgm-text')?.value || '';
         window.radioSettings.font = document.getElementById('adm-bgm-font')?.value || "'Space Mono', monospace";
         
+        // Lokal ve Firebase Online Kayıt! Herkes anında görecek
         localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+        try { firebase.database().ref('radioSettings').set(window.radioSettings); } catch(e){}
+        
         window.applyRadioSettingsToPlayer(window.radioSettings);
-        window.toast("Radyo Ayarları Yayına Alındı!", "📻");
+        window.toast("Radyo Ayarları Tüm Kullanıcılar İçin Yayında!", "📻");
     } catch(err) { console.error("Radyo kaydetme hatası", err); }
 };
 
