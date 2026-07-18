@@ -8603,6 +8603,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (hasRealMusic) {
                     audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
                     let trackData = null;
+                    
                     if (item.audio === 'firebaseDB') {
                         if (window.audioStorage) trackData = await window.audioStorage.get(id);
                         if (!trackData) {
@@ -8613,14 +8614,30 @@ document.addEventListener("DOMContentLoaded", function() {
                                 else { window.toast("Müzik sunucuda bulunamadı", "❌"); }
                             } catch (e) { console.error(e); }
                         }
-                    } else if (item.audio && item.audio.startsWith('data:audio')) { trackData = item.audio; } 
+                    } 
+                    else if (item.audio && item.audio.startsWith('data:audio')) { trackData = item.audio; } 
+                    // 🌟 KESİN ÇÖZÜM 1: İnternet Linklerini (Marşlar) Algıla!
+                    else if (item.audio && item.audio.startsWith('http')) { trackData = item.audio; }
                     else if (window.audioStorage && item.hasAudio) { trackData = await window.audioStorage.get(id); }
                     
-                    if (trackData && aud && aud.src !== trackData) {
-                        await window.loadAudioSafely(aud, trackData);
-                        let ic1 = document.getElementById('fp-play-icon'); if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                    // 🌟 KESİN ÇÖZÜM 2: Player'ın içindeki eski şarkıyı ZORLA temizle ki karışmasın
+                    if (aud) {
+                        if (trackData) {
+                            if (aud.src !== trackData) {
+                                await window.loadAudioSafely(aud, trackData);
+                            }
+                            let ic1 = document.getElementById('fp-play-icon'); 
+                            if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                        } else {
+                            // Eğer trackData boşsa, demek ki Müzik Yok. Eski şarkıyı hemen durdur ve sil!
+                            aud.pause();
+                            aud.src = "";
+                            aud.removeAttribute('src');
+                        }
                     }
                 } else { 
+                    // Müzik olmayan bir kart açıldıysa, Player'ı kesin olarak sustur!
+                    if (aud) { aud.pause(); aud.src = ""; aud.removeAttribute('src'); }
                     audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important')); 
                 }
             } else if (audCont) {
