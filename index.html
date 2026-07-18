@@ -3614,13 +3614,21 @@ window.adminRadioUpload = async function(input) {
             source[idx].audioYazan = document.getElementById('cp-yazan').value.trim();
             source[idx].audioOkuyan = document.getElementById('cp-okuyan').value.trim();
             source[idx].audioMuzik = document.getElementById('cp-muzik').value.trim();
+            
+            // KESİN ÇÖZÜM: Hem lokale hem de Firebase Cloud'a kaydet (Live Sync)
             try {
-                if(type === 'userPoems') localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                else localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-            } catch(e) {}
+                if(type === 'userPoems') {
+                    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                    firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                } else {
+                    localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                    firebase.database().ref('contentDB').set(window.DB);
+                }
+            } catch(e) { console.error("Künye kaydetme hatası:", e); }
+            
             window.currentItemData = source[idx];
             window.updateAudioUI(source[idx], true, id, type); 
-            window.toast("Eser Künyesi Güncellendi!", "✅");
+            window.toast("Eser Künyesi Online Kaydedildi!", "✅");
             window.renderAllContent();
         }
         window.closeTopModal();
