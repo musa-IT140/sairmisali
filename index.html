@@ -7487,13 +7487,24 @@ window.renderAllContent = function() {
                 let noteHTML = hasRealMusic ? `<span class="c-stat" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
 
                 let currentType = typeof item !== 'undefined' ? type : 'userPoems';
+                
+                // 🌟 YENİ: KART İÇİ İMZA (Şiirlerim ve Sözlerim için her zaman Şair Misal.i)
+                let cardAuthHTML = '';
+                if (!['bilmeceler', 'bulmacalar', 'persons'].includes(currentType)) {
+                    let cardAuthName = item.author || item.name || "Anonim";
+                    if (['poems', 'quotes'].includes(currentType) && (cardAuthName === 'Anonim' || cardAuthName === 'Sistem' || !item.author)) {
+                        cardAuthName = "Şair Misal.i";
+                    }
+                    let authColor = (cardAuthName === 'Şair Misal.i' || cardAuthName === 'Sair Misali') ? 'var(--accent-cyan)' : 'var(--accent-gold)';
+                    let authGlow = (cardAuthName === 'Şair Misal.i' || cardAuthName === 'Sair Misali') ? 'text-shadow: 0 0 8px rgba(0,206,209,0.5);' : '';
+                    cardAuthHTML = `<div class="card-auth" style="color:${authColor}; ${authGlow} font-family:'Great Vibes', cursive; font-size:1.3rem; margin-top:5px; margin-bottom:5px;">~ ${cardAuthName}</div>`;
+                }
+
                 let footerHTML = !['bilmeceler', 'bulmacalar', 'persons'].includes(currentType) 
                     ? `<div class="card-footer">${noteHTML}<span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span><span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span><span class="c-stat"><span class="real-blue-rose" style="font-size:0.9rem; margin-right:3px;">🌹</span> ${roses}</span>${shareBtns}${audioBtn}</div>` 
                     : '';
 
-            return `<div class="card" onclick="${action}">${ribbon}<div class="admin-card-actions">${editBtn}${deleteBtn}</div><button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${item.id}')"><i class="fas fa-bookmark"></i></button><div class="card-ic">${item.emoji || '✨'}</div><h3 class="card-t">${item.title || item.trTitle || 'Eser'}</h3><p class="card-sub">${textPreview}</p>${footerHTML}</div>`;
-        }).join('');
-    });
+                return `<div class="card" onclick="${action}">${ribbon}<div class="admin-card-actions">${editBtn}${deleteBtn}</div><button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${item.id}')"><i class="fas fa-bookmark"></i></button><div class="card-ic">${item.emoji || '✨'}</div><h3 class="card-t">${item.title || item.trTitle || 'Eser'}</h3><p class="card-sub">${textPreview}</p>${cardAuthHTML}${footerHTML}</div>`;
     
     // 3. Üye Eserleri
     let uGrid = document.getElementById('userPoems-grid');
@@ -8568,6 +8579,12 @@ document.addEventListener("DOMContentLoaded", function() {
             if(authEl) {
                 authEl.style.display = 'block'; 
                 let displayedAuthor = (item.author || item.authorTR || item.name || "Anonim");
+                
+                // 🌟 ZORUNLU KONTROL: Eğer kategori Şiir veya Söz ise, Anonim'i ez ve Şair Misal.i yap!
+                if (['poems', 'quotes'].includes(type) && (displayedAuthor === 'Anonim' || displayedAuthor === 'Sistem' || !item.author)) {
+                    displayedAuthor = "Şair Misal.i";
+                }
+                
                 authEl.innerText = "~ " + displayedAuthor; 
                 authEl.className = (displayedAuthor === 'Şair Misal.i' || displayedAuthor === 'Sair Misali') ? "misali-signature-text" : "author-signature-gold";
             }
