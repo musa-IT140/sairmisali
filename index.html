@@ -3293,17 +3293,10 @@ window.saveRadioName = function(idx, newVal) {
         }
     };
 
-window.adminUploadAudioCurrent = function(input) {
+window.adminUploadAudioCurrent = async function(input) {
     if (!input.files || !input.files[0]) return;
     let file = input.files[0];
-    
-    // 1. Dosya Boyutu Kontrolü (Realtime DB limiti 10MB, Base64 ile şişer)
-    if (file.size > 6000000) { // 6MB üstü risklidir
-        window.showMisaliAlert("Hata", "Dosya çok büyük! Lütfen 6MB'dan küçük bir ses dosyası seçin.");
-        return;
-    }
-
-    window.toast("Buluta Yükleniyor...", "⏳");
+    window.toast("Müzik Buluta Yükleniyor...", "⏳");
     
     let reader = new FileReader();
     reader.onload = async function(e) {
@@ -3311,22 +3304,20 @@ window.adminUploadAudioCurrent = function(input) {
         let id = window.currentItemData.id;
         
         try {
-            // 2. Önce müziği ayrı bir yere yaz
+            // 1. Önce Firebase'e gönder ve cevabı bekle (await)
             await firebase.database().ref('audioFiles/' + id).set(base64Data);
             
-            // 3. Eserin kendisini güncelle
+            // 2. Eser objesini güncelle
             window.currentItemData.hasAudio = true;
             window.currentItemData.audio = "firebaseDB";
             
-            // Eserin bulunduğu ana listeyi (userPoems veya DB[type]) güncelle
             let type = window.currentItemData.type;
             let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
             let idx = source.findIndex(x => x.id === id);
             if(idx > -1) {
                 source[idx].hasAudio = true;
                 source[idx].audio = "firebaseDB";
-                
-                // Senkronizasyon (Hem Local hem Online)
+                // 3. Veritabanını güncelle
                 if(type === 'userPoems') {
                     localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
                     await firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
@@ -3336,12 +3327,17 @@ window.adminUploadAudioCurrent = function(input) {
                 }
             }
             
-            window.toast("Başarıyla online yüklendi!", "✅");
-            window.renderAllContent();
-            window.openReadModal(id, type);
+            // 4. UI'yı Zorla Göster
+            let audCont = document.getElementById('card-audio-container');
+            if(audCont) {
+                audCont.classList.add('force-show');
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.display = 'flex');
+            }
+            window.updateAudioUI(window.currentItemData, true, id, type);
+            window.toast("Başarıyla Kaydedildi!", "✅");
         } catch(err) {
-            console.error("Firebase Yükleme Hatası:", err);
-            window.showMisaliAlert("Yükleme Hatası", "Firebase'e yazılamadı. Hata: " + err.message);
+            console.error(err);
+            window.toast("Hata: Firebase bağlantısı koptu!", "❌");
         }
     };
     reader.readAsDataURL(file);
@@ -5655,39 +5651,37 @@ window.audioStorage = {
 window.adminRadioUpload = async function(input) {
     if (!input.files || input.files.length === 0) return;
     window.radioSettings = window.radioSettings || { playlist: [] };
-    window.radioSettings.playlist = window.radioSettings.playlist || [];
-    
-    window.toast("Radyo Müzikleri Realtime DB'ye Yükleniyor...", "⏳");
     
     for(let i = 0; i < input.files.length; i++) {
         let file = input.files[i];
         let reader = new FileReader();
+        window.toast(file.name + " yükleniyor...", "⏳");
         
         reader.onload = async function(e) {
             let base64Data = e.target.result;
-            let trackId = "radio_track_" + Date.now() + "_" + i;
+            let trackId = "radio_" + Date.now() + "_" + i;
             let trackName = file.name.replace(/\.[^/.]+$/, "");
             
             try {
-                // 1. Base64 verisini Firebase Realtime Database'deki radioFiles klasörüne at
+                // Müziği Realtime Database'e göm
                 await firebase.database().ref('radioFiles/' + trackId).set(base64Data);
                 
-                // 2. Playlist'e sadece ID'yi yaz. Base64'ü LocalStorage'a KESİNLİKLE yazma, aksi takdirde çöker!
+                // Sadece ID ve İsimi tut (Büyük veriyi tutma!)
                 window.radioSettings.playlist.push({ id: trackId, name: trackName, src: "firebaseDB" });
+                
+                // Senkronize et
                 localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
-                firebase.database().ref('radioSettings').set(window.radioSettings);
+                await firebase.database().ref('radioSettings').set(window.radioSettings);
                 
-                if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
-                if(typeof window.updateRadioPlayerDisplay === 'function') window.updateRadioPlayerDisplay();
-                
-                window.toast(trackName + " radyoya eklendi!", "🎵");
+                window.renderRadioPlaylist();
+                window.toast(trackName + " eklendi!", "🎵");
             } catch(err) {
-                window.toast("Dosya çok büyük. Yüklenemedi.", "❌");
+                window.toast("Hata: Dosya çok büyük (Realtime DB limit)", "❌");
             }
         };
         reader.readAsDataURL(file);
     }
-    input.value = ""; 
+    input.value = "";
 };
 
 window.applyRadioSettingsToPlayer = async function(settings) {
