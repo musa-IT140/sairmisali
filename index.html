@@ -2574,7 +2574,7 @@ window.syncData = function(refPath, data) {
         }
     });
 
-    // FIREBASE LIVE-SYNC: Online verileri anında herkese yansıt
+// FIREBASE LIVE-SYNC: Online verileri anında herkese yansıt
     firebase.database().ref('interactions').on('value', (snap) => {
         if(snap.exists()) {
             window.poemDataStore = snap.val();
@@ -2588,6 +2588,32 @@ window.syncData = function(refPath, data) {
         if(snap.exists()) {
             localStorage.setItem('misaliAudioRatingsDB', JSON.stringify(snap.val()));
             if(typeof window.renderAllContent === 'function') window.renderAllContent();
+        }
+    });
+
+    // 🌟 YENİ: DİĞER CİHAZLARIN MÜZİKLERİ ANINDA GÖRMESİ İÇİN CANLI DİNLEYİCİLER
+    firebase.database().ref('userPoemsDB').on('value', (snap) => {
+        if(snap.exists()) {
+            window.userPoemsDB = snap.val();
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            if(typeof window.renderAllContent === 'function') window.renderAllContent();
+        }
+    });
+
+    firebase.database().ref('contentDB').on('value', (snap) => {
+        if(snap.exists()) {
+            window.DB = snap.val();
+            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+            if(typeof window.renderAllContent === 'function') window.renderAllContent();
+        }
+    });
+
+    firebase.database().ref('radioSettings').on('value', (snap) => {
+        if(snap.exists()) {
+            window.radioSettings = snap.val();
+            localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+            if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
+            if(typeof window.updateRadioPlayerDisplay === 'function') window.updateRadioPlayerDisplay();
         }
     });
 
@@ -3370,6 +3396,39 @@ window.adminUploadAudioCurrent = async function(input) {
     reader.readAsDataURL(file);
 };
 
+window.adminRadioUpload = async function(input) {
+        if (!input.files || input.files.length === 0) return;
+        window.radioSettings = window.radioSettings || { playlist: [] };
+        if (!window.radioSettings.playlist) window.radioSettings.playlist = [];
+        
+        for(let i = 0; i < input.files.length; i++) {
+            let file = input.files[i];
+            let reader = new FileReader();
+            window.toast(file.name + " yükleniyor...", "⏳");
+            
+            reader.onload = async function(e) {
+                let base64Data = e.target.result;
+                let trackId = "radio_track_" + Date.now() + "_" + i;
+                let trackName = file.name.replace(/\.[^/.]+$/, "");
+                
+                try {
+                    await firebase.database().ref('radioFiles/' + trackId).set(base64Data);
+                    window.radioSettings.playlist.push({ id: trackId, name: trackName, src: "firebaseDB" });
+                    
+                    localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+                    await firebase.database().ref('radioSettings').set(window.radioSettings);
+                    
+                    if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
+                    window.toast(trackName + " eklendi!", "🎵");
+                } catch(err) {
+                    window.toast("Hata: Dosya çok büyük (Realtime DB limit)", "❌");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        input.value = "";
+    };
+
     const originalOpenReadModal_V7 = window.openReadModal;
     window.openReadModal = async function(id, type) {
         if (typeof originalOpenReadModal_V7 === 'function') await originalOpenReadModal_V7(id, type);
@@ -3377,38 +3436,45 @@ window.adminUploadAudioCurrent = async function(input) {
         let item = window.currentItemData, isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
         let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
         
-if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
-            // KESİN GÖRÜNÜRLÜK
+        if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
+            audCont.classList.add('force-show'); // KESİN GÖRÜNÜRLÜK (KAYBOLMA FIX)
             audCont.style.setProperty('display', 'flex', 'important');
             audCont.style.setProperty('opacity', '1', 'important');
-            audCont.style.setProperty('visibility', 'visible', 'important');
-            audCont.classList.add('force-show');
             
             if (hasRealMusic) {
-                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => {
-                    p.style.setProperty('display', 'flex', 'important');
-                    p.style.setProperty('opacity', '1', 'important');
-                    p.style.setProperty('visibility', 'visible', 'important');
-                });
-                 let trackData = null;
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+                let trackData = null;
+                
                 if (item.audio === 'firebaseDB') {
                     if (window.audioStorage) trackData = await window.audioStorage.get(id);
                     if (!trackData) {
                         window.toast("Müzik indiriliyor...", "☁️");
                         try {
                             let snap = await firebase.database().ref('audioFiles/' + id).once('value');
-                            if (snap.exists()) { trackData = snap.val(); if(window.audioStorage) window.audioStorage.save(id, trackData); }
-                        } catch (e) { console.error(e); }
+                            if (snap.exists()) { 
+                                trackData = snap.val(); 
+                                if(window.audioStorage) window.audioStorage.save(id, trackData); 
+                            }
+                        } catch (e) { console.error(e); window.toast("İndirme Hatası", "❌"); }
                     }
-                } else if (item.audio && item.audio.startsWith('data:audio')) { trackData = item.audio; } 
-                else if (window.audioStorage && item.hasAudio) { trackData = await window.audioStorage.get(id); }
+                } else if (item.audio && item.audio.startsWith('data:audio')) { 
+                    trackData = item.audio; 
+                } else if (window.audioStorage && item.hasAudio) { 
+                    trackData = await window.audioStorage.get(id); 
+                }
                 
                 if (trackData && aud && aud.src !== trackData) {
                     await window.loadAudioSafely(aud, trackData);
-                    let ic1 = document.getElementById('fp-play-icon'); if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                    let ic1 = document.getElementById('fp-play-icon'); 
+                    if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
                 }
-            } else { audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important')); }
-        } else if (audCont) audCont.style.setProperty('display', 'none', 'important');
+            } else { 
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important')); 
+            }
+        } else if (audCont) {
+            audCont.classList.remove('force-show');
+            audCont.style.setProperty('display', 'none', 'important');
+        }
     };
 
     window.adminDeleteAudioCurrent = async function() {
