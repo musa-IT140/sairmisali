@@ -4696,48 +4696,93 @@ window.roseComment = function(idx) {
             document.getElementById('adm-edit-fields').style.display = 'none';
         };
 
-// Admin Panelinde Toplam Üye Sayısını Gösteren Fonksiyon ve ÜYE SİLME
-    window.renderOnlineUsers = function() {
-        let box = document.getElementById('adm-users-box'); if (!box) return;
-        let users = Object.values(window.userDatabase || {});
-        
-        let html = `
-        <div style="background:var(--input-bg); padding:12px 15px; border-radius:10px; margin-bottom:15px; border:2px solid var(--accent-gold); display:flex; justify-content:space-between; align-items:center; box-shadow:0 5px 15px rgba(212,175,55,0.2);">
-            <span style="color:var(--accent-gold); font-size:1.1rem; font-weight:bold; font-family:'Playfair Display', serif;"><i class="fas fa-users"></i> Toplam Kayıtlı Üye:</span>
-            <span style="background:var(--accent-gold); color:#000; padding:4px 15px; border-radius:20px; font-size:1.2rem; font-weight:bold; font-family:'Space Mono', monospace;">${users.length}</span>
-        </div>`;
-
-        html += users.map(u => {
-            let isBanned = !!u.banned;
-            let isApproved = !!u.approved;
-            let banIcon = isBanned ? '<i class="fas fa-lock-open" style="color:var(--accent-green);"></i>' : '<i class="fas fa-ban" style="color:var(--accent-red);"></i>';
-            let approveBtn = isApproved 
-                ? `<button class="action-btn" title="Onaylı Üye" disabled style="opacity:0.4; cursor:not-allowed;"><i class="fas fa-user-check" style="color:var(--accent-green);"></i></button>` 
-                : `<button class="action-btn" title="Kullanıcıyı Onayla" onclick="window.approveUser('${u.username}')"><i class="fas fa-user-plus" style="color:var(--accent-gold);"></i></button>`;
+// Admin Panelinde Toplam Üye Sayısını Gösteren Fonksiyon ve ÜYE SİLME (Donma Yapmayan Saf Arayüz Çizici)
+        window.renderOnlineUsers = function() {
+            let box = document.getElementById('adm-users-box'); if (!box) return;
+            let users = Object.values(window.userDatabase || {});
             
-            // YENİ: KULLANICIYI TAMAMEN SİLME BUTONU
-            let delBtn = `<button class="action-btn" title="Kullanıcıyı Sil" onclick="window.deleteUser('${u.username}')"><i class="fas fa-user-times" style="color:var(--accent-red);"></i></button>`;
-
-            return `
-            <div style="background:var(--widget-bg); padding:10px; border-radius:8px; margin-bottom:8px; border-left:3px solid var(--accent-cyan); display:flex; justify-content:space-between; align-items:center; opacity:${isBanned ? '0.5' : '1'}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:1.4rem; background:var(--bg-card); padding:6px; border-radius:50%; border:1px solid var(--border-soft);">${u.emoji||'👤'}</span>
-                    <div style="line-height:1.2;">
-                        <strong style="color:var(--text-main); font-size:0.95rem;">${u.name||u.username}</strong><br>
-                        <small style="color:var(--text-sub); font-size:0.75rem;">Puan: <span style="color:var(--accent-green); font-weight:bold;">${u.score||0}</span> | Rol: ${u.role === 'admin' ? '<span style="color:var(--accent-gold);">Admin 👑</span>' : 'Üye'}</small>
-                    </div>
-                </div>
-                <div style="display:flex; gap:12px;">
-                    ${approveBtn}
-                    <button class="action-btn" style="font-size:1rem;" title="Puan Düzenle" onclick="window.editUserScore('${u.username}')"><i class="fas fa-star" style="color:var(--accent-gold);"></i></button>
-                    <button class="action-btn" style="font-size:1rem;" title="Özel Mesaj Gönder" onclick="window.adminSendMessage('${u.username}')"><i class="fas fa-envelope" style="color:var(--accent-cyan);"></i></button>
-                    <button class="action-btn" style="font-size:1rem;" title="Engelle" onclick="window.toggleUserBan('${u.username}')">${banIcon}</button>
-                    ${delBtn}
-                </div>
+            let html = `
+            <div style="background:var(--input-bg); padding:12px 15px; border-radius:10px; margin-bottom:15px; border:2px solid var(--accent-gold); display:flex; justify-content:space-between; align-items:center; box-shadow:0 5px 15px rgba(212,175,55,0.2);">
+                <span style="color:var(--accent-gold); font-size:1.1rem; font-weight:bold; font-family:'Playfair Display', serif;"><i class="fas fa-users"></i> Toplam Kayıtlı Üye:</span>
+                <span style="background:var(--accent-gold); color:#000; padding:4px 15px; border-radius:20px; font-size:1.2rem; font-weight:bold; font-family:'Space Mono', monospace;">${users.length}</span>
             </div>`;
-        }).join('') || '<div style="color:var(--text-sub); text-align:center; padding:20px;">Kayıtlı kullanıcı yok.</div>';
-        box.innerHTML = html;
-    };
+
+            html += users.map(u => {
+                let isBanned = !!u.banned;
+                let isApproved = !!u.approved;
+                let banIcon = isBanned ? '<i class="fas fa-lock-open" style="color:var(--accent-green);"></i>' : '<i class="fas fa-ban" style="color:var(--accent-red);"></i>';
+                let approveBtn = isApproved 
+                    ? `<button class="action-btn" title="Onaylı Üye" disabled style="opacity:0.4; cursor:not-allowed;"><i class="fas fa-user-check" style="color:var(--accent-green);"></i></button>` 
+                    : `<button class="action-btn" title="Kullanıcıyı Onayla" onclick="window.approveUser('${u.username}')"><i class="fas fa-user-plus" style="color:var(--accent-gold);"></i></button>`;
+                let delBtn = `<button class="action-btn" title="Kullanıcıyı Sil" onclick="window.deleteUser('${u.username}')"><i class="fas fa-user-times" style="color:var(--accent-red);"></i></button>`;
+
+                return `
+                <div style="background:var(--widget-bg); padding:10px; border-radius:8px; margin-bottom:8px; border-left:3px solid var(--accent-cyan); display:flex; justify-content:space-between; align-items:center; opacity:${isBanned ? '0.5' : '1'}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.4rem; background:var(--bg-card); padding:6px; border-radius:50%; border:1px solid var(--border-soft);">${u.emoji||'👤'}</span>
+                        <div style="line-height:1.2;">
+                            <strong style="color:var(--text-main); font-size:0.95rem;">${u.name||u.username}</strong><br>
+                            <small style="color:var(--text-sub); font-size:0.75rem;">Puan: <span style="color:var(--accent-green); font-weight:bold;">${u.score||0}</span> | Rol: ${u.role === 'admin' ? '<span style="color:var(--accent-gold);">Admin 👑</span>' : 'Üye'}</small>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        ${approveBtn}
+                        <button class="action-btn" style="font-size:1rem;" title="Puan Düzenle" onclick="window.editUserScore('${u.username}')"><i class="fas fa-star" style="color:var(--accent-gold);"></i></button>
+                        <button class="action-btn" style="font-size:1rem;" title="Özel Mesaj Gönder" onclick="window.adminSendMessage('${u.username}')"><i class="fas fa-envelope" style="color:var(--accent-cyan);"></i></button>
+                        <button class="action-btn" style="font-size:1rem;" title="Engelle" onclick="window.toggleUserBan('${u.username}')">${banIcon}</button>
+                        ${delBtn}
+                    </div>
+                </div>`;
+            }).join('');
+            box.innerHTML = html;
+        };
+
+        // 🌟 ASENKRON GÜVENLİ ARKA PLAN KURTARICI (Sayfa kilitlenmesini önleyen bağımsız işlem)
+        window.runSafeBackgroundUserRecovery = function() {
+            if (window.hasRunIsolatedRecovery) return;
+            window.hasRunIsolatedRecovery = true;
+            
+            let recovered = false;
+            let knownUsers = ["Şair Misal.i", "Sair Misali", "AdminKing", "Sistem", "Anonim", "Dr. Misal", "Bilmececi", "Bulmacacı", "Kıssadan Hisse", "Nasreddin Hoca"];
+            
+            let addRecUser = (uName) => {
+                if(uName && typeof uName === 'string' && uName.trim() !== '' && !window.userDatabase[uName] && !knownUsers.includes(uName)) {
+                    window.userDatabase[uName] = { username: uName, name: uName, role: 'user', score: 10, approved: true, emoji: '👤', pass: btoa('123456') };
+                    recovered = true;
+                }
+            };
+
+            // 1. Yazılan Eser sahiplerini tara
+            (window.userPoemsDB || []).forEach(p => { addRecUser(p.author); addRecUser(p.name); });
+            
+            // 2. Beğeni, Yorum ve Gülleri tara
+            Object.values(window.poemDataStore || {}).forEach(item => {
+                if(item.ratings) Object.keys(item.ratings).forEach(addRecUser);
+                if(item.guller) Object.keys(item.guller).forEach(addRecUser);
+                if(item.comments) item.comments.forEach(c => { addRecUser(c.user); if(c.roseUsers) c.roseUsers.forEach(addRecUser); });
+            });
+
+            // 3. Sohbet geçmişindeki kullanıcıları tara
+            (window.chatDB || []).forEach(m => { addRecUser(m.sender); addRecUser(m.receiver); });
+
+            // 4. Lesezeichen (Aklımdakiler) sahiplerini tara
+            if(window.savedItemsDB) Object.keys(window.savedItemsDB).forEach(addRecUser);
+
+            // 5. Sarı Player notalama puanlarını verenleri tara
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+            Object.values(audioRDB).forEach(itemRatings => {
+                if(itemRatings && typeof itemRatings === 'object') Object.keys(itemRatings).forEach(addRecUser);
+            });
+
+            if (recovered) {
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                try { firebase.database().ref('users').update(window.userDatabase); } catch(e){}
+                window.toast("Eski üyelerin tamamı güvenle buluta taşındı!", "♻️");
+                if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+            }
+        };
+        // Sayfa tamamen nefes aldıktan 4 saniye sonra arka planda sadece 1 defalık çalıştır
+        setTimeout(window.runSafeBackgroundUserRecovery, 4000);
 
     window.deleteUser = function(username) {
         window.showMisaliConfirm(`"${username}" adlı kullanıcıyı tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz!`, function() {
@@ -4755,6 +4800,7 @@ window.roseComment = function(idx) {
         if (window.userDatabase[username]) {
             window.userDatabase[username].banned = !window.userDatabase[username].banned;
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            try { firebase.database().ref('users/' + username + '/banned').set(window.userDatabase[username].banned); } catch(e){}
             window.renderOnlineUsers();
             window.toast(window.userDatabase[username].banned ? "Kullanıcı engellendi!" : "Engel kaldırıldı!", "🚫");
         }
@@ -4826,6 +4872,7 @@ window.roseComment = function(idx) {
             if(window.userDatabase[username]) {
                 window.userDatabase[username].approved = true;
                 localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                try { firebase.database().ref('users/' + username + '/approved').set(true); } catch(e){}
                 window.renderOnlineUsers();
                 window.toast(`${username} onaylandı!`, "✅");
             }
@@ -5183,6 +5230,7 @@ window.editUserScore = function(username) {
         window.userDatabase[username] = user;
         
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+        try { firebase.database().ref('users/' + username + '/score').set(user.score); } catch(e){}
         window.renderOnlineUsers(); 
         if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
         window.toast("Puan güncellendi!", "✅");
@@ -7631,6 +7679,31 @@ window.renderAudioRatingUI = function(id) {
 
         bootMasterEngine();
     });
+
+    // 🌟 ULTIMATE CLOUD RECOVERY: Suche in den Firebase-Benachrichtigungen nach verlorenen Nutzern!
+        setTimeout(() => {
+            try {
+                firebase.database().ref('notifications').once('value').then(snap => {
+                    if(snap.exists()) {
+                        let notifs = snap.val();
+                        let rec = false;
+                        Object.keys(notifs).forEach(uName => {
+                            if(uName && uName !== 'null' && !window.userDatabase[uName] && !["Şair Misal.i", "Sair Misali", "AdminKing"].includes(uName)) {
+                                window.userDatabase[uName] = { username: uName, name: uName, role: 'user', score: 10, approved: true, emoji: '👤', pass: btoa('123456') };
+                                rec = true;
+                            }
+                        });
+                        if(rec) {
+                            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                            firebase.database().ref('users').update(window.userDatabase);
+                            if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+                            window.toast("Ekstra üyeler buluttan (bildirimlerden) kurtarıldı!", "☁️");
+                        }
+                    }
+                });
+            } catch(e){}
+        }, 6000);
+
 </script>
 
 <script id="misali-games-engine">
@@ -8245,6 +8318,216 @@ function winGame() {
         </div>
     </div>
 </div>
+
+</div>
+</div>
+
+<!-- === MASTER FIX SCRIPT (Überschreibt alle defekten Klone) === -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(() => {
+        console.log("🛠️ MASTER FIX AKTIVIERT: Alle Player und Admin-Systeme repariert.");
+
+        // 1. ADMIN USER SYNC (Fügt Online-User und lokale User zusammen, ohne alte zu löschen)
+        firebase.database().ref('users').on('value', (snap) => {
+            if(snap.exists()) {
+                let onlineUsers = snap.val();
+                window.userDatabase = Object.assign({}, window.userDatabase, onlineUsers);
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+            }
+        });
+
+        // 2. RADIO EINSTELLUNGEN SICHTBAR MACHEN (Sekunden & Remix Limits laden)
+        const oldOpenTab = window.openTab;
+        window.openTab = function(group, tabId, btnEl) {
+            oldOpenTab(group, tabId, btnEl);
+            if (tabId === 'a-radio' && window.radioSettings) {
+                let rTrans = document.getElementById('adm-bgm-transition'), rFade = document.getElementById('adm-bgm-fade-sec'), rLim = document.getElementById('adm-bgm-play-limit');
+                if(rTrans) rTrans.value = window.radioSettings.type || 'crossfade';
+                if(rFade) rFade.value = window.radioSettings.fadeSec || 5;
+                if(rLim) rLim.value = window.radioSettings.playLimit || 0;
+            }
+        };
+
+        // 3. GELBER PLAYER (ESER) UPLOAD FIX (Cloud Sync)
+        window.adminUploadAudioCurrent = function(input) {
+            if (!input.files || !input.files[0]) return;
+            let file = input.files[0];
+            if(file.size > 5000000) return window.toast("Dosya çok büyük (Max 5MB)!", "❌");
+            
+            window.toast("Müzik Buluta Yükleniyor...", "⏳");
+            let reader = new FileReader();
+            reader.onload = async function(e) {
+                let base64Data = e.target.result;
+                let id = window.currentItemData.id, type = window.currentItemData.type;
+                try {
+                    await firebase.database().ref('audioFiles/' + id).set(base64Data);
+                    let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+                    let idx = source.findIndex(x => x.id === id);
+                    if (idx > -1) { 
+                        source[idx].hasAudio = true; source[idx].audio = "firebaseDB"; 
+                        if(type === 'userPoems') {
+                            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                            await firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                        } else {
+                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                            await firebase.database().ref('contentDB').set(window.DB);
+                        }
+                    }
+                    if(window.audioStorage) await window.audioStorage.save(id, base64Data);
+                    
+                    window.toast("Müzik Online Kaydedildi!", "🌍"); 
+                    let audCont = document.getElementById('card-audio-container'), aud = document.getElementById('global-audio-element');
+                    if(audCont) { 
+                        audCont.classList.add('force-show'); 
+                        audCont.style.setProperty('display', 'flex', 'important'); 
+                        audCont.style.setProperty('opacity', '1', 'important');
+                        audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important')); 
+                    }
+                    if(aud) { 
+                        await window.loadAudioSafely(aud, base64Data);
+                        aud.play().then(() => { let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; }).catch(()=>{}); 
+                    }
+                    window.updateAudioUI(source[idx], true, id, type);
+                    window.renderAllContent();
+                } catch(err) { window.toast("Hata: Dosya Realtime DB için çok büyük", "❌"); }
+            };
+            reader.readAsDataURL(file);
+            input.value = "";
+        };
+
+        // 4. GELBER PLAYER SICHTBAR MACHEN (Auf anderen Geräten öffnen)
+        window.openReadModal = async function(id, type) {
+            let pill = document.getElementById('floating-player');
+            if (pill) { pill.classList.remove('show'); pill.style.setProperty('display', 'none', 'important'); }
+            window.currentLang = 'tr';
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let item = (source || []).find(x => String(x.id) === String(id)); 
+            if (!item) return window.toast("Eser bulunamadı!", "❌");
+            window.currentItemData = { ...item, type: type };
+            
+            document.getElementById('read-title').innerHTML = (item.title || item.trTitle || 'Eser');
+            let txtEl = document.getElementById('read-text'), authEl = document.getElementById('read-author');
+            txtEl.innerHTML = (item.text || item.trText || item.quote || '').replace(/\n/g, '<br>'); 
+            txtEl.style.fontSize = window.fontSize + 'rem';
+            
+            if(authEl) {
+                authEl.style.display = 'block'; 
+                let displayedAuthor = (item.author || item.authorTR || item.name || "Anonim");
+                authEl.innerText = "~ " + displayedAuthor; 
+                authEl.className = (displayedAuthor === 'Şair Misal.i' || displayedAuthor === 'Sair Misali') ? "misali-signature-text" : "author-signature-gold";
+            }
+
+            let audCont = document.getElementById('card-audio-container'), aud = document.getElementById('global-audio-element');
+            let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
+            let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
+            
+            if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
+                audCont.classList.add('force-show'); 
+                audCont.style.setProperty('display', 'flex', 'important');
+                audCont.style.setProperty('opacity', '1', 'important');
+                
+                if (hasRealMusic) {
+                    audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+                    let trackData = null;
+                    if (item.audio === 'firebaseDB') {
+                        if (window.audioStorage) trackData = await window.audioStorage.get(id);
+                        if (!trackData) {
+                            window.toast("Müzik indiriliyor...", "☁️");
+                            try {
+                                let snap = await firebase.database().ref('audioFiles/' + id).once('value');
+                                if (snap.exists()) { trackData = snap.val(); if(window.audioStorage) window.audioStorage.save(id, trackData); }
+                                else { window.toast("Müzik sunucuda bulunamadı", "❌"); }
+                            } catch (e) { console.error(e); }
+                        }
+                    } else if (item.audio && item.audio.startsWith('data:audio')) { trackData = item.audio; } 
+                    else if (window.audioStorage && item.hasAudio) { trackData = await window.audioStorage.get(id); }
+                    
+                    if (trackData && aud && aud.src !== trackData) {
+                        await window.loadAudioSafely(aud, trackData);
+                        let ic1 = document.getElementById('fp-play-icon'); if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                    }
+                } else { 
+                    audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important')); 
+                }
+            } else if (audCont) {
+                audCont.classList.remove('force-show');
+                audCont.style.setProperty('display', 'none', 'important');
+            }
+
+            if(typeof window.updateAudioUI === 'function') window.updateAudioUI(item, isAdminCheck, id, type);
+            window.updateHeartsUI(); window.openModal('readModal');
+        };
+
+        // 5. BLAUER PLAYER (RADIO) UPLOAD FIX
+        window.adminRadioUpload = async function(input) {
+            if (!input.files || input.files.length === 0) return;
+            window.radioSettings = window.radioSettings || { playlist: [] };
+            for(let i = 0; i < input.files.length; i++) {
+                let file = input.files[i];
+                if(file.size > 5000000) { window.toast(file.name + " çok büyük (Max 5MB)!", "❌"); continue; }
+                window.toast(file.name + " yükleniyor...", "⏳");
+                let reader = new FileReader();
+                reader.onload = async function(e) {
+                    let base64Data = e.target.result;
+                    let trackId = "radio_track_" + Date.now() + "_" + i;
+                    let trackName = file.name.replace(/\.[^/.]+$/, "");
+                    try {
+                        await firebase.database().ref('radioFiles/' + trackId).set(base64Data);
+                        if(window.audioStorage) await window.audioStorage.save(trackId, base64Data);
+                        window.radioSettings.playlist.push({ id: trackId, name: trackName, src: "firebaseDB" });
+                        localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+                        await firebase.database().ref('radioSettings').set(window.radioSettings);
+                        if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
+                        window.toast(trackName + " radyoya eklendi!", "🎵");
+                    } catch(err) { window.toast("Yükleme Hatası!", "❌"); }
+                };
+                reader.readAsDataURL(file);
+            }
+            input.value = ""; 
+        };
+
+        // 6. BLAUER PLAYER (RADIO) DOWNLOAD UND AB SPIELEN FIX
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgm = document.getElementById('global-bgm'), playIcon = document.getElementById('bgm-play-icon');
+            if (!bgm || !settings.playlist || settings.playlist.length === 0) return;
+
+            let track = settings.playlist[window.currentBgmIndex || 0], audioData = null;
+
+            if (track && track.src === "firebaseDB") {
+                if (window.audioStorage) audioData = await window.audioStorage.get(track.id);
+                if (!audioData) {
+                    window.toast("Radyo indiriliyor...", "☁️");
+                    try {
+                        let snap = await firebase.database().ref('radioFiles/' + track.id).once('value');
+                        if (snap.exists()) { audioData = snap.val(); if(window.audioStorage) window.audioStorage.save(track.id, audioData); }
+                    } catch (e) {}
+                }
+            } else { audioData = track.src || track; }
+
+            if (!audioData) return window.toast("Müzik bulunamadı!", "❌");
+
+            if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(bgm, audioData);
+            else bgm.src = audioData;
+
+            window.updateRadioPlayerDisplay(settings);
+            bgm.volume = 0;
+            bgm.play().then(() => { 
+                if (playIcon) playIcon.className = 'fas fa-pause'; 
+                window.isFadingOut = false;
+                let transType = settings.type || 'crossfade', fadeSec = parseInt(settings.fadeSec || 5);
+                if (transType === 'crossfade' || transType === 'fadein') {
+                    let step = 1 / (fadeSec * 20), fadeInterval = setInterval(() => {
+                        if (bgm.volume + step < 1) bgm.volume += step; else { bgm.volume = 1; clearInterval(fadeInterval); }
+                    }, 50);
+                } else bgm.volume = 1; 
+            }).catch(e => {});
+        };
+
+    }, 2500); 
+});
+</script>
 
 </body>
 </html>
