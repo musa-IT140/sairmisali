@@ -3329,67 +3329,136 @@ window.saveRadioName = function(idx, newVal) {
     }
 };
 
-    window.applyRadioSettingsToPlayer = async function(settings) {
-        let bgm = document.getElementById('global-bgm'), playIcon = document.getElementById('bgm-play-icon');
-        if (!bgm || !settings.playlist || settings.playlist.length === 0) return;
-        let track = settings.playlist[window.currentBgmIndex || 0], audioData = null;
+// ========================================================================
+// MAVİ PLAYER (RADYO) KUSURSUZ MOTORU - SES KARMAŞASI (STOTTERN) FİXİ
+// ========================================================================
+window.applyRadioSettingsToPlayer = async function(settings) {
+    let bgm = document.getElementById('global-bgm');
+    let playIcon = document.getElementById('bgm-play-icon');
+    
+    if (!bgm || !settings.playlist || settings.playlist.length === 0) {
+        window.toast("Radyo listesi boş! Önce şarkı yükleyin.", "⚠️");
+        return;
+    }
 
-        if (track && track.src === "firebaseDB") {
-            if (window.audioStorage) audioData = await window.audioStorage.get(track.id);
-            if (!audioData) {
-                window.toast("Buluttan indiriliyor...", "☁️");
-                try {
-                    let snap = await firebase.database().ref('radioFiles/' + track.id).once('value');
-                    if (snap.exists()) { audioData = snap.val(); if(window.audioStorage) window.audioStorage.save(track.id, audioData); }
-                } catch(e) { console.error(e); }
-            }
-        } else { audioData = track.src || track; }
+    // 🌟 KESİN ÇÖZÜM: Tüm eski ses değiştirme (Fade) motorlarını durdur ki sesler çatlamasın!
+    if (window.bgmFadeInterval) clearInterval(window.bgmFadeInterval);
+    if (window.bgmFadeOutInterval) clearInterval(window.bgmFadeOutInterval);
+    window.isFadingOut = false;
 
-        if (!audioData) return window.toast("Müzik okunamadı!", "❌");
+    window.toast("Radyo hazırlanıyor...", "🔄");
+    let track = settings.playlist[window.currentBgmIndex || 0];
+    let audioData = null;
 
-        if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(bgm, audioData);
-        else bgm.src = audioData;
+    // Veritabanından Şarkıyı Getir
+    if (track && track.id && window.audioStorage) {
+        audioData = await window.audioStorage.get(track.id);
+    } else if (typeof track === 'object' && track.src) {
+        audioData = track.src;
+    } else {
+        audioData = track; 
+    }
 
-        window.updateRadioPlayerDisplay(settings);
-        bgm.volume = 0;
-        bgm.play().then(() => { 
-            if (playIcon) playIcon.className = 'fas fa-pause'; 
-            window.isFadingOut = false;
-            let transType = settings.type || 'crossfade', fadeSec = parseInt(settings.fadeSec || 5);
-            if (transType === 'crossfade' || transType === 'fadein') {
-                let step = 1 / (fadeSec * 20), fadeInterval = setInterval(() => {
-                    if (bgm.volume + step < 1) bgm.volume += step; else { bgm.volume = 1; clearInterval(fadeInterval); }
-                }, 50);
-            } else bgm.volume = 1; 
-        }).catch(e => console.error(e));
-    };
+    if (!audioData) {
+        window.toast("Müzik dosyası bulunamadı!", "❌");
+        return;
+    }
 
-    window.setupRadioEventListeners = function() {
-        let bgmAud = document.getElementById('global-bgm');
-        if(bgmAud && !bgmAud.hasAttribute('data-listeners-set')) {
-            bgmAud.setAttribute('data-listeners-set', 'true');
-            bgmAud.addEventListener('timeupdate', function() {
-                if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 1) return;
-                let dur = bgmAud.duration, cur = bgmAud.currentTime;
-                if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
-                
-                let fadeSec = parseInt(window.radioSettings.fadeSec || 5), playLimit = parseInt(window.radioSettings.playLimit || 0);
-                let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+    // Kusursuz yükleyiciyle yükle
+    await window.loadAudioSafely(bgm, audioData);
+    
+    // Ekranı güncelle
+    window.updateRadioPlayerDisplay(settings);
+    
+    // Kullanıcının ayarladığı hedef ses seviyesini al (Eğer ayarlanmamışsa 1 yani %100)
+    let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+    
+    // Müzik çalma ve Fade efektleri
+    bgm.volume = 0;
+    bgm.play().then(() => { 
+        if (playIcon) playIcon.className = 'fas fa-pause'; 
+        
+        let transType = settings.type || 'crossfade';
+        let fadeSec = parseInt(settings.fadeSec || 5);
 
-                if (isEnding && !window.isFadingOut) {
-                    window.isFadingOut = true;
-                    let transType = window.radioSettings.type || 'crossfade';
-                    if (transType === 'crossfade' || transType === 'fadeout') {
-                        let step = bgmAud.volume / (fadeSec * 20), fadeInterval = setInterval(() => {
-                            if (bgmAud.volume - step > 0.05) bgmAud.volume -= step;
-                            else { bgmAud.volume = 0; clearInterval(fadeInterval); window.triggerNextRadioSong(); }
-                        }, 50);
-                    } else window.triggerNextRadioSong(); 
+        if ((transType === 'crossfade' || transType === 'fadein') && fadeSec > 0) {
+            let fadeTime = fadeSec * 1000;
+            let step = targetVol / (fadeTime / 50); 
+            
+            window.bgmFadeInterval = setInterval(() => {
+                if (bgm.volume + step < targetVol) {
+                    bgm.volume += step; 
+                } else { 
+                    bgm.volume = targetVol; 
+                    clearInterval(window.bgmFadeInterval); 
                 }
-            });
-            bgmAud.addEventListener('ended', function() { if(!window.isFadingOut) window.triggerNextRadioSong(); });
+            }, 50);
+        } else { 
+            bgm.volume = targetVol; 
         }
-    };
+    }).catch(e => {
+        console.error("Otomatik oynatma tarayıcı tarafından engellendi:", e);
+        window.toast("Dinlemek için manuel Play tuşuna basın.", "▶️");
+    });
+};
+
+window.setupRadioEventListeners = function() {
+    let bgmAud = document.getElementById('global-bgm');
+    if(bgmAud && !bgmAud.hasAttribute('data-listeners-set')) {
+        bgmAud.setAttribute('data-listeners-set', 'true');
+        
+        bgmAud.addEventListener('timeupdate', function() {
+            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 1) return;
+            
+            let dur = bgmAud.duration, cur = bgmAud.currentTime;
+            if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
+            
+            let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+            let playLimit = parseInt(window.radioSettings.playLimit || 0);
+            
+            // Remix Limiti veya Şarkı Sonu Kontrolü
+            let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+
+            if (isEnding && !window.isFadingOut) {
+                window.isFadingOut = true;
+                
+                // Eğer devam eden bir giriş efekti varsa, onu iptal et
+                if (window.bgmFadeInterval) clearInterval(window.bgmFadeInterval);
+                
+                let transType = window.radioSettings.type || 'crossfade';
+                
+                if ((transType === 'crossfade' || transType === 'fadeout') && fadeSec > 0) {
+                    let step = bgmAud.volume / (fadeSec * 20); 
+                    window.bgmFadeOutInterval = setInterval(() => {
+                        if (bgmAud.volume - step > 0.05) {
+                            bgmAud.volume -= step;
+                        } else { 
+                            bgmAud.volume = 0; 
+                            clearInterval(window.bgmFadeOutInterval); 
+                            window.triggerNextRadioSong(); 
+                        }
+                    }, 50);
+                } else {
+                    window.triggerNextRadioSong(); 
+                }
+            }
+        });
+
+        bgmAud.addEventListener('ended', function() {
+            if(!window.isFadingOut) window.triggerNextRadioSong();
+        });
+    }
+};
+
+// Ses Çubuğu (Slider) Güncellendiğinde Geçerli Fade'i Ez!
+window.bgmVolume = function(val) { 
+    let bgm = document.getElementById('global-bgm'); 
+    if (bgm) {
+        if (window.bgmFadeInterval) clearInterval(window.bgmFadeInterval);
+        if (window.bgmFadeOutInterval) clearInterval(window.bgmFadeOutInterval);
+        bgm.volume = parseFloat(val); 
+    }
+};
     setTimeout(window.setupRadioEventListeners, 1000);
 
     window.triggerNextRadioSong = async function() {
