@@ -1489,9 +1489,24 @@ body { padding-top: 310px !important; }
             #readModal .modal-body > div:first-child div { display: none !important; }
         }
 
-        /* --- WEBKIT (iPHONE) TOUCH CALLOUT FIX --- */
+        /* --- SARI PLAYER (PİLLE) DARK MODE KONTRAST FIX --- */
+        .floating-pill { border: 2px solid var(--accent-gold) !important; background: var(--bg-glass) !important; }
+        #fp-min-icon { color: var(--accent-gold) !important; text-shadow: 0 0 5px rgba(212,175,55,0.5) !important; }
+        [data-theme="light"] .floating-pill { border-color: #b48608 !important; }
+
+        /* --- WEBKIT (iPHONE) TOUCH CALLOUT VE ANİMASYON FIX --- */
         @supports (-webkit-touch-callout: none) {
-            .card, .action-btn, .s-pill, .nav-link, .ptab-btn, .noble-btn, .hero-avatar, .card-ic { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; }
+            .card, .action-btn, .s-pill, .nav-link, .ptab-btn, .noble-btn, .hero-avatar, .card-ic { 
+                -webkit-touch-callout: none !important; 
+                -webkit-user-select: none !important; 
+                user-select: none !important; 
+                -webkit-tap-highlight-color: transparent !important; 
+            }
+            /* iPhone'da genişleyerek gelen giriş animasyonunu iptal et (taşmayı önler) */
+            .hero-avatar, .card { animation: none !important; transition: none !important; }
+            .h-row-1 { padding: 5px !important; }
+            .brand { font-size: 1.2rem !important; }
+            .dt-box { padding: 2px 4px !important; font-size: 0.55rem !important; }
         }
 
         /* --- SARI PİLLE (Koyu/Açık Tema İkon Görünürlük Fix) --- */
@@ -2502,6 +2517,28 @@ document.addEventListener("DOMContentLoaded", function() {
 
     console.log("🚀 Şair Misal.i ATOMIC MEGA ULTRA Engine (Kusursuz Sürüm) başlatılıyor...");
 
+    // Merkezi Senkronizasyon Fonksiyonu (Eksik olan Online Kayıt Motoru)
+    window.syncDB = function(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+        try { firebase.database().ref(key).set(data); } catch(e) { console.error("Sync Error", e); }
+    };
+
+    // Admin Bildirimlerini Firebase üzerinden CANLI dinle
+    firebase.database().ref('adminOnlineLogs').on('child_added', (snap) => {
+        let newLog = snap.val();
+        if (newLog && window.currentUser && window.currentUser.role === 'admin') {
+            window.adminLogs = window.adminLogs || [];
+            let exists = window.adminLogs.some(l => l.ts === newLog.ts);
+            if (!exists) {
+                window.adminLogs.unshift(newLog);
+                if(window.adminLogs.length > 100) window.adminLogs.pop();
+                localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
+                if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+            }
+        }
+    });
+
     // EKLENDİ: Fatma vb. gezindiğinde Admine anında canlı log düşür!
     firebase.database().ref('adminOnlineLogs').on('child_added', (snap) => {
         let newLog = snap.val();
@@ -2871,16 +2908,22 @@ window.renderUserMessages = function() {
     };
 
     window.logUserAction = function(msg, linkId = null, linkType = null) {
-        // Spam-Schutz: Gleiche Nachricht innerhalb von 3 Sekunden blockieren
         if (msg === window.lastLogMsg && (Date.now() - window.lastLogTimestamp < 3000)) return;
         window.lastLogMsg = msg;
         window.lastLogTimestamp = Date.now();
 
-        window.adminLogs = window.adminLogs || [];
         let timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-        window.adminLogs.unshift({ time: timeStr, msg: msg, linkId: linkId, linkType: linkType });
+        let newLog = { time: timeStr, msg: msg, linkId: linkId, linkType: linkType, ts: Date.now() };
+
+        window.adminLogs = window.adminLogs || [];
+        window.adminLogs.unshift(newLog);
+        if(window.adminLogs.length > 100) window.adminLogs.pop();
+
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
         
+        // ONLINE GÖNDERİM: Tüm hareketler anında Firebase'e (Admin'e) gider!
+        try { firebase.database().ref('adminOnlineLogs').push(newLog); } catch(e){}
+
         if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
         if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
     };
@@ -4727,10 +4770,10 @@ window.addGamePoints = function(pts, gameName, isWin) {
         window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
         window.userDatabase[window.currentUser.username] = window.currentUser;
         
-        // ONLINE VE LOKAL KAYIT
+        // ONLINE VE LOKAL KAYIT: Tüm kullanıcılar puanı anında görsün
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score });
+        try { firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score }); } catch(e){}
         
         window.toast(isWin ? `+${pts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
         window.logUserAction(`🎮 OYUN: ${window.currentUser.username}, "${gameName}" oyununu ${isWin ? "kazandı" : "kaybetti"}.`);
