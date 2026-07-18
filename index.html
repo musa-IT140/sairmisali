@@ -66,7 +66,30 @@
         header { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg-glass); backdrop-filter: blur(15px); border-bottom: 2px solid var(--accent-gold); z-index: 9000; box-shadow: var(--shadow-heavy); }
         .h-row-1 { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px dashed var(--border-soft); height: auto; min-height: 60px; flex-wrap: wrap; gap: 15px; }
         
-        .brand { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 2.5vw, 2.2rem); font-weight: bold; color: var(--accent-gold); cursor: pointer; display:flex; align-items:center; gap:8px; text-shadow: 0 2px 10px rgba(212,175,55,0.4); white-space:nowrap;}
+        /* ZARİF TÜY ANİMASYONU (Header) */
+/* KESİN ÇÖZÜM: Renk değişimi engellendi, sadece hareket var */
+        .brand { 
+            font-family: 'Playfair Display', serif; 
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem); 
+            font-weight: bold; 
+            color: var(--accent-cyan) !important; /* Turkuaz sabit */
+            cursor: pointer; display:flex; align-items:center; gap:8px; 
+            text-shadow: 0 2px 10px rgba(0,206,209,0.4) !important; 
+            white-space:nowrap;
+        }
+        
+        @keyframes gentleFeather {
+            0% { transform: rotate(0deg) translateY(0); }
+            50% { transform: rotate(15deg) translateY(-2px); }
+            100% { transform: rotate(0deg) translateY(0); }
+        }
+        
+        .anim-feather {
+            color: var(--accent-cyan) !important; /* Turkuaz sabit */
+            animation: gentleFeather 3s ease-in-out infinite;
+            display: inline-block;
+            transform-origin: bottom left;
+        }
         .dt-group { display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; }
         .dt-box { background: var(--bg-card); padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border-soft); font-family: 'Space Mono', monospace; font-size: 0.95rem; color: var(--text-sub); cursor: pointer; transition: 0.3s; display:flex; align-items:center; gap:8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .dt-box:hover { border-color: var(--accent-gold); color: var(--text-main); transform: translateY(-3px); box-shadow:0 8px 20px rgba(212,175,55,0.2);}
@@ -2414,8 +2437,11 @@ body { padding-top: 310px !important; }
                     <div style="background:var(--widget-bg); padding:12px; border-radius:8px; margin-bottom:15px; border:1px dashed var(--accent-gold);">
                         <label style="color:var(--accent-gold); font-weight:bold; font-size:0.85rem; margin-bottom:8px; display:block;"><i class="fas fa-sliders-h"></i> Radyo Geçiş & Remix Ayarları</label>
                         <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-                            <select id="adm-bgm-transition" class="inp" style="margin:0; flex:1; min-width:120px;">
-                                <option value="crossfade">Yumuşak Geçiş (Crossfade)</option><option value="direct">Keskin Geçiş</option>
+                            <select id="adm-bgm-transition" class="inp" style="margin:0; flex:1; min-width:120px; font-weight:bold; color:var(--accent-gold);">
+                                <option value="crossfade">🔀 Çapraz Geçiş (Crossfade)</option>
+                                <option value="fadein">🔉 Ses Yavaşça Açılsın</option>
+                                <option value="fadeout">🔈 Ses Yavaşça Kısılsın</option>
+                                <option value="direct">⏹️ Keskin Geçiş (Direkt)</option>
                             </select>
                             <div style="flex:1; display:flex; align-items:center; background:var(--input-bg); border:1px solid var(--border-soft); border-radius:8px; padding-left:10px; min-width:120px;">
                                 <span style="color:var(--text-sub); font-size:0.75rem; white-space:nowrap;">Geçiş Süresi:</span>
@@ -4703,33 +4729,44 @@ window.readAloudText = function() {
             return; 
         }
         
-        // Kommas und Punkte erzwingen eine saubere Pause für natürlicheres Vorlesen
         let cleanText = text.replace("Cevabı Göster", "").replace(/([.,?!:;])/g, "$1 \n "); 
-        
         let msg = new SpeechSynthesisUtterance(cleanText); 
-        let voices = window.speechSynthesis.getVoices();
         
+        let voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            window.toast("Ses motoru yükleniyor, lütfen 1 saniye sonra tekrar basın.", "⏳");
+            window.speechSynthesis.getVoices();
+            return;
+        }
+        
+        // KESİN ÇÖZÜM: Dilleri agresif bir şekilde filtrele
         if (window.currentLang === 'tr') {
             msg.lang = 'tr-TR';
-            msg.rate = 0.80; // Sehr langsam und deutlich
-            msg.pitch = 0.9; // Tiefe, ruhige Stimme
-            // Finde eine männliche türkische Stimme
-            let trVoice = voices.find(v => v.lang.includes('tr') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('tolga'))) || voices.find(v => v.lang.includes('tr'));
-            if (trVoice) msg.voice = trVoice;
+            // Sadece Türkçe sesleri listele
+            let trVoices = voices.filter(v => v.lang.includes('tr') || v.lang.includes('TR'));
+            if (trVoices.length > 0) {
+                // Kaliteli bir ses bulmaya çalış, bulamazsa listedeki ilk Türkçe sesi seç
+                msg.voice = trVoices.find(v => v.name.includes('Google') || v.name.includes('Yelda') || v.name.includes('Premium')) || trVoices[0];
+            }
+            msg.rate = 0.85; 
+            msg.pitch = 0.95; 
+            window.toast("Türkçe sesli okuma başlatıldı", "🇹🇷");
         } else {
             msg.lang = 'de-DE';
-            msg.rate = 0.85; // Deutlich und verständlich
-            msg.pitch = 1.1; // Weiblichere, etwas höhere Stimme
-            // Finde eine weibliche deutsche Stimme
-            let deVoice = voices.find(v => v.lang.includes('de') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('marlene') || v.name.toLowerCase().includes('anna'))) || voices.find(v => v.lang.includes('de'));
-            if (deVoice) msg.voice = deVoice;
+            // Sadece Almanca sesleri listele
+            let deVoices = voices.filter(v => v.lang.includes('de') || v.lang.includes('DE'));
+            if (deVoices.length > 0) {
+                // Kaliteli bir Alman sesi bulmaya çalış, bulamazsa listedeki ilk Almanca sesi seç
+                msg.voice = deVoices.find(v => v.name.includes('Google') || v.name.includes('Anna') || v.name.includes('Marlene') || v.name.includes('Premium')) || deVoices[0];
+            }
+            msg.rate = 0.90; 
+            msg.pitch = 1.0; 
+            window.toast("Deutsche Stimme gestartet", "🇩🇪");
         }
         
         window.speechSynthesis.speak(msg); 
-        window.toast(window.currentLang === 'tr' ? "Sesli okuma başlatıldı" : "Vorlesen gestartet", "🗣️");
     };
 
-    // Bugfix für Android/iOS: Erzwingt das sofortige Laden der Sprachen
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
     }
@@ -5049,7 +5086,7 @@ window.roseComment = function(idx) {
             }
         };
 
-        window.runMigration = async function() {
+window.runMigration = async function() {
             let status = document.getElementById('mig-status');
             if(status) status.innerText = 'Bağlanıyor: sairmisali.de...';
             setTimeout(async () => {
@@ -5057,20 +5094,54 @@ window.roseComment = function(idx) {
                     const response = await fetch('https://sairmisali-web-default-rtdb.europe-west1.firebasedatabase.app/misaliData.json');
                     if(!response.ok) throw new Error("Ağ hatası.");
                     const data = await response.json();
-                    if(data && data.contentDB) { 
-                        window.DB = data.contentDB; 
-                        window.DB.games = ZENGIN_DB.games; 
-                        window.DB.marslar = ZENGIN_DB.marslar;
-                        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB)); 
+                    
+                    if(data) { 
+                        // 1. Eserleri Aktar ve Birleştir
+                        if(data.contentDB) {
+                            window.DB = Object.assign({}, window.DB, data.contentDB); 
+                            window.DB.games = ZENGIN_DB.games; 
+                            window.DB.marslar = ZENGIN_DB.marslar;
+                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                            try { firebase.database().ref('contentDB').set(window.DB); } catch(e){}
+                        }
+                        
+                        // 2. YENİ: Yorumları, Kalpleri ve Gülleri DEEP MERGE (Kusursuz Birleştirme) ile Aktar
+                        if(data.interactions) {
+                            for (let id in data.interactions) {
+                                if(!window.poemDataStore[id]) {
+                                    window.poemDataStore[id] = data.interactions[id];
+                                } else {
+                                    // Yorumları kaybetmeden birleştir (Çift kayıtları engelle)
+                                    let oldC = data.interactions[id].comments || [];
+                                    let newC = window.poemDataStore[id].comments || [];
+                                    let mergedComments = [...oldC, ...newC].filter((v,i,a) => a.findIndex(t => (t.user === v.user && t.text === v.text)) === i);
+                                    window.poemDataStore[id].comments = mergedComments;
+                                    
+                                    // Kalpleri ve Gülleri birleştir
+                                    window.poemDataStore[id].ratings = Object.assign({}, data.interactions[id].ratings, window.poemDataStore[id].ratings);
+                                    window.poemDataStore[id].guller = Object.assign({}, data.interactions[id].guller, window.poemDataStore[id].guller);
+                                }
+                            }
+                            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+                            try { firebase.database().ref('interactions').set(window.poemDataStore); } catch(e){}
+                        }
+                        
+                        // 3. 3'lü Notaları (Müzik Puanları) Aktar
+                        if(data.audioRatings) {
+                            let localAR = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+                            let mergedAR = Object.assign({}, localAR, data.audioRatings);
+                            localStorage.setItem('misaliAudioRatingsDB', JSON.stringify(mergedAR));
+                            try { firebase.database().ref('audioRatings').update(data.audioRatings); } catch(e){}
+                        }
                     }
+                    
                     if(status) status.innerText = 'Aktarım Başarılı!';
-                    window.toast("Tüm eserler ve puanlar indirildi!", "☁️");
-                    window.updateLiveBadges(); window.renderAllContent();
+                    window.toast("Eserler, Yorumlar ve Puanlar başarıyla aktarıldı!", "✅");
+                    window.updateLiveBadges(); 
+                    window.renderAllContent();
                 } catch (e) {
                     if(status) status.innerText = 'Sunucu yanıt vermedi, lokal veri güvende.'; 
                     window.toast("Sairmisali.de ulaşılamadı. Lokal veri aktif.", "☁️");
-                    window.adminLogs.push({time: new Date().toLocaleTimeString('tr-TR'), msg: "Migration hatası. Lokal yedek kullanıldı."});
-                    window.renderAdminLogs();
                 }
                 setTimeout(() => { if(status) status.innerText = ''; }, 3200);
             }, 1500);
@@ -5374,23 +5445,56 @@ function loseGame(msg = "Kaybettin. Tekrar dene!") {
     }, 1500);
 }
 
-// Admin Funktion: Punkte manuell anpassen
+// Özelleştirilmiş Şık Prompt Modalı (Puan ve diğer girdiler için)
+window.showMisaliPrompt = function(title, desc, defaultVal, icon, onConfirm) {
+    let overlay = document.createElement('div');
+    overlay.className = 'custom-overlay';
+    overlay.style.zIndex = '9999999';
+    overlay.innerHTML = `
+        <div class="custom-box" style="border: 2px solid var(--accent-gold); background: linear-gradient(145deg, var(--bg-card), rgba(20,20,20,0.98)); box-shadow: 0 15px 50px rgba(212,175,55,0.4);">
+            <h3 style="color:var(--accent-gold); margin-top:0; font-size:1.3rem;"><i class="${icon}"></i> ${title}</h3>
+            <p style="color:var(--text-sub); font-size:0.95rem; margin-bottom:15px;">${desc}</p>
+            <input type="number" id="custom-prompt-input" class="inp" value="${defaultVal}" style="text-align:center; font-size:1.8rem; font-weight:bold; color:var(--accent-green); height:60px; margin-bottom:20px; background:rgba(0,0,0,0.5);">
+            <div class="custom-btn-group">
+                <button class="custom-btn btn-cancel">İptal</button>
+                <button class="custom-btn btn-delete" style="background:var(--accent-green); color:#fff; box-shadow:0 0 15px rgba(34,197,94,0.4);">Kaydet</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    let inp = overlay.querySelector('#custom-prompt-input');
+    inp.focus(); inp.select();
+    
+    overlay.querySelector('.btn-cancel').onclick = () => overlay.remove();
+    overlay.querySelector('.btn-delete').onclick = () => { 
+        let val = inp.value; 
+        overlay.remove(); 
+        onConfirm(val); 
+    };
+};
+
+// Admin Funktion: Punkte manuell anpassen (Design Passend + Live Sync)
 window.editUserScore = function(username) {
     let user = window.userDatabase[username]; 
     if(!user) return;
     
-    let newScore = prompt(`${user.name || username} adlı kullanıcının yeni puanını girin:`, user.score || 0);
-    if (newScore !== null && newScore.trim() !== "" && !isNaN(newScore)) {
-        user.score = parseInt(newScore); 
-        window.userDatabase[username] = user;
-        
-        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-        try { firebase.database().ref('users/' + username + '/score').set(user.score); } catch(e){}
-        window.renderOnlineUsers(); 
-        if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
-        window.toast("Puan güncellendi!", "✅");
-    }
+    window.showMisaliPrompt("Puan Düzenle", `${user.name || username} adlı kullanıcının yeni puanını belirleyin:`, user.score || 0, "fas fa-star", function(newScore) {
+        if (newScore !== null && newScore.toString().trim() !== "" && !isNaN(newScore)) {
+            user.score = parseInt(newScore); 
+            window.userDatabase[username] = user;
+            
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            try { firebase.database().ref('users/' + username + '/score').set(user.score); } catch(e){}
+            window.renderOnlineUsers(); 
+            if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+            window.toast("Puan başarıyla güncellendi!", "✅");
+        }
+    });
 };
+
+// Açılır Menü (Select) Renk ve Tema Düzeltmesi (Light Mode Uyumlu)
+document.head.insertAdjacentHTML('beforeend', '<style>select.inp option { background: var(--bg-card); color: var(--text-main); font-weight:bold; } html[data-theme="light"] select.inp { color: #000; font-weight:bold; } html[data-theme="light"] select.inp option { background: #fff; color: #000; }</style>');
+
 
 // ========================================================
     // YENİ: DUYURU (ANNOUNCEMENT) SİSTEMİ
@@ -7540,44 +7644,40 @@ window.renderAllContent = function() {
             
             let safeTitle = (item.title || item.trTitle || 'Eser').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             let safeText = rawText.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, " ");
-            let shareBtns = `<span class="c-stat" style="margin-left:8px;" onclick="event.stopPropagation(); window.shareWhatsApp('${safeTitle}', '${safeText}')"><i class="fab fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i></span><span class="c-stat" onclick="event.stopPropagation(); window.copyContent('${safeTitle}', '${safeText}')"><i class="fas fa-copy" style="color:var(--text-sub); font-size:1.1rem;"></i></span>`;
             
-            // ADMIN ACTIONS (Stift + Mülleimer)
             let editBtn = isAdmin ? `<button class="admin-btn edit" style="border-color:var(--accent-gold); color:var(--accent-gold);" onmouseover="this.style.background='var(--accent-gold)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.8)'; this.style.color='var(--accent-gold)';" onclick="event.stopPropagation(); window.quickEditItem('${item.id}', '${type}')"><i class="fas fa-pen"></i></button>` : '';
             let deleteBtn = isAdmin ? `<button class="admin-btn del" onclick="event.stopPropagation(); window.deleteAnyItem('${item.id}', '${type}')"><i class="fas fa-trash"></i></button>` : '';
 
-            // Nota Puanını Hesapla
-                let notesScore = 0;
-                let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
-                if(audioRDB[item.id || d.id]) Object.values(audioRDB[item.id || d.id]).forEach(v => notesScore += parseInt(v||0));
-                
-                // Eğer müzik varsa Kalpten önce Notayı (🎵) göster
-                let hasRealMusic = (typeof item !== 'undefined' ? (item.hasAudio || item.audio) : (d.hasAudio || d.audio));
-                let noteHTML = hasRealMusic ? `<span class="c-stat" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
+            let notesScore = 0;
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+            if(audioRDB[item.id]) Object.values(audioRDB[item.id]).forEach(v => notesScore += parseInt(v||0));
+            
+            // 🌟 Müzik Notası - Gül ve Whatsapp Arasında!
+            let noteHTML = hasMusic ? `<span class="c-stat" title="Müzik Puanı" style="margin:0 5px;"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
+            let shareBtns = `${noteHTML}<span class="c-stat" onclick="event.stopPropagation(); window.shareWhatsApp('${safeTitle}', '${safeText}')"><i class="fab fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i></span><span class="c-stat" onclick="event.stopPropagation(); window.copyContent('${safeTitle}', '${safeText}')"><i class="fas fa-copy" style="color:var(--text-sub); font-size:1.1rem;"></i></span>`;
 
-let currentType = typeof item !== 'undefined' ? type : 'userPoems';
-                
-                // 🌟 YENİ: KART İÇİ İMZA (Şiirlerim ve Sözlerim için her zaman Şair Misal.i)
-                let cardAuthHTML = '';
-                if (!['bilmeceler', 'bulmacalar', 'persons'].includes(currentType)) {
-                    let cardAuthName = item.author || item.name || "Anonim";
-                    if (['poems', 'quotes'].includes(currentType) && (cardAuthName === 'Anonim' || cardAuthName === 'Sistem' || !item.author)) {
-                        cardAuthName = "Şair Misal.i";
-                    }
-                    let authColor = (cardAuthName === 'Şair Misal.i' || cardAuthName === 'Sair Misali') ? 'var(--accent-cyan)' : 'var(--accent-gold)';
-                    let authGlow = (cardAuthName === 'Şair Misal.i' || cardAuthName === 'Sair Misali') ? 'text-shadow: 0 0 8px rgba(0,206,209,0.5);' : '';
-                    cardAuthHTML = `<div class="card-auth" style="color:${authColor}; ${authGlow} font-family:'Great Vibes', cursive; font-size:1.3rem; margin-top:5px; margin-bottom:5px;">~ ${cardAuthName}</div>`;
+            let currentType = typeof item !== 'undefined' ? type : 'userPoems';
+            
+            let cardAuthHTML = '';
+            if (!['bilmeceler', 'bulmacalar', 'persons'].includes(currentType)) {
+                let cardAuthName = item.author || item.name || "Anonim";
+                if (['poems', 'quotes'].includes(currentType) && (cardAuthName === 'Anonim' || cardAuthName === 'Sistem' || !item.author)) {
+                    cardAuthName = "Şair Misal.i";
                 }
+                let authColor = (cardAuthName === 'Şair Misal.i' || cardAuthName === 'Sair Misali') ? 'var(--accent-cyan)' : 'var(--accent-gold)';
+                let authGlow = (cardAuthName === 'Şair Misal.i' || cardAuthName === 'Sair Misali') ? 'text-shadow: 0 0 8px rgba(0,206,209,0.5);' : '';
+                cardAuthHTML = `<div class="card-auth" style="color:${authColor}; ${authGlow} font-family:'Great Vibes', cursive; font-size:1.3rem; margin-top:5px; margin-bottom:5px;">~ ${cardAuthName}</div>`;
+            }
 
-                let footerHTML = !['bilmeceler', 'bulmacalar', 'persons'].includes(currentType) 
-                    ? `<div class="card-footer">${noteHTML}<span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span><span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span><span class="c-stat"><span class="real-blue-rose" style="font-size:0.9rem; margin-right:3px;">🌹</span> ${roses}</span>${shareBtns}${audioBtn}</div>` 
-                    : '';
+            let footerHTML = !['bilmeceler', 'bulmacalar', 'persons'].includes(currentType) 
+                ? `<div class="card-footer"><span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span><span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span><span class="c-stat"><span class="real-blue-rose" style="font-size:0.9rem; margin-right:3px;">🌹</span> ${roses}</span>${shareBtns}${audioBtn}</div>` 
+                : '';
 
-                return `<div class="card" onclick="${action}">${ribbon}<div class="admin-card-actions">${editBtn}${deleteBtn}</div><button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${item.id}')"><i class="fas fa-bookmark"></i></button><div class="card-ic">${item.emoji || '✨'}</div><h3 class="card-t">${item.title || item.trTitle || 'Eser'}</h3><p class="card-sub">${textPreview}</p>${cardAuthHTML}${footerHTML}</div>`;
-            }).join('');
+            return `<div class="card" onclick="${action}">${ribbon}<div class="admin-card-actions">${editBtn}${deleteBtn}</div><button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${item.id}')"><i class="fas fa-bookmark"></i></button><div class="card-ic">${item.emoji || '✨'}</div><h3 class="card-t">${item.title || item.trTitle || 'Eser'}</h3><p class="card-sub">${textPreview}</p>${cardAuthHTML}${footerHTML}</div>`;
+        }).join('');
     });
     
-    // 3. Üye Eserleri
+    // Üye Eserleri Tablosu (Güvenli Çözüm)
     let uGrid = document.getElementById('userPoems-grid');
     if (uGrid) {
         uGrid.innerHTML = [...window.userPoemsDB].sort((a,b) => b.timestamp - a.timestamp).map(d => {
@@ -7590,20 +7690,30 @@ let currentType = typeof item !== 'undefined' ? type : 'userPoems';
             let hasMusic = d.hasAudio || d.audio;
             let textPreview = (d.text || '').replace(/<[^>]*>?/gm, '').replace(/[\r\n]/g, ' ').substring(0, 80) + '...';
             
-            let encId = encodeURIComponent(d.id);
             let safeTitle = (d.title || 'Eser').replace(/'/g, "&#39;");
+            let safeTextForWA = (d.text||'').replace(/'/g, '');
             
             let isNew = (Date.now() - (d.timestamp || 0)) < 86400000;
             let ribbon = isNew ? `<div class="new-ribbon">YENİ</div>` : '';
             
             let isMyPoem = uName && (d.author === uName || d.author === window.currentUser.name);
             
-            // ADMIN ACTIONS FÜR ÜYE ESERLERİ
             let uEditBtn = isAdmin ? `<button class="admin-btn edit" style="border-color:var(--accent-gold); color:var(--accent-gold);" onmouseover="this.style.background='var(--accent-gold)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.8)'; this.style.color='var(--accent-gold)';" onclick="event.stopPropagation(); window.quickEditItem('${d.id}', 'userPoems')"><i class="fas fa-pen"></i></button>` : '';
             let uDeleteBtn = (isAdmin || isMyPoem) ? `<button class="admin-btn del" onclick="event.stopPropagation(); window.deleteAnyItem('${d.id}', 'userPoems')"><i class="fas fa-trash"></i></button>` : '';
 
             let audioBtn = hasMusic ? `<div class="c-stat music" onclick="event.stopPropagation(); window.openReadModal('${d.id}', 'userPoems'); setTimeout(()=>window.fpToggle(true), 600);" style="color:${isPlaying ? 'var(--accent-red)' : 'var(--accent-green)'}"><i class="fas ${isPlaying ? 'fa-pause-circle' : 'fa-play-circle'}"></i></div>` : (isAdmin ? `<div class="c-stat music" style="color:var(--text-sub);" onclick="event.stopPropagation(); window.openReadModal('${d.id}', 'userPoems')"><i class="fas fa-upload"></i></div>` : '');
-            let shareBtns = `<span class="c-stat" style="margin-left:8px;" onclick="event.stopPropagation(); window.shareWhatsApp('${safeTitle}', '${(d.text||'').replace(/'/g, '')}')"><i class="fab fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i></span>`;
+            
+            let notesScore = 0;
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+            if(audioRDB[d.id]) Object.values(audioRDB[d.id]).forEach(v => notesScore += parseInt(v||0));
+            
+            // 🌟 Müzik Notası - Gül ve Whatsapp Arasında (Hata vermeyen güvenli yapı)
+            let noteHTML = hasMusic ? `<span class="c-stat" title="Müzik Puanı" style="margin:0 5px;"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
+            let shareBtns = `${noteHTML}<span class="c-stat" onclick="event.stopPropagation(); window.shareWhatsApp('${safeTitle}', '${safeTextForWA}')"><i class="fab fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i></span>`;
+
+            let finalAuthor = d.author || d.name || 'Şair Misal.i';
+            let authorColor = finalAuthor === 'Şair Misal.i' ? 'var(--accent-cyan)' : 'var(--accent-gold)';
+            let authorGlow = finalAuthor === 'Şair Misal.i' ? 'text-shadow: 0 0 8px rgba(0,206,209,0.5);' : '';
 
             return `<div class="card" onclick="window.openReadModal('${d.id}', 'userPoems')">
                 ${ribbon}<div class="admin-card-actions">${uEditBtn}${uDeleteBtn}</div>
@@ -7611,7 +7721,7 @@ let currentType = typeof item !== 'undefined' ? type : 'userPoems';
                 <div class="card-ic">${d.emoji || '📖'}</div>
                 <h3 class="card-t">${safeTitle}</h3>
                 <p class="card-sub">${textPreview}</p>
-                <div class="card-auth" style="color:var(--accent-gold); font-family:'Great Vibes', cursive; font-size:1.2rem; margin-top:5px;">~ ${d.author || d.name}</div>
+                <div class="card-auth" style="color:${authorColor}; ${authorGlow} font-family:'Great Vibes', cursive; font-size:1.4rem; margin-top:5px;">~ ${finalAuthor}</div>
                 <div class="card-footer">
                     <span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span>
                     <span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span>
@@ -7624,6 +7734,7 @@ let currentType = typeof item !== 'undefined' ? type : 'userPoems';
     
     document.querySelectorAll('.hero-avatar, .mini-avatar').forEach(img => { img.onclick = function(e) { e.stopPropagation(); window.showRandomQuote(); }; });
     window.updateLiveBadges();
+    if(typeof window.updateLiveTickers === 'function') window.updateLiveTickers();
 };
 
 window.EMOJI_LIBRARY = [
@@ -7694,18 +7805,24 @@ window.renderAudioRatingUI = function(id) {
                 // 🌟 FULL MARŞLAR AUTO-INJECTOR
     let marslarInjected = localStorage.getItem('misali_marslar_v2');
     if (!marslarInjected) {
-// 🌟 MARŞLAR İÇİN ZORUNLU GÜNCELLEME (Tam Metinler)
+// 🌟 MARŞLAR İÇİN ZORUNLU GÜNCELLEME (Telif Hakkı Olmayan Müzikler ve Künye Bilgileri)
     window.DB.marslar = [
         {
-            id: "m_istiklal", title: "İstiklal Marşı (Tamamı)", emoji: "🇹🇷", author: "Mehmet Akif Ersoy", audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg",
+            id: "m_istiklal", title: "İstiklal Marşı (Tamamı)", emoji: "🇹🇷", author: "Mehmet Akif Ersoy", 
+            audioYazan: "Mehmet Akif Ersoy", audioOkuyan: "Devlet Korosu", audioMuzik: "Osman Zeki Üngör",
+            audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg",
             text: "Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak.\n\nÇatma, kurban olayım, çehreni ey nazlı hilal!\nKahraman ırkıma bir gül! Ne bu şiddet, bu celal?\nSana olmaz dökülen kanlarımız sonra helal...\nHakkıdır, hakk'a tapan, milletimin istiklal!\n\nBen ezelden beridir hür yaşadım, hür yaşarım.\nHangi çılgın bana zincir vuracakmış? Şaşarım!\nKükremiş sel gibiyim, bendimi çiğner, aşarım.\nYırtarım dağları, enginlere sığmam, taşarım.\n\nGarbın afakını sarmışsa çelik zırhlı duvar,\nBenim iman dolu göğsüm gibi serhaddim var.\nUlusun, korkma! Nasıl böyle bir imanı boğar,\n'Medeniyet!' dediğin tek dişi kalmış canavar?\n\nArkadaş! Yurduma alçakları uğratma, sakın.\nSiper et gövdeni, dursun bu hayasızca akın.\nDoğacaktır sana va'dettiği günler hakk'ın...\nKim bilir, belki yarın, belki yarından da yakın.\n\nBastığın yerleri 'toprak!' diyerek geçme, tanı:\nDüşün altında binlerce kefensiz yatanı.\nSen şehit oğlusun, incitme, yazıktır, atanı:\nVerme, dünyaları alsan da, bu cennet vatanı.\n\nKim bu cennet vatanın uğruna olmaz ki feda?\nŞuheda fışkıracak toprağı sıksan, şuheda!\nCanı, cananı, bütün varımı alsın da hüda,\nEtmesin tek vatanımdan beni dünyada cüda.\n\nRuhumun senden, ilahi, şudur ancak emeli:\nDeğmesin mabedimin göğsüne namahrem eli.\nBu ezanlar-ki şahadetleri dinin temeli,\nEbedi yurdumun üstünde benim inlemeli.\n\nO zaman vecd ile bin secde eder -varsa- taşım,\nHer cerihamdan, ilahi, boşanıp kanlı yaşım,\nFışkırır ruh-i mücerret gibi yerden na'şım;\nO zaman yükselerek arşa değer belki başım.\n\nDalgalan sen de şafaklar gibi ey şanlı hilal!\nOlsun artık dökülen kanlarımın hepsi helal.\nEbediyen sana yok, ırkıma yok izmihlal:\nHakkıdır, hür yaşamış, bayrağımın hürriyet;\nHakkıdır, hakk'a tapan, milletimin istiklal!"
         },
         {
-            id: "m_almanya", title: "Deutschlandlied (Almanya Marşı)", emoji: "🇩🇪", author: "A.H. Hoffmann von Fallersleben", audio: "https://upload.wikimedia.org/wikipedia/commons/a/a6/National_anthem_of_Germany_-_U.S._Army_Band_%28instrumental%29.ogg",
-            text: "Einigkeit und Recht und Freiheit\nFür das deutsche Vaterland!\nDanach lasst uns alle streben\nBrüderlich mit Herz und Hand!\nEinigkeit und Recht und Freiheit\nSind des Glückes Unterpfand:\n|: Blüh im Glanze dieses Glückes,\nBlühe, deutsches Vaterland! :|"
+            id: "m_onuncu", title: "10. Yıl Marşı", emoji: "🇹🇷", author: "Faruk Nafiz & Behçet Kemal", 
+            audioYazan: "Faruk Nafiz & Behçet Kemal", audioOkuyan: "Çok Sesli Koro", audioMuzik: "Cemal Reşit Rey",
+            audio: "https://upload.wikimedia.org/wikipedia/commons/7/77/10._Yil_Marsi.ogg",
+            text: "Çıktık açık alınla on yılda her savaştan,\nOn yılda on beş milyon genç yarattık her yaştan;\nBaşta bütün dünyanın saydığı başkumandan,\nDemir ağlarla ördük anayurdu dört baştan.\n\nTürk'üz, Cumhuriyet'in göğsümüz tunç siperi,\nTürk'e durmak yaraşmaz, Türk önde, Türk ileri!"
         },
         {
-            id: "m_izmir", title: "İzmir Marşı", emoji: "🇹🇷", author: "Anonim", audio: "",
+            id: "m_izmir", title: "İzmir Marşı", emoji: "🇹🇷", author: "Anonim", 
+            audioYazan: "Anonim", audioOkuyan: "Ordu Korosu", audioMuzik: "Kafkasya Marşı Uyarlaması",
+            audio: "https://upload.wikimedia.org/wikipedia/commons/2/23/Izmir_Marsi.ogg",
             text: "İzmir'in dağlarında çiçekler açar.\nAltın güneş orda sırmalar saçar.\nBozulmuş düşmanlar yel gibi kaçar.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa.\n\nİzmir'in dağlarına bomba koydular\nTürk'ün sancağını öne koydular.\nŞanlı zaferleri deftere oydular.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa."
         }
     ];
@@ -8559,7 +8676,16 @@ document.addEventListener("DOMContentLoaded", function() {
             if (updatedUser && uName) {
                 window.userDatabase[uName] = updatedUser;
                 localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                
                 if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+                if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+                
+                // 🌟 KESİN ÇÖZÜM: Eğer puanı/bilgisi değişen kişi ŞU AN GİRİŞ YAPMIŞ KİŞİ ise, header'ı CANLI güncelle!
+                if (window.currentUser && window.currentUser.username === uName) {
+                    window.currentUser = updatedUser;
+                    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                    if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+                }
             }
         });
         
@@ -8691,13 +8817,19 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     // 🌟 KESİN ÇÖZÜM 2: Player'ın içindeki eski şarkıyı ZORLA temizle ki karışmasın
                     if (aud) {
-                        if (trackData) {
-                            if (aud.src !== trackData) {
-                                await window.loadAudioSafely(aud, trackData);
-                            }
-                            let ic1 = document.getElementById('fp-play-icon'); 
-                            if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
-                        } else {
+if (trackData) {
+                        if (aud.src !== trackData) {
+                            await window.loadAudioSafely(aud, trackData);
+                        }
+                        let ic1 = document.getElementById('fp-play-icon'); 
+                        if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                        
+                        // 🌟 KESİN ÇÖZÜM: 3'lü Müzik Notalarını (Rating UI) Ekle ve Görünür Kıl
+                        if(!document.getElementById('audio-rating-ui')) {
+                            audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center; width:100%; display:block;"></div>`);
+                        }
+                        window.renderAudioRatingUI(id);
+                    } else {
                             // Eğer trackData boşsa, demek ki Müzik Yok. Eski şarkıyı hemen durdur ve sil!
                             aud.pause();
                             aud.src = "";
