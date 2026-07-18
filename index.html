@@ -2527,6 +2527,12 @@ document.addEventListener("DOMContentLoaded", function() {
         try { firebase.database().ref(key).set(data); } catch(e) { console.error("Sync Error", e); }
     };
 
+    // ALLE Datenänderungen müssen Firebase pushen:
+window.syncData = function(refPath, data) {
+    localStorage.setItem(refPath, JSON.stringify(data));
+    try { firebase.database().ref(refPath).set(data); } catch(e) { console.error(e); }
+};
+
     // Admin Bildirimlerini Firebase üzerinden CANLI dinle
     firebase.database().ref('adminOnlineLogs').on('child_added', (snap) => {
         let newLog = snap.val();
@@ -2580,6 +2586,13 @@ document.addEventListener("DOMContentLoaded", function() {
             if(typeof window.renderAllContent === 'function') window.renderAllContent();
         }
     });
+
+    // Jedes mal wenn ein User liked, yorum yapar vs...
+firebase.database().ref('adminOnlineLogs').push({
+    time: new Date().toLocaleTimeString(),
+    msg: window.currentUser.username + " bir esere etkileşimde bulundu.",
+    ts: Date.now()
+});
 
     let animStyle = document.createElement('style');
     animStyle.innerHTML = `
@@ -5767,39 +5780,38 @@ window.renderRadioPlaylist = function() {
     let list = window.radioSettings.playlist || [];
     listEl.innerHTML = list.map((item, idx) => {
         let tName = typeof item === 'object' ? item.name : 'Parça ' + (idx + 1);
+        // İsim değiştirme için ID'ler ve fonksiyonlar direkt HTML içinde tanımlı
         return `
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--border-soft);">
-            <span style="font-size:0.9rem; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; margin-right:10px;">
-                <i class="fas fa-music" style="margin-right:8px; color:var(--accent-cyan);"></i>
-                <span id="rad-name-disp-${idx}">${tName}</span>
-                <input type="text" id="rad-name-inp-${idx}" class="radio-edit-inp" style="display:none;" value="${tName}" onblur="window.saveRadioName(${idx}, this.value)" onkeypress="if(event.key==='Enter') this.blur();">
+            <span style="flex:1; margin-right:10px; overflow:hidden;">
+                <span id="rad-name-disp-${idx}" style="color:var(--text-main);">${tName}</span>
+                <input type="text" id="rad-name-inp-${idx}" class="radio-edit-inp" style="display:none;" value="${tName}" 
+                    onblur="window.saveRadioName(${idx}, this.value)" 
+                    onkeypress="if(event.key==='Enter') this.blur();">
             </span>
             <div style="display:flex; gap:8px;">
-                <button onclick="event.stopPropagation(); window.editRadioName(${idx})" style="background:rgba(212,175,55,0.15); border:1px solid var(--accent-gold); color:var(--accent-gold); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:0.85rem;" title="İsmi Değiştir"><i class="fas fa-pen"></i></button>
-                <button onclick="event.stopPropagation(); window.previewRadioSong(${idx})" style="background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); color:var(--accent-green); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:0.85rem;" title="Dinle"><i class="fas fa-play"></i></button>
-                <button onclick="event.stopPropagation(); window.deleteRadioSong(${idx})" style="background:rgba(239,68,68,0.15); border:1px solid var(--accent-red); color:var(--accent-red); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:0.85rem;" title="Sil"><i class="fas fa-trash"></i></button>
+                <button onclick="window.editRadioName(${idx})" style="background:rgba(212,175,55,0.15); border:1px solid var(--accent-gold); color:var(--accent-gold); border-radius:6px; padding:4px 10px; cursor:pointer;" title="İsmi Değiştir"><i class="fas fa-pen"></i></button>
+                <button onclick="window.previewRadioSong(${idx})" style="background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); color:var(--accent-green); border-radius:6px; padding:4px 10px; cursor:pointer;" title="Dinle"><i class="fas fa-play"></i></button>
+                <button onclick="window.deleteRadioSong(${idx})" style="background:rgba(239,68,68,0.15); border:1px solid var(--accent-red); color:var(--accent-red); border-radius:6px; padding:4px 10px; cursor:pointer;" title="Sil"><i class="fas fa-trash"></i></button>
             </div>
         </div>`;
-    }).join('') || '<div style="color:var(--text-sub); text-align:center; padding:10px; font-style:italic;">Henüz şarkı yüklenmedi...</div>';
+    }).join('') || '<div style="color:var(--text-sub); text-align:center; padding:10px;">Henüz şarkı yok.</div>';
 };
 
-// 2. Namensänderung
 window.editRadioName = function(idx) {
-    let disp = document.getElementById('rad-name-disp-'+idx);
-    let inp = document.getElementById('rad-name-inp-'+idx);
-    if(disp && inp) {
-        disp.style.display = 'none';
-        inp.style.display = 'inline-block';
-        inp.focus();
-    }
+    document.getElementById('rad-name-disp-'+idx).style.display = 'none';
+    document.getElementById('rad-name-inp-'+idx).style.display = 'inline-block';
+    document.getElementById('rad-name-inp-'+idx).focus();
 };
 
 window.saveRadioName = function(idx, newVal) {
     if(!newVal || newVal.trim()==="") newVal = "İsimsiz Parça";
     window.radioSettings.playlist[idx].name = newVal;
     localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+    try { firebase.database().ref('radioSettings').set(window.radioSettings); } catch(e){}
     window.renderRadioPlaylist();
     window.updateRadioPlayerDisplay();
+    window.toast("İsim güncellendi!", "✅");
 };
 
 // 3. Fehlerfreier Crossfade & Song-Übergang
@@ -5808,45 +5820,31 @@ window.setupRadioEventListeners = function() {
     if(bgmAud && !bgmAud.hasAttribute('data-listeners-set')) {
         bgmAud.setAttribute('data-listeners-set', 'true');
         
-        bgmAud.addEventListener('timeupdate', function() {
-            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 2) return;
-            
-            let dur = bgmAud.duration, cur = bgmAud.currentTime;
-            if(isNaN(dur) || dur === Infinity || dur === 0) return;
-            
-            let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
-            let playLimit = parseInt(window.radioSettings.playLimit || 0);
-            let transType = window.radioSettings.type || 'crossfade';
-            
-            // KESİN ÇÖZÜM: Şarkı limit süresine ulaştıysa (örn: 20sn) veya bitmesine fadeSec kaldıysa geçişi başlat
-            let isEndingByLimit = (playLimit > 0 && cur >= playLimit);
-            let isEndingByDuration = ((dur - cur) <= fadeSec);
+bgmAud.addEventListener('timeupdate', function() {
+    if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 1) return;
+    
+    let dur = bgmAud.duration, cur = bgmAud.currentTime;
+    if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
+    
+    let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+    let playLimit = parseInt(window.radioSettings.playLimit || 0); // Remix süresi
+    
+    // Eğer playLimit ayarlandıysa, o sürede geç. Değilse şarkı sonuna bak.
+    let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
 
-            if ((isEndingByLimit || isEndingByDuration) && !window.isFadingOut) {
-                window.isFadingOut = true;
-                
-                if (transType === 'crossfade' || transType === 'fadeout') {
-                    let step = bgmAud.volume / 10; // 0.5 saniyede sesi hızlıca kıs
-                    let fadeInterval = setInterval(() => {
-                        if (bgmAud.volume - step > 0.05) {
-                            bgmAud.volume -= step;
-                        } else { 
-                            bgmAud.volume = 0; 
-                            clearInterval(fadeInterval); 
-                            window.triggerNextRadioSong(); 
-                        }
-                    }, 50);
-                } else {
-                    window.triggerNextRadioSong(); // Keskin geçiş
-                }
+    if (isEnding && !window.isFadingOut) {
+        window.isFadingOut = true;
+        // Fade Out Logik
+        let step = bgmAud.volume / (fadeSec * 20); 
+        let fadeInterval = setInterval(() => {
+            if (bgmAud.volume - step > 0.05) bgmAud.volume -= step;
+            else { 
+                bgmAud.volume = 0; clearInterval(fadeInterval); 
+                window.triggerNextRadioSong(); 
             }
-        });
-
-        bgmAud.addEventListener('ended', function() {
-            if(!window.isFadingOut) window.triggerNextRadioSong();
-        });
+        }, 50);
     }
-};
+});
 
 window.triggerNextRadioSong = async function() {
     window.isFadingOut = false;
