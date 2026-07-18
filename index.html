@@ -2521,17 +2521,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
     console.log("🚀 Şair Misal.i ATOMIC MEGA ULTRA Engine (Kusursuz Sürüm) başlatılıyor...");
 
-    // Merkezi Senkronizasyon Fonksiyonu (Eksik olan Online Kayıt Motoru)
-    window.syncDB = function(key, data) {
-        localStorage.setItem(key, JSON.stringify(data));
-        try { firebase.database().ref(key).set(data); } catch(e) { console.error("Sync Error", e); }
-    };
-
     // ALLE Datenänderungen müssen Firebase pushen:
 window.syncData = function(refPath, data) {
     localStorage.setItem(refPath, JSON.stringify(data));
     try { firebase.database().ref(refPath).set(data); } catch(e) { console.error(e); }
 };
+
+    // Merkezi Senkronizasyon Fonksiyonu (Eksik olan Online Kayıt Motoru)
+    window.syncDB = function(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+        try { firebase.database().ref(key).set(data); } catch(e) { console.error("Sync Error", e); }
+    };
 
     // Admin Bildirimlerini Firebase üzerinden CANLI dinle
     firebase.database().ref('adminOnlineLogs').on('child_added', (snap) => {
@@ -2587,12 +2587,7 @@ window.syncData = function(refPath, data) {
         }
     });
 
-    // Jedes mal wenn ein User liked, yorum yapar vs...
-firebase.database().ref('adminOnlineLogs').push({
-    time: new Date().toLocaleTimeString(),
-    msg: window.currentUser.username + " bir esere etkileşimde bulundu.",
-    ts: Date.now()
-});
+    
 
     let animStyle = document.createElement('style');
     animStyle.innerHTML = `
@@ -5845,6 +5840,12 @@ bgmAud.addEventListener('timeupdate', function() {
         }, 50);
     }
 });
+
+        bgmAud.addEventListener('ended', function() {
+            if(!window.isFadingOut) window.triggerNextRadioSong();
+        });
+    }
+};
 
 window.triggerNextRadioSong = async function() {
     window.isFadingOut = false;
