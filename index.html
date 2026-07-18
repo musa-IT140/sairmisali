@@ -8328,11 +8328,36 @@ document.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => {
         console.log("🛠️ MASTER FIX AKTIVIERT: Alle Player und Admin-Systeme repariert.");
 
-        // 1. ADMIN USER SYNC (Fügt Online-User und lokale User zusammen, ohne alte zu löschen)
-        firebase.database().ref('users').on('value', (snap) => {
-            if(snap.exists()) {
-                let onlineUsers = snap.val();
-                window.userDatabase = Object.assign({}, window.userDatabase, onlineUsers);
+        // 1. KUSURSUZ CANLI ÜYE SENKRONİZASYONU (PROFESSIONAL LIVE SOCKET)
+        const usersRef = firebase.database().ref('users');
+        
+        // LIVE: Jemand Neues registriert sich -> Sofort im Panel anzeigen
+        usersRef.on('child_added', (snap) => {
+            let newUser = snap.val();
+            let uName = snap.key;
+            if (newUser && uName) {
+                window.userDatabase[uName] = newUser;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+            }
+        });
+
+        // LIVE: Jemand wird bestätigt (approved), gesperrt oder Punkte ändern sich
+        usersRef.on('child_changed', (snap) => {
+            let updatedUser = snap.val();
+            let uName = snap.key;
+            if (updatedUser && uName) {
+                window.userDatabase[uName] = updatedUser;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+            }
+        });
+        
+        // LIVE: Ein User wird aus der Datenbank gelöscht -> Sofort aus Liste entfernen
+        usersRef.on('child_removed', (snap) => {
+            let uName = snap.key;
+            if (uName && window.userDatabase[uName]) {
+                delete window.userDatabase[uName];
                 localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
                 if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
             }
