@@ -4766,7 +4766,11 @@ window.roseComment = function(idx) {
             let emoji = document.getElementById('adm-emoji')?.value.trim() || '✨';
             if (!title || !text) return alert("Başlık ve içerik zorunludur!");
             window.DB[cat].unshift({ id: "item_" + Date.now(), title: title, text: text, emoji: emoji, author: "Şair Misal.i" });
-            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB)); window.toast("İçerik Eklendi!", "✅");
+            
+            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB)); 
+            try { firebase.database().ref('contentDB').set(window.DB); } catch(e){}
+            
+            window.toast("İçerik Eklendi!", "✅");
             window.renderAllContent(); window.updateLiveBadges(); window.closeTopModal();
         };
 
@@ -5170,17 +5174,11 @@ window.addGamePoints = function(pts, gameName, isWin) {
         if (!title || !text) { window.toast("Başlık ve içerik boş bırakılamaz!", "⚠️"); return; }
 
         let newItem = { id: "user_poem_" + Date.now(), title: title, text: text, emoji: emoji, author: window.currentUser.name || window.currentUser.username, timestamp: Date.now() };
-        window.userPoemsDB = window.userPoemsDB || []; window.userPoemsDB.unshift(newItem); 
+        window.userPoemsDB = window.userPoemsDB || []; 
+        window.userPoemsDB.unshift(newItem); 
+        
         localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-        // EKLENECEK SATIR:
-        firebase.database().ref('interactions/' + pId + '/ratings').set(window.poemDataStore[pId].ratings);
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-        // EKLENECEK SATIR:
-        firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
-        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
-        // EKLENECEK SATIR:
-        firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments);
+        try { firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){}
 
         document.getElementById('write-title').value = ''; document.getElementById('write-text').value = ''; document.getElementById('write-emoji-picker').style.display = 'none';
         
@@ -5800,45 +5798,39 @@ window.adminUpdateItem = function() {
     if(emj) source[idx].emoji = emj;
     
     // Punkte updaten (falls UserPoem)
-    if (cat === 'userPoems') {
-        let tier = document.getElementById('adm-rating-tier').value;
-        let pts = parseInt(document.getElementById('adm-rating-pts').value || 0);
-        let oldPts = source[idx].adminRating ? source[idx].adminRating.points : 0;
-        let diff = pts - oldPts;
+if (cat === 'userPoems') {
+            let tier = document.getElementById('adm-rating-tier').value;
+            let pts = parseInt(document.getElementById('adm-rating-pts').value || 0);
+            let oldPts = source[idx].adminRating ? source[idx].adminRating.points : 0;
+            let diff = pts - oldPts;
 
-        if(tier !== 'none') {
-            source[idx].adminRating = { tier: tier, points: pts };
+            if(tier !== 'none') source[idx].adminRating = { tier: tier, points: pts };
+            else { delete source[idx].adminRating; diff = -oldPts; }
+            
+            let authorName = source[idx].author || source[idx].name;
+            let authorObj = Object.values(window.userDatabase).find(u => u.name === authorName || u.username === authorName);
+            if(authorObj && diff !== 0) {
+                authorObj.score = (authorObj.score || 0) + diff;
+                window.userDatabase[authorObj.username] = authorObj;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                if(window.currentUser && window.currentUser.username === authorObj.username) {
+                    window.currentUser.score = authorObj.score;
+                    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                    window.updateHeaderUserUI();
+                }
+                if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+            }
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            try { firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){}
         } else {
-            delete source[idx].adminRating;
-            diff = -oldPts; 
+            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+            try { firebase.database().ref('contentDB').set(window.DB); } catch(e){}
         }
         
-        let authorName = source[idx].author;
-        let authorObj = Object.values(window.userDatabase).find(u => u.name === authorName || u.username === authorName);
-        if(authorObj && diff !== 0) {
-            authorObj.score = (authorObj.score || 0) + diff;
-            window.userDatabase[authorObj.username] = authorObj;
-            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-            
-            if(window.currentUser && window.currentUser.username === authorObj.username) {
-                window.currentUser.score = authorObj.score;
-                sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-                window.updateHeaderUserUI();
-            }
-            if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
-            if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
-        }
-
-        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-        if(typeof window.updateLiveTickers === 'function') window.updateLiveTickers(); 
-    } else {
-        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-    }
-    
-    window.toast("Eser Güncellendi!", "✅"); 
-    window.renderAllContent(); // 🔄 Lädt die Startseite neu -> Neues Emoji erscheint sofort!
-    window.closeTopModal();
-};
+        window.toast("Eser Güncellendi!", "✅"); 
+        window.renderAllContent(); 
+        window.closeTopModal();
+    };
 
 // KUSURSUZ MAVİ PLAYER VE SINIRSIZ VERİTABANI (INDEXEDDB V2)
 window.audioStorage = {
@@ -7174,8 +7166,13 @@ window.deleteAnyItem = function(id, type) {
         let idx = source.findIndex(item => String(item.id) === String(id));
         if (idx > -1) {
             source.splice(idx, 1);
-            if (type === 'userPoems') localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-            else localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+            if (type === 'userPoems') {
+                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                try { firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){}
+            } else {
+                localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                try { firebase.database().ref('contentDB').set(window.DB); } catch(e){}
+            }
             
             window.toast("Eser başarıyla silindi!", "🗑️");
             if (typeof window.renderAllContent === 'function') window.renderAllContent();
