@@ -2918,30 +2918,31 @@ window.renderUserMessages = function() {
     };
 
 window.renderAdminLogs = function() {
-        let box = document.getElementById('adm-logs-box-panel');
-        let inbox = document.getElementById('adm-logs-box-inbox'); 
+    let box = document.getElementById('adm-logs-box-panel');
+    let inbox = document.getElementById('adm-logs-box-inbox'); 
+    let html = window.adminLogs.map(l => {
+        let isClickable = l.linkId && l.linkType && !String(l.linkId).includes('window.');
         
-        let html = window.adminLogs.map(l => {
-            let isClickable = l.linkId && l.linkType && !String(l.linkId).includes('window.');
-            let actionAttr = isClickable ? `onclick="window.goToLink('${l.linkId}', '${l.linkType}')" style="cursor:pointer; padding:12px; border:1px solid rgba(0,206,209,0.2); background:rgba(0,206,209,0.05); transition:0.3s; border-radius:8px; margin-bottom:8px;" onmouseover="this.style.background='rgba(0,206,209,0.15)'" onmouseout="this.style.background='rgba(0,206,209,0.05)'"` : `style="padding:12px; border-bottom:1px dashed rgba(255,255,255,0.1); margin-bottom:8px;"`;
-            let openIcon = isClickable ? `<i class="fas fa-arrow-right" style="float:right; color:var(--accent-cyan); margin-top:5px; font-size:1.2rem;" title="Eseri Gör"></i>` : '';
-            
-            return `<div ${actionAttr}>
-                ${openIcon}
-                <div style="color:var(--accent-gold); font-size:0.75rem; margin-bottom:4px; font-family:'Space Mono', monospace;"><i class="far fa-clock"></i> ${l.time}</div>
-                <div style="color:var(--text-main); font-size:0.95rem; line-height:1.4;">${l.msg}</div>
-            </div>`;
-        }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+        // KESİN ÇÖZÜM: Klickbares Styling
+        let actionAttr = isClickable ? `onclick="window.goToLink('${l.linkId}', '${l.linkType}')" style="cursor:pointer; padding:12px; border:1px solid rgba(0,206,209,0.3); background:rgba(0,206,209,0.1); border-radius:8px; margin-bottom:8px; display:block;"` : `style="padding:12px; border-bottom:1px dashed rgba(255,255,255,0.2); margin-bottom:8px; display:block;"`;
+        let openIcon = isClickable ? `<i class="fas fa-external-link-square-alt" style="float:right; color:var(--accent-cyan); font-size:1.2rem;"></i>` : '';
         
-        if (box) box.innerHTML = html;
-        if (inbox) inbox.innerHTML = html;
-        
-        let bellBadge = document.getElementById('bell-counter');
-        if(bellBadge) { 
-            bellBadge.innerText = window.adminLogs.length; 
-            bellBadge.style.display = window.adminLogs.length > 0 ? 'flex' : 'none'; 
-        }
-    };
+        return `<div ${actionAttr}>
+            ${openIcon}
+            <div style="color:var(--accent-gold); font-size:0.75rem; margin-bottom:4px; font-family:'Space Mono', monospace;"><i class="far fa-clock"></i> ${l.time}</div>
+            <div style="color:var(--text-main); font-size:0.95rem; line-height:1.4;">${l.msg}</div>
+        </div>`;
+    }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+    
+    if (box) box.innerHTML = html;
+    if (inbox) inbox.innerHTML = html;
+    
+    let bellBadge = document.getElementById('bell-counter');
+    if(bellBadge) { 
+        bellBadge.innerText = window.adminLogs.length; 
+        bellBadge.style.display = window.adminLogs.length > 0 ? 'flex' : 'none'; 
+    }
+};
 
     window.logUserAction = function(msg, linkId = null, linkType = null) {
         if (msg === window.lastLogMsg && (Date.now() - window.lastLogTimestamp < 3000)) return;
@@ -3293,51 +3294,48 @@ window.saveRadioName = function(idx, newVal) {
         }
     };
 
-window.adminUploadAudioCurrent = async function(input) {
+window.adminUploadAudioCurrent = function(input) {
     if (!input.files || !input.files[0]) return;
     let file = input.files[0];
-    window.toast("Müzik Buluta Yükleniyor...", "⏳");
-    
+    if (file.size > 5000000) return window.toast("Dosya çok büyük (Max 5MB)!", "❌");
+
+    window.toast("Müzik Veritabanına Yükleniyor...", "⏳");
     let reader = new FileReader();
     reader.onload = async function(e) {
         let base64Data = e.target.result;
-        let id = window.currentItemData.id;
+        let newName = file.name.replace(/\.[^/.]+$/, "");
         
-        try {
-            // 1. Önce Firebase'e gönder ve cevabı bekle (await)
-            await firebase.database().ref('audioFiles/' + id).set(base64Data);
-            
-            // 2. Eser objesini güncelle
-            window.currentItemData.hasAudio = true;
-            window.currentItemData.audio = "firebaseDB";
-            
-            let type = window.currentItemData.type;
+        if(window.currentItemData) {
+            let type = window.currentItemData.type, id = window.currentItemData.id;
             let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
             let idx = source.findIndex(x => x.id === id);
-            if(idx > -1) {
-                source[idx].hasAudio = true;
-                source[idx].audio = "firebaseDB";
-                // 3. Veritabanını güncelle
-                if(type === 'userPoems') {
-                    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                    await firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
-                } else {
-                    localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                    await firebase.database().ref('contentDB').set(window.DB);
-                }
+            if (idx > -1) { 
+                source[idx].hasAudio = true; 
+                source[idx].audio = "firebaseDB"; // Speichert nur das Etikett, nicht das riesige File!
+                if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
+                window.currentItemData = source[idx];
+                
+                try {
+                    // Firebase Cloud Upload (Sicher)
+                    await firebase.database().ref('audioFiles/' + id).set(base64Data);
+                    
+                    if(type === 'userPoems') {
+                        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                        firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                    } else {
+                        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                        firebase.database().ref('contentDB').set(window.DB);
+                    }
+                    window.toast("Müzik Başarıyla Kaydedildi!", "🌍"); 
+                } catch(err) { window.toast("Hata: Firebase yükleme başarısız", "❌"); }
             }
-            
-            // 4. UI'yı Zorla Göster
-            let audCont = document.getElementById('card-audio-container');
-            if(audCont) {
-                audCont.classList.add('force-show');
-                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.display = 'flex');
+            let audCont = document.getElementById('card-audio-container'), aud = document.getElementById('global-audio-element');
+            if(audCont) { audCont.classList.add('force-show'); audCont.style.setProperty('display', 'flex', 'important'); audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important')); }
+            if(aud) { 
+                await window.loadAudioSafely(aud, base64Data);
+                aud.play().then(() => { let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; }).catch(() => {}); 
             }
-            window.updateAudioUI(window.currentItemData, true, id, type);
-            window.toast("Başarıyla Kaydedildi!", "✅");
-        } catch(err) {
-            console.error(err);
-            window.toast("Hata: Firebase bağlantısı koptu!", "❌");
+            window.updateAudioUI(source[idx], true, id, type);
         }
     };
     reader.readAsDataURL(file);
@@ -5654,43 +5652,35 @@ window.adminRadioUpload = async function(input) {
     
     for(let i = 0; i < input.files.length; i++) {
         let file = input.files[i];
-        let reader = new FileReader();
-        window.toast(file.name + " yükleniyor...", "⏳");
+        if(file.size > 5000000) { window.toast(file.name + " çok büyük (Max 5MB)!", "❌"); continue; }
         
+        window.toast(file.name + " yükleniyor...", "⏳");
+        let reader = new FileReader();
         reader.onload = async function(e) {
             let base64Data = e.target.result;
-            let trackId = "radio_" + Date.now() + "_" + i;
+            let trackId = "radio_track_" + Date.now() + "_" + i;
             let trackName = file.name.replace(/\.[^/.]+$/, "");
-            
             try {
-                // Müziği Realtime Database'e göm
+                // Cloud Upload
                 await firebase.database().ref('radioFiles/' + trackId).set(base64Data);
-                
-                // Sadece ID ve İsimi tut (Büyük veriyi tutma!)
                 window.radioSettings.playlist.push({ id: trackId, name: trackName, src: "firebaseDB" });
                 
-                // Senkronize et
                 localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
-                await firebase.database().ref('radioSettings').set(window.radioSettings);
+                firebase.database().ref('radioSettings').set(window.radioSettings);
                 
-                window.renderRadioPlaylist();
-                window.toast(trackName + " eklendi!", "🎵");
-            } catch(err) {
-                window.toast("Hata: Dosya çok büyük (Realtime DB limit)", "❌");
-            }
+                if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
+                window.toast(trackName + " radyoya eklendi!", "🎵");
+            } catch(err) { window.toast("Yükleme Hatası!", "❌"); }
         };
         reader.readAsDataURL(file);
     }
-    input.value = "";
+    input.value = ""; 
 };
 
 window.applyRadioSettingsToPlayer = async function(settings) {
     let bgm = document.getElementById('global-bgm');
     let playIcon = document.getElementById('bgm-play-icon');
-    if (!bgm || !settings.playlist || settings.playlist.length === 0) {
-        window.toast("Radyo listesi boş!", "⚠️");
-        return;
-    }
+    if (!bgm || !settings.playlist || settings.playlist.length === 0) return;
 
     window.toast("Şarkı hazırlanıyor...", "🔄");
     let track = settings.playlist[window.currentBgmIndex || 0];
@@ -5698,47 +5688,64 @@ window.applyRadioSettingsToPlayer = async function(settings) {
 
     if (track && track.src === "firebaseDB") {
         try {
-            // Şarkıyı doğrudan Realtime Database'den indir
             let snap = await firebase.database().ref('radioFiles/' + track.id).once('value');
-            if (snap.exists()) {
-                audioData = snap.val();
-            }
-        } catch (e) { console.error("Firebase Çekme Hatası:", e); }
-    } else if (typeof track === 'object' && track.src) {
-        audioData = track.src;
+            if (snap.exists()) audioData = snap.val();
+        } catch (e) { console.error("Firebase Hatası:", e); }
     } else {
-        audioData = track; 
+        audioData = track.src || track; 
     }
 
-    if (!audioData) {
-        window.toast("Müzik bulunamadı!", "❌");
-        return;
-    }
+    if (!audioData) return window.toast("Müzik bulunamadı!", "❌");
 
-    if (typeof window.loadAudioSafely === 'function') {
-        await window.loadAudioSafely(bgm, audioData);
-    } else {
-        bgm.src = audioData;
-    }
+    if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(bgm, audioData);
+    else bgm.src = audioData;
 
-    window.updateRadioPlayerDisplay();
+    window.updateRadioPlayerDisplay(settings);
     bgm.volume = 0;
     bgm.play().then(() => { 
         if (playIcon) playIcon.className = 'fas fa-pause'; 
-        
+        window.isFadingOut = false;
         let transType = settings.type || 'crossfade';
         let fadeSec = parseInt(settings.fadeSec || 5);
-        
         if (transType === 'crossfade' || transType === 'fadein') {
             let step = 1 / (fadeSec * 20); 
             let fadeInterval = setInterval(() => {
                 if (bgm.volume + step < 1) bgm.volume += step; 
                 else { bgm.volume = 1; clearInterval(fadeInterval); }
             }, 50);
-        } else { 
-            bgm.volume = 1; 
-        }
+        } else { bgm.volume = 1; }
     }).catch(e => console.error("Çalma hatası", e));
+};
+
+window.setupRadioEventListeners = function() {
+    let bgmAud = document.getElementById('global-bgm');
+    if(bgmAud && !bgmAud.hasAttribute('data-listeners-set')) {
+        bgmAud.setAttribute('data-listeners-set', 'true');
+        bgmAud.addEventListener('timeupdate', function() {
+            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 1) return;
+            let dur = bgmAud.duration, cur = bgmAud.currentTime;
+            if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
+            
+            let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+            let playLimit = parseInt(window.radioSettings.playLimit || 0);
+            
+            // Remix Limiti veya Şarkı Sonu Kontrolü
+            let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+
+            if (isEnding && !window.isFadingOut) {
+                window.isFadingOut = true;
+                let transType = window.radioSettings.type || 'crossfade';
+                if (transType === 'crossfade' || transType === 'fadeout') {
+                    let step = bgmAud.volume / (fadeSec * 20); 
+                    let fadeInterval = setInterval(() => {
+                        if (bgmAud.volume - step > 0.05) bgmAud.volume -= step;
+                        else { bgmAud.volume = 0; clearInterval(fadeInterval); window.triggerNextRadioSong(); }
+                    }, 50);
+                } else window.triggerNextRadioSong(); 
+            }
+        });
+        bgmAud.addEventListener('ended', function() { if(!window.isFadingOut) window.triggerNextRadioSong(); });
+    }
 };
 
 window.adminSelectEditItem = function() {
