@@ -1507,6 +1507,30 @@ body { padding-top: 310px !important; }
 #card-audio-container .player-time-row, 
 #card-audio-container .p-controls-row { display: flex !important; }
 
+/* Header-Überlappung verhindern (Schiebt alles weiter nach unten) */
+            body { padding-top: 250px !important; }
+            .main-content { margin-top: 20px !important; }
+
+            /* Statistik-Buttons (Hap Butonlar) ZWINGEND in eine Reihe mit Wisch-Funktion */
+            .h-row-2 { 
+                display: flex !important;
+                flex-wrap: nowrap !important; /* Kein Umbruch! */
+                overflow-x: auto !important; /* Nach links/rechts wischbar */
+                -webkit-overflow-scrolling: touch !important; /* Sanftes Wischen für iPhone */
+                justify-content: flex-start !important; 
+                gap: 8px !important; 
+                padding: 8px 10px !important; 
+                width: 100% !important;
+            }
+            .h-row-2::-webkit-scrollbar { display: none !important; } /* Versteckt den Scrollbalken */
+            
+            .s-pill { 
+                flex: 0 0 auto !important; /* Verhindert das Quetschen der Buttons */
+                white-space: nowrap !important; 
+                font-size: 0.75rem !important;
+                padding: 6px 12px !important;
+            }
+
     </style>
 
 </head>
@@ -3091,67 +3115,66 @@ window.clearLogs = function() {
     };
 
 window.adminUploadAudioCurrent = function(input) {
-    if (!input.files || !input.files[0]) return;
-    let file = input.files[0];
-    
-    window.toast("Müzik Yükleniyor (Sınırsız)...", "⏳");
-    document.getElementById('read-author').innerText = "Müzik işleniyor...";
-    
-    let reader = new FileReader();
-    reader.onload = async function(e) {
-        let base64Data = e.target.result;
-        let newName = file.name.replace(/\.[^/.]+$/, "");
+        if (!input.files || !input.files[0]) return;
+        let file = input.files[0];
         
-        if(window.currentItemData) {
-            let type = window.currentItemData.type, id = window.currentItemData.id;
-            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
-            let idx = source.findIndex(x => x.id === id);
+        window.toast("Müzik Yükleniyor (Sınırsız)...", "⏳");
+        document.getElementById('read-author').innerText = "Müzik işleniyor... Bekleyin.";
+        
+        let reader = new FileReader();
+        reader.onload = async function(e) {
+            let base64Data = e.target.result;
+            let newName = file.name.replace(/\.[^/.]+$/, "");
             
-            if (idx > -1) { 
-                source[idx].hasAudio = true; 
-                // EKLENDİ: Firebase kurallarını (%0 hatasını) tamamen ezer, sınırsız lokal DB'ye kaydeder!
-                if(window.audioStorage) await window.audioStorage.save(id, base64Data);
-                source[idx].audio = "indexedDB:" + id; 
+            if(window.currentItemData) {
+                let type = window.currentItemData.type, id = window.currentItemData.id;
+                let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+                let idx = source.findIndex(x => x.id === id);
                 
-                if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
-                if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
-                if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
+                if (idx > -1) { 
+                    source[idx].hasAudio = true; 
+                    source[idx].audio = base64Data; // KESİN ÇÖZÜM: Base64 kodunu objeye göm. 0% hatasını atlar!
+                    
+                    if(window.audioStorage) await window.audioStorage.save(id, base64Data);
+                    
+                    if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
+                    if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
+                    if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
+                    
+                    window.currentItemData = source[idx];
+                    
+                    try {
+                        if(type === 'userPoems') {
+                            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                            firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                        } else {
+                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                            firebase.database().ref('contentDB').set(window.DB);
+                        }
+                        window.toast("Müzik Online Kaydedildi!", "🌍"); 
+                    } catch(err) { window.toast("Hata Oluştu!", "❌"); }
+                }
                 
-                window.currentItemData = source[idx];
+                // Oynatıcıyı anında göster ve çalıştır
+                let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
+                if(audCont) {
+                    audCont.style.setProperty('display', 'flex', 'important'); 
+                    audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+                }
                 
-                try {
-                    if(type === 'userPoems') {
-                        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                        firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
-                    } else {
-                        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                        firebase.database().ref('contentDB').set(window.DB);
-                    }
-                    window.toast("Eser Müziği Kaydedildi!", "✅"); 
-                } catch(err) { window.toast("Kayıt Hatası", "❌"); }
+                if(aud) { 
+                    aud.src = base64Data;
+                    aud.play().then(() => { 
+                        let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
+                        window.renderAllContent(); 
+                    }).catch(() => {}); 
+                }
+                window.updateAudioUI(window.currentItemData, true, id, type);
+                document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
             }
-            
-            // KESİN ÇÖZÜM: Kartın GÖBEĞİNDEKİ (Sarı) player'ı zorla aç!
-            let audCont = document.getElementById('card-audio-container');
-            let aud = document.getElementById('global-audio-element');
-            
-            if(audCont) {
-                audCont.classList.add('force-show');
-            }
-            
-            if(aud) { 
-                aud.src = base64Data;
-                aud.play().then(() => { 
-                    let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
-                    window.renderAllContent(); 
-                }).catch(() => {}); 
-            }
-            window.updateAudioUI(window.currentItemData, true, id, type);
-            document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
-        }
+        };
+        reader.readAsDataURL(file);
     };
-    reader.readAsDataURL(file); // %0 Hatasını atlayan kod
-};
 
     window.adminDeleteAudioCurrent = async function() {
         if(window.currentItemData) {
@@ -4082,44 +4105,122 @@ window.renderAllContent = function() {
     window.updateLiveBadges();
 };
 
-const originalOpenReadModal_V5 = window.openReadModal;
 window.openReadModal = async function(id, type) {
-    // 1. Lass das System die Karte normal öffnen
-    if (typeof originalOpenReadModal_V5 === 'function') await originalOpenReadModal_V5(id, type);
-    
-    // 2. Erwinge den gelben Player INNEN
-    let audCont = document.getElementById('card-audio-container');
-    let aud = document.getElementById('global-audio-element');
-    let item = window.currentItemData;
-    let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
-    
-    let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
-    
-    if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
-        audCont.classList.add('force-show'); // Erzwungenes CSS aktivieren
+        let pill = document.getElementById('floating-player');
+        if (pill) { pill.classList.remove('show'); pill.style.setProperty('display', 'none', 'important'); }
+
+        window.currentLang = 'tr';
+        let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+        let item = (source || []).find(x => String(x.id) === String(id)); 
+        if (!item) { window.toast("Eser bulunamadı!", "❌"); return; }
+
+        window.currentItemData = { ...item, type: type };
         
-        if (hasRealMusic) {
-            audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
-            
-            if (window.audioStorage && item.hasAudio) {
-                let trackData = await window.audioStorage.get(id);
-                if (trackData && aud && aud.src !== trackData) {
-                    await window.loadAudioSafely(aud, trackData);
-                    let ic1 = document.getElementById('fp-play-icon');
-                    if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
-                }
-            } else if (item.audio && aud && aud.src !== item.audio) {
-                await window.loadAudioSafely(aud, item.audio);
-            }
-        } else {
-            // Keine Musik -> Mache Bedienelemente unsichtbar (Upload-Button bleibt für Admin)
-            audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important'));
+        // Okuma Logu
+        if(window.currentUser) {
+            let safeTitle = (item.title || item.trTitle || item.name || "Eser").replace(/'/g, "\\'");
+            let titleHtml = `<span style='color:var(--accent-gold); text-decoration:underline;'>${safeTitle}</span>`;
+            window.logUserAction(`${item.emoji || '📖'} İNCELEME: ${window.currentUser.username}, "${titleHtml}" adlı eseri okudu.`, id, type);
         }
-    } else if (audCont) {
-        audCont.classList.remove('force-show');
-        audCont.style.setProperty('display', 'none', 'important');
-    }
-};
+
+        document.getElementById('read-title').innerHTML = (item.title || item.trTitle || 'Eser');
+        document.getElementById('read-title').style.marginBottom = "10px";
+
+        let badgeCont = document.getElementById('read-badge-container');
+        if (!badgeCont) {
+            document.getElementById('read-title').insertAdjacentHTML('afterend', '<div id="read-badge-container" style="text-align:center; margin-bottom:25px;"></div>');
+            badgeCont = document.getElementById('read-badge-container');
+        }
+        badgeCont.innerHTML = (type === 'userPoems' && item.adminRating && item.adminRating.points > 0) 
+            ? `<div style="font-size:1.1rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); display:inline-block; font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.3);">🏅 ${item.adminRating.points} Puan</div>` 
+            : '';
+
+        let txtEl = document.getElementById('read-text'), authEl = document.getElementById('read-author'), adminRatingUI = document.getElementById('readModal-admin-rating');
+        
+        if (adminRatingUI) {
+            let isAdm = window.currentUser && window.currentUser.role === 'admin';
+            if (isAdm && type === 'userPoems') {
+                adminRatingUI.style.display = 'block'; 
+                document.getElementById('read-rating-tier').value = item.adminRating ? item.adminRating.tier : 'none'; 
+                document.getElementById('read-rating-pts').value = item.adminRating ? item.adminRating.points : '';
+            } else { adminRatingUI.style.display = 'none'; }
+        }
+
+        if (['bilmeceler', 'bulmacalar'].includes(type)) {
+            let parts = (item.text || item.trText || item.quote || '').split(/(?:Cevap:|Çözüm:|\|\|)/i), question = parts[0].trim(), answer = parts.length > 1 ? parts[1].trim() : 'Cevap henüz eklenmemiş.';
+            txtEl.innerHTML = `<div style="margin-bottom:20px; font-size:${window.fontSize}rem;">${question.replace(/\n/g, '<br>')}</div><button class="noble-btn primary" onclick="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width:100%; cursor:pointer;">👁️ Cevabı Göster</button><div class="secret-answer" style="display:none; margin-top:15px; padding:15px; background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); border-radius:8px; color:#fff; font-size:1.1rem; text-align:center;">🎯 <strong>Cevap:</strong> ${answer}</div>`;
+            if(authEl) authEl.style.display = 'none';
+        } else {
+            txtEl.innerHTML = (item.text || item.trText || item.quote || '').replace(/\n/g, '<br>'); txtEl.style.fontSize = window.fontSize + 'rem';
+            if(authEl) {
+                if (type === 'persons') authEl.style.display = 'none'; 
+                else { 
+                    authEl.style.display = 'block'; 
+                    let displayedAuthor = (item.author || item.authorTR || item.name || "Anonim");
+                    if (['poems','quotes'].includes(type) && (!item.author)) displayedAuthor = "Şair Misal.i";
+                    authEl.innerText = "~ " + displayedAuthor; authEl.style.marginTop = "15px";
+                    authEl.className = (displayedAuthor === 'Şair Misal.i' || displayedAuthor === 'Sair Misali') ? "misali-signature-text" : (type === 'marslar' ? "author-signature-white" : "author-signature-gold");
+                }
+            }
+        }
+
+        let bm = document.getElementById('modal-bookmark-icon');
+        if (bm) bm.style.color = (window.currentUser && window.savedItemsDB[window.currentUser.username]?.includes(id)) ? 'var(--accent-pink)' : 'rgba(255,255,255,0.35)';
+
+        let audCont = document.getElementById('card-audio-container');
+        let aud = document.getElementById('global-audio-element');
+        let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
+        
+        let trackData = null;
+        if(item.audio && item.audio.startsWith('data:audio')) {
+            trackData = item.audio; // Lade direkt aus Base64
+        } else if (item.hasAudio && window.audioStorage) {
+            trackData = await window.audioStorage.get(id); // Versuche DB
+        }
+
+        // KESİN ÇÖZÜM: Sarı Player'ı Zorla Göster
+        if (trackData || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type))) {
+            if (audCont) {
+                audCont.style.setProperty('display', 'flex', 'important'); 
+                audCont.style.opacity = '1';
+                audCont.style.visibility = 'visible';
+                
+                let pHeader = audCont.querySelector('.audio-player-header');
+                let pTimeRow = audCont.querySelector('.player-time-row');
+                let pControls = audCont.querySelector('.p-controls-row');
+                let adminInline = audCont.querySelector('.inline-admin-audio');
+                
+                if (adminInline) adminInline.style.setProperty('display', isAdminCheck ? 'flex' : 'none', 'important');
+                
+                if (trackData) {
+                    if(pHeader) pHeader.style.setProperty('display', 'flex', 'important');
+                    if(pTimeRow) pTimeRow.style.setProperty('display', 'flex', 'important');
+                    if(pControls) pControls.style.setProperty('display', 'flex', 'important');
+                    
+                    if(!document.getElementById('audio-rating-ui')) {
+                        audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center;"></div>`);
+                    }
+                    window.renderAudioRatingUI(id);
+                } else {
+                    if(pHeader) pHeader.style.setProperty('display', 'none', 'important');
+                    if(pTimeRow) pTimeRow.style.setProperty('display', 'none', 'important');
+                    if(pControls) pControls.style.setProperty('display', 'none', 'important');
+                }
+            }
+            if (aud && trackData) { 
+                await window.loadAudioSafely(aud, trackData); 
+                let ic1 = document.getElementById('fp-play-icon');
+                if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+            } 
+        } else { 
+            if (audCont) audCont.style.setProperty('display', 'none', 'important'); 
+        }
+
+        if(typeof window.updateAudioUI === 'function') window.updateAudioUI(item, isAdminCheck, id, type);
+
+        window.updateHeartsUI(); 
+        window.openModal('readModal');
+    };
 
 window.changeFontSize = function(dir) {
         window.fontSize = Math.min(Math.max(0.8, window.fontSize + dir * 0.15), 2.5);
@@ -4136,36 +4237,43 @@ window.changeFontSize = function(dir) {
     };
 
 window.readAloudText = function() {
-            let text = document.getElementById('read-text')?.innerText; if (!text) return;
-            if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
-            
-            // Kommas und Punkte erzwingen eine saubere Pause
-            let cleanText = text.replace("Cevabı Göster", "").replace(/([.,?!:;])/g, "$1 \n "); 
-            let msg = new SpeechSynthesisUtterance(cleanText); 
-            let voices = window.speechSynthesis.getVoices();
-            
-            if (window.currentLang === 'tr') {
-                msg.lang = 'tr-TR';
-                msg.rate = 0.85; // Vernünftige Geschwindigkeit
-                msg.pitch = 0.9; // Tiefe Männerstimme
-                // Finde eine männliche türkische Stimme
-                let trVoice = voices.find(v => v.lang.includes('tr') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('tolga'))) || voices.find(v => v.lang.includes('tr'));
-                if (trVoice) msg.voice = trVoice;
-            } else {
-                msg.lang = 'de-DE';
-                msg.rate = 0.85; // Vernünftige Geschwindigkeit
-                msg.pitch = 1.1; // Hohe Frauenstimme
-                // Finde eine weibliche deutsche Stimme
-                let deVoice = voices.find(v => v.lang.includes('de') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('marlene') || v.name.toLowerCase().includes('anna'))) || voices.find(v => v.lang.includes('de'));
-                if (deVoice) msg.voice = deVoice;
-            }
-            window.speechSynthesis.speak(msg); 
-            window.toast(window.currentLang === 'tr' ? "Sesli okuma başlatıldı" : "Vorlesen gestartet", "🗣️");
-        };
+        let text = document.getElementById('read-text')?.innerText; 
+        if (!text) return;
+        
+        if (window.speechSynthesis.speaking) { 
+            window.speechSynthesis.cancel(); 
+            return; 
+        }
+        
+        // Kommas und Punkte erzwingen eine saubere Pause für natürlicheres Vorlesen
+        let cleanText = text.replace("Cevabı Göster", "").replace(/([.,?!:;])/g, "$1 \n "); 
+        
+        let msg = new SpeechSynthesisUtterance(cleanText); 
+        let voices = window.speechSynthesis.getVoices();
+        
+        if (window.currentLang === 'tr') {
+            msg.lang = 'tr-TR';
+            msg.rate = 0.80; // Sehr langsam und deutlich
+            msg.pitch = 0.9; // Tiefe, ruhige Stimme
+            // Finde eine männliche türkische Stimme
+            let trVoice = voices.find(v => v.lang.includes('tr') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('tolga'))) || voices.find(v => v.lang.includes('tr'));
+            if (trVoice) msg.voice = trVoice;
+        } else {
+            msg.lang = 'de-DE';
+            msg.rate = 0.85; // Deutlich und verständlich
+            msg.pitch = 1.1; // Weiblichere, etwas höhere Stimme
+            // Finde eine weibliche deutsche Stimme
+            let deVoice = voices.find(v => v.lang.includes('de') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('marlene') || v.name.toLowerCase().includes('anna'))) || voices.find(v => v.lang.includes('de'));
+            if (deVoice) msg.voice = deVoice;
+        }
+        
+        window.speechSynthesis.speak(msg); 
+        window.toast(window.currentLang === 'tr' ? "Sesli okuma başlatıldı" : "Vorlesen gestartet", "🗣️");
+    };
 
-    // BÖCEK DÜZELTİCİ (BUGFIX): Android ve iOS'un ses kütüphanesini geç yüklemesini engeller
+    // Bugfix für Android/iOS: Erzwingt das sofortige Laden der Sprachen
     if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
+        speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
     }
 
         window.toggleLang = async function(lang) {
