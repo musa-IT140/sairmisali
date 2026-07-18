@@ -2408,18 +2408,18 @@ body { padding-top: 310px !important; }
                     </div>
                     
                     <div style="background:var(--widget-bg); padding:12px; border-radius:8px; margin-bottom:15px; border:1px dashed var(--accent-gold);">
-                        <label style="color:var(--accent-gold); font-weight:bold; font-size:0.85rem; margin-bottom:8px; display:block;"><i class="fas fa-sliders-h"></i> Geçiş ve Remix Ayarları</label>
-                        <div style="display:flex; gap:10px; margin-bottom:10px;">
-                            <select id="adm-bgm-transition" class="inp" style="margin:0; flex:1.5;">
+                        <label style="color:var(--accent-gold); font-weight:bold; font-size:0.85rem; margin-bottom:8px; display:block;"><i class="fas fa-sliders-h"></i> Radyo Geçiş & Remix Ayarları</label>
+                        <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+                            <select id="adm-bgm-transition" class="inp" style="margin:0; flex:1; min-width:120px;">
                                 <option value="crossfade">Yumuşak Geçiş (Crossfade)</option><option value="direct">Keskin Geçiş</option>
                             </select>
-                            <div style="flex:1; display:flex; align-items:center; background:var(--input-bg); border:1px solid var(--border-soft); border-radius:8px; padding-left:10px;">
-                                <span style="color:var(--text-sub); font-size:0.75rem; white-space:nowrap;">Geçiş:</span>
+                            <div style="flex:1; display:flex; align-items:center; background:var(--input-bg); border:1px solid var(--border-soft); border-radius:8px; padding-left:10px; min-width:120px;">
+                                <span style="color:var(--text-sub); font-size:0.75rem; white-space:nowrap;">Geçiş Süresi:</span>
                                 <input type="number" id="adm-bgm-fade-sec" class="inp" style="border:none; margin:0; flex:1; background:transparent; text-align:right;" placeholder="5" min="1" max="30" value="5"><span style="color:var(--text-sub); font-size:0.75rem; margin-right:10px;">sn</span>
                             </div>
-                            <div style="flex:1; display:flex; align-items:center; background:rgba(236,72,153,0.1); border:1px solid var(--accent-pink); border-radius:8px; padding-left:10px;" title="Şarkı kaç saniye çalsın? (Sınırsız için 0 yapın)">
-                                <span style="color:var(--accent-pink); font-size:0.75rem; font-weight:bold; white-space:nowrap;">Remix:</span>
-                                <input type="number" id="adm-bgm-play-limit" class="inp" style="border:none; margin:0; flex:1; background:transparent; color:var(--accent-pink); font-weight:bold; text-align:right;" placeholder="0" min="0" max="600" value="0"><span style="color:var(--accent-pink); font-size:0.75rem; margin-right:10px;">sn</span>
+                            <div style="flex:1; display:flex; align-items:center; background:rgba(236,72,153,0.1); border:1px solid var(--accent-pink); border-radius:8px; padding-left:10px; min-width:120px;" title="Şarkı kaç saniye çalsın? (Sınırsız çalması için 0 yapın)">
+                                <span style="color:var(--accent-pink); font-size:0.75rem; font-weight:bold; white-space:nowrap;">Remix Limiti:</span>
+                                <input type="number" id="adm-bgm-play-limit" class="inp" style="border:none; margin:0; flex:1; background:transparent; color:var(--accent-pink); font-weight:bold; text-align:right;" placeholder="20" min="0" max="600" value="0"><span style="color:var(--accent-pink); font-size:0.75rem; margin-right:10px;">sn</span>
                             </div>
                         </div>
                     </div>
@@ -2921,21 +2921,21 @@ window.renderUserMessages = function() {
         msgBox.innerHTML = html;
     };
 
-    window.renderAdminLogs = function() {
+window.renderAdminLogs = function() {
         let box = document.getElementById('adm-logs-box-panel');
         let inbox = document.getElementById('adm-logs-box-inbox'); 
+        
         let html = window.adminLogs.map(l => {
             let isClickable = l.linkId && l.linkType && !String(l.linkId).includes('window.');
-            // KESİN ÇÖZÜM: Tırnak işaretlerini koruma
-            let actionAttr = isClickable ? 'onclick="window.goToLink(\'' + l.linkId + '\', \'' + l.linkType + '\')" style="cursor:pointer; padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); transition:0.3s;" onmouseover="this.style.background=\'rgba(255,255,255,0.08)\'" onmouseout="this.style.background=\'transparent\'"' : 'style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);"';
-            let openIcon = isClickable ? '<i class="fas fa-external-link-square-alt" style="float:right; color:var(--accent-gold); margin-top:2px;" title="Görüntüle"></i>' : '';
+            let actionAttr = isClickable ? `onclick="window.goToLink('${l.linkId}', '${l.linkType}')" style="cursor:pointer; padding:12px; border:1px solid rgba(0,206,209,0.2); background:rgba(0,206,209,0.05); transition:0.3s; border-radius:8px; margin-bottom:8px;" onmouseover="this.style.background='rgba(0,206,209,0.15)'" onmouseout="this.style.background='rgba(0,206,209,0.05)'"` : `style="padding:12px; border-bottom:1px dashed rgba(255,255,255,0.1); margin-bottom:8px;"`;
+            let openIcon = isClickable ? `<i class="fas fa-arrow-right" style="float:right; color:var(--accent-cyan); margin-top:5px; font-size:1.2rem;" title="Eseri Gör"></i>` : '';
             
-            return '<div ' + actionAttr + '>' + 
-                openIcon + 
-                '<small style="color:var(--accent-gold);">' + l.time + '</small><br>' + 
-                '<span style="color:var(--text-main);">' + l.msg + '</span>' + 
-            '</div>';
-        }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-sub);">Log kaydı yok.</div>';
+            return `<div ${actionAttr}>
+                ${openIcon}
+                <div style="color:var(--accent-gold); font-size:0.75rem; margin-bottom:4px; font-family:'Space Mono', monospace;"><i class="far fa-clock"></i> ${l.time}</div>
+                <div style="color:var(--text-main); font-size:0.95rem; line-height:1.4;">${l.msg}</div>
+            </div>`;
+        }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
         
         if (box) box.innerHTML = html;
         if (inbox) inbox.innerHTML = html;
@@ -3198,112 +3198,120 @@ window.clearLogs = function() {
     };
 
 window.adminUploadAudioCurrent = function(input) {
-        if (!input.files || !input.files[0]) return;
-        let file = input.files[0];
+    if (!input.files || !input.files[0]) return;
+    let file = input.files[0];
+    
+    window.toast("Müzik Buluta Yükleniyor...", "⏳");
+    document.getElementById('read-author').innerText = "Müzik sunucuya aktarılıyor...";
+    
+    let reader = new FileReader();
+    reader.onload = async function(e) {
+        let base64Data = e.target.result;
+        let newName = file.name.replace(/\.[^/.]+$/, "");
         
-        window.toast("Sisteme Yükleniyor (Online)...", "⏳");
-        document.getElementById('read-author').innerText = "Müzik işleniyor... Bekleyin.";
-        
-        let reader = new FileReader();
-        reader.onload = async function(e) {
-            let base64Data = e.target.result;
-            let newName = file.name.replace(/\.[^/.]+$/, "");
+        if(window.currentItemData) {
+            let type = window.currentItemData.type, id = window.currentItemData.id;
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let idx = source.findIndex(x => x.id === id);
             
-            if(window.currentItemData) {
-                let type = window.currentItemData.type, id = window.currentItemData.id;
-                let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
-                let idx = source.findIndex(x => x.id === id);
+            if (idx > -1) { 
+                source[idx].hasAudio = true; 
+                source[idx].audio = "firebaseDB"; // Etiket: Müzik artık Online'da!
                 
-                if (idx > -1) { 
-                    source[idx].hasAudio = true; 
-                    source[idx].audio = "firebaseDB"; // Etikett, dass die Musik online liegt!
-                    
-                    if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
-                    if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
-                    if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
-                    
-                    window.currentItemData = source[idx];
-                    
-                    try {
-                        // 1. Ana veriyi güncelle
-                        if(type === 'userPoems') {
-                            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
-                            firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
-                        } else {
-                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-                            firebase.database().ref('contentDB').set(window.DB);
-                        }
-                        
-                        // 2. MÜZİĞİ AYRI BİR BULUT KLASÖRÜNE KAYDET (Çökmeyi engeller, herkes dinler!)
-                        firebase.database().ref('audioFiles/' + id).set(base64Data);
-                        
-                        window.toast("Müzik Online Kaydedildi! Herkes dinleyebilir.", "🌍"); 
-                    } catch(err) { window.toast("Hata Oluştu!", "❌"); }
-                }
+                if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
+                if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
+                if(!source[idx].audioMuzik) source[idx].audioMuzik = newName;
                 
-                // Oynatıcıyı anında göster ve çalıştır
-                let aud = document.getElementById('global-audio-element'), audCont = document.getElementById('card-audio-container');
-                if(audCont) {
-                    audCont.style.setProperty('display', 'flex', 'important'); 
-                    audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
-                }
+                window.currentItemData = source[idx];
                 
-                if(aud) { 
-                    aud.src = base64Data;
-                    aud.play().then(() => { 
-                        let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
-                        window.renderAllContent(); 
-                    }).catch(() => {}); 
-                }
-                window.updateAudioUI(window.currentItemData, true, id, type);
-                document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
+                try {
+                    // 1. Bilgileri Online Güncelle
+                    if(type === 'userPoems') {
+                        localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                        firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                    } else {
+                        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                        firebase.database().ref('contentDB').set(window.DB);
+                    }
+                    
+                    // 2. MÜZİĞİN KENDİSİNİ FIREBASE'E GÖNDER (Herkes için ulaşılabilir olur)
+                    firebase.database().ref('audioFiles/' + id).set(base64Data);
+                    
+                    // Kendi cihazında hızlı açılsın diye lokale de kaydet
+                    if(window.audioStorage) await window.audioStorage.save(id, base64Data);
+                    
+                    window.toast("Müzik Online Kaydedildi! Herkes Dinleyebilir.", "🌍"); 
+                } catch(err) { window.toast("Kayıt Hatası", "❌"); }
             }
-        };
-        reader.readAsDataURL(file);
-    };
-
-    // OKUMA PENCERESİ AÇILDIĞINDA ONLINE MÜZİĞİ HERKES İÇİN İNDİR
-    const originalOpenReadModal_V6 = window.openReadModal;
-    window.openReadModal = async function(id, type) {
-        if (typeof originalOpenReadModal_V6 === 'function') await originalOpenReadModal_V6(id, type);
-        
-        let audCont = document.getElementById('card-audio-container');
-        let aud = document.getElementById('global-audio-element');
-        let item = window.currentItemData;
-        let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
-        
-        let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
-        
-        if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
-            audCont.style.setProperty('display', 'flex', 'important');
             
-            if (hasRealMusic) {
+            let audCont = document.getElementById('card-audio-container');
+            let aud = document.getElementById('global-audio-element');
+            if(audCont) {
+                audCont.style.setProperty('display', 'flex', 'important'); 
                 audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
-                
-                let trackData = null;
-                // EĞER MÜZİK ONLINE'DA (FIREBASE) İSE:
-                if (item.audio === 'firebaseDB') {
-                    window.toast("Müzik sunucudan alınıyor...", "☁️");
-                    let snap = await firebase.database().ref('audioFiles/' + id).once('value');
-                    if (snap.exists()) trackData = snap.val();
-                } else if (item.audio && item.audio.startsWith('data:audio')) {
-                    trackData = item.audio;
-                } else if (window.audioStorage && item.hasAudio) {
-                    trackData = await window.audioStorage.get(id);
-                }
-                
-                if (trackData && aud && aud.src !== trackData) {
-                    await window.loadAudioSafely(aud, trackData);
-                    let ic1 = document.getElementById('fp-play-icon');
-                    if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
-                }
-            } else {
-                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important'));
             }
-        } else if (audCont) {
-            audCont.style.setProperty('display', 'none', 'important');
+            if(aud) { 
+                aud.src = base64Data;
+                aud.play().then(() => { 
+                    let ic1 = document.getElementById('fp-play-icon'); if (ic1) ic1.className = 'fas fa-pause'; 
+                    window.renderAllContent(); 
+                }).catch(() => {}); 
+            }
+            window.updateAudioUI(window.currentItemData, true, id, type);
+            document.getElementById('read-author').innerText = "~ " + (window.currentItemData.author || window.currentItemData.name || "Şair Misal.i");
         }
     };
+    reader.readAsDataURL(file);
+};
+
+const originalOpenReadModal_V7 = window.openReadModal;
+window.openReadModal = async function(id, type) {
+    if (typeof originalOpenReadModal_V7 === 'function') await originalOpenReadModal_V7(id, type);
+    
+    let audCont = document.getElementById('card-audio-container');
+    let aud = document.getElementById('global-audio-element');
+    let item = window.currentItemData;
+    let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
+    
+    let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
+    
+    if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
+        audCont.style.setProperty('display', 'flex', 'important');
+        
+        if (hasRealMusic) {
+            audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+            
+            let trackData = null;
+            if (item.audio === 'firebaseDB') {
+                // Önce lokale bak
+                if (window.audioStorage) trackData = await window.audioStorage.get(id);
+                // Lokal de yoksa Firebase'den HERKES İÇİN indir!
+                if (!trackData) {
+                    window.toast("Müzik sunucudan yükleniyor...", "☁️");
+                    let snap = await firebase.database().ref('audioFiles/' + id).once('value');
+                    if (snap.exists()) {
+                        trackData = snap.val();
+                        if(window.audioStorage) window.audioStorage.save(id, trackData); // Cihaza kopyala
+                    }
+                }
+            } else if (item.audio && item.audio.startsWith('data:audio')) {
+                trackData = item.audio;
+            } else if (window.audioStorage && item.hasAudio) {
+                trackData = await window.audioStorage.get(id);
+            }
+            
+            if (trackData && aud && aud.src !== trackData) {
+                await window.loadAudioSafely(aud, trackData);
+                let ic1 = document.getElementById('fp-play-icon');
+                if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+            }
+        } else {
+            audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important'));
+        }
+    } else if (audCont) {
+        audCont.style.setProperty('display', 'none', 'important');
+    }
+};
 
     window.adminDeleteAudioCurrent = async function() {
         if(window.currentItemData) {
@@ -5775,11 +5783,11 @@ window.renderRadioPlaylist = function() {
     let list = window.radioSettings.playlist || [];
     listEl.innerHTML = list.map((item, idx) => {
         let tName = typeof item === 'object' ? item.name : 'Parça ' + (idx + 1);
-        // İsim değiştirme için ID'ler ve fonksiyonlar direkt HTML içinde tanımlı
         return `
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--border-soft);">
             <span style="flex:1; margin-right:10px; overflow:hidden;">
-                <span id="rad-name-disp-${idx}" style="color:var(--text-main);">${tName}</span>
+                <i class="fas fa-music" style="margin-right:8px; color:var(--accent-cyan);"></i>
+                <span id="rad-name-disp-${idx}" style="color:var(--text-main); cursor:pointer;" onclick="window.editRadioName(${idx})">${tName}</span>
                 <input type="text" id="rad-name-inp-${idx}" class="radio-edit-inp" style="display:none;" value="${tName}" 
                     onblur="window.saveRadioName(${idx}, this.value)" 
                     onkeypress="if(event.key==='Enter') this.blur();">
@@ -5809,37 +5817,42 @@ window.saveRadioName = function(idx, newVal) {
     window.toast("İsim güncellendi!", "✅");
 };
 
-// 3. Fehlerfreier Crossfade & Song-Übergang
+// RADYO REMIX (CROSSFADE) VE ŞARKI DEĞİŞİMİ
 window.setupRadioEventListeners = function() {
     let bgmAud = document.getElementById('global-bgm');
     if(bgmAud && !bgmAud.hasAttribute('data-listeners-set')) {
         bgmAud.setAttribute('data-listeners-set', 'true');
         
-bgmAud.addEventListener('timeupdate', function() {
-    if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 1) return;
-    
-    let dur = bgmAud.duration, cur = bgmAud.currentTime;
-    if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
-    
-    let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
-    let playLimit = parseInt(window.radioSettings.playLimit || 0); // Remix süresi
-    
-    // Eğer playLimit ayarlandıysa, o sürede geç. Değilse şarkı sonuna bak.
-    let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+        bgmAud.addEventListener('timeupdate', function() {
+            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 1) return;
+            
+            let dur = bgmAud.duration, cur = bgmAud.currentTime;
+            if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
+            
+            let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+            let playLimit = parseInt(window.radioSettings.playLimit || 0); // Remix süresi (örn 20)
+            
+            // Eğer Remix Limit (20sn) ayarlandıysa o an geç, ayarlanmadıysa şarkı bitimine (fadeSec) kala geç.
+            let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
 
-    if (isEnding && !window.isFadingOut) {
-        window.isFadingOut = true;
-        // Fade Out Logik
-        let step = bgmAud.volume / (fadeSec * 20); 
-        let fadeInterval = setInterval(() => {
-            if (bgmAud.volume - step > 0.05) bgmAud.volume -= step;
-            else { 
-                bgmAud.volume = 0; clearInterval(fadeInterval); 
-                window.triggerNextRadioSong(); 
+            if (isEnding && !window.isFadingOut) {
+                window.isFadingOut = true;
+                let transType = window.radioSettings.type || 'crossfade';
+                
+                if (transType === 'crossfade' || transType === 'fadeout') {
+                    let step = bgmAud.volume / (fadeSec * 20); // Fade-Out
+                    let fadeInterval = setInterval(() => {
+                        if (bgmAud.volume - step > 0.05) bgmAud.volume -= step;
+                        else { 
+                            bgmAud.volume = 0; clearInterval(fadeInterval); 
+                            window.triggerNextRadioSong(); 
+                        }
+                    }, 50);
+                } else {
+                    window.triggerNextRadioSong(); // Keskin Geçiş
+                }
             }
-        }, 50);
-    }
-});
+        });
 
         bgmAud.addEventListener('ended', function() {
             if(!window.isFadingOut) window.triggerNextRadioSong();
@@ -5853,7 +5866,6 @@ window.triggerNextRadioSong = async function() {
     if(window.radioSettings && window.radioSettings.playlist && window.radioSettings.playlist.length > 0) {
         window.currentBgmIndex = (window.currentBgmIndex + 1) % window.radioSettings.playlist.length;
         let nextTrack = window.radioSettings.playlist[window.currentBgmIndex];
-        
         let audioData = (nextTrack && nextTrack.src) ? nextTrack.src : nextTrack;
         
         if (audioData) {
@@ -5866,7 +5878,7 @@ window.triggerNextRadioSong = async function() {
                 let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
                 
                 if (transType === 'crossfade' || transType === 'fadein') {
-                    let step = 1 / 10; // 0.5 saniyede sesi aç
+                    let step = 1 / (fadeSec * 20); // Fade-In
                     let fadeInterval = setInterval(() => {
                         if (bgmAud.volume + step < 1) bgmAud.volume += step;
                         else { bgmAud.volume = 1; clearInterval(fadeInterval); }
