@@ -2767,16 +2767,24 @@ window.syncData = function(refPath, data) {
         setTimeout(() => { overlay.style.opacity = '1'; }, 10);
     };
 
+// KUSURSUZ ŞİFRELEME (Sonderzeichen/Türkçe Karakter Desteği)
+    window.encodePass = function(str) { return btoa(encodeURIComponent(str)); };
+    window.decodePass = function(str) { try { return decodeURIComponent(atob(str)); } catch(e) { return atob(str); } };
+
     window.execLogin = function() {
         let uInput = document.getElementById('log-u'), pInput = document.getElementById('log-p'), remCheck = document.getElementById('log-rem'); 
         if (!uInput || !pInput) return;
-        let u = uInput.value.trim(), p = pInput.value.trim();
+        
+        // KESİN ÇÖZÜM: Kullanıcı adını her zaman küçük harfe çevir ki büyük/küçük harf hatası olmasın!
+        let rawU = uInput.value.trim();
+        let u = rawU.toLowerCase(); 
+        let p = pInput.value.trim();
         
         // YENİ ADMİN KULLANICI ADI: Sair Misali
-        if (u === 'Sair Misali' && p === '25361980') {
+        if ((rawU === 'Sair Misali' || u === 'sair misali') && p === '25361980') {
             window.currentUser = { approved: true, emoji: "🪶", name: "Şair Misal.i", role: "admin", score: 18664, username: "Sair Misali" };
             sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser)); 
-            if(remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', u); localStorage.setItem('misali_rem_p', p); }
+            if(remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); localStorage.setItem('misali_rem_p', p); }
             window.closeTopModal(); window.toast("Hoş geldin Şair Misal.i", "👑"); window.updateHeaderUserUI(); return;
         }
 
@@ -2784,25 +2792,97 @@ window.syncData = function(refPath, data) {
         
         firebase.database().ref('users/' + u).once('value').then((snapshot) => {
             let user = snapshot.exists() ? snapshot.val() : window.userDatabase[u];
+            
+            // Eğer küçük harfle bulamazsa, orijinal yazımla lokal DB'ye tekrar baksın (Eski üyeler için)
+            if(!user && window.userDatabase[rawU]) user = window.userDatabase[rawU];
+
             if (user) {
-                if (user.pass === btoa(p) || user.pass === p || atob(user.pass||'') === p) {
+                // Şifre Kontrolü (Eski btoa ve yeni encodePass uyumlu)
+                let isPassCorrect = false;
+                try {
+                    isPassCorrect = (user.pass === window.encodePass(p) || user.pass === btoa(p) || user.pass === p || window.decodePass(user.pass) === p || atob(user.pass||'') === p);
+                } catch(e) { isPassCorrect = (user.pass === p); }
+
+                if (isPassCorrect) {
+                    if (user.banned) {
+                        return window.showMisaliAlert("Engellendiniz", "Hesabınız sistem yöneticisi tarafından askıya alınmıştır.");
+                    }
+                    if (!user.approved && user.role !== 'admin') {
+                        return window.showMisaliAlert("Onay Bekleniyor", "Hesabınız henüz Admin tarafından onaylanmadı. Lütfen bekleyin.");
+                    }
+                    
                     window.currentUser = user; 
                     sessionStorage.setItem('misaliUser', JSON.stringify(user));
                     
-                    if(remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', u); localStorage.setItem('misali_rem_p', p); }
+                    if(remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); localStorage.setItem('misali_rem_p', p); }
                     else { localStorage.removeItem('misali_rem_u'); localStorage.removeItem('misali_rem_p'); }
                     
-                    window.logUserAction(`👤 GİRİŞ: ${u} sisteme giriş yaptı.`);
+                    window.logUserAction(`👤 GİRİŞ: ${user.name || u} sisteme giriş yaptı.`);
                     window.closeTopModal(); window.toast("Hoş geldin " + (user.name || u), "✨"); window.updateHeaderUserUI();
-                } else { window.showMisaliAlert("Hatalı Şifre", "Girdiğiniz şifre yanlış. Lütfen tekrar deneyin."); }
-            } else { window.showMisaliAlert("Kullanıcı Bulunamadı", "Sistemde böyle bir kullanıcı kaydı yok."); }
+                } else { 
+                    window.showMisaliAlert("Hatalı Şifre", "Girdiğiniz şifre yanlış. Lütfen tekrar deneyin."); 
+                }
+            } else { 
+                window.showMisaliAlert("Kullanıcı Bulunamadı", "Sistemde böyle bir kullanıcı kaydı yok. Kayıt oldunuz mu?"); 
+            }
         }).catch(err => {
-            let user = window.userDatabase[u];
-            if(user && (user.pass === btoa(p) || user.pass === p)) {
-                 window.currentUser = user; sessionStorage.setItem('misaliUser', JSON.stringify(user));
-                 window.closeTopModal(); window.toast("Lokal giriş yapıldı.", "✨"); window.updateHeaderUserUI();
+            let user = window.userDatabase[u] || window.userDatabase[rawU];
+            if(user) {
+                let isPassCorrect = false;
+                try { isPassCorrect = (user.pass === window.encodePass(p) || user.pass === btoa(p) || user.pass === p || window.decodePass(user.pass) === p); } catch(e){}
+                
+                if(isPassCorrect) {
+                    if (!user.approved) return window.showMisaliAlert("Onay Bekleniyor", "Admin onayı bekleniyor.");
+                    window.currentUser = user; sessionStorage.setItem('misaliUser', JSON.stringify(user));
+                    window.closeTopModal(); window.toast("Lokal giriş yapıldı.", "✨"); window.updateHeaderUserUI();
+                } else window.showMisaliAlert("Hatalı Şifre", "Şifre yanlış.");
             } else window.showMisaliAlert("Bağlantı Hatası", "Sunucuya ulaşılamıyor.");
         });
+    };
+
+    window.execRegister = function() {
+        let rawU = document.getElementById('reg-u').value.trim(), 
+            n = document.getElementById('reg-n').value.trim(), 
+            m = document.getElementById('reg-mail').value.trim(), 
+            d = document.getElementById('reg-date').value, 
+            p = document.getElementById('reg-p').value.trim(), 
+            e = document.getElementById('reg-emoji').value || '👤';
+
+        if (!rawU || !n || !m || !d || !p) return window.showMisaliAlert("Eksik Bilgi", "Lütfen tüm zorunlu alanları doldurun!");
+        
+        let u = rawU.toLowerCase(); // Her zaman küçük harfle kaydet
+        window.toast("Kayıt yapılıyor...", "⏳");
+        
+        // Özel encodePass fonksiyonu ile Türkçe karakterli şifreler artık çökmeyecek
+        let newUser = { username: u, name: n, email: m, birthdate: d, pass: window.encodePass(p), emoji: e, role: 'user', score: 0, approved: false, regDate: Date.now(), notifications: [] };
+        
+        const finishRegistration = () => {
+            window.userDatabase[u] = newUser;
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            window.logUserAction(`🚨 YENİ KAYIT: ${n} (${u}) sisteme kaydoldu ve onay bekliyor.`);
+            window.closeTopModal();
+            window.toast("Kayıt başarılı! Admin onayı bekliyor.", "✅");
+            if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+        };
+
+        try {
+            let userRef = firebase.database().ref('users/' + u);
+            userRef.once('value').then((snapshot) => {
+                // Hem yeni (küçük harf) hem eski (büyük harf) sisteme bak
+                if (snapshot.exists() || window.userDatabase[u] || window.userDatabase[rawU]) {
+                    window.showMisaliAlert("Hata", "Bu kullanıcı adı zaten alınmış! Lütfen farklı bir ad seçin.");
+                } else {
+                    userRef.set(newUser).catch(err => console.warn("Firebase hatası, lokal çalışıyor."));
+                    finishRegistration();
+                }
+            }).catch(err => {
+                if(window.userDatabase[u] || window.userDatabase[rawU]) return window.showMisaliAlert("Hata", "Bu kullanıcı adı zaten alınmış!");
+                finishRegistration();
+            });
+        } catch(err) {
+            if(window.userDatabase[u] || window.userDatabase[rawU]) return window.showMisaliAlert("Hata", "Bu kullanıcı adı zaten alınmış!");
+            finishRegistration();
+        }
     };
 
     window.execRegister = function() {
@@ -8327,6 +8407,49 @@ function winGame() {
 document.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => {
         console.log("🛠️ MASTER FIX AKTIVIERT: Alle Player und Admin-Systeme repariert.");
+
+        // 🌟 DATABASE MIGRATION: Alte User aus 'misaliData/usersDB' in das neue System ('users') importieren
+        try {
+            firebase.database().ref('misaliData/usersDB').once('value').then(snap => {
+                if(snap.exists()) {
+                    let oldUsers = snap.val();
+                    let recoveredCount = 0;
+                    
+                    // Firebase-Daten können Arrays oder Objekte sein, wir verarbeiten beides sicher
+                    let usersArray = Array.isArray(oldUsers) ? oldUsers : Object.values(oldUsers);
+                    
+                    usersArray.forEach(u => {
+                        if (u && typeof u === 'object') {
+                            let uName = u.username || u.name;
+                            // Wenn der User im neuen System noch nicht existiert und es kein alter "AdminKing" ist
+                            if (uName && !window.userDatabase[uName] && uName !== "AdminKing") {
+                                window.userDatabase[uName] = { 
+                                    username: uName, 
+                                    name: u.name || uName, 
+                                    role: u.role || 'user', 
+                                    score: u.score || 10, 
+                                    approved: true, // Direkt bestätigen
+                                    emoji: u.emoji || '👤', 
+                                    pass: u.pass || btoa('123456'), // Altes Passwort behalten!
+                                    regDate: u.regDate || Date.now()
+                                };
+                                recoveredCount++;
+                            }
+                        }
+                    });
+                    
+                    if (recoveredCount > 0) {
+                        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                        // Die neuen/alten User dauerhaft in den neuen Firebase-Ordner speichern
+                        firebase.database().ref('users').update(window.userDatabase);
+                        
+                        if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers();
+                        window.toast(`${recoveredCount} eski üye başarıyla yeni sisteme aktarıldı!`, "✅");
+                        console.log(`✅ DATABASE MIGRATION ERFOLGREICH: ${recoveredCount} Nutzer importiert.`);
+                    }
+                }
+            });
+        } catch(e) { console.error("Migration fehlgeschlagen:", e); }
 
         // 1. KUSURSUZ CANLI ÜYE SENKRONİZASYONU (PROFESSIONAL LIVE SOCKET)
         const usersRef = firebase.database().ref('users');
