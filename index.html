@@ -2815,7 +2815,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 350);
     };
 
-window.logUserAction = function(msg, linkId = null, linkType = null) {
+// 1. Merkezi Log Fonksiyonu (Admin İçin)
+    window.logUserAction = function(msg, linkId = null, linkType = null) {
+        if (!window.currentUser) return;
+        
+        // Spam filtresi
         if (msg === window.lastLogMsg && (Date.now() - window.lastLogTimestamp < 3000)) return;
         window.lastLogMsg = msg;
         window.lastLogTimestamp = Date.now();
@@ -2823,43 +2827,67 @@ window.logUserAction = function(msg, linkId = null, linkType = null) {
         let timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
         let newLog = { time: timeStr, msg: msg, linkId: linkId, linkType: linkType, ts: Date.now() };
 
+        // Kendi lokalimize ekleyelim
         window.adminLogs = window.adminLogs || [];
         window.adminLogs.unshift(newLog);
-        
-        // 100'den fazla log birikmesini engelle
         if(window.adminLogs.length > 100) window.adminLogs.pop();
-
         localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
         
-        // EKLENDİ: Logları anında Firebase'e (Online) gönder!
+        // Firebase'e Admin'in görmesi için at
         try { firebase.database().ref('adminOnlineLogs').push(newLog); } catch(e){}
 
         if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
         if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
     };
 
-    window.notifyUser = function(username, msg, linkId = null, linkType = null) {
-        if (!window.userDatabase[username]) return;
-        
-        // Spam-Schutz
-        if (msg === window.lastLogMsg && (Date.now() - window.lastLogTime < 2000)) return;
-        window.lastLogMsg = msg;
-        window.lastLogTime = Date.now();
-
-        let u = window.userDatabase[username];
-        u.notifications = u.notifications || [];
-        let timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-        u.notifications.unshift({ time: timeStr, msg: msg, linkId: linkId, linkType: linkType });
-        
-        window.userDatabase[username] = u;
-        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-        
-        if (window.currentUser && window.currentUser.username === username) {
-            window.currentUser.notifications = u.notifications;
-            sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-            if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+    // 2. Admin'in Canlı Log Dinleyicisi (Otomatik Başlar)
+    firebase.database().ref('adminOnlineLogs').on('child_added', (snap) => {
+        let newLog = snap.val();
+        if (newLog && window.currentUser && window.currentUser.role === 'admin') {
+            window.adminLogs = window.adminLogs || [];
+            let exists = window.adminLogs.some(l => l.ts === newLog.ts);
+            if (!exists) {
+                window.adminLogs.unshift(newLog);
+                if(window.adminLogs.length > 100) window.adminLogs.pop();
+                localStorage.setItem('misaliAdminLogs', JSON.stringify(window.adminLogs));
+                
+                if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+            }
         }
+    });
+
+    // 3. User Özel Bildirim Gönderme (Örn: Beğeni aldığında)
+    window.notifyUser = function(username, msg, linkId = null, linkType = null) {
+        if (!username || username === (window.currentUser ? window.currentUser.username : '')) return; // Kendine bildirim atma
+        
+        let timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+        let notif = { time: timeStr, msg: msg, linkId: linkId, linkType: linkType, ts: Date.now() };
+
+        // Firebase'e kullanıcının özel kutusuna at
+        try { firebase.database().ref('notifications/' + username).push(notif); } catch(e){}
     };
+
+    // 4. Giriş yapan kullanıcının kendi bildirimlerini dinlemesi
+    window.syncUserNotifications = function() {
+        if (!window.currentUser || window.currentUser.role === 'admin') return;
+        
+        firebase.database().ref('notifications/' + window.currentUser.username).on('child_added', (snap) => {
+            let notif = snap.val();
+            if (notif) {
+                window.currentUser.notifications = window.currentUser.notifications || [];
+                let exists = window.currentUser.notifications.some(n => n.ts === notif.ts);
+                if (!exists) {
+                    window.currentUser.notifications.unshift(notif);
+                    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                    if(typeof window.renderUserMessages === 'function') window.renderUserMessages();
+                    if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+                }
+            }
+        });
+    };
+    // Girişten sonra otomatik başlat
+    setTimeout(window.syncUserNotifications, 2000);
 
 window.renderUserMessages = function() {
         let msgBox = document.querySelector('#msgModal .theme-sub-panel');
@@ -3165,7 +3193,7 @@ window.adminUploadAudioCurrent = function(input) {
         if (!input.files || !input.files[0]) return;
         let file = input.files[0];
         
-        window.toast("Müzik Yükleniyor (Sınırsız)...", "⏳");
+        window.toast("Sisteme Yükleniyor (Online)...", "⏳");
         document.getElementById('read-author').innerText = "Müzik işleniyor... Bekleyin.";
         
         let reader = new FileReader();
@@ -3180,9 +3208,7 @@ window.adminUploadAudioCurrent = function(input) {
                 
                 if (idx > -1) { 
                     source[idx].hasAudio = true; 
-                    source[idx].audio = base64Data; // KESİN ÇÖZÜM: Base64 kodunu objeye göm. 0% hatasını atlar!
-                    
-                    if(window.audioStorage) await window.audioStorage.save(id, base64Data);
+                    source[idx].audio = "firebaseDB"; // Etikett, dass die Musik online liegt!
                     
                     if(!source[idx].audioYazan) source[idx].audioYazan = source[idx].author || source[idx].authorTR || 'Şair Misal.i';
                     if(!source[idx].audioOkuyan) source[idx].audioOkuyan = 'Şair Misal.i';
@@ -3191,6 +3217,7 @@ window.adminUploadAudioCurrent = function(input) {
                     window.currentItemData = source[idx];
                     
                     try {
+                        // 1. Ana veriyi güncelle
                         if(type === 'userPoems') {
                             localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
                             firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
@@ -3198,7 +3225,11 @@ window.adminUploadAudioCurrent = function(input) {
                             localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
                             firebase.database().ref('contentDB').set(window.DB);
                         }
-                        window.toast("Müzik Online Kaydedildi!", "🌍"); 
+                        
+                        // 2. MÜZİĞİ AYRI BİR BULUT KLASÖRÜNE KAYDET (Çökmeyi engeller, herkes dinler!)
+                        firebase.database().ref('audioFiles/' + id).set(base64Data);
+                        
+                        window.toast("Müzik Online Kaydedildi! Herkes dinleyebilir.", "🌍"); 
                     } catch(err) { window.toast("Hata Oluştu!", "❌"); }
                 }
                 
@@ -3221,6 +3252,49 @@ window.adminUploadAudioCurrent = function(input) {
             }
         };
         reader.readAsDataURL(file);
+    };
+
+    // OKUMA PENCERESİ AÇILDIĞINDA ONLINE MÜZİĞİ HERKES İÇİN İNDİR
+    const originalOpenReadModal_V6 = window.openReadModal;
+    window.openReadModal = async function(id, type) {
+        if (typeof originalOpenReadModal_V6 === 'function') await originalOpenReadModal_V6(id, type);
+        
+        let audCont = document.getElementById('card-audio-container');
+        let aud = document.getElementById('global-audio-element');
+        let item = window.currentItemData;
+        let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
+        
+        let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
+        
+        if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
+            audCont.style.setProperty('display', 'flex', 'important');
+            
+            if (hasRealMusic) {
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+                
+                let trackData = null;
+                // EĞER MÜZİK ONLINE'DA (FIREBASE) İSE:
+                if (item.audio === 'firebaseDB') {
+                    window.toast("Müzik sunucudan alınıyor...", "☁️");
+                    let snap = await firebase.database().ref('audioFiles/' + id).once('value');
+                    if (snap.exists()) trackData = snap.val();
+                } else if (item.audio && item.audio.startsWith('data:audio')) {
+                    trackData = item.audio;
+                } else if (window.audioStorage && item.hasAudio) {
+                    trackData = await window.audioStorage.get(id);
+                }
+                
+                if (trackData && aud && aud.src !== trackData) {
+                    await window.loadAudioSafely(aud, trackData);
+                    let ic1 = document.getElementById('fp-play-icon');
+                    if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                }
+            } else {
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important'));
+            }
+        } else if (audCont) {
+            audCont.style.setProperty('display', 'none', 'important');
+        }
     };
 
     window.adminDeleteAudioCurrent = async function() {
@@ -5738,54 +5812,71 @@ window.setupRadioEventListeners = function() {
             if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length < 2) return;
             
             let dur = bgmAud.duration, cur = bgmAud.currentTime;
-            if(isNaN(dur) || dur === Infinity) return;
+            if(isNaN(dur) || dur === Infinity || dur === 0) return;
             
             let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+            let playLimit = parseInt(window.radioSettings.playLimit || 0);
             let transType = window.radioSettings.type || 'crossfade';
             
-            // Wenn Song gleich endet, starte Ausblenden
-            if ((transType === 'crossfade' || transType === 'fadeout') && (dur - cur) <= fadeSec && !window.isFadingOut) {
-                window.isFadingOut = true;
-                let step = bgmAud.volume / ((dur - cur) * 20); 
-                
-                let fadeInterval = setInterval(() => {
-                    if (bgmAud.volume - step > 0.05) bgmAud.volume -= step;
-                    else { bgmAud.volume = 0; clearInterval(fadeInterval); }
-                }, 50);
-            }
-        });
+            // KESİN ÇÖZÜM: Şarkı limit süresine ulaştıysa (örn: 20sn) veya bitmesine fadeSec kaldıysa geçişi başlat
+            let isEndingByLimit = (playLimit > 0 && cur >= playLimit);
+            let isEndingByDuration = ((dur - cur) <= fadeSec);
 
-        bgmAud.addEventListener('ended', async function() {
-            window.isFadingOut = false;
-            if(window.radioSettings && window.radioSettings.playlist && window.radioSettings.playlist.length > 0) {
-                window.currentBgmIndex = (window.currentBgmIndex + 1) % window.radioSettings.playlist.length;
-                let nextTrack = window.radioSettings.playlist[window.currentBgmIndex];
+            if ((isEndingByLimit || isEndingByDuration) && !window.isFadingOut) {
+                window.isFadingOut = true;
                 
-                let audioData = null;
-                if (nextTrack && nextTrack.id && window.audioStorage) audioData = await window.audioStorage.get(nextTrack.id);
-                else if (typeof nextTrack === 'object' && nextTrack.src) audioData = nextTrack.src;
-                else audioData = nextTrack;
-                
-                if (audioData) {
-                    await window.loadAudioSafely(bgmAud, audioData);
-                    window.updateRadioPlayerDisplay();
-                    
-                    bgmAud.volume = 0; 
-                    bgmAud.play().then(() => {
-                        let transType = window.radioSettings.type || 'crossfade';
-                        let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
-                        
-                        if (transType === 'crossfade' || transType === 'fadein') {
-                            let step = 1 / (fadeSec * 20);
-                            let fadeInterval = setInterval(() => {
-                                if (bgmAud.volume + step < 1) bgmAud.volume += step;
-                                else { bgmAud.volume = 1; clearInterval(fadeInterval); }
-                            }, 50);
-                        } else { bgmAud.volume = 1; }
-                    }).catch(e => console.error("Radyo geçiş hatası:", e));
+                if (transType === 'crossfade' || transType === 'fadeout') {
+                    let step = bgmAud.volume / 10; // 0.5 saniyede sesi hızlıca kıs
+                    let fadeInterval = setInterval(() => {
+                        if (bgmAud.volume - step > 0.05) {
+                            bgmAud.volume -= step;
+                        } else { 
+                            bgmAud.volume = 0; 
+                            clearInterval(fadeInterval); 
+                            window.triggerNextRadioSong(); 
+                        }
+                    }, 50);
+                } else {
+                    window.triggerNextRadioSong(); // Keskin geçiş
                 }
             }
         });
+
+        bgmAud.addEventListener('ended', function() {
+            if(!window.isFadingOut) window.triggerNextRadioSong();
+        });
+    }
+};
+
+window.triggerNextRadioSong = async function() {
+    window.isFadingOut = false;
+    let bgmAud = document.getElementById('global-bgm');
+    if(window.radioSettings && window.radioSettings.playlist && window.radioSettings.playlist.length > 0) {
+        window.currentBgmIndex = (window.currentBgmIndex + 1) % window.radioSettings.playlist.length;
+        let nextTrack = window.radioSettings.playlist[window.currentBgmIndex];
+        
+        let audioData = (nextTrack && nextTrack.src) ? nextTrack.src : nextTrack;
+        
+        if (audioData) {
+            await window.loadAudioSafely(bgmAud, audioData);
+            window.updateRadioPlayerDisplay();
+            
+            bgmAud.volume = 0; 
+            bgmAud.play().then(() => {
+                let transType = window.radioSettings.type || 'crossfade';
+                let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+                
+                if (transType === 'crossfade' || transType === 'fadein') {
+                    let step = 1 / 10; // 0.5 saniyede sesi aç
+                    let fadeInterval = setInterval(() => {
+                        if (bgmAud.volume + step < 1) bgmAud.volume += step;
+                        else { bgmAud.volume = 1; clearInterval(fadeInterval); }
+                    }, 50);
+                } else {
+                    bgmAud.volume = 1; 
+                }
+            }).catch(e => console.error("Radyo geçiş hatası:", e));
+        }
     }
 };
 
