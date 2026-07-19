@@ -13101,5 +13101,220 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ OMNI-PATCH V21: JURY-RATING & TOP-10 STATS 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-jury-patch-css">
+    /* Stats Layout auf Startseite */
+    .top-stats-container { display: flex; gap: 10px; font-size: 0.75rem; color: var(--text-sub); margin-top: 6px; justify-content: center; }
+    .stat-item { display: flex; align-items: center; gap: 3px; }
+    
+    /* Jury Box im Yellow Player */
+    .jury-box { 
+        margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); 
+        border-radius: 8px; border: 1px dashed var(--accent-gold); text-align: center; 
+    }
+    .jury-select { 
+        background: var(--input-bg); border: 1px solid var(--accent-gold); color: var(--text-main);
+        padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer;
+    }
+</style>
+
+<!-- ===================================================================== -->
+<!-- 🏆 OMNI-PATCH V22: JURY-SYSTEM PRO & RADIO FADE FIX 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-jury-pro-css">
+    /* Top 10 Stats Styling - Edel und kompakt */
+    .top-stats-container { display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-sub); margin-top: 6px; }
+    .stat-badge { display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 12px; border: 1px solid var(--border-soft); }
+    .stat-badge i { font-size: 0.8rem; }
+    
+    /* Jury Box im Yellow Player */
+    .jury-pro-box { margin-top: 15px; padding: 12px; background: rgba(212,175,55,0.05); border-radius: 12px; border: 1px dashed var(--accent-gold); text-align: center; display: flex; flex-direction: column; gap: 8px; }
+    .jury-pro-select { background: var(--bg-card); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; outline: none; text-align: center; -webkit-appearance: none; appearance: none; }
+    .jury-pro-select:focus { box-shadow: 0 0 10px rgba(212,175,55,0.3); }
+    [data-theme="light"] .jury-pro-select { background: #fff; color: #b48608; }
+</style>
+
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ OMNI-PATCH V33: ZERO FLICKER + LIGHT MODE PERFECT 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-v33-css">
+    /* Top 10 Stats Styling - Kompakt, feiner und OHNE Gesamtpunkte rechts */
+    .top-stats-container { display: flex !important; gap: 8px !important; margin-top: 6px !important; flex-wrap: wrap !important; }
+    .stat-badge { display: flex !important; align-items: center !important; gap: 4px !important; background: rgba(0,0,0,0.3) !important; padding: 3px 8px !important; border-radius: 12px !important; border: 1px solid var(--border-soft) !important; color: var(--text-main) !important; font-size: 0.7rem !important; font-weight: bold !important; }
+    .stat-badge i { font-size: 0.75rem !important; margin-right: 3px !important; }
+    
+    /* 🌟 LIGHT MODE FIX FÜR KARTEN & BADGES (Kein schmutziges Grau mehr!) 🌟 */
+    [data-theme="light"] .stat-badge { background: #ffffff !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.04) !important; color: #334155 !important; }
+    [data-theme="light"] .audio-track-item { background: #ffffff !important; border: 1px solid rgba(0,0,0,0.08) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important; }
+    
+    /* Jury Box im Yellow Player */
+    .jury-pro-box { display: flex !important; flex-direction: column !important; gap: 8px !important; margin-top: 15px !important; padding: 12px !important; background: rgba(212,175,55,0.1) !important; border-radius: 12px !important; border: 1px dashed var(--accent-gold) !important; text-align: center !important; width: 100% !important; }
+    .jury-pro-select { background: var(--bg-card) !important; border: 1px solid var(--accent-gold) !important; color: var(--accent-gold) !important; padding: 8px 15px !important; border-radius: 8px !important; font-weight: bold !important; cursor: pointer !important; outline: none !important; text-align: center !important; -webkit-appearance: none !important; appearance: none !important; width: 100% !important; display: block !important; }
+    [data-theme="light"] .jury-pro-select { background: #ffffff !important; color: #b48608 !important; border-color: #b48608 !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; }
+    
+    /* Brute-Force-Sicherheit: Zwingt alte Punkte dazu, sich unsichtbar zu machen */
+    .audio-track-item > div:nth-child(3) { display: none !important; }
+</style>
+
+<script id="misali-v33-js">
+(function() {
+    console.log("🛡️ V33: Unbreakable Render Engine Initiated. Light Mode gefixt!");
+
+    // Diese Funktion zeichnet das PERFEKTE Layout (Mit Badges unten, OHNE Punkte rechts)
+    const flawlessRenderTopAudio = function() {
+        let container = document.getElementById('top-audio-works');
+        if (!container || !document.getElementById('home-view').classList.contains('active')) return;
+
+        let audioWorks = [];
+        ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
+            let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
+            if(source && Array.isArray(source)) {
+                source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
+            }
+        });
+
+        if (audioWorks.length === 0) return;
+
+        // Wir holen die Daten DIREKT aus der Datenbank, egal was passiert
+        let heartsDB = JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
+        let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+
+        audioWorks.forEach(w => {
+            let sd = heartsDB[w.id] || (window.poemDataStore ? window.poemDataStore[w.id] : null) || {};
+            let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+            let notes = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => notes += parseInt(v||0));
+            
+            let juryAvg = 0; 
+            if(sd.jury) { 
+                let jVals = Object.values(sd.jury); 
+                if(jVals.length > 0) juryAvg = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); 
+            }
+            
+            w.stats = { hearts, notes, jury: juryAvg };
+            w.totalScore = (hearts * 2) + (notes * 3) + (parseFloat(juryAvg) * 5); 
+        });
+
+        audioWorks.sort((a,b) => b.totalScore - a.totalScore);
+        let top10 = audioWorks.slice(0, 10);
+
+        const palette = ['var(--accent-pink)', 'var(--accent-cyan)', '#c084fc', 'var(--accent-gold)'];
+        let html = '<div class="top-audio-container"><div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:15px; text-align:center; font-size:1.2rem;">🎧 Top 10 Sesli Eserler</div><div style="display:flex; flex-direction:column; gap:8px;">';
+        
+        top10.forEach((w, i) => {
+            let rankColor = palette[i % palette.length];
+            let safeId = encodeURIComponent(w.id);
+            let authorText = w.author || w.name || 'Şair Misal.i';
+            let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
+            
+            html += `
+            <div class="audio-track-item" style="border-left: 3px solid ${rankColor}; align-items:flex-start; padding:12px; background:var(--input-bg); border-radius:12px; margin-bottom:8px; cursor:pointer; display:flex; transition: 0.3s;" onclick="window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); setTimeout(()=>window.fpToggle(true), 600);">
+                <div class="audio-track-rank" style="color:${rankColor}; font-weight:bold; font-size:1.4rem; min-width:30px; margin-top:2px;">${i+1}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; font-size:1rem; color:var(--text-main);">${w.title || w.trTitle}</div>
+                    <div class="${authorClass}" style="font-size: 1.1rem; margin-top: 2px;">~ ${authorText}</div>
+                    <div class="top-stats-container">
+                        <span class="stat-badge" title="Kalpler"><i class="fas fa-heart" style="color:var(--accent-red);"></i> ${w.stats.hearts}</span>
+                        <span class="stat-badge" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan);"></i> ${w.stats.notes}</span>
+                        <span class="stat-badge" title="Jüri"><i class="fas fa-gavel" style="color:var(--accent-gold);"></i> ${w.stats.jury}/10</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += '</div></div>';
+        
+        // Verhindert Flackern: Nur austauschen, wenn sich wirklich was geändert hat
+        if (container.innerHTML !== html) {
+            container.innerHTML = html;
+        }
+    };
+
+    // 🚨 KESİN ÇÖZÜM (ABSOLUTE LOCK) 🚨
+    Object.defineProperty(window, 'renderTopAudioList', {
+        get: function() { return flawlessRenderTopAudio; },
+        set: function(v) { console.log("🛡️ Blocked an old script from destroying the layout!"); }
+    });
+
+    // ==========================================
+    // JURY SYSTEM & YELLOW PLAYER LOGIC
+    // ==========================================
+    const perfectJurySave = function(id, val) {
+        if (!window.currentUser) {
+            window.toast("Giriş yapın!", "🔒");
+            let sel = document.getElementById('jury-select-' + id);
+            if(sel) sel.value = "0";
+            return;
+        }
+        const pId = id; 
+        if (!window.poemDataStore) window.poemDataStore = {};
+        if (!window.poemDataStore[pId]) window.poemDataStore[pId] = { ratings: {}, comments: [], jury: {} };
+        window.poemDataStore[pId].jury = window.poemDataStore[pId].jury || {};
+        
+        let parsedVal = parseInt(val);
+        if (parsedVal > 0) {
+            window.poemDataStore[pId].jury[window.currentUser.username] = parsedVal;
+            window.toast("Jüri puanınız (" + parsedVal + "/10) kaydedildi!", "🏅");
+        } else {
+            delete window.poemDataStore[pId].jury[window.currentUser.username];
+            window.toast("Jüri puanı geri çekildi.", "🗑️");
+        }
+        
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+        try { firebase.database().ref('interactions/' + pId + '/jury').set(window.poemDataStore[pId].jury); } catch(e){}
+        
+        flawlessRenderTopAudio(); 
+        if (typeof window.updateLiveTickers === 'function') window.updateLiveTickers();
+    };
+
+    Object.defineProperty(window, 'saveJuryRating', {
+        get: function() { return perfectJurySave; },
+        set: function(v) {}
+    });
+
+    const modalObserver = new MutationObserver(() => {
+        let audCont = document.getElementById('card-audio-container');
+        if (audCont && audCont.classList.contains('force-show') && window.currentItemData) {
+            let id = window.currentItemData.id;
+            
+            if (document.getElementById('jury-box-inject-' + id)) return;
+            document.querySelectorAll('.jury-pro-box').forEach(el => el.remove());
+
+            let sd = window.poemDataStore[id] || {};
+            let myVote = 0;
+            if(window.currentUser && sd.jury && sd.jury[window.currentUser.username]) {
+                myVote = sd.jury[window.currentUser.username];
+            }
+
+            let options = `<option value="0">-- Puan Seç --</option>`;
+            for(let n=1; n<=10; n++) {
+                options += `<option value="${n}" ${myVote === n ? 'selected' : ''}>${n} Puan</option>`;
+            }
+
+            audCont.insertAdjacentHTML('beforeend', `
+                <div id="jury-box-inject-${id}" class="jury-pro-box">
+                    <label style="font-size:0.95rem !important; color:var(--accent-gold) !important; font-weight:bold !important;"><i class="fas fa-gavel"></i> Jüri Değerlendirmesi</label>
+                    <select id="jury-select-${id}" class="jury-pro-select" onchange="window.saveJuryRating('${id}', this.value)">
+                        ${options}
+                    </select>
+                </div>
+            `);
+        }
+    });
+    
+    let checkBody = setInterval(() => {
+        if(document.body) {
+            modalObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+            clearInterval(checkBody);
+            flawlessRenderTopAudio();
+        }
+    }, 50);
+
+    setInterval(flawlessRenderTopAudio, 2000);
+
+})();
+</script>
+<!-- ===================================================================== -->
+
 </body>
 </html>
