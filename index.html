@@ -13316,5 +13316,117 @@ window.addEventListener('load', function() {
 </script>
 <!-- ===================================================================== -->
 
+<!-- ===================================================================== -->
+<!-- ❤️ MİSALİ HOTFIX V33: NEW WORKS HEART RATING FIX ❤️ -->
+<!-- ===================================================================== -->
+<script id="misali-heart-hotfix">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("❤️ Heart-Rating Hotfix geladen.");
+
+        // Die absolut kugelsichere Herz-Vergabe-Funktion
+        window.rateCurrent = function(val) {
+            if (!window.currentUser) return window.toast("Puan vermek için giriş yapmalısın!", "🔒");
+            if (!window.currentItemData) return;
+            
+            const pId = window.currentItemData.id;
+            let pType = window.currentItemData.type || 'userPoems';
+            let pEmoji = window.currentItemData.emoji || '📖';
+            
+            // KESİN ÇÖZÜM: Yeni eserlerde eksik olan veritabanı yollarını ZORLA oluştur!
+            if (!window.poemDataStore) window.poemDataStore = {};
+            if (!window.poemDataStore[pId]) window.poemDataStore[pId] = {};
+            if (!window.poemDataStore[pId].ratings) window.poemDataStore[pId].ratings = {}; // <-- HIER WAR DER FEHLER
+            if (!window.poemDataStore[pId].comments) window.poemDataStore[pId].comments = [];
+            
+            let currentRatingObj = window.poemDataStore[pId].ratings[window.currentUser.username];
+            let oldVal = 0;
+            
+            if (currentRatingObj) {
+                oldVal = typeof currentRatingObj === 'object' ? parseInt(currentRatingObj.val || 0) : parseInt(currentRatingObj || 0);
+            }
+            
+            let newVal = parseInt(val);
+            if (newVal === oldVal) newVal = 0; // Aynı kalbe basılırsa sıfırla (Toggle)
+            
+            let isReturning = newVal < oldVal;
+            let doveCount = isReturning ? (oldVal - newVal) : (newVal - oldVal);
+            
+            if (newVal === 0) {
+                delete window.poemDataStore[pId].ratings[window.currentUser.username];
+            } else {
+                window.poemDataStore[pId].ratings[window.currentUser.username] = { val: newVal, ts: Date.now() };
+            }
+            
+            // LOKAL + ONLINE (Firebase) KAYIT
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            try { firebase.database().ref('interactions/' + pId + '/ratings').set(window.poemDataStore[pId].ratings); } catch(e){}
+            
+            let btnEl = document.getElementById('heart-' + (newVal > 0 ? newVal : oldVal)) || document.getElementById('heart-1');
+            if(window.flyDovesRealistically) window.flyDovesRealistically(doveCount, btnEl, isReturning);
+            
+            window.toast(isReturning ? `${doveCount} Kalp geri çekildi.` : `${newVal} Kalp verildi! 🕊️`, isReturning ? "💔" : "❤️");
+            
+            let safeTitle = (window.currentItemData.title || window.currentItemData.trTitle || 'Eser').replace(/'/g, "\\'");
+            let titleHtml = `<span style='color:var(--accent-gold); text-decoration:underline;'>${safeTitle}</span>`;
+
+            if (!isReturning) {
+                let authorName = window.currentItemData.author || window.currentItemData.name;
+                if (authorName && authorName !== window.currentUser.username && authorName !== window.currentUser.name) {
+                    let authorObj = Object.values(window.userDatabase).find(user => user.name === authorName || user.username === authorName);
+                    if (authorObj && window.notifyUser) {
+                        window.notifyUser(authorObj.username, `❤️ ${window.currentUser.name || window.currentUser.username}, "${titleHtml}" adlı eserine ${newVal} kalp verdi!`, pId, pType);
+                    }
+                }
+            }
+            
+            if(window.logUserAction) window.logUserAction(`❤️ BEĞENİ: ${window.currentUser.username}, ${pEmoji} "${titleHtml}" adlı esere ${newVal} kalp verdi.`, pId, pType);
+            
+            if(typeof window.updateHeartsUI === 'function') window.updateHeartsUI(); 
+            if(typeof window.updateLiveBadges === 'function') window.updateLiveBadges();
+            if(typeof window.renderAllContent === 'function') window.renderAllContent();
+        };
+
+        // UI-Update-Funktion ebenfalls kugelsicher machen für neue Werke
+        window.updateHeartsUI = function() {
+            if (!window.currentItemData) return;
+            const pId = window.currentItemData.id;
+            
+            // ZORLA OLUŞTUR
+            if (!window.poemDataStore) window.poemDataStore = {};
+            if (!window.poemDataStore[pId]) window.poemDataStore[pId] = {};
+            if (!window.poemDataStore[pId].ratings) window.poemDataStore[pId].ratings = {};
+            if (!window.poemDataStore[pId].comments) window.poemDataStore[pId].comments = [];
+
+            const data = window.poemDataStore[pId];
+            let uName = window.currentUser ? window.currentUser.username : null;
+            let myVal = 0;
+            
+            if (uName && data.ratings[uName]) {
+                myVal = typeof data.ratings[uName] === 'object' ? parseInt(data.ratings[uName].val || 0) : parseInt(data.ratings[uName] || 0);
+            }
+            
+            for(let i = 1; i <= 3; i++) {
+                let hEl = document.getElementById('heart-' + i);
+                if (hEl) hEl.className = i <= myVal ? "fas fa-heart react-heart auth-visible heart-active" : "fas fa-heart react-heart auth-visible heart-inactive";
+            }
+
+            let cList = document.getElementById('modal-comments-list');
+            if (cList) {
+                if (!data.comments || data.comments.length === 0) {
+                    cList.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px; font-style:italic;">İlk yorumu sen yap...</div>';
+                } else {
+                    if(typeof window.renderCommentsTree === 'function') {
+                        cList.innerHTML = window.renderCommentsTree(data.comments, "");
+                    }
+                }
+            }
+        };
+
+    }, 2000); // Lädt nach den anderen Skripten, um die Funktionen final zu sichern
+});
+</script>
+<!-- ===================================================================== -->
+
 </body>
 </html>
