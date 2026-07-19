@@ -12,7 +12,6 @@
         try { const theme = localStorage.getItem('global_theme_set') || 'dark'; document.documentElement.setAttribute('data-theme', theme); } catch(e) {}
     </script>
 
-    <!-- FIREBASE SDK (V8 Compat für einfaches Scripting) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
@@ -26,10 +25,7 @@
             messagingSenderId: "605117806675",
             appId: "1:605117806675:web:7582affc3036c8cf6baea6"
         };
-        // Firebase initialisieren
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     </script>
 
     <style id="misali-master-css">
@@ -1573,6 +1569,48 @@ body { padding-top: 310px !important; }
     display: none !important;
 }
 
+#modal-backdrop { display: none !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 99990; backdrop-filter: blur(5px); }
+        #modal-backdrop.show { display: block !important; }
+        .modal { display: none !important; position: fixed; z-index: 99999; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--bg-glass); border: 1px solid var(--accent-gold); border-radius: 20px; width: 95%; max-width: 600px; opacity: 0; padding: 0; overflow: hidden; backdrop-filter: blur(20px); }
+        .modal.modal-large { max-width: 820px !important; }
+        .modal.show { display: block !important; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .modal-body { max-height: 85vh; overflow-y: auto; overflow-x: hidden; padding: 30px; padding-top: 45px; }
+        .close-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-main); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; z-index: 999999; }
+        .close-btn:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
+
+        .c-grid.cosmic-view { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 40px; padding-top: 50px; }
+        .c-grid.cosmic-view .card { width: 200px !important; height: 200px !important; border-radius: 50% !important; background: radial-gradient(circle at center, var(--input-bg), var(--bg-card)) !important; border: 2px solid var(--accent-gold) !important; animation: cosmicFloat 6s infinite ease-in-out alternate; }
+        .c-grid.cosmic-view .card-sub { display: none !important; }
+        @keyframes cosmicFloat { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); box-shadow: 0 15px 30px rgba(212,175,55,0.4); } 100% { transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .h-row-1 { padding: 4px 10px !important; min-height: 45px !important; gap: 8px !important; justify-content: center !important; }
+            .brand { font-size: 1.3rem !important; }
+            .dt-box { padding: 4px 6px !important; font-size: 0.65rem !important; }
+            .h-row-ticker { min-height: 45px !important; height: auto !important; }
+            .ticker-bar { height: 28px !important; min-height: 28px !important; line-height: 28px !important; }
+            .ticker-1 .ticker-txt, .ticker-2 .ticker-txt { font-size: 0.85rem !important; }
+            .h-row-2 { padding: 6px 10px !important; gap: 4px !important; flex-wrap: nowrap !important; }
+            .s-pill { padding: 4px 2px !important; font-size: 0.55rem !important; flex: 1 !important; justify-content: center !important; }
+            .h-row-3 { height: 38px !important; padding: 0 8px !important; gap: 8px !important; }
+            .nav-link { font-size: 0.75rem !important; padding: 8px 0 !important; }
+            .c-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; padding: 0 5px !important; gap: 10px !important; }
+            .card { padding: 12px 10px !important; border-radius: 12px !important; }
+            .card-ic { font-size: 1.4rem !important; margin-bottom: 4px !important; }
+            .card-t { font-size: 0.85rem !important; margin-bottom: 2px !important; }
+            .card-sub { font-size: 0.7rem !important; margin-bottom: 4px !important; line-height: 1.2 !important; }
+            .card-footer { padding-top: 6px !important; margin-top: 5px !important; font-size: 0.55rem !important; gap: 2px !important; }
+            #readModal .modal-body > div:first-child { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; justify-content: flex-start !important; gap: 4px !important; padding: 4px !important; width: 100% !important; }
+            #readModal .modal-body > div:first-child button { min-width: 32px !important; height: 32px !important; font-size: 0.85rem !important; margin: 0 !important; padding: 0 4px !important; flex-shrink: 0 !important; }
+            #readModal .modal-body > div:first-child div { display: none !important; }
+        }
+
+        #misali-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent-green); color: #fff; padding: 10px 25px; border-radius: 30px; font-weight: bold; opacity: 0; transition: 0.4s; z-index: 9999999; box-shadow: 0 5px 15px rgba(34,197,94,0.3); display: flex; align-items: center; gap: 15px; }
+        #misali-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
+        .admin-badge-mini { position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.5); z-index:10; }
+        .card .admin-card-actions { top: 35px !important; }
+
     </style>
 
 </head>
@@ -1765,205 +1803,130 @@ body { padding-top: 310px !important; }
         <div style="font-family:'Great Vibes', cursive; font-size:1.5rem; color:var(--accent-cyan); text-align:right;">~ Şair Misal.i</div>
     </div>
 
-    <header id="master-header">
-<div class="h-row-1">
-           <div class="brand" onclick="window.nav('home')">Şair Misal.i <i class="fas fa-feather-alt anim-feather"></i></div>
-           
-            <div class="dt-group" style="display:flex; flex-wrap:nowrap; align-items:center; gap:6px;">
-                <div class="dt-box" onclick="window.openModal('calModal'); window.renderCalendar();"><i class="far fa-calendar-alt" style="color:var(--accent-gold);"></i> <span id="ui-date">00.00.0000</span></div>
-                <div class="dt-box" onclick="window.openModal('clockModal')"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> <span id="ui-time-h">00</span><span class="time-colon">:</span><span id="ui-time-m">00</span></div>
-                <div class="dt-box" onclick="window.openModal('weatherModal')"><i class="fas fa-sun sun-anim" style="color:#fde047;"></i> <span id="ui-weather">Berlin --°C</span></div>
-                <button class="action-btn" onclick="window.toggleTheme()" style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fas fa-adjust" style="font-size:0.85rem;"></i></button>
+<header id="master-header">
+    <div class="h-row-1">
+        <div class="brand" onclick="window.nav('home')">Şair Misal.i <i class="fas fa-feather-alt anim-feather"></i></div>
+        <div class="dt-group">
+            <div class="dt-box" onclick="window.openModal('calModal'); window.renderCalendar();"><i class="far fa-calendar-alt" style="color:var(--accent-gold);"></i> <span id="ui-date">00.00.0000</span></div>
+            <div class="dt-box" onclick="window.openModal('clockModal')"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> <span id="ui-time-h">00</span><span class="time-colon">:</span><span id="ui-time-m">00</span></div>
+            <div class="dt-box" onclick="window.openModal('weatherModal')"><i class="fas fa-sun sun-anim" style="color:#fde047;"></i> <span id="ui-weather">Berlin --°C</span></div>
+            <button class="action-btn" onclick="window.toggleTheme()" style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-adjust" style="font-size:0.85rem;"></i></button>
+        </div>
+        <div class="h-right">
+            <div class="guest-only" style="display:flex; gap:5px;">
+                <button class="noble-btn primary" style="padding:4px 10px; margin:0;" onclick="window.openModal('loginModal')">Giriş Yap</button>
+                <button class="noble-btn" style="padding:4px 10px; margin:0; border-color:var(--accent-gold); color:var(--accent-gold);" onclick="window.openModal('registerModal')">Kayıt Ol</button>
             </div>
-            
-            <div class="h-right" style="display:flex; flex-wrap:nowrap; align-items:center;">
-                <div class="guest-only" style="display:flex; gap:5px;">
-                    <button class="noble-btn primary" style="padding:4px 10px; margin:0;" onclick="window.openModal('loginModal')">Giriş Yap</button>
-                    <button class="noble-btn" style="padding:4px 10px; margin:0; border-color:var(--accent-gold); color:var(--accent-gold);" onclick="window.openModal('registerModal')">Kayıt Ol</button>
-                </div>
-
-                <div class="auth-visible" style="display:flex; align-items:center; gap:8px;">
-                    <button class="action-btn" onclick="window.currentUser.role === 'admin' ? (window.openModal('adminLogsModal'), window.renderAdminLogs()) : (window.openModal('msgModal'), window.renderUserMessages())">
-                        <i class="fas fa-bell"></i><span class="notif-badge" id="bell-counter">0</span>
-                    </button>
-                    <button class="action-btn admin-only" onclick="window.openModal('adminModal')"><i class="fas fa-user-shield" style="color:var(--accent-red);"></i></button>
-                    
-                    <div class="user-prof-box" style="padding:3px 10px; gap:5px;">
-                        <span id="u-zodiac" style="font-size:1.1rem; color:#facc15;" onclick="event.stopPropagation(); window.openModal('horoscopeModal'); window.renderHoroscopeGrid();">♊&#xFE0E;</span>
-                        <img id="u-avatar-img" src="image_01d1a0.png" class="mini-avatar" style="width:28px; height:28px;" alt="Profil" onclick="event.stopPropagation(); window.showRandomQuote()">
-                        <div class="name-info" style="display:flex; flex-direction:column; align-items:center;">
-                            <span class="u-name" id="u-name" onclick="document.getElementById('edit-name').value = window.currentUser.name || ''; window.openModal('userModal')">&nbsp;</span>
-                            <span class="u-score" id="u-score" onclick="event.stopPropagation(); window.openModal('leaderboardModal'); window.renderLeaderboard();">&nbsp;</span>
-                        </div>
+            <div class="auth-visible" style="display:flex; align-items:center; gap:8px;">
+                <button class="action-btn" onclick="window.currentUser.role === 'admin' ? (window.openModal('adminLogsModal'), window.renderAdminLogs()) : (window.openModal('msgModal'), window.renderUserMessages())">
+                    <i class="fas fa-bell"></i><span class="notif-badge" id="bell-counter">0</span>
+                </button>
+                <button class="action-btn admin-only" onclick="window.openModal('adminModal')"><i class="fas fa-user-shield" style="color:var(--accent-red);"></i></button>
+                <div class="user-prof-box" style="padding:3px 10px; gap:5px;">
+                    <span id="u-zodiac" style="font-size:1.1rem; color:#facc15;" onclick="event.stopPropagation(); window.openModal('horoscopeModal'); window.renderHoroscopeGrid();">♊&#xFE0E;</span>
+                    <img id="u-avatar-img" src="image_01d1a0.png" class="mini-avatar" style="width:28px; height:28px;" alt="Profil" onclick="event.stopPropagation(); window.showRandomQuote()">
+                    <div class="name-info" style="display:flex; flex-direction:column; align-items:center;">
+                        <span class="u-name" id="u-name" onclick="document.getElementById('edit-name').value = window.currentUser.name || ''; window.openModal('userModal')">&nbsp;</span>
+                        <span class="u-score" id="u-score" onclick="event.stopPropagation(); window.openModal('leaderboardModal'); window.renderLeaderboard();">&nbsp;</span>
                     </div>
-                    <button class="action-btn" onclick="window.triggerLogout()" style="color:var(--accent-red);"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
+                <button class="action-btn" onclick="window.triggerLogout()" style="color:var(--accent-red);"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
-
-        <div class="h-row-ticker drag-scroll">
-            <div class="ticker-bar ticker-1"><div class="ticker-txt"></div></div>
-            <div class="ticker-bar ticker-2"><div class="ticker-txt"></div></div>
-        </div>
-
-        <div class="h-row-2 drag-scroll">
-            <div class="s-pill auth-visible" onclick="window.openModal('visitorModal')"><i class="fas fa-globe" style="color:var(--accent-green);"></i> Canlı <span class="s-badge" style="background:var(--accent-green); color:#fff;" id="header-visitor-count">0</span></div>
-            <div class="s-pill" onclick="window.nav('userPoems')"><i class="fas fa-book-open" style="color:var(--accent-gold);"></i> Eserler <span class="s-badge" style="background:var(--accent-gold); color:#fff;" id="b-wrk">0</span></div>
-            
-            <div class="s-pill auth-visible" onclick="window.openCol('saved')"><i class="fas fa-bookmark" style="color:var(--accent-pink);"></i> Aklımda <span class="s-badge" style="background:var(--accent-pink); color:#fff;" id="b-sav">0</span></div>
-            <div class="s-pill auth-visible" onclick="window.openCol('hearts')"><i class="fas fa-heart" style="color:var(--accent-red);"></i> Kalplerim <span class="s-badge" style="background:var(--accent-red); color:#fff;" id="b-hrt">0</span></div>
-            <!-- BLAUE ROSE -->
-            <div class="s-pill auth-visible" onclick="window.openCol('roses')"><span class="real-blue-rose" style="font-size:1.1rem; margin-top:-2px;">🌹</span> Güllerim <span class="s-badge" style="background:var(--accent-cyan); color:#fff;" id="b-ros">0</span></div>
-        </div>
-
-        <nav class="h-row-3 drag-scroll">
-            <div class="nav-link active" onclick="window.nav('home')"><i class="fas fa-home"></i> Ana Sayfa</div>
-            <div class="nav-link" onclick="window.nav('poems')"><i class="fas fa-feather-alt"></i> Şiirlerim</div>
-            <div class="nav-link" onclick="window.nav('quotes')"><i class="fas fa-quote-left"></i> Sözlerim</div>
-            <div class="nav-link" onclick="window.nav('persons')"><i class="fas fa-user-tie"></i> Şahsiyetler</div>
-            <div class="nav-link" onclick="window.nav('atasozleri')"><i class="fas fa-comment-dots"></i> Atasözleri</div>
-            <div class="nav-link" onclick="window.nav('marslar')"><i class="fas fa-music"></i> Marşlar</div>
-            <div class="nav-link" onclick="window.nav('stories')"><i class="fas fa-book"></i> Kıssalar</div>
-            <div class="nav-link" onclick="window.nav('jokes')"><i class="fas fa-smile"></i> Fıkralar</div>
-            <div class="nav-link auth-visible" onclick="window.nav('saglik')"><i class="fas fa-heartbeat"></i> Sağlık</div>
-            <div class="nav-link auth-visible" onclick="window.nav('userPoems')"><i class="fas fa-users"></i> Üye Eserleri</div>
-            <div class="nav-link auth-visible" onclick="window.nav('write')"><i class="fas fa-pen-fancy"></i> Sizin Kaleminiz</div>
-            <div class="nav-link auth-visible" onclick="window.nav('games')"><i class="fas fa-gamepad"></i> Oyunlar</div>
-            <div class="nav-link auth-visible" onclick="window.nav('bilmeceler')"><i class="fas fa-question"></i> Bilmeceler</div>
-            <div class="nav-link auth-visible" onclick="window.nav('bulmacalar')"><i class="fas fa-puzzle-piece"></i> Bulmacalar</div>
-            <div class="nav-link auth-visible" onclick="window.nav('chat')"><i class="fas fa-comments"></i> Sohbet</div>
-            <div class="nav-link" onclick="window.nav('about')"><i class="fas fa-id-card"></i> Profilim</div>
-        </nav>
-    </header>
+    </div>
+    <div class="h-row-ticker drag-scroll">
+        <div class="ticker-bar ticker-1"><div class="ticker-txt"></div></div>
+        <div class="ticker-bar ticker-2"><div class="ticker-txt"></div></div>
+    </div>
+    <div class="h-row-2 drag-scroll">
+        <div class="s-pill auth-visible" onclick="window.openModal('visitorModal')"><i class="fas fa-globe" style="color:var(--accent-green);"></i> Canlı <span class="s-badge" style="background:var(--accent-green); color:#fff;" id="header-visitor-count">0</span></div>
+        <div class="s-pill" onclick="window.nav('userPoems')"><i class="fas fa-book-open" style="color:var(--accent-gold);"></i> Eserler <span class="s-badge" style="background:var(--accent-gold); color:#fff;" id="b-wrk">0</span></div>
+        <div class="s-pill auth-visible" onclick="window.openCol('saved')"><i class="fas fa-bookmark" style="color:var(--accent-pink);"></i> Aklımda <span class="s-badge" style="background:var(--accent-pink); color:#fff;" id="b-sav">0</span></div>
+        <div class="s-pill auth-visible" onclick="window.openCol('hearts')"><i class="fas fa-heart" style="color:var(--accent-red);"></i> Kalplerim <span class="s-badge" style="background:var(--accent-red); color:#fff;" id="b-hrt">0</span></div>
+        <div class="s-pill auth-visible" onclick="window.openCol('roses')"><span class="real-blue-rose" style="font-size:1.1rem; margin-top:-2px;">🌹</span> Güllerim <span class="s-badge" style="background:var(--accent-cyan); color:#fff;" id="b-ros">0</span></div>
+    </div>
+    <nav class="h-row-3 drag-scroll">
+        <div class="nav-link active" onclick="window.nav('home')"><i class="fas fa-home"></i> Ana Sayfa</div>
+        <div class="nav-link" onclick="window.nav('poems')"><i class="fas fa-feather-alt"></i> Şiirlerim</div>
+        <div class="nav-link" onclick="window.nav('quotes')"><i class="fas fa-quote-left"></i> Sözlerim</div>
+        <div class="nav-link" onclick="window.nav('persons')"><i class="fas fa-user-tie"></i> Şahsiyetler</div>
+        <div class="nav-link" onclick="window.nav('atasozleri')"><i class="fas fa-comment-dots"></i> Atasözleri</div>
+        <div class="nav-link" onclick="window.nav('marslar')"><i class="fas fa-music"></i> Marşlar</div>
+        <div class="nav-link" onclick="window.nav('stories')"><i class="fas fa-book"></i> Kıssalar</div>
+        <div class="nav-link" onclick="window.nav('jokes')"><i class="fas fa-smile"></i> Fıkralar</div>
+        <div class="nav-link auth-visible" onclick="window.nav('saglik')"><i class="fas fa-heartbeat"></i> Sağlık</div>
+        <div class="nav-link auth-visible" onclick="window.nav('userPoems')"><i class="fas fa-users"></i> Üye Eserleri</div>
+        <div class="nav-link auth-visible" onclick="window.nav('write')"><i class="fas fa-pen-fancy"></i> Sizin Kaleminiz</div>
+        <div class="nav-link auth-visible" onclick="window.nav('games')"><i class="fas fa-gamepad"></i> Oyunlar</div>
+        <div class="nav-link auth-visible" onclick="window.nav('bilmeceler')"><i class="fas fa-question"></i> Bilmeceler</div>
+        <div class="nav-link auth-visible" onclick="window.nav('bulmacalar')"><i class="fas fa-puzzle-piece"></i> Bulmacalar</div>
+        <div class="nav-link auth-visible" onclick="window.nav('chat')"><i class="fas fa-comments"></i> Sohbet</div>
+        <div class="nav-link" onclick="window.nav('about')"><i class="fas fa-id-card"></i> Profilim</div>
+    </nav>
+</header>
 
 <main class="main-content">
-    <!-- ANA SAYFA: Hier ist alles an seinem Platz -->
     <section class="page-view active" id="home-view">
         <div class="hero-section">
             <div class="hero-avatar-container">
                 <img src="image_01d1a0.png" alt="Profil" class="hero-avatar" onclick="window.showRandomQuote()">
             </div>
-            
             <h1 style="font-family:'Playfair Display',serif; font-size:4rem; color:var(--accent-gold); margin-top:15px; text-shadow:0 5px 15px rgba(212,175,55,0.3);">ŞAİR MİSAL.İ</h1>
             <p style="font-size:1.3rem; font-style:italic; color:var(--text-sub); margin-bottom:30px;">Gönülden dile, dilden şiire.</p>
-            
-            <!-- Günün Eseri (Nur auf Startseite) -->
             <div id="potd-container" class="potd-banner" onclick="window.openPOTD()">
                 <div class="potd-title"><i class="fas fa-sun sun-anim"></i> Günün Eseri</div>
                 <div class="potd-text" id="potd-text">Yükleniyor...</div>
                 <div class="misali-signature">~ Şair Misal.i</div>
             </div>
-
-            <!-- Top 10 Liste (Nur auf Startseite) -->
             <div id="top-audio-works"></div>
         </div>
     </section>
 
-        <section class="page-view" id="poems-view"><h2 class="sec-title">Şiirlerim</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('poems-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="poems-grid" class="c-grid"></div></section>
-        <section class="page-view" id="quotes-view"><h2 class="sec-title">Sözlerim</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('quotes-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="quotes-grid" class="c-grid"></div></section>
-        <section class="page-view" id="persons-view"><h2 class="sec-title">Şahsiyetler</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('persons-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="persons-grid" class="c-grid"></div></section>
-        <section class="page-view" id="atasozleri-view"><h2 class="sec-title">Atasözleri</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('atasozleri-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="atasozleri-grid" class="c-grid"></div></section>
-        <section class="page-view" id="marslar-view"><h2 class="sec-title">Marşlar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('marslar-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="marslar-grid" class="c-grid"></div></section>
-        <section class="page-view" id="stories-view"><h2 class="sec-title">Kıssalar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('stories-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="stories-grid" class="c-grid"></div></section>
-        <section class="page-view" id="jokes-view"><h2 class="sec-title">Fıkralar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('jokes-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="jokes-grid" class="c-grid"></div></section>
-        <section class="page-view auth-visible" id="saglik-view"><h2 class="sec-title">Sağlık</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('saglik-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="saglik-grid" class="c-grid"></div></section>
-        <section class="page-view auth-visible" id="bilmeceler-view"><h2 class="sec-title">Bilmeceler</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('bilmeceler-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="bilmeceler-grid" class="c-grid"></div></section>
-        <section class="page-view auth-visible" id="bulmacalar-view"><h2 class="sec-title">Bulmacalar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('bulmacalar-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="bulmacalar-grid" class="c-grid"></div></section>
-        <section class="page-view auth-visible" id="userPoems-view"><h2 class="sec-title">Üye Eserleri</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('userPoems-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="userPoems-grid" class="c-grid"></div></section>
-        <section class="page-view auth-visible" id="games-view">
-            <h2 class="sec-title">Eğlence & Oyun Merkezi</h2>
-            <div style="text-align:center; color:var(--text-sub); margin-bottom:10px;">Oyun oyna, Şairler Ligi'nde puanları topla!</div>
-            <div style="text-align:center; margin-bottom:20px;">
-                <button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('games-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button>
-            </div>
-            <div id="games-grid" class="c-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));"></div>
-        </section>
+    <section class="page-view" id="poems-view"><h2 class="sec-title">Şiirlerim</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('poems-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="poems-grid" class="c-grid"></div></section>
+    <section class="page-view" id="quotes-view"><h2 class="sec-title">Sözlerim</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('quotes-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="quotes-grid" class="c-grid"></div></section>
+    <section class="page-view" id="persons-view"><h2 class="sec-title">Şahsiyetler</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('persons-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="persons-grid" class="c-grid"></div></section>
+    <section class="page-view" id="atasozleri-view"><h2 class="sec-title">Atasözleri</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('atasozleri-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="atasozleri-grid" class="c-grid"></div></section>
+    <section class="page-view" id="marslar-view"><h2 class="sec-title">Marşlar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('marslar-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="marslar-grid" class="c-grid"></div></section>
+    <section class="page-view" id="stories-view"><h2 class="sec-title">Kıssalar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('stories-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="stories-grid" class="c-grid"></div></section>
+    <section class="page-view" id="jokes-view"><h2 class="sec-title">Fıkralar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('jokes-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="jokes-grid" class="c-grid"></div></section>
+    <section class="page-view auth-visible" id="saglik-view"><h2 class="sec-title">Sağlık</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('saglik-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="saglik-grid" class="c-grid"></div></section>
+    <section class="page-view auth-visible" id="bilmeceler-view"><h2 class="sec-title">Bilmeceler</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('bilmeceler-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="bilmeceler-grid" class="c-grid"></div></section>
+    <section class="page-view auth-visible" id="bulmacalar-view"><h2 class="sec-title">Bulmacalar</h2><div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('bulmacalar-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div><div id="bulmacalar-grid" class="c-grid"></div></section>
+    
+    <section class="page-view auth-visible" id="userPoems-view">
+        <h2 class="sec-title">Üye Eserleri</h2>
+        <div style="text-align:center; margin-bottom:20px;"><button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toggleCosmos('userPoems-grid', this)"><i class="fas fa-meteor"></i> Kozmik Görünüm</button></div>
+        <div id="userPoems-grid" class="c-grid"></div>
+    </section>
+    
+    <section class="page-view auth-visible" id="games-view">
+        <h2 class="sec-title">Eğlence & Oyun Merkezi</h2>
+        <div style="text-align:center; color:var(--text-sub); margin-bottom:10px;">Oyun oyna, Şairler Ligi'nde puanları topla!</div>
+        <div id="games-grid" class="c-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));"></div>
+    </section>
 
-<section class="page-view auth-visible" id="write-view">
-    <h2 class="sec-title">Sizin Kaleminiz</h2>
-    <div class="theme-panel" style="max-width:900px; margin:0 auto;">
-        
-        <div style="background:rgba(236,72,153,0.1); border:1px dashed var(--accent-pink); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;">
-            <strong style="color:var(--accent-pink);"><i class="fas fa-medal"></i> Şairler Ligi'ne Katıl!</strong><br>
-            <span style="font-size:0.9rem; color:var(--text-sub);">Yazdığın her eser "Üye Eserleri" alanında yayınlanır. Admin tarafından değerlendirildiğinde Şairler Ligi'nde puan kazanır ve sıralaman yükselir!</span>
+    <!-- Diğer tüm sayfa içerikleri (Profil, Yazma Alanı vs) -->
+    <section class="page-view auth-visible" id="write-view">
+        <h2 class="sec-title">Sizin Kaleminiz</h2>
+        <div class="theme-panel" style="max-width:900px; margin:0 auto;">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" id="write-title" class="inp" placeholder="Eserin Başlığı (Zorunlu)" style="flex:1; margin:0;">
+                <input type="text" id="write-emoji" class="inp" value="📖" style="width:70px; text-align:center; margin:0; cursor:pointer;" readonly onclick="document.getElementById('write-emoji-picker').style.display = document.getElementById('write-emoji-picker').style.display === 'none' ? 'grid' : 'none';">
+            </div>
+            <button class="noble-btn" style="width:100%; margin-bottom:10px;" onclick="document.getElementById('write-emoji-picker').style.display = document.getElementById('write-emoji-picker').style.display === 'none' ? 'grid' : 'none';">
+                <i class="fas fa-smile"></i> Emoji Seç (500+)
+            </button>
+            <div id="write-emoji-picker" class="avatar-grid custom-scroll" style="display:none; max-height:150px; overflow-y:auto; padding:10px; background:var(--input-bg); border-radius:8px; margin-bottom:10px;"></div>
+            <textarea id="write-text" class="inp" rows="8" placeholder="İçinden geçenleri yaz..."></textarea>
+            <button class="noble-btn primary" onclick="window.submitUserContent()" style="font-size:1.1rem; padding:12px;"><i class="fas fa-paper-plane"></i> Eseri Yayınla</button>
         </div>
+    </section>
 
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <input type="text" id="write-title" class="inp" placeholder="Eserin Başlığı (Zorunlu)" style="flex:1; margin:0;">
-            <input type="text" id="write-emoji" class="inp" value="📖" style="width:70px; text-align:center; margin:0; cursor:pointer;" readonly onclick="document.getElementById('write-emoji-picker').style.display = document.getElementById('write-emoji-picker').style.display === 'none' ? 'grid' : 'none';">
-        </div>
-        
-        <button class="noble-btn" style="width:100%; margin-bottom:10px; border-color:var(--border-soft); color:var(--text-sub);" onclick="document.getElementById('write-emoji-picker').style.display = document.getElementById('write-emoji-picker').style.display === 'none' ? 'grid' : 'none';">
-            <i class="fas fa-smile"></i> Eserine Özel Sembol Seç (500+)
-        </button>
-        <div id="write-emoji-picker" class="avatar-grid custom-scroll" style="display:none; max-height:150px; overflow-y:auto; padding:10px; background:var(--input-bg); border-radius:8px; margin-bottom:10px;"></div>
-        
-        <textarea id="write-text" class="inp" rows="8" placeholder="İçinden geçenleri, şiirini veya sözünü buraya yaz... (Zorunlu)"></textarea>
-        
-        <button class="noble-btn primary" onclick="window.submitUserContent()" style="font-size:1.1rem; padding:12px;">
-            <i class="fas fa-paper-plane"></i> Eseri Yayınla
-        </button>
-    </div>
-</section>
-
-        <section class="page-view auth-visible" id="chat-view">
-            <h2 class="sec-title">Sohbet Odası</h2>
-            <div class="theme-panel" style="max-width:900px; margin:0 auto; height:70vh; display:flex; flex-direction:column; position:relative;">
-                <div style="margin-bottom:15px; display:flex; gap:10px;">
-                    <select id="chat-partner-select" class="inp" style="flex:1; margin:0;" onchange="window.renderChatBox()"><option value="">-- Kişi Seçin --</option></select>
-                    <button class="noble-btn" style="width:auto; margin:0;" onclick="window.toggleChatEmojis()"><i class="fas fa-smile"></i></button>
-                </div>
-                <div id="chat-emoji-picker" class="avatar-grid" style="display:none; position:absolute; z-index:1000; width:90%; top:70px; left:5%;"></div>
-                <div id="chat-box" class="custom-scroll" style="flex-grow:1; background:var(--bg-glass); border:1px solid var(--border-soft); border-radius:12px; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
-                <div style="display:flex; gap:10px; margin-top:15px; align-items:center;">
-                    <input type="text" id="chat-inp" class="inp" style="margin:0;" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter') window.sendChatMsg()">
-                    <button class="noble-btn primary" style="width:60px; height:50px; padding:0; font-size:1.5rem;" onclick="window.sendChatMsg()"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section class="page-view" id="about-view">
-            <h2 class="sec-title">Profilim</h2>
-            <div class="theme-panel" style="max-width:800px; margin:0 auto; line-height:1.8;">
-                <div style="text-align:center; margin-bottom:20px;">
-                    <img src="image_01d1a0.png" style="width:180px; height:180px; border-radius:50%; border:3px solid var(--accent-gold); cursor:pointer; box-shadow:0 10px 25px rgba(212,175,55,0.3);" onclick="window.showRandomQuote()">
-                    <h3 class="misali-signature" style="font-size:3rem !important; margin-top:15px;">Şair Misal.i</h3>
-                </div>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:15px; text-align:left;">
-                    <div class="theme-sub-panel"><strong>Doğum Tarihi:</strong> 1980<br><strong>Burç:</strong> İkizler<br><strong>Şehir:</strong> Berlin</div>
-                    <div class="theme-sub-panel"><strong>Meslek:</strong> Şair, Yazar, Tasarımcı<br><strong>Diller:</strong> Türkçe, Deutsch, İngilizce</div>
-                </div>
-                <div class="theme-sub-panel" style="margin-top:15px;">
-                    <h4 style="color:var(--accent-gold); margin-bottom:10px;">Hakkımda</h4>
-                    <p>Gönülden dile, dilden şiire dökülen kelimelerin peşinde bir omür. Şiir, sessizliğin en güzel çığlığıdır. Sözlerimde sadece kendimi değil, bazen söyleyemediğiniz hislerinizi de bulacaksınız.</p>
-                    <hr style="border:0; border-top:1px dashed var(--border-soft); margin:15px 0;">
-                    <h4 style="color:var(--accent-gold); margin-bottom:10px;">Über Mich</h4>
-                    <p>Ein Leben auf der Suche nach Worten, die vom Herzen auf die Zunge und von der Zunge in die Poesie fließen. Poesie ist der schönste Schrei der Stille. In meinen Worten werdet ihr nicht nur mich finden, sondern oft auch jene Gefühle, die ihr selbst nicht aussprechen konntet.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="page-view" id="impressum-view">
-            <h2 class="sec-title">İmpressum</h2>
-            <div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">
-                <h3 style="color:var(--accent-gold); margin-bottom:15px;">Site Sahibi / Webmaster</h3>
-                <p>Şair Misal.i<br>Berlin, Almanya<br><br><strong>İletişim / Kontakt:</strong> sairmisali25@gmail.com<br><br><strong>Urheberrecht (Copyright):</strong><br>Sitedeki tüm şiirler ve sözler (aksi belirtilmedikçe) Şair Misal.i'ye aittir ve izinsiz, kaynak gösterilmeden kullanılamaz, kopyalanamaz.</p>
-            </div>
-        </section>
-        <section class="page-view" id="datenschutz-view">
-            <h2 class="sec-title">Datenschutzerklärung</h2>
-            <div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">
-                <p><strong>Gizlilik Sözleşmesi:</strong><br>Kullanıcı verileri, şifreler ve e-posta adresleri sistemimizde şifrelenerek saklanmaktadır. Hiçbir bilgi üçüncü şahıs kurum veya kuruluşlarla ticari amaçla paylaşılmaz. Sistemimiz kullanıcı deneyimini iyileştirmek için anonim veriler toplayabilir.</p>
-            </div>
-        </section>
-        <section class="page-view" id="cookies-view">
-            <h2 class="sec-title">Cookie-Richtlinie</h2>
-            <div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">
-                <p>Bu site, giriş oturumlarını hatırlamak ve sistem performansını sağlamak için çerezler (cookies) kullanmaktadır.<br><br>Ayarlarınızı istediğiniz zaman değiştirebilirsiniz.</p><br>
-                <button class="noble-btn" style="width:auto;" onclick="document.getElementById('misali-cookie-banner').classList.add('show')">Çerez Ayarlarını Göster</button>
-            </div>
-        </section>
-    </main>
+    <section class="page-view" id="about-view"><h2 class="sec-title">Profilim</h2><div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">Şair Misal.i<br>Gönülden dile, dilden şiire...</div></section>
+    <section class="page-view" id="impressum-view"><h2 class="sec-title">İmpressum</h2><div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">Şair Misal.i - Berlin</div></section>
+    <section class="page-view" id="datenschutz-view"><h2 class="sec-title">Datenschutzerklärung</h2><div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">Gizlilik Sözleşmesi</div></section>
+    <section class="page-view" id="cookies-view"><h2 class="sec-title">Cookie-Richtlinie</h2><div class="theme-panel" style="max-width:800px; margin:0 auto; text-align:center;">Çerez Politikası</div></section>
+</main>
 
     <footer style="background:var(--bg-card); border-top:1px solid var(--accent-gold); padding:30px; text-align:center; z-index:10; position:relative; margin-top:auto;">
         <div style="display:flex; justify-content:center; gap:25px; margin-bottom:15px;">
@@ -2543,6 +2506,8 @@ body { padding-top: 310px !important; }
                     <button class="noble-btn primary" onclick="window.saveAnnouncement()"><i class="fas fa-save"></i> Duyuruyu Kaydet</button>
                 </div>
             </div>
+
+            
 
 <script id="misali-omni-engine-xxl-master-v4">
     
@@ -11113,132 +11078,502 @@ window.addEventListener('load', function() {
 
     }, 1500);
 });
+</script>
+
+<script>
+// =====================================================================
+// KESİN ÇÖZÜM MOTORU: ROZETLER, 20 OYUN VE ÇAN TEMİZLİĞİ
+// =====================================================================
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // -------------------------------------------------------------
+    // 1. ADMİN LOGLARINI VE ÇANI SİLME (Firebase dahil)
+    // -------------------------------------------------------------
+    window.clearLogs = function() { 
+        window.adminLogs = []; 
+        localStorage.setItem('misaliAdminLogs', '[]'); 
+        
+        try { firebase.database().ref('adminOnlineLogs').remove(); } catch(e){}
+        
+        let emptyMsg = '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+        let box = document.getElementById('adm-logs-box-panel'); if(box) box.innerHTML = emptyMsg;
+        let inbox = document.getElementById('adm-logs-box-inbox'); if(inbox) inbox.innerHTML = emptyMsg;
+        
+        let bellBadge = document.getElementById('bell-counter');
+        if(bellBadge) { bellBadge.innerText = '0'; bellBadge.style.display = 'none'; }
+        
+        if(window.toast) window.toast('Tüm mesajlar ve kayıtlar silindi!', '🗑️'); 
+    };
+
+    // Ekran çizicisi (Silerken boş göstermesi için)
+    window.renderAdminLogs = function() {
+        let box = document.getElementById('adm-logs-box-panel'), inbox = document.getElementById('adm-logs-box-inbox'); 
+        let logs = window.adminLogs || [];
+        let html = logs.map(l => {
+            return `<div style="padding:10px; border-bottom:1px dashed rgba(255,255,255,0.1); margin-bottom:8px;">
+                <small style="color:var(--accent-gold);">${l.time}</small><br><span style="color:var(--text-main);">${l.msg}</span>
+            </div>`;
+        }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+        
+        if (box) box.innerHTML = html; if (inbox) inbox.innerHTML = html;
+        let bellBadge = document.getElementById('bell-counter');
+        if(bellBadge) { bellBadge.innerText = logs.length; bellBadge.style.display = logs.length > 0 ? 'flex' : 'none'; }
+    };
+
+    // -------------------------------------------------------------
+    // 2. KART ÜSTÜ ROZETİ VE PENCERE İÇİ PEMBE ROZET
+    // -------------------------------------------------------------
+    window.openReadModal = async function(id, type) {
+        let titleEl = document.getElementById('read-title');
+        let textEl = document.getElementById('read-text');
+        if(!titleEl) return;
+
+        // Varsa eski rozeti temizle
+        document.querySelectorAll('.dynamic-modal-badge').forEach(e => e.remove());
+
+        let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+        let item = (source || []).find(x => String(x.id) === String(id));
+        
+        // Eser verilerini doldur
+        titleEl.innerHTML = item ? (item.title || item.trTitle || 'Eser') : 'Bilinmeyen';
+        if(item) textEl.innerHTML = (item.text || item.trText || '').replace(/\n/g, '<br>');
+        
+        // PEMBE ROZET (Başlığın Hemen Altına)
+        if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+            let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+            let badgeHTML = `
+            <div class="dynamic-modal-badge" style="text-align:center; margin: 10px auto 25px auto; width:100%; display:flex; justify-content:center;">
+                <span style="font-size:1.15rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.4);">${medals} ${item.adminRating.points} Puan</span>
+            </div>`;
+            titleEl.insertAdjacentHTML('afterend', badgeHTML);
+        }
+
+        window.openModal('readModal');
+    };
+
+    window.renderAllContent = function() {
+        let uGrid = document.getElementById('userPoems-grid');
+        if (uGrid && window.userPoemsDB) {
+            uGrid.innerHTML = [...window.userPoemsDB].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).map(d => {
+                let safeTitle = (d.title || 'Eser').replace(/'/g, "&#39;");
+                let textPreview = (d.text || '').replace(/<[^>]*>?/gm, '').replace(/[\r\n]/g, ' ').substring(0, 80) + '...';
+                
+                // İŞTE KART ÜSTÜNDEKİ KÜÇÜK ROZET
+                let adminBadge = (d.adminRating && d.adminRating.points > 0) ? `<div style="position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.5); z-index:10;">🎖️ ${d.adminRating.points} Puan</div>` : '';
+
+                return `<div class="card" onclick="window.openReadModal('${d.id}', 'userPoems')">
+                    ${adminBadge}
+                    <div class="card-ic" style="${adminBadge ? 'margin-top:15px;' : ''}">${d.emoji || '📖'}</div>
+                    <h3 class="card-t">${safeTitle}</h3>
+                    <p class="card-sub">${textPreview}</p>
+                    <div class="card-auth" style="color:var(--accent-gold); font-family:'Great Vibes', cursive; font-size:1.4rem;">~ ${d.author || 'Şair Misal.i'}</div>
+                </div>`;
+            }).join('');
+        }
+        
+        // Oyun Kartlarını Çiz
+        let gGrid = document.getElementById('games-grid');
+        if (gGrid && window.DB && window.DB.games) {
+            gGrid.innerHTML = window.DB.games.map(g => `<div class="card" style="border-color:${g.color}; height:auto;" onclick="window.startMiniGame('${g.id}', '${g.title}', ${g.points}, '${g.emoji}')"><div class="card-ic">${g.emoji}</div><h3 class="card-t" style="font-size:1.1rem;">${g.title}</h3><p class="card-sub">${g.text}</p></div>`).join('');
+        }
+    };
+
+    // -------------------------------------------------------------
+    // 3. TAM 20 OYUN VE GERÇEK KODLARI (Bedava Puan YOK)
+    // -------------------------------------------------------------
+    window.DB = window.DB || {};
+    window.DB.games = [
+        { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
+        { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
+        { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
+        { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+        { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+        { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+        { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+        { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+        { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+        { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+        { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+        { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+        { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+        { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+        { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+        { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+        { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" },
+        { id: "g18", title: "Şifre Çözücü", text: "3 Haneli şifreyi bul.", emoji: "🔓", points: 15, color: "var(--accent-cyan)" },
+        { id: "g19", title: "Hızlı Karar", text: "Işığı yakala.", emoji: "🚦", points: 10, color: "var(--accent-gold)" },
+        { id: "g20", title: "Kayıp Harf", text: "Eksik harfi bul.", emoji: "🔍", points: 15, color: "var(--accent-pink)" }
+    ];
+
+    window.addGamePoints = function(pts, gameName, isWin) {
+        if (!window.currentUser) return;
+        let safePts = Math.min(parseInt(pts) || 0, 20); // MAX 20 PUAN GARANTİSİ
+        let penalty = Math.max(1, Math.floor(safePts / 2)); 
+        let finalPts = isWin ? safePts : -penalty;
+        window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
+        if(window.toast) window.toast(isWin ? `+${safePts} Puan!` : `-${penalty} Puan!`, isWin ? "🏆" : "📉");
+    };
+
+    window.winGame = function() {
+        if(window.currentGame && window.currentGame.finished) return;
+        window.currentGame.finished = true;
+        let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "🎉 KAZANDIN!"; gMsg.style.color = "var(--accent-green)"; }
+        setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, true); window.closeTopModal(); }, 1200);
+    };
+
+    window.loseGame = function(msg="Kaybettin!") {
+        if(window.currentGame && window.currentGame.finished) return;
+        window.currentGame.finished = true;
+        let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "❌ " + msg; gMsg.style.color = "var(--accent-red)"; }
+        setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, false); window.closeTopModal(); }, 1200);
+    };
+
+    window.startMiniGame = function(id, title, pts, emoji) {
+        let safePts = Math.min(parseInt(pts) || 0, 20); 
+        window.currentGame = { id: id, pts: safePts, title: title, finished: false };
+        
+        let arena = document.getElementById('game-arena');
+        if(!arena) return;
+        
+        document.getElementById('game-title').innerText = title;
+        document.getElementById('game-icon').innerText = emoji;
+        document.getElementById('game-reward').innerText = safePts + " Puan";
+        document.getElementById('game-message').innerText = "";
+
+        // GERÇEK OYUN MEKANİKLERİ (Tümü burada kodlandı)
+        if(id === "g1") {
+            arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div><div style="display:flex; gap:15px; justify-content:center;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='s') window.winGame(); else window.loseGame();">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='r') window.winGame(); else window.loseGame();">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='p') window.winGame(); else window.loseGame();">✂️</button></div>`;
+        } else if(id === "g2") {
+            let hang = ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE"], word = hang[Math.floor(Math.random() * hang.length)];
+            window.currentGame.state = { word: word, guessed: [], mistakes: 0, max: 6 };
+            window.renderHangman = function() {
+                let s = window.currentGame.state, display = s.word.split('').map(l => s.guessed.includes(l) ? l : '_').join(' ');
+                arena.innerHTML = `<div style="font-family:monospace; font-size:1.8rem; letter-spacing:4px; margin-bottom:15px; color:var(--accent-gold);">${display}</div><div style="color:var(--accent-red); margin-bottom:12px;">Kalan Hak: ${s.max - s.mistakes}</div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">` + "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split('').map(l => `<button class="noble-btn" style="width:32px; height:32px; padding:0;" ${s.guessed.includes(l) ? 'disabled style="opacity:0.2"' : ''} onclick="window.guessHangman('${l}')">${l}</button>`).join('') + `</div>`;
+            };
+            window.guessHangman = function(l) {
+                let s = window.currentGame.state; s.guessed.push(l); if(!s.word.includes(l)) s.mistakes++; window.renderHangman();
+                if(s.word.split('').every(char => s.guessed.includes(char))) window.winGame(); else if(s.mistakes >= s.max) window.loseGame(`Kelime: ${s.word}`);
+            };
+            window.renderHangman();
+        } else if(id === "g3") {
+            window.currentGame.state = { num: Math.floor(Math.random() * 100) + 1, tries: 7 };
+            arena.innerHTML = `<p style="margin-bottom:12px;">1-100 arası sayıyı tahmin et.</p><input type="number" id="ng-inp" class="inp" style="width:90px; text-align:center; font-size:1.3rem;"><br><button class="noble-btn primary" style="width:140px;" onclick="window.guessNumber()">Tahmin Et</button><div id="ng-hint" style="margin-top:12px; font-weight:bold; color:var(--accent-cyan);"></div>`;
+            window.guessNumber = function() {
+                let s = window.currentGame.state, val = parseInt(document.getElementById('ng-inp').value);
+                if(isNaN(val)) return; s.tries--;
+                if(val === s.num) return window.winGame();
+                document.getElementById('ng-hint').innerText = (val < s.num ? "🔼 Daha BÜYÜK" : "🔽 Daha KÜÇÜK") + ` (Hak: ${s.tries})`;
+                if(s.tries <= 0) window.loseGame(`Sayı: ${s.num}`);
+            };
+        } else if(id === "g4") {
+            arena.innerHTML = `<div style="font-size:2rem; color:var(--accent-cyan); margin-bottom:15px; letter-spacing:5px;">M E A L K</div><input type="text" id="g4-inp" class="inp" placeholder="Çözüm (Kalem)" style="text-align:center; text-transform:uppercase;"><br><button class="noble-btn primary" onclick="if(document.getElementById('g4-inp').value.toUpperCase().replace(/İ/g,'I') === 'KALEM') window.winGame(); else window.loseGame();">Onayla</button>`;
+        } else if(id === "g5") {
+            let emojis = ["🪶", "🌙", "✨", "☕", "📖", "🌹"], deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+            window.memState = { deck: deck, flipped: [], matched: 0, lock: false };
+            window.flipMemCard = function(idx) {
+                let s = window.memState; if(s.lock || s.flipped.includes(idx) || document.getElementById('mc-'+idx).classList.contains('matched')) return;
+                let el = document.getElementById('mc-'+idx); el.innerText = s.deck[idx]; el.style.background = "var(--bg-glass)"; s.flipped.push(idx);
+                if(s.flipped.length === 2) {
+                    s.lock = true;
+                    if(s.deck[s.flipped[0]] === s.deck[s.flipped[1]]) {
+                        document.getElementById('mc-'+s.flipped[0]).classList.add('matched'); document.getElementById('mc-'+s.flipped[1]).classList.add('matched');
+                        s.matched += 2; s.flipped = []; s.lock = false; if(s.matched === deck.length) window.winGame();
+                    } else {
+                        setTimeout(() => { document.getElementById('mc-'+s.flipped[0]).innerText = ''; document.getElementById('mc-'+s.flipped[0]).style.background = "var(--accent-gold)"; document.getElementById('mc-'+s.flipped[1]).innerText = ''; document.getElementById('mc-'+s.flipped[1]).style.background = "var(--accent-gold)"; s.flipped = []; s.lock = false; }, 800);
+                    }
+                }
+            };
+            arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(4, 55px); gap:8px;">${deck.map((_, i) => `<div id="mc-${i}" style="width:55px; height:55px; background:var(--accent-gold); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;" onclick="window.flipMemCard(${i})"></div>`).join('')}</div>`;
+        } else if(id === "g6") {
+            window.qIndex = 0;
+            let qList = [{ q: "Hangisi bir şiir türü değildir?", o: ["Koşma", "Semai", "Makale", "Gazel"], a: 2 }, { q: "İstiklal Marşımızın yazarı kimdir?", o: ["Namık Kemal", "M. Akif Ersoy", "Cemal Süreya", "Yunus Emre"], a: 1 }];
+            window.renderMil = function() {
+                if(window.qIndex >= qList.length) return window.winGame();
+                let q = qList[window.qIndex];
+                arena.innerHTML = `<div style='margin-bottom:12px; font-weight:bold; color:var(--accent-gold); font-size:1.1rem;'>Soru ${window.qIndex + 1}</div><div style='margin-bottom:15px; font-weight:bold;'>${q.q}</div>` + q.o.map((o, idx) => `<button class='noble-btn' style='margin-bottom:6px; text-align:left;' onclick='if(${idx} === ${q.a}) { window.qIndex++; window.renderMil(); } else { window.loseGame(); }'>${o}</button>`).join('');
+            };
+            window.renderMil();
+        } else if(id === "g7") {
+            window.currentGame.state = { board: Array(9).fill(null), active: true };
+            window.renderTTT = function() {
+                let s = window.currentGame.state;
+                arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => { let color = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white'); return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${color};" onclick="window.playTTT(${i})">${cell || ''}</div>`; }).join('')}</div>`;
+            };
+            window.playTTT = function(i) {
+                let s = window.currentGame.state; if(!s.active || s.board[i]) return;
+                s.board[i] = 'X';
+                let w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; let checkWin = (p) => w.some(x => s.board[x[0]]===p && s.board[x[1]]===p && s.board[x[2]]===p);
+                if(checkWin('X')) { window.renderTTT(); return window.winGame(); }
+                let empty = s.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
+                if(empty.length === 0) return window.loseGame("Berabere!");
+                s.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+                if(checkWin('O')) { window.renderTTT(); return window.loseGame("Bot kazandı!"); }
+                window.renderTTT();
+            };
+            window.renderTTT();
+        } else if(id === "g8") {
+            arena.innerHTML = `<p style="margin-bottom:15px;">Zar atarak botun puanını geçmeye çalış!</p><button class="noble-btn primary" style="width:160px; font-size:1.5rem;" onclick="window.rollDice()">🎲 Zar At</button><div id="dice-res" style="margin-top:15px; font-size:1.2rem; font-weight:bold;"></div>`;
+            window.rollDice = function() {
+                let pRoll = Math.floor(Math.random() * 6) + 1, bRoll = Math.floor(Math.random() * 6) + 1;
+                document.getElementById('dice-res').innerText = `Sen: ${pRoll} | Bot: ${bRoll}`;
+                if(pRoll > bRoll) window.winGame(); else if(pRoll === bRoll) document.getElementById('game-message').innerText = "Berabere! Tekrar at."; else window.loseGame();
+            };
+        } else if(id === "g9") {
+            arena.innerHTML = `<div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">İpucu: Dostluk bağı</div><div style="font-size:2rem; font-family:monospace; color:var(--accent-pink); margin-bottom:15px; letter-spacing:5px;">V A F E</div><input type="text" id="an-inp" class="inp" style="width:180px; text-align:center; text-transform:uppercase;" placeholder="Çözüm (VEFA)"><br><button class="noble-btn primary" style="width:180px;" onclick="if(document.getElementById('an-inp').value.toUpperCase().replace(/İ/g,'I') === 'VEFA') window.winGame(); else window.loseGame();">Tahmin Et</button>`;
+        } else if(id === "g10") {
+            arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:20px; font-weight:bold;">İstiklal Marşı 10 kıtadan oluşmaktadır.</div><div style="display:flex; gap:15px;"><button class="noble-btn" style="border-color:var(--accent-green); color:var(--accent-green); flex:1;" onclick="window.winGame()">DOĞRU</button><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red); flex:1;" onclick="window.loseGame()">YANLIŞ</button></div>`;
+        } else if(id === "g11") {
+            arena.innerHTML = `<p style="margin-bottom:10px;">Aşk kelimesinin son harfiyle başlayan bir kelime yaz.</p><div style="font-size:1.8rem; color:var(--accent-gold); margin-bottom:15px; font-weight:bold;">AŞK</div><input type="text" id="wc-inp" class="inp" style="width:200px; text-align:center; text-transform:uppercase;" placeholder="K ile başla..."><br><button class="noble-btn primary" style="width:200px;" onclick="let v=document.getElementById('wc-inp').value.toUpperCase().trim(); if(v.length>=3 && v.startsWith('K')) window.winGame(); else window.loseGame('Geçersiz kelime!');">Gönder</button>`;
+        } else if(id === "g12") {
+            let rNum = Math.floor(10000 + Math.random() * 90000); 
+            arena.innerHTML = `<p style="margin-bottom:10px;">Sayıyı aklında tut!</p><div id="flash-num" style="font-size:3rem; font-family:monospace; color:var(--accent-cyan); font-weight:bold; margin:20px 0;">${rNum}</div>`;
+            setTimeout(() => { if(document.getElementById('flash-num')) { arena.innerHTML = `<p style="margin-bottom:15px;">Gördüğün sayıyı yaz:</p><input type="number" id="flash-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('flash-inp').value == '${rNum}') window.winGame(); else window.loseGame();">Onayla</button>`; } }, 1500); 
+        } else if(id === "g13") {
+            let num1 = Math.floor(Math.random() * 50) + 10, num2 = Math.floor(Math.random() * 20) + 1, ans = num1 + num2;
+            arena.innerHTML = `<p style="margin-bottom:10px;">İşlemin sonucunu bul:</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} + ${num2} = ?</div><input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('math-inp').value == '${ans}') window.winGame(); else window.loseGame();">Cevapla</button>`;
+        } else if(id === "g14") {
+            arena.innerHTML = `<p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:20px; letter-spacing:2px;">KIRMIZI</div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red);" onclick="window.loseGame()">KIRMIZI</button><button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.winGame()">MAVİ</button></div>`;
+        } else if(id === "g15") {
+            arena.innerHTML = `<p style="margin-bottom:15px;">Şans çarkını çevir!</p><div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1); color:var(--accent-gold);">🎡</div><button class="noble-btn primary" style="width:180px;" onclick="window.spinWheel()">Çevir</button>`;
+            window.spinWheel = function() {
+                document.getElementById('wheel-icon').style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
+                setTimeout(() => { if(Math.random() > 0.4) window.winGame(); else window.loseGame("Çark sana gülmedi!"); }, 2000);
+            };
+        } else if(id === "g16") {
+            window.currentGame.state = { clicks: 0, required: 15 };
+            arena.innerHTML = `<p style="margin-bottom:15px;">3 Saniye içinde 15 kere tıkla!</p><button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%; box-shadow:0 0 15px rgba(34,197,94,0.4);" onclick="window.fastClickStart()">TIKLA</button><div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>`;
+            window.fastClickTimer = null;
+            window.fastClickStart = function() {
+                let s = window.currentGame.state;
+                if (s.clicks === 0) { window.fastClickTimer = setTimeout(() => { if (s.clicks < s.required) window.loseGame("Süre bitti, yavaşsın!"); }, 3000); }
+                s.clicks++; document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
+                if (s.clicks >= s.required) { clearTimeout(window.fastClickTimer); window.winGame(); }
+            };
+        } else if(id === "g17") {
+            let sentence = "Şiir ruhun gıdasıdır".split(" "), shuffled = [...sentence].sort(() => Math.random() - 0.5);
+            window.currentGame.state = { currentOrder: [], correct: sentence };
+            window.renderSort = function() {
+                let s = window.currentGame.state;
+                arena.innerHTML = `<p style="margin-bottom:15px;">Doğru sıraya diz:</p><div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">${s.currentOrder.join(" ")}</div><div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">${shuffled.map(w => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="window.pickWord('${w}')">${w}</button>`).join('')}</div>`;
+            };
+            window.pickWord = function(w) {
+                let s = window.currentGame.state; s.currentOrder.push(w); window.renderSort();
+                if (s.currentOrder.length === s.correct.length) {
+                    if (s.currentOrder.join(" ") === s.correct.join(" ")) window.winGame(); else window.loseGame("Yanlış sıralama!");
+                }
+            };
+            window.renderSort();
+        } else if(id === "g18") {
+            let code = Math.floor(100 + Math.random() * 900).toString(); 
+            window.cbState = { code: code, tries: 5 };
+            arena.innerHTML = `<p style="margin-bottom:10px;">3 Haneli şifreyi tahmin et (5 Hak):</p><input type="number" id="cb-inp" class="inp" style="width:120px; text-align:center; font-size:2rem; letter-spacing:5px;"><br><button class="noble-btn primary" style="width:150px;" onclick="window.checkCodeBreaker()">Dene</button><div id="cb-hint" style="margin-top:15px; font-weight:bold; color:var(--accent-cyan); font-size:1.1rem;"></div>`;
+            window.checkCodeBreaker = function() {
+                let guess = document.getElementById('cb-inp').value, hintEl = document.getElementById('cb-hint');
+                if(guess.length !== 3) { hintEl.innerText = "3 haneli girin!"; return; }
+                if(guess === window.cbState.code) return window.winGame();
+                window.cbState.tries--;
+                if(window.cbState.tries <= 0) return window.loseGame(`Şifre: ${window.cbState.code}`);
+                let exact = 0, wrongPlace = 0;
+                for(let i=0; i<3; i++) { if(guess[i] === window.cbState.code[i]) exact++; else if(window.cbState.code.includes(guess[i])) wrongPlace++; }
+                hintEl.innerText = `🟩 İsabet: ${exact} | 🟨 Yanlış Yer: ${wrongPlace} (Hak: ${window.cbState.tries})`;
+            };
+        } else if(id === "g19") {
+            arena.innerHTML = `<p style="margin-bottom:15px;">Kutu <b style="color:var(--accent-green);">YEŞİL</b> olduğunda hemen tıkla!</p><div id="reflex-box" style="width:150px; height:150px; background:var(--accent-red); border-radius:16px; margin:0 auto; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);" onclick="window.clickReflex()"></div>`;
+            window.reflexState = { active: false, timer: null };
+            window.reflexState.timer = setTimeout(() => {
+                let box = document.getElementById('reflex-box');
+                if(box) {
+                    box.style.background = 'var(--accent-green)'; box.style.boxShadow = '0 0 20px rgba(34,197,94,0.8)'; window.reflexState.active = true;
+                    setTimeout(() => { if(window.reflexState.active) window.loseGame("Çok yavaş kaldın!"); }, 800);
+                }
+            }, 1500 + Math.random() * 3000);
+            window.clickReflex = function() {
+                if(window.reflexState.active) { window.reflexState.active = false; window.winGame(); }
+                else { clearTimeout(window.reflexState.timer); window.loseGame("Erken tıkladın!"); }
+            };
+        } else if(id === "g20") {
+            let words = ["EDEBİYAT", "İSTİKLAL", "HÜRRİYET", "MÜKEMMEL", "TAHAYYÜL"], word = words[Math.floor(Math.random() * words.length)], missingIdx = Math.floor(Math.random() * word.length), missingChar = word[missingIdx], displayWord = word.substring(0, missingIdx) + "_" + word.substring(missingIdx + 1);
+            arena.innerHTML = `<p style="margin-bottom:15px;">Eksik harfi bul:</p><div style="font-size:2.5rem; letter-spacing:5px; font-family:monospace; color:var(--accent-pink); font-weight:bold; margin-bottom:20px;">${displayWord}</div><input type="text" id="ml-inp" class="inp" maxlength="1" style="width:80px; text-align:center; font-size:2rem; text-transform:uppercase;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('ml-inp').value.toUpperCase().replace(/İ/g,'I') === '${missingChar}'.replace(/İ/g,'I')) window.winGame(); else window.loseGame();">Cevapla</button>`;
+        }
+
+        window.openModal('gameModal');
+    };
+
+    if(window.renderAllContent) window.renderAllContent();
+
+});
+</script>
+
 <!-- ===================================================================== -->
-<!-- 🏆 MİSALİ KESİN ÇÖZÜM: ROZET, 20 OYUN VE ÇAN TEMİZLİĞİ FİXİ 🏆 -->
+<!-- 🧹 MİSALİ "YOK EDİCİ" FİNAL MOTORU: KLONLARI SİLER, SİSTEMİ ONARIR 🧹 -->
 <!-- ===================================================================== -->
-<script id="misali-absolute-master-final-fix">
+<script id="misali-terminator-patch">
 window.addEventListener('load', function() {
     setTimeout(function() {
-        console.log("⚡ Misali Final Fix: Oyunlar, Rozetler ve Loglar Onarılıyor...");
+        console.log("🔥 Misali Terminator Devrede: Tüm kopyalar temizleniyor...");
 
-        // ==========================================
-        // 1. EKSİK CSS STİLLERİ (Rozetlerin şık durması için)
-        // ==========================================
-        let style = document.createElement('style');
-        style.innerHTML = `
-            .admin-badge-mini { position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.5); z-index:5; letter-spacing:0.5px; }
-            .card .admin-card-actions { top: 35px !important; }
-            #read-badge-container { text-align:center; margin-bottom:15px; width:100%; display:flex; justify-content:center; }
-        `;
-        document.head.appendChild(style);
-
-        // ==========================================
-        // 2. AÇILAN PENCEREDE BAŞLIK İLE ŞİİR ARASINA PEMBE PUAN (SENİN İSTEDİĞİN GİBİ)
-        // ==========================================
-        const baseOpenModal = window.openReadModal;
-        window.openReadModal = async function(id, type) {
-            if(baseOpenModal) await baseOpenModal(id, type);
-            
-            let titleEl = document.getElementById('read-title');
-            if(!titleEl) return;
-
-            let badgeCont = document.getElementById('read-badge-container');
-            if (!badgeCont) {
-                badgeCont = document.createElement('div');
-                badgeCont.id = 'read-badge-container';
-                // Başlığın hemen sonrasına ekler (Şiir metni ile başlık arasına)
-                titleEl.after(badgeCont); 
-            }
-
-            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
-            let item = (source || []).find(x => String(x.id) === String(id));
-            
-            if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
-                let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
-                badgeCont.innerHTML = `<span style="font-size:1.1rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.3);">${medals} ${item.adminRating.points} Puan</span>`;
-            } else {
-                badgeCont.innerHTML = '';
-            }
-        };
-
-        // ==========================================
-        // 3. KARTLARIN ÜZERİNE KÜÇÜK PEMBE ROZETİ EKLE
-        // ==========================================
-        const baseRender = window.renderAllContent;
-        window.renderAllContent = function() {
-            if(baseRender) baseRender();
-            
-            let uGrid = document.getElementById('userPoems-grid');
-            if (uGrid && window.userPoemsDB) {
-                let uName = window.currentUser ? window.currentUser.username : null;
-                let isAdmin = window.currentUser && window.currentUser.role === 'admin';
-                
-                uGrid.innerHTML = [...window.userPoemsDB].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).map(d => {
-                    let sd = window.poemDataStore[d.id] || {}, hc = 0, cc = sd.comments ? sd.comments.length : 0, roses = 0;
-                    if (sd.ratings) Object.values(sd.ratings).forEach(v => hc += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
-                    if (sd.comments) sd.comments.forEach(c => roses += (c.roses || 0)); 
-                    let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName]?.includes(d.id);
-                    let hasMusic = d.hasAudio || d.audio;
-                    let textPreview = (d.text || '').replace(/<[^>]*>?/gm, '').replace(/[\r\n]/g, ' ').substring(0, 80) + '...';
-                    let safeTitle = (d.title || 'Eser').replace(/'/g, "&#39;");
-                    let ribbon = ((Date.now() - (d.timestamp || 0)) < 86400000) ? `<div class="new-ribbon">YENİ</div>` : '';
-                    
-                    // İŞTE KART ÜSTÜNDEKİ ROZET
-                    let adminBadge = (d.adminRating && d.adminRating.points > 0) ? `<div class="admin-badge-mini">🎖️ ${d.adminRating.points} Puan</div>` : '';
-
-                    let uEditBtn = isAdmin ? `<button class="admin-btn edit" style="border-color:var(--accent-gold); color:var(--accent-gold);" onclick="event.stopPropagation(); window.quickEditItem('${d.id}', 'userPoems')"><i class="fas fa-pen"></i></button>` : '';
-                    let isMyPoem = uName && (d.author === uName || d.author === window.currentUser?.name);
-                    let uDeleteBtn = (isAdmin || isMyPoem) ? `<button class="admin-btn del" onclick="event.stopPropagation(); window.deleteAnyItem('${d.id}', 'userPoems')"><i class="fas fa-trash"></i></button>` : '';
-                    let audioBtn = hasMusic ? `<div class="c-stat music" onclick="event.stopPropagation(); window.openReadModal('${d.id}', 'userPoems');" style="color:var(--accent-green)"><i class="fas fa-play-circle"></i></div>` : '';
-                    
-                    let notesScore = 0; let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
-                    if(audioRDB[d.id]) Object.values(audioRDB[d.id]).forEach(v => notesScore += parseInt(v||0));
-                    let noteHTML = hasMusic ? `<span class="c-stat" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
-
-                    let finalAuthor = d.author || d.name || 'Şair Misal.i';
-                    let authorColor = finalAuthor === 'Şair Misal.i' ? 'var(--accent-cyan)' : 'var(--accent-gold)';
-
-                    return `<div class="card" onclick="window.openReadModal('${d.id}', 'userPoems')">
-                        ${ribbon}${adminBadge}
-                        <div class="admin-card-actions" style="top:${adminBadge ? '35px' : '12px'};">${uEditBtn}${uDeleteBtn}</div>
-                        <button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${d.id}')"><i class="fas fa-bookmark"></i></button>
-                        <div class="card-ic">${d.emoji || '📖'}</div>
-                        <h3 class="card-t">${safeTitle}</h3>
-                        <p class="card-sub">${textPreview}</p>
-                        <div class="card-auth" style="color:${authorColor}; font-family:'Great Vibes', cursive; font-size:1.4rem; margin-top:5px;">~ ${finalAuthor}</div>
-                        <div class="card-footer">${noteHTML}<span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span><span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span><span class="c-stat"><span class="real-blue-rose" style="font-size:0.9rem;">🌹</span> ${roses}</span>${audioBtn}</div>
-                    </div>`;
-                }).join('');
-            }
-        };
-
-        // ==========================================
-        // 4. ÇAN (BİLDİRİM/LOG) TEMİZLEME DÜZELTMESİ
-        // ==========================================
+        // =========================================================
+        // 1. GELEN KUTUSU SİLME FİXİ (TITREME YOK)
+        // =========================================================
         window.clearLogs = function() { 
             window.adminLogs = []; 
             localStorage.setItem('misaliAdminLogs', '[]'); 
             
-            // Arayüzdeki listeleri anında temizle
-            let box = document.getElementById('adm-logs-box-panel');
-            let inbox = document.getElementById('adm-logs-box-inbox');
-            let emptyMsg = '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
-            if(box) box.innerHTML = emptyMsg;
-            if(inbox) inbox.innerHTML = emptyMsg;
-            
-            // Kırmızı çan simgesini sıfırla ve gizle
-            let bellBadge = document.getElementById('bell-counter');
-            if(bellBadge) { bellBadge.innerText = 0; bellBadge.style.display = 'none'; }
-            
-            window.toast('Raporlar Temizlendi', '🗑️'); 
-
-            // Firebase'i temizle
+            // Firebase'den kökten sil
             try { firebase.database().ref('adminOnlineLogs').remove(); } catch(e){}
+            
+            // Ekranda kaç tane klon menü varsa hepsini bul ve içini boşalt
+            document.querySelectorAll('#adm-logs-box-panel, #adm-logs-box-inbox').forEach(el => {
+                el.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+            });
+            
+            // Çan ikonunu sıfırla
+            document.querySelectorAll('#bell-counter').forEach(bell => {
+                bell.style.setProperty('display', 'none', 'important');
+            });
+            
+            if(window.toast) window.toast('Tüm kayıtlar silindi!', '🗑️'); 
         };
 
-        // ==========================================
-        // 5. 20 OYUNUN KESİN ÇÖZÜMÜ (MAX 20 PUAN)
-        // ==========================================
+        // =========================================================
+        // 2. AÇILAN PENCEREDE 3 TANE ÇIKAN ROZETLERİ YOK ETME
+        // =========================================================
+        const originalModal = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            if(originalModal) await originalModal(id, type);
+            
+            // DİKKAT: Diğer tüm hatalı kodların çalışıp ekrana 3 tane rozet basmasını 150 milisaniye bekliyoruz...
+            if (window.modalTemizleyici) clearTimeout(window.modalTemizleyici);
+            
+            window.modalTemizleyici = setTimeout(() => {
+                let activeModals = document.querySelectorAll('#readModal.show');
+                let modal = activeModals.length > 0 ? activeModals[activeModals.length - 1] : document.getElementById('readModal');
+                if(!modal) return;
+                
+                let titleEl = modal.querySelector('#read-title');
+                let textEl = modal.querySelector('#read-text');
+                if(!titleEl || !textEl) return;
+                
+                // ZALİM TEMİZLİK: Başlık ile Şiir metni arasına diğer kodların eklediği HER ŞEYİ sil!
+                let curr = titleEl.nextSibling;
+                while(curr && curr !== textEl) {
+                    let nxt = curr.nextSibling;
+                    // Sadece HTML elementlerini kontrol et. Admin Puanlama (Düzenleme) kutusunu koru, gerisini sil!
+                    if(curr.nodeType === 1 && (!curr.id || !curr.id.includes('admin-rating'))) {
+                        curr.remove();
+                    }
+                    curr = nxt;
+                }
+                
+                // Şimdi TERTEMİZ alana sadece 1 tane GERÇEK rozet ekle
+                let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+                let item = (source || []).find(x => String(x.id) === String(id));
+                
+                if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+                    let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+                    titleEl.insertAdjacentHTML('afterend', `
+                    <div class="misali-gercek-rozet" style="text-align:center; margin: 10px auto 25px auto; width:100%; display:flex; justify-content:center;">
+                        <span style="font-size:1.15rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.4);">${medals} ${item.adminRating.points} Puan</span>
+                    </div>`);
+                }
+            }, 150); // 150ms bekler ve tüm çöpleri silip tek rozeti basar.
+        };
+
+        // =========================================================
+        // 3. KART ÜSTÜNDEKİ ROZET VE OYUNLARI ALFABETİK SIRALAMA
+        // =========================================================
+        const originalRender = window.renderAllContent;
+        window.renderAllContent = function() {
+            if(originalRender) originalRender();
+            
+            setTimeout(() => {
+                // Kart rozetlerini DOM'a güvenle yerleştir
+                document.querySelectorAll('#userPoems-grid .card').forEach(card => {
+                    let tEl = card.querySelector('.card-t');
+                    if(!tEl) return;
+                    
+                    let poemData = (window.userPoemsDB || []).find(p => p.title === tEl.innerText || (p.title || '').replace(/'/g, "&#39;") === tEl.innerText);
+                    
+                    if (poemData && poemData.adminRating && poemData.adminRating.points > 0) {
+                        if (!card.querySelector('.misali-kart-rozet')) {
+                            card.style.position = 'relative';
+                            card.insertAdjacentHTML('afterbegin', `<div class="misali-kart-rozet" style="position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.5); z-index:10;">🎖️ ${poemData.adminRating.points} Puan</div>`);
+                            let acts = card.querySelector('.admin-card-actions');
+                            if(acts) acts.style.setProperty('top', '35px', 'important');
+                        }
+                    }
+                });
+
+                // Oyunları Alfabetik Sırala
+                let gGrid = document.getElementById('games-grid');
+                if (gGrid && window.DB && window.DB.games) {
+                    window.DB.games.sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+                    gGrid.innerHTML = window.DB.games.map(g => `<div class="card" style="border-color:${g.color}; height:auto;" onclick="window.startMiniGame('${g.id}', '${g.title.replace(/'/g, "\\'")}', ${g.points}, '${g.emoji}')"><div class="card-ic">${g.emoji}</div><h3 class="card-t" style="font-size:1.1rem;">${g.title}</h3><p class="card-sub">${g.text}</p></div>`).join('');
+                }
+            }, 100);
+        };
+
+        // =========================================================
+        // 4. OYUN PUANLARINI KESİN OLARAK 20'YE LİMİTLEME
+        // =========================================================
+        // startMiniGame'i hiç ellemiyoruz ki senin orijinal oyun fonksiyonların bozulmasın. 
+        // Sadece kazanılan puanı MAX 20'ye sabitliyoruz!
+        const oldAddPoints = window.addGamePoints;
+        window.addGamePoints = function(pts, gameName, isWin) {
+            let safePts = Math.min(parseInt(pts) || 0, 20); // 20 PUAN KİLİDİ
+            
+            if (oldAddPoints) {
+                oldAddPoints(safePts, gameName, isWin);
+            } else if (window.currentUser) {
+                let penalty = Math.max(1, Math.floor(safePts / 2)); 
+                let finalPts = isWin ? safePts : -penalty;
+                window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
+                window.userDatabase[window.currentUser.username] = window.currentUser;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                try { firebase.database().ref('users/' + window.currentUser.username + '/score').set(window.currentUser.score); } catch(e){}
+                window.toast(isWin ? `+${safePts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+            }
+        };
+
+        // Değişiklikleri anında tetikle
+        window.renderAllContent();
+
+    }, 2000); // Senin karmaşık sisteminin tam oturmasını 2 saniye bekler, sonra ezer geçer.
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🛡️ MİSALİ ABSOLUTE HARD-RESET (FENSTER, SPIELE & LÖSCH-FIX) 🛡️ -->
+<!-- ===================================================================== -->
+<script id="misali-absolute-hard-reset">
+window.addEventListener('load', function() {
+    // Wir warten 2.5 Sekunden, bis alle alten Codes und Fehler ausgeführt wurden.
+    // Dann schlagen wir zu und überschreiben die Kernfunktionen komplett neu.
+    setTimeout(function() {
+        console.log("⚡ HARD RESET AKTIV: Alle fehlerhaften Ketten wurden durchtrennt.");
+
+        // =========================================================
+        // 1. POSTEINGANG (LOGS) KUSURSUZ SİLME - KEIN ZITTERN
+        // =========================================================
+        window.clearLogs = function() { 
+            window.adminLogs = []; 
+            localStorage.setItem('misaliAdminLogs', '[]'); 
+            try { firebase.database().ref('adminOnlineLogs').remove(); } catch(e){}
+            
+            document.querySelectorAll('#adm-logs-box-panel, #adm-logs-box-inbox').forEach(el => {
+                el.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+            });
+            document.querySelectorAll('#bell-counter').forEach(bell => {
+                bell.innerText = '0';
+                bell.style.setProperty('display', 'none', 'important');
+            });
+            if(window.toast) window.toast('Tüm kayıtlar silindi!', '🗑️'); 
+        };
+
+        // =========================================================
+        // 2. SPIELE: ALPHABETISCH SORTIERT & PUNKTE AUF 20 LIMITIERT
+        // =========================================================
         window.DB.games = [
             { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
             { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
@@ -11261,16 +11596,30 @@ window.addEventListener('load', function() {
             { id: "g19", title: "Hızlı Karar", text: "Işığı yakala.", emoji: "🚦", points: 10, color: "var(--accent-gold)" },
             { id: "g20", title: "Kayıp Harf", text: "Eksik harfi bul.", emoji: "🔍", points: 15, color: "var(--accent-pink)" }
         ];
-        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
 
+        // Wir überschreiben die Render-Funktion für Spiele, um die Alphabetische Sortierung zu garantieren
+        const backupRender = window.renderAllContent;
+        window.renderAllContent = function() {
+            if(backupRender) backupRender();
+            setTimeout(() => {
+                let gGrid = document.getElementById('games-grid');
+                if (gGrid && window.DB && window.DB.games) {
+                    let sortedGames = [...window.DB.games].sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+                    gGrid.innerHTML = sortedGames.map(g => `<div class="card" style="border-color:${g.color}; height:auto;" onclick="window.startMiniGame('${g.id}', '${g.title.replace(/'/g, "\\'")}', ${g.points}, '${g.emoji}')"><div class="card-ic">${g.emoji}</div><h3 class="card-t" style="font-size:1.1rem;">${g.title}</h3><p class="card-sub">${g.text}</p></div>`).join('');
+                }
+            }, 150);
+        };
+
+        // Punkte hart limitieren (Nie über 20)
         window.addGamePoints = function(pts, gameName, isWin) {
             if (!window.currentUser) { window.toast("Puan kazanmak için giriş yapmalısın!", "🔒"); return; }
-            let safePts = Math.min(parseInt(pts) || 0, 20); 
+            let safePts = Math.min(parseInt(pts) || 0, 20); // MAX 20 PUAN SPERRE
             let penalty = Math.max(1, Math.floor(safePts / 2)); 
             let finalPts = isWin ? safePts : -penalty;
             
             window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
             window.userDatabase[window.currentUser.username] = window.currentUser;
+            
             localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
             sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
             try { firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score }); } catch(e){}
@@ -11280,198 +11629,145 @@ window.addEventListener('load', function() {
             if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
         };
 
-        window.winGame = function() {
-            if(window.currentGame && window.currentGame.finished) return;
-            window.currentGame.finished = true;
-            let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "🎉 KAZANDIN!"; gMsg.style.color = "var(--accent-green)"; }
-            setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, true); window.closeTopModal(); }, 1200);
-        };
+        // =========================================================
+        // 3. DAS FENSTER (MODAL): TEXT-VERLUST & 3x BADGE BEHOBEN
+        // =========================================================
+        // Wir überschreiben die Funktion komplett (ohne die alten Ketten aufzurufen), 
+        // damit kein alter Code mehr Elemente löscht.
+        window.openReadModal = async function(id, type) {
+            // Verhindern, dass alte Musikboxen stören
+            let pill = document.getElementById('floating-player');
+            if (pill) { pill.classList.remove('show'); pill.style.setProperty('display', 'none', 'important'); }
 
-        window.loseGame = function(msg="Kaybettin!") {
-            if(window.currentGame && window.currentGame.finished) return;
-            window.currentGame.finished = true;
-            let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "❌ " + msg; gMsg.style.color = "var(--accent-red)"; }
-            setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, false); window.closeTopModal(); }, 1200);
-        };
+            window.currentLang = 'tr';
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let item = (source || []).find(x => String(x.id) === String(id));
+            if (!item) return window.toast("Eser bulunamadı!", "❌");
 
-        window.startMiniGame = function(id, title, pts, emoji) {
-            window.isGameAnswered = false; 
-            let safePts = Math.min(parseInt(pts) || 0, 20); 
-            window.currentGame = { id: id, pts: safePts, title: title, state: {} };
-            
-            let arena = document.getElementById('game-arena');
-            if(!arena) return;
-            
-            document.getElementById('game-title').innerText = title;
-            document.getElementById('game-icon').innerText = emoji;
-            document.getElementById('game-reward').innerText = safePts + " Puan";
-            document.getElementById('game-message').innerText = "";
+            window.currentItemData = { ...item, type: type };
 
-            if(id === "g1") {
-                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div><div style="display:flex; gap:15px; justify-content:center;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='s') window.winGame(); else window.loseGame();">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='r') window.winGame(); else window.loseGame();">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='p') window.winGame(); else window.loseGame();">✂️</button></div>`;
-            } else if(id === "g2") {
-                let hang = ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE"]; let word = hang[Math.floor(Math.random() * hang.length)];
-                window.currentGame.state = { word: word, guessed: [], mistakes: 0, max: 6 };
-                window.renderHangman = function() {
-                    let s = window.currentGame.state, display = s.word.split('').map(l => s.guessed.includes(l) ? l : '_').join(' ');
-                    arena.innerHTML = `<div style="font-family:monospace; font-size:1.8rem; letter-spacing:4px; margin-bottom:15px; color:var(--accent-gold);">${display}</div><div style="color:var(--accent-red); margin-bottom:12px;">Kalan Hak: ${s.max - s.mistakes}</div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">` + "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split('').map(l => `<button class="noble-btn" style="width:32px; height:32px; padding:0;" ${s.guessed.includes(l) ? 'disabled style="opacity:0.2"' : ''} onclick="window.guessHangman('${l}')">${l}</button>`).join('') + `</div>`;
-                };
-                window.guessHangman = function(l) {
-                    let s = window.currentGame.state; s.guessed.push(l); if(!s.word.includes(l)) s.mistakes++; window.renderHangman();
-                    if(s.word.split('').every(char => s.guessed.includes(char))) window.winGame(); else if(s.mistakes >= s.max) window.loseGame(`Kelime: ${s.word}`);
-                };
-                window.renderHangman();
-            } else if(id === "g3") {
-                window.currentGame.state = { num: Math.floor(Math.random() * 100) + 1, tries: 7 };
-                arena.innerHTML = `<p style="margin-bottom:12px;">1-100 arası sayıyı tahmin et.</p><input type="number" id="ng-inp" class="inp" style="width:90px; text-align:center; font-size:1.3rem;"><br><button class="noble-btn primary" style="width:140px;" onclick="window.guessNumber()">Tahmin Et</button><div id="ng-hint" style="margin-top:12px; font-weight:bold; color:var(--accent-cyan);"></div>`;
-                window.guessNumber = function() {
-                    let s = window.currentGame.state, val = parseInt(document.getElementById('ng-inp').value);
-                    if(isNaN(val)) return; s.tries--;
-                    if(val === s.num) return window.winGame();
-                    document.getElementById('ng-hint').innerText = (val < s.num ? "🔼 Daha BÜYÜK" : "🔽 Daha KÜÇÜK") + ` (Hak: ${s.tries})`;
-                    if(s.tries <= 0) window.loseGame(`Sayı: ${s.num}`);
-                };
-            } else if(id === "g4") {
-                arena.innerHTML = `<div style="font-size:2rem; color:var(--accent-cyan); margin-bottom:15px; letter-spacing:5px;">M E A L K</div><input type="text" id="g4-inp" class="inp" placeholder="Çözüm (Kalem)" style="text-align:center; text-transform:uppercase;"><br><button class="noble-btn primary" onclick="if(document.getElementById('g4-inp').value.toUpperCase().replace(/İ/g,'I') === 'KALEM') window.winGame(); else window.loseGame();">Onayla</button>`;
-            } else if(id === "g5") {
-                let emojis = ["🪶", "🌙", "✨", "☕", "📖", "🌹"], deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
-                window.memState = { deck: deck, flipped: [], matched: 0, lock: false };
-                window.flipMemCard = function(idx) {
-                    let s = window.memState; if(s.lock || s.flipped.includes(idx) || document.getElementById('mc-'+idx).classList.contains('matched')) return;
-                    let el = document.getElementById('mc-'+idx); el.innerText = s.deck[idx]; el.style.background = "var(--bg-glass)"; s.flipped.push(idx);
-                    if(s.flipped.length === 2) {
-                        s.lock = true;
-                        if(s.deck[s.flipped[0]] === s.deck[s.flipped[1]]) {
-                            document.getElementById('mc-'+s.flipped[0]).classList.add('matched'); document.getElementById('mc-'+s.flipped[1]).classList.add('matched');
-                            s.matched += 2; s.flipped = []; s.lock = false; if(s.matched === deck.length) window.winGame();
-                        } else {
-                            setTimeout(() => { document.getElementById('mc-'+s.flipped[0]).innerText = ''; document.getElementById('mc-'+s.flipped[0]).style.background = "var(--accent-gold)"; document.getElementById('mc-'+s.flipped[1]).innerText = ''; document.getElementById('mc-'+s.flipped[1]).style.background = "var(--accent-gold)"; s.flipped = []; s.lock = false; }, 800);
-                        }
-                    }
-                };
-                arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(4, 55px); gap:8px;">${deck.map((_, i) => `<div id="mc-${i}" style="width:55px; height:55px; background:var(--accent-gold); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;" onclick="window.flipMemCard(${i})"></div>`).join('')}</div>`;
-            } else if(id === "g6") { // MİLYONER FİX
-                window.qIndex = 0;
-                window.milQuestions = [{ q: "Hangisi bir şiir türü değildir?", o: ["Koşma", "Semai", "Makale", "Gazel"], a: 2 }, { q: "İstiklal Marşımızın yazarı kimdir?", o: ["Namık Kemal", "M. Akif Ersoy", "Cemal Süreya", "Yunus Emre"], a: 1 }];
-                window.renderMil = function() {
-                    if(window.qIndex >= window.milQuestions.length) return window.winGame();
-                    let q = window.milQuestions[window.qIndex];
-                    arena.innerHTML = `<div style='margin-bottom:12px; font-weight:bold; font-size:1.1rem;'>${q.q}</div>` + q.o.map((o, idx) => `<button class='noble-btn' style='margin-bottom:6px; text-align:left;' onclick='if(${idx} === ${q.a}) { window.qIndex++; window.renderMil(); } else { window.loseGame(); }'>${o}</button>`).join('');
-                };
-                window.renderMil();
-            } else if(id === "g7") {
-                window.currentGame.state = { board: Array(9).fill(null), active: true };
-                window.renderTTT = function() {
-                    let s = window.currentGame.state;
-                    arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => { let color = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white'); return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${color};" onclick="window.playTTT(${i})">${cell || ''}</div>`; }).join('')}</div>`;
-                };
-                window.playTTT = function(i) {
-                    let s = window.currentGame.state; if(!s.active || s.board[i]) return;
-                    s.board[i] = 'X';
-                    let w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; let checkWin = (p) => w.some(x => s.board[x[0]]===p && s.board[x[1]]===p && s.board[x[2]]===p);
-                    if(checkWin('X')) { window.renderTTT(); return window.winGame(); }
-                    let empty = s.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
-                    if(empty.length === 0) return window.loseGame("Berabere!");
-                    s.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
-                    if(checkWin('O')) { window.renderTTT(); return window.loseGame("Bot kazandı!"); }
-                    window.renderTTT();
-                };
-                window.renderTTT();
-            } else if(id === "g8") {
-                arena.innerHTML = `<p style="margin-bottom:15px;">Zar atarak botun puanını geçmeye çalış!</p><button class="noble-btn primary" style="width:160px; font-size:1.5rem;" onclick="window.rollDice()">🎲 Zar At</button><div id="dice-res" style="margin-top:15px; font-size:1.2rem; font-weight:bold;"></div>`;
-                window.rollDice = function() {
-                    let pRoll = Math.floor(Math.random() * 6) + 1, bRoll = Math.floor(Math.random() * 6) + 1;
-                    document.getElementById('dice-res').innerText = `Sen: ${pRoll} | Bot: ${bRoll}`;
-                    if(pRoll > bRoll) window.winGame(); else if(pRoll === bRoll) document.getElementById('game-message').innerText = "Berabere! Tekrar at."; else window.loseGame();
-                };
-            } else if(id === "g9") {
-                arena.innerHTML = `<div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">İpucu: Dostluk bağı</div><div style="font-size:2rem; font-family:monospace; color:var(--accent-pink); margin-bottom:15px; letter-spacing:5px;">V A F E</div><input type="text" id="an-inp" class="inp" style="width:180px; text-align:center; text-transform:uppercase;" placeholder="Çözüm (VEFA)"><br><button class="noble-btn primary" style="width:180px;" onclick="if(document.getElementById('an-inp').value.toUpperCase().replace(/İ/g,'I') === 'VEFA') window.winGame(); else window.loseGame();">Tahmin Et</button>`;
-            } else if(id === "g10") {
-                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:20px; font-weight:bold;">İstiklal Marşı 10 kıtadan oluşmaktadır.</div><div style="display:flex; gap:15px;"><button class="noble-btn" style="border-color:var(--accent-green); color:var(--accent-green); flex:1;" onclick="window.winGame()">DOĞRU</button><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red); flex:1;" onclick="window.loseGame()">YANLIŞ</button></div>`;
-            } else if(id === "g11") {
-                arena.innerHTML = `<p style="margin-bottom:10px;">Aşk kelimesinin son harfiyle başlayan bir kelime yaz.</p><div style="font-size:1.8rem; color:var(--accent-gold); margin-bottom:15px; font-weight:bold;">AŞK</div><input type="text" id="wc-inp" class="inp" style="width:200px; text-align:center; text-transform:uppercase;" placeholder="K ile başla..."><br><button class="noble-btn primary" style="width:200px;" onclick="let v=document.getElementById('wc-inp').value.toUpperCase().trim(); if(v.length>=3 && v.startsWith('K')) window.winGame(); else window.loseGame('Geçersiz kelime!');">Gönder</button>`;
-            } else if(id === "g12") {
-                let rNum = Math.floor(10000 + Math.random() * 90000); 
-                arena.innerHTML = `<p style="margin-bottom:10px;">Sayıyı aklında tut!</p><div id="flash-num" style="font-size:3rem; font-family:monospace; color:var(--accent-cyan); font-weight:bold; margin:20px 0;">${rNum}</div>`;
-                setTimeout(() => { if(document.getElementById('flash-num')) { arena.innerHTML = `<p style="margin-bottom:15px;">Gördüğün sayıyı yaz:</p><input type="number" id="flash-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('flash-inp').value == '${rNum}') window.winGame(); else window.loseGame();">Onayla</button>`; } }, 1500); 
-            } else if(id === "g13") {
-                let num1 = Math.floor(Math.random() * 50) + 10, num2 = Math.floor(Math.random() * 20) + 1, ans = num1 + num2;
-                arena.innerHTML = `<p style="margin-bottom:10px;">İşlemin sonucunu bul:</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} + ${num2} = ?</div><input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('math-inp').value == '${ans}') window.winGame(); else window.loseGame();">Cevapla</button>`;
-            } else if(id === "g14") {
-                arena.innerHTML = `<p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:20px; letter-spacing:2px;">KIRMIZI</div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red);" onclick="window.loseGame()">KIRMIZI</button><button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.winGame()">MAVİ</button></div>`;
-            } else if(id === "g15") {
-                arena.innerHTML = `<p style="margin-bottom:15px;">Şans çarkını çevir!</p><div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1); color:var(--accent-gold);">🎡</div><button class="noble-btn primary" style="width:180px;" onclick="window.spinWheel()">Çevir</button>`;
-                window.spinWheel = function() {
-                    document.getElementById('wheel-icon').style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
-                    setTimeout(() => { if(Math.random() > 0.4) window.winGame(); else window.loseGame("Çark sana gülmedi!"); }, 2000);
-                };
-            } else if(id === "g16") {
-                window.currentGame.state = { clicks: 0, required: 15 };
-                arena.innerHTML = `<p style="margin-bottom:15px;">3 Saniye içinde 15 kere tıkla!</p><button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%; box-shadow:0 0 15px rgba(34,197,94,0.4);" onclick="window.fastClickStart()">TIKLA</button><div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>`;
-                window.fastClickTimer = null;
-                window.fastClickStart = function() {
-                    let s = window.currentGame.state;
-                    if (s.clicks === 0) { window.fastClickTimer = setTimeout(() => { if (s.clicks < s.required) window.loseGame("Süre bitti, yavaşsın!"); }, 3000); }
-                    s.clicks++; document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
-                    if (s.clicks >= s.required) { clearTimeout(window.fastClickTimer); window.winGame(); }
-                };
-            } else if(id === "g17") {
-                let sentence = "Şiir ruhun gıdasıdır".split(" "), shuffled = [...sentence].sort(() => Math.random() - 0.5);
-                window.currentGame.state = { currentOrder: [], correct: sentence };
-                window.renderSort = function() {
-                    let s = window.currentGame.state;
-                    arena.innerHTML = `<p style="margin-bottom:15px;">Doğru sıraya diz:</p><div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">${s.currentOrder.join(" ")}</div><div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">${shuffled.map(w => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="window.pickWord('${w}')">${w}</button>`).join('')}</div>`;
-                };
-                window.pickWord = function(w) {
-                    let s = window.currentGame.state; s.currentOrder.push(w); window.renderSort();
-                    if (s.currentOrder.length === s.correct.length) {
-                        if (s.currentOrder.join(" ") === s.correct.join(" ")) window.winGame(); else window.loseGame("Yanlış sıralama!");
-                    }
-                };
-                window.renderSort();
-            } else if(id === "g18") {
-                let code = Math.floor(100 + Math.random() * 900).toString(); 
-                window.cbState = { code: code, tries: 5 };
-                arena.innerHTML = `<p style="margin-bottom:10px;">3 Haneli şifreyi tahmin et (5 Hak):</p><input type="number" id="cb-inp" class="inp" style="width:120px; text-align:center; font-size:2rem; letter-spacing:5px;"><br><button class="noble-btn primary" style="width:150px;" onclick="window.checkCodeBreaker()">Dene</button><div id="cb-hint" style="margin-top:15px; font-weight:bold; color:var(--accent-cyan); font-size:1.1rem;"></div>`;
-                window.checkCodeBreaker = function() {
-                    let guess = document.getElementById('cb-inp').value, hintEl = document.getElementById('cb-hint');
-                    if(guess.length !== 3) { hintEl.innerText = "3 haneli girin!"; return; }
-                    if(guess === window.cbState.code) return window.winGame();
-                    window.cbState.tries--;
-                    if(window.cbState.tries <= 0) return window.loseGame(`Şifre: ${window.cbState.code}`);
-                    let exact = 0, wrongPlace = 0;
-                    for(let i=0; i<3; i++) { if(guess[i] === window.cbState.code[i]) exact++; else if(window.cbState.code.includes(guess[i])) wrongPlace++; }
-                    hintEl.innerText = `🟩 İsabet: ${exact} | 🟨 Yanlış Yer: ${wrongPlace} (Hak: ${window.cbState.tries})`;
-                };
-            } else if(id === "g19") {
-                arena.innerHTML = `<p style="margin-bottom:15px;">Kutu <b style="color:var(--accent-green);">YEŞİL</b> olduğunda hemen tıkla!</p><div id="reflex-box" style="width:150px; height:150px; background:var(--accent-red); border-radius:16px; margin:0 auto; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);" onclick="window.clickReflex()"></div>`;
-                window.reflexState = { active: false, timer: null };
-                window.reflexState.timer = setTimeout(() => {
-                    let box = document.getElementById('reflex-box');
-                    if(box) {
-                        box.style.background = 'var(--accent-green)'; box.style.boxShadow = '0 0 20px rgba(34,197,94,0.8)'; window.reflexState.active = true;
-                        setTimeout(() => { if(window.reflexState.active) window.loseGame("Çok yavaş kaldın!"); }, 800);
-                    }
-                }, 1500 + Math.random() * 3000);
-                window.clickReflex = function() {
-                    if(window.reflexState.active) { window.reflexState.active = false; window.winGame(); }
-                    else { clearTimeout(window.reflexState.timer); window.loseGame("Erken tıkladın!"); }
-                };
-            } else if(id === "g20") {
-                let words = ["EDEBİYAT", "İSTİKLAL", "HÜRRİYET", "MÜKEMMEL", "TAHAYYÜL"], word = words[Math.floor(Math.random() * words.length)], missingIdx = Math.floor(Math.random() * word.length), missingChar = word[missingIdx], displayWord = word.substring(0, missingIdx) + "_" + word.substring(missingIdx + 1);
-                arena.innerHTML = `<p style="margin-bottom:15px;">Eksik harfi bul:</p><div style="font-size:2.5rem; letter-spacing:5px; font-family:monospace; color:var(--accent-pink); font-weight:bold; margin-bottom:20px;">${displayWord}</div><input type="text" id="ml-inp" class="inp" maxlength="1" style="width:80px; text-align:center; font-size:2rem; text-transform:uppercase;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('ml-inp').value.toUpperCase().replace(/İ/g,'I') === '${missingChar}'.replace(/İ/g,'I')) window.winGame(); else window.loseGame();">Cevapla</button>`;
+            // Titel einfügen
+            let titleEl = document.getElementById('read-title');
+            titleEl.innerHTML = (item.title || item.trTitle || item.name || 'Eser');
+            titleEl.style.marginBottom = "10px";
+
+            // CSS-Säuberung aller alten Klon-Badges
+            document.querySelectorAll('.dynamic-admin-ui, .misali-gercek-rozet, .misali-tek-rozet, .modal-pink-badge, #modal-strict-admin-badge, #read-badge-container, .final-supreme-badge').forEach(e => e.remove());
+
+            // 1 SAUBERES BADGE EINFÜGEN
+            if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+                let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+                titleEl.insertAdjacentHTML('afterend', `
+                <div class="final-supreme-badge" style="text-align:center; margin: 10px auto 25px auto; width:100%; display:flex; justify-content:center;">
+                    <span style="font-size:1.15rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.4);">${medals} ${item.adminRating.points} Puan</span>
+                </div>`);
             }
 
-            window.openModal('gameModal');
+            // TEXT UND AUTOR SICHER EINFÜGEN (Kein Löschen mehr!)
+            let txtEl = document.getElementById('read-text');
+            let authEl = document.getElementById('read-author');
+            
+            if (['bilmeceler', 'bulmacalar'].includes(type)) {
+                let parts = (item.text || item.trText || item.quote || '').split(/(?:Cevap:|Çözüm:|\|\|)/i);
+                let question = parts[0].trim();
+                let answer = parts.length > 1 ? parts[1].trim() : 'Cevap henüz eklenmemiş.';
+                txtEl.innerHTML = `<div style="margin-bottom:20px; font-size:${window.fontSize}rem;">${question.replace(/\n/g, '<br>')}</div><button class="noble-btn primary" onclick="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width:100%; cursor:pointer;">👁️ Cevabı Göster</button><div class="secret-answer" style="display:none; margin-top:15px; padding:15px; background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); border-radius:8px; color:#fff; font-size:1.1rem; text-align:center;">🎯 <strong>Cevap:</strong> ${answer}</div>`;
+                if(authEl) authEl.style.display = 'none';
+            } else {
+                txtEl.innerHTML = (item.text || item.trText || item.quote || '').replace(/\n/g, '<br>'); 
+                txtEl.style.fontSize = window.fontSize + 'rem';
+                if(authEl) {
+                    if (type === 'persons') {
+                        authEl.style.display = 'none'; 
+                    } else { 
+                        authEl.style.display = 'block'; 
+                        let displayedAuthor = (item.author || item.authorTR || item.name || "Anonim");
+                        if (['poems','quotes'].includes(type) && (displayedAuthor === 'Anonim' || displayedAuthor === 'Sistem' || !item.author)) displayedAuthor = "Şair Misal.i";
+                        authEl.innerText = "~ " + displayedAuthor; 
+                        authEl.style.marginTop = "15px";
+                        authEl.className = (displayedAuthor === 'Şair Misal.i' || displayedAuthor === 'Sair Misali') ? "misali-signature-text" : (type === 'marslar' ? "author-signature-white" : "author-signature-gold");
+                    }
+                }
+            }
+
+            // Admin UI
+            let adminRatingUI = document.getElementById('readModal-admin-rating');
+            let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
+            if (adminRatingUI) {
+                if (isAdminCheck && type === 'userPoems') {
+                    adminRatingUI.style.setProperty('display', 'block', 'important');
+                    document.getElementById('read-rating-tier').value = item.adminRating ? item.adminRating.tier : 'none';
+                    document.getElementById('read-rating-pts').value = item.adminRating ? item.adminRating.points : '';
+                } else {
+                    adminRatingUI.style.setProperty('display', 'none', 'important');
+                }
+            }
+
+            // Bookmark icon
+            let bm = document.getElementById('modal-bookmark-icon');
+            if (bm) bm.style.color = (window.currentUser && window.savedItemsDB[window.currentUser.username]?.includes(id)) ? 'var(--accent-pink)' : 'rgba(255,255,255,0.35)';
+
+            // Audio Player laden
+            let audCont = document.getElementById('card-audio-container');
+            let aud = document.getElementById('global-audio-element');
+            let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
+            
+            if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
+                audCont.classList.add('force-show'); 
+                audCont.style.setProperty('display', 'flex', 'important');
+                audCont.style.setProperty('opacity', '1', 'important');
+                
+                if (hasRealMusic) {
+                    audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+                    let trackData = null;
+                    if (item.audio === 'firebaseDB') {
+                        if (window.audioStorage) trackData = await window.audioStorage.get(id);
+                        if (!trackData) {
+                            try {
+                                let snap = await firebase.database().ref('audioFiles/' + id).once('value');
+                                if (snap.exists()) { trackData = snap.val(); if(window.audioStorage) window.audioStorage.save(id, trackData); }
+                            } catch (e) { }
+                        }
+                    } else if (item.audio && item.audio.startsWith('data:audio')) { trackData = item.audio; } 
+                    else if (item.audio && item.audio.startsWith('http')) { trackData = item.audio; }
+                    else if (window.audioStorage && item.hasAudio) { trackData = await window.audioStorage.get(id); }
+                    
+                    if (aud) {
+                        if (trackData) {
+                            if (aud.src !== trackData) {
+                                if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(aud, trackData);
+                                else aud.src = trackData;
+                            }
+                            let ic1 = document.getElementById('fp-play-icon'); 
+                            if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                            
+                            if(!document.getElementById('audio-rating-ui')) {
+                                audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center; width:100%; display:block;"></div>`);
+                            }
+                            if (typeof window.renderAudioRatingUI === 'function') window.renderAudioRatingUI(id);
+                        } else {
+                            aud.pause(); aud.src = ""; aud.removeAttribute('src');
+                        }
+                    }
+                } else { 
+                    if (aud) { aud.pause(); aud.src = ""; aud.removeAttribute('src'); }
+                    audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important')); 
+                }
+            } else if (audCont) {
+                audCont.classList.remove('force-show');
+                audCont.style.setProperty('display', 'none', 'important');
+            }
+
+            if(typeof window.updateAudioUI === 'function') window.updateAudioUI(item, isAdminCheck, id, type);
+            if(typeof window.updateHeartsUI === 'function') window.updateHeartsUI(); 
+            window.openModal('readModal');
         };
 
-        if(typeof window.renderAllContent === 'function') window.renderAllContent();
-    }, 1500);
+        // Das Interface sofort einmal aktualisieren
+        window.renderAllContent();
+
+    }, 2500); // 2.5 Sekunden stellen sicher, dass alle Fehler geladen wurden, bevor wir sie plattmachen.
 });
-
-
-</script>
-
 </script>
 <!-- ===================================================================== -->
 
