@@ -11771,5 +11771,1231 @@ window.addEventListener('load', function() {
 </script>
 <!-- ===================================================================== -->
 
+<!-- ===================================================================== -->
+<!-- 🛠️ MİSALİ MEGA PATCH: FAVICON, MOBILE UI, BACK-BTN & RADIO FIX 🛠️ -->
+<!-- ===================================================================== -->
+<script id="misali-mega-patch-v1">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Mega Patch geladen: Favicon, UI, History & Radio repariert!");
+
+        // ==========================================
+        // 1. FEDER FAVICON HINZUFÜGEN (Tab İkonu)
+        // ==========================================
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        // Setzt eine Feder als Icon
+        link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🪶</text></svg>';
+
+        // ==========================================
+        // 2. MOBILE BADGE ÜBERLAPPUNG FIX (CSS Injection)
+        // ==========================================
+        let style = document.createElement('style');
+        style.innerHTML = `
+            @media (max-width: 768px) {
+                /* Zwingt die Container dazu, sich an den Text anzupassen */
+                .h-row-2 .s-pill { 
+                    min-width: max-content !important; 
+                    width: auto !important; 
+                    padding: 4px 8px !important; 
+                    flex-shrink: 0 !important;
+                }
+                /* Macht den Text im Badge etwas feiner, damit er reinpasst */
+                .s-badge { 
+                    font-size: 0.55rem !important; 
+                    letter-spacing: -0.2px !important; 
+                    padding: 2px 5px !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ==========================================
+        // 3. HANDY ZURÜCK-BUTTON FIX (History API)
+        // ==========================================
+        // Überschreibt openModal, um einen "Schritt" in der Browser-Historie zu speichern
+        const originalModalOpener = window.openModal;
+        window.openModal = function(id) {
+            if (originalModalOpener) originalModalOpener(id);
+            history.pushState({ modalOpen: true, modalId: id }, '', window.location.href);
+        };
+
+        // Wenn der Nutzer am Handy "Zurück" drückt
+        window.addEventListener('popstate', function(event) {
+            let openModals = document.querySelectorAll('.modal.show');
+            let lugatOverlay = document.getElementById('lugat-overlay');
+            
+            // Wenn etwas offen ist, schließe es, anstatt die Seite zu verlassen
+            if (openModals.length > 0 || (lugatOverlay && lugatOverlay.classList.contains('show'))) {
+                window.closeTopModal();
+                if(lugatOverlay) lugatOverlay.classList.remove('show');
+            }
+        });
+
+        // Initiale History setzen
+        history.replaceState({ page: 'home' }, '', window.location.href);
+
+        // ==========================================
+        // 4. RADIO REMIX & STOTTER FIX (Sanfte Übergänge)
+        // ==========================================
+        // Globale Timer, die strikt überwacht werden
+        window.bgmFaderInterval = null;
+        window.isRadioTransitioning = false;
+
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgm = document.getElementById('global-bgm');
+            let playIcon = document.getElementById('bgm-play-icon');
+            if (!bgm || !settings.playlist || settings.playlist.length === 0) return;
+
+            // KESİN ÇÖZÜM: Tüm eski ses açma/kısma işlemlerini YOK ET!
+            clearInterval(window.bgmFaderInterval);
+            window.isFadingOut = false;
+            window.isRadioTransitioning = true;
+
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src === 'firebaseDB' && window.audioStorage ? await window.audioStorage.get(track.id) : (track.src || track);
+
+            if (!audioData) {
+                window.isRadioTransitioning = false;
+                window.triggerNextRadioSong(); // Überspringen, falls Datei fehlt
+                return;
+            }
+
+            bgm.pause();
+            if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(bgm, audioData);
+            else bgm.src = audioData;
+            
+            if(window.updateRadioPlayerDisplay) window.updateRadioPlayerDisplay(settings);
+
+            let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+            bgm.volume = 0; // Immer stumm starten für den Fade-In
+            
+            bgm.play().then(() => {
+                if(playIcon) playIcon.className = 'fas fa-pause';
+                let type = settings.type || 'crossfade';
+                let fadeSec = parseInt(settings.fadeSec || 5);
+
+                // Sanfter Lautstärke-Anstieg
+                if ((type === 'crossfade' || type === 'fadein') && fadeSec > 0) {
+                    let steps = 20; // 20 Schritte pro Sekunde
+                    let volStep = targetVol / (fadeSec * steps);
+                    
+                    window.bgmFaderInterval = setInterval(() => {
+                        if (bgm.volume + volStep < targetVol) {
+                            bgm.volume += volStep;
+                        } else {
+                            bgm.volume = targetVol;
+                            clearInterval(window.bgmFaderInterval);
+                            window.isRadioTransitioning = false;
+                        }
+                    }, 50);
+                } else {
+                    bgm.volume = targetVol;
+                    window.isRadioTransitioning = false;
+                }
+            }).catch(e => {
+                window.isRadioTransitioning = false;
+                console.log("Radyo otomatik çalma engellendi.");
+            });
+        };
+
+        window.setupRadioEventListeners = function() {
+            let bgmAud = document.getElementById('global-bgm');
+            // Verhindert, dass Event-Listener mehrfach angehängt werden
+            if(bgmAud && !bgmAud.hasAttribute('data-perfect-listener')) {
+                bgmAud.setAttribute('data-perfect-listener', 'true');
+                
+                bgmAud.addEventListener('timeupdate', function() {
+                    // Wenn gerade ein Übergang läuft, nichts tun!
+                    if(!window.radioSettings || window.isRadioTransitioning || window.isFadingOut) return;
+                    
+                    let dur = bgmAud.duration, cur = bgmAud.currentTime;
+                    if(isNaN(dur) || dur <= 0) return;
+                    
+                    let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+                    let playLimit = parseInt(window.radioSettings.playLimit || 0);
+                    
+                    let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+
+                    if (isEnding) {
+                        window.isFadingOut = true;
+                        clearInterval(window.bgmFaderInterval); // Laufende Fader stoppen
+                        
+                        let type = window.radioSettings.type || 'crossfade';
+                        // Sanftes Ausklingen (Fade-Out)
+                        if ((type === 'crossfade' || type === 'fadeout') && fadeSec > 0) {
+                            let volStep = bgmAud.volume / (fadeSec * 20);
+                            
+                            window.bgmFaderInterval = setInterval(() => {
+                                if (bgmAud.volume - volStep > 0.05) {
+                                    bgmAud.volume -= volStep;
+                                } else {
+                                    bgmAud.volume = 0;
+                                    clearInterval(window.bgmFaderInterval);
+                                    window.triggerNextRadioSong();
+                                }
+                            }, 50);
+                        } else {
+                            window.triggerNextRadioSong();
+                        }
+                    }
+                });
+                
+                bgmAud.addEventListener('ended', function() {
+                    if(!window.isFadingOut) window.triggerNextRadioSong();
+                });
+            }
+        };
+
+        // Überschreibe den Lautstärkeregler, damit er laufende Übergänge abbrechen kann
+        window.bgmVolume = function(val) { 
+            let bgm = document.getElementById('global-bgm'); 
+            if (bgm) {
+                clearInterval(window.bgmFaderInterval); // Stoppt Fading, wenn User manuell regelt
+                window.isRadioTransitioning = false;
+                bgm.volume = parseFloat(val); 
+            }
+        };
+
+        // Radio-Listener initialisieren
+        setTimeout(window.setupRadioEventListeners, 1000);
+
+    }, 1500);
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🎵 MİSALİ FINAL PATCH: RADIO, COSMIC VIEW & BACK BUTTON 🎵 -->
+<!-- ===================================================================== -->
+<style id="misali-mobile-fixes">
+    /* 1. KOZMIK GÖRÜNÜM: 2 KREISE NEBENEINANDER AUF DEM HANDY */
+    @media (max-width: 768px) {
+        .c-grid.cosmic-view {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important; /* Zwingt 2 Spalten nebeneinander */
+            gap: 12px !important;
+            padding: 10px !important;
+            justify-items: center !important;
+        }
+        .c-grid.cosmic-view .card {
+            width: 100% !important;
+            max-width: 160px !important;
+            aspect-ratio: 1 / 1 !important; /* Hält den Kreis perfekt rund */
+            height: auto !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 10px !important;
+            margin: 0 !important;
+        }
+        .c-grid.cosmic-view .card-ic { font-size: 1.5rem !important; margin-bottom: 2px !important; }
+        .c-grid.cosmic-view .card-t { font-size: 0.75rem !important; line-height: 1.1 !important; margin-bottom: 2px !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; text-align: center !important; }
+        .c-grid.cosmic-view .card-sub { font-size: 0.6rem !important; line-height: 1.1 !important; margin-bottom: 4px !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; text-align: center !important; color: var(--text-sub) !important; }
+        .c-grid.cosmic-view .card-footer { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 4px !important; font-size: 0.65rem !important; }
+        .c-grid.cosmic-view .c-stat i { font-size: 0.75rem !important; }
+        .c-grid.cosmic-view .bookmark-btn { top: 10px !important; right: 15px !important; font-size: 0.9rem !important; }
+        .c-grid.cosmic-view .admin-badge-mini { top: 5px !important; left: 5px !important; font-size: 0.55rem !important; padding: 2px 4px !important; }
+    }
+</style>
+
+<script id="misali-radio-history-fix">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        
+        // ==========================================
+        // 2. HANDY ZURÜCK-BUTTON (BACK BUTTON) FIX
+        // ==========================================
+        // Setzt einen Anker in der Browser-Historie
+        history.replaceState({ page: 'home' }, '', window.location.href);
+
+        const origOpenModalHistory = window.openModal;
+        window.openModal = function(id) {
+            if(origOpenModalHistory) origOpenModalHistory(id);
+            // Beim Öffnen eines Fensters einen virtuellen Schritt vorwärts gehen
+            history.pushState({ modalOpen: true, modalId: id }, '', window.location.href);
+        };
+
+        window.addEventListener('popstate', function(event) {
+            let openModals = document.querySelectorAll('.modal.show');
+            if (openModals.length > 0) {
+                window.closeTopModal(); // Schließt nur das Fenster
+                // Verhindert das Schließen der gesamten App durch Einfügen eines neuen States
+                history.pushState(null, '', window.location.href);
+            }
+        });
+
+        // ==========================================
+        // 3. RADIO REMIX & STOTTER FIX (BUTTERWEICH)
+        // ==========================================
+        let bgm = document.getElementById('global-bgm');
+        if (bgm) {
+            // NUKE-METHODE: Klonen des Audio-Elements zerstört ALLE alten, fehlerhaften Event-Listener, die das Stottern verursacht haben!
+            let newBgm = bgm.cloneNode(true);
+            bgm.parentNode.replaceChild(newBgm, bgm);
+            bgm = newBgm;
+            bgm.loop = false; // Niemals loopen bei Remix!
+        }
+
+        window.isFadingOut = false;
+        if(window.bgmFaderInterval) clearInterval(window.bgmFaderInterval);
+        window.bgmFaderInterval = null;
+
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgmAud = document.getElementById('global-bgm');
+            let playIcon = document.getElementById('bgm-play-icon');
+            if (!bgmAud || !settings.playlist || settings.playlist.length === 0) return;
+
+            // Laufende Fades sofort abbrechen
+            clearInterval(window.bgmFaderInterval);
+            window.isFadingOut = false;
+
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src === 'firebaseDB' && window.audioStorage ? await window.audioStorage.get(track.id) : (track.src || track);
+
+            if (!audioData) {
+                window.triggerNextRadioSong(); 
+                return;
+            }
+
+            bgmAud.pause();
+            if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(bgmAud, audioData);
+            else bgmAud.src = audioData;
+            
+            if(window.updateRadioPlayerDisplay) window.updateRadioPlayerDisplay(settings);
+
+            let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+            bgmAud.volume = 0; // Für sanften Start immer stumm
+            
+            bgmAud.play().then(() => {
+                if(playIcon) playIcon.className = 'fas fa-pause';
+                let type = settings.type || 'crossfade';
+                let fadeSec = parseInt(settings.fadeSec || 5);
+
+                if ((type === 'crossfade' || type === 'fadein') && fadeSec > 0) {
+                    let volStep = targetVol / (fadeSec * 20); // Butterweich (20 Berechnungen pro Sekunde)
+                    window.bgmFaderInterval = setInterval(() => {
+                        if (bgmAud.volume + volStep < targetVol) {
+                            bgmAud.volume += volStep;
+                        } else {
+                            bgmAud.volume = targetVol;
+                            clearInterval(window.bgmFaderInterval);
+                        }
+                    }, 50);
+                } else {
+                    bgmAud.volume = targetVol;
+                }
+            }).catch(e => console.log("Autoplay blockiert"));
+        };
+
+        window.setupRadioEventListeners = function() {
+            let bgmAud = document.getElementById('global-bgm');
+            if(!bgmAud || bgmAud.hasAttribute('data-perfect-listener')) return;
+            
+            bgmAud.setAttribute('data-perfect-listener', 'true');
+            
+            bgmAud.addEventListener('timeupdate', function() {
+                // Sperre: Wenn es bereits ausfadet, ignorieren! (Das behebt das Stottern/die Störgeräusche)
+                if(!window.radioSettings || window.isFadingOut) return;
+                
+                let dur = bgmAud.duration, cur = bgmAud.currentTime;
+                if(isNaN(dur) || dur <= 0) return;
+                
+                let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+                let playLimit = parseInt(window.radioSettings.playLimit || 0);
+                
+                let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+
+                if (isEnding) {
+                    window.isFadingOut = true; // Sperre rein!
+                    clearInterval(window.bgmFaderInterval);
+                    
+                    let type = window.radioSettings.type || 'crossfade';
+                    if ((type === 'crossfade' || type === 'fadeout') && fadeSec > 0) {
+                        let volStep = bgmAud.volume / (fadeSec * 20);
+                        window.bgmFaderInterval = setInterval(() => {
+                            if (bgmAud.volume - volStep > 0.05) {
+                                bgmAud.volume -= volStep;
+                            } else {
+                                bgmAud.volume = 0;
+                                clearInterval(window.bgmFaderInterval);
+                                window.triggerNextRadioSong();
+                            }
+                        }, 50);
+                    } else {
+                        window.triggerNextRadioSong();
+                    }
+                }
+            });
+            
+            bgmAud.addEventListener('ended', function() {
+                if(!window.isFadingOut) window.triggerNextRadioSong();
+            });
+        };
+
+        // Volumeregler muss einen Fade abbrechen, sonst springt die Lautstärke
+        window.bgmVolume = function(val) { 
+            let bgmAud = document.getElementById('global-bgm'); 
+            if (bgmAud) {
+                clearInterval(window.bgmFaderInterval); 
+                bgmAud.volume = parseFloat(val); 
+            }
+        };
+
+        setTimeout(window.setupRadioEventListeners, 500);
+
+    }, 1500);
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🎵 MİSALİ FINAL MASTER FIX: RADIO ENGINE & BLAUE ROSE 🎵 -->
+<!-- ===================================================================== -->
+<style id="misali-rose-fix">
+    /* Die blaue Rose näher an die Zahl schieben */
+    .real-blue-rose { 
+        display: inline-block; 
+        transform: translateX(4px); /* Schiebt die Rose leicht nach rechts zur Zahl */
+        margin-right: 0 !important; 
+        padding-right: 0 !important;
+    }
+</style>
+
+<script id="misali-radio-master-engine">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Radio Master Engine & UI Fixes geladen!");
+
+        // ==========================================
+        // 1. SİSTEM VE VERİTABANI KORUMASI (Upload Fix)
+        // ==========================================
+        // Speichert Lieder sicher in Firebase und IndexedDB, um Abstürze zu verhindern
+        window.adminRadioUpload = async function(input) {
+            if (!input.files || input.files.length === 0) return;
+            window.radioSettings = window.radioSettings || { playlist: [] };
+            if (!window.radioSettings.playlist) window.radioSettings.playlist = [];
+            
+            for(let i = 0; i < input.files.length; i++) {
+                let file = input.files[i];
+                if(file.size > 5000000) { window.toast(file.name + " çok büyük (Max 5MB)!", "❌"); continue; }
+                
+                window.toast(file.name + " yükleniyor...", "⏳");
+                let reader = new FileReader();
+                reader.onload = async function(e) {
+                    let base64Data = e.target.result;
+                    let trackId = "radio_track_" + Date.now() + "_" + i;
+                    let trackName = file.name.replace(/\.[^/.]+$/, "");
+                    
+                    try {
+                        await firebase.database().ref('radioFiles/' + trackId).set(base64Data);
+                        if(window.audioStorage) await window.audioStorage.save(trackId, base64Data);
+                        
+                        // NUR die ID speichern, nicht den riesigen Base64-String! (Verhindert Absturz)
+                        window.radioSettings.playlist.push({ id: trackId, name: trackName, src: "firebaseDB" });
+                        
+                        localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+                        await firebase.database().ref('radioSettings').set(window.radioSettings);
+                        
+                        if(typeof window.renderRadioPlaylist === 'function') window.renderRadioPlaylist();
+                        window.toast(trackName + " eklendi!", "🎵");
+                    } catch(err) { window.toast("Yükleme Hatası (5MB Limit)", "❌"); }
+                };
+                reader.readAsDataURL(file);
+            }
+            input.value = ""; 
+        };
+
+        // ==========================================
+        // 2. RADIO ABSPIEL-ENGINE (KUSURSUZ OYNATICI)
+        // ==========================================
+        window.isFadingOut = false;
+        window.isRadioTransitioning = false; // Sperre für flüssige Übergänge
+        if(window.bgmFaderInterval) clearInterval(window.bgmFaderInterval);
+
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgmAud = document.getElementById('global-bgm');
+            let playIcon = document.getElementById('bgm-play-icon');
+            if (!bgmAud || !settings.playlist || settings.playlist.length === 0) return;
+
+            // Alte Fades sofort abbrechen
+            clearInterval(window.bgmFaderInterval);
+            window.isFadingOut = false;
+            window.isRadioTransitioning = true; // Übergang startet
+
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src;
+
+            // Lied aus der Datenbank laden, falls nötig
+            if (track.src === 'firebaseDB') {
+                audioData = null;
+                if (window.audioStorage) audioData = await window.audioStorage.get(track.id);
+                if (!audioData || audioData === 'firebaseDB') {
+                    try {
+                        let snap = await firebase.database().ref('radioFiles/' + track.id).once('value');
+                        if (snap.exists()) {
+                            audioData = snap.val();
+                            if(window.audioStorage) window.audioStorage.save(track.id, audioData);
+                        }
+                    } catch(e) {}
+                }
+            }
+
+            if (!audioData) { 
+                window.isRadioTransitioning = false;
+                window.triggerNextRadioSong(); 
+                return; 
+            }
+
+            bgmAud.pause();
+            
+            // Infinity-Bug (Lieddauer-Fehler) umgehen
+            if(window.loadAudioSafely) {
+                await window.loadAudioSafely(bgmAud, audioData);
+            } else {
+                bgmAud.src = audioData;
+                bgmAud.load();
+            }
+
+            if(window.updateRadioPlayerDisplay) window.updateRadioPlayerDisplay(settings);
+
+            let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+            let type = settings.type || 'crossfade';
+            let fadeSec = parseInt(settings.fadeSec || 5);
+
+            // Sanftes Einblenden (Fade-In)
+            if (['crossfade', 'fadein', 'fadeoutin'].includes(type) && fadeSec > 0) {
+                bgmAud.volume = 0; 
+                bgmAud.play().then(() => {
+                    if(playIcon) playIcon.className = 'fas fa-pause';
+                    let volStep = targetVol / (fadeSec * 20); // Butterweicher Übergang
+                    window.bgmFaderInterval = setInterval(() => {
+                        if (bgmAud.volume + volStep < targetVol) {
+                            bgmAud.volume += volStep;
+                        } else {
+                            bgmAud.volume = targetVol;
+                            clearInterval(window.bgmFaderInterval);
+                            window.isRadioTransitioning = false;
+                        }
+                    }, 50);
+                }).catch(e => { window.isRadioTransitioning = false; });
+            } else {
+                // Normales Abspielen (Harter Schnitt)
+                bgmAud.volume = targetVol;
+                bgmAud.play().then(() => { 
+                    if(playIcon) playIcon.className = 'fas fa-pause'; 
+                    window.isRadioTransitioning = false;
+                }).catch(e => { window.isRadioTransitioning = false; });
+            }
+        };
+
+        // ==========================================
+        // 3. REMIX-WÄCHTER (Stotter-Fix & Lied-Wechsel)
+        // ==========================================
+        window.setupRadioEventListeners = function() {
+            let bgmAud = document.getElementById('global-bgm');
+            if(!bgmAud || bgmAud.hasAttribute('data-perfect-listener')) return;
+            
+            bgmAud.setAttribute('data-perfect-listener', 'true');
+            bgmAud.loop = false; // Darf beim Remix niemals loopen!
+            
+            bgmAud.addEventListener('timeupdate', function() {
+                // Ignorieren, wenn ein Fade läuft oder das Lied gerade erst wechselt
+                if(!window.radioSettings || window.isFadingOut || window.isRadioTransitioning) return;
+                
+                let dur = bgmAud.duration, cur = bgmAud.currentTime;
+                if(isNaN(dur) || dur <= 0 || dur === Infinity) return; // Verhindert Chrome-Fehler
+                
+                let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+                let playLimit = parseInt(window.radioSettings.playLimit || 0);
+                let type = window.radioSettings.type || 'crossfade';
+                
+                let isEnding = false;
+                // Prüft, ob das eingestellte Zeitlimit erreicht wurde oder das Lied zu Ende geht
+                if (playLimit > 0 && cur >= playLimit) isEnding = true;
+                else if ((dur - cur) <= fadeSec) isEnding = true;
+
+                if (isEnding) {
+                    window.isFadingOut = true;
+                    clearInterval(window.bgmFaderInterval);
+                    
+                    if (['crossfade', 'fadeout', 'fadeoutin'].includes(type) && fadeSec > 0) {
+                        let volStep = bgmAud.volume / (fadeSec * 20);
+                        
+                        window.bgmFaderInterval = setInterval(() => {
+                            if (bgmAud.volume - volStep > 0.05) {
+                                bgmAud.volume -= volStep;
+                            } else {
+                                bgmAud.volume = 0;
+                                clearInterval(window.bgmFaderInterval);
+                                
+                                if (type === 'fadeoutin') {
+                                    setTimeout(() => window.triggerNextRadioSong(), 1500); // 1.5s Pause zwischen Liedern
+                                } else {
+                                    window.triggerNextRadioSong();
+                                }
+                            }
+                        }, 50);
+                    } else {
+                        window.triggerNextRadioSong();
+                    }
+                }
+            });
+            
+            bgmAud.addEventListener('ended', function() {
+                if(!window.isFadingOut && !window.isRadioTransitioning) window.triggerNextRadioSong();
+            });
+        };
+        setTimeout(window.setupRadioEventListeners, 500);
+
+        // ==========================================
+        // 4. VORSCHAU (ÖNDİNLEME) & SPEICHERN (YAYINA AL) FIX
+        // ==========================================
+        window.previewRemix = function() {
+            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length === 0) {
+                return window.toast("Önce şarkı yükleyin!", "⚠️");
+            }
+            
+            // Liest die aktuellen Dropdown-Werte aus und erzwingt das Abspielen
+            let tempSettings = {
+                type: document.getElementById('adm-bgm-transition')?.value || 'crossfade',
+                fadeSec: parseInt(document.getElementById('adm-bgm-fade-sec')?.value || 5),
+                playLimit: parseInt(document.getElementById('adm-bgm-play-limit')?.value || 0),
+                icon: document.getElementById('adm-bgm-icon')?.value || '',
+                customText: document.getElementById('adm-bgm-text')?.value || '',
+                font: document.getElementById('adm-bgm-font')?.value || "'Space Mono', monospace",
+                playlist: window.radioSettings.playlist // WICHTIG: Playlist übergeben!
+            };
+            
+            window.applyRadioSettingsToPlayer(tempSettings); 
+            window.toast("Radyo Önizleme Modu Aktif", "🎧");
+        };
+
+        window.saveGlobalBGM = function() {
+            if(!window.radioSettings) return;
+            
+            window.radioSettings.type = document.getElementById('adm-bgm-transition')?.value || 'crossfade';
+            window.radioSettings.fadeSec = parseInt(document.getElementById('adm-bgm-fade-sec')?.value || 5);
+            window.radioSettings.playLimit = parseInt(document.getElementById('adm-bgm-play-limit')?.value || 0);
+            window.radioSettings.icon = document.getElementById('adm-bgm-icon')?.value || '';
+            window.radioSettings.customText = document.getElementById('adm-bgm-text')?.value || '';
+            window.radioSettings.font = document.getElementById('adm-bgm-font')?.value || "'Space Mono', monospace";
+            
+            localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+            try { firebase.database().ref('radioSettings').set(window.radioSettings); } catch(e){}
+            
+            window.applyRadioSettingsToPlayer(window.radioSettings);
+            window.toast("Radyo Ayarları Yayına Alındı!", "📻");
+        };
+
+        // Volumenregler überschreibt laufenden Fade
+        window.bgmVolume = function(val) { 
+            let bgmAud = document.getElementById('global-bgm'); 
+            if (bgmAud) {
+                clearInterval(window.bgmFaderInterval); 
+                window.isRadioTransitioning = false;
+                bgmAud.volume = parseFloat(val); 
+            }
+        };
+
+    }, 1500);
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 👑 MİSALİ OMNI-PATCH: NESTED COMMENTS, TOP 10 SYNC & RADIO REMIX 👑 -->
+<!-- ===================================================================== -->
+<script id="misali-omni-patch">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Omni-Patch geladen: Kommentare, Ticker, Radio & Badges repariert!");
+
+        // ==========================================
+        // 1. ESERLER BADGE (ÜYE ESERLERİ) ZÄHLER FIX
+        // ==========================================
+        const oldUpdateLiveBadges = window.updateLiveBadges;
+        window.updateLiveBadges = function() {
+            if(oldUpdateLiveBadges) oldUpdateLiveBadges();
+            // Zwingt das Badge dazu, die GESAMTZAHL aller User-Werke für alle anzuzeigen!
+            let bWrk = document.getElementById('b-wrk');
+            if(bWrk) bWrk.innerText = (window.userPoemsDB || []).length;
+        };
+        window.updateLiveBadges();
+
+        // ==========================================
+        // 2. TOP 10 & LIVE TICKER PERFEKT SYNCHRONISIEREN
+        // ==========================================
+        window.getGlobalTopAudioWorks = function() {
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+            let audioWorks = [];
+            
+            // Sammelt alle Audio-Werke aus allen Kategorien
+            ['poems', 'quotes', 'atasozleri', 'stories', 'jokes', 'marslar'].forEach(cat => { 
+                if (window.DB && window.DB[cat]) window.DB[cat].forEach(w => { if (w.hasAudio || w.audio) audioWorks.push({...w, type: cat}); }); 
+            });
+            if (window.userPoemsDB) window.userPoemsDB.forEach(w => { if (w.hasAudio || w.audio) audioWorks.push({...w, type: 'userPoems'}); });
+            
+            // Berechnet die Noten (Punkte)
+            audioWorks.forEach(w => {
+                let nScore = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => nScore += parseInt(v||0));
+                w.calcNotes = nScore;
+            });
+            
+            // Exakt gleiche Sortierung für ALLES (Nach Punkten, dann nach Zeit)
+            audioWorks.sort((a,b) => {
+                if (b.calcNotes !== a.calcNotes) return b.calcNotes - a.calcNotes;
+                return (b.timestamp || 0) - (a.timestamp || 0); 
+            });
+            
+            return audioWorks;
+        };
+
+        // Überschreibt die Top 10 Liste mit dem neuen Synced-Array
+        window.renderTopAudioList = function() {
+            let container = document.getElementById('top-audio-works');
+            if (!container || !document.getElementById('home-view').classList.contains('active')) return;
+
+            let top10 = window.getGlobalTopAudioWorks().slice(0, 10);
+            if (top10.length === 0) { container.innerHTML = ''; return; }
+
+            const palette = ['var(--accent-pink)', 'var(--accent-cyan)', '#c084fc', 'var(--accent-gold)'];
+            let html = '<div class="top-audio-container"><div class="top-audio-header" style="color:var(--accent-cyan); border-bottom:1px dashed var(--accent-pink); padding-bottom:10px; margin-bottom:15px; font-size:1.2rem; font-weight:bold; display:flex; align-items:center; gap:8px;"><i class="fas fa-headphones-alt" style="color:var(--accent-pink); font-size:1.4rem;"></i> Top 10 Sesli Eserler</div><div style="display:flex; flex-direction:column; gap:5px;">';
+
+            top10.forEach((w, i) => {
+                let safeId = encodeURIComponent(w.id);
+                let authorText = w.author || w.name || 'Şair Misal.i';
+                let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
+                let rankColor = palette[i % palette.length];
+
+                html += `<div class="audio-track-item" style="animation-delay: ${i*0.08}s; border-left: 3px solid ${rankColor};" onclick="window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); setTimeout(()=>window.fpToggle(true), 600);">
+                            <div class="audio-track-rank" style="color:${rankColor}; font-weight:bold; font-size:1.4rem; min-width:30px; text-shadow:0 0 10px ${rankColor};">${i+1}</div>
+                            <div class="audio-track-info" style="flex:1;">
+                                <div class="audio-track-title">${w.title || w.trTitle || 'Eser'}</div>
+                                <div class="${authorClass}" style="font-size: 1.25rem; margin-top: 2px;">~ ${authorText}</div>
+                            </div>
+                            <div class="audio-track-btn" style="color:${rankColor}; font-size:1.4rem; filter: drop-shadow(0 0 5px ${rankColor});"><i class="fas fa-play-circle"></i></div>
+                        </div>`;
+            });
+            container.innerHTML = html + '</div></div>';
+        };
+
+        // Überschreibt den Ticker, damit er exakt die ersten 3 aus der Top 10 nimmt
+        const oldUpdateLiveTickers = window.updateLiveTickers;
+        window.updateLiveTickers = function() {
+            if(oldUpdateLiveTickers) oldUpdateLiveTickers();
+            
+            let t2 = document.querySelector('.ticker-2 .ticker-txt');
+            if(t2) {
+                let topWorks = (window.userPoemsDB || []).filter(w => w.adminRating && w.adminRating.points > 0).sort((a, b) => b.adminRating.points - a.adminRating.points).slice(0, 3);
+                
+                // HIER: Greift auf EXAKT das gleiche Array zu wie die Top 10 Liste!
+                let top3Audio = window.getGlobalTopAudioWorks().slice(0, 3);
+
+                let html = "<span style='font-size:0.85rem; color:var(--text-main);'>";
+                let parts = [];
+                
+                if(topWorks.length > 0) {
+                    parts.push("<span style='color:#c084fc; font-weight:bold;'>🏆 ŞAİRLER LİGİ - İLK 3:</span> &nbsp; " + 
+                        topWorks.map((w, i) => {
+                            let aColorClass = (w.author === 'Şair Misal.i') ? 'misali-signature-text' : 'author-signature-gold';
+                            return `<span onmousedown="event.stopPropagation();" onclick="window.openReadModal('${w.id}', 'userPoems')" style="cursor:pointer; transition:0.3s;" onmouseover="this.style.color='var(--accent-cyan)';" onmouseout="this.style.color='inherit';"><b>${i+1}. ${w.title}</b> <span class="${aColorClass}" style="font-size:1.1rem !important;">~ ${w.author}</span> 🏅 <span style="background:var(--accent-pink); color:#fff; padding:2px 5px; border-radius:4px;">${w.adminRating.points} Puan</span></span>`;
+                        }).join(' &nbsp;|&nbsp; '));
+                }
+                
+                if(top3Audio.length > 0) {
+                    parts.push("<span style='color:var(--accent-cyan); font-weight:bold;'>🎧 TOP 3 SESLİ ESERLER:</span> &nbsp; " + 
+                        top3Audio.map((w, i) => {
+                            let aName = w.author || w.name || 'Şair Misal.i';
+                            let aColorClass = (aName === 'Şair Misal.i') ? 'misali-signature-text' : 'author-signature-gold';
+                            return `<span onmousedown="event.stopPropagation();" onclick="window.openReadModal('${w.id}', '${w.type}')" style="cursor:pointer; transition:0.3s;" onmouseover="this.style.color='var(--accent-pink)';" onmouseout="this.style.color='inherit';"><b>${i+1}. ${w.title || w.trTitle}</b> <span class="${aColorClass}" style="font-size:1.1rem !important;">~ ${aName}</span> 🎵 <span style="color:var(--accent-cyan); font-weight:bold;">${w.calcNotes} Nota</span></span>`;
+                        }).join(' &nbsp;|&nbsp; '));
+                }
+                
+                if (parts.length > 0) { html += parts.join(" &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:var(--accent-gold); font-size:1.2rem;'>★</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "); } 
+                else { html += "Henüz puanlanmış eser yok."; }
+                
+                html += "</span>";
+                t2.innerHTML = html;
+            }
+        };
+
+
+        // ==========================================
+        // 3. VERSCHACHTELTE KOMMENTARE (THREADING & ROSEN)
+        // ==========================================
+        // Hilfsfunktion: Finde einen Kommentar rekursiv über einen Index-Pfad (z.B. "0-2-1")
+        window.getCommentByPath = function(pathStr, pId) {
+            let indices = pathStr.split('-');
+            let arr = window.poemDataStore[pId].comments;
+            let target = null;
+            for(let i=0; i<indices.length; i++) {
+                let idx = parseInt(indices[i]);
+                if(i === indices.length - 1) { target = arr[idx]; } 
+                else { if(!arr[idx].replies) arr[idx].replies = []; arr = arr[idx].replies; }
+            }
+            return target;
+        };
+
+        // Die rekursive Render-Engine für Kommentare
+        window.renderCommentsTree = function(commentsArray, pathPrefix = "") {
+            return commentsArray.map((c, idx) => {
+                let currentPath = pathPrefix === "" ? String(idx) : pathPrefix + "-" + idx;
+                let uName = window.currentUser ? window.currentUser.username : null;
+                let hasRosed = uName && c.roseUsers && c.roseUsers.includes(uName);
+                
+                let roleBadge = `<span style="font-size:0.65rem; color:var(--text-sub); border:1px solid var(--border-soft); padding:2px 5px; border-radius:4px; margin-left:8px; vertical-align:middle; background:rgba(0,0,0,0.2);">👤 User</span>`;
+                let commentUserObj = Object.values(window.userDatabase || {}).find(usr => (usr.name === c.user || usr.username === c.user));
+                if ((commentUserObj && commentUserObj.role === 'admin') || c.user === 'Şair Misal.i' || c.user === 'Sair Misali') {
+                    roleBadge = `<span style="font-size:0.65rem; color:#000; background:var(--accent-gold); border:1px solid var(--accent-gold); padding:2px 5px; border-radius:4px; margin-left:8px; vertical-align:middle; box-shadow:0 0 8px rgba(212,175,55,0.6); font-weight:bold;">👑 Admin</span>`;
+                }
+
+                // Render verschachtelte Antworten (Replies)
+                let repliesHtml = (c.replies && c.replies.length > 0) ? `<div style="margin-left:25px; border-left:2px dashed rgba(0,206,209,0.3); padding-left:12px; margin-top:10px;">${window.renderCommentsTree(c.replies, currentPath)}</div>` : '';
+                
+                // Reply Input Box
+                let replyInputHtml = `
+                    <div id="reply-box-${currentPath}" style="display:none; margin-top:10px; gap:8px; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                        <input type="text" id="reply-inp-${currentPath}" class="inp" placeholder="Yanıtla..." style="margin:0; font-size:0.85rem; padding:8px;">
+                        <button class="noble-btn primary" style="width:auto; padding:8px 12px; margin:0;" onclick="window.submitReply('${currentPath}')"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                `;
+
+                return `
+                <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:8px; margin-bottom:10px; border-left: 3px solid var(--accent-cyan);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <div><strong style="color:var(--accent-gold);">${c.user}</strong>${roleBadge}</div>
+                        <small style="color:var(--text-sub); font-size:0.75rem;">${c.time}</small>
+                    </div>
+                    <div style="margin-bottom:8px; color:var(--text-main); font-size:0.95rem; line-height:1.4;">${c.text}</div>
+                    
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <button class="rose-btn" style="background:transparent; border:none; cursor:pointer; display:flex; align-items:center; gap:5px;" onclick="window.roseCommentNested('${currentPath}')">
+                            <span class="real-blue-rose ${hasRosed ? 'comment-rose-anim' : 'dimmed'}" style="font-size:1.1rem; padding-right:2px;">🌹</span>
+                            <span style="font-weight:bold; color:var(--text-main);">${c.roses || 0}</span>
+                        </button>
+                        <button class="auth-visible" style="background:transparent; border:none; color:var(--accent-cyan); cursor:pointer; font-size:0.85rem; font-weight:bold; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" onclick="let b = document.getElementById('reply-box-${currentPath}'); b.style.display = b.style.display==='none'?'flex':'none';">
+                            <i class="fas fa-reply"></i> Yanıtla
+                        </button>
+                    </div>
+                    ${replyInputHtml}
+                    ${repliesHtml}
+                </div>`;
+            }).join('');
+        };
+
+        // Überschreibt UpdateHeartsUI, um die neue verschachtelte Struktur zu laden
+        window.updateHeartsUI = function() {
+            if (!window.currentItemData) return;
+            const pId = window.currentItemData.id;
+            const data = window.poemDataStore[pId] || { ratings: {}, comments: [] };
+            
+            let uName = window.currentUser ? window.currentUser.username : null;
+            let myVal = 0;
+            if (uName && data.ratings && data.ratings[uName]) {
+                myVal = typeof data.ratings[uName] === 'object' ? parseInt(data.ratings[uName].val || 0) : parseInt(data.ratings[uName] || 0);
+            }
+            
+            for(let i = 1; i <= 3; i++) {
+                let hEl = document.getElementById('heart-' + i);
+                if (hEl) hEl.className = i <= myVal ? "fas fa-heart react-heart auth-visible heart-active" : "fas fa-heart react-heart auth-visible heart-inactive";
+            }
+
+            let cList = document.getElementById('modal-comments-list');
+            if (cList) {
+                if (!data.comments || data.comments.length === 0) {
+                    cList.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px; font-style:italic;">İlk yorumu sen yap...</div>';
+                } else {
+                    cList.innerHTML = window.renderCommentsTree(data.comments, "");
+                }
+            }
+        };
+
+        // Haupt-Kommentar speichern
+        window.addComment = function() {
+            if (!window.currentUser) return window.toast("Giriş yapın.", "🔒");
+            let input = document.getElementById('modal-comment-input'), txt = input?.value.trim(); if (!txt) return;
+            const pId = window.currentItemData.id; 
+            if (!window.poemDataStore[pId]) window.poemDataStore[pId] = { ratings: {}, comments: [] };
+            window.poemDataStore[pId].comments = window.poemDataStore[pId].comments || [];
+            
+            window.poemDataStore[pId].comments.push({ 
+                user: window.currentUser.name || window.currentUser.username, 
+                text: txt, roses: 0, roseUsers: [], replies: [], 
+                time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) 
+            });
+            
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            try{ firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments); }catch(e){}
+            if (input) input.value = ''; 
+            window.updateHeartsUI(); window.renderAllContent();
+        };
+
+        // Antwort (Reply) speichern
+        window.submitReply = function(pathStr) {
+            if (!window.currentUser) return window.toast("Giriş yapın.", "🔒");
+            let input = document.getElementById('reply-inp-' + pathStr);
+            let txt = input.value.trim();
+            if(!txt) return;
+
+            const pId = window.currentItemData.id;
+            let targetNode = window.getCommentTarget ? window.getCommentTarget(pathStr, pId) : window.getCommentByPath(pathStr, pId);
+            
+            if(!targetNode.replies) targetNode.replies = [];
+            targetNode.replies.push({
+                user: window.currentUser.name || window.currentUser.username,
+                text: txt, roses: 0, roseUsers: [], replies: [],
+                time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            try{ firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments); }catch(e){}
+            window.updateHeartsUI();
+        };
+
+        // Rose für verschachtelte Kommentare
+        window.roseCommentNested = function(pathStr) {
+            if (!window.currentUser) return window.toast("Giriş yapın.", "🔒");
+            const pId = window.currentItemData.id;
+            let c = window.getCommentTarget ? window.getCommentTarget(pathStr, pId) : window.getCommentByPath(pathStr, pId);
+            
+            c.roseUsers = c.roseUsers || [];
+            let uName = window.currentUser.username;
+            let uIdx = c.roseUsers.indexOf(uName);
+            
+            if (uIdx > -1) {
+                c.roseUsers.splice(uIdx, 1);
+                c.roses = Math.max(0, (c.roses || 1) - 1);
+            } else {
+                c.roseUsers.push(uName);
+                c.roses = (c.roses || 0) + 1;
+            }
+            
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); 
+            try{ firebase.database().ref('interactions/' + pId + '/comments').set(window.poemDataStore[pId].comments); }catch(e){}
+            window.updateHeartsUI(); 
+            window.updateLiveBadges(); 
+        };
+
+        // ==========================================
+        // 4. RADIO REMIX & VORSCHAU FIX
+        // ==========================================
+        // Die Vorschau springt jetzt SOFORT ins nächste Lied, um den Übergang live zu demonstrieren!
+        window.previewRemix = function() {
+            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length === 0) {
+                return window.toast("Önce şarkı yükleyin!", "⚠️");
+            }
+            // Aktuelle Einstellungen sichern
+            window.radioSettings.type = document.getElementById('adm-bgm-transition')?.value || 'crossfade';
+            window.radioSettings.fadeSec = parseInt(document.getElementById('adm-bgm-fade-sec')?.value || 5);
+            window.radioSettings.playLimit = parseInt(document.getElementById('adm-bgm-play-limit')?.value || 0);
+            
+            window.toast("Radyo Önizleme Modu: Remix Test Ediliyor 🎧", "✨");
+            
+            // Erzwingt den Sprung ins NÄCHSTE Lied, um den Crossfade-Effekt zu beweisen
+            if(window.triggerNextRadioSong) {
+                window.isFadingOut = true; // Sperre aktivieren
+                window.triggerNextRadioSong();
+            }
+        };
+
+        // Überschreibt den Event Listener, um Endlosschleifen zu verhindern und den Remix sanft zu machen
+        window.triggerNextRadioSong = async function() {
+            window.isFadingOut = false;
+            let settings = window.radioSettings;
+            if(settings && settings.playlist && settings.playlist.length > 0) {
+                if(typeof window.currentBgmIndex === 'undefined') window.currentBgmIndex = 0;
+                
+                // Springe zum nächsten Lied
+                window.currentBgmIndex = (window.currentBgmIndex + 1) % settings.playlist.length;
+                console.log("Remix Transition -> Next Track Index: ", window.currentBgmIndex);
+                
+                await window.applyRadioSettingsToPlayer(settings);
+            }
+        };
+
+        // UI SOFORT AKTUALISIEREN
+        window.renderAllContent();
+        if(window.renderTopAudioList) window.renderTopAudioList();
+        if(window.updateLiveTickers) window.updateLiveTickers();
+
+    }, 2000);
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🎵 MİSALİ FINAL AUDIO & LIGHT MODE PATCH 🎵 -->
+<!-- ===================================================================== -->
+<script id="misali-audio-light-patch">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Audio & Light Mode Patch geladen!");
+
+        // ==========================================
+        // 1. LIGHT MODE FIX: HELLES TRACK-DISPLAY
+        // ==========================================
+        if(!document.getElementById('misali-light-radio-css')) {
+            let style = document.createElement('style');
+            style.id = 'misali-light-radio-css';
+            style.innerHTML = `
+                [data-theme="light"] .bgm-track-display {
+                    background: rgba(255, 255, 255, 0.95) !important;
+                    border: 1px solid var(--accent-cyan) !important;
+                    color: var(--accent-cyan) !important;
+                    box-shadow: inset 0 0 10px rgba(0, 206, 209, 0.15), 0 2px 5px rgba(0,0,0,0.05) !important;
+                    font-weight: bold !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ==========================================
+        // 2. MEHR REMIX-OPTIONEN IM ADMIN PANEL
+        // ==========================================
+        let transSelect = document.getElementById('adm-bgm-transition');
+        if(transSelect) {
+            transSelect.innerHTML = `
+                <option value="crossfade">🔀 Standart Çapraz (Crossfade)</option>
+                <option value="dj">🎛️ DJ Mix (Hızlı Geçiş)</option>
+                <option value="cinema">🎬 Sinematik (Yavaş & Derin)</option>
+                <option value="fadein">🔉 Sadece İçe Doğru (Fade In)</option>
+                <option value="fadeout">🔈 Sadece Dışa Doğru (Fade Out)</option>
+                <option value="fadeoutin">〰️ Nefes Payı (Duraklamalı)</option>
+                <option value="direct">⏹️ Anında Kesim (Efektsiz)</option>
+            `;
+            if (window.radioSettings && window.radioSettings.type) {
+                transSelect.value = window.radioSettings.type;
+            }
+        }
+
+        // ==========================================
+        // 3. ABSOLUT ZUVERLÄSSIGER PAUSE & PLAY BUTTON
+        // ==========================================
+        window.bgmToggle = async function(forcePlay) {
+            let bgm = document.getElementById('global-bgm');
+            let ic = document.getElementById('bgm-play-icon');
+            if (!bgm) return;
+
+            // Wenn das Radio spielt, zwinge es zur Pause!
+            if (!bgm.paused && forcePlay !== true) {
+                clearInterval(window.bgmFaderInterval); // Stoppe alle laufenden Übergänge
+                bgm.pause();
+                if (ic) ic.className = 'fas fa-play';
+                return;
+            }
+
+            // Wenn es pausiert ist, starte es!
+            if (!bgm.src || bgm.src === window.location.href || bgm.src.endsWith('/')) {
+                if(window.radioSettings && window.radioSettings.playlist && window.radioSettings.playlist.length > 0) {
+                    await window.applyRadioSettingsToPlayer(window.radioSettings);
+                    return; 
+                } else {
+                    window.toast("Radyo listesi boş!", "⚠️");
+                    return;
+                }
+            }
+            
+            // Fortsetzen
+            bgm.play().then(() => {
+                if(ic) ic.className = 'fas fa-pause';
+                clearInterval(window.bgmFaderInterval);
+                let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+                bgm.volume = targetVol; 
+            }).catch(e => console.log("Play blockiert", e));
+        };
+
+        window.bgmStop = function() { 
+            let bgm = document.getElementById('global-bgm');
+            let ic = document.getElementById('bgm-play-icon');
+            if (bgm) { 
+                clearInterval(window.bgmFaderInterval);
+                bgm.pause(); 
+                bgm.currentTime = 0; 
+            } 
+            if (ic) ic.className = 'fas fa-play'; 
+        };
+
+        // ==========================================
+        // 4. VERBESSERTE AUDIO ENGINE (FÜR NEUE REMIXE)
+        // ==========================================
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgmAud = document.getElementById('global-bgm');
+            let playIcon = document.getElementById('bgm-play-icon');
+            if (!bgmAud || !settings.playlist || settings.playlist.length === 0) return;
+
+            clearInterval(window.bgmFaderInterval);
+            window.isFadingOut = false;
+
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src === 'firebaseDB' && window.audioStorage ? await window.audioStorage.get(track.id) : (track.src || track);
+
+            if (!audioData) { window.triggerNextRadioSong(); return; }
+
+            bgmAud.pause();
+            if (typeof window.loadAudioSafely === 'function') await window.loadAudioSafely(bgmAud, audioData);
+            else bgmAud.src = audioData;
+            
+            if(window.updateRadioPlayerDisplay) window.updateRadioPlayerDisplay(settings);
+
+            let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+            let type = settings.type || 'crossfade';
+            let fadeSec = parseInt(settings.fadeSec || 5);
+
+            // Neue Effekte anpassen
+            if (type === 'dj') fadeSec = Math.max(1, fadeSec / 2); // DJ Mix ist doppelt so schnell
+            if (type === 'cinema') fadeSec = fadeSec * 1.5; // Cinema ist langsamer und epischer
+
+            bgmAud.volume = 0; 
+            
+            bgmAud.play().then(() => {
+                if(playIcon) playIcon.className = 'fas fa-pause';
+                if (['crossfade', 'fadein', 'fadeoutin', 'dj', 'cinema'].includes(type) && fadeSec > 0) {
+                    let volStep = targetVol / (fadeSec * 20); 
+                    window.bgmFaderInterval = setInterval(() => {
+                        if (bgmAud.volume + volStep < targetVol) {
+                            bgmAud.volume += volStep;
+                        } else {
+                            bgmAud.volume = targetVol;
+                            clearInterval(window.bgmFaderInterval);
+                        }
+                    }, 50);
+                } else {
+                    bgmAud.volume = targetVol;
+                }
+            }).catch(e => console.log("Autoplay blockiert"));
+        };
+
+        window.setupRadioEventListeners = function() {
+            let bgmAud = document.getElementById('global-bgm');
+            if(!bgmAud || bgmAud.hasAttribute('data-perfect-listener')) return;
+            
+            bgmAud.setAttribute('data-perfect-listener', 'true');
+            
+            bgmAud.addEventListener('timeupdate', function() {
+                if(!window.radioSettings || window.isFadingOut) return;
+                
+                let dur = bgmAud.duration, cur = bgmAud.currentTime;
+                if(isNaN(dur) || dur <= 0) return;
+                
+                let type = window.radioSettings.type || 'crossfade';
+                let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+                let playLimit = parseInt(window.radioSettings.playLimit || 0);
+
+                if (type === 'dj') fadeSec = Math.max(1, fadeSec / 2);
+                if (type === 'cinema') fadeSec = fadeSec * 1.5;
+                
+                let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+
+                if (isEnding) {
+                    window.isFadingOut = true;
+                    clearInterval(window.bgmFaderInterval);
+                    
+                    if (['crossfade', 'fadeout', 'fadeoutin', 'dj', 'cinema'].includes(type) && fadeSec > 0) {
+                        let volStep = bgmAud.volume / (fadeSec * 20);
+                        
+                        window.bgmFaderInterval = setInterval(() => {
+                            if (bgmAud.volume - volStep > 0.05) {
+                                bgmAud.volume -= volStep;
+                            } else {
+                                bgmAud.volume = 0;
+                                clearInterval(window.bgmFaderInterval);
+                                
+                                if (type === 'fadeoutin') {
+                                    setTimeout(() => window.triggerNextRadioSong(), 1500); 
+                                } else {
+                                    window.triggerNextRadioSong();
+                                }
+                            }
+                        }, 50);
+                    } else {
+                        window.triggerNextRadioSong();
+                    }
+                }
+            });
+            
+            bgmAud.addEventListener('ended', function() {
+                if(!window.isFadingOut) window.triggerNextRadioSong();
+            });
+        };
+
+        // Regler überschreibt sofort alle Fades
+        window.bgmVolume = function(val) { 
+            let bgmAud = document.getElementById('global-bgm'); 
+            if (bgmAud) {
+                clearInterval(window.bgmFaderInterval); 
+                bgmAud.volume = parseFloat(val); 
+            }
+        };
+
+        // Starte Wächter
+        setTimeout(window.setupRadioEventListeners, 500);
+
+    }, 1500);
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- ⏯️ MİSALİ PAUSE BUTTON FIX (RADIO) ⏯️ -->
+<!-- ===================================================================== -->
+<script id="misali-pause-fix">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Pause Fix geladen!");
+
+        // Den Button im HTML von seinem fehlerhaften Zwangsbefehl befreien
+        let radioPlayBtn = document.querySelector('#global-radio-widget .p-controls .fa-play')?.parentNode || 
+                           document.querySelector('#global-radio-widget .p-controls .fa-pause')?.parentNode;
+        
+        if (radioPlayBtn) {
+            radioPlayBtn.onclick = function(e) {
+                e.stopPropagation();
+                window.bgmToggle(); // Ohne 'true', also reines Toggle!
+            };
+        }
+
+        // Die absolut strikte Toggle-Funktion
+        window.bgmToggle = async function() {
+            let bgm = document.getElementById('global-bgm');
+            let ic = document.getElementById('bgm-play-icon');
+            if (!bgm) return;
+
+            if (!bgm.paused) {
+                // Es läuft -> PAUSE ERZWINGEN
+                clearInterval(window.bgmFaderInterval);
+                bgm.pause();
+                if (ic) ic.className = 'fas fa-play';
+            } else {
+                // Es steht -> ABSPIELEN
+                if (!bgm.src || bgm.src === window.location.href || bgm.src.endsWith('/')) {
+                    if (window.radioSettings && window.radioSettings.playlist && window.radioSettings.playlist.length > 0) {
+                        await window.applyRadioSettingsToPlayer(window.radioSettings);
+                    } else {
+                        if (window.toast) window.toast("Radyo listesi boş!", "⚠️");
+                    }
+                    return;
+                }
+                
+                bgm.play().then(() => {
+                    if (ic) ic.className = 'fas fa-pause';
+                    clearInterval(window.bgmFaderInterval);
+                    let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+                    bgm.volume = targetVol; 
+                }).catch(e => console.log("Play blockiert", e));
+            }
+        };
+
+    }, 2000); // Wartet kurz, bis das Menü fertig geladen ist, und wendet den Fix an
+});
+</script>
+<!-- ===================================================================== -->
+
 </body>
 </html>
