@@ -2734,28 +2734,53 @@ window.syncData = function(refPath, data) {
         saglik: [{ id: "sa1", title: "Su ve Zihin", text: "Günlük su tüketimi zihinsel berraklık için vazgeçilmezdir.", author: "Dr. Misal", emoji: "🌿" }],
         bilmeceler: [{ id: "bi1", title: "Dilsiz Kaval", text: "Sol kaval misali dilsizdir ama çok şey anlatır.\nCevap: Kalem", author: "Bilmececi", emoji: "❓" }],
         bulmacalar: [{ id: "bu1", title: "Kelime Avı", text: "İki heceli, şiir yazan kişiye ne denir?\nÇözüm: Şair", author: "Bulmacacı", emoji: "🧩" }],
+// OYUNLAR (Puanlar max 20 olarak ayarlandı, 5 Yeni Oyun eklendi)
         games: [
             { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
-            { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 25, color: "var(--accent-gold)" },
+            { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
             { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
-            { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 50, color: "var(--accent-green)" },
-            { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 30, color: "#8b5cf6" },
-            { id: "g6", title: "Milyoner", text: "Büyük ödül!", emoji: "💰", points: 100, color: "var(--accent-red)" },
-            { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 20, color: "var(--text-main)" },
-            { id: "g8", title: "Zar Sallama", text: "Botu alt et, şansını katla.", emoji: "🎲", points: 2, color: "var(--accent-cyan)" },
-            { id: "g9", title: "Anagram", text: "Karışık harflerden anlam çıkar.", emoji: "🔠", points: 8, color: "var(--accent-gold)" },
-            { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı edebiyat kültürü.", emoji: "✅", points: 1, color: "var(--accent-green)" },
-            { id: "g11", title: "Sözcük Merdiveni", text: "Son harften yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
-            { id: "g12", title: "Hızlı Hafıza", text: "Anlık beliren sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" }
+            { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+            { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+            { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+            { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+            { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+            { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+            { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+            { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+            { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+            // YENİ OYUNLAR
+            { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+            { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+            { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+            { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+            { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" }
         ]
     };
 
-    let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
+let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
     window.DB = Object.keys(loadedDB).length > 0 ? loadedDB : ZENGIN_DB;
-    if (!window.DB.poems || window.DB.poems.length === 0) window.DB.poems = ZENGIN_DB.poems; 
     
-    window.DB.games = ZENGIN_DB.games;
-    window.DB.marslar = ZENGIN_DB.marslar;
+    // KESİN ÇÖZÜM: Spiele knallhart überschreiben und sofort im Cache speichern!
+    window.DB.games = [
+        { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
+        { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
+        { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
+        { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+        { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+        { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+        { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+        { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+        { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+        { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+        { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+        { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+        { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+        { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+        { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+        { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+        { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" }
+    ];
+    window.DB.marslar = ZENGIN_DB.marslar; 
     localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
 
     window.userPoemsDB = JSON.parse(localStorage.getItem('misaliUserPoems')) || [];
@@ -4596,11 +4621,10 @@ window.openReadModal = async function(id, type) {
         window.currentLang = 'tr';
         let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
         let item = (source || []).find(x => String(x.id) === String(id)); 
-        if (!item) { window.toast("Eser bulunamadı!", "❌"); return; }
+        if (!item) return window.toast("Eser bulunamadı!", "❌");
 
         window.currentItemData = { ...item, type: type };
         
-        // Okuma Logu
         if(window.currentUser) {
             let safeTitle = (item.title || item.trTitle || item.name || "Eser").replace(/'/g, "\\'");
             let titleHtml = `<span style='color:var(--accent-gold); text-decoration:underline;'>${safeTitle}</span>`;
@@ -4610,6 +4634,7 @@ window.openReadModal = async function(id, type) {
         document.getElementById('read-title').innerHTML = (item.title || item.trTitle || 'Eser');
         document.getElementById('read-title').style.marginBottom = "10px";
 
+        // Admin Rozeti Gösterimi
         let badgeCont = document.getElementById('read-badge-container');
         if (!badgeCont) {
             document.getElementById('read-title').insertAdjacentHTML('afterend', '<div id="read-badge-container" style="text-align:center; margin-bottom:25px;"></div>');
@@ -4619,15 +4644,20 @@ window.openReadModal = async function(id, type) {
             ? `<div style="font-size:1.1rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); display:inline-block; font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.3);">🏅 ${item.adminRating.points} Puan</div>` 
             : '';
 
-        let txtEl = document.getElementById('read-text'), authEl = document.getElementById('read-author'), adminRatingUI = document.getElementById('readModal-admin-rating');
+        let txtEl = document.getElementById('read-text'), authEl = document.getElementById('read-author');
+        
+        // 🌟 ZURÜCKGEBRACHT: Admin Punkte-Menü für User-Gedichte!
+        let adminRatingUI = document.getElementById('readModal-admin-rating');
+        let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
         
         if (adminRatingUI) {
-            let isAdm = window.currentUser && window.currentUser.role === 'admin';
-            if (isAdm && type === 'userPoems') {
+            if (isAdminCheck && type === 'userPoems') {
                 adminRatingUI.style.display = 'block'; 
                 document.getElementById('read-rating-tier').value = item.adminRating ? item.adminRating.tier : 'none'; 
                 document.getElementById('read-rating-pts').value = item.adminRating ? item.adminRating.points : '';
-            } else { adminRatingUI.style.display = 'none'; }
+            } else { 
+                adminRatingUI.style.display = 'none'; 
+            }
         }
 
         if (['bilmeceler', 'bulmacalar'].includes(type)) {
@@ -4635,13 +4665,14 @@ window.openReadModal = async function(id, type) {
             txtEl.innerHTML = `<div style="margin-bottom:20px; font-size:${window.fontSize}rem;">${question.replace(/\n/g, '<br>')}</div><button class="noble-btn primary" onclick="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width:100%; cursor:pointer;">👁️ Cevabı Göster</button><div class="secret-answer" style="display:none; margin-top:15px; padding:15px; background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); border-radius:8px; color:#fff; font-size:1.1rem; text-align:center;">🎯 <strong>Cevap:</strong> ${answer}</div>`;
             if(authEl) authEl.style.display = 'none';
         } else {
-            txtEl.innerHTML = (item.text || item.trText || item.quote || '').replace(/\n/g, '<br>'); txtEl.style.fontSize = window.fontSize + 'rem';
+            txtEl.innerHTML = (item.text || item.trText || item.quote || '').replace(/\n/g, '<br>'); 
+            txtEl.style.fontSize = window.fontSize + 'rem';
             if(authEl) {
                 if (type === 'persons') authEl.style.display = 'none'; 
                 else { 
                     authEl.style.display = 'block'; 
                     let displayedAuthor = (item.author || item.authorTR || item.name || "Anonim");
-                    if (['poems','quotes'].includes(type) && (!item.author)) displayedAuthor = "Şair Misal.i";
+                    if (['poems','quotes'].includes(type) && (displayedAuthor === 'Anonim' || displayedAuthor === 'Sistem' || !item.author)) displayedAuthor = "Şair Misal.i";
                     authEl.innerText = "~ " + displayedAuthor; authEl.style.marginTop = "15px";
                     authEl.className = (displayedAuthor === 'Şair Misal.i' || displayedAuthor === 'Sair Misali') ? "misali-signature-text" : (type === 'marslar' ? "author-signature-white" : "author-signature-gold");
                 }
@@ -4653,57 +4684,58 @@ window.openReadModal = async function(id, type) {
 
         let audCont = document.getElementById('card-audio-container');
         let aud = document.getElementById('global-audio-element');
-        let isAdminCheck = window.currentUser && window.currentUser.role === 'admin';
+        let hasRealMusic = (item && (item.hasAudio || (item.audio && item.audio !== "")));
         
-        let trackData = null;
-        if(item.audio && item.audio.startsWith('data:audio')) {
-            trackData = item.audio; // Lade direkt aus Base64
-        } else if (item.hasAudio && window.audioStorage) {
-            trackData = await window.audioStorage.get(id); // Versuche DB
-        }
-
-        // KESİN ÇÖZÜM: Sarı Player'ı Zorla Göster
-        if (trackData || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type))) {
-            if (audCont) {
-                audCont.style.setProperty('display', 'flex', 'important'); 
-                audCont.style.opacity = '1';
-                audCont.style.visibility = 'visible';
+        if (audCont && (hasRealMusic || (isAdminCheck && ['poems', 'quotes', 'userPoems', 'marslar'].includes(type)))) {
+            audCont.classList.add('force-show'); 
+            audCont.style.setProperty('display', 'flex', 'important');
+            audCont.style.setProperty('opacity', '1', 'important');
+            audCont.style.setProperty('visibility', 'visible', 'important');
+            
+            if (hasRealMusic) {
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'flex', 'important'));
+                let trackData = null;
                 
-                let pHeader = audCont.querySelector('.audio-player-header');
-                let pTimeRow = audCont.querySelector('.player-time-row');
-                let pControls = audCont.querySelector('.p-controls-row');
-                let adminInline = audCont.querySelector('.inline-admin-audio');
-                
-                if (adminInline) adminInline.style.setProperty('display', isAdminCheck ? 'flex' : 'none', 'important');
-                
-                if (trackData) {
-                    if(pHeader) pHeader.style.setProperty('display', 'flex', 'important');
-                    if(pTimeRow) pTimeRow.style.setProperty('display', 'flex', 'important');
-                    if(pControls) pControls.style.setProperty('display', 'flex', 'important');
-                    
-                    if(!document.getElementById('audio-rating-ui')) {
-                        audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center;"></div>`);
+                if (item.audio === 'firebaseDB') {
+                    if (window.audioStorage) trackData = await window.audioStorage.get(id);
+                    if (!trackData) {
+                        window.toast("Müzik indiriliyor...", "☁️");
+                        try {
+                            let snap = await firebase.database().ref('audioFiles/' + id).once('value');
+                            if (snap.exists()) { trackData = snap.val(); if(window.audioStorage) window.audioStorage.save(id, trackData); }
+                            else { window.toast("Müzik sunucuda bulunamadı", "❌"); }
+                        } catch (e) { console.error(e); }
                     }
-                    window.renderAudioRatingUI(id);
-                } else {
-                    if(pHeader) pHeader.style.setProperty('display', 'none', 'important');
-                    if(pTimeRow) pTimeRow.style.setProperty('display', 'none', 'important');
-                    if(pControls) pControls.style.setProperty('display', 'none', 'important');
+                } 
+                else if (item.audio && item.audio.startsWith('data:audio')) { trackData = item.audio; } 
+                else if (item.audio && item.audio.startsWith('http')) { trackData = item.audio; }
+                else if (window.audioStorage && item.hasAudio) { trackData = await window.audioStorage.get(id); }
+                
+                if (aud) {
+                    if (trackData) {
+                        if (aud.src !== trackData) await window.loadAudioSafely(aud, trackData);
+                        let ic1 = document.getElementById('fp-play-icon'); 
+                        if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
+                        
+                        if(!document.getElementById('audio-rating-ui')) {
+                            audCont.insertAdjacentHTML('beforeend', `<div id="audio-rating-ui" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--accent-gold); text-align:center; width:100%; display:block;"></div>`);
+                        }
+                        window.renderAudioRatingUI(id);
+                    } else {
+                        aud.pause(); aud.src = ""; aud.removeAttribute('src');
+                    }
                 }
+            } else { 
+                if (aud) { aud.pause(); aud.src = ""; aud.removeAttribute('src'); }
+                audCont.querySelectorAll('.audio-player-header, .player-time-row, .p-controls-row').forEach(p => p.style.setProperty('display', 'none', 'important')); 
             }
-            if (aud && trackData) { 
-                await window.loadAudioSafely(aud, trackData); 
-                let ic1 = document.getElementById('fp-play-icon');
-                if(ic1) ic1.className = aud.paused ? 'fas fa-play' : 'fas fa-pause';
-            } 
-        } else { 
-            if (audCont) audCont.style.setProperty('display', 'none', 'important'); 
+        } else if (audCont) {
+            audCont.classList.remove('force-show');
+            audCont.style.setProperty('display', 'none', 'important');
         }
 
         if(typeof window.updateAudioUI === 'function') window.updateAudioUI(item, isAdminCheck, id, type);
-
-        window.updateHeartsUI(); 
-        window.openModal('readModal');
+        window.updateHeartsUI(); window.openModal('readModal');
     };
 
 window.changeFontSize = function(dir) {
@@ -5298,18 +5330,21 @@ window.renderLeaderboard = function() {
     // ========================================================
 window.addGamePoints = function(pts, gameName, isWin) {
         if (!window.currentUser) { window.toast("Puan kazanmak için giriş yapmalısın!", "🔒"); return; }
-        let penalty = Math.max(1, Math.floor(pts / 2)); 
-        let finalPts = isWin ? pts : -penalty;
+        
+        // KESİN ÇÖZÜM: Oyun puanı ne olursa olsun MAXIMUM 20 ile sınırla!
+        let safePts = Math.min(parseInt(pts) || 0, 20); 
+        
+        let penalty = Math.max(1, Math.floor(safePts / 2)); 
+        let finalPts = isWin ? safePts : -penalty;
         
         window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
         window.userDatabase[window.currentUser.username] = window.currentUser;
         
-        // ONLINE VE LOKAL KAYIT: Tüm kullanıcılar puanı anında görsün
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
         try { firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score }); } catch(e){}
         
-        window.toast(isWin ? `+${pts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+        window.toast(isWin ? `+${safePts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
         window.logUserAction(`🎮 OYUN: ${window.currentUser.username}, "${gameName}" oyununu ${isWin ? "kazandı" : "kaybetti"}.`);
         
         if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
@@ -8001,7 +8036,7 @@ document.addEventListener("DOMContentLoaded", function() {
             .replace(/[İI]/g, 'I').replace(/[ÖO]/g, 'O').replace(/[ÇC]/g, 'C');
     };
 
-    const GameDB = {
+const GameDB = {
         hangman: ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE", "İNSANLIK", "HÜRRİYET", "SÜKUT", "TEBESSÜM"],
         scramble: [
             { w: "ŞAİR", h: "Şiir yazan usta" }, { w: "KALEM", h: "Kelimenin kılıcı" }, 
@@ -8022,14 +8057,35 @@ document.addEventListener("DOMContentLoaded", function() {
             { scrambled: "Y A F I K E", original: "KAFİYE", h: "Şiir ritmi" },
             { scrambled: "T U K Ü S", original: "SÜKUT", h: "Sessizlik asaleti" },
             { scrambled: "V A F E", original: "VEFA", h: "Dostluk bağı" }
+        ],
+        // OYUNLAR (Puanlar max 20 olarak ayarlandı, 5 Yeni Oyun eklendi)
+        games: [
+            { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
+            { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
+            { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
+            { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+            { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+            { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+            { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+            { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+            { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+            { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+            { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+            { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+            // YENİ OYUNLAR
+            { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+            { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+            { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+            { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+            { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" }
         ]
     };
 
     window.currentGame = { id: null, pts: 0, state: {} };
     window.isGameAnswered = false; // Anti-Cheat Kilidi
 
-    window.startMiniGame = function(id, title, pts, emoji) {
-        window.isGameAnswered = false; // Kilidi aç
+window.startMiniGame = function(id, title, pts, emoji) {
+        window.isGameAnswered = false; 
         window.currentGame = { id: id, pts: pts, title: title, state: {} };
         document.getElementById('game-title').innerText = title;
         document.getElementById('game-icon').innerText = emoji;
@@ -8052,18 +8108,19 @@ document.addEventListener("DOMContentLoaded", function() {
         else if(id === "g10") initTrueFalseGame(arena);
         else if(id === "g11") initWordChainGame(arena);
         else if(id === "g12") initFlashMemoryGame(arena);
+        // Yeni Oyunlar
+        else if(id === "g13") initMathGame(arena);
+        else if(id === "g14") initColorMatch(arena);
+        else if(id === "g15") initWheelOfFortune(arena);
+        else if(id === "g16") initFastClick(arena);
+        else if(id === "g17") initWordSort(arena);
 
         window.openModal('gameModal');
     };
 
-    // MERKEZİ PUAN KAYDETME FONKSİYONU
     window.addGamePoints = function(pts, gameName, isWin) {
-        if (!window.currentUser) {
-            window.toast("Puan kazanmak için giriş yapmalısın!", "🔒");
-            return;
-        }
-        
-        let penalty = Math.max(1, Math.floor(pts / 2)); // Minimum 1 ceza, asla -0 olmaz
+        if (!window.currentUser) { window.toast("Puan kazanmak için giriş yapmalısın!", "🔒"); return; }
+        let penalty = Math.max(1, Math.floor(pts / 2)); 
         let finalPts = isWin ? pts : -penalty;
         
         window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
@@ -8071,35 +8128,25 @@ document.addEventListener("DOMContentLoaded", function() {
         
         localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
         sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+        try { firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score }); } catch(e){}
         
         window.toast(isWin ? `+${pts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+        window.logUserAction(`🎮 OYUN: ${window.currentUser.username}, "${gameName}" oyununu ${isWin ? "kazandı" : "kaybetti"}.`);
         
         if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
         if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
     };
 
-function winGame() {
+    function winGame() {
         if(window.currentGame.finished) return;
         window.currentGame.finished = true;
         document.getElementById('game-message').innerText = "🎉 TEBRİKLER! Puan eklendi!";
         document.getElementById('game-message').style.color = "var(--accent-green)";
-        
-        // Puanı ekle ve 1.5 saniye sonra OYUNU YENİDEN BAŞLAT
         setTimeout(() => {
-            if(typeof window.addGamePoints === 'function') window.addGamePoints(window.currentGame.pts, window.currentGame.title, true);
-            
-            let id = window.currentGame.id;
-            let title = window.currentGame.title;
-            let pts = window.currentGame.pts;
-            let emoji = document.getElementById('game-icon').innerText;
-            
-            if (id === 'g6') {
-                 // Millionär beendet sich nach 3 Fragen (wird in renderMil behandelt)
-                 window.closeTopModal(); 
-            } else {
-                 // Bei allen anderen Spielen: Mache endlos weiter, bis man verliert!
-                 window.startMiniGame(id, title, pts, emoji);
-            }
+            window.addGamePoints(window.currentGame.pts, window.currentGame.title, true);
+            let id = window.currentGame.id, title = window.currentGame.title, pts = window.currentGame.pts, emoji = document.getElementById('game-icon').innerText;
+            if (id === 'g6' || id === 'g15') { window.closeTopModal(); } 
+            else { window.startMiniGame(id, title, pts, emoji); }
         }, 1500);
     }
 
@@ -8108,65 +8155,37 @@ function winGame() {
         window.currentGame.finished = true;
         document.getElementById('game-message').innerText = "❌ " + msg;
         document.getElementById('game-message').style.color = "var(--accent-red)";
-        
-        // Kaybedince pencereyi kapat (Kick out)
         setTimeout(() => {
-            if(typeof window.addGamePoints === 'function') window.addGamePoints(window.currentGame.pts, window.currentGame.title, false);
+            window.addGamePoints(window.currentGame.pts, window.currentGame.title, false);
             window.closeTopModal();
         }, 1500);
     }
 
-    // MERKEZİ OYUN CEVAP KONTROLÜ (Doğruysa devam eder, yanlışsa atar)
     window.handleGameAnswer = function(selectedIndex, correctIndex, pointsToWin, gameType = 'mil') {
         if (window.isGameAnswered) return;
         window.isGameAnswered = true; 
         
         let sel = String(selectedIndex).trim();
         let corr = String(correctIndex).trim();
-        let pts = Math.max(1, parseInt(pointsToWin) || 10);
-        let penalty = Math.max(1, Math.floor(pts / 2)); 
         
         if (sel === corr) {
-            window.toast(`Doğru Cevap! +${pts} Puan 🎉`, "✅");
-            if (window.currentUser) {
-                window.currentUser.score = (window.currentUser.score || 0) + pts;
-                window.userDatabase[window.currentUser.username] = window.currentUser;
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
-            }
-            
-            // Pencereyi kapatmadan sıradaki soruya geçiş yap
+            window.toast(`Doğru Cevap! 🎉`, "✅");
             setTimeout(() => {
                 window.isGameAnswered = false; 
-                let id = window.currentGame.id;
-                let title = window.currentGame.title;
-                let emoji = document.getElementById('game-icon').innerText;
+                let id = window.currentGame.id, title = window.currentGame.title, pts = window.currentGame.pts, emoji = document.getElementById('game-icon').innerText;
                 
                 if (gameType === 'mil' && typeof window.renderMil === 'function') { 
                     window.qIndex++; window.renderMil(); 
                 } else {
-                    // DOĞRU BİLİNCE DİĞER SORUYA GEÇ / OYUNU YENİLE
-                    window.startMiniGame(id, title, pts, emoji);
+                    winGame();
                 }
-            }, 1000);
+            }, 800);
         } else {
-            // Falsche Antwort -> Raus!
-            window.toast(`Yanlış Cevap! -${penalty} Puan kaybettin.`, "❌");
-            if (window.currentUser) {
-                window.currentUser.score = Math.max(0, (window.currentUser.score || 0) - penalty);
-                window.userDatabase[window.currentUser.username] = window.currentUser;
-                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
-            }
-            
-            setTimeout(() => { 
-                window.isGameAnswered = false; 
-                if (typeof window.closeTopModal === 'function') window.closeTopModal(); 
-                else document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-            }, 1200);
+            loseGame();
         }
     };
 
+    // --- ESKİ OYUNLAR ---
     function initRockPaperScissors(arena) {
         arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div>
             <div style="display:flex; gap:15px;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="playRPS('rock')">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="playRPS('paper')">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="playRPS('scissors')">✂️</button></div><div id="rps-result" style="margin-top:20px; font-size:1.3rem;"></div>`;
@@ -8192,12 +8211,9 @@ function winGame() {
         window.guessHangman = function(l) {
             let s = window.currentGame.state;
             let possibleMatches = [l, window.normalizeTR(l)];
-            if(l === 'I') possibleMatches.push('İ');
-            if(l === 'S') possibleMatches.push('Ş');
-            if(l === 'O') possibleMatches.push('Ö');
-            if(l === 'U') possibleMatches.push('Ü');
-            if(l === 'C') possibleMatches.push('Ç');
-            if(l === 'G') possibleMatches.push('Ğ');
+            if(l === 'I') possibleMatches.push('İ'); if(l === 'S') possibleMatches.push('Ş');
+            if(l === 'O') possibleMatches.push('Ö'); if(l === 'U') possibleMatches.push('Ü');
+            if(l === 'C') possibleMatches.push('Ç'); if(l === 'G') possibleMatches.push('Ğ');
 
             s.guessed.push(l);
             let isCorrect = possibleMatches.some(char => s.word.includes(char));
@@ -8268,11 +8284,14 @@ function winGame() {
         window.renderMil();
     }
 
-    function initTicTacToe(arena) {
+function initTicTacToe(arena) {
         window.currentGame.state = { board: Array(9).fill(null), active: true };
         window.renderTTT = function() {
             let s = window.currentGame.state;
-            arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;" onclick="playTTT(${i})">${cell || ''}</div>`).join('')}</div>`;
+            arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => {
+                let cellColor = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white');
+                return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${cellColor};" onclick="playTTT(${i})">${cell || ''}</div>`;
+            }).join('')}</div>`;
         };
         window.playTTT = function(i) {
             let s = window.currentGame.state; if(!s.active || s.board[i]) return;
@@ -8341,6 +8360,108 @@ function winGame() {
                     <button class="noble-btn primary" style="width:150px;" onclick="window.handleGameAnswer(document.getElementById('flash-inp').value, '${randNum}', ${window.currentGame.pts}, 'flash')">Onayla</button>`;
             }
         }, 1500); 
+    }
+
+    // --- 5 NEUE SPIELE ---
+    function initMathGame(arena) {
+        let ops = ['+', '-'];
+        let op = ops[Math.floor(Math.random() * ops.length)];
+        let num1 = Math.floor(Math.random() * 50) + 10;
+        let num2 = Math.floor(Math.random() * 20) + 1;
+        let ans = op === '+' ? num1 + num2 : num1 - num2;
+        
+        arena.innerHTML = `
+            <p style="margin-bottom:10px;">İşlemin sonucunu bul:</p>
+            <div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} ${op} ${num2} = ?</div>
+            <input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br>
+            <button class="noble-btn primary" style="width:150px;" onclick="window.handleGameAnswer(document.getElementById('math-inp').value, '${ans}', ${window.currentGame.pts}, 'math')">Cevapla</button>`;
+    }
+
+    function initColorMatch(arena) {
+        let colors = [
+            { name: "KIRMIZI", code: "var(--accent-red)" },
+            { name: "MAVİ", code: "var(--accent-cyan)" },
+            { name: "YEŞİL", code: "var(--accent-green)" },
+            { name: "SARI", code: "var(--accent-gold)" }
+        ];
+        let textObj = colors[Math.floor(Math.random() * colors.length)];
+        let colorObj = colors[Math.floor(Math.random() * colors.length)];
+        
+        arena.innerHTML = `
+            <p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p>
+            <div style="font-size:2.5rem; color:${colorObj.code}; font-weight:bold; margin-bottom:20px; letter-spacing:2px;">${textObj.name}</div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                ${colors.map((c, i) => `<button class="noble-btn" style="border-color:${c.code}; color:${c.code};" onclick="window.handleGameAnswer('${c.code}', '${colorObj.code}', ${window.currentGame.pts}, 'color')">${c.name}</button>`).join('')}
+            </div>`;
+    }
+
+    function initWheelOfFortune(arena) {
+        arena.innerHTML = `
+            <p style="margin-bottom:15px;">Şans çarkını çevir!</p>
+            <div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: 2s; color:var(--accent-gold);">🎡</div>
+            <button class="noble-btn primary" style="width:180px;" onclick="spinWheel()">Çevir</button>
+        `;
+        window.spinWheel = function() {
+            let icon = document.getElementById('wheel-icon');
+            icon.style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
+            setTimeout(() => {
+                let win = Math.random() > 0.4; // 60% Gewinnchance
+                if(win) winGame(); else loseGame("Çark sana gülmedi!");
+            }, 2000);
+        };
+    }
+
+    function initFastClick(arena) {
+        window.currentGame.state = { clicks: 0, required: 15 };
+        arena.innerHTML = `
+            <p style="margin-bottom:15px;">3 Saniye içinde butona 15 kere tıkla!</p>
+            <button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%;" onclick="fastClickStart()">TIKLA</button>
+            <div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>
+        `;
+        window.fastClickTimer = null;
+        window.fastClickStart = function() {
+            let s = window.currentGame.state;
+            if (s.clicks === 0) {
+                window.fastClickTimer = setTimeout(() => {
+                    if (s.clicks < s.required) loseGame("Süre bitti, yeterince hızlı değilsin!");
+                }, 3000);
+            }
+            s.clicks++;
+            document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
+            if (s.clicks >= s.required) {
+                clearTimeout(window.fastClickTimer);
+                winGame();
+            }
+        };
+    }
+
+    function initWordSort(arena) {
+        let sentence = "Şiir ruhun gıdasıdır".split(" ");
+        let shuffled = [...sentence].sort(() => Math.random() - 0.5);
+        window.currentGame.state = { currentOrder: [], correct: sentence };
+        
+        window.renderSort = function() {
+            let s = window.currentGame.state;
+            arena.innerHTML = `
+                <p style="margin-bottom:15px;">Kelimeleri doğru sıraya diz:</p>
+                <div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">
+                    ${s.currentOrder.join(" ")}
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    ${shuffled.map((w, i) => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="pickWord('${w}')">${w}</button>`).join('')}
+                </div>
+            `;
+        };
+        window.pickWord = function(w) {
+            let s = window.currentGame.state;
+            s.currentOrder.push(w);
+            window.renderSort();
+            if (s.currentOrder.length === s.correct.length) {
+                if (s.currentOrder.join(" ") === s.correct.join(" ")) winGame();
+                else loseGame("Yanlış sıralama!");
+            }
+        };
+        window.renderSort();
     }
 });
 
@@ -10073,6 +10194,1284 @@ window.addEventListener('load', function() {
 
     }, 1500); // 1.5 Saniye bekle, ana DOM yüklensin, sonra üstüne çök!
 });
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🚀 MİSALİ ABSOLUTE FINAL FIX: OYUNLAR, LİVE SYNC & ADMİN MENÜSÜ 🚀 -->
+<!-- ===================================================================== -->
+<script id="misali-absolute-final-fix">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Final Fix Aktif: Oyunlar ve Arayüz onarılıyor...");
+
+        // ==========================================
+        // 1. ZORUNLU 20 PUAN LİMİTİ VE OYUN KAZANÇ SİSTEMİ
+        // ==========================================
+        window.addGamePoints = function(pts, gameName, isWin) {
+            if (!window.currentUser) { window.toast("Puan kazanmak için giriş yapmalısın!", "🔒"); return; }
+            
+            let safePts = Math.min(parseInt(pts) || 0, 20); // KESİN LİMİT: Milyoner dahil hiçbir oyun 20 puanı geçemez!
+            let penalty = Math.max(1, Math.floor(safePts / 2)); 
+            let finalPts = isWin ? safePts : -penalty;
+            
+            window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
+            window.userDatabase[window.currentUser.username] = window.currentUser;
+            
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+            try { firebase.database().ref('users/' + window.currentUser.username + '/score').set(window.currentUser.score); } catch(e){}
+            
+            window.toast(isWin ? `+${safePts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+            window.logUserAction(`🎮 OYUN: ${window.currentUser.username}, "${gameName}" oyununu ${isWin ? "kazandı" : "kaybetti"}.`);
+            if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+            if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+        };
+
+        window.winGame = function() {
+            if(window.currentGame && window.currentGame.finished) return;
+            window.currentGame.finished = true;
+            let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "🎉 KAZANDIN!"; gMsg.style.color = "var(--accent-green)"; }
+            setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, true); window.closeTopModal(); }, 1200);
+        };
+
+        window.loseGame = function(msg="Kaybettin. Tekrar dene!") {
+            if(window.currentGame && window.currentGame.finished) return;
+            window.currentGame.finished = true;
+            let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "❌ " + msg; gMsg.style.color = "var(--accent-red)"; }
+            setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, false); window.closeTopModal(); }, 1200);
+        };
+
+        // ==========================================
+        // 2. TÜM 20 OYUNUN GERÇEK KODLARI
+        // ==========================================
+        window.startMiniGame = function(id, title, pts, emoji) {
+            let safePts = Math.min(parseInt(pts) || 0, 20); 
+            window.currentGame = { id: id, pts: safePts, title: title, finished: false };
+            
+            let arena = document.getElementById('game-arena');
+            if(!arena) return;
+            
+            document.getElementById('game-title').innerText = title;
+            document.getElementById('game-icon').innerText = emoji;
+            document.getElementById('game-reward').innerText = safePts + " Puan";
+            document.getElementById('game-message').innerText = "";
+
+            if(id === "g1") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div><div style="display:flex; gap:15px; justify-content:center;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="window.playRPS('rock')">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="window.playRPS('paper')">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="window.playRPS('scissors')">✂️</button></div><div id="rps-result" style="margin-top:20px; font-size:1.3rem;"></div>`;
+                window.playRPS = function(p) {
+                    let o = ['rock', 'paper', 'scissors'], b = o[Math.floor(Math.random()*3)], ic = {rock:'🪨', paper:'📄', scissors:'✂️'};
+                    document.getElementById('rps-result').innerHTML = `Sen: ${ic[p]} VS Bot: ${ic[b]}`;
+                    if(p === b) return;
+                    if((p==='rock'&&b==='scissors')||(p==='paper'&&b==='rock')||(p==='scissors'&&b==='paper')) window.winGame(); else window.loseGame();
+                };
+            } else if(id === "g2") {
+                let hang = ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE"]; let word = hang[Math.floor(Math.random() * hang.length)];
+                window.currentGame.state = { word: word, guessed: [], mistakes: 0, max: 6 };
+                window.renderHangman = function() {
+                    let s = window.currentGame.state, display = s.word.split('').map(l => s.guessed.includes(l) ? l : '_').join(' ');
+                    arena.innerHTML = `<div style="font-family:monospace; font-size:1.8rem; letter-spacing:4px; margin-bottom:15px; color:var(--accent-gold);">${display}</div><div style="color:var(--accent-red); margin-bottom:12px;">Kalan Hak: ${s.max - s.mistakes}</div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">` + "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split('').map(l => `<button class="noble-btn" style="width:32px; height:32px; padding:0;" ${s.guessed.includes(l) ? 'disabled style="opacity:0.2"' : ''} onclick="window.guessHangman('${l}')">${l}</button>`).join('') + `</div>`;
+                };
+                window.guessHangman = function(l) {
+                    let s = window.currentGame.state; s.guessed.push(l); if(!s.word.includes(l)) s.mistakes++; window.renderHangman();
+                    if(s.word.split('').every(char => s.guessed.includes(char))) window.winGame(); else if(s.mistakes >= s.max) window.loseGame(`Kelime: ${s.word}`);
+                };
+                window.renderHangman();
+            } else if(id === "g3") {
+                window.currentGame.state = { num: Math.floor(Math.random() * 100) + 1, tries: 7 };
+                arena.innerHTML = `<p style="margin-bottom:12px;">1-100 arası sayıyı tahmin et.</p><input type="number" id="ng-inp" class="inp" style="width:90px; text-align:center; font-size:1.3rem;"><br><button class="noble-btn primary" style="width:140px;" onclick="window.guessNumber()">Tahmin Et</button><div id="ng-hint" style="margin-top:12px; font-weight:bold; color:var(--accent-cyan);"></div>`;
+                window.guessNumber = function() {
+                    let s = window.currentGame.state, val = parseInt(document.getElementById('ng-inp').value);
+                    if(isNaN(val)) return; s.tries--;
+                    if(val === s.num) return window.winGame();
+                    document.getElementById('ng-hint').innerText = (val < s.num ? "🔼 Daha BÜYÜK" : "🔽 Daha KÜÇÜK") + ` (Hak: ${s.tries})`;
+                    if(s.tries <= 0) window.loseGame(`Sayı: ${s.num}`);
+                };
+            } else if(id === "g4") {
+                arena.innerHTML = `<div style="font-size:2rem; color:var(--accent-cyan); margin-bottom:15px; letter-spacing:5px;">M E A L K</div><input type="text" id="g4-inp" class="inp" placeholder="Çözüm (Kalem)" style="text-align:center; text-transform:uppercase;"><button class="noble-btn primary" onclick="if(document.getElementById('g4-inp').value.toUpperCase().replace(/İ/g,'I') === 'KALEM') window.winGame(); else window.loseGame();">Onayla</button>`;
+            } else if(id === "g5") {
+                let emojis = ["🪶", "🌙", "✨", "☕", "📖", "🌹"], deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+                window.memState = { deck: deck, flipped: [], matched: 0, lock: false };
+                window.flipMemCard = function(idx) {
+                    let s = window.memState; if(s.lock || s.flipped.includes(idx) || document.getElementById('mc-'+idx).classList.contains('matched')) return;
+                    let el = document.getElementById('mc-'+idx); el.innerText = s.deck[idx]; el.style.background = "var(--bg-glass)"; s.flipped.push(idx);
+                    if(s.flipped.length === 2) {
+                        s.lock = true;
+                        if(s.deck[s.flipped[0]] === s.deck[s.flipped[1]]) {
+                            document.getElementById('mc-'+s.flipped[0]).classList.add('matched'); document.getElementById('mc-'+s.flipped[1]).classList.add('matched');
+                            s.matched += 2; s.flipped = []; s.lock = false; if(s.matched === deck.length) window.winGame();
+                        } else {
+                            setTimeout(() => {
+                                document.getElementById('mc-'+s.flipped[0]).innerText = ''; document.getElementById('mc-'+s.flipped[0]).style.background = "var(--accent-gold)";
+                                document.getElementById('mc-'+s.flipped[1]).innerText = ''; document.getElementById('mc-'+s.flipped[1]).style.background = "var(--accent-gold)";
+                                s.flipped = []; s.lock = false;
+                            }, 800);
+                        }
+                    }
+                };
+                arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(4, 55px); gap:8px;">${deck.map((_, i) => `<div id="mc-${i}" style="width:55px; height:55px; background:var(--accent-gold); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;" onclick="window.flipMemCard(${i})"></div>`).join('')}</div>`;
+            } else if(id === "g6") { // MİLYONER FİX
+                window.qIndex = 0;
+                let qList = [
+                    { q: "Hangisi bir şiir türü değildir?", o: ["Koşma", "Semai", "Makale", "Gazel"], a: 2 },
+                    { q: "İstiklal Marşımızın yazarı kimdir?", o: ["Namık Kemal", "M. Akif Ersoy", "Cemal Süreya", "Yunus Emre"], a: 1 },
+                    { q: "Sükut altınsa, söz nedir?", o: ["Bakır", "Elmas", "Gümüş", "Demir"], a: 2 }
+                ];
+                window.renderMil = function() {
+                    if(window.qIndex >= qList.length) return window.winGame();
+                    let q = qList[window.qIndex];
+                    arena.innerHTML = `<div style='margin-bottom:12px; font-weight:bold; color:var(--accent-gold); font-size:1.1rem;'>Soru ${window.qIndex + 1}</div><div style='margin-bottom:15px; font-weight:bold;'>${q.q}</div>` + q.o.map((o, idx) => `<button class='noble-btn' style='margin-bottom:6px; text-align:left;' onclick='if(${idx} === ${q.a}) { window.qIndex++; window.renderMil(); } else { window.loseGame(); }'>${o}</button>`).join('');
+                };
+                window.renderMil();
+            } else if(id === "g7") { // TİC TAC TOE
+                window.currentGame.state = { board: Array(9).fill(null), active: true };
+                window.renderTTT = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => {
+                        let color = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white');
+                        return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${color};" onclick="window.playTTT(${i})">${cell || ''}</div>`;
+                    }).join('')}</div>`;
+                };
+                window.playTTT = function(i) {
+                    let s = window.currentGame.state; if(!s.active || s.board[i]) return;
+                    s.board[i] = 'X';
+                    let w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                    let checkWin = (p) => w.some(x => s.board[x[0]]===p && s.board[x[1]]===p && s.board[x[2]]===p);
+                    if(checkWin('X')) { window.renderTTT(); return window.winGame(); }
+                    let empty = s.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
+                    if(empty.length === 0) return window.loseGame("Berabere!");
+                    s.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+                    if(checkWin('O')) { window.renderTTT(); return window.loseGame("Bot kazandı!"); }
+                    window.renderTTT();
+                };
+                window.renderTTT();
+            } else if(id === "g8") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Zar atarak botun puanını geçmeye çalış!</p><button class="noble-btn primary" style="width:160px; font-size:1.5rem;" onclick="window.rollDice()">🎲 Zar At</button><div id="dice-res" style="margin-top:15px; font-size:1.2rem; font-weight:bold;"></div>`;
+                window.rollDice = function() {
+                    let pRoll = Math.floor(Math.random() * 6) + 1, bRoll = Math.floor(Math.random() * 6) + 1;
+                    document.getElementById('dice-res').innerText = `Sen: ${pRoll} | Bot: ${bRoll}`;
+                    if(pRoll > bRoll) window.winGame(); else if(pRoll === bRoll) document.getElementById('game-message').innerText = "Berabere! Tekrar at."; else window.loseGame();
+                };
+            } else if(id === "g9") {
+                arena.innerHTML = `<div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">İpucu: Dostluk bağı</div><div style="font-size:2rem; font-family:monospace; color:var(--accent-pink); margin-bottom:15px; letter-spacing:5px;">V A F E</div><input type="text" id="an-inp" class="inp" style="width:180px; text-align:center; text-transform:uppercase;" placeholder="Çözüm (VEFA)"><br><button class="noble-btn primary" style="width:180px;" onclick="if(document.getElementById('an-inp').value.toUpperCase().replace(/İ/g,'I') === 'VEFA') window.winGame(); else window.loseGame();">Tahmin Et</button>`;
+            } else if(id === "g10") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:20px; font-weight:bold;">İstiklal Marşı 10 kıtadan oluşmaktadır.</div><div style="display:flex; gap:15px;"><button class="noble-btn" style="border-color:var(--accent-green); color:var(--accent-green); flex:1;" onclick="window.winGame()">DOĞRU</button><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red); flex:1;" onclick="window.loseGame()">YANLIŞ</button></div>`;
+            } else if(id === "g11") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Aşk kelimesinin son harfiyle başlayan bir kelime yaz.</p><div style="font-size:1.8rem; color:var(--accent-gold); margin-bottom:15px; font-weight:bold;">AŞK</div><input type="text" id="wc-inp" class="inp" style="width:200px; text-align:center; text-transform:uppercase;" placeholder="K ile başla..."><br><button class="noble-btn primary" style="width:200px;" onclick="let v=document.getElementById('wc-inp').value.toUpperCase().trim(); if(v.length>=3 && v.startsWith('K')) window.winGame(); else window.loseGame('Geçersiz kelime!');">Gönder</button>`;
+            } else if(id === "g12") {
+                let rNum = Math.floor(10000 + Math.random() * 90000); 
+                arena.innerHTML = `<p style="margin-bottom:10px;">Sayıyı aklında tut!</p><div id="flash-num" style="font-size:3rem; font-family:monospace; color:var(--accent-cyan); font-weight:bold; margin:20px 0;">${rNum}</div>`;
+                setTimeout(() => { if(document.getElementById('flash-num')) { arena.innerHTML = `<p style="margin-bottom:15px;">Gördüğün sayıyı yaz:</p><input type="number" id="flash-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('flash-inp').value == '${rNum}') window.winGame(); else window.loseGame();">Onayla</button>`; } }, 1500); 
+            } else if(id === "g13") {
+                let num1 = Math.floor(Math.random() * 50) + 10, num2 = Math.floor(Math.random() * 20) + 1, ans = num1 + num2;
+                arena.innerHTML = `<p style="margin-bottom:10px;">İşlemin sonucunu bul:</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} + ${num2} = ?</div><input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('math-inp').value == '${ans}') window.winGame(); else window.loseGame();">Cevapla</button>`;
+            } else if(id === "g14") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:20px; letter-spacing:2px;">KIRMIZI</div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red);" onclick="window.loseGame()">KIRMIZI</button><button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.winGame()">MAVİ</button></div>`;
+            } else if(id === "g15") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Şans çarkını çevir!</p><div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1); color:var(--accent-gold);">🎡</div><button class="noble-btn primary" style="width:180px;" onclick="window.spinWheel()">Çevir</button>`;
+                window.spinWheel = function() {
+                    document.getElementById('wheel-icon').style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
+                    setTimeout(() => { if(Math.random() > 0.4) window.winGame(); else window.loseGame("Çark sana gülmedi!"); }, 2000);
+                };
+            } else if(id === "g16") {
+                window.currentGame.state = { clicks: 0, required: 15 };
+                arena.innerHTML = `<p style="margin-bottom:15px;">3 Saniye içinde 15 kere tıkla!</p><button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%; box-shadow:0 0 15px rgba(34,197,94,0.4);" onclick="window.fastClickStart()">TIKLA</button><div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>`;
+                window.fastClickTimer = null;
+                window.fastClickStart = function() {
+                    let s = window.currentGame.state;
+                    if (s.clicks === 0) { window.fastClickTimer = setTimeout(() => { if (s.clicks < s.required) window.loseGame("Süre bitti, yavaşsın!"); }, 3000); }
+                    s.clicks++; document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
+                    if (s.clicks >= s.required) { clearTimeout(window.fastClickTimer); window.winGame(); }
+                };
+            } else if(id === "g17") {
+                let sentence = "Şiir ruhun gıdasıdır".split(" "), shuffled = [...sentence].sort(() => Math.random() - 0.5);
+                window.currentGame.state = { currentOrder: [], correct: sentence };
+                window.renderSort = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<p style="margin-bottom:15px;">Doğru sıraya diz:</p><div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">${s.currentOrder.join(" ")}</div><div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">${shuffled.map(w => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="window.pickWord('${w}')">${w}</button>`).join('')}</div>`;
+                };
+                window.pickWord = function(w) {
+                    let s = window.currentGame.state; s.currentOrder.push(w); window.renderSort();
+                    if (s.currentOrder.length === s.correct.length) {
+                        if (s.currentOrder.join(" ") === s.correct.join(" ")) window.winGame(); else window.loseGame("Yanlış sıralama!");
+                    }
+                };
+                window.renderSort();
+            } else if(id === "g18") {
+                let code = Math.floor(100 + Math.random() * 900).toString(); 
+                window.cbState = { code: code, tries: 5 };
+                arena.innerHTML = `<p style="margin-bottom:10px;">3 Haneli şifreyi tahmin et (5 Hak):</p><input type="number" id="cb-inp" class="inp" style="width:120px; text-align:center; font-size:2rem; letter-spacing:5px;"><br><button class="noble-btn primary" style="width:150px;" onclick="window.checkCodeBreaker()">Dene</button><div id="cb-hint" style="margin-top:15px; font-weight:bold; color:var(--accent-cyan); font-size:1.1rem;"></div>`;
+                window.checkCodeBreaker = function() {
+                    let guess = document.getElementById('cb-inp').value, hintEl = document.getElementById('cb-hint');
+                    if(guess.length !== 3) { hintEl.innerText = "3 haneli girin!"; return; }
+                    if(guess === window.cbState.code) return window.winGame();
+                    window.cbState.tries--;
+                    if(window.cbState.tries <= 0) return window.loseGame(`Şifre: ${window.cbState.code}`);
+                    let exact = 0, wrongPlace = 0;
+                    for(let i=0; i<3; i++) { if(guess[i] === window.cbState.code[i]) exact++; else if(window.cbState.code.includes(guess[i])) wrongPlace++; }
+                    hintEl.innerText = `🟩 İsabet: ${exact} | 🟨 Yanlış Yer: ${wrongPlace} (Hak: ${window.cbState.tries})`;
+                };
+            } else if(id === "g19") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Kutu <b style="color:var(--accent-green);">YEŞİL</b> olduğunda hemen tıkla!</p><div id="reflex-box" style="width:150px; height:150px; background:var(--accent-red); border-radius:16px; margin:0 auto; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);" onclick="window.clickReflex()"></div>`;
+                window.reflexState = { active: false, timer: null };
+                window.reflexState.timer = setTimeout(() => {
+                    let box = document.getElementById('reflex-box');
+                    if(box) {
+                        box.style.background = 'var(--accent-green)'; box.style.boxShadow = '0 0 20px rgba(34,197,94,0.8)'; window.reflexState.active = true;
+                        setTimeout(() => { if(window.reflexState.active) window.loseGame("Çok yavaş kaldın!"); }, 800);
+                    }
+                }, 1500 + Math.random() * 3000);
+                window.clickReflex = function() {
+                    if(window.reflexState.active) { window.reflexState.active = false; window.winGame(); }
+                    else { clearTimeout(window.reflexState.timer); window.loseGame("Erken tıkladın!"); }
+                };
+            } else if(id === "g20") {
+                let words = ["EDEBİYAT", "İSTİKLAL", "HÜRRİYET", "MÜKEMMEL", "TAHAYYÜL"], word = words[Math.floor(Math.random() * words.length)], missingIdx = Math.floor(Math.random() * word.length), missingChar = word[missingIdx], displayWord = word.substring(0, missingIdx) + "_" + word.substring(missingIdx + 1);
+                arena.innerHTML = `<p style="margin-bottom:15px;">Eksik harfi bul:</p><div style="font-size:2.5rem; letter-spacing:5px; font-family:monospace; color:var(--accent-pink); font-weight:bold; margin-bottom:20px;">${displayWord}</div><input type="text" id="ml-inp" class="inp" maxlength="1" style="width:80px; text-align:center; font-size:2rem; text-transform:uppercase;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('ml-inp').value.toUpperCase().replace(/İ/g,'I') === '${missingChar}'.replace(/İ/g,'I')) window.winGame(); else window.loseGame();">Cevapla</button>`;
+            }
+            window.openModal('gameModal');
+        };
+
+        // ==========================================
+        // 4. OKUMA PENCERESİ: BAŞLIK ALTINDA PEMBE MENÜ VE ROZET
+        // ==========================================
+        const origOpenReadModal = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            // Önceki kopyaları temizle
+            document.querySelectorAll('.dynamic-admin-ui').forEach(e => e.remove());
+            
+            if(origOpenReadModal) await origOpenReadModal(id, type);
+            
+            let titleEl = document.getElementById('read-title');
+            if(!titleEl) return;
+
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let item = (source || []).find(x => String(x.id) === String(id));
+            
+            // Kırmızı çizgi çektiğin yer: Başlığın hemen altına pembe puan rozetini yerleştir
+            if(item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+                let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+                titleEl.insertAdjacentHTML('afterend', `
+                <div class="dynamic-admin-ui" style="text-align:center; margin: 5px auto 20px auto; width:100%; display:flex; justify-content:center;">
+                    <span style="font-size:1.1rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.3);">${medals} ${item.adminRating.points} Puan</span>
+                </div>`);
+            }
+
+            // Admin isen, Puanlama Menüsünü (Pembe Kutu) yerleştir
+            if(window.currentUser && window.currentUser.role === 'admin' && type === 'userPoems') {
+                let targetEl = document.getElementById('read-author') || titleEl;
+                targetEl.insertAdjacentHTML('afterend', `
+                <div class="dynamic-admin-ui admin-only" style="background:rgba(236, 72, 153, 0.08); border:1px dashed var(--accent-pink); padding:15px; border-radius:12px; margin:20px auto; max-width:400px; text-align:center; display:block !important;">
+                    <label style="color:var(--accent-pink); font-size:0.95rem; font-weight:bold; display:block; margin-bottom:10px;">👑 Admin Puanlama Sistemi</label>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <select id="read-rating-tier" class="inp" style="flex:1.5; margin:0;"><option value="none">-- Derece Seç --</option><option value="normal">🎖️ Normal</option><option value="elite">🎖️🎖️ Elite</option><option value="super">🎖️🎖️🎖️ Super Elite</option></select>
+                        <input type="number" id="read-rating-pts" class="inp" placeholder="Puan (0-20)" style="flex:1; margin:0; text-align:center;" min="0" max="20">
+                    </div>
+                    <button class="noble-btn" style="margin-top:10px; background:var(--accent-pink); color:#fff; padding:8px; width:100%; border:none; font-size:1.1rem;" onclick="window.rateUserPoemDirectly()">Puanı Onayla / Güncelle</button>
+                </div>`);
+                
+                if(item && item.adminRating) {
+                    document.getElementById('read-rating-tier').value = item.adminRating.tier;
+                    document.getElementById('read-rating-pts').value = item.adminRating.points;
+                }
+            }
+        };
+
+        window.rateUserPoemDirectly = function() {
+            if (!window.currentItemData || window.currentItemData.type !== 'userPoems') return;
+            
+            let id = window.currentItemData.id;
+            let tier = document.getElementById('read-rating-tier').value;
+            let pts = parseInt(document.getElementById('read-rating-pts').value || 0);
+            
+            let idx = window.userPoemsDB.findIndex(x => String(x.id) === String(id));
+            if (idx === -1) return;
+            
+            let oldPts = window.userPoemsDB[idx].adminRating ? window.userPoemsDB[idx].adminRating.points : 0;
+            let diff = pts - oldPts;
+
+            if (tier !== 'none') { window.userPoemsDB[idx].adminRating = { tier: tier, points: pts }; } 
+            else { delete window.userPoemsDB[idx].adminRating; diff = -oldPts; }
+            
+            let authorName = window.userPoemsDB[idx].author || window.userPoemsDB[idx].name;
+            let authorObj = Object.values(window.userDatabase).find(u => u.name === authorName || u.username === authorName);
+            
+            if (authorObj && diff !== 0) {
+                authorObj.score = (authorObj.score || 0) + diff;
+                window.userDatabase[authorObj.username] = authorObj;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                try { firebase.database().ref('users/' + authorObj.username).update({ score: authorObj.score }); } catch(e){}
+                
+                if (window.currentUser && window.currentUser.username === authorObj.username) {
+                    window.currentUser.score = authorObj.score;
+                    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                    if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+                }
+                if (typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+            }
+
+            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+            try { firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){}
+            
+            window.currentItemData = window.userPoemsDB[idx];
+            window.toast("Puan başarıyla kaydedildi!", "🏆");
+            
+            if (typeof window.renderAllContent === 'function') window.renderAllContent();
+            window.openReadModal(id, 'userPoems'); // Ekranı canlı güncelle
+        };
+
+        // ==========================================
+        // 5. KARTLARDA ZARİF KÜÇÜK ROZET VE LİVE SYNC
+        // ==========================================
+        const origRender = window.renderAllContent;
+        window.renderAllContent = function() {
+            if(origRender) origRender(); 
+
+            let uGrid = document.getElementById('userPoems-grid');
+            if (uGrid && window.userPoemsDB) {
+                let uName = window.currentUser ? window.currentUser.username : null;
+                let isAdmin = window.currentUser && window.currentUser.role === 'admin';
+
+                uGrid.innerHTML = [...window.userPoemsDB].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).map(d => {
+                    let sd = window.poemDataStore[d.id] || {}, hc = 0, cc = sd.comments ? sd.comments.length : 0, roses = 0;
+                    if (sd.ratings) Object.values(sd.ratings).forEach(v => hc += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+                    if (sd.comments) sd.comments.forEach(c => roses += (c.roses || 0)); 
+                    
+                    let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName]?.includes(d.id);
+                    let hasMusic = d.hasAudio || d.audio;
+                    let textPreview = (d.text || '').replace(/<[^>]*>?/gm, '').replace(/[\r\n]/g, ' ').substring(0, 80) + '...';
+                    let ribbon = ((Date.now() - (d.timestamp || 0)) < 86400000) ? `<div class="new-ribbon">YENİ</div>` : '';
+                    
+                    // ZARİF KÜÇÜK KART ROZETİ
+                    let adminBadge = (d.adminRating && d.adminRating.points > 0) ? `<div style="position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:2px 8px; border-radius:8px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.4); z-index:5; letter-spacing:0.5px;">🎖️ ${d.adminRating.points} P</div>` : '';
+
+                    let uEditBtn = isAdmin ? `<button class="admin-btn edit" style="border-color:var(--accent-gold); color:var(--accent-gold);" onclick="event.stopPropagation(); window.quickEditItem('${d.id}', 'userPoems')"><i class="fas fa-pen"></i></button>` : '';
+                    let isMyPoem = uName && (d.author === uName || d.author === window.currentUser?.name);
+                    let uDeleteBtn = (isAdmin || isMyPoem) ? `<button class="admin-btn del" onclick="event.stopPropagation(); window.deleteAnyItem('${d.id}', 'userPoems')"><i class="fas fa-trash"></i></button>` : '';
+                    let audioBtn = hasMusic ? `<div class="c-stat music" onclick="event.stopPropagation(); window.openReadModal('${d.id}', 'userPoems');" style="color:var(--accent-green)"><i class="fas fa-play-circle"></i></div>` : '';
+                    
+                    let notesScore = 0; let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+                    if(audioRDB[d.id]) Object.values(audioRDB[d.id]).forEach(v => notesScore += parseInt(v||0));
+                    let noteHTML = hasMusic ? `<span class="c-stat" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
+                    let finalAuthor = d.author || d.name || 'Şair Misal.i';
+                    let authorColor = finalAuthor === 'Şair Misal.i' ? 'var(--accent-cyan)' : 'var(--accent-gold)';
+
+                    return `<div class="card" onclick="window.openReadModal('${d.id}', 'userPoems')">
+                        ${ribbon}${adminBadge}
+                        <div class="admin-card-actions" style="top:${adminBadge ? '35px' : '12px'};">${uEditBtn}${uDeleteBtn}</div>
+                        <button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${d.id}')"><i class="fas fa-bookmark"></i></button>
+                        <div class="card-ic">${d.emoji || '📖'}</div>
+                        <h3 class="card-t">${(d.title||'').replace(/'/g, "&#39;")}</h3>
+                        <p class="card-sub">${textPreview}</p>
+                        <div class="card-auth" style="color:${authorColor}; font-family:'Great Vibes', cursive; font-size:1.4rem; margin-top:5px;">~ ${finalAuthor}</div>
+                        <div class="card-footer">${noteHTML}<span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span><span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span><span class="c-stat"><span class="real-blue-rose" style="font-size:0.9rem;">🌹</span> ${roses}</span>${audioBtn}</div>
+                    </div>`;
+                }).join('');
+            }
+        };
+
+        // BÜTÜN HERŞEYİ CANLI DİNLE (%100 LIVE SYNC)
+        if (typeof firebase !== 'undefined') {
+            firebase.database().ref('interactions').on('value', snap => {
+                if(snap.exists()) {
+                    window.poemDataStore = snap.val();
+                    localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+                    if(typeof window.updateHeartsUI === 'function') window.updateHeartsUI();
+                    if(typeof window.renderAllContent === 'function') window.renderAllContent();
+                }
+            });
+            firebase.database().ref('userPoemsDB').on('value', snap => {
+                if(snap.exists()) {
+                    window.userPoemsDB = snap.val();
+                    localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                    if(typeof window.renderAllContent === 'function') window.renderAllContent();
+                }
+            });
+        }
+
+        // Sayfa yüklendiğinde bir kez render et
+        if(typeof window.renderAllContent === 'function') window.renderAllContent();
+
+    }, 1500);
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🛡️ MİSALİ KESİN KURTARMA: ÇİFTLERİ SİL, OYUNLARI DÜZELT, PEMBE ROZETİ EKLE 🛡️ -->
+<!-- ===================================================================== -->
+<script id="misali-ultimate-rescue-patch">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🛡️ Kurtarma Motoru Aktif: Çiftler siliniyor, oyunlar ve rozet onarılıyor...");
+
+        // ==========================================
+        // 1. ÇİFT ESERLERİ (DUBLAJLARI) KESİN OLARAK SİL
+        // ==========================================
+        if (window.userPoemsDB && window.userPoemsDB.length > 0) {
+            let uniquePoems = [];
+            let seenIds = new Set();
+            window.userPoemsDB.forEach(p => {
+                // Aynı ID'ye sahip eseri sadece 1 kere ekle
+                if (!seenIds.has(p.id)) {
+                    seenIds.add(p.id);
+                    uniquePoems.push(p);
+                }
+            });
+            window.userPoemsDB = uniquePoems;
+            localStorage.setItem('misaliUserPoems', JSON.stringify(uniquePoems));
+            try { if(typeof firebase !== 'undefined') firebase.database().ref('userPoemsDB').set(uniquePoems); } catch(e){}
+            if (typeof window.renderAllContent === 'function') window.renderAllContent();
+        }
+
+        // ==========================================
+        // 2. AÇILAN PENCEREDE (MODAL) BAŞLIK ALTINDA PEMBE PUAN
+        // ==========================================
+        const originalOpenModalForBadge = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            if(originalOpenModalForBadge) await originalOpenModalForBadge(id, type);
+            
+            let titleEl = document.getElementById('read-title');
+            if(!titleEl) return;
+
+            // Varsa eski rozeti temizle ki üst üste binmesin
+            let oldBadge = document.getElementById('modal-strict-admin-badge');
+            if (oldBadge) oldBadge.remove();
+
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let item = (source || []).find(x => String(x.id) === String(id));
+            
+            // Eğer Üye Eseri ise ve Puanı varsa Başlık (read-title) ile Metin (read-text) arasına yerleştir
+            if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+                let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+                let badgeHTML = `
+                <div id="modal-strict-admin-badge" style="text-align:center; margin: 5px auto 25px auto; width:100%; display:flex; justify-content:center;">
+                    <span style="font-size:1.15rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.4);">${medals} ${item.adminRating.points} Puan</span>
+                </div>`;
+                titleEl.insertAdjacentHTML('afterend', badgeHTML);
+            }
+        };
+
+        // ==========================================
+        // 3. TAM 20 OYUNUN GERÇEK MEKANİKLERİ (BLOKSUZ & BEDAVA PUANSIZ)
+        // ==========================================
+        window.DB.games = [
+            { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
+            { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
+            { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
+            { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+            { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+            { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+            { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+            { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+            { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+            { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+            { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+            { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+            { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+            { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+            { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+            { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+            { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" },
+            { id: "g18", title: "Şifre Çözücü", text: "3 Haneli şifreyi bul.", emoji: "🔓", points: 15, color: "var(--accent-cyan)" },
+            { id: "g19", title: "Hızlı Karar", text: "Işığı yakala.", emoji: "🚦", points: 10, color: "var(--accent-gold)" },
+            { id: "g20", title: "Kayıp Harf", text: "Eksik harfi bul.", emoji: "🔍", points: 15, color: "var(--accent-pink)" }
+        ];
+
+        window.startMiniGame = function(id, title, pts, emoji) {
+            window.isGameAnswered = false; 
+            let safePts = Math.min(parseInt(pts) || 0, 20); 
+            window.currentGame = { id: id, pts: safePts, title: title, state: {} };
+            
+            let arena = document.getElementById('game-arena');
+            if(!arena) return;
+            
+            document.getElementById('game-title').innerText = title;
+            document.getElementById('game-icon').innerText = emoji;
+            document.getElementById('game-reward').innerText = safePts + " Puan";
+            document.getElementById('game-message').innerText = "";
+
+            // OYUNLARIN GERÇEK MEKANİKLERİ
+            if(id === "g1") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div><div style="display:flex; gap:15px; justify-content:center;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='s') window.winGame(); else window.loseGame();">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='r') window.winGame(); else window.loseGame();">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='p') window.winGame(); else window.loseGame();">✂️</button></div>`;
+            } else if(id === "g2") {
+                let hang = ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE"], word = hang[Math.floor(Math.random() * hang.length)];
+                window.currentGame.state = { word: word, guessed: [], mistakes: 0, max: 6 };
+                window.renderHangman = function() {
+                    let s = window.currentGame.state, display = s.word.split('').map(l => s.guessed.includes(l) ? l : '_').join(' ');
+                    arena.innerHTML = `<div style="font-family:monospace; font-size:1.8rem; letter-spacing:4px; margin-bottom:15px; color:var(--accent-gold);">${display}</div><div style="color:var(--accent-red); margin-bottom:12px;">Kalan Hak: ${s.max - s.mistakes}</div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">` + "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split('').map(l => `<button class="noble-btn" style="width:32px; height:32px; padding:0;" ${s.guessed.includes(l) ? 'disabled style="opacity:0.2"' : ''} onclick="window.guessHangman('${l}')">${l}</button>`).join('') + `</div>`;
+                };
+                window.guessHangman = function(l) {
+                    let s = window.currentGame.state; s.guessed.push(l); if(!s.word.includes(l)) s.mistakes++; window.renderHangman();
+                    if(s.word.split('').every(char => s.guessed.includes(char))) window.winGame(); else if(s.mistakes >= s.max) window.loseGame(`Kelime: ${s.word}`);
+                };
+                window.renderHangman();
+            } else if(id === "g3") {
+                window.currentGame.state = { num: Math.floor(Math.random() * 100) + 1, tries: 7 };
+                arena.innerHTML = `<p style="margin-bottom:12px;">1-100 arası sayıyı tahmin et.</p><input type="number" id="ng-inp" class="inp" style="width:90px; text-align:center; font-size:1.3rem;"><br><button class="noble-btn primary" style="width:140px;" onclick="window.guessNumber()">Tahmin Et</button><div id="ng-hint" style="margin-top:12px; font-weight:bold; color:var(--accent-cyan);"></div>`;
+                window.guessNumber = function() {
+                    let s = window.currentGame.state, val = parseInt(document.getElementById('ng-inp').value);
+                    if(isNaN(val)) return; s.tries--;
+                    if(val === s.num) return window.winGame();
+                    document.getElementById('ng-hint').innerText = (val < s.num ? "🔼 Daha BÜYÜK" : "🔽 Daha KÜÇÜK") + ` (Hak: ${s.tries})`;
+                    if(s.tries <= 0) window.loseGame(`Sayı: ${s.num}`);
+                };
+            } else if(id === "g4") {
+                arena.innerHTML = `<div style="font-size:2rem; color:var(--accent-cyan); margin-bottom:15px; letter-spacing:5px;">M E A L K</div><input type="text" id="g4-inp" class="inp" placeholder="Çözüm (Kalem)" style="text-align:center; text-transform:uppercase;"><button class="noble-btn primary" onclick="if(document.getElementById('g4-inp').value.toUpperCase().replace(/İ/g,'I') === 'KALEM') window.winGame(); else window.loseGame();">Onayla</button>`;
+            } else if(id === "g5") {
+                let emojis = ["🪶", "🌙", "✨", "☕", "📖", "🌹"], deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+                window.memState = { deck: deck, flipped: [], matched: 0, lock: false };
+                window.flipMemCard = function(idx) {
+                    let s = window.memState; if(s.lock || s.flipped.includes(idx) || document.getElementById('mc-'+idx).classList.contains('matched')) return;
+                    let el = document.getElementById('mc-'+idx); el.innerText = s.deck[idx]; el.style.background = "var(--bg-glass)"; s.flipped.push(idx);
+                    if(s.flipped.length === 2) {
+                        s.lock = true;
+                        if(s.deck[s.flipped[0]] === s.deck[s.flipped[1]]) {
+                            document.getElementById('mc-'+s.flipped[0]).classList.add('matched'); document.getElementById('mc-'+s.flipped[1]).classList.add('matched');
+                            s.matched += 2; s.flipped = []; s.lock = false; if(s.matched === deck.length) window.winGame();
+                        } else {
+                            setTimeout(() => { document.getElementById('mc-'+s.flipped[0]).innerText = ''; document.getElementById('mc-'+s.flipped[0]).style.background = "var(--accent-gold)"; document.getElementById('mc-'+s.flipped[1]).innerText = ''; document.getElementById('mc-'+s.flipped[1]).style.background = "var(--accent-gold)"; s.flipped = []; s.lock = false; }, 800);
+                        }
+                    }
+                };
+                arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(4, 55px); gap:8px;">${deck.map((_, i) => `<div id="mc-${i}" style="width:55px; height:55px; background:var(--accent-gold); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;" onclick="window.flipMemCard(${i})"></div>`).join('')}</div>`;
+            } else if(id === "g6") {
+                window.qIndex = 0;
+                let qList = [{ q: "Hangisi bir şiir türü değildir?", o: ["Koşma", "Semai", "Makale", "Gazel"], a: 2 }, { q: "İstiklal Marşımızın yazarı kimdir?", o: ["Namık Kemal", "M. Akif Ersoy", "Cemal Süreya", "Yunus Emre"], a: 1 }];
+                window.renderMil = function() {
+                    if(window.qIndex >= qList.length) return window.winGame();
+                    let q = qList[window.qIndex];
+                    arena.innerHTML = `<div style='margin-bottom:12px; font-weight:bold; color:var(--accent-gold); font-size:1.1rem;'>Soru ${window.qIndex + 1}</div><div style='margin-bottom:15px; font-weight:bold;'>${q.q}</div>` + q.o.map((o, idx) => `<button class='noble-btn' style='margin-bottom:6px; text-align:left;' onclick='if(${idx} === ${q.a}) { window.qIndex++; window.renderMil(); } else { window.loseGame(); }'>${o}</button>`).join('');
+                };
+                window.renderMil();
+            } else if(id === "g7") {
+                window.currentGame.state = { board: Array(9).fill(null), active: true };
+                window.renderTTT = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => { let color = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white'); return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${color};" onclick="window.playTTT(${i})">${cell || ''}</div>`; }).join('')}</div>`;
+                };
+                window.playTTT = function(i) {
+                    let s = window.currentGame.state; if(!s.active || s.board[i]) return;
+                    s.board[i] = 'X';
+                    let w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; let checkWin = (p) => w.some(x => s.board[x[0]]===p && s.board[x[1]]===p && s.board[x[2]]===p);
+                    if(checkWin('X')) { window.renderTTT(); return window.winGame(); }
+                    let empty = s.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
+                    if(empty.length === 0) return window.loseGame("Berabere!");
+                    s.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+                    if(checkWin('O')) { window.renderTTT(); return window.loseGame("Bot kazandı!"); }
+                    window.renderTTT();
+                };
+                window.renderTTT();
+            } else if(id === "g8") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Zar atarak botun puanını geçmeye çalış!</p><button class="noble-btn primary" style="width:160px; font-size:1.5rem;" onclick="window.rollDice()">🎲 Zar At</button><div id="dice-res" style="margin-top:15px; font-size:1.2rem; font-weight:bold;"></div>`;
+                window.rollDice = function() {
+                    let pRoll = Math.floor(Math.random() * 6) + 1, bRoll = Math.floor(Math.random() * 6) + 1;
+                    document.getElementById('dice-res').innerText = `Sen: ${pRoll} | Bot: ${bRoll}`;
+                    if(pRoll > bRoll) window.winGame(); else if(pRoll === bRoll) document.getElementById('game-message').innerText = "Berabere! Tekrar at."; else window.loseGame();
+                };
+            } else if(id === "g9") {
+                arena.innerHTML = `<div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">İpucu: Dostluk bağı</div><div style="font-size:2rem; font-family:monospace; color:var(--accent-pink); margin-bottom:15px; letter-spacing:5px;">V A F E</div><input type="text" id="an-inp" class="inp" style="width:180px; text-align:center; text-transform:uppercase;" placeholder="Çözüm (VEFA)"><br><button class="noble-btn primary" style="width:180px;" onclick="if(document.getElementById('an-inp').value.toUpperCase().replace(/İ/g,'I') === 'VEFA') window.winGame(); else window.loseGame();">Tahmin Et</button>`;
+            } else if(id === "g10") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:20px; font-weight:bold;">İstiklal Marşı 10 kıtadan oluşmaktadır.</div><div style="display:flex; gap:15px;"><button class="noble-btn" style="border-color:var(--accent-green); color:var(--accent-green); flex:1;" onclick="window.winGame()">DOĞRU</button><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red); flex:1;" onclick="window.loseGame()">YANLIŞ</button></div>`;
+            } else if(id === "g11") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Aşk kelimesinin son harfiyle başlayan bir kelime yaz.</p><div style="font-size:1.8rem; color:var(--accent-gold); margin-bottom:15px; font-weight:bold;">AŞK</div><input type="text" id="wc-inp" class="inp" style="width:200px; text-align:center; text-transform:uppercase;" placeholder="K ile başla..."><br><button class="noble-btn primary" style="width:200px;" onclick="let v=document.getElementById('wc-inp').value.toUpperCase().trim(); if(v.length>=3 && v.startsWith('K')) window.winGame(); else window.loseGame('Geçersiz kelime!');">Gönder</button>`;
+            } else if(id === "g12") {
+                let rNum = Math.floor(10000 + Math.random() * 90000); 
+                arena.innerHTML = `<p style="margin-bottom:10px;">Sayıyı aklında tut!</p><div id="flash-num" style="font-size:3rem; font-family:monospace; color:var(--accent-cyan); font-weight:bold; margin:20px 0;">${rNum}</div>`;
+                setTimeout(() => { if(document.getElementById('flash-num')) { arena.innerHTML = `<p style="margin-bottom:15px;">Gördüğün sayıyı yaz:</p><input type="number" id="flash-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('flash-inp').value == '${rNum}') window.winGame(); else window.loseGame();">Onayla</button>`; } }, 1500); 
+            } else if(id === "g13") {
+                let num1 = Math.floor(Math.random() * 50) + 10, num2 = Math.floor(Math.random() * 20) + 1, ans = num1 + num2;
+                arena.innerHTML = `<p style="margin-bottom:10px;">İşlemin sonucunu bul:</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} + ${num2} = ?</div><input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('math-inp').value == '${ans}') window.winGame(); else window.loseGame();">Cevapla</button>`;
+            } else if(id === "g14") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:20px; letter-spacing:2px;">KIRMIZI</div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red);" onclick="window.loseGame()">KIRMIZI</button><button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.winGame()">MAVİ</button></div>`;
+            } else if(id === "g15") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Şans çarkını çevir!</p><div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1); color:var(--accent-gold);">🎡</div><button class="noble-btn primary" style="width:180px;" onclick="window.spinWheel()">Çevir</button>`;
+                window.spinWheel = function() {
+                    document.getElementById('wheel-icon').style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
+                    setTimeout(() => { if(Math.random() > 0.4) window.winGame(); else window.loseGame("Çark sana gülmedi!"); }, 2000);
+                };
+            } else if(id === "g16") {
+                window.currentGame.state = { clicks: 0, required: 15 };
+                arena.innerHTML = `<p style="margin-bottom:15px;">3 Saniye içinde 15 kere tıkla!</p><button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%; box-shadow:0 0 15px rgba(34,197,94,0.4);" onclick="window.fastClickStart()">TIKLA</button><div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>`;
+                window.fastClickTimer = null;
+                window.fastClickStart = function() {
+                    let s = window.currentGame.state;
+                    if (s.clicks === 0) { window.fastClickTimer = setTimeout(() => { if (s.clicks < s.required) window.loseGame("Süre bitti, yavaşsın!"); }, 3000); }
+                    s.clicks++; document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
+                    if (s.clicks >= s.required) { clearTimeout(window.fastClickTimer); window.winGame(); }
+                };
+            } else if(id === "g17") {
+                let sentence = "Şiir ruhun gıdasıdır".split(" "), shuffled = [...sentence].sort(() => Math.random() - 0.5);
+                window.currentGame.state = { currentOrder: [], correct: sentence };
+                window.renderSort = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<p style="margin-bottom:15px;">Doğru sıraya diz:</p><div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">${s.currentOrder.join(" ")}</div><div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">${shuffled.map(w => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="window.pickWord('${w}')">${w}</button>`).join('')}</div>`;
+                };
+                window.pickWord = function(w) {
+                    let s = window.currentGame.state; s.currentOrder.push(w); window.renderSort();
+                    if (s.currentOrder.length === s.correct.length) {
+                        if (s.currentOrder.join(" ") === s.correct.join(" ")) window.winGame(); else window.loseGame("Yanlış sıralama!");
+                    }
+                };
+                window.renderSort();
+            } else if(id === "g18") {
+                let code = Math.floor(100 + Math.random() * 900).toString(); 
+                window.cbState = { code: code, tries: 5 };
+                arena.innerHTML = `<p style="margin-bottom:10px;">3 Haneli şifreyi tahmin et (5 Hak):</p><input type="number" id="cb-inp" class="inp" style="width:120px; text-align:center; font-size:2rem; letter-spacing:5px;"><br><button class="noble-btn primary" style="width:150px;" onclick="window.checkCodeBreaker()">Dene</button><div id="cb-hint" style="margin-top:15px; font-weight:bold; color:var(--accent-cyan); font-size:1.1rem;"></div>`;
+                window.checkCodeBreaker = function() {
+                    let guess = document.getElementById('cb-inp').value, hintEl = document.getElementById('cb-hint');
+                    if(guess.length !== 3) { hintEl.innerText = "3 haneli girin!"; return; }
+                    if(guess === window.cbState.code) return window.winGame();
+                    window.cbState.tries--;
+                    if(window.cbState.tries <= 0) return window.loseGame(`Şifre: ${window.cbState.code}`);
+                    let exact = 0, wrongPlace = 0;
+                    for(let i=0; i<3; i++) { if(guess[i] === window.cbState.code[i]) exact++; else if(window.cbState.code.includes(guess[i])) wrongPlace++; }
+                    hintEl.innerText = `🟩 İsabet: ${exact} | 🟨 Yanlış Yer: ${wrongPlace} (Hak: ${window.cbState.tries})`;
+                };
+            } else if(id === "g19") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Kutu <b style="color:var(--accent-green);">YEŞİL</b> olduğunda hemen tıkla!</p><div id="reflex-box" style="width:150px; height:150px; background:var(--accent-red); border-radius:16px; margin:0 auto; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);" onclick="window.clickReflex()"></div>`;
+                window.reflexState = { active: false, timer: null };
+                window.reflexState.timer = setTimeout(() => {
+                    let box = document.getElementById('reflex-box');
+                    if(box) {
+                        box.style.background = 'var(--accent-green)'; box.style.boxShadow = '0 0 20px rgba(34,197,94,0.8)'; window.reflexState.active = true;
+                        setTimeout(() => { if(window.reflexState.active) window.loseGame("Çok yavaş kaldın!"); }, 800);
+                    }
+                }, 1500 + Math.random() * 3000);
+                window.clickReflex = function() {
+                    if(window.reflexState.active) { window.reflexState.active = false; window.winGame(); }
+                    else { clearTimeout(window.reflexState.timer); window.loseGame("Erken tıkladın!"); }
+                };
+            } else if(id === "g20") {
+                let words = ["EDEBİYAT", "İSTİKLAL", "HÜRRİYET", "MÜKEMMEL", "TAHAYYÜL"], word = words[Math.floor(Math.random() * words.length)], missingIdx = Math.floor(Math.random() * word.length), missingChar = word[missingIdx], displayWord = word.substring(0, missingIdx) + "_" + word.substring(missingIdx + 1);
+                arena.innerHTML = `<p style="margin-bottom:15px;">Eksik harfi bul:</p><div style="font-size:2.5rem; letter-spacing:5px; font-family:monospace; color:var(--accent-pink); font-weight:bold; margin-bottom:20px;">${displayWord}</div><input type="text" id="ml-inp" class="inp" maxlength="1" style="width:80px; text-align:center; font-size:2rem; text-transform:uppercase;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('ml-inp').value.toUpperCase().replace(/İ/g,'I') === '${missingChar}'.replace(/İ/g,'I')) window.winGame(); else window.loseGame();">Cevapla</button>`;
+            }
+
+            window.openModal('gameModal');
+        };
+
+        if(typeof window.renderAllContent === 'function') window.renderAllContent();
+
+    }, 1500);
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 🛡️ MİSALİ KESİN KURTARMA: ÇİFTLERİ SİL, OYUNLARI DÜZELT, PEMBE ROZETİ EKLE 🛡️ -->
+<!-- ===================================================================== -->
+<script id="misali-ultimate-rescue-patch">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🛡️ Kurtarma Motoru Aktif: Çiftler siliniyor, oyunlar ve rozet onarılıyor...");
+
+        // ==========================================
+        // 1. ÇİFT ESERLERİ (DUBLAJLARI) KESİN OLARAK SİL
+        // ==========================================
+        if (window.userPoemsDB && window.userPoemsDB.length > 0) {
+            let uniquePoems = [];
+            let seenIds = new Set();
+            window.userPoemsDB.forEach(p => {
+                // Aynı ID'ye sahip eseri sadece 1 kere ekle
+                if (!seenIds.has(p.id)) {
+                    seenIds.add(p.id);
+                    uniquePoems.push(p);
+                }
+            });
+            window.userPoemsDB = uniquePoems;
+            localStorage.setItem('misaliUserPoems', JSON.stringify(uniquePoems));
+            try { if(typeof firebase !== 'undefined') firebase.database().ref('userPoemsDB').set(uniquePoems); } catch(e){}
+            if (typeof window.renderAllContent === 'function') window.renderAllContent();
+        }
+
+        // ==========================================
+        // 2. AÇILAN PENCEREDE (MODAL) BAŞLIK ALTINDA PEMBE PUAN
+        // ==========================================
+        const originalOpenModalForBadge = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            if(originalOpenModalForBadge) await originalOpenModalForBadge(id, type);
+            
+            let titleEl = document.getElementById('read-title');
+            if(!titleEl) return;
+
+            // Varsa eski rozeti temizle ki üst üste binmesin
+            let oldBadge = document.getElementById('modal-strict-admin-badge');
+            if (oldBadge) oldBadge.remove();
+
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let item = (source || []).find(x => String(x.id) === String(id));
+            
+            // Eğer Üye Eseri ise ve Puanı varsa Başlık (read-title) ile Metin (read-text) arasına yerleştir
+            if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+                let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+                let badgeHTML = `
+                <div id="modal-strict-admin-badge" style="text-align:center; margin: 5px auto 25px auto; width:100%; display:flex; justify-content:center;">
+                    <span style="font-size:1.15rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.4);">${medals} ${item.adminRating.points} Puan</span>
+                </div>`;
+                titleEl.insertAdjacentHTML('afterend', badgeHTML);
+            }
+        };
+
+        // ==========================================
+        // 3. TAM 20 OYUNUN GERÇEK MEKANİKLERİ (BLOKSUZ & BEDAVA PUANSIZ)
+        // ==========================================
+        window.DB.games = [
+            { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
+            { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
+            { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
+            { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+            { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+            { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+            { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+            { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+            { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+            { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+            { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+            { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+            { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+            { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+            { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+            { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+            { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" },
+            { id: "g18", title: "Şifre Çözücü", text: "3 Haneli şifreyi bul.", emoji: "🔓", points: 15, color: "var(--accent-cyan)" },
+            { id: "g19", title: "Hızlı Karar", text: "Işığı yakala.", emoji: "🚦", points: 10, color: "var(--accent-gold)" },
+            { id: "g20", title: "Kayıp Harf", text: "Eksik harfi bul.", emoji: "🔍", points: 15, color: "var(--accent-pink)" }
+        ];
+
+        window.startMiniGame = function(id, title, pts, emoji) {
+            window.isGameAnswered = false; 
+            let safePts = Math.min(parseInt(pts) || 0, 20); 
+            window.currentGame = { id: id, pts: safePts, title: title, state: {} };
+            
+            let arena = document.getElementById('game-arena');
+            if(!arena) return;
+            
+            document.getElementById('game-title').innerText = title;
+            document.getElementById('game-icon').innerText = emoji;
+            document.getElementById('game-reward').innerText = safePts + " Puan";
+            document.getElementById('game-message').innerText = "";
+
+            // OYUNLARIN GERÇEK MEKANİKLERİ
+            if(id === "g1") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div><div style="display:flex; gap:15px; justify-content:center;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='s') window.winGame(); else window.loseGame();">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='r') window.winGame(); else window.loseGame();">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='p') window.winGame(); else window.loseGame();">✂️</button></div>`;
+            } else if(id === "g2") {
+                let hang = ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE"], word = hang[Math.floor(Math.random() * hang.length)];
+                window.currentGame.state = { word: word, guessed: [], mistakes: 0, max: 6 };
+                window.renderHangman = function() {
+                    let s = window.currentGame.state, display = s.word.split('').map(l => s.guessed.includes(l) ? l : '_').join(' ');
+                    arena.innerHTML = `<div style="font-family:monospace; font-size:1.8rem; letter-spacing:4px; margin-bottom:15px; color:var(--accent-gold);">${display}</div><div style="color:var(--accent-red); margin-bottom:12px;">Kalan Hak: ${s.max - s.mistakes}</div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">` + "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split('').map(l => `<button class="noble-btn" style="width:32px; height:32px; padding:0;" ${s.guessed.includes(l) ? 'disabled style="opacity:0.2"' : ''} onclick="window.guessHangman('${l}')">${l}</button>`).join('') + `</div>`;
+                };
+                window.guessHangman = function(l) {
+                    let s = window.currentGame.state; s.guessed.push(l); if(!s.word.includes(l)) s.mistakes++; window.renderHangman();
+                    if(s.word.split('').every(char => s.guessed.includes(char))) window.winGame(); else if(s.mistakes >= s.max) window.loseGame(`Kelime: ${s.word}`);
+                };
+                window.renderHangman();
+            } else if(id === "g3") {
+                window.currentGame.state = { num: Math.floor(Math.random() * 100) + 1, tries: 7 };
+                arena.innerHTML = `<p style="margin-bottom:12px;">1-100 arası sayıyı tahmin et.</p><input type="number" id="ng-inp" class="inp" style="width:90px; text-align:center; font-size:1.3rem;"><br><button class="noble-btn primary" style="width:140px;" onclick="window.guessNumber()">Tahmin Et</button><div id="ng-hint" style="margin-top:12px; font-weight:bold; color:var(--accent-cyan);"></div>`;
+                window.guessNumber = function() {
+                    let s = window.currentGame.state, val = parseInt(document.getElementById('ng-inp').value);
+                    if(isNaN(val)) return; s.tries--;
+                    if(val === s.num) return window.winGame();
+                    document.getElementById('ng-hint').innerText = (val < s.num ? "🔼 Daha BÜYÜK" : "🔽 Daha KÜÇÜK") + ` (Hak: ${s.tries})`;
+                    if(s.tries <= 0) window.loseGame(`Sayı: ${s.num}`);
+                };
+            } else if(id === "g4") {
+                arena.innerHTML = `<div style="font-size:2rem; color:var(--accent-cyan); margin-bottom:15px; letter-spacing:5px;">M E A L K</div><input type="text" id="g4-inp" class="inp" placeholder="Çözüm (Kalem)" style="text-align:center; text-transform:uppercase;"><button class="noble-btn primary" onclick="if(document.getElementById('g4-inp').value.toUpperCase().replace(/İ/g,'I') === 'KALEM') window.winGame(); else window.loseGame();">Onayla</button>`;
+            } else if(id === "g5") {
+                let emojis = ["🪶", "🌙", "✨", "☕", "📖", "🌹"], deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+                window.memState = { deck: deck, flipped: [], matched: 0, lock: false };
+                window.flipMemCard = function(idx) {
+                    let s = window.memState; if(s.lock || s.flipped.includes(idx) || document.getElementById('mc-'+idx).classList.contains('matched')) return;
+                    let el = document.getElementById('mc-'+idx); el.innerText = s.deck[idx]; el.style.background = "var(--bg-glass)"; s.flipped.push(idx);
+                    if(s.flipped.length === 2) {
+                        s.lock = true;
+                        if(s.deck[s.flipped[0]] === s.deck[s.flipped[1]]) {
+                            document.getElementById('mc-'+s.flipped[0]).classList.add('matched'); document.getElementById('mc-'+s.flipped[1]).classList.add('matched');
+                            s.matched += 2; s.flipped = []; s.lock = false; if(s.matched === deck.length) window.winGame();
+                        } else {
+                            setTimeout(() => { document.getElementById('mc-'+s.flipped[0]).innerText = ''; document.getElementById('mc-'+s.flipped[0]).style.background = "var(--accent-gold)"; document.getElementById('mc-'+s.flipped[1]).innerText = ''; document.getElementById('mc-'+s.flipped[1]).style.background = "var(--accent-gold)"; s.flipped = []; s.lock = false; }, 800);
+                        }
+                    }
+                };
+                arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(4, 55px); gap:8px;">${deck.map((_, i) => `<div id="mc-${i}" style="width:55px; height:55px; background:var(--accent-gold); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;" onclick="window.flipMemCard(${i})"></div>`).join('')}</div>`;
+            } else if(id === "g6") {
+                window.qIndex = 0;
+                let qList = [{ q: "Hangisi bir şiir türü değildir?", o: ["Koşma", "Semai", "Makale", "Gazel"], a: 2 }, { q: "İstiklal Marşımızın yazarı kimdir?", o: ["Namık Kemal", "M. Akif Ersoy", "Cemal Süreya", "Yunus Emre"], a: 1 }];
+                window.renderMil = function() {
+                    if(window.qIndex >= qList.length) return window.winGame();
+                    let q = qList[window.qIndex];
+                    arena.innerHTML = `<div style='margin-bottom:12px; font-weight:bold; color:var(--accent-gold); font-size:1.1rem;'>Soru ${window.qIndex + 1}</div><div style='margin-bottom:15px; font-weight:bold;'>${q.q}</div>` + q.o.map((o, idx) => `<button class='noble-btn' style='margin-bottom:6px; text-align:left;' onclick='if(${idx} === ${q.a}) { window.qIndex++; window.renderMil(); } else { window.loseGame(); }'>${o}</button>`).join('');
+                };
+                window.renderMil();
+            } else if(id === "g7") {
+                window.currentGame.state = { board: Array(9).fill(null), active: true };
+                window.renderTTT = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => { let color = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white'); return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${color};" onclick="window.playTTT(${i})">${cell || ''}</div>`; }).join('')}</div>`;
+                };
+                window.playTTT = function(i) {
+                    let s = window.currentGame.state; if(!s.active || s.board[i]) return;
+                    s.board[i] = 'X';
+                    let w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; let checkWin = (p) => w.some(x => s.board[x[0]]===p && s.board[x[1]]===p && s.board[x[2]]===p);
+                    if(checkWin('X')) { window.renderTTT(); return window.winGame(); }
+                    let empty = s.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
+                    if(empty.length === 0) return window.loseGame("Berabere!");
+                    s.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+                    if(checkWin('O')) { window.renderTTT(); return window.loseGame("Bot kazandı!"); }
+                    window.renderTTT();
+                };
+                window.renderTTT();
+            } else if(id === "g8") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Zar atarak botun puanını geçmeye çalış!</p><button class="noble-btn primary" style="width:160px; font-size:1.5rem;" onclick="window.rollDice()">🎲 Zar At</button><div id="dice-res" style="margin-top:15px; font-size:1.2rem; font-weight:bold;"></div>`;
+                window.rollDice = function() {
+                    let pRoll = Math.floor(Math.random() * 6) + 1, bRoll = Math.floor(Math.random() * 6) + 1;
+                    document.getElementById('dice-res').innerText = `Sen: ${pRoll} | Bot: ${bRoll}`;
+                    if(pRoll > bRoll) window.winGame(); else if(pRoll === bRoll) document.getElementById('game-message').innerText = "Berabere! Tekrar at."; else window.loseGame();
+                };
+            } else if(id === "g9") {
+                arena.innerHTML = `<div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">İpucu: Dostluk bağı</div><div style="font-size:2rem; font-family:monospace; color:var(--accent-pink); margin-bottom:15px; letter-spacing:5px;">V A F E</div><input type="text" id="an-inp" class="inp" style="width:180px; text-align:center; text-transform:uppercase;" placeholder="Çözüm (VEFA)"><br><button class="noble-btn primary" style="width:180px;" onclick="if(document.getElementById('an-inp').value.toUpperCase().replace(/İ/g,'I') === 'VEFA') window.winGame(); else window.loseGame();">Tahmin Et</button>`;
+            } else if(id === "g10") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:20px; font-weight:bold;">İstiklal Marşı 10 kıtadan oluşmaktadır.</div><div style="display:flex; gap:15px;"><button class="noble-btn" style="border-color:var(--accent-green); color:var(--accent-green); flex:1;" onclick="window.winGame()">DOĞRU</button><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red); flex:1;" onclick="window.loseGame()">YANLIŞ</button></div>`;
+            } else if(id === "g11") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Aşk kelimesinin son harfiyle başlayan bir kelime yaz.</p><div style="font-size:1.8rem; color:var(--accent-gold); margin-bottom:15px; font-weight:bold;">AŞK</div><input type="text" id="wc-inp" class="inp" style="width:200px; text-align:center; text-transform:uppercase;" placeholder="K ile başla..."><br><button class="noble-btn primary" style="width:200px;" onclick="let v=document.getElementById('wc-inp').value.toUpperCase().trim(); if(v.length>=3 && v.startsWith('K')) window.winGame(); else window.loseGame('Geçersiz kelime!');">Gönder</button>`;
+            } else if(id === "g12") {
+                let rNum = Math.floor(10000 + Math.random() * 90000); 
+                arena.innerHTML = `<p style="margin-bottom:10px;">Sayıyı aklında tut!</p><div id="flash-num" style="font-size:3rem; font-family:monospace; color:var(--accent-cyan); font-weight:bold; margin:20px 0;">${rNum}</div>`;
+                setTimeout(() => { if(document.getElementById('flash-num')) { arena.innerHTML = `<p style="margin-bottom:15px;">Gördüğün sayıyı yaz:</p><input type="number" id="flash-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('flash-inp').value == '${rNum}') window.winGame(); else window.loseGame();">Onayla</button>`; } }, 1500); 
+            } else if(id === "g13") {
+                let num1 = Math.floor(Math.random() * 50) + 10, num2 = Math.floor(Math.random() * 20) + 1, ans = num1 + num2;
+                arena.innerHTML = `<p style="margin-bottom:10px;">İşlemin sonucunu bul:</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} + ${num2} = ?</div><input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('math-inp').value == '${ans}') window.winGame(); else window.loseGame();">Cevapla</button>`;
+            } else if(id === "g14") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:20px; letter-spacing:2px;">KIRMIZI</div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red);" onclick="window.loseGame()">KIRMIZI</button><button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.winGame()">MAVİ</button></div>`;
+            } else if(id === "g15") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Şans çarkını çevir!</p><div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1); color:var(--accent-gold);">🎡</div><button class="noble-btn primary" style="width:180px;" onclick="window.spinWheel()">Çevir</button>`;
+                window.spinWheel = function() {
+                    document.getElementById('wheel-icon').style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
+                    setTimeout(() => { if(Math.random() > 0.4) window.winGame(); else window.loseGame("Çark sana gülmedi!"); }, 2000);
+                };
+            } else if(id === "g16") {
+                window.currentGame.state = { clicks: 0, required: 15 };
+                arena.innerHTML = `<p style="margin-bottom:15px;">3 Saniye içinde 15 kere tıkla!</p><button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%; box-shadow:0 0 15px rgba(34,197,94,0.4);" onclick="window.fastClickStart()">TIKLA</button><div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>`;
+                window.fastClickTimer = null;
+                window.fastClickStart = function() {
+                    let s = window.currentGame.state;
+                    if (s.clicks === 0) { window.fastClickTimer = setTimeout(() => { if (s.clicks < s.required) window.loseGame("Süre bitti, yavaşsın!"); }, 3000); }
+                    s.clicks++; document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
+                    if (s.clicks >= s.required) { clearTimeout(window.fastClickTimer); window.winGame(); }
+                };
+            } else if(id === "g17") {
+                let sentence = "Şiir ruhun gıdasıdır".split(" "), shuffled = [...sentence].sort(() => Math.random() - 0.5);
+                window.currentGame.state = { currentOrder: [], correct: sentence };
+                window.renderSort = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<p style="margin-bottom:15px;">Doğru sıraya diz:</p><div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">${s.currentOrder.join(" ")}</div><div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">${shuffled.map(w => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="window.pickWord('${w}')">${w}</button>`).join('')}</div>`;
+                };
+                window.pickWord = function(w) {
+                    let s = window.currentGame.state; s.currentOrder.push(w); window.renderSort();
+                    if (s.currentOrder.length === s.correct.length) {
+                        if (s.currentOrder.join(" ") === s.correct.join(" ")) window.winGame(); else window.loseGame("Yanlış sıralama!");
+                    }
+                };
+                window.renderSort();
+            } else if(id === "g18") {
+                let code = Math.floor(100 + Math.random() * 900).toString(); 
+                window.cbState = { code: code, tries: 5 };
+                arena.innerHTML = `<p style="margin-bottom:10px;">3 Haneli şifreyi tahmin et (5 Hak):</p><input type="number" id="cb-inp" class="inp" style="width:120px; text-align:center; font-size:2rem; letter-spacing:5px;"><br><button class="noble-btn primary" style="width:150px;" onclick="window.checkCodeBreaker()">Dene</button><div id="cb-hint" style="margin-top:15px; font-weight:bold; color:var(--accent-cyan); font-size:1.1rem;"></div>`;
+                window.checkCodeBreaker = function() {
+                    let guess = document.getElementById('cb-inp').value, hintEl = document.getElementById('cb-hint');
+                    if(guess.length !== 3) { hintEl.innerText = "3 haneli girin!"; return; }
+                    if(guess === window.cbState.code) return window.winGame();
+                    window.cbState.tries--;
+                    if(window.cbState.tries <= 0) return window.loseGame(`Şifre: ${window.cbState.code}`);
+                    let exact = 0, wrongPlace = 0;
+                    for(let i=0; i<3; i++) { if(guess[i] === window.cbState.code[i]) exact++; else if(window.cbState.code.includes(guess[i])) wrongPlace++; }
+                    hintEl.innerText = `🟩 İsabet: ${exact} | 🟨 Yanlış Yer: ${wrongPlace} (Hak: ${window.cbState.tries})`;
+                };
+            } else if(id === "g19") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Kutu <b style="color:var(--accent-green);">YEŞİL</b> olduğunda hemen tıkla!</p><div id="reflex-box" style="width:150px; height:150px; background:var(--accent-red); border-radius:16px; margin:0 auto; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);" onclick="window.clickReflex()"></div>`;
+                window.reflexState = { active: false, timer: null };
+                window.reflexState.timer = setTimeout(() => {
+                    let box = document.getElementById('reflex-box');
+                    if(box) {
+                        box.style.background = 'var(--accent-green)'; box.style.boxShadow = '0 0 20px rgba(34,197,94,0.8)'; window.reflexState.active = true;
+                        setTimeout(() => { if(window.reflexState.active) window.loseGame("Çok yavaş kaldın!"); }, 800);
+                    }
+                }, 1500 + Math.random() * 3000);
+                window.clickReflex = function() {
+                    if(window.reflexState.active) { window.reflexState.active = false; window.winGame(); }
+                    else { clearTimeout(window.reflexState.timer); window.loseGame("Erken tıkladın!"); }
+                };
+            } else if(id === "g20") {
+                let words = ["EDEBİYAT", "İSTİKLAL", "HÜRRİYET", "MÜKEMMEL", "TAHAYYÜL"], word = words[Math.floor(Math.random() * words.length)], missingIdx = Math.floor(Math.random() * word.length), missingChar = word[missingIdx], displayWord = word.substring(0, missingIdx) + "_" + word.substring(missingIdx + 1);
+                arena.innerHTML = `<p style="margin-bottom:15px;">Eksik harfi bul:</p><div style="font-size:2.5rem; letter-spacing:5px; font-family:monospace; color:var(--accent-pink); font-weight:bold; margin-bottom:20px;">${displayWord}</div><input type="text" id="ml-inp" class="inp" maxlength="1" style="width:80px; text-align:center; font-size:2rem; text-transform:uppercase;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('ml-inp').value.toUpperCase().replace(/İ/g,'I') === '${missingChar}'.replace(/İ/g,'I')) window.winGame(); else window.loseGame();">Cevapla</button>`;
+            }
+
+            window.openModal('gameModal');
+        };
+
+        if(typeof window.renderAllContent === 'function') window.renderAllContent();
+
+    }, 1500);
+});
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ KESİN ÇÖZÜM: ROZET, 20 OYUN VE ÇAN TEMİZLİĞİ FİXİ 🏆 -->
+<!-- ===================================================================== -->
+<script id="misali-absolute-master-final-fix">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ Misali Final Fix: Oyunlar, Rozetler ve Loglar Onarılıyor...");
+
+        // ==========================================
+        // 1. EKSİK CSS STİLLERİ (Rozetlerin şık durması için)
+        // ==========================================
+        let style = document.createElement('style');
+        style.innerHTML = `
+            .admin-badge-mini { position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.5); z-index:5; letter-spacing:0.5px; }
+            .card .admin-card-actions { top: 35px !important; }
+            #read-badge-container { text-align:center; margin-bottom:15px; width:100%; display:flex; justify-content:center; }
+        `;
+        document.head.appendChild(style);
+
+        // ==========================================
+        // 2. AÇILAN PENCEREDE BAŞLIK İLE ŞİİR ARASINA PEMBE PUAN (SENİN İSTEDİĞİN GİBİ)
+        // ==========================================
+        const baseOpenModal = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            if(baseOpenModal) await baseOpenModal(id, type);
+            
+            let titleEl = document.getElementById('read-title');
+            if(!titleEl) return;
+
+            let badgeCont = document.getElementById('read-badge-container');
+            if (!badgeCont) {
+                badgeCont = document.createElement('div');
+                badgeCont.id = 'read-badge-container';
+                // Başlığın hemen sonrasına ekler (Şiir metni ile başlık arasına)
+                titleEl.after(badgeCont); 
+            }
+
+            let source = type === 'userPoems' ? window.userPoemsDB : window.DB[type];
+            let item = (source || []).find(x => String(x.id) === String(id));
+            
+            if (item && item.adminRating && item.adminRating.points > 0 && type === 'userPoems') {
+                let medals = item.adminRating.tier === 'super' ? '🎖️🎖️🎖️' : (item.adminRating.tier === 'elite' ? '🎖️🎖️' : '🎖️');
+                badgeCont.innerHTML = `<span style="font-size:1.1rem; color:var(--accent-pink); background:rgba(236,72,153,0.15); padding:6px 20px; border-radius:20px; border:1px solid var(--accent-pink); font-weight:bold; box-shadow:0 0 15px rgba(236,72,153,0.3);">${medals} ${item.adminRating.points} Puan</span>`;
+            } else {
+                badgeCont.innerHTML = '';
+            }
+        };
+
+        // ==========================================
+        // 3. KARTLARIN ÜZERİNE KÜÇÜK PEMBE ROZETİ EKLE
+        // ==========================================
+        const baseRender = window.renderAllContent;
+        window.renderAllContent = function() {
+            if(baseRender) baseRender();
+            
+            let uGrid = document.getElementById('userPoems-grid');
+            if (uGrid && window.userPoemsDB) {
+                let uName = window.currentUser ? window.currentUser.username : null;
+                let isAdmin = window.currentUser && window.currentUser.role === 'admin';
+                
+                uGrid.innerHTML = [...window.userPoemsDB].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).map(d => {
+                    let sd = window.poemDataStore[d.id] || {}, hc = 0, cc = sd.comments ? sd.comments.length : 0, roses = 0;
+                    if (sd.ratings) Object.values(sd.ratings).forEach(v => hc += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+                    if (sd.comments) sd.comments.forEach(c => roses += (c.roses || 0)); 
+                    let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName]?.includes(d.id);
+                    let hasMusic = d.hasAudio || d.audio;
+                    let textPreview = (d.text || '').replace(/<[^>]*>?/gm, '').replace(/[\r\n]/g, ' ').substring(0, 80) + '...';
+                    let safeTitle = (d.title || 'Eser').replace(/'/g, "&#39;");
+                    let ribbon = ((Date.now() - (d.timestamp || 0)) < 86400000) ? `<div class="new-ribbon">YENİ</div>` : '';
+                    
+                    // İŞTE KART ÜSTÜNDEKİ ROZET
+                    let adminBadge = (d.adminRating && d.adminRating.points > 0) ? `<div class="admin-badge-mini">🎖️ ${d.adminRating.points} Puan</div>` : '';
+
+                    let uEditBtn = isAdmin ? `<button class="admin-btn edit" style="border-color:var(--accent-gold); color:var(--accent-gold);" onclick="event.stopPropagation(); window.quickEditItem('${d.id}', 'userPoems')"><i class="fas fa-pen"></i></button>` : '';
+                    let isMyPoem = uName && (d.author === uName || d.author === window.currentUser?.name);
+                    let uDeleteBtn = (isAdmin || isMyPoem) ? `<button class="admin-btn del" onclick="event.stopPropagation(); window.deleteAnyItem('${d.id}', 'userPoems')"><i class="fas fa-trash"></i></button>` : '';
+                    let audioBtn = hasMusic ? `<div class="c-stat music" onclick="event.stopPropagation(); window.openReadModal('${d.id}', 'userPoems');" style="color:var(--accent-green)"><i class="fas fa-play-circle"></i></div>` : '';
+                    
+                    let notesScore = 0; let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+                    if(audioRDB[d.id]) Object.values(audioRDB[d.id]).forEach(v => notesScore += parseInt(v||0));
+                    let noteHTML = hasMusic ? `<span class="c-stat" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan); margin-right:3px;"></i> ${notesScore}</span>` : ``;
+
+                    let finalAuthor = d.author || d.name || 'Şair Misal.i';
+                    let authorColor = finalAuthor === 'Şair Misal.i' ? 'var(--accent-cyan)' : 'var(--accent-gold)';
+
+                    return `<div class="card" onclick="window.openReadModal('${d.id}', 'userPoems')">
+                        ${ribbon}${adminBadge}
+                        <div class="admin-card-actions" style="top:${adminBadge ? '35px' : '12px'};">${uEditBtn}${uDeleteBtn}</div>
+                        <button class="bookmark-btn ${isSaved ? 'active' : ''}" style="color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'};" onclick="event.stopPropagation(); window.toggleBookmark('${d.id}')"><i class="fas fa-bookmark"></i></button>
+                        <div class="card-ic">${d.emoji || '📖'}</div>
+                        <h3 class="card-t">${safeTitle}</h3>
+                        <p class="card-sub">${textPreview}</p>
+                        <div class="card-auth" style="color:${authorColor}; font-family:'Great Vibes', cursive; font-size:1.4rem; margin-top:5px;">~ ${finalAuthor}</div>
+                        <div class="card-footer">${noteHTML}<span class="c-stat"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${hc}</span><span class="c-stat"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${cc}</span><span class="c-stat"><span class="real-blue-rose" style="font-size:0.9rem;">🌹</span> ${roses}</span>${audioBtn}</div>
+                    </div>`;
+                }).join('');
+            }
+        };
+
+        // ==========================================
+        // 4. ÇAN (BİLDİRİM/LOG) TEMİZLEME DÜZELTMESİ
+        // ==========================================
+        window.clearLogs = function() { 
+            window.adminLogs = []; 
+            localStorage.setItem('misaliAdminLogs', '[]'); 
+            
+            // Arayüzdeki listeleri anında temizle
+            let box = document.getElementById('adm-logs-box-panel');
+            let inbox = document.getElementById('adm-logs-box-inbox');
+            let emptyMsg = '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>';
+            if(box) box.innerHTML = emptyMsg;
+            if(inbox) inbox.innerHTML = emptyMsg;
+            
+            // Kırmızı çan simgesini sıfırla ve gizle
+            let bellBadge = document.getElementById('bell-counter');
+            if(bellBadge) { bellBadge.innerText = 0; bellBadge.style.display = 'none'; }
+            
+            window.toast('Raporlar Temizlendi', '🗑️'); 
+
+            // Firebase'i temizle
+            try { firebase.database().ref('adminOnlineLogs').remove(); } catch(e){}
+        };
+
+        // ==========================================
+        // 5. 20 OYUNUN KESİN ÇÖZÜMÜ (MAX 20 PUAN)
+        // ==========================================
+        window.DB.games = [
+            { id: "g1", title: "Taş Kağıt Makas", text: "Şansa bırak!", emoji: "✂️", points: 10, color: "var(--accent-cyan)" },
+            { id: "g2", title: "Adam Asmaca", text: "Kelimeleri kurtar.", emoji: "🪢", points: 15, color: "var(--accent-gold)" },
+            { id: "g3", title: "Sayı Tahmini", text: "Zihnini test et.", emoji: "🔢", points: 15, color: "var(--accent-pink)" },
+            { id: "g4", title: "Kelime Avı", text: "Harfleri birleştir.", emoji: "🧩", points: 20, color: "var(--accent-green)" },
+            { id: "g5", title: "Hafıza Oyunu", text: "Kartları eşleştir.", emoji: "🧠", points: 20, color: "#8b5cf6" },
+            { id: "g6", title: "Milyoner", text: "Bilgini sına!", emoji: "💰", points: 20, color: "var(--accent-red)" },
+            { id: "g7", title: "Tic Tac Toe", text: "XOX Stratejisi", emoji: "⭕", points: 15, color: "var(--text-main)" },
+            { id: "g8", title: "Zar Sallama", text: "Botu alt et.", emoji: "🎲", points: 5, color: "var(--accent-cyan)" },
+            { id: "g9", title: "Anagram", text: "Anlam çıkar.", emoji: "🔠", points: 10, color: "var(--accent-gold)" },
+            { id: "g10", title: "Doğru mu Yanlış mı?", text: "Hızlı kültür.", emoji: "✅", points: 5, color: "var(--accent-green)" },
+            { id: "g11", title: "Sözcük Merdiveni", text: "Yeni kelime türet.", emoji: "🪜", points: 12, color: "var(--accent-pink)" },
+            { id: "g12", title: "Hızlı Hafıza", text: "Sayıları hatırla.", emoji: "⚡", points: 15, color: "#8b5cf6" },
+            { id: "g13", title: "Matematik Dehası", text: "Hızlı işlem yap.", emoji: "🧮", points: 10, color: "var(--accent-cyan)" },
+            { id: "g14", title: "Renk Avcısı", text: "Doğru rengi seç.", emoji: "🎨", points: 15, color: "var(--accent-red)" },
+            { id: "g15", title: "Şans Çarkı", text: "Kaderini çevir.", emoji: "🎡", points: 10, color: "var(--accent-gold)" },
+            { id: "g16", title: "Hızlı Tıklama", text: "Reflekslerini sına.", emoji: "⏱️", points: 20, color: "var(--accent-green)" },
+            { id: "g17", title: "Kelime Sırası", text: "Cümleyi kur.", emoji: "📝", points: 15, color: "var(--accent-pink)" },
+            { id: "g18", title: "Şifre Çözücü", text: "3 Haneli şifreyi bul.", emoji: "🔓", points: 15, color: "var(--accent-cyan)" },
+            { id: "g19", title: "Hızlı Karar", text: "Işığı yakala.", emoji: "🚦", points: 10, color: "var(--accent-gold)" },
+            { id: "g20", title: "Kayıp Harf", text: "Eksik harfi bul.", emoji: "🔍", points: 15, color: "var(--accent-pink)" }
+        ];
+        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+
+        window.addGamePoints = function(pts, gameName, isWin) {
+            if (!window.currentUser) { window.toast("Puan kazanmak için giriş yapmalısın!", "🔒"); return; }
+            let safePts = Math.min(parseInt(pts) || 0, 20); 
+            let penalty = Math.max(1, Math.floor(safePts / 2)); 
+            let finalPts = isWin ? safePts : -penalty;
+            
+            window.currentUser.score = Math.max(0, (window.currentUser.score || 0) + finalPts);
+            window.userDatabase[window.currentUser.username] = window.currentUser;
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+            try { firebase.database().ref('users/' + window.currentUser.username).update({ score: window.currentUser.score }); } catch(e){}
+            
+            window.toast(isWin ? `+${safePts} Puan Kazandın!` : `-${penalty} Puan Kaybettin!`, isWin ? "🏆" : "📉");
+            if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+            if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+        };
+
+        window.winGame = function() {
+            if(window.currentGame && window.currentGame.finished) return;
+            window.currentGame.finished = true;
+            let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "🎉 KAZANDIN!"; gMsg.style.color = "var(--accent-green)"; }
+            setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, true); window.closeTopModal(); }, 1200);
+        };
+
+        window.loseGame = function(msg="Kaybettin!") {
+            if(window.currentGame && window.currentGame.finished) return;
+            window.currentGame.finished = true;
+            let gMsg = document.getElementById('game-message'); if(gMsg) { gMsg.innerText = "❌ " + msg; gMsg.style.color = "var(--accent-red)"; }
+            setTimeout(() => { window.addGamePoints(window.currentGame.pts, window.currentGame.title, false); window.closeTopModal(); }, 1200);
+        };
+
+        window.startMiniGame = function(id, title, pts, emoji) {
+            window.isGameAnswered = false; 
+            let safePts = Math.min(parseInt(pts) || 0, 20); 
+            window.currentGame = { id: id, pts: safePts, title: title, state: {} };
+            
+            let arena = document.getElementById('game-arena');
+            if(!arena) return;
+            
+            document.getElementById('game-title').innerText = title;
+            document.getElementById('game-icon').innerText = emoji;
+            document.getElementById('game-reward').innerText = safePts + " Puan";
+            document.getElementById('game-message').innerText = "";
+
+            if(id === "g1") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:15px;">Seçimini yap:</div><div style="display:flex; gap:15px; justify-content:center;"><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='s') window.winGame(); else window.loseGame();">🪨</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='r') window.winGame(); else window.loseGame();">📄</button><button class="noble-btn" style="font-size:2rem; width:60px; height:60px;" onclick="let o=['r','p','s'], b=o[Math.floor(Math.random()*3)]; if(b==='p') window.winGame(); else window.loseGame();">✂️</button></div>`;
+            } else if(id === "g2") {
+                let hang = ["EDEBİYAT", "İSTİKLAL", "MİSALİ", "KAFİYE"]; let word = hang[Math.floor(Math.random() * hang.length)];
+                window.currentGame.state = { word: word, guessed: [], mistakes: 0, max: 6 };
+                window.renderHangman = function() {
+                    let s = window.currentGame.state, display = s.word.split('').map(l => s.guessed.includes(l) ? l : '_').join(' ');
+                    arena.innerHTML = `<div style="font-family:monospace; font-size:1.8rem; letter-spacing:4px; margin-bottom:15px; color:var(--accent-gold);">${display}</div><div style="color:var(--accent-red); margin-bottom:12px;">Kalan Hak: ${s.max - s.mistakes}</div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">` + "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split('').map(l => `<button class="noble-btn" style="width:32px; height:32px; padding:0;" ${s.guessed.includes(l) ? 'disabled style="opacity:0.2"' : ''} onclick="window.guessHangman('${l}')">${l}</button>`).join('') + `</div>`;
+                };
+                window.guessHangman = function(l) {
+                    let s = window.currentGame.state; s.guessed.push(l); if(!s.word.includes(l)) s.mistakes++; window.renderHangman();
+                    if(s.word.split('').every(char => s.guessed.includes(char))) window.winGame(); else if(s.mistakes >= s.max) window.loseGame(`Kelime: ${s.word}`);
+                };
+                window.renderHangman();
+            } else if(id === "g3") {
+                window.currentGame.state = { num: Math.floor(Math.random() * 100) + 1, tries: 7 };
+                arena.innerHTML = `<p style="margin-bottom:12px;">1-100 arası sayıyı tahmin et.</p><input type="number" id="ng-inp" class="inp" style="width:90px; text-align:center; font-size:1.3rem;"><br><button class="noble-btn primary" style="width:140px;" onclick="window.guessNumber()">Tahmin Et</button><div id="ng-hint" style="margin-top:12px; font-weight:bold; color:var(--accent-cyan);"></div>`;
+                window.guessNumber = function() {
+                    let s = window.currentGame.state, val = parseInt(document.getElementById('ng-inp').value);
+                    if(isNaN(val)) return; s.tries--;
+                    if(val === s.num) return window.winGame();
+                    document.getElementById('ng-hint').innerText = (val < s.num ? "🔼 Daha BÜYÜK" : "🔽 Daha KÜÇÜK") + ` (Hak: ${s.tries})`;
+                    if(s.tries <= 0) window.loseGame(`Sayı: ${s.num}`);
+                };
+            } else if(id === "g4") {
+                arena.innerHTML = `<div style="font-size:2rem; color:var(--accent-cyan); margin-bottom:15px; letter-spacing:5px;">M E A L K</div><input type="text" id="g4-inp" class="inp" placeholder="Çözüm (Kalem)" style="text-align:center; text-transform:uppercase;"><br><button class="noble-btn primary" onclick="if(document.getElementById('g4-inp').value.toUpperCase().replace(/İ/g,'I') === 'KALEM') window.winGame(); else window.loseGame();">Onayla</button>`;
+            } else if(id === "g5") {
+                let emojis = ["🪶", "🌙", "✨", "☕", "📖", "🌹"], deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+                window.memState = { deck: deck, flipped: [], matched: 0, lock: false };
+                window.flipMemCard = function(idx) {
+                    let s = window.memState; if(s.lock || s.flipped.includes(idx) || document.getElementById('mc-'+idx).classList.contains('matched')) return;
+                    let el = document.getElementById('mc-'+idx); el.innerText = s.deck[idx]; el.style.background = "var(--bg-glass)"; s.flipped.push(idx);
+                    if(s.flipped.length === 2) {
+                        s.lock = true;
+                        if(s.deck[s.flipped[0]] === s.deck[s.flipped[1]]) {
+                            document.getElementById('mc-'+s.flipped[0]).classList.add('matched'); document.getElementById('mc-'+s.flipped[1]).classList.add('matched');
+                            s.matched += 2; s.flipped = []; s.lock = false; if(s.matched === deck.length) window.winGame();
+                        } else {
+                            setTimeout(() => { document.getElementById('mc-'+s.flipped[0]).innerText = ''; document.getElementById('mc-'+s.flipped[0]).style.background = "var(--accent-gold)"; document.getElementById('mc-'+s.flipped[1]).innerText = ''; document.getElementById('mc-'+s.flipped[1]).style.background = "var(--accent-gold)"; s.flipped = []; s.lock = false; }, 800);
+                        }
+                    }
+                };
+                arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(4, 55px); gap:8px;">${deck.map((_, i) => `<div id="mc-${i}" style="width:55px; height:55px; background:var(--accent-gold); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;" onclick="window.flipMemCard(${i})"></div>`).join('')}</div>`;
+            } else if(id === "g6") { // MİLYONER FİX
+                window.qIndex = 0;
+                window.milQuestions = [{ q: "Hangisi bir şiir türü değildir?", o: ["Koşma", "Semai", "Makale", "Gazel"], a: 2 }, { q: "İstiklal Marşımızın yazarı kimdir?", o: ["Namık Kemal", "M. Akif Ersoy", "Cemal Süreya", "Yunus Emre"], a: 1 }];
+                window.renderMil = function() {
+                    if(window.qIndex >= window.milQuestions.length) return window.winGame();
+                    let q = window.milQuestions[window.qIndex];
+                    arena.innerHTML = `<div style='margin-bottom:12px; font-weight:bold; font-size:1.1rem;'>${q.q}</div>` + q.o.map((o, idx) => `<button class='noble-btn' style='margin-bottom:6px; text-align:left;' onclick='if(${idx} === ${q.a}) { window.qIndex++; window.renderMil(); } else { window.loseGame(); }'>${o}</button>`).join('');
+                };
+                window.renderMil();
+            } else if(id === "g7") {
+                window.currentGame.state = { board: Array(9).fill(null), active: true };
+                window.renderTTT = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<div style="display:grid; grid-template-columns:repeat(3, 70px); gap:5px;">${s.board.map((cell, i) => { let color = cell === 'X' ? 'var(--accent-gold)' : (cell === 'O' ? 'var(--accent-cyan)' : 'white'); return `<div style="width:70px; height:70px; background:var(--input-bg); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; cursor:pointer; color:${color};" onclick="window.playTTT(${i})">${cell || ''}</div>`; }).join('')}</div>`;
+                };
+                window.playTTT = function(i) {
+                    let s = window.currentGame.state; if(!s.active || s.board[i]) return;
+                    s.board[i] = 'X';
+                    let w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; let checkWin = (p) => w.some(x => s.board[x[0]]===p && s.board[x[1]]===p && s.board[x[2]]===p);
+                    if(checkWin('X')) { window.renderTTT(); return window.winGame(); }
+                    let empty = s.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
+                    if(empty.length === 0) return window.loseGame("Berabere!");
+                    s.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+                    if(checkWin('O')) { window.renderTTT(); return window.loseGame("Bot kazandı!"); }
+                    window.renderTTT();
+                };
+                window.renderTTT();
+            } else if(id === "g8") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Zar atarak botun puanını geçmeye çalış!</p><button class="noble-btn primary" style="width:160px; font-size:1.5rem;" onclick="window.rollDice()">🎲 Zar At</button><div id="dice-res" style="margin-top:15px; font-size:1.2rem; font-weight:bold;"></div>`;
+                window.rollDice = function() {
+                    let pRoll = Math.floor(Math.random() * 6) + 1, bRoll = Math.floor(Math.random() * 6) + 1;
+                    document.getElementById('dice-res').innerText = `Sen: ${pRoll} | Bot: ${bRoll}`;
+                    if(pRoll > bRoll) window.winGame(); else if(pRoll === bRoll) document.getElementById('game-message').innerText = "Berabere! Tekrar at."; else window.loseGame();
+                };
+            } else if(id === "g9") {
+                arena.innerHTML = `<div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">İpucu: Dostluk bağı</div><div style="font-size:2rem; font-family:monospace; color:var(--accent-pink); margin-bottom:15px; letter-spacing:5px;">V A F E</div><input type="text" id="an-inp" class="inp" style="width:180px; text-align:center; text-transform:uppercase;" placeholder="Çözüm (VEFA)"><br><button class="noble-btn primary" style="width:180px;" onclick="if(document.getElementById('an-inp').value.toUpperCase().replace(/İ/g,'I') === 'VEFA') window.winGame(); else window.loseGame();">Tahmin Et</button>`;
+            } else if(id === "g10") {
+                arena.innerHTML = `<div style="font-size:1.1rem; margin-bottom:20px; font-weight:bold;">İstiklal Marşı 10 kıtadan oluşmaktadır.</div><div style="display:flex; gap:15px;"><button class="noble-btn" style="border-color:var(--accent-green); color:var(--accent-green); flex:1;" onclick="window.winGame()">DOĞRU</button><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red); flex:1;" onclick="window.loseGame()">YANLIŞ</button></div>`;
+            } else if(id === "g11") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Aşk kelimesinin son harfiyle başlayan bir kelime yaz.</p><div style="font-size:1.8rem; color:var(--accent-gold); margin-bottom:15px; font-weight:bold;">AŞK</div><input type="text" id="wc-inp" class="inp" style="width:200px; text-align:center; text-transform:uppercase;" placeholder="K ile başla..."><br><button class="noble-btn primary" style="width:200px;" onclick="let v=document.getElementById('wc-inp').value.toUpperCase().trim(); if(v.length>=3 && v.startsWith('K')) window.winGame(); else window.loseGame('Geçersiz kelime!');">Gönder</button>`;
+            } else if(id === "g12") {
+                let rNum = Math.floor(10000 + Math.random() * 90000); 
+                arena.innerHTML = `<p style="margin-bottom:10px;">Sayıyı aklında tut!</p><div id="flash-num" style="font-size:3rem; font-family:monospace; color:var(--accent-cyan); font-weight:bold; margin:20px 0;">${rNum}</div>`;
+                setTimeout(() => { if(document.getElementById('flash-num')) { arena.innerHTML = `<p style="margin-bottom:15px;">Gördüğün sayıyı yaz:</p><input type="number" id="flash-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('flash-inp').value == '${rNum}') window.winGame(); else window.loseGame();">Onayla</button>`; } }, 1500); 
+            } else if(id === "g13") {
+                let num1 = Math.floor(Math.random() * 50) + 10, num2 = Math.floor(Math.random() * 20) + 1, ans = num1 + num2;
+                arena.innerHTML = `<p style="margin-bottom:10px;">İşlemin sonucunu bul:</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:15px;">${num1} + ${num2} = ?</div><input type="number" id="math-inp" class="inp" style="width:150px; text-align:center; font-size:1.5rem;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('math-inp').value == '${ans}') window.winGame(); else window.loseGame();">Cevapla</button>`;
+            } else if(id === "g14") {
+                arena.innerHTML = `<p style="margin-bottom:10px;">Yazının <b>RENGİNİ</b> seç (Okuduğunu değil):</p><div style="font-size:2.5rem; color:var(--accent-cyan); font-weight:bold; margin-bottom:20px; letter-spacing:2px;">KIRMIZI</div><div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"><button class="noble-btn" style="border-color:var(--accent-red); color:var(--accent-red);" onclick="window.loseGame()">KIRMIZI</button><button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.winGame()">MAVİ</button></div>`;
+            } else if(id === "g15") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Şans çarkını çevir!</p><div id="wheel-icon" style="font-size:4rem; margin-bottom:20px; transition: transform 2s cubic-bezier(0.25, 1, 0.5, 1); color:var(--accent-gold);">🎡</div><button class="noble-btn primary" style="width:180px;" onclick="window.spinWheel()">Çevir</button>`;
+                window.spinWheel = function() {
+                    document.getElementById('wheel-icon').style.transform = `rotate(${Math.floor(Math.random() * 1000) + 720}deg)`;
+                    setTimeout(() => { if(Math.random() > 0.4) window.winGame(); else window.loseGame("Çark sana gülmedi!"); }, 2000);
+                };
+            } else if(id === "g16") {
+                window.currentGame.state = { clicks: 0, required: 15 };
+                arena.innerHTML = `<p style="margin-bottom:15px;">3 Saniye içinde 15 kere tıkla!</p><button id="fast-btn" class="noble-btn" style="background:var(--accent-green); color:#000; font-size:1.5rem; width:100px; height:100px; border-radius:50%; box-shadow:0 0 15px rgba(34,197,94,0.4);" onclick="window.fastClickStart()">TIKLA</button><div id="fast-counter" style="margin-top:15px; font-weight:bold; font-size:1.5rem; color:var(--accent-gold);">0 / 15</div>`;
+                window.fastClickTimer = null;
+                window.fastClickStart = function() {
+                    let s = window.currentGame.state;
+                    if (s.clicks === 0) { window.fastClickTimer = setTimeout(() => { if (s.clicks < s.required) window.loseGame("Süre bitti, yavaşsın!"); }, 3000); }
+                    s.clicks++; document.getElementById('fast-counter').innerText = `${s.clicks} / ${s.required}`;
+                    if (s.clicks >= s.required) { clearTimeout(window.fastClickTimer); window.winGame(); }
+                };
+            } else if(id === "g17") {
+                let sentence = "Şiir ruhun gıdasıdır".split(" "), shuffled = [...sentence].sort(() => Math.random() - 0.5);
+                window.currentGame.state = { currentOrder: [], correct: sentence };
+                window.renderSort = function() {
+                    let s = window.currentGame.state;
+                    arena.innerHTML = `<p style="margin-bottom:15px;">Doğru sıraya diz:</p><div style="min-height:40px; border-bottom:2px dashed var(--accent-cyan); margin-bottom:15px; display:flex; gap:8px; justify-content:center; color:var(--accent-cyan); font-weight:bold; font-size:1.1rem; padding:10px;">${s.currentOrder.join(" ")}</div><div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">${shuffled.map(w => `<button class="noble-btn" style="width:auto;" ${s.currentOrder.includes(w) ? 'disabled style="opacity:0.3"' : ''} onclick="window.pickWord('${w}')">${w}</button>`).join('')}</div>`;
+                };
+                window.pickWord = function(w) {
+                    let s = window.currentGame.state; s.currentOrder.push(w); window.renderSort();
+                    if (s.currentOrder.length === s.correct.length) {
+                        if (s.currentOrder.join(" ") === s.correct.join(" ")) window.winGame(); else window.loseGame("Yanlış sıralama!");
+                    }
+                };
+                window.renderSort();
+            } else if(id === "g18") {
+                let code = Math.floor(100 + Math.random() * 900).toString(); 
+                window.cbState = { code: code, tries: 5 };
+                arena.innerHTML = `<p style="margin-bottom:10px;">3 Haneli şifreyi tahmin et (5 Hak):</p><input type="number" id="cb-inp" class="inp" style="width:120px; text-align:center; font-size:2rem; letter-spacing:5px;"><br><button class="noble-btn primary" style="width:150px;" onclick="window.checkCodeBreaker()">Dene</button><div id="cb-hint" style="margin-top:15px; font-weight:bold; color:var(--accent-cyan); font-size:1.1rem;"></div>`;
+                window.checkCodeBreaker = function() {
+                    let guess = document.getElementById('cb-inp').value, hintEl = document.getElementById('cb-hint');
+                    if(guess.length !== 3) { hintEl.innerText = "3 haneli girin!"; return; }
+                    if(guess === window.cbState.code) return window.winGame();
+                    window.cbState.tries--;
+                    if(window.cbState.tries <= 0) return window.loseGame(`Şifre: ${window.cbState.code}`);
+                    let exact = 0, wrongPlace = 0;
+                    for(let i=0; i<3; i++) { if(guess[i] === window.cbState.code[i]) exact++; else if(window.cbState.code.includes(guess[i])) wrongPlace++; }
+                    hintEl.innerText = `🟩 İsabet: ${exact} | 🟨 Yanlış Yer: ${wrongPlace} (Hak: ${window.cbState.tries})`;
+                };
+            } else if(id === "g19") {
+                arena.innerHTML = `<p style="margin-bottom:15px;">Kutu <b style="color:var(--accent-green);">YEŞİL</b> olduğunda hemen tıkla!</p><div id="reflex-box" style="width:150px; height:150px; background:var(--accent-red); border-radius:16px; margin:0 auto; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);" onclick="window.clickReflex()"></div>`;
+                window.reflexState = { active: false, timer: null };
+                window.reflexState.timer = setTimeout(() => {
+                    let box = document.getElementById('reflex-box');
+                    if(box) {
+                        box.style.background = 'var(--accent-green)'; box.style.boxShadow = '0 0 20px rgba(34,197,94,0.8)'; window.reflexState.active = true;
+                        setTimeout(() => { if(window.reflexState.active) window.loseGame("Çok yavaş kaldın!"); }, 800);
+                    }
+                }, 1500 + Math.random() * 3000);
+                window.clickReflex = function() {
+                    if(window.reflexState.active) { window.reflexState.active = false; window.winGame(); }
+                    else { clearTimeout(window.reflexState.timer); window.loseGame("Erken tıkladın!"); }
+                };
+            } else if(id === "g20") {
+                let words = ["EDEBİYAT", "İSTİKLAL", "HÜRRİYET", "MÜKEMMEL", "TAHAYYÜL"], word = words[Math.floor(Math.random() * words.length)], missingIdx = Math.floor(Math.random() * word.length), missingChar = word[missingIdx], displayWord = word.substring(0, missingIdx) + "_" + word.substring(missingIdx + 1);
+                arena.innerHTML = `<p style="margin-bottom:15px;">Eksik harfi bul:</p><div style="font-size:2.5rem; letter-spacing:5px; font-family:monospace; color:var(--accent-pink); font-weight:bold; margin-bottom:20px;">${displayWord}</div><input type="text" id="ml-inp" class="inp" maxlength="1" style="width:80px; text-align:center; font-size:2rem; text-transform:uppercase;"><br><button class="noble-btn primary" style="width:150px;" onclick="if(document.getElementById('ml-inp').value.toUpperCase().replace(/İ/g,'I') === '${missingChar}'.replace(/İ/g,'I')) window.winGame(); else window.loseGame();">Cevapla</button>`;
+            }
+
+            window.openModal('gameModal');
+        };
+
+        if(typeof window.renderAllContent === 'function') window.renderAllContent();
+    }, 1500);
+});
+
+
+</script>
+
 </script>
 <!-- ===================================================================== -->
 
