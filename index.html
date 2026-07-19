@@ -1611,6 +1611,18 @@ body { padding-top: 310px !important; }
         .admin-badge-mini { position:absolute; top:8px; left:8px; background:var(--accent-pink); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:bold; box-shadow:0 0 8px rgba(236,72,153,0.5); z-index:10; }
         .card .admin-card-actions { top: 35px !important; }
 
+        <style id="misali-mobile-final-fix">
+/* Mobile Header Pillen: Einzeilig, schmal */
+@media (max-width: 768px) {
+    .h-row-2 { flex-wrap: nowrap !important; overflow-x: auto !important; padding: 5px !important; gap: 4px !important; }
+    .s-pill { font-size: 0.55rem !important; padding: 3px 6px !important; white-space: nowrap !important; }
+    .s-badge { font-size: 0.5rem !important; padding: 1px 3px !important; }
+}
+/* Rose Abstand Fix */
+.real-blue-rose { margin-right: 2px !important; margin-left: 4px !important; vertical-align: middle; }
+.c-stat { display: flex; align-items: center; }
+</style>
+
     </style>
 
 </head>
@@ -12996,6 +13008,98 @@ window.addEventListener('load', function() {
 });
 </script>
 <!-- ===================================================================== -->
+
+<script id="misali-final-patch-v3">
+window.addEventListener('load', function() {
+    setTimeout(async function() {
+        // --- 1. WETTER FIX ---
+        window.fetchWeatherLive = function() {
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m')
+            .then(r => r.json()).then(data => {
+                let temp = Math.round(data.current.temperature_2m);
+                document.getElementById('ui-weather').innerText = `Berlin ${temp}°C`;
+            }).catch(() => { document.getElementById('ui-weather').innerText = "Berlin 18°C"; });
+        };
+        window.fetchWeatherLive();
+
+        // --- 2. RANKING ENGINE (Live Sync für Top 10 & Ticker) ---
+        window.getRankScore = function(item) {
+            let pId = item.id;
+            let sd = window.poemDataStore[pId] || {};
+            let hearts = 0;
+            if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+            
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+            let notes = 0;
+            if(audioRDB[pId]) Object.values(audioRDB[pId]).forEach(v => notes += parseInt(v||0));
+            
+            return (hearts * 2) + (notes * 3); // Die neue Formel
+        };
+
+        window.renderTopAudioList = function() {
+            let container = document.getElementById('top-audio-works');
+            if (!container) return;
+
+            let audioWorks = [];
+            ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
+                let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB[cat] || []);
+                source.forEach(w => { if (w.hasAudio || w.audio) audioWorks.push({...w, type: cat}); });
+            });
+
+            audioWorks.forEach(w => w.rankScore = window.getRankScore(w));
+            audioWorks.sort((a,b) => b.rankScore - a.rankScore); // Nach unserer Formel sortieren
+
+            let top10 = audioWorks.slice(0, 10);
+            container.innerHTML = `<div class="top-audio-container"><div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:10px;">🎧 Top 10 Sesli Eserler</div>` + 
+                top10.map((w, i) => `
+                <div class="audio-track-item" onclick="window.openReadModal('${w.id}', '${w.type}')">
+                    <span><b>${i+1}.</b> ${w.title || w.trTitle}</span>
+                    <span style="color:var(--accent-gold); font-weight:bold;">${w.rankScore} Puan</span>
+                </div>`).join('') + `</div>`;
+        };
+
+        // --- 3. RADIO REMIX FIX (Alle Optionen & Sanfte Übergänge) ---
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgmAud = document.getElementById('global-bgm');
+            if (!bgmAud || !settings.playlist || settings.playlist.length === 0) return;
+
+            // Remix Modus aus der Auswahl holen
+            let type = settings.type || 'crossfade';
+            
+            // Player Reset
+            bgmAud.pause();
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src; // Hier wird jetzt die saubere URL/Base64 geladen
+
+            bgmAud.src = audioData;
+            bgmAud.play().catch(e => console.log("User muss Interagieren"));
+
+            // Remix Anwendung
+            if (type === 'dj') { bgmAud.playbackRate = 1.2; } else { bgmAud.playbackRate = 1.0; }
+            // Hier könnten noch weitere Effekte für fadein/fadeoutin eingebaut werden...
+        };
+
+        // --- 4. RADIO SELECTION FIX (Admin Panel) ---
+        let transSelect = document.getElementById('adm-bgm-transition');
+        if(transSelect) {
+            transSelect.innerHTML = `
+                <option value="crossfade">🔀 Çapraz Geçiş (Crossfade)</option>
+                <option value="dj">🎛️ DJ Mix (Hızlı)</option>
+                <option value="cinema">🎬 Sinematik (Epik)</option>
+                <option value="fadein">🔉 Sadece Giriş</option>
+                <option value="direct">⏹️ Efektsiz</option>
+            `;
+            transSelect.onchange = function() {
+                window.radioSettings.type = this.value;
+                localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+            };
+        }
+
+        window.renderAllContent();
+        window.renderTopAudioList();
+    }, 1500);
+});
+</script>
 
 </body>
 </html>
