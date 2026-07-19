@@ -9433,5 +9433,619 @@ if (trackData) {
 </script>
 <!-- ===================================================================== -->
 
+<!-- ===================================================================== -->
+<!-- ⚠️ SAF DÜZELTME KODU (TTS, LİVE SYNC, BGM PLAYER) ⚠️ -->
+<!-- ===================================================================== -->
+<script id="misali-absolute-fix">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🛠️ Hata Düzeltme Modülü Devrede: Fonksiyonlar zorla eziliyor...");
+
+        // ========================================================================
+        // 1. ALMANCA SESLİ OKUMA (TTS) KESİN ÇÖZÜMÜ
+        // ========================================================================
+        // Sorun: getVoices() asenkron olduğu için boş dönüyordu ve sistem Türkçeye düşüyordu.
+        window.readAloudText = function() {
+            window.speechSynthesis.cancel(); // Önceki okumayı kesin durdur
+            
+            let textEl = document.getElementById('read-text');
+            let titleEl = document.getElementById('read-title');
+            if (!textEl) return;
+            
+            let text = textEl.innerText.replace("Cevabı Göster", "").replace(/([.,?!:;])/g, "$1 \n "); 
+            let msg = new SpeechSynthesisUtterance(text); 
+            
+            let isGerman = (window.currentLang === 'de') || (titleEl && titleEl.innerText.includes('(DE)'));
+
+            const setVoiceAndPlay = () => {
+                let voices = window.speechSynthesis.getVoices();
+                
+                if (isGerman) {
+                    msg.lang = 'de-DE'; // Tarayıcıyı Almanca okumaya ZORLA
+                    // Cihazdaki Almanca sesleri bul (de-DE, de_DE vs.)
+                    let deVoices = voices.filter(v => v.lang.toLowerCase().includes('de'));
+                    
+                    if (deVoices.length > 0) {
+                        // Varsa kaliteli olanı, yoksa bulduğu ilk Almanca sesi ata
+                        msg.voice = deVoices.find(v => v.name.includes('Google') || v.name.includes('Anna') || v.name.includes('Marlene')) || deVoices[0];
+                        if(window.toast) window.toast("Wird auf Deutsch vorgelesen", "🇩🇪");
+                    } else {
+                        if(window.toast) window.toast("Cihazda Almanca ses paketi yok!", "⚠️");
+                    }
+                    msg.rate = 0.85;
+                } else {
+                    msg.lang = 'tr-TR';
+                    let trVoices = voices.filter(v => v.lang.toLowerCase().includes('tr'));
+                    if (trVoices.length > 0) {
+                        msg.voice = trVoices.find(v => v.name.includes('Google') || v.name.includes('Yelda')) || trVoices[0];
+                    }
+                    msg.rate = 0.85;
+                    if(window.toast) window.toast("Türkçe sesli okuma başlatıldı", "🇹🇷");
+                }
+                window.speechSynthesis.speak(msg);
+            };
+
+            // Sesler henüz yüklenmediyse bekle, yüklendiyse direkt çal
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.addEventListener('voiceschanged', setVoiceAndPlay, { once: true });
+            } else {
+                setVoiceAndPlay();
+            }
+        };
+
+        // ========================================================================
+        // 2. TEXT EDIT & LIVE SYNC (CANLI SENKRONİZASYON) ÇÖZÜMÜ
+        // ========================================================================
+        // Sorun: Düzenleme yapıldığında sadece localStorage'a yazıyor, Firebase'e gitmiyordu.
+        window.adminUpdateItem = function() {
+            let cat = document.getElementById('adm-edit-cat')?.value || 'poems';
+            let id = document.getElementById('adm-edit-sel')?.value;
+            if (!id) return;
+
+            let source = cat === 'userPoems' ? window.userPoemsDB : window.DB[cat];
+            let idx = (source || []).findIndex(x => String(x.id) === String(id)); 
+            if (idx === -1) return;
+            
+            // Textleri güncelle
+            source[idx].title = document.getElementById('adm-e-title')?.value.trim();
+            source[idx].text = document.getElementById('adm-e-text')?.value.trim();
+            let emj = document.getElementById('adm-e-emoji-disp')?.value.trim(); 
+            if(emj) source[idx].emoji = emj;
+            
+            if (cat === 'userPoems') {
+                let tier = document.getElementById('adm-rating-tier')?.value;
+                let pts = parseInt(document.getElementById('adm-rating-pts')?.value || 0);
+                if (tier && tier !== 'none') {
+                    source[idx].adminRating = { tier: tier, points: pts };
+                } else {
+                    delete source[idx].adminRating;
+                }
+                
+                // 1. Lokale Kaydet
+                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                // 2. FIREBASE'E ZORLA YAZ (Live Sync)
+                if (typeof firebase !== 'undefined') firebase.database().ref('userPoemsDB').set(window.userPoemsDB);
+                window.currentItemData = window.userPoemsDB[idx];
+            } else {
+                // 1. Lokale Kaydet
+                localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                // 2. FIREBASE'E ZORLA YAZ (Live Sync)
+                if (typeof firebase !== 'undefined') firebase.database().ref('contentDB').set(window.DB);
+                window.currentItemData = window.DB[cat][idx];
+            }
+            
+            // 3. Okuma ekranı açıksa anında (F5 yapmadan) metni güncelle
+            let readTitle = document.getElementById('read-title');
+            let readText = document.getElementById('read-text');
+            if (readTitle && readText && document.getElementById('readModal').classList.contains('show')) {
+                readTitle.innerHTML = source[idx].title;
+                let contentStr = (window.currentLang === 'de' && source[idx].deText) ? source[idx].deText : (source[idx].text || source[idx].trText || '');
+                readText.innerHTML = contentStr.replace(/\n/g, '<br>');
+            }
+
+            if(window.toast) window.toast("Eser Canlı Olarak Güncellendi!", "✅"); 
+            if(window.renderAllContent) window.renderAllContent(); 
+            if(window.closeTopModal) window.closeTopModal();
+        };
+
+        // ========================================================================
+        // 3. MAVİ PLAYER (BGM) REMIX & PLAY STOTTER (CIZIRTI) ÇÖZÜMÜ
+        // ========================================================================
+        // Sorun: Zamanlayıcıların (Interval) üst üste binmesi ve "loop" etiketinin kalması
+        
+        let bgmAud = document.getElementById('global-bgm');
+        if (bgmAud) {
+            // HTML'de gizli kalmış loop özelliğini söküp atıyoruz!
+            bgmAud.removeAttribute('loop');
+            bgmAud.loop = false;
+        }
+
+        // Global interval tutucu
+        window.bgmFadeTimer = null;
+
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgm = document.getElementById('global-bgm');
+            let playIcon = document.getElementById('bgm-play-icon');
+            if (!bgm || !settings.playlist || settings.playlist.length === 0) return;
+
+            // Devam eden ses kısma/açma işlemlerini ZORLA durdur!
+            clearInterval(window.bgmFadeTimer);
+            window.isFadingOut = false;
+
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src === 'firebaseDB' && window.audioStorage ? await window.audioStorage.get(track.id) : (track.src || track);
+
+            if (!audioData) return;
+
+            bgm.src = audioData;
+            if(window.updateRadioPlayerDisplay) window.updateRadioPlayerDisplay(settings);
+
+            let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+            bgm.volume = 0; // Her zaman sıfırdan başla
+            
+            bgm.play().then(() => {
+                if (playIcon) playIcon.className = 'fas fa-pause';
+                let type = settings.type || 'crossfade';
+                let fadeSec = parseInt(settings.fadeSec || 5);
+
+                if ((type === 'crossfade' || type === 'fadein') && fadeSec > 0) {
+                    let step = targetVol / (fadeSec * 20); 
+                    window.bgmFadeTimer = setInterval(() => {
+                        if (bgm.volume + step < targetVol) {
+                            bgm.volume += step;
+                        } else {
+                            bgm.volume = targetVol;
+                            clearInterval(window.bgmFadeTimer);
+                        }
+                    }, 50);
+                } else {
+                    bgm.volume = targetVol;
+                }
+            }).catch(e => { console.log("Otomatik çalma engellendi."); });
+        };
+
+        window.bgmToggle = async function(forcePlay) {
+            let bgm = document.getElementById('global-bgm');
+            let ic = document.getElementById('bgm-play-icon');
+            if (!bgm) return;
+
+            if (!bgm.paused && !forcePlay) {
+                clearInterval(window.bgmFadeTimer);
+                bgm.pause();
+                if (ic) ic.className = 'fas fa-play';
+                return;
+            }
+
+            if (!bgm.src || bgm.src === window.location.href) {
+                if(window.radioSettings && window.radioSettings.playlist && window.radioSettings.playlist.length > 0) {
+                    await window.applyRadioSettingsToPlayer(window.radioSettings);
+                    return;
+                }
+            }
+            
+            bgm.play().then(() => {
+                if (ic) ic.className = 'fas fa-pause';
+                clearInterval(window.bgmFadeTimer);
+                let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+                bgm.volume = targetVol; 
+            }).catch(e => console.error(e));
+        };
+
+        // Event dinleyicisini temizleyip baştan kuruyoruz (Geçişlerin stotter yapmasını engeller)
+        if(bgmAud) {
+            // Eski eventleri eziyoruz
+            bgmAud.ontimeupdate = function() {
+                if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length <= 1) return;
+                
+                let dur = bgmAud.duration, cur = bgmAud.currentTime;
+                if(isNaN(dur) || dur <= 0 || dur === Infinity) return;
+                
+                let fadeSec = parseInt(window.radioSettings.fadeSec || 5);
+                let playLimit = parseInt(window.radioSettings.playLimit || 0);
+                
+                let isEnding = (playLimit > 0 && cur >= playLimit) || ((dur - cur) <= fadeSec);
+
+                if (isEnding && !window.isFadingOut) {
+                    window.isFadingOut = true;
+                    clearInterval(window.bgmFadeTimer);
+                    
+                    let type = window.radioSettings.type || 'crossfade';
+                    
+                    if ((type === 'crossfade' || type === 'fadeout') && fadeSec > 0) {
+                        let step = bgmAud.volume / (fadeSec * 20); 
+                        window.bgmFadeTimer = setInterval(() => {
+                            if (bgmAud.volume - step > 0.05) {
+                                bgmAud.volume -= step;
+                            } else { 
+                                bgmAud.volume = 0; 
+                                clearInterval(window.bgmFadeTimer); 
+                                if(window.triggerNextRadioSong) window.triggerNextRadioSong(); 
+                            }
+                        }, 50);
+                    } else {
+                        if(window.triggerNextRadioSong) window.triggerNextRadioSong(); 
+                    }
+                }
+            };
+
+            bgmAud.onended = function() {
+                if(!window.isFadingOut && window.triggerNextRadioSong) window.triggerNextRadioSong();
+            };
+        }
+        
+    }, 1000); // 1 saniye bekle, asıl kodları tamamen yüklesin, sonra bizimkiler üstüne çöksün.
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🛠️ MİSALİ ÇEKİRDEK MEKANİK YAMASI (SEPYA + ADMİN + RADYO) 🛠️ -->
+<!-- ===================================================================== -->
+<style id="misali-sepia-player-fix">
+    /* 1. ESKİ KAĞIT (SEPYA) MODUNDA SARI PLAYER'IN SİYAH KALMASINI ÖNLER */
+    body.sepia-mode .card-audio-player {
+        background: rgba(139, 69, 19, 0.08) !important;
+        border: 2px solid #8b4513 !important;
+        box-shadow: inset 0 0 15px rgba(139, 69, 19, 0.15) !important;
+    }
+    body.sepia-mode .card-audio-player * { color: #43302e !important; text-shadow: none !important; border-color: rgba(139, 69, 19, 0.3) !important; }
+    
+    /* İkonlar ve Tuşlar Sepya Uyumlu */
+    body.sepia-mode .card-audio-player .p-btn { background: rgba(139, 69, 19, 0.1) !important; color: #8b4513 !important; }
+    body.sepia-mode .card-audio-player .p-btn.main-play { background: #8b4513 !important; color: #f4ecd8 !important; }
+    body.sepia-mode .audio-rating-note { filter: none !important; color: #8b4513 !important; }
+    
+    /* Ses ve İlerleme Çubuğu Sepya Uyumlu */
+    body.sepia-mode input[type=range]::-webkit-slider-runnable-track { background: rgba(139, 69, 19, 0.2) !important; }
+    body.sepia-mode input[type=range]::-webkit-slider-thumb { background: #8b4513 !important; box-shadow: none !important; }
+    body.sepia-mode .vinyl-spin { background: transparent !important; border: 2px solid #8b4513 !important; color: #8b4513 !important; }
+</style>
+
+<!-- ===================================================================== -->
+<!-- 🛠️ MİSALİ V20 ULTIMATE FIX: SYNC, REMIX, TTS & SEPIA PATCH 🛠️ -->
+<!-- ===================================================================== -->
+<style id="misali-v20-styles">
+    /* ESKİ KAĞIT (SEPYA) MODUNDA SARI PLAYER'IN SİYAH KALMASINI ÖNLER */
+    body.sepia-mode .card-audio-player {
+        background: rgba(139, 69, 19, 0.08) !important;
+        border: 2px solid #8b4513 !important;
+        box-shadow: inset 0 0 15px rgba(139, 69, 19, 0.15) !important;
+    }
+    body.sepia-mode .card-audio-player * { color: #43302e !important; text-shadow: none !important; border-color: rgba(139, 69, 19, 0.3) !important; }
+    body.sepia-mode .card-audio-player .p-btn { background: rgba(139, 69, 19, 0.1) !important; color: #8b4513 !important; }
+    body.sepia-mode .card-audio-player .p-btn.main-play { background: #8b4513 !important; color: #f4ecd8 !important; }
+    body.sepia-mode .audio-rating-note { filter: none !important; color: #8b4513 !important; }
+    body.sepia-mode input[type=range]::-webkit-slider-runnable-track { background: rgba(139, 69, 19, 0.2) !important; }
+    body.sepia-mode input[type=range]::-webkit-slider-thumb { background: #8b4513 !important; box-shadow: none !important; }
+    body.sepia-mode .vinyl-spin { background: transparent !important; border: 2px solid #8b4513 !important; color: #8b4513 !important; }
+
+    /* YEMYEŞİL GÜNCELLEME ONAY KUTUSU (CUSTOM MODAL) */
+    .custom-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999999; backdrop-filter: blur(5px); animation: fadeIn 0.2s ease; opacity: 0; transition: opacity 0.2s; }
+    .custom-box { background: #121212; border: 2px solid var(--accent-green); padding: 25px; border-radius: 16px; width: 85%; max-width: 380px; text-align: center; box-shadow: 0 15px 40px rgba(34,197,94,0.3); color: #fff; font-family: 'Poppins', sans-serif; }
+    .custom-box h3 { color: var(--accent-green); margin-top: 0; font-size: 1.4rem; margin-bottom: 15px; }
+    .custom-box p { color: var(--text-main); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5; }
+    .custom-btn-group { display: flex; gap: 10px; justify-content: center; }
+    .custom-btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; flex: 1; font-size:1.05rem; }
+    .btn-cancel { background: #333; color: #fff; } .btn-cancel:hover { background: #444; }
+    .btn-confirm-upd { background: var(--accent-green); color: #000; box-shadow: 0 0 15px rgba(34,197,94,0.4); } .btn-confirm-upd:hover { transform: scale(1.05); }
+</style>
+
+<script id="misali-v20-script">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🛠️ V20 YÜKLENDİ: Tüm çakışmalar giderildi, Saf Mekanik aktif.");
+
+        // ========================================================================
+        // 1. GÜNCELLE & PUANLA BUTONU KESİN ÇÖZÜMÜ (YEŞİL EKRAN + EMOJI/AUDIO/ÇEVİRİ)
+        // ========================================================================
+        window.handleAudioUpload = function(input, hiddenId, dispId) {
+            if (!input.files || input.files.length === 0) return;
+            let file = input.files[0];
+            if(file.size > 5000000) return window.toast("Dosya çok büyük (Max 5MB)!", "❌");
+            window.toast("Ses dosyası hafızaya alınıyor...", "⏳");
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(hiddenId).value = e.target.result;
+                document.getElementById(dispId).value = file.name;
+                window.toast("Ses hazır, GÜNCELLE'ye basın.", "🎵");
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.showMisaliUpdateConfirm = function(onConfirm) {
+            let overlay = document.createElement('div');
+            overlay.className = 'custom-overlay';
+            overlay.innerHTML = `
+                <div class="custom-box">
+                    <h3><i class="fas fa-sync-alt"></i> Eser Güncellensin mi?</h3>
+                    <p>Değişiklikleri ve puanlamayı kaydedip tüm kullanıcılara canlı olarak yansıtmak istediğinize emin misiniz? (Eski çeviriler silinecektir).</p>
+                    <div class="custom-btn-group">
+                        <button class="custom-btn btn-cancel" onclick="this.closest('.custom-overlay').remove()">İptal</button>
+                        <button class="custom-btn btn-confirm-upd" id="v20-update-btn">Evet, Güncelle</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+            document.getElementById('v20-update-btn').onclick = function() {
+                overlay.remove();
+                if(onConfirm) onConfirm();
+            };
+        };
+
+        window.adminUpdateItem = async function() {
+            let cat = document.getElementById('adm-edit-cat')?.value || 'poems';
+            let id = document.getElementById('adm-edit-sel')?.value;
+            if (!id) return window.toast("Lütfen düzenlemek için bir eser seçin!", "⚠️");
+
+            let source = cat === 'userPoems' ? window.userPoemsDB : window.DB[cat];
+            let idx = (source || []).findIndex(x => String(x.id) === String(id)); 
+            if (idx === -1) return window.toast("Eser bulunamadı!", "❌");
+            
+            // Metin ve Başlık
+            source[idx].title = document.getElementById('adm-e-title')?.value.trim() || source[idx].title;
+            source[idx].text = document.getElementById('adm-e-text')?.value.trim() || source[idx].text;
+            
+            // Emoji
+            let emj = document.getElementById('adm-e-emoji-disp')?.value.trim(); 
+            if(emj) source[idx].emoji = emj;
+
+            // Audio (Dosyadan yüklenen)
+            let newAudioData = document.getElementById('adm-e-audio-hidden')?.value;
+            if (newAudioData && newAudioData.startsWith('data:audio')) {
+                source[idx].hasAudio = true;
+                source[idx].audio = "firebaseDB";
+                if(window.audioStorage) await window.audioStorage.save(id, newAudioData);
+                try { if (typeof firebase !== 'undefined') firebase.database().ref('audioFiles/' + id).set(newAudioData); } catch(e){}
+            }
+
+            // Tercüme Önbelleğini Temizle (Yeni eklenen yazılar için)
+            delete source[idx].deText;
+            delete source[idx].enText;
+
+            // Puanlama Sistemi
+            if (cat === 'userPoems') {
+                let tier = document.getElementById('adm-rating-tier')?.value;
+                let pts = parseInt(document.getElementById('adm-rating-pts')?.value || 0);
+                let oldPts = source[idx].adminRating ? source[idx].adminRating.points : 0;
+                let diff = pts - oldPts;
+
+                if(tier && tier !== 'none') { source[idx].adminRating = { tier: tier, points: pts }; } 
+                else { delete source[idx].adminRating; diff = -oldPts; }
+                
+                let authorName = source[idx].author || source[idx].name;
+                let authorObj = Object.values(window.userDatabase).find(u => u.name === authorName || u.username === authorName);
+                if(authorObj && diff !== 0) {
+                    authorObj.score = (authorObj.score || 0) + diff;
+                    window.userDatabase[authorObj.username] = authorObj;
+                    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                    try { if (typeof firebase !== 'undefined') firebase.database().ref('users/' + authorObj.username + '/score').set(authorObj.score); } catch(e){}
+                    if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+                }
+                
+                localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                try { if (typeof firebase !== 'undefined') firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){}
+                window.currentItemData = window.userPoemsDB[idx];
+            } else {
+                localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                try { if (typeof firebase !== 'undefined') firebase.database().ref('contentDB').set(window.DB); } catch(e){}
+                window.currentItemData = window.DB[cat][idx];
+            }
+            
+            // Okuma penceresi açıksa içeriği anında Türkçeye çekip göster
+            let readTitle = document.getElementById('read-title');
+            if (readTitle && document.getElementById('readModal').classList.contains('show')) {
+                window.currentLang = 'tr'; 
+                readTitle.innerHTML = source[idx].title;
+                document.getElementById('read-text').innerHTML = source[idx].text.replace(/\n/g, '<br>');
+            }
+
+            window.toast("Eser Başarıyla Güncellendi!", "✅"); 
+            if(window.renderAllContent) window.renderAllContent(); 
+            if(window.closeTopModal) window.closeTopModal();
+        };
+
+        // UI'daki tüm butonları bul ve Güncelle Butonunu ele geçir
+        document.querySelectorAll('button').forEach(btn => {
+            if (btn.innerText.includes("Güncelle") && btn.innerText.includes("Puanla")) {
+                let newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn); // Tüm eski Event Listener'ları yok et
+                newBtn.onclick = function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    window.showMisaliUpdateConfirm(window.adminUpdateItem);
+                };
+            }
+        });
+
+        // ========================================================================
+        // 2. MAVİ PLAYER (BGM) REMIX VE ÖNİZLEME MOTORU FİXİ
+        // ========================================================================
+        let bgmAud = document.getElementById('global-bgm');
+        if (bgmAud) {
+            bgmAud.removeAttribute('loop'); 
+            bgmAud.loop = false; // ASLA DÖNGÜDE KALMAMALI
+        }
+
+        window.bgmFadeTimerIn = null;
+        window.bgmFadeTimerOut = null;
+        window.isFadingOut = false;
+
+        // BGM Uygulama ve Çalma
+        window.applyRadioSettingsToPlayer = async function(settings) {
+            let bgm = document.getElementById('global-bgm');
+            let playIcon = document.getElementById('bgm-play-icon');
+            if (!bgm || !settings.playlist || settings.playlist.length === 0) return;
+
+            // Önceki geçişleri zorla temizle
+            clearInterval(window.bgmFadeTimerIn);
+            clearInterval(window.bgmFadeTimerOut);
+            window.isFadingOut = false;
+            bgm.loop = false; 
+
+            let track = settings.playlist[window.currentBgmIndex || 0];
+            let audioData = track.src;
+            if(track.src === 'firebaseDB' && window.audioStorage) {
+                let fetched = await window.audioStorage.get(track.id);
+                if(fetched) audioData = fetched;
+            }
+            if(!audioData) audioData = track.src || track;
+
+            if (typeof window.loadAudioSafely === 'function') {
+                await window.loadAudioSafely(bgm, audioData);
+            } else {
+                bgm.src = audioData;
+            }
+
+            if(window.updateRadioPlayerDisplay) window.updateRadioPlayerDisplay(settings);
+
+            let targetVol = document.getElementById('bgm-vol') ? parseFloat(document.getElementById('bgm-vol').value) : 1;
+            bgm.volume = 0; 
+            
+            bgm.play().then(() => {
+                if (playIcon) playIcon.className = 'fas fa-pause';
+                let type = settings.type || 'crossfade';
+                let fadeSec = parseInt(settings.fadeSec || 5);
+
+                if ((type === 'crossfade' || type === 'fadein') && fadeSec > 0) {
+                    let volStep = targetVol / (fadeSec * 20); 
+                    window.bgmFadeTimerIn = setInterval(() => {
+                        if (bgm.volume + volStep < targetVol) {
+                            bgm.volume += volStep;
+                        } else {
+                            bgm.volume = targetVol;
+                            clearInterval(window.bgmFadeTimerIn);
+                        }
+                    }, 50);
+                } else {
+                    bgm.volume = targetVol;
+                }
+            }).catch(e => { console.log("Otomatik çalma tarayıcı korumasına takıldı."); });
+        };
+
+        window.triggerNextRadioSong = async function() {
+            window.isFadingOut = false;
+            let settings = window.radioSettings;
+            if(settings && settings.playlist && settings.playlist.length > 0) {
+                window.currentBgmIndex = (window.currentBgmIndex + 1) % settings.playlist.length;
+                await window.applyRadioSettingsToPlayer(settings);
+            }
+        };
+
+        // Önizleme Butonu (Preview)
+        window.previewRemix = function() {
+            if(!window.radioSettings || !window.radioSettings.playlist || window.radioSettings.playlist.length === 0) {
+                return window.toast("Önce çalma listesine şarkı yükleyin!", "⚠️");
+            }
+            let tempSettings = {
+                type: document.getElementById('adm-bgm-transition')?.value || 'crossfade',
+                fadeSec: parseInt(document.getElementById('adm-bgm-fade-sec')?.value || 5),
+                playLimit: parseInt(document.getElementById('adm-bgm-play-limit')?.value || 0),
+                icon: document.getElementById('adm-bgm-icon')?.value || '',
+                customText: document.getElementById('adm-bgm-text')?.value || '',
+                font: document.getElementById('adm-bgm-font')?.value || "'Space Mono', monospace",
+                playlist: window.radioSettings.playlist
+            };
+            window.applyRadioSettingsToPlayer(tempSettings); 
+            if(window.toast) window.toast("Radyo Önizleme Modu Aktif", "🎧");
+        };
+
+        // Bağımsız ve Sağlam Zaman Gözlemcisi (Remix Interval Monitor)
+        if (window.radioTimeMonitor) clearInterval(window.radioTimeMonitor);
+        
+        window.radioTimeMonitor = setInterval(() => {
+            let bgm = document.getElementById('global-bgm');
+            if (!bgm || bgm.paused || window.isFadingOut) return;
+            
+            let settings = window.radioSettings;
+            if (!settings || !settings.playlist) return;
+
+            if (settings.playlist.length <= 1) { bgm.loop = true; return; }
+
+            let cur = bgm.currentTime;
+            let dur = bgm.duration;
+            let limit = parseInt(settings.playLimit || 0);
+            let fadeSec = parseInt(settings.fadeSec || 5);
+            let type = settings.type || 'crossfade';
+
+            let isEnding = false;
+            if (limit > 0 && cur >= limit) isEnding = true;
+            else if (dur && dur !== Infinity && !isNaN(dur) && (dur - cur) <= fadeSec) isEnding = true;
+
+            if (isEnding) {
+                window.isFadingOut = true;
+                clearInterval(window.bgmFadeTimerIn); 
+
+                if ((type === 'crossfade' || type === 'fadeout') && fadeSec > 0) {
+                    let volStep = bgm.volume / (fadeSec * 20);
+                    window.bgmFadeTimerOut = setInterval(() => {
+                        if (bgm.volume - volStep > 0.05) {
+                            bgm.volume -= volStep;
+                        } else {
+                            bgm.volume = 0;
+                            clearInterval(window.bgmFadeTimerOut);
+                            window.triggerNextRadioSong();
+                        }
+                    }, 50);
+                } else {
+                    window.triggerNextRadioSong();
+                }
+            }
+        }, 250);
+
+        // ========================================================================
+        // 3. KUSURSUZ ALMANCA (NATIVE) SESLİ OKUMA MOTORU (TTS)
+        // ========================================================================
+        window.readAloudText = function() {
+            window.speechSynthesis.cancel(); 
+            let textEl = document.getElementById('read-text');
+            let titleEl = document.getElementById('read-title');
+            if (!textEl) return;
+            
+            let rawText = textEl.innerText || textEl.textContent;
+            let cleanText = rawText.replace("Cevabı Göster", "").replace(/([.,?!:;])/g, "$1 \n "); 
+            let msg = new SpeechSynthesisUtterance(cleanText); 
+            
+            // Eğer dil de ise veya başlıkta (DE) varsa KESİNLİKLE Alman sesini çağır
+            let isGerman = (window.currentLang === 'de') || (titleEl && titleEl.innerText.includes('(DE)'));
+
+            const setVoiceAndPlay = () => {
+                let voices = window.speechSynthesis.getVoices();
+                if (isGerman) {
+                    msg.lang = 'de-DE'; // Sistemi zorla
+                    let deVoices = voices.filter(v => v.lang.toLowerCase().includes('de'));
+                    
+                    if (deVoices.length > 0) {
+                        msg.voice = deVoices.find(v => v.name.includes('Google') || v.name.includes('Anna') || v.name.includes('Marlene') || v.name.includes('Premium')) || deVoices[0];
+                        if(window.toast) window.toast("Wird auf Deutsch vorgelesen", "🇩🇪");
+                    } else {
+                        if(window.toast) window.toast("Cihazınızda Almanca ses paketi bulunamadı!", "⚠️");
+                    }
+                    msg.rate = 0.88; 
+                } else {
+                    msg.lang = 'tr-TR';
+                    let trVoices = voices.filter(v => v.lang.toLowerCase().includes('tr'));
+                    if (trVoices.length > 0) {
+                        msg.voice = trVoices.find(v => v.name.includes('Google') || v.name.includes('Yelda') || v.name.includes('Tolga')) || trVoices[0];
+                    }
+                    msg.rate = 0.85; 
+                    if(window.toast) window.toast("Türkçe sesli okuma başlatıldı", "🇹🇷");
+                }
+                msg.pitch = 1.0;
+                window.speechSynthesis.speak(msg);
+            };
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.addEventListener('voiceschanged', setVoiceAndPlay, { once: true });
+                if(window.toast) window.toast("Spiker motoru hazırlanıyor...", "⏳");
+            } else {
+                setVoiceAndPlay();
+            }
+        };
+
+    }, 1500); // 1.5 Saniye bekle, ana DOM yüklensin, sonra üstüne çök!
+});
+</script>
+<!-- ===================================================================== -->
+
 </body>
 </html>
