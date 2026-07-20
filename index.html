@@ -14681,5 +14681,187 @@ window.addEventListener('load', function() {
 </script>
 <!-- ===================================================================== -->
 
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ OMNI-PATCH V53: PROFIL HERKESE AÇIK & TİCKER RENK ADAPTASYONU 🏆 -->
+<!-- ===================================================================== -->
+<script id="misali-v53-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ V53 Patch: Profil Herkese Açık & Ticker Renk Adaptasyonu (Dark/Light).");
+
+        // =========================================================
+        // 1. PROFILİ HERKESE AÇIK YAP, KALEMLERİ SADECE ADMİNE GÖSTER
+        // =========================================================
+        window.renderProfileView = function() {
+            let aboutView = document.getElementById('about-view');
+            if(!aboutView) return;
+            
+            // Admin kontrolü (misafirlerde currentUser null olur)
+            let isAdmin = window.currentUser && window.currentUser.role === 'admin';
+            
+            let btnPers = isAdmin ? `<button class="profile-edit-btn" onclick="window.editProfileZone('personal')" title="Kişisel Bilgileri Düzenle"><i class="fas fa-pen"></i></button>` : '';
+            let btnWork = isAdmin ? `<button class="profile-edit-btn" onclick="window.editProfileZone('work')" title="Meslek/Dil Düzenle"><i class="fas fa-pen"></i></button>` : '';
+            let btnTr = isAdmin ? `<button class="profile-edit-btn" onclick="window.editProfileZone('tr')" title="Türkçe Hakkımda Düzenle"><i class="fas fa-pen"></i></button>` : '';
+            let btnDe = isAdmin ? `<button class="profile-edit-btn" onclick="window.editProfileZone('de')" title="Almanca Hakkımda Düzenle"><i class="fas fa-pen"></i></button>` : '';
+
+            let p = window.profileDB || { dogum: "1980", burc: "İkizler", sehir: "Berlin", meslek: "Şair, Yazar, Tasarımcı", diller: "Türkçe, Deutsch, İngilizce", trText: "Gönülden dile...", deText: "Ein Leben..." };
+
+            // Sadece giriş yapmış kullanıcılar için alt ayar butonları, diğerlerine giriş butonu.
+            let userActions = window.currentUser ? `
+                <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin-top:10px;">
+                    <button class="noble-btn" style="width:auto; border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.openModal('userModal')"><i class="fas fa-cog"></i> Ayarlar</button>
+                    <button class="noble-btn" style="width:auto; border-color:var(--accent-pink); color:var(--accent-pink);" onclick="window.openModal('avatarModal')"><i class="fas fa-smile"></i> Sembol Değiştir</button>
+                    <button class="noble-btn" style="width:auto; border-color:var(--accent-red); color:var(--accent-red);" onclick="window.triggerLogout()"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</button>
+                </div>
+            ` : `
+                <div style="text-align:center; margin-top:20px;">
+                    <button class="noble-btn" style="width:auto; border-color:var(--accent-gold); color:var(--accent-gold);" onclick="window.openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> Sisteme Giriş Yap</button>
+                </div>
+            `;
+
+            aboutView.innerHTML = `
+                <h2 class="sec-title"><i class="fas fa-user-circle"></i> Profilim</h2>
+                <div class="theme-panel" style="max-width:900px; margin:0 auto; background: transparent; border: none; padding: 0;">
+                    <div style="text-align:center; margin-bottom: 30px;">
+                        <img src="image_01d1a0.png" onclick="window.showRandomQuote()" style="width:160px; height:160px; border-radius:50%; border: 3px solid var(--accent-gold); box-shadow: 0 0 25px rgba(212,175,55,0.4); object-fit: cover; cursor: pointer;">
+                        <h1 style="font-family:'Great Vibes', cursive; font-size:4.5rem; color:var(--accent-cyan); margin-top:15px; text-shadow: 0 0 15px rgba(0,206,209,0.4);">Şair Misal.i</h1>
+                        <p style="color:var(--text-sub); font-size:1rem; margin-top:5px;">Sitenin Kurucusu & Şairi</p>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-bottom: 20px;">
+                        <div style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:12px; padding:20px; text-align:left; position:relative;">
+                            ${btnPers}
+                            <p style="margin-bottom:10px;"><strong style="color:var(--text-main); font-weight:900;">Doğum Tarihi:</strong> <span style="color:var(--text-main);">${p.dogum || ''}</span></p>
+                            <p style="margin-bottom:10px;"><strong style="color:var(--text-main); font-weight:900;">Burç:</strong> <span style="color:var(--text-main);">${p.burc || ''}</span></p>
+                            <p><strong style="color:var(--text-main); font-weight:900;">Şehir:</strong> <span style="color:var(--text-main);">${p.sehir || ''}</span></p>
+                        </div>
+                        <div style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:12px; padding:20px; text-align:left; position:relative;">
+                            ${btnWork}
+                            <p style="margin-bottom:10px;"><strong style="color:var(--text-main); font-weight:900;">Meslek:</strong> <span style="color:var(--text-main);">${p.meslek || ''}</span></p>
+                            <p><strong style="color:var(--text-main); font-weight:900;">Diller:</strong> <span style="color:var(--text-main);">${p.diller || ''}</span></p>
+                        </div>
+                    </div>
+                    <div style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:12px; padding:25px; text-align:left; position:relative; margin-bottom:20px;">
+                        ${btnTr}
+                        <h3 style="color:var(--accent-gold); margin-bottom:15px; font-size:1.1rem;">Hakkımda</h3>
+                        <p style="color:var(--text-main); font-size:0.95rem; line-height:1.7;">${(p.trText||'').replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <div style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:12px; padding:25px; text-align:left; position:relative; margin-bottom:20px;">
+                        ${btnDe}
+                        <h3 style="color:var(--accent-gold); margin-bottom:15px; font-size:1.1rem;">Über Mich</h3>
+                        <p style="color:var(--text-main); font-size:0.95rem; line-height:1.7;">${(p.deText||'').replace(/\n/g, '<br>')}</p>
+                    </div>
+                    ${userActions}
+                </div>
+            `;
+        };
+        // Hemen tetikle
+        window.renderProfileView();
+
+
+        // =========================================================
+        // 2. TICKER BEYAZ/SİYAH ADAPTASYONU (LIGHT/DARK MODE)
+        // =========================================================
+        // Eğer renk HEX kodu beyaz veya siyah seçildiyse, bunu "var(--text-main)" yap.
+        // Böylece gündüz modunda siyah, gece modunda otomatik beyaz olur!
+        const adaptColor = (hex) => {
+            let h = (hex || '').toLowerCase();
+            if (h === '#ffffff' || h === '#000000') return 'var(--text-main)';
+            return hex; // Mavi vb. özel renkler ise aynen kalır.
+        };
+
+        // Admin Listesi Adaptasyonu
+        window.renderAdminTickerList = function() {
+            let listEl = document.getElementById('adm-ticker-list');
+            if(!listEl || !window.tickerDB || !window.tickerDB.items) return;
+            
+            let badgeLabels = { "tb-yeni": "YENİ", "tb-flas": "FLAŞ", "tb-dikkat": "DİKKAT", "tb-duyuru": "DUYURU", "tb-oku": "İYİ OKU", "tb-ozel": "ÖZEL", "tb-onemli": "ÖNEMLİ", "tb-gunun": "GÜNÜN SÖZÜ", "tb-tavsiye": "TAVSİYE", "tb-populer": "POPÜLER", "tb-seckin": "SEÇKİN", "tb-bilgi": "BİLGİ", "tb-uyari": "UYARI", "tb-guncel": "GÜNCEL", "tb-kampanya": "KAMPANYA", "tb-siir": "ŞİİR", "tb-soz": "SÖZ", "tb-kissa": "KISSA", "tb-fikra": "FIKRA", "tb-bilmece": "BİLMECE" };
+
+            listEl.innerHTML = window.tickerDB.items.map((item, idx) => {
+                let badgeDisplay = (item.badge && item.badge !== 'none') ? `<span class="ticker-custom-badge ${item.badge}">${badgeLabels[item.badge] || 'ETİKET'}</span>` : '';
+                let effClass = item.effect && item.effect !== 'none' ? item.effect : '';
+
+                // ADAPTASYON FONKSİYONUNDAN GEÇİRİYORUZ
+                let tColor = adaptColor(item.textColor || item.color || '#ffffff');
+                let aColor = adaptColor(item.authColor || item.color || '#0ea5e9');
+                
+                let tFont = item.textFont || item.font || "'Poppins', sans-serif";
+                if (tFont.includes('Great Vibes') && !item.textFont) tFont = "'Poppins', sans-serif";
+                let aFont = item.authFont || "'Great Vibes', cursive";
+
+                return `
+                <div style="background:rgba(0,0,0,0.2); border:1px solid var(--border-soft); border-left:3px solid ${aColor !== 'var(--text-main)' ? aColor : 'var(--accent-gold)'}; border-radius:8px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="flex:1; padding-right:15px; display:flex; align-items:center; flex-wrap:wrap;">
+                        ${badgeDisplay}
+                        <span class="${effClass}" style="font-family:${tFont} !important; font-size:1rem !important; color:${tColor} !important; margin-right:8px;">${item.text}</span>
+                        <span style="font-family:${aFont} !important; font-size:1.3rem !important; color:${aColor} !important;">~ ${item.author}</span>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="action-btn" style="color:var(--accent-gold); font-size:1.1rem; background:rgba(212,175,55,0.1); border:1px solid var(--accent-gold); border-radius:6px; padding:5px 8px;" title="Düzenle" onclick="window.editTickerItem(${idx})"><i class="fas fa-pen"></i></button>
+                        <button class="action-btn" style="color:var(--accent-red); font-size:1.1rem; background:rgba(239,68,68,0.1); border:1px solid var(--accent-red); border-radius:6px; padding:5px 8px;" title="Sil" onclick="window.deleteTickerItem(${idx})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('') || '<div style="text-align:center; color:var(--text-sub); padding:10px;">Liste boş.</div>';
+        };
+
+        // Live Ticker Adaptasyonu & Hız Klonlama Modeli
+        window.updateLiveTickers = function() {
+            let t1 = document.querySelector('.ticker-1 .ticker-txt');
+            let t1Container = document.querySelector('.ticker-1');
+            if(!t1 || !window.tickerDB || !window.tickerDB.items) return;
+
+            if(t1Container) t1Container.classList.remove('ready');
+
+            let badgeLabels = { "tb-yeni": "YENİ", "tb-flas": "FLAŞ", "tb-dikkat": "DİKKAT", "tb-duyuru": "DUYURU", "tb-oku": "İYİ OKU", "tb-ozel": "ÖZEL", "tb-onemli": "ÖNEMLİ", "tb-gunun": "GÜNÜN SÖZÜ", "tb-tavsiye": "TAVSİYE", "tb-populer": "POPÜLER", "tb-seckin": "SEÇKİN", "tb-bilgi": "BİLGİ", "tb-uyari": "UYARI", "tb-guncel": "GÜNCEL", "tb-kampanya": "KAMPANYA", "tb-siir": "ŞİİR", "tb-soz": "SÖZ", "tb-kissa": "KISSA", "tb-fikra": "FIKRA", "tb-bilmece": "BİLMECE" };
+            
+            let gap = window.tickerDB.gap !== undefined ? window.tickerDB.gap : 60;
+            let sep = window.tickerDB.separator || 'star';
+            
+            let sepHTML = "";
+            if(sep === 'star') sepHTML = `<span style="color:var(--accent-gold); font-size:1.2rem; margin:0 ${gap/2}px;">★</span>`;
+            else if(sep === 'line') sepHTML = `<span style="color:var(--text-sub); margin:0 ${gap/2}px;">|</span>`;
+            else if(sep === 'dots') sepHTML = `<span style="color:var(--accent-cyan); letter-spacing:2px; margin:0 ${gap/2}px;">•••</span>`;
+            else sepHTML = `<span style="display:inline-block; width:${gap}px;"></span>`;
+
+            let itemsHtml = window.tickerDB.items.map(i => {
+                let badgeHtml = (i.badge && i.badge !== 'none') ? `<span class="ticker-custom-badge ${i.badge}">${badgeLabels[i.badge] || 'ETİKET'}</span>` : '';
+                let effClass = i.effect && i.effect !== 'none' ? i.effect : 'eff-none';
+                
+                // ADAPTASYON FONKSİYONUNDAN GEÇİRİYORUZ
+                let tColor = adaptColor((i.textColor && i.textColor.length === 7) ? i.textColor : '#ffffff');
+                let aColor = adaptColor((i.authColor && i.authColor.length === 7) ? i.authColor : '#0ea5e9');
+                
+                let tFont = i.textFont || i.font || "'Poppins', sans-serif";
+                if (tFont.includes('Great Vibes') && !i.textFont) tFont = "'Poppins', sans-serif";
+                let tSize = i.textSize || i.size || '0.95rem';
+                
+                let aFont = i.authFont || "'Great Vibes', cursive";
+                let aSize = i.authSize || '1.3rem';
+                
+                return `${badgeHtml}<span class="${effClass}" style="font-family:${tFont} !important; font-size:${tSize} !important; color:${tColor} !important; margin-right:8px;">${i.text}</span> <span style="color:${aColor} !important; font-size:${aSize} !important; font-family:${aFont} !important;">~ ${i.author}</span>`;
+            }).join(sepHTML);
+
+            if(!itemsHtml) itemsHtml = "Şair Misal.i - Gönülden dile, dilden şiire...";
+
+            t1.innerHTML = `<span style="display:flex; align-items:center; height:100%; margin-right:${gap}px;">${itemsHtml}</span>`;
+            
+            // HIZ UYGULAMASI (Klonlama Tekniği ile - Tarayıcıyı zorlar ve hemen günceller)
+            let spd = window.tickerDB.speed || 220;
+            let newT1 = t1.cloneNode(true);
+            newT1.style.setProperty('animation-duration', spd + 's', 'important');
+            t1.parentNode.replaceChild(newT1, t1);
+
+            if(t1Container) { setTimeout(() => t1Container.classList.add('ready'), 50); }
+        };
+
+        // Render İşlemini Başlat
+        window.renderAdminTickerList();
+        window.updateLiveTickers();
+
+    }, 3500); 
+});
+</script>
+<!-- ===================================================================== -->
+
 </body>
 </html>
