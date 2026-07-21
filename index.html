@@ -14864,56 +14864,269 @@ window.addEventListener('load', function() {
 <!-- ===================================================================== -->
 
 <!-- ===================================================================== -->
-<!-- 🏆 MİSALİ V63 "FELS-PATCH": KUSURSUZ MARŞLAR & SES SİSTEMİ 🏆 -->
+<!-- 👑 MİSALİ V65 GOD-MODE: ICONS, RELOAD-FIX, VIEWS & MUSIC LIB 👑 -->
 <!-- ===================================================================== -->
-<script id="misali-v63-js">
+<style id="misali-v65-css">
+    /* Top 10 Views Styling */
+    .top-audio-container { position: relative; }
+    .audio-track-item { position: relative; }
+    .audio-views-badge { position: absolute; right: 15px; bottom: 12px; font-size: 0.75rem; color: var(--text-sub); display: flex; align-items: center; gap: 4px; font-weight: bold; }
+    
+    /* Music Library Modal Styling */
+    .music-lib-item { background: var(--input-bg); border: 1px solid var(--border-soft); border-left: 4px solid var(--accent-pink); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
+    .music-lib-item:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(236,72,153,0.2); }
+    [data-theme="light"] .music-lib-item { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); }
+</style>
+
+<script id="misali-v65-js">
 window.addEventListener('load', function() {
-    console.log("🛠️ V63 Fels-Patch geladen. System wird versiegelt.");
+    setTimeout(function() {
+        console.log("⚡ V65 God-Mode geladen: UI, Navigation, Sync & Music Library aktiv!");
 
-    // Die 10 Marsch-Daten (ID's angepasst für Kompatibilität)
-    const marslar10 = [
-        { id: "m_istiklal", title: "İstiklal Marşı", author: "Mehmet Akif Ersoy", emoji: "🇹🇷", text: "Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak.\n\nÇatma, kurban olayım, çehreni ey nazlı hilal!\nKahraman ırkıma bir gül! Ne bu şiddet, bu celal?\nSana olmaz dökülen kanlarımız sonra helal...\nHakkıdır, hakk'a tapan, milletimin istiklal!", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg" },
-        { id: "m_10yil", title: "10. Yıl Marşı", author: "Faruk Nafiz", emoji: "🇹🇷", text: "Çıktık açık alınla on yılda her savaştan,\nOn yılda on beş milyon genç yarattık her yaştan.\nBaşta bütün dünyanın saydığı başkumandan,\nDemir ağlarla ördük anayurdu dört baştan.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/7/77/10._Yil_Marsi.ogg" },
-        { id: "m_izmir", title: "İzmir Marşı", author: "Anonim", emoji: "🇹🇷", text: "İzmir'in dağlarında çiçekler açar.\nAltın güneş orda sırmalar saçar.\nBozulmuş düşmanlar yel gibi kaçar.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/23/Izmir_Marsi.ogg" },
-        { id: "m_ceddin", title: "Ceddin Deden", author: "Osmanlı Mehteranı", emoji: "⚔️", text: "Ceddin deden, neslin baban\nHep kahraman Türk milleti\nOrduların, pek çok zaman\nVermiştiler dünyaya şan.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/29/Ceddin_Deden_-_Ottoman_military_march.ogg" },
-        { id: "m_plevne", title: "Plevne Marşı", author: "Osman Paşa", emoji: "🏰", text: "Tuna nehri akmam diyor\nEtrafımı yıkmam diyor\nŞanı büyük Osman Paşa\nPlevne'den çıkmam diyor.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Plevne_Marsi.ogg" },
-        { id: "m_harbiye", title: "Harbiye Marşı", author: "Cevat Şakir", emoji: "🎖️", text: "Yıldırımlar yaratan bir ırkın ahfadıyız,\nTufanları gösteren, tarihlerin yâdıyız.\nKanla, irfanla kurduk biz bu Cumhuriyeti,\nCehennemler kudursa, ölmez nigahbanıyız.", hasAudio: false, audio: "" },
-        { id: "m_genclik", title: "Gençlik Marşı", author: "Ali Ulvi", emoji: "🏔️", text: "Dağ başını duman almış,\nGümüş dere durmaz akar.\nGüneş ufuktan şimdi doğar,\nYürüyelim arkadaşlar.", hasAudio: false, audio: "" },
-        { id: "m_sakarya", title: "Sakarya Marşı", author: "Halil Bedii", emoji: "🌊", text: "Hürmet sana ey şan dolu sancağım,\nBaştan başa arza hakim ol şahım.\nTürk ordusu, Türk ordusu sayende,\nSakarya'da kurtarıldı otağım.", hasAudio: false, audio: "" },
-        { id: "m_vatan", title: "Vatan Marşı", author: "Cemal Edhem", emoji: "🏫", text: "Başka bir aşk istemez, aşkınla çarpar kalbimiz,\nEy Vatan gözyaşların dinsin, yetiştik çünkü biz.", hasAudio: false, audio: "" },
-        { id: "m_cirpinirdi", title: "Çırpınırdı Karadeniz", author: "Ahmet Cevat", emoji: "🌊", text: "Çırpınırdı Karadeniz\nBakıp Türk'ün bayrağına!\nAh ölmeden bir görseydim\nDüşeceğim toprağına.", hasAudio: false, audio: "" }
-    ];
-
-    // Datenbank-Versiegelung: Verhindert, dass Firebase die Mars-Liste löscht
-    window.DB = window.DB || {};
-    window.DB.marslar = marslar10;
-    localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-
-    // Override Render-Funktion für Marşlar
-    const oldRender = window.renderAllContent;
-    window.renderAllContent = function() {
-        if(oldRender) oldRender();
-        window.DB.marslar = marslar10; // Zwingt die Liste bei jedem Rendern zurück
-    };
-
-    // Fix für "Eser bulunamadı": Prüft ob die ID beim Öffnen existiert
-    const oldOpenModal = window.openReadModal;
-    window.openReadModal = function(id, type) {
-        if (type === 'marslar') {
-            let exists = marslar10.find(m => m.id === id);
-            if (!exists) {
-                console.log("ID nicht gefunden, korrigiere...");
-                // Prüfen, ob der Nutzer vielleicht den Titel statt der ID benutzt
-                let byTitle = marslar10.find(m => m.title === id);
-                if(byTitle) id = byTitle.id;
-            }
+        // ==========================================
+        // 1. CHROME ICONS (FONT-AWESOME) FIX
+        // ==========================================
+        if(!document.querySelector('link[href*="font-awesome"]')) {
+            let fa = document.createElement('link');
+            fa.rel = 'stylesheet';
+            fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+            document.head.appendChild(fa);
         }
-        if(oldOpenModal) oldOpenModal(id, type);
-    };
 
-    window.renderAllContent();
+        // ==========================================
+        // 2. F5 / RELOAD FIX (SAYFADA KALMA)
+        // ==========================================
+        const origNav = window.nav;
+        window.nav = function(viewId) {
+            if(origNav) origNav(viewId);
+            sessionStorage.setItem('misali_current_view', viewId); // Speichert die aktuelle Ansicht
+        };
+        // Lade die zuletzt besuchte Seite beim Start
+        let savedView = sessionStorage.getItem('misali_current_view');
+        if (savedView && document.getElementById(savedView + '-view')) {
+            window.nav(savedView);
+        }
+
+        // ==========================================
+        // 3. HEADER PUNKTE (SCORE) LIVE SYNC
+        // ==========================================
+        if (window.currentUser && window.currentUser.username) {
+            try {
+                firebase.database().ref('users/' + window.currentUser.username + '/score').on('value', snap => {
+                    if (snap.exists()) {
+                        let sc = snap.val();
+                        window.currentUser.score = sc;
+                        sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                        
+                        let scoreEl = document.getElementById('u-score');
+                        if (scoreEl) {
+                            scoreEl.innerHTML = `<b style="color:var(--accent-green); text-shadow:0 0 5px rgba(34,197,94,0.4);">${sc} Puan</b>`;
+                        }
+                    }
+                });
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // 4. MARŞLAR ABSOLUTE FIX (10 KARTEN)
+        // ==========================================
+        const marslar10 = [
+            { id: "m_istiklal", title: "İstiklal Marşı", author: "Mehmet Akif Ersoy", emoji: "🇹🇷", text: "Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak.\n\nÇatma, kurban olayım, çehreni ey nazlı hilal!\nKahraman ırkıma bir gül! Ne bu şiddet, bu celal?\nSana olmaz dökülen kanlarımız sonra helal...\nHakkıdır, hakk'a tapan, milletimin istiklal!", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg" },
+            { id: "m_10yil", title: "10. Yıl Marşı", author: "Faruk Nafiz", emoji: "🇹🇷", text: "Çıktık açık alınla on yılda her savaştan,\nOn yılda on beş milyon genç yarattık her yaştan.\nBaşta bütün dünyanın saydığı başkumandan,\nDemir ağlarla ördük anayurdu dört baştan.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/7/77/10._Yil_Marsi.ogg" },
+            { id: "m_izmir", title: "İzmir Marşı", author: "Anonim", emoji: "🇹🇷", text: "İzmir'in dağlarında çiçekler açar.\nAltın güneş orda sırmalar saçar.\nBozulmuş düşmanlar yel gibi kaçar.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/23/Izmir_Marsi.ogg" },
+            { id: "m_ceddin", title: "Ceddin Deden", author: "Osmanlı Mehteranı", emoji: "⚔️", text: "Ceddin deden, neslin baban\nHep kahraman Türk milleti\nOrduların, pek çok zaman\nVermiştiler dünyaya şan.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/29/Ceddin_Deden_-_Ottoman_military_march.ogg" },
+            { id: "m_plevne", title: "Plevne Marşı", author: "Osman Paşa", emoji: "🏰", text: "Tuna nehri akmam diyor\nEtrafımı yıkmam diyor\nŞanı büyük Osman Paşa\nPlevne'den çıkmam diyor.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Plevne_Marsi.ogg" },
+            { id: "m_harbiye", title: "Harbiye Marşı", author: "Cevat Şakir", emoji: "🎖️", text: "Yıldırımlar yaratan bir ırkın ahfadıyız,\nTufanları gösteren, tarihlerin yâdıyız.\nKanla, irfanla kurduk biz bu Cumhuriyeti,\nCehennemler kudursa, ölmez nigahbanıyız.", hasAudio: false, audio: "" },
+            { id: "m_genclik", title: "Gençlik Marşı", author: "Ali Ulvi", emoji: "🏔️", text: "Dağ başını duman almış,\nGümüş dere durmaz akar.\nGüneş ufuktan şimdi doğar,\nYürüyelim arkadaşlar.", hasAudio: false, audio: "" },
+            { id: "m_sakarya", title: "Sakarya Marşı", author: "Halil Bedii", emoji: "🌊", text: "Hürmet sana ey şan dolu sancağım,\nBaştan başa arza hakim ol şahım.\nTürk ordusu, Türk ordusu sayende,\nSakarya'da kurtarıldı otağım.", hasAudio: false, audio: "" },
+            { id: "m_vatan", title: "Vatan Marşı", author: "Cemal Edhem", emoji: "🏫", text: "Başka bir aşk istemez, aşkınla çarpar kalbimiz,\nEy Vatan gözyaşların dinsin, yetiştik çünkü biz.", hasAudio: false, audio: "" },
+            { id: "m_cirpinirdi", title: "Çırpınırdı Karadeniz", author: "Ahmet Cevat", emoji: "🌊", text: "Çırpınırdı Karadeniz\nBakıp Türk'ün bayrağına!\nAh ölmeden bir görseydim\nDüşeceğim toprağına.", hasAudio: false, audio: "" }
+        ];
+
+        window.DB = window.DB || {};
+        window.DB.marslar = marslar10;
+        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+        try { firebase.database().ref('contentDB/marslar').set(marslar10); } catch(e){}
+
+        const origRender = window.renderAllContent;
+        window.renderAllContent = function() {
+            if (!window.DB) window.DB = {};
+            window.DB.marslar = marslar10; // Zwingt Marşlar vor jedem Malen rein
+            if (origRender) origRender();
+        };
+
+        // ==========================================
+        // 5. VIEW-COUNTER (AUFRUFE) BEIM KLICKEN
+        // ==========================================
+        const origOpenModal = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            // Zähle den Aufruf in der Datenbank
+            if (!window.poemDataStore) window.poemDataStore = {};
+            if (!window.poemDataStore[id]) window.poemDataStore[id] = { ratings: {}, comments: [], views: 0 };
+            
+            window.poemDataStore[id].views = (window.poemDataStore[id].views || 0) + 1;
+            
+            // Speichere in Firebase
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            try { firebase.database().ref('interactions/' + id + '/views').set(window.poemDataStore[id].views); } catch(e){}
+            
+            // Aktualisiere sofort die Top 10 und Music Library Liste
+            if (typeof window.renderTopAudioList === 'function') window.renderTopAudioList();
+            if (typeof window.renderMusicLibrary === 'function') window.renderMusicLibrary();
+
+            // Öffne das Modal normal
+            if (origOpenModal) await origOpenModal(id, type);
+        };
+
+        // ==========================================
+        // 6. TOP 10 LISTE MIT VIEWS & RANKING
+        // ==========================================
+        window.renderTopAudioList = function() {
+            let container = document.getElementById('top-audio-works');
+            if (!container || !document.getElementById('home-view').classList.contains('active')) return;
+
+            let audioWorks = [];
+            ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
+                let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
+                if(source && Array.isArray(source)) {
+                    source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
+                }
+            });
+
+            if (audioWorks.length === 0) return;
+
+            let heartsDB = JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+
+            audioWorks.forEach(w => {
+                let sd = heartsDB[w.id] || (window.poemDataStore ? window.poemDataStore[w.id] : null) || {};
+                let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+                let notes = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => notes += parseInt(v||0));
+                let juryAvg = 0; if(sd.jury) { let jVals = Object.values(sd.jury); if(jVals.length > 0) juryAvg = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); }
+                let views = sd.views || 0; // Hier sind die Aufrufe
+                
+                w.stats = { hearts, notes, jury: juryAvg, views };
+                w.totalScore = (hearts * 2) + (notes * 3) + (parseFloat(juryAvg) * 5); 
+            });
+
+            audioWorks.sort((a,b) => b.totalScore - a.totalScore);
+            let top10 = audioWorks.slice(0, 10);
+
+            const palette = ['var(--accent-pink)', 'var(--accent-cyan)', '#c084fc', 'var(--accent-gold)'];
+            let html = '<div class="top-audio-container"><div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:15px; text-align:center; font-size:1.2rem;">🎧 Top 10 Sesli Eserler</div><div style="display:flex; flex-direction:column; gap:8px;">';
+            
+            top10.forEach((w, i) => {
+                let rankColor = palette[i % palette.length];
+                let safeId = encodeURIComponent(w.id);
+                let authorText = w.author || w.name || 'Şair Misal.i';
+                let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
+                
+                html += `
+                <div class="audio-track-item" style="border-left: 3px solid ${rankColor}; align-items:flex-start; padding:12px; background:var(--input-bg); border-radius:12px; margin-bottom:8px; cursor:pointer; display:flex; transition: 0.3s;" onclick="window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); setTimeout(()=>window.fpToggle(true), 600);">
+                    <div class="audio-track-rank" style="color:${rankColor}; font-weight:bold; font-size:1.4rem; min-width:30px; margin-top:2px;">${i+1}</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; font-size:1rem; color:var(--text-main);">${w.title || w.trTitle}</div>
+                        <div class="${authorClass}" style="font-size: 1.1rem; margin-top: 2px;">~ ${authorText}</div>
+                        <div class="top-stats-container" style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
+                            <span class="stat-badge" title="Kalpler"><i class="fas fa-heart" style="color:var(--accent-red);"></i> ${w.stats.hearts}</span>
+                            <span class="stat-badge" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan);"></i> ${w.stats.notes}</span>
+                            <span class="stat-badge" title="Jüri"><i class="fas fa-gavel" style="color:var(--accent-gold);"></i> ${w.stats.jury}/10</span>
+                        </div>
+                    </div>
+                    <!-- VIEWS (Aufrufe) HIER EINGEFÜGT -->
+                    <div class="audio-views-badge">
+                        <i class="fas fa-eye" style="color:var(--accent-cyan);"></i> ${w.stats.views}
+                    </div>
+                </div>`;
+            });
+            html += '</div></div>';
+            
+            if (container.innerHTML !== html) container.innerHTML = html;
+        };
+
+        // ==========================================
+        // 7. HEADER BUTTON & MUSIC LIBRARY MODAL
+        // ==========================================
+        let dtGroup = document.querySelector('.dt-group');
+        if(dtGroup && !document.getElementById('music-lib-btn')) {
+            dtGroup.insertAdjacentHTML('beforeend', `<div id="music-lib-btn" class="dt-box" onclick="window.openMusicLibrary()"><i class="fas fa-compact-disc" style="color:var(--accent-pink);"></i> Müzik Eserleri</div>`);
+        }
+
+        if(!document.getElementById('musicLibModal')) {
+            document.body.insertAdjacentHTML('beforeend', `
+            <div class="modal premium-modal modal-large" id="musicLibModal">
+                <button class="close-btn" onclick="window.closeTopModal()"><i class="fas fa-times"></i></button>
+                <div class="modal-body custom-scroll">
+                    <h2 class="sec-title" style="color:var(--accent-pink);"><i class="fas fa-compact-disc"></i> Tüm Sesli Eserler</h2>
+                    <div style="text-align:center; color:var(--text-sub); margin-bottom:20px;">Sistemdeki tüm müzikli eserler puanlarına göre sıralanmıştır.</div>
+                    <div id="music-lib-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+            </div>
+            `);
+        }
+
+        window.renderMusicLibrary = function() {
+            let container = document.getElementById('music-lib-list');
+            if(!container) return;
+            
+            let audioWorks = [];
+            ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
+                let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
+                if(source && Array.isArray(source)) {
+                    source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
+                }
+            });
+            
+            let heartsDB = JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
+            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+
+            audioWorks.forEach(w => {
+                let sd = heartsDB[w.id] || {};
+                let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+                let notes = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => notes += parseInt(v||0));
+                let juryAvg = 0; if(sd.jury) { let jVals = Object.values(sd.jury); if(jVals.length > 0) juryAvg = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); }
+                
+                w.stats = { hearts, notes, jury: juryAvg, views: sd.views || 0 };
+                w.totalScore = (hearts * 2) + (notes * 3) + (parseFloat(juryAvg) * 5); 
+            });
+            
+            audioWorks.sort((a,b) => b.totalScore - a.totalScore);
+            
+            container.innerHTML = audioWorks.map((w, i) => {
+                let safeId = encodeURIComponent(w.id);
+                let authorText = w.author || w.name || 'Şair Misal.i';
+                let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
+
+                return `
+                <div class="music-lib-item" onclick="window.closeTopModal(); setTimeout(()=> { window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); setTimeout(()=>window.fpToggle(true), 600); }, 300);">
+                    <div style="flex:1;">
+                        <div style="color:var(--text-main); font-size:1.1rem; font-weight:bold;">${i+1}. ${w.title || w.trTitle}</div>
+                        <div class="${authorClass}" style="font-size:1.3rem; margin-top:2px;">~ ${authorText}</div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px; font-size:0.8rem; color:var(--text-sub); font-weight:bold;">
+                        <div style="display:flex; gap:8px;">
+                            <span style="background:rgba(239,68,68,0.1); color:var(--accent-red); padding:3px 8px; border-radius:6px;"><i class="fas fa-heart"></i> ${w.stats.hearts}</span>
+                            <span style="background:rgba(0,206,209,0.1); color:var(--accent-cyan); padding:3px 8px; border-radius:6px;"><i class="fas fa-music"></i> ${w.stats.notes}</span>
+                        </div>
+                        <div style="color:var(--accent-cyan);"><i class="fas fa-eye"></i> ${w.stats.views} Aufrufe</div>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        window.openMusicLibrary = function() {
+            window.renderMusicLibrary();
+            window.openModal('musicLibModal');
+        };
+
+        // Initiale Renderings
+        window.renderAllContent();
+        window.renderTopAudioList();
+        
+    }, 1500);
 });
 </script>
+<!-- ===================================================================== -->
 
 </body>
 </html>
