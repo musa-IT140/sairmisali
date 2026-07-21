@@ -14864,241 +14864,217 @@ window.addEventListener('load', function() {
 <!-- ===================================================================== -->
 
 <!-- ===================================================================== -->
-<!-- 👑 MİSALİ V65 GOD-MODE: ICONS, RELOAD-FIX, VIEWS & MUSIC LIB 👑 -->
+<!-- 👑 MİSALİ V76 OMNI-MASTER: KUSURSUZ LİVE SAYAÇ, KİLİT & MODAL GÖZ 👑 -->
 <!-- ===================================================================== -->
-<style id="misali-v65-css">
-    /* Top 10 Views Styling */
-    .top-audio-container { position: relative; }
-    .audio-track-item { position: relative; }
-    .audio-views-badge { position: absolute; right: 15px; bottom: 12px; font-size: 0.75rem; color: var(--text-sub); display: flex; align-items: center; gap: 4px; font-weight: bold; }
-    
-    /* Music Library Modal Styling */
+<style id="misali-v76-css">
+    /* 1. Top 10 ve Kütüphane 4'lü Sembol Tasarımı (Asla alt alta düşmez) */
+    .top-stats-container { display: flex !important; gap: 6px !important; margin-top: 6px !important; flex-wrap: wrap !important; }
+    .stat-badge { display: flex !important; align-items: center !important; gap: 4px !important; background: rgba(0,0,0,0.3) !important; padding: 3px 6px !important; border-radius: 12px !important; border: 1px solid var(--border-soft) !important; color: var(--text-main) !important; font-size: 0.65rem !important; font-weight: bold !important; line-height: 1 !important;}
+    .stat-badge i { font-size: 0.7rem !important; margin-right: 0 !important; }
+    [data-theme="light"] .stat-badge { background: #ffffff !important; border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.04) !important; color: #334155 !important; }
+
+    /* 2. Müzik Kütüphanesi Liste Elemanları */
     .music-lib-item { background: var(--input-bg); border: 1px solid var(--border-soft); border-left: 4px solid var(--accent-pink); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
     .music-lib-item:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(236,72,153,0.2); }
     [data-theme="light"] .music-lib-item { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); }
+
+    /* 3. Misafir Kilit Ekranı (Guest Lock) */
+    .guest-lock-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s ease; }
+    .guest-lock-box { background: var(--bg-card); border: 2px solid var(--accent-cyan); padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 40px rgba(0,206,209,0.3); }
+    .guest-lock-title { color: var(--accent-gold); font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 10px; }
+    .guest-lock-text { color: var(--text-main); font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px; }
+
+    /* 4. Pencere İçi (Modal) Sol Üst Göz Sayacı */
+    .modal-eye-btn {
+        position: absolute; top: 12px; left: 12px;
+        background: rgba(255,255,255,0.1); border: 1px solid var(--accent-green);
+        color: var(--accent-green); height: 34px; border-radius: 17px;
+        display: flex; align-items: center; justify-content: center;
+        padding: 0 15px; font-weight: bold; font-size: 0.95rem;
+        z-index: 999999; backdrop-filter: blur(5px);
+        box-shadow: 0 0 10px rgba(34,197,94,0.2);
+    }
+
+    /* 5. Admin Puan Düzenleme Modalı */
+    .custom-dialog-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 999999; backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 20px; }
+    .custom-dialog-backdrop.show { display: flex; animation: fadeIn 0.2s; }
+    .custom-dialog-box { background: var(--bg-card); border: 1px solid var(--accent-gold); border-radius: 16px; padding: 30px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 </style>
 
-<script id="misali-v65-js">
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        console.log("⚡ V65 God-Mode geladen: UI, Navigation, Sync & Music Library aktiv!");
+<script id="misali-v76-js">
+(function() {
+    console.log("⚡ V76 OMNI-MASTER DEVREDE: Live Sync, Kilitler ve Semboller aktif.");
 
-        // ==========================================
-        // 1. CHROME ICONS (FONT-AWESOME) FIX
-        // ==========================================
-        if(!document.querySelector('link[href*="font-awesome"]')) {
-            let fa = document.createElement('link');
-            fa.rel = 'stylesheet';
-            fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
-            document.head.appendChild(fa);
+    // ==========================================
+    // 1. ZWANGS-MARŞLAR (Garantiert 10 Stück)
+    // ==========================================
+    const MARSLAR_10 = [
+        { id: "m_istiklal", title: "İstiklal Marşı", author: "Mehmet Akif Ersoy", emoji: "🇹🇷", text: "Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak...", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg" },
+        { id: "m_10yil", title: "10. Yıl Marşı", author: "Faruk Nafiz", emoji: "🇹🇷", text: "Çıktık açık alınla on yılda her savaştan...", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/7/77/10._Yil_Marsi.ogg" },
+        { id: "m_izmir", title: "İzmir Marşı", author: "Anonim", emoji: "🇹🇷", text: "İzmir'in dağlarında çiçekler açar...", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/23/Izmir_Marsi.ogg" },
+        { id: "m_ceddin", title: "Ceddin Deden", author: "Osmanlı Mehteranı", emoji: "⚔️", text: "Ceddin deden, neslin baban...", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/29/Ceddin_Deden_-_Ottoman_military_march.ogg" },
+        { id: "m_plevne", title: "Plevne Marşı", author: "Osman Paşa", emoji: "🏰", text: "Tuna nehri akmam diyor...", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Plevne_Marsi.ogg" },
+        { id: "m_harbiye", title: "Harbiye Marşı", author: "Cevat Şakir", emoji: "🎖️", text: "Yıldırımlar yaratan bir ırkın ahfadıyız...", hasAudio: false, audio: "" },
+        { id: "m_genclik", title: "Gençlik Marşı", author: "Ali Ulvi", emoji: "🏔️", text: "Dağ başını duman almış...", hasAudio: false, audio: "" },
+        { id: "m_sakarya", title: "Sakarya Marşı", author: "Halil Bedii", emoji: "🌊", text: "Hürmet sana ey şan dolu sancağım...", hasAudio: false, audio: "" },
+        { id: "m_vatan", title: "Vatan Marşı", author: "Cemal Edhem", emoji: "🏫", text: "Başka bir aşk istemez, aşkınla çarpar kalbimiz...", hasAudio: false, audio: "" },
+        { id: "m_cirpinirdi", title: "Çırpınırdı Karadeniz", author: "Ahmet Cevat", emoji: "🌊", text: "Çırpınırdı Karadeniz\nBakıp Türk'ün bayrağına!", hasAudio: false, audio: "" }
+    ];
+
+    setInterval(() => {
+        if (!window.DB) window.DB = {};
+        window.DB.marslar = MARSLAR_10;
+    }, 100);
+
+    // ==========================================
+    // 2. MİSAFİR KİLİDİ (GUEST LOCK) KESİN ENGEL
+    // ==========================================
+    window.showStrictGuestLock = function() {
+        if(window.closeTopModal) window.closeTopModal(); 
+        let overlay = document.createElement('div');
+        overlay.className = 'guest-lock-overlay';
+        overlay.innerHTML = `
+            <div class="guest-lock-box">
+                <i class="fas fa-lock" style="font-size:3.5rem; color:var(--accent-red); margin-bottom:15px;"></i>
+                <h3 class="guest-lock-title">Sadece Üyelere Özel</h3>
+                <p class="guest-lock-text">Müzikli eserleri, marşları ve kütüphaneyi dinlemek için lütfen aramıza katılın. Bu içerikler misafirlere kapalıdır.</p>
+                <div style="display:flex; gap:10px;">
+                    <button class="noble-btn" style="flex:1; border-color:var(--text-sub); color:var(--text-sub);" onclick="this.closest('.guest-lock-overlay').remove()">Kapat</button>
+                    <button class="noble-btn primary" style="flex:1;" onclick="this.closest('.guest-lock-overlay').remove(); window.openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> Giriş Yap</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    };
+
+    // Tıklamaları ana koddan önce yakalayan Muhafız (Wächter)
+    document.addEventListener('click', function(e) {
+        let isAudioTrack = e.target.closest('.audio-track-item');
+        let isMusicLib = e.target.closest('.music-lib-item');
+        let isMarsCard = e.target.closest('#marslar-grid .card');
+        let isMusicButton = e.target.closest('#music-lib-btn');
+        let hasMusicIcon = e.target.closest('.card') && e.target.closest('.card').querySelector('.c-stat.music');
+
+        if ((isAudioTrack || isMusicLib || isMarsCard || isMusicButton || hasMusicIcon) && !window.currentUser) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.showStrictGuestLock();
         }
+    }, true); 
 
-        // ==========================================
-        // 2. F5 / RELOAD FIX (SAYFADA KALMA)
-        // ==========================================
-        const origNav = window.nav;
-        window.nav = function(viewId) {
-            if(origNav) origNav(viewId);
-            sessionStorage.setItem('misali_current_view', viewId); // Speichert die aktuelle Ansicht
-        };
-        // Lade die zuletzt besuchte Seite beim Start
-        let savedView = sessionStorage.getItem('misali_current_view');
-        if (savedView && document.getElementById(savedView + '-view')) {
-            window.nav(savedView);
-        }
-
-        // ==========================================
-        // 3. HEADER PUNKTE (SCORE) LIVE SYNC
-        // ==========================================
-        if (window.currentUser && window.currentUser.username) {
-            try {
-                firebase.database().ref('users/' + window.currentUser.username + '/score').on('value', snap => {
-                    if (snap.exists()) {
-                        let sc = snap.val();
-                        window.currentUser.score = sc;
-                        sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-                        
-                        let scoreEl = document.getElementById('u-score');
-                        if (scoreEl) {
-                            scoreEl.innerHTML = `<b style="color:var(--accent-green); text-shadow:0 0 5px rgba(34,197,94,0.4);">${sc} Puan</b>`;
-                        }
-                    }
-                });
-            } catch(e) {}
-        }
-
-        // ==========================================
-        // 4. MARŞLAR ABSOLUTE FIX (10 KARTEN)
-        // ==========================================
-        const marslar10 = [
-            { id: "m_istiklal", title: "İstiklal Marşı", author: "Mehmet Akif Ersoy", emoji: "🇹🇷", text: "Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak.\n\nÇatma, kurban olayım, çehreni ey nazlı hilal!\nKahraman ırkıma bir gül! Ne bu şiddet, bu celal?\nSana olmaz dökülen kanlarımız sonra helal...\nHakkıdır, hakk'a tapan, milletimin istiklal!", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg" },
-            { id: "m_10yil", title: "10. Yıl Marşı", author: "Faruk Nafiz", emoji: "🇹🇷", text: "Çıktık açık alınla on yılda her savaştan,\nOn yılda on beş milyon genç yarattık her yaştan.\nBaşta bütün dünyanın saydığı başkumandan,\nDemir ağlarla ördük anayurdu dört baştan.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/7/77/10._Yil_Marsi.ogg" },
-            { id: "m_izmir", title: "İzmir Marşı", author: "Anonim", emoji: "🇹🇷", text: "İzmir'in dağlarında çiçekler açar.\nAltın güneş orda sırmalar saçar.\nBozulmuş düşmanlar yel gibi kaçar.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/23/Izmir_Marsi.ogg" },
-            { id: "m_ceddin", title: "Ceddin Deden", author: "Osmanlı Mehteranı", emoji: "⚔️", text: "Ceddin deden, neslin baban\nHep kahraman Türk milleti\nOrduların, pek çok zaman\nVermiştiler dünyaya şan.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/2/29/Ceddin_Deden_-_Ottoman_military_march.ogg" },
-            { id: "m_plevne", title: "Plevne Marşı", author: "Osman Paşa", emoji: "🏰", text: "Tuna nehri akmam diyor\nEtrafımı yıkmam diyor\nŞanı büyük Osman Paşa\nPlevne'den çıkmam diyor.", hasAudio: true, audio: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Plevne_Marsi.ogg" },
-            { id: "m_harbiye", title: "Harbiye Marşı", author: "Cevat Şakir", emoji: "🎖️", text: "Yıldırımlar yaratan bir ırkın ahfadıyız,\nTufanları gösteren, tarihlerin yâdıyız.\nKanla, irfanla kurduk biz bu Cumhuriyeti,\nCehennemler kudursa, ölmez nigahbanıyız.", hasAudio: false, audio: "" },
-            { id: "m_genclik", title: "Gençlik Marşı", author: "Ali Ulvi", emoji: "🏔️", text: "Dağ başını duman almış,\nGümüş dere durmaz akar.\nGüneş ufuktan şimdi doğar,\nYürüyelim arkadaşlar.", hasAudio: false, audio: "" },
-            { id: "m_sakarya", title: "Sakarya Marşı", author: "Halil Bedii", emoji: "🌊", text: "Hürmet sana ey şan dolu sancağım,\nBaştan başa arza hakim ol şahım.\nTürk ordusu, Türk ordusu sayende,\nSakarya'da kurtarıldı otağım.", hasAudio: false, audio: "" },
-            { id: "m_vatan", title: "Vatan Marşı", author: "Cemal Edhem", emoji: "🏫", text: "Başka bir aşk istemez, aşkınla çarpar kalbimiz,\nEy Vatan gözyaşların dinsin, yetiştik çünkü biz.", hasAudio: false, audio: "" },
-            { id: "m_cirpinirdi", title: "Çırpınırdı Karadeniz", author: "Ahmet Cevat", emoji: "🌊", text: "Çırpınırdı Karadeniz\nBakıp Türk'ün bayrağına!\nAh ölmeden bir görseydim\nDüşeceğim toprağına.", hasAudio: false, audio: "" }
-        ];
-
-        window.DB = window.DB || {};
-        window.DB.marslar = marslar10;
-        localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
-        try { firebase.database().ref('contentDB/marslar').set(marslar10); } catch(e){}
-
-        const origRender = window.renderAllContent;
-        window.renderAllContent = function() {
-            if (!window.DB) window.DB = {};
-            window.DB.marslar = marslar10; // Zwingt Marşlar vor jedem Malen rein
-            if (origRender) origRender();
-        };
-
-        // ==========================================
-        // 5. VIEW-COUNTER (AUFRUFE) BEIM KLICKEN
-        // ==========================================
-        const origOpenModal = window.openReadModal;
-        window.openReadModal = async function(id, type) {
-            // Zähle den Aufruf in der Datenbank
-            if (!window.poemDataStore) window.poemDataStore = {};
-            if (!window.poemDataStore[id]) window.poemDataStore[id] = { ratings: {}, comments: [], views: 0 };
-            
-            window.poemDataStore[id].views = (window.poemDataStore[id].views || 0) + 1;
-            
-            // Speichere in Firebase
-            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
-            try { firebase.database().ref('interactions/' + id + '/views').set(window.poemDataStore[id].views); } catch(e){}
-            
-            // Aktualisiere sofort die Top 10 und Music Library Liste
-            if (typeof window.renderTopAudioList === 'function') window.renderTopAudioList();
-            if (typeof window.renderMusicLibrary === 'function') window.renderMusicLibrary();
-
-            // Öffne das Modal normal
-            if (origOpenModal) await origOpenModal(id, type);
-        };
-
-        // ==========================================
-        // 6. TOP 10 LISTE MIT VIEWS & RANKING
-        // ==========================================
-        window.renderTopAudioList = function() {
-            let container = document.getElementById('top-audio-works');
-            if (!container || !document.getElementById('home-view').classList.contains('active')) return;
-
-            let audioWorks = [];
-            ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
-                let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
-                if(source && Array.isArray(source)) {
-                    source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
-                }
-            });
-
-            if (audioWorks.length === 0) return;
-
-            let heartsDB = JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
-            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
-
-            audioWorks.forEach(w => {
-                let sd = heartsDB[w.id] || (window.poemDataStore ? window.poemDataStore[w.id] : null) || {};
-                let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
-                let notes = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => notes += parseInt(v||0));
-                let juryAvg = 0; if(sd.jury) { let jVals = Object.values(sd.jury); if(jVals.length > 0) juryAvg = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); }
-                let views = sd.views || 0; // Hier sind die Aufrufe
-                
-                w.stats = { hearts, notes, jury: juryAvg, views };
-                w.totalScore = (hearts * 2) + (notes * 3) + (parseFloat(juryAvg) * 5); 
-            });
-
-            audioWorks.sort((a,b) => b.totalScore - a.totalScore);
-            let top10 = audioWorks.slice(0, 10);
-
-            const palette = ['var(--accent-pink)', 'var(--accent-cyan)', '#c084fc', 'var(--accent-gold)'];
-            let html = '<div class="top-audio-container"><div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:15px; text-align:center; font-size:1.2rem;">🎧 Top 10 Sesli Eserler</div><div style="display:flex; flex-direction:column; gap:8px;">';
-            
-            top10.forEach((w, i) => {
-                let rankColor = palette[i % palette.length];
-                let safeId = encodeURIComponent(w.id);
-                let authorText = w.author || w.name || 'Şair Misal.i';
-                let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
-                
-                html += `
-                <div class="audio-track-item" style="border-left: 3px solid ${rankColor}; align-items:flex-start; padding:12px; background:var(--input-bg); border-radius:12px; margin-bottom:8px; cursor:pointer; display:flex; transition: 0.3s;" onclick="window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); setTimeout(()=>window.fpToggle(true), 600);">
-                    <div class="audio-track-rank" style="color:${rankColor}; font-weight:bold; font-size:1.4rem; min-width:30px; margin-top:2px;">${i+1}</div>
-                    <div style="flex:1;">
-                        <div style="font-weight:bold; font-size:1rem; color:var(--text-main);">${w.title || w.trTitle}</div>
-                        <div class="${authorClass}" style="font-size: 1.1rem; margin-top: 2px;">~ ${authorText}</div>
-                        <div class="top-stats-container" style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
-                            <span class="stat-badge" title="Kalpler"><i class="fas fa-heart" style="color:var(--accent-red);"></i> ${w.stats.hearts}</span>
-                            <span class="stat-badge" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan);"></i> ${w.stats.notes}</span>
-                            <span class="stat-badge" title="Jüri"><i class="fas fa-gavel" style="color:var(--accent-gold);"></i> ${w.stats.jury}/10</span>
-                        </div>
-                    </div>
-                    <!-- VIEWS (Aufrufe) HIER EINGEFÜGT -->
-                    <div class="audio-views-badge">
-                        <i class="fas fa-eye" style="color:var(--accent-cyan);"></i> ${w.stats.views}
-                    </div>
-                </div>`;
-            });
-            html += '</div></div>';
-            
-            if (container.innerHTML !== html) container.innerHTML = html;
-        };
-
-        // ==========================================
-        // 7. HEADER BUTTON & MUSIC LIBRARY MODAL
-        // ==========================================
+    // ==========================================
+    // 3. MÜZİK KÜTÜPHANESİ BUTONU & MODAL OLUŞTURUCU
+    // ==========================================
+    function ensureMusicButton() {
         let dtGroup = document.querySelector('.dt-group');
-        if(dtGroup && !document.getElementById('music-lib-btn')) {
-            dtGroup.insertAdjacentHTML('beforeend', `<div id="music-lib-btn" class="dt-box" onclick="window.openMusicLibrary()"><i class="fas fa-compact-disc" style="color:var(--accent-pink);"></i> Müzik Eserleri</div>`);
+        if (dtGroup && !document.getElementById('music-lib-btn')) {
+            dtGroup.insertAdjacentHTML('beforeend', `<div id="music-lib-btn" class="dt-box" style="color:var(--accent-pink); border-color:var(--accent-pink); cursor:pointer;" onclick="window.openMusicLibrary()"><i class="fas fa-compact-disc"></i> Müzik Eserleri</div>`);
         }
-
-        if(!document.getElementById('musicLibModal')) {
+        if (!document.getElementById('musicLibModal')) {
             document.body.insertAdjacentHTML('beforeend', `
             <div class="modal premium-modal modal-large" id="musicLibModal">
                 <button class="close-btn" onclick="window.closeTopModal()"><i class="fas fa-times"></i></button>
                 <div class="modal-body custom-scroll">
                     <h2 class="sec-title" style="color:var(--accent-pink);"><i class="fas fa-compact-disc"></i> Tüm Sesli Eserler</h2>
-                    <div style="text-align:center; color:var(--text-sub); margin-bottom:20px;">Sistemdeki tüm müzikli eserler puanlarına göre sıralanmıştır.</div>
+                    <div style="text-align:center; color:var(--text-sub); margin-bottom:20px;">Sistemdeki tüm müzikli eserler puanlarına ve okunma sayısına göre sıralanmıştır.</div>
                     <div id="music-lib-list" style="display:flex; flex-direction:column; gap:10px;"></div>
                 </div>
             </div>
             `);
         }
+    }
+    setInterval(ensureMusicButton, 1000);
 
-        window.renderMusicLibrary = function() {
-            let container = document.getElementById('music-lib-list');
-            if(!container) return;
-            
-            let audioWorks = [];
-            ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
-                let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
-                if(source && Array.isArray(source)) {
-                    source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
-                }
-            });
-            
-            let heartsDB = JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
-            let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+    window.openMusicLibrary = function() {
+        if (!window.currentUser) {
+            window.showStrictGuestLock();
+            return;
+        }
+        window.renderMusicLibrary();
+        window.openModal('musicLibModal');
+    };
 
-            audioWorks.forEach(w => {
-                let sd = heartsDB[w.id] || {};
-                let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
-                let notes = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => notes += parseInt(v||0));
-                let juryAvg = 0; if(sd.jury) { let jVals = Object.values(sd.jury); if(jVals.length > 0) juryAvg = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); }
+    // ==========================================
+    // 4. LİVE SYNC: TOP 10 VE MÜZİK KÜTÜPHANESİ (4 SEMBOLLÜ)
+    // ==========================================
+    window.renderTop10AndLibrary = function() {
+        let audioWorks = [];
+        ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
+            let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
+            if(cat === 'marslar' && (!source || source.length === 0)) source = MARSLAR_10;
+            if(source && Array.isArray(source)) {
+                source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
+            }
+        });
+
+        if (audioWorks.length === 0) return;
+
+        let heartsDB = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
+        let audioRDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+
+        audioWorks.forEach(w => {
+            let sd = heartsDB[w.id] || {};
+            let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+            let notes = 0; if(audioRDB[w.id]) Object.values(audioRDB[w.id]).forEach(v => notes += parseInt(v||0));
+            let juryAvg = 0; if(sd.jury) { let jVals = Object.values(sd.jury); if(jVals.length > 0) juryAvg = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); }
+            
+            let views = sd.views || 0; // 👁️ Aufrufe
+            w.stats = { hearts, notes, jury: juryAvg, views };
+            w.totalScore = (hearts * 2) + (notes * 3) + (parseFloat(juryAvg) * 5) + (views * 0.5); 
+        });
+
+        audioWorks.sort((a,b) => b.totalScore - a.totalScore);
+
+        // --- TOP 10 GÜNCELLEMESİ ---
+        let topContainer = document.getElementById('top-audio-works');
+        if (topContainer && document.getElementById('home-view').classList.contains('active')) {
+            if (!window.currentUser) {
+                topContainer.innerHTML = `
+                <div class="top-audio-container" style="background:var(--bg-card); border:2px dashed var(--accent-cyan); padding:25px; border-radius:16px; text-align:center;">
+                    <i class="fas fa-headphones" style="font-size:3rem; color:var(--accent-cyan); margin-bottom:15px;"></i>
+                    <h3 style="color:var(--accent-gold); margin-bottom:10px;">Müzikli Eserler Sizi Bekliyor</h3>
+                    <p style="color:var(--text-sub); margin-bottom:20px;">Top 10 listesini ve müzikli eserleri dinlemek için sisteme giriş yapmalısınız.</p>
+                </div>`;
+            } else {
+                let top10 = audioWorks.slice(0, 10);
+                const palette = ['var(--accent-pink)', 'var(--accent-cyan)', '#c084fc', 'var(--accent-gold)'];
+                let html = '<div class="top-audio-container"><div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:15px; text-align:center; font-size:1.2rem;">🎧 Top 10 Sesli Eserler</div><div style="display:flex; flex-direction:column; gap:8px;">';
                 
-                w.stats = { hearts, notes, jury: juryAvg, views: sd.views || 0 };
-                w.totalScore = (hearts * 2) + (notes * 3) + (parseFloat(juryAvg) * 5); 
-            });
-            
-            audioWorks.sort((a,b) => b.totalScore - a.totalScore);
-            
-            container.innerHTML = audioWorks.map((w, i) => {
+                top10.forEach((w, i) => {
+                    let rankColor = palette[i % palette.length];
+                    let safeId = encodeURIComponent(w.id);
+                    let authorText = w.author || w.name || 'Şair Misal.i';
+                    let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
+                    
+                    html += `
+                    <div class="audio-track-item" style="border-left: 3px solid ${rankColor}; align-items:flex-start; padding:12px; background:var(--input-bg); border-radius:12px; cursor:pointer; display:flex;" onclick="window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}');">
+                        <div class="audio-track-rank" style="color:${rankColor}; font-weight:bold; font-size:1.4rem; min-width:30px; margin-top:2px;">${i+1}</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; font-size:1rem; color:var(--text-main);">${w.title || w.trTitle}</div>
+                            <div class="${authorClass}" style="font-size: 1.1rem; margin-top: 2px;">~ ${authorText}</div>
+                            <div class="top-stats-container">
+                                <span class="stat-badge" title="Kalpler"><i class="fas fa-heart" style="color:var(--accent-red);"></i> ${w.stats.hearts}</span>
+                                <span class="stat-badge" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan);"></i> ${w.stats.notes}</span>
+                                <span class="stat-badge" title="Jüri Puanı"><i class="fas fa-gavel" style="color:var(--accent-gold);"></i> ${w.stats.jury}/10</span>
+                                <span class="stat-badge" title="Okunma/Dinlenme"><i class="fas fa-eye" style="color:var(--accent-green);"></i> ${w.stats.views}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div></div>';
+                if (topContainer.innerHTML !== html) topContainer.innerHTML = html;
+            }
+        }
+
+        // --- MÜZİK KÜTÜPHANESİ GÜNCELLEMESİ ---
+        let libContainer = document.getElementById('music-lib-list');
+        if (libContainer && window.currentUser) {
+            libContainer.innerHTML = audioWorks.map((w, i) => {
                 let safeId = encodeURIComponent(w.id);
                 let authorText = w.author || w.name || 'Şair Misal.i';
                 let authorClass = (authorText === 'Şair Misal.i' || ['poems', 'quotes'].includes(w.type)) ? 'misali-signature-text' : 'author-signature-gold';
-
                 return `
-                <div class="music-lib-item" onclick="window.closeTopModal(); setTimeout(()=> { window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); setTimeout(()=>window.fpToggle(true), 600); }, 300);">
+                <div class="music-lib-item" onclick="window.closeTopModal(); setTimeout(()=> { window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); }, 300);">
                     <div style="flex:1;">
                         <div style="color:var(--text-main); font-size:1.1rem; font-weight:bold;">${i+1}. ${w.title || w.trTitle}</div>
                         <div class="${authorClass}" style="font-size:1.3rem; margin-top:2px;">~ ${authorText}</div>
@@ -15108,23 +15084,183 @@ window.addEventListener('load', function() {
                             <span style="background:rgba(239,68,68,0.1); color:var(--accent-red); padding:3px 8px; border-radius:6px;"><i class="fas fa-heart"></i> ${w.stats.hearts}</span>
                             <span style="background:rgba(0,206,209,0.1); color:var(--accent-cyan); padding:3px 8px; border-radius:6px;"><i class="fas fa-music"></i> ${w.stats.notes}</span>
                         </div>
-                        <div style="color:var(--accent-cyan);"><i class="fas fa-eye"></i> ${w.stats.views} Aufrufe</div>
+                        <div style="color:var(--accent-green);"><i class="fas fa-eye"></i> ${w.stats.views} Dinlenme</div>
                     </div>
                 </div>`;
             }).join('');
-        };
+        }
+    };
+    
+    // Her saniye kontrol et ve Live Sync sağla
+    setInterval(window.renderTop10AndLibrary, 1000);
+    window.renderMusicLibrary = window.renderTop10AndLibrary;
+    window.renderTopAudioList = window.renderTop10AndLibrary;
 
-        window.openMusicLibrary = function() {
-            window.renderMusicLibrary();
-            window.openModal('musicLibModal');
-        };
-
-        // Initiale Renderings
-        window.renderAllContent();
-        window.renderTopAudioList();
+    // ==========================================
+    // 5. ESER AÇILIŞI & LİVE GÖZ (VİEWS) ARTIŞI + SOL ÜST X PARALELİ GÖZ
+    // ==========================================
+    const v76_origOpenModal = window.openReadModal;
+    window.openReadModal = async function(id, type) {
         
-    }, 1500);
-});
+        let source = type === 'userPoems' ? window.userPoemsDB : (window.DB ? window.DB[type] : null);
+        let item = (source || []).find(x => String(x.id) === String(id));
+        let hasMusic = (item && (item.hasAudio || item.audio)) || type === 'marslar';
+
+        // Tıklamada Misafir Kontrolü (Güvenlik)
+        if (hasMusic && !window.currentUser) {
+            window.showStrictGuestLock();
+            return;
+        }
+
+        let views = 0;
+        if (item) {
+            if (!window.poemDataStore) window.poemDataStore = {};
+            if (!window.poemDataStore[id]) window.poemDataStore[id] = { ratings: {}, comments: [], views: 0 };
+            
+            // Görüntülenmeyi Artır
+            window.poemDataStore[id].views = (window.poemDataStore[id].views || 0) + 1;
+            views = window.poemDataStore[id].views;
+
+            // Kaydet (Live Sync tetikler)
+            localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+            try { if(typeof firebase !== 'undefined') firebase.database().ref('interactions/' + id + '/views').set(views); } catch(e){}
+            
+            window.renderTop10AndLibrary();
+        }
+
+        // Orijinal Açılış
+        if (v76_origOpenModal) await v76_origOpenModal(id, type);
+
+        // AÇILAN PENCEREDE (MODAL) SOL ÜST KÖŞEYE GÖZ YERLEŞTİRME (Sadece Müziklilerde)
+        let readModal = document.getElementById('readModal');
+        if (readModal && hasMusic) {
+            let oldEye = document.getElementById('modal-top-eye-badge');
+            if (oldEye) oldEye.remove();
+            
+            // X (Kapat) butonu ile aynı hizaya, sol üste sabitler
+            readModal.insertAdjacentHTML('afterbegin', `
+                <div id="modal-top-eye-badge" class="modal-eye-btn" title="Okunma / Dinlenme">
+                    <i class="fas fa-eye" style="margin-right:6px;"></i> <span id="modal-eye-count">${views}</span>
+                </div>
+            `);
+        } else if (readModal && !hasMusic) {
+            let oldEye = document.getElementById('modal-top-eye-badge');
+            if (oldEye) oldEye.remove();
+        }
+
+        // Otomatik Müzik Başlatma Tetikleyicisi
+        if (hasMusic) setTimeout(()=>window.fpToggle(true), 600);
+    };
+
+    // ==========================================
+    // 6. KARTLARIN (GRID) ÜSTÜNE GÖZ YERLEŞTİRME
+    // ==========================================
+    // Kartlar çizildikten sonra, müziği olan kartlara Göz ikonunu (c-stat class'ı ile) ekler.
+    setInterval(() => {
+        let cards = document.querySelectorAll('.card');
+        let heartsDB = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
+
+        cards.forEach(card => {
+            let onclickStr = card.getAttribute('onclick') || '';
+            let match = onclickStr.match(/openReadModal\(['"]?([^'",]+)['"]?/);
+            if (match && match[1]) {
+                let id = decodeURIComponent(match[1]);
+                let hasMusicIcon = card.querySelector('.c-stat.music') || card.closest('#marslar-grid');
+                
+                if (hasMusicIcon) {
+                    let views = heartsDB[id] ? (heartsDB[id].views || 0) : 0;
+                    let existingEye = card.querySelector('.card-view-eye-badge');
+                    
+                    if (!existingEye) {
+                        let footer = card.querySelector('.card-footer');
+                        if (footer) {
+                            // Diğer kalp, yorum vs. yanına ekler
+                            footer.insertAdjacentHTML('afterbegin', `<span class="c-stat card-view-eye-badge" style="color:var(--accent-green);" title="Dinlenme"><i class="fas fa-eye"></i> <span class="v-cnt">${views}</span></span>`);
+                        }
+                    } else {
+                        existingEye.querySelector('.v-cnt').innerText = views;
+                    }
+                }
+            }
+        });
+    }, 1000);
+
+    // ==========================================
+    // 7. OYUN ÇÖZÜMLERİNİ (SPOILER) SİLME
+    // ==========================================
+    setInterval(() => {
+        let g4inp = document.getElementById('g4-inp');
+        if (g4inp && g4inp.placeholder.includes('Kalem')) g4inp.placeholder = "Cevabı yazın...";
+        
+        let anInp = document.getElementById('an-inp');
+        if (anInp && anInp.placeholder.includes('VEFA')) anInp.placeholder = "Cevabı yazın...";
+    }, 500);
+
+    // ==========================================
+    // 8. ADMİN SCORE (PUAN) CANLI EDİT & SYNC
+    // ==========================================
+    if (window.currentUser && window.currentUser.username) {
+        try {
+            firebase.database().ref('users/' + window.currentUser.username + '/score').on('value', snap => {
+                if (snap.exists()) {
+                    window.currentUser.score = snap.val();
+                    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                    let scoreEl = document.getElementById('u-score');
+                    if (scoreEl) scoreEl.innerHTML = `<b style="color:var(--accent-green); text-shadow:0 0 5px rgba(34,197,94,0.4);">${window.currentUser.score} Puan</b>`;
+                }
+            });
+        } catch(e) {}
+    }
+
+    window.editUserScore = function(username) {
+        let user = window.userDatabase[username]; 
+        if(!user) return;
+        
+        let overlay = document.createElement('div');
+        overlay.className = 'custom-dialog-backdrop show';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '9999999';
+        overlay.innerHTML = `
+            <div class="custom-dialog-box">
+                <h3 style="color:var(--accent-gold); margin-bottom:15px; font-family:'Playfair Display', serif;"><i class="fas fa-star"></i> Puan Düzenle</h3>
+                <p style="color:var(--text-main); margin-bottom:15px;"><b>${user.name || username}</b> adlı kullanıcının yeni puanı:</p>
+                <input type="number" id="adm-score-input" class="inp" value="${user.score || 0}" style="font-size:2rem; text-align:center; color:var(--accent-green); height:60px; margin-bottom:20px; background:rgba(0,0,0,0.4);">
+                <div style="display:flex; gap:10px;">
+                    <button class="noble-btn" id="score-cancel" style="flex:1;">İptal</button>
+                    <button class="noble-btn primary" id="score-ok" style="flex:1; background:rgba(34,197,94,0.2); border-color:var(--accent-green); color:var(--accent-green);">Kaydet</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        let inp = document.getElementById('adm-score-input');
+        inp.focus(); inp.select();
+        
+        document.getElementById('score-cancel').onclick = () => overlay.remove();
+        document.getElementById('score-ok').onclick = () => {
+            let newVal = inp.value;
+            if(newVal !== "" && !isNaN(newVal)) {
+                user.score = parseInt(newVal);
+                window.userDatabase[username] = user;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                try { firebase.database().ref('users/' + username + '/score').set(user.score); } catch(e){}
+                
+                if (window.currentUser && window.currentUser.username === username) {
+                    window.currentUser.score = user.score;
+                    sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                    let scoreEl = document.getElementById('u-score');
+                    if (scoreEl) scoreEl.innerHTML = `<b style="color:var(--accent-green); text-shadow:0 0 5px rgba(34,197,94,0.4);">${user.score} Puan</b>`;
+                }
+                
+                if(typeof window.renderOnlineUsers === 'function') window.renderOnlineUsers(); 
+                if(typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+                window.toast("Puan başarıyla güncellendi!", "✅");
+            }
+            overlay.remove();
+        };
+    };
+
+})();
 </script>
 <!-- ===================================================================== -->
 
