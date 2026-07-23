@@ -17589,5 +17589,258 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<!-- ===================================================================== -->
+<!-- 📱 MİSALİ V85 PATCH: IPHONE UI, HOROSCOPE & INBOX SYNC FIX 📱 -->
+<!-- ===================================================================== -->
+<style id="misali-v85-css">
+    /* 1. IPHONE (WEBKIT) KUSURSUZ HİZALAMA VE TAŞMA KORUMASI */
+    .audio-track-item {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 12px !important;
+        padding: 12px 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important; /* Taşmaları engeller */
+    }
+
+    /* Sayılar (1, 2, 3...) ezilmesin diye sabit genişlik */
+    .audio-track-rank {
+        flex: 0 0 auto !important; /* Asla küçülme! */
+        min-width: 25px !important;
+        text-align: center !important;
+    }
+
+    /* Metin alanı iPhone'da dışarı taşmasın diye min-width: 0 */
+    .audio-track-item > div:nth-child(2) {
+        flex: 1 1 auto !important;
+        min-width: 0 !important; 
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Uzun başlıklar iPhone'da alt satıra geçmek yerine ... ile bitsin */
+    .audio-track-item > div:nth-child(2) > div:first-child {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+    }
+
+    /* Rozetlerin alt alta düşüp taşmasını engeller */
+    .audio-track-item .clean-badge {
+        font-size: 0.6rem !important;
+        padding: 3px 6px !important;
+        white-space: nowrap !important;
+    }
+
+    /* Tüm Müzikli Eserler (Modal İçindeki Liste) iPhone Fix */
+    #musicLibModal .audio-track-item {
+        flex-wrap: wrap !important; /* Mobilde alt alta inebilsin */
+        align-items: flex-start !important;
+    }
+    #musicLibModal .audio-track-item > div:last-child {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-top: 5px !important;
+    }
+
+    /* 2. YÜZEN BUTONLAR (PUSULA & ZARF) İPHONE OVERLAP FİX */
+    @media (max-width: 768px) {
+        .n-float-btn {
+            top: auto !important;
+            bottom: 85px !important; /* Menü çubuğunun (Navbar) hemen üstüne sabitle */
+            transform: none !important;
+        }
+        #n-pusula { left: 15px !important; }
+        #n-zarf { right: 15px !important; }
+        
+        /* Pusula Menüsü de yukarı açılmalı */
+        #n-mood-menu {
+            top: auto !important;
+            bottom: 135px !important;
+            left: 15px !important;
+            transform: none !important;
+        }
+        #n-mood-menu.show {
+            transform: none !important;
+        }
+
+        /* Top 10 Listesinin altında butonlar için boşluk bırak */
+        .top-audio-container {
+            padding-bottom: 60px !important;
+        }
+    }
+</style>
+
+<script id="misali-v85-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("📱 V85 Patch: iPhone Layout, Horoscope Text & Inbox Fix aktiv.");
+
+        // ==============================================================
+        // 1. HOROSKOP (BURÇLAR) ALMANCA ÇEVİRİ FİXİ (Metinler Çevrilmiyordu)
+        // ==============================================================
+        window.horoTrTexts = {
+            "Koç": { a: "Aşkta ateşlisiniz. Sürpriz bir karşılaşma an meselesi.", p: "Cesur kararlarınız para getiriyor. Beklenen ödeme yolda.", s: "Enerjinizi doğru yönlendirin, spora ağırlık verin." },
+            "Boğa": { a: "Güven arayışınız sonuç veriyor. Karşınızdaki size değer veriyor.", p: "Maddi konularda sağlam adımlar. Karlı bir anlaşma var.", s: "Boğaz bölgenize dikkat edin, soğuktan korunun." },
+            "İkizler": { a: "Edebi ve zihinsel uyum ön planda. Büyüleyeceksiniz.", p: "Pratik fikirleriniz anlık ek gelir getirebilir.", s: "Zihinsel yorgunluğa karşı bol su için." },
+            "Yengeç": { a: "Duygusal bağlarınız güçleniyor. Sıcaklık verecek.", p: "Birikim yapmak için harika bir gün.", s: "Midenizi yoracak yiyeceklerden uzak durun." },
+            "Aslan": { a: "İlgi odağısınız. Etkileyici auranızla büyülüyorsunuz.", p: "Gereksiz lüks harcamalara dikkat.", s: "Kalp ve sırt sağlığınıza özen gösterin." },
+            "Başak": { a: "Detaylar aşk hayatınızda belirleyici olacak.", p: "Hesap kitap işlerinde kusursuzsunuz.", s: "Sindirim sisteminizi dinlendirin." },
+            "Terazi": { a: "Romantizm ve denge dorukta. Uyumlu diyalog.", p: "Ortaklıklardan kazanç sağlayabilirsiniz.", s: "Böbrekler ve su tüketimine dikkat." },
+            "Akrep": { a: "Tutkulu ve derin hisler sizi bekliyor.", p: "Gizli yatırımlarınız değerleniyor.", s: "Stresi kendinizden uzak tutun." },
+            "Yay": { a: "Maceracı ruhunuz aşkı bulmanızı kolaylaştırıyor.", p: "Eğitim veya seyahat kaynaklı kazanç kapıları.", s: "Bacak ve kas ağrılarına karşı esneme yapın." },
+            "Oğlak": { a: "Ciddi adımlar atma zamanı. Güven sağlamlaşıyor.", p: "Kariyerinizde kalıcı maddi başarılar gözüküyor.", s: "Diş ve kemik sağlığınıza önem verin." },
+            "Kova": { a: "Sıradışı bir romantizm... Arkadaşlıktan aşka.", p: "Teknolojik yatırımlar kazandırabilir.", s: "Dijital detokslar yapın." },
+            "Balık": { a: "Hayallerinizdeki aşk gerçeğe dönüşebilir.", p: "Sezgileriniz size doğru yatırımı fısıldıyor.", s: "Ayaklarınıza ve uyku düzeninize dikkat edin." }
+        };
+
+        window.horoDeTexts = {
+            "Koç": { a: "Feurig in der Liebe. Eine Überraschung steht bevor.", p: "Mutige Entscheidungen bringen Geld.", s: "Leite deine Energie richtig, mach Sport." },
+            "Boğa": { a: "Ihre Suche nach Sicherheit zahlt sich aus.", p: "Solide Schritte in finanziellen Angelegenheiten.", s: "Achten Sie auf Ihren Halsbereich." },
+            "İkizler": { a: "Geistige Harmonie im Vordergrund.", p: "Praktische Ideen bringen Zusatzeinkommen.", s: "Viel Wasser trinken gegen geistige Erschöpfung." },
+            "Yengeç": { a: "Emotionale Bindungen werden stärker.", p: "Ein toller Tag zum Sparen.", s: "Vermeiden Sie Stress und schwere Kost." },
+            "Aslan": { a: "Sie stehen absolut im Mittelpunkt.", p: "Vorsicht vor unnötigen Luxusausgaben.", s: "Achten Sie auf Herz und Rücken." },
+            "Başak": { a: "Details sind entscheidend in der Liebe.", p: "Perfekt in Berechnungen, Investitionen warten.", s: "Schonen Sie Ihre Verdauung." },
+            "Terazi": { a: "Romantik und Balance auf dem Höhepunkt.", p: "Gewinne durch Partnerschaften möglich.", s: "Achten Sie auf Ihre Nieren." },
+            "Akrep": { a: "Leidenschaftliche und tiefe Gefühle warten.", p: "Geheime Investitionen gewinnen an Wert.", s: "Halten Sie toxischen Stress fern." },
+            "Yay": { a: "Ihr Abenteuergeist erleichtert die Liebe.", p: "Einnahmequellen durch Reisen oder Bildung.", s: "Dehnen Sie Ihre Beinmuskulatur." },
+            "Oğlak": { a: "Zeit für ernsthafte Schritte in der Liebe.", p: "Dauerhafter finanzieller Erfolg in Sicht.", s: "Achten Sie auf Knochen und Zähne." },
+            "Kova": { a: "Außergewöhnliche Romantik wartet...", p: "Technologische Projekte können sich auszahlen.", s: "Digitale Entgiftung für die Nerven." },
+            "Balık": { a: "Ihre Traumliebe kann heute wahr werden.", p: "Ihre Intuition flüstert Ihnen das Richtige zu.", s: "Achten Sie auf Schlaf und Entspannung." }
+        };
+
+        // Überschreibt die defekte Übersetzungsfunktion für das Horoskop
+        window.toggleHoroscopeLang = function(btn, zodTrName) {
+            let isDe = btn.innerHTML.includes('TR'); // Wenn Button TR anzeigt, sind wir in DE-Ansicht
+            
+            // Buttons übersetzen
+            let modal = document.getElementById('horoscopeDetailModal');
+            if(modal) {
+                modal.querySelectorAll('button').forEach(b => {
+                    if(b.innerText.includes('Aşk') || b.innerText.includes('Liebe')) b.innerHTML = isDe ? '❤️ Aşk' : '❤️ Liebe';
+                    if(b.innerText.includes('Para') || b.innerText.includes('Finanzen')) b.innerHTML = isDe ? '🪙 Para' : '🪙 Finanzen';
+                    if(b.innerText.includes('Sağlık') || b.innerText.includes('Gesundheit')) b.innerHTML = isDe ? '🍃 Sağlık' : '🍃 Gesundheit';
+                });
+            }
+
+            // Exakte Text-Zuweisung je nach Sprache! (Das war vorher kaputt)
+            let dTr = window.horoTrTexts[zodTrName] || {a:"Aşk...", p:"Para...", s:"Sağlık..."};
+            let dDe = window.horoDeTexts[zodTrName] || {a:"Liebe...", p:"Geld...", s:"Gesundheit..."};
+
+            let askEl = document.getElementById('hd-text-ask');
+            let paraEl = document.getElementById('hd-text-para');
+            let saglikEl = document.getElementById('hd-text-saglik');
+
+            if(isDe) {
+                // Zurück zu TR
+                if(askEl) askEl.innerText = dTr.a;
+                if(paraEl) paraEl.innerText = dTr.p;
+                if(saglikEl) saglikEl.innerText = dTr.s;
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE';
+                if(window.toast) window.toast("Türkçeye çevrildi", "🇹🇷");
+            } else {
+                // Zu DE übersetzen
+                if(askEl) askEl.innerText = dDe.a;
+                if(paraEl) paraEl.innerText = dDe.p;
+                if(saglikEl) saglikEl.innerText = dDe.s;
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇹🇷 TR';
+                if(window.toast) window.toast("Auf Deutsch übersetzt", "🇩🇪");
+            }
+        };
+
+
+        // ==============================================================
+        // 2. GELEN KUTUSU (POSTEINGANG) RECHTE-FIX
+        // ==============================================================
+        // Dieser Code zwingt die Glocke und die Inbox, nur ECHTE, für den User bestimmte Nachrichten anzuzeigen.
+        window.updateHeaderUserUI = function() {
+            let u = window.currentUser;
+            let nameEl = document.getElementById('u-name'), scoreEl = document.getElementById('u-score'), emjEl = document.getElementById('u-emj');
+            
+            if (u && nameEl) {
+                let displayedName = u.name || u.username;
+                nameEl.innerText = displayedName;
+                if (displayedName === 'Şair Misal.i' || u.username === 'AdminKing') nameEl.style.color = 'var(--accent-cyan)';
+                else if (u.color) nameEl.style.color = u.color;
+                else nameEl.style.color = 'var(--accent-gold)';
+                
+                if (scoreEl) scoreEl.innerText = (u.score || 0) + ' Puan';
+                if (emjEl) { emjEl.innerText = u.emoji || '🪶'; emjEl.style.display = 'inline-block'; }
+                
+                document.documentElement.classList.remove('is-guest'); document.documentElement.classList.add('user-mode');
+                if (u.role === 'admin') document.documentElement.classList.add('admin-mode');
+            } else {
+                if (emjEl) emjEl.style.display = 'none';
+                document.documentElement.classList.add('is-guest'); document.documentElement.classList.remove('user-mode', 'admin-mode');
+            }
+            if(window.updateLiveBadges) window.updateLiveBadges();
+            
+            // DIE WICHTIGE ZÄHLER-LOGIK!
+            let bellBadge = document.getElementById('bell-counter');
+            if(bellBadge) { 
+                let count = 0;
+                if (u && u.role === 'admin') {
+                    // Admin sieht die System-Logs
+                    count = window.adminLogs ? window.adminLogs.length : 0;
+                } else if (u) {
+                    // Fatma und Co. sehen NUR ihre eigenen Benachrichtigungen!
+                    count = u.notifications ? u.notifications.length : 0;
+                }
+                bellBadge.innerText = count; 
+                bellBadge.style.display = count > 0 ? 'flex' : 'none'; 
+            }
+
+            if(typeof window.populateChatUsers === 'function') window.populateChatUsers();
+        };
+
+        // Den Inhalt des Posteingangs exakt und fehlerfrei zeichnen
+        window.renderUserMessages = function() {
+            let msgModal = document.getElementById('msgModal');
+            if (!msgModal) return;
+            
+            let msgBox = msgModal.querySelector('.theme-sub-panel') || msgModal.querySelector('.modal-body');
+            if (!msgBox) return;
+
+            // Keine Nachrichten vorhanden?
+            if (!window.currentUser || !window.currentUser.notifications || window.currentUser.notifications.length === 0) {
+                msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px; font-style:italic; font-size:1.1rem;"><i class="fas fa-envelope-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz yeni mesajınız yok.</div>';
+                return;
+            }
+            
+            // Nachrichten zeichnen
+            let html = '<button class="noble-btn" style="margin-bottom:20px; width:100%; border-color:var(--accent-red); color:var(--accent-red); background:rgba(239,68,68,0.05); font-size:1.1rem; padding:12px;" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
+            
+            html += window.currentUser.notifications.map(n => {
+                let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer; padding:15px; border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); border-radius:12px; margin-bottom:12px; position:relative;"` : `style="padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:12px; position:relative;"`;
+                
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-gold); color:#000; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-search"></i></div>` : '';
+                
+                let formattedMsg = (typeof window.formatLogMessage === 'function') ? window.formatLogMessage(n.msg) : n.msg;
+
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="color:var(--text-sub); font-size:0.75rem; margin-bottom:10px; font-family:'Space Mono', monospace;"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> ${n.time}</div>
+                    <div style="color:var(--text-main); font-size:1rem; line-height:1.6; padding-right:${isClickable ? '45px' : '0'};">${formattedMsg}</div>
+                </div>`;
+            }).join('');
+            
+            msgBox.innerHTML = html;
+        };
+
+        // Zwinge das UI, sich einmal sofort korrekt zu aktualisieren
+        if(window.currentUser) {
+            window.updateHeaderUserUI();
+            window.renderUserMessages();
+        }
+
+    }, 2500); 
+});
+</script>
+
 </body>
 </html>
