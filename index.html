@@ -5328,22 +5328,74 @@ window.readAloudText = function() {
         speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
     }
 
-        window.toggleLang = async function(lang) {
-            let d = window.currentItemData, txtEl = document.getElementById('read-text'); if(!d) return;
-            if (lang === 'tr') { window.openReadModal(d.id, d.type); window.toast("Türkçe", "🇹🇷"); }
+window.toggleLang = async function(lang) {
+            let d = window.currentItemData;
+            let txtEl = document.getElementById('read-text');
+            let titleEl = document.getElementById('read-title');
+            if(!d) return;
+            
+            if (lang === 'tr') { 
+                window.openReadModal(d.id, d.type); 
+                window.toast("Türkçe", "🇹🇷"); 
+            }
             else if (lang === 'de') {
-                document.getElementById('read-title').innerText = (d.title || d.trTitle) + " (DE)";
-                if (d.deText) { txtEl.innerHTML = d.deText.replace(/\n/g, '<br>'); window.toast("Deutsch", "🇩🇪"); }
-                else {
-                    txtEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Satır satır çevriliyor...';
-                    try {
+                txtEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Çevriliyor / Übersetze...';
+                
+                try {
+                    // 1. BAŞLIK (TITLE) ÇEVİRİSİ
+                    if (!d.deTitle) {
+                        let origTitle = d.title || d.trTitle || 'Eser';
+                        let rTitle = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(origTitle)}&langpair=tr|de`);
+                        let jTitle = await rTitle.json();
+                        d.deTitle = jTitle?.responseData?.translatedText || origTitle;
+                    }
+                    titleEl.innerHTML = d.deTitle + " <small style='color:var(--text-sub); font-size:0.7rem;'>(DE)</small>";
+
+                    // 2. METİN (TEXT) ÇEVİRİSİ
+                    if (!d.deText) {
                         let lines = (d.text || d.quote || '').split('\n');
                         let tLines = await Promise.all(lines.map(async l => {
                             if(!l.trim()) return '';
-                            try { let r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(l)}&langpair=tr|de`); let j = await r.json(); return j?.responseData?.translatedText || l; } catch(err) { return l; }
+                            try { 
+                                let r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(l)}&langpair=tr|de`); 
+                                let j = await r.json(); 
+                                return j?.responseData?.translatedText || l; 
+                            } catch(err) { return l; }
                         }));
-                        d.deText = tLines.join('\n'); txtEl.innerHTML = d.deText.replace(/\n/g, '<br>'); window.toast("Çeviri Tamamlandı", "✅");
-                    } catch(e) { txtEl.innerHTML = "Çeviri Hatası"; }
+                        d.deText = tLines.join('\n');
+                    }
+                    
+                    // 3. BİLMECE/BULMACA CEVABI GİZLEME (ALMANCA BUTON İLE)
+                    if (['bilmeceler', 'bulmacalar'].includes(d.type)) {
+                        let parts = d.deText.split(/(?:Cevap:|Çözüm:|Antwort:|Lösung:|\|\|)/i);
+                        let question = parts[0].trim();
+                        let answer = parts.length > 1 ? parts[1].trim() : 'Keine Antwort hinterlegt.';
+                        
+                        txtEl.innerHTML = `<div style="margin-bottom:20px; font-size:1.3rem;">${question.replace(/\n/g, '<br>')}</div>` +
+                                          `<button class="noble-btn primary" onclick="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width:100%; cursor:pointer;">👁️ Antwort zeigen</button>` +
+                                          `<div class="secret-answer" style="display:none; margin-top:15px; padding:15px; background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); border-radius:8px; color:#fff; font-size:1.1rem; text-align:center;">🎯 <strong>Antwort:</strong> ${answer}</div>`;
+                    } else {
+                        txtEl.innerHTML = d.deText.replace(/\n/g, '<br>');
+                    }
+                    
+                    // Veritabanını güncelle (Çevirileri Kalıcı Yap)
+                    let source = d.type === 'userPoems' ? window.userPoemsDB : window.DB[d.type];
+                    let idx = source.findIndex(x => String(x.id) === String(d.id));
+                    if(idx > -1) {
+                        source[idx].deTitle = d.deTitle;
+                        source[idx].deText = d.deText;
+                        if(d.type === 'userPoems') {
+                            localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB));
+                            try { if(typeof firebase !== 'undefined') firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){}
+                        } else {
+                            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+                            try { if(typeof firebase !== 'undefined') firebase.database().ref('contentDB').set(window.DB); } catch(e){}
+                        }
+                    }
+                    
+                    window.toast("Deutsch", "🇩🇪");
+                } catch(e) { 
+                    txtEl.innerHTML = "Çeviri Hatası / Übersetzungsfehler"; 
                 }
             }
         };
@@ -5925,9 +5977,20 @@ const myPerfectOpenReadModal = async function(id, type) {
         let modal = document.getElementById('readModal');
         if(!modal || !modal.classList.contains('show') || !window.currentItemData) return;
 
+        let pId = window.currentItemData.id;
+
+        // 🌟 KESİN ÇÖZÜM: İZLENME SAYACINI (VİEWS) ARTIR VE KAYDET 🌟
+        if (!window.poemDataStore) window.poemDataStore = {};
+        if (!window.poemDataStore[pId]) window.poemDataStore[pId] = {};
+        window.poemDataStore[pId].views = (window.poemDataStore[pId].views || 0) + 1; // +1 Ekle
+        localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+        try { if(typeof firebase !== 'undefined') firebase.database().ref('interactions/' + pId + '/views').set(window.poemDataStore[pId].views); } catch(e){}
+        // Arka plandaki kartları gizlice güncelle ki sayaç anında artsın
+        if(typeof window.renderAllContent === 'function') window.renderAllContent();
+
         let textEl = document.getElementById('read-text');
         let audioCont = document.getElementById('card-audio-container');
-        let pId = window.currentItemData.id;
+        
         let s = window.getOmniStats ? window.getOmniStats(pId) : {hearts:0, views:0, listens:0, audioAvg:"0.0", audioCount:0};
         let hasMusic = window.currentItemData.hasAudio || window.currentItemData.audio || type === 'marslar';
 
@@ -5949,7 +6012,6 @@ const myPerfectOpenReadModal = async function(id, type) {
             let aName = window.currentItemData.author || window.currentItemData.name;
             if (!aName || ['Sistem', 'Anonim', 'Yazar'].includes(aName.trim()) || aName.trim() === '') aName = 'Şair Misal.i';
             
-            // İMZA TAM METNİN ALTINDA
             let authEl = document.createElement('div');
             authEl.id = 'read-author-clean';
             authEl.className = (aName === 'Şair Misal.i' || aName === 'Sair Misali') ? "misali-signature-text" : "author-signature-gold";
@@ -5957,10 +6019,9 @@ const myPerfectOpenReadModal = async function(id, type) {
             authEl.innerText = "~ " + aName;
             textEl.after(authEl);
 
-            // ŞEFFAF VE ÇERÇEVESİZ SAYAÇ KUTUSU (Grauer Kasten ist weg!)
             let statsBox = document.createElement('div');
             statsBox.id = 'modal-stats-clean';
-            statsBox.style.cssText = 'display:flex !important; justify-content:center !important; align-items:center !important; gap:6px !important; flex-wrap:wrap !important; margin:10px auto 22px auto !important; padding:4px 8px !important; background:transparent !important; border:none !important; box-shadow:none !important; max-width:100% !important; width:100% !important; box-sizing:border-box !important;';
+            statsBox.style.cssText = 'display:flex !important; justify-content:center !important; align-items:center !important; gap:8px !important; flex-wrap:wrap !important; margin:10px auto 22px auto !important; padding:10px 15px !important; background:rgba(0,0,0,0.2) !important; border-radius:10px !important; border-top:1px dashed var(--accent-cyan) !important; border-bottom:1px dashed var(--accent-cyan) !important; max-width:500px !important; width:100% !important;';
             statsBox.innerHTML = `
                 ${hasMusic ? `<span class="clean-badge" title="Müzik Puanı"><i class="fas fa-music" style="color:var(--accent-cyan);"></i> <span>${s.audioAvg}</span> <small style="opacity:0.8;">(${s.audioCount} Oy)</small></span>` : ''}
                 <span class="clean-badge" title="Kalp"><i class="fas fa-heart" style="color:var(--accent-red);"></i> <span class="live-heart" data-id="${pId}">${s.hearts}</span></span>
@@ -5997,7 +6058,7 @@ const myPerfectOpenReadModal = async function(id, type) {
 try {
     Object.defineProperty(window, 'openReadModal', {
         get: function() { return myPerfectOpenReadModal; },
-        set: function(val) { console.log("Eski bir skriptin openReadModal'ı ezmesi engellendi!"); },
+        set: function(val) {},
         configurable: true
     });
 } catch(e) { window.openReadModal = myPerfectOpenReadModal; }
@@ -8093,11 +8154,17 @@ if (!document.getElementById('misali-heart-dove-css')) {
             opacity: 1 !important;
             transform: scale(1.1);
         }
-        .heart-inactive {
-            color: rgba(255,255,255,0.2) !important;
-            filter: grayscale(100%) opacity(0.3) !important;
-            transform: scale(0.9);
-        }
+/* BOŞ KALPLER: İçi tamamen şeffaf, sadece belirgin dış çerçeve (Outline-Effekt) */
+.heart-inactive {
+    color: transparent !important; /* İçi tamamen boş (şeffaf) */
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.7) !important; /* Dunkelmodus: Belirgin beyaz dış çizgi */
+    transform: scale(0.9);
+    transition: 0.2s;
+    opacity: 1 !important;
+}
+[data-theme="light"] .heart-inactive {
+    -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.5) !important; /* Hellmodus: Belirgin koyu gri/siyah dış çizgi */
+}
         .real-dove {
             position: fixed;
             font-size: 2.5rem;
@@ -15456,6 +15523,1041 @@ window.addEventListener('load', function() {
 </script>
 <!-- ===================================================================== -->
 
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ V54 PATCH: 3'LÜ KART DÜZENİ, BURÇLAR, KALPLER VE TAM MARŞLAR 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-v54-css">
+    /* 1. BOŞ KALPLER: SADECE ÇİZGİ, İÇİ TAMAMEN ŞEFFAF */
+    .heart-inactive {
+        color: transparent !important; 
+        -webkit-text-stroke: 2px rgba(255, 255, 255, 0.6) !important; /* Gece: Belirgin beyaz ince çizgi */
+        transform: scale(0.9);
+        transition: 0.2s;
+        opacity: 1 !important;
+    }
+    [data-theme="light"] .heart-inactive {
+        -webkit-text-stroke: 2px rgba(100, 116, 139, 0.7) !important; /* Gündüz: Zarif grimsi-mavi çizgi */
+    }
+
+    /* 2. POPUP KARTLARI (Beğendiklerim vb.) - TAM 3 SÜTUN (YAN YANA 3 ADET) */
+    #colSavedModal .modal-body, #colHeartsModal .modal-body, #colRosesModal .modal-body {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; /* Kesinlikle 3 sütun */
+        gap: 8px !important;
+        padding: 15px 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        justify-items: center !important;
+        align-items: stretch !important;
+    }
+
+    #colSavedModal .card, #colHeartsModal .card, #colRosesModal .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 8px 4px !important;
+        height: auto !important;
+    }
+
+    /* 3. BURÇLAR (HOROSCOPE) - TAM 3 SÜTUN (YAN YANA 3 ADET) */
+    #horoscope-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; /* Masaüstü ve mobilde her zaman 3 sütun */
+        gap: 12px !important;
+    }
+
+    /* MOBİL İÇİN KART İÇİ KOMPAKT SKALALANDIRMA (Yazı ve İkon Boyutları Küçülür) */
+    @media (max-width: 768px) {
+        #colSavedModal .modal-body, #colHeartsModal .modal-body, #colRosesModal .modal-body {
+            gap: 5px !important;
+            padding: 10px 5px !important;
+        }
+        #colSavedModal .card-ic, #colHeartsModal .card-ic, #colRosesModal .card-ic {
+            font-size: 1.3rem !important; /* İkonlar küçültüldü */
+            margin-bottom: 2px !important;
+        }
+        #colSavedModal .card-t, #colHeartsModal .card-t, #colRosesModal .card-t {
+            font-size: 0.65rem !important; /* Başlıklar küçültüldü */
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            padding: 0 2px !important;
+        }
+        #colSavedModal .clean-badge, #colHeartsModal .clean-badge, #colRosesModal .clean-badge {
+            font-size: 0.55rem !important; /* Alt ikonlar küçültüldü */
+            padding: 2px 4px !important;
+        }
+        
+        #horoscope-grid { gap: 8px !important; }
+        #horoscope-grid > div { padding: 10px 5px !important; }
+        #horoscope-grid > div > div { font-size: 2rem !important; } /* Burç emojisi */
+        #horoscope-grid h4 { font-size: 0.85rem !important; } /* Burç adı */
+        #horoscope-grid small { font-size: 0.6rem !important; } /* Tarih */
+    }
+</style>
+
+<script id="misali-v54-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ V54 Patch: 3'lü Grid, Boş Kalpler ve Marşlar düzeltildi.");
+
+        // MARŞLARIN TAM METİNLERİNİ KESİN OLARAK VERİTABANINA KAZIMA
+        let tamMarslar = [
+            { id: "m_istiklal", title: "İstiklal Marşı (Tamamı)", emoji: "🇹🇷", author: "Mehmet Akif Ersoy", audio: "https://upload.wikimedia.org/wikipedia/commons/c/c5/IstiklalMarsi.ogg", text: "Korkma, sönmez bu şafaklarda yüzen al sancak;\nSönmeden yurdumun üstünde tüten en son ocak.\nO benim milletimin yıldızıdır, parlayacak;\nO benimdir, o benim milletimindir ancak.\n\nÇatma, kurban olayım, çehreni ey nazlı hilal!\nKahraman ırkıma bir gül! Ne bu şiddet, bu celal?\nSana olmaz dökülen kanlarımız sonra helal...\nHakkıdır, hakk'a tapan, milletimin istiklal!\n\nBen ezelden beridir hür yaşadım, hür yaşarım.\nHangi çılgın bana zincir vuracakmış? Şaşarım!\nKükremiş sel gibiyim, bendimi çiğner, aşarım.\nYırtarım dağları, enginlere sığmam, taşarım.\n\nGarbın afakını sarmışsa çelik zırhlı duvar,\nBenim iman dolu göğsüm gibi serhaddim var.\nUlusun, korkma! Nasıl böyle bir imanı boğar,\n'Medeniyet!' dediğin tek dişi kalmış canavar?\n\nArkadaş! Yurduma alçakları uğratma, sakın.\nSiper et gövdeni, dursun bu hayasızca akın.\nDoğacaktır sana va'dettiği günler hakk'ın...\nKim bilir, belki yarın, belki yarından da yakın.\n\nBastığın yerleri 'toprak!' diyerek geçme, tanı:\nDüşün altında binlerce kefensiz yatanı.\nSen şehit oğlusun, incitme, yazıktır, atanı:\nVerme, dünyaları alsan da, bu cennet vatanı.\n\nKim bu cennet vatanın uğruna olmaz ki feda?\nŞuheda fışkıracak toprağı sıksan, şuheda!\nCanı, cananı, bütün varımı alsın da hüda,\nEtmesin tek vatanımdan beni dünyada cüda.\n\nRuhumun senden, ilahi, şudur ancak emeli:\nDeğmesin mabedimin göğsüne namahrem eli.\nBu ezanlar-ki şahadetleri dinin temeli,\nEbedi yurdumun üstünde benim inlemeli.\n\nO zaman vecd ile bin secde eder -varsa- taşım,\nHer cerihamdan, ilahi, boşanıp kanlı yaşım,\nFışkırır ruh-i mücerret gibi yerden na'şım;\nO zaman yükselerek arşa değer belki başım.\n\nDalgalan sen de şafaklar gibi ey şanlı hilal!\nOlsun artık dökülen kanlarımın hepsi helal.\nEbediyen sana yok, ırkıma yok izmihlal:\nHakkıdır, hür yaşamış, bayrağımın hürriyet;\nHakkıdır, hakk'a tapan, milletimin istiklal!" },
+            { id: "m_onuncu", title: "10. Yıl Marşı (Tamamı)", emoji: "🇹🇷", author: "Faruk Nafiz & Behçet Kemal", audio: "https://upload.wikimedia.org/wikipedia/commons/7/77/10._Yil_Marsi.ogg", text: "Çıktık açık alınla on yılda her savaştan,\nOn yılda on beş milyon genç yarattık her yaştan;\nBaşta bütün dünyanın saydığı başkumandan,\nDemir ağlarla ördük anayurdu dört baştan.\n\nTürk'üz: Cumhuriyet'in göğsümüz tunç siperi;\nTürk'e durmak yaraşmaz, Türk önde, Türk ileri!\n\nBir mucizedir bizimler, coşkun sularla koşan;\nDünün mazlum milleti, bugün dünyaya taşan.\nYalınkat kılıçlarla yedi düveli aşan;\nŞimdi çelik zırhlarla göklerde kanatlanşan.\n\nTürk'üz: Cumhuriyet'in göğsümüz tunç siperi;\nTürk'e durmak yaraşmaz, Türk önde, Türk ileri!\n\nÖrnektir milletlere açtığımız yeni iz;\nİmtiyazsız, sınıfsız, kaynaşmış bir kitleyiz;\nHiçbir engelden yıldırmaz, sarsılmaz imanımız;\nÖzgürlük ve istiklal en büyük şiarımız.\n\nTürk'üz: Cumhuriyet'in göğsümüz tunç siperi;\nTürk'e durmak yaraşmaz, Türk önde, Türk ileri!" },
+            { id: "m_izmir", title: "İzmir Marşı (Tamamı)", emoji: "🇹🇷", author: "Anonim", audio: "", text: "İzmir'in dağlarında çiçekler açar.\nAltın güneş orda sırmalar saçar.\nBozulmuş düşmanlar yel gibi kaçar.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa.\n\nİzmir'in dağlarına bomba koydular\nTürk'ün sancağını öne koydular.\nŞanlı zaferleri deftere oydular.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa.\n\nTürk oğluyum ben ölmek isterim;\nToprak diken olsa yatağım yerim.\nAllahından utansın dönenler geri.\n\nYaşa Mustafa Kemal Paşa yaşa;\nAdın yazılacak mücevher taşa." },
+            { id: "m_genclik", title: "Gençlik Marşı (Dağ Başını Duman Almış)", emoji: "🇹🇷", author: "Ali Ulvi Elöve", audio: "", text: "Dağ başını duman almış,\nGümüş dere durmaz akar.\nGüneş ufuktan şimdi doğar,\nYürüyelim arkadaşlar!\n\nSesimizi yer, gök, su dinlesin;\nSert adımlarla her yer inlesin!\n\nBu gök, deniz nerede var?\nNerede bu dağlar, taşlar?\nBu ağaçlar, güzel kuşlar,\nYürüyelim arkadaşlar!\n\nSesimizi yer, gök, su dinlesin;\nSert adımlarla her yer inlesin!\n\nHer dağ köylü, her yer şehir;\nBu vatan bizim, bizimdir!\nYürüyelim arkadaşlar!\n\nSesimizi yer, gök, su dinlesin;\nSert adımlarla her yer inlesin!" },
+            { id: "m_harbiye", title: "Harbiye Marşı (Tamamı)", emoji: "🎖️", author: "Hüsnü Öncü", audio: "", text: "Yıldırımlar yaratan bir ırkın ahfadıyız,\nTufanları gösteren, tarihlerin yadıyız.\nKanla, irfanla kurduk biz bu Cumhuriyeti,\nCehennemler kudursa, ölmez nigahbanıyız.\n\nYaşa var ol Harbiye, yıkılmaz satvetinle,\nGöklerden gelen bir ses sana ne diyor, dinle:\nTürk vatanı üstünde sönmez güneşsin sen,\nKartal yuvalarında, hürriyetin sesisin sen!\n\nYüzyıllardır harbiye, bu vatanın kalesi;\nSarsılmaz iradenle, milletin gür sesisi.\nKanla, irfanla kurduk biz bu Cumhuriyeti,\nCehennemler kudursa, ölmez nigahbanıyız." },
+            { id: "m_plevne", title: "Plevne Marşı (Tamamı)", emoji: "⚔️", author: "Anonim", audio: "", text: "Tuna nehri akmam diyor,\nEtrafımı yıkmam diyor.\nŞanı büyük Osman Paşa,\nPlevne'den çıkmam diyor.\n\nOlur mu böyle olur mu?\nEvlat babayı vurur mu?\nSizi millet hainleri,\nBu dünya size kalır mı?\n\nDüşman Tuna'yı atladı,\nKarakolları yokladı.\nOsman Paşa'nın kolunda\nBeş bin top birden patladı.\n\nOlur mu böyle olur mu?\nEvlat babayı vurur mu?\nSizi millet hainleri,\nBu dünya size kalır mı?" },
+            { id: "m_sakarya", title: "Sakarya Marşı (Tamamı)", emoji: "🇹🇷", author: "Anonim", audio: "", text: "Hani ardına çizmeli binler takarak;\nŞu kızıltuğlu direkler gibi dimdik durarak,\nBu şafaklar ki, kıvılcımlı ufuktan taşar...\nSakarya, ey şanlı destanım benim!\n\nYolunu bekliyor Türk'ün şanlı ordusu;\nYıkılacak düşmanın o hain kurgusu.\nGök gürlesin, toprak yansın, ufuklar titresin;\nSakarya'nın sularında düşmanlar erisin!\n\nİleri, daima ileri ey şanlı asker;\nVatanın bağrında açsın nice zafer!" },
+            { id: "m_vatan", title: "Vatan Marşı (Tamamı)", emoji: "🇹🇷", author: "Anonim", audio: "", text: "Başka bir aşk istemez, aşkınla çarpar kalbimiz,\nEy Vatan gözyaşların dinsin, yetiştik çünkü biz.\nGül ki sen, neş'enle gülsün ay, güneş, toprak, deniz...\nEy Vatan gözyaşların dinsin, yetiştik çünkü biz.\n\nBir elimizde kılıç, bir elde bayrak gideriz;\nKaralar, denizler aşar, göklerde kükreriz.\nSana canımız feda olsun ey şanlı vatan;\nSenin uğruna feda olsun bu gövde, bu kan!" },
+            { id: "m_akdeniz", title: "Akdeniz Marşı (Tamamı)", emoji: "🌊", author: "Anonim", audio: "", text: "Yaslı Gelin şad ol, ağlama gayrı,\nDertlerini bir bir söyle, dinleyim.\nAkdeniz'in şanlı Türk yiğitleri,\nDalgalar göğsünü açsın, ilerle!\n\nÇırpınır dalgalar, rüzgar esiyor;\nTürk'ün bayrağı göklerde esiyor.\nAkdeniz, Karadeniz, Ege bizimdir;\nBu denizlerde destan yazan yiğitler bizimdir!\n\nYaslı Gelin şad ol, ağlama gayrı,\nDertlerini bir bir söyle, dinleyim." },
+            { id: "m_almanya", title: "Deutschlandlied (Almanya Marşı)", emoji: "🇩🇪", author: "A.H. Hoffmann von Fallersleben", audio: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Das_Lied_der_Deutschen.ogg", text: "Einigkeit und Recht und Freiheit\nFür das deutsche Vaterland!\nDanach lasst uns alle streben\nBrüderlich mit Herz und Hand!\nEinigkeit und Recht und Freiheit\nSind des Glückes Unterpfand;\nBlüh im Glanze dieses Glückes,\nBlühe, deutsches Vaterland!\n\nEinigkeit und Recht und Freiheit\nFür das deutsche Vaterland!\nDanach lasst uns alle streben\nBrüderlich mit Herz und Hand!" }
+        ];
+        
+        if (window.DB) {
+            window.DB.marslar = tamMarslar;
+            localStorage.setItem('misaliFullDB', JSON.stringify(window.DB));
+            try { firebase.database().ref('contentDB/marslar').set(tamMarslar); } catch(e){}
+            
+            // Eğer o an marşlar sekmesindeysek kartları yenile
+            if (document.getElementById('marslar-view') && document.getElementById('marslar-view').classList.contains('active')) {
+                if(typeof window.renderAllContent === 'function') window.renderAllContent();
+            }
+        }
+        
+    }, 4500); // Tüm diğer kodların çalışıp ezmesini bekler, sonra üstüne çöker (4.5 sn)
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ V55 PATCH: KESİN 3'LÜ POPUP GRID VE BAŞLIK DÜZELTMESİ 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-popup-3grid-fix">
+    /* KESİN 3'LÜ GRID: Mobilde ve Masaüstünde HER ZAMAN yan yana 3 kart */
+    #colSavedModal .modal-body,
+    #colHeartsModal .modal-body,
+    #colRosesModal .modal-body {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        padding: 5px !important;
+        box-sizing: border-box !important;
+        align-items: start !important;
+    }
+
+    /* Başlığı (Title) HER ZAMAN en üstte tut (Flex order ile zorlama) */
+    #colSavedModal .modal-content,
+    #colHeartsModal .modal-content,
+    #colRosesModal .modal-content {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    #colSavedModal h2.sec-title,
+    #colHeartsModal h2.sec-title,
+    #colRosesModal h2.sec-title {
+        order: -1 !important; /* Başlığı HTML sırasına bakmadan en üste çeker */
+        text-align: center !important;
+        margin-bottom: 15px !important;
+        width: 100% !important;
+        font-size: 1.4rem !important;
+        display: block !important;
+    }
+
+    /* Kart boyutları ve iç boşluklar (Taşmayı önler, Skalierung) */
+    #colSavedModal .card,
+    #colHeartsModal .card,
+    #colRosesModal .card {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10px 4px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-height: 100px !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Yazı boyutlarının mobilde dışarı taşmasını engeller */
+    #colSavedModal .card-t,
+    #colHeartsModal .card-t,
+    #colRosesModal .card-t {
+        font-size: 0.65rem !important;
+        line-height: 1.2 !important;
+        margin: 5px 0 !important;
+        text-align: center !important;
+        width: 100% !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        padding: 0 4px !important;
+        box-sizing: border-box !important;
+    }
+
+    #colSavedModal .card-ic,
+    #colHeartsModal .card-ic,
+    #colRosesModal .card-ic {
+        font-size: 1.4rem !important;
+        margin: 2px 0 !important;
+    }
+</style>
+
+<script id="misali-v55-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ V55 Patch: Popup Grid 3'lü yapıya zorlandı ve başlık üste alındı.");
+
+        // openCol fonksiyonunu eziyoruz ki inline stiller CSS'imizi bozmasın
+        window.openCol = function(type) {
+            if (!window.currentUser) return window.toast("Giriş yapmalısınız.", "🔒");
+            let uName = window.currentUser.username;
+            let gridId = type === 'saved' ? 'col-saved-grid' : (type === 'hearts' ? 'col-hearts-grid' : 'col-roses-grid');
+            let modalId = type === 'saved' ? 'colSavedModal' : (type === 'hearts' ? 'colHeartsModal' : 'colRosesModal');
+            
+            let allItems = [];
+            if (window.DB) {
+                Object.keys(window.DB).forEach(k => { if (Array.isArray(window.DB[k])) allItems = allItems.concat(window.DB[k].map(i => ({ ...i, type: k }))); });
+            }
+            if (Array.isArray(window.userPoemsDB)) allItems = allItems.concat(window.userPoemsDB.map(i => ({ ...i, type: 'userPoems' })));
+
+            let filtered = allItems.filter(x => {
+                if (!x || !x.id) return false;
+                if (type === 'saved') return (window.savedItemsDB && window.savedItemsDB[uName] || []).includes(x.id);
+                if (type === 'hearts') return (window.poemDataStore && window.poemDataStore[x.id]?.ratings?.[uName]?.val > 0 || window.poemDataStore[x.id]?.ratings?.[uName] > 0);
+                if (type === 'roses') return (window.poemDataStore && window.poemDataStore[x.id]?.comments?.some(c => c.roseUsers && c.roseUsers.includes(uName)));
+                return false;
+            });
+
+            filtered.sort((a,b) => (a.title || a.trTitle || '').localeCompare(b.title || b.trTitle || '', 'tr'));
+
+            let grid = document.getElementById(gridId);
+            if (grid) {
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div style="color:var(--text-sub); width:100%; text-align:center; padding:30px; grid-column: 1 / -1;">Eser bulunmuyor.</div>';
+                } else {
+                    // KART İÇERİĞİ OLUŞTURULUYOR
+                    grid.innerHTML = filtered.map(item => {
+                        let s = window.getOmniStats ? window.getOmniStats(item.id) : {hearts:0, comments:0, roses:0, listens:0, views:0};
+                        let hasMusic = item.hasAudio || item.audio;
+                        let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName]?.includes(item.id);
+                        
+                        return `
+                        <div class="card" onclick="window.closeTopModal(); setTimeout(() => { window.openReadModal('${item.id}', '${item.type}'); }, 350);">
+                            ${hasMusic ? `<div style="position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.8); border:1px solid var(--accent-cyan); padding:2px 4px; border-radius:4px; z-index:10; color:#fff; font-size:0.6rem;"><i class="fas fa-music" style="color:var(--accent-cyan)"></i></div>` : ''}
+                            <button class="bookmark-btn ${isSaved ? 'active' : ''}" style="position:absolute; top:4px !important; right:4px !important; font-size:0.75rem !important; color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'}; padding:0; background:transparent; border:none; z-index:10;" onclick="event.stopPropagation(); window.toggleBookmark('${item.id}')"><i class="fas fa-bookmark"></i></button>
+                            
+                            <div class="card-ic">${item.emoji || '✨'}</div>
+                            <h3 class="card-t">${item.title || item.trTitle || 'Eser'}</h3>
+                            
+                            <div style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:3px; width:100%; border-top:1px solid rgba(150,150,150,0.15); padding-top:6px;">
+                                <span style="background:rgba(255,255,255,0.08); border-radius:4px; color:#fff; font-weight:bold; padding:2px 4px; font-size:0.55rem; display:flex; align-items:center; gap:2px;"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${s.hearts}</span>
+                                <span style="background:rgba(255,255,255,0.08); border-radius:4px; color:#fff; font-weight:bold; padding:2px 4px; font-size:0.55rem; display:flex; align-items:center; gap:2px;"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${s.comments}</span>
+                                <span style="background:rgba(255,255,255,0.08); border-radius:4px; color:#fff; font-weight:bold; padding:2px 4px; font-size:0.55rem; display:flex; align-items:center; gap:2px;"><span style="font-size:0.6rem;">🌹</span> ${s.roses}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+            window.openModal(modalId);
+        };
+
+    }, 3000); // Wartet bis alle alten Skripte geladen sind und überschreibt dann die Fehler
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ V56 PATCH: POPUP İÇİ GRID KESİN ÇÖZÜMÜ (3'LÜ DÜZEN) 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-v56-css">
+    /* 1. Önceki hatalı komutu ezip Modal Body'yi normale (Block) döndürüyoruz */
+    #colSavedModal .modal-body,
+    #colHeartsModal .modal-body,
+    #colRosesModal .modal-body {
+        display: block !important; 
+        text-align: center !important;
+        padding: 15px 10px !important;
+    }
+
+    /* 2. ASIL HEDEF: Başlığın altındaki Kartların bulunduğu Grid alanları! */
+    #col-saved-grid, 
+    #col-hearts-grid, 
+    #col-roses-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; /* HER ZAMAN YAN YANA 3 KART */
+        gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-top: 15px !important;
+    }
+
+    /* 3. Kartların Boyutları ve Sıkışma Koruması */
+    #col-saved-grid .card, 
+    #col-hearts-grid .card, 
+    #col-roses-grid .card {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 8px 4px !important;
+        min-height: 105px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 4. Başlıkların taşmasını engelle */
+    #col-saved-grid .card-t, 
+    #col-hearts-grid .card-t, 
+    #col-roses-grid .card-t {
+        font-size: 0.65rem !important;
+        line-height: 1.2 !important;
+        margin: 4px 0 !important;
+        text-align: center !important;
+        width: 100% !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        padding: 0 2px !important;
+    }
+
+    #col-saved-grid .card-ic, 
+    #col-hearts-grid .card-ic, 
+    #col-roses-grid .card-ic {
+        font-size: 1.3rem !important;
+        margin: 2px 0 !important;
+    }
+</style>
+
+<script id="misali-v56-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ V56 Patch: Popup (Aklımda vb.) Grid'leri Kusursuz 3'lüye Çevrildi.");
+
+        // Popup İçeriğini Çizen Fonksiyonu Güncelliyoruz
+        window.openCol = function(type) {
+            if (!window.currentUser) return window.toast("Giriş yapmalısınız.", "🔒");
+            let uName = window.currentUser.username;
+            let gridId = type === 'saved' ? 'col-saved-grid' : (type === 'hearts' ? 'col-hearts-grid' : 'col-roses-grid');
+            let modalId = type === 'saved' ? 'colSavedModal' : (type === 'hearts' ? 'colHeartsModal' : 'colRosesModal');
+            
+            let allItems = [];
+            if (window.DB) {
+                Object.keys(window.DB).forEach(k => { if (Array.isArray(window.DB[k])) allItems = allItems.concat(window.DB[k].map(i => ({ ...i, type: k }))); });
+            }
+            if (Array.isArray(window.userPoemsDB)) allItems = allItems.concat(window.userPoemsDB.map(i => ({ ...i, type: 'userPoems' })));
+
+            let filtered = allItems.filter(x => {
+                if (!x || !x.id) return false;
+                if (type === 'saved') return (window.savedItemsDB && window.savedItemsDB[uName] || []).includes(x.id);
+                if (type === 'hearts') return (window.poemDataStore && window.poemDataStore[x.id]?.ratings?.[uName]?.val > 0 || window.poemDataStore[x.id]?.ratings?.[uName] > 0);
+                if (type === 'roses') return (window.poemDataStore && window.poemDataStore[x.id]?.comments?.some(c => c.roseUsers && c.roseUsers.includes(uName)));
+                return false;
+            });
+
+            filtered.sort((a,b) => (a.title || a.trTitle || '').localeCompare(b.title || b.trTitle || '', 'tr'));
+
+            let grid = document.getElementById(gridId);
+            if (grid) {
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div style="color:var(--text-sub); width:100%; text-align:center; padding:30px; grid-column: 1 / -1;">Eser bulunmuyor.</div>';
+                } else {
+                    grid.innerHTML = filtered.map(item => {
+                        let s = window.getOmniStats ? window.getOmniStats(item.id) : {hearts:0, comments:0, roses:0, listens:0, views:0};
+                        let hasMusic = item.hasAudio || item.audio;
+                        let isSaved = uName && window.savedItemsDB && window.savedItemsDB[uName]?.includes(item.id);
+                        
+                        return `
+                        <div class="card" onclick="window.closeTopModal(); setTimeout(() => { window.openReadModal('${item.id}', '${item.type}'); }, 350);">
+                            ${hasMusic ? `<div style="position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.8); border:1px solid var(--accent-cyan); padding:2px 4px; border-radius:4px; z-index:10; color:#fff; font-size:0.6rem;"><i class="fas fa-music" style="color:var(--accent-cyan)"></i></div>` : ''}
+                            <button class="bookmark-btn ${isSaved ? 'active' : ''}" style="position:absolute; top:4px !important; right:4px !important; font-size:0.75rem !important; color:${isSaved?'var(--accent-pink)':'rgba(255,255,255,0.35)'}; padding:0; background:transparent; border:none; z-index:10;" onclick="event.stopPropagation(); window.toggleBookmark('${item.id}')"><i class="fas fa-bookmark"></i></button>
+                            
+                            <div class="card-ic">${item.emoji || '✨'}</div>
+                            <h3 class="card-t">${item.title || item.trTitle || 'Eser'}</h3>
+                            
+                            <div style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:3px; width:100%; border-top:1px solid rgba(150,150,150,0.15); padding-top:6px; margin-top:auto;">
+                                <span class="clean-badge" style="padding:2px 4px !important; font-size:0.55rem !important; display:flex; align-items:center; gap:2px;"><i class="fas fa-heart" style="color:var(--accent-red)"></i> ${s.hearts}</span>
+                                <span class="clean-badge" style="padding:2px 4px !important; font-size:0.55rem !important; display:flex; align-items:center; gap:2px;"><i class="fas fa-comment" style="color:var(--accent-cyan)"></i> ${s.comments}</span>
+                                <span class="clean-badge" style="padding:2px 4px !important; font-size:0.55rem !important; display:flex; align-items:center; gap:2px;"><span style="font-size:0.6rem;">🌹</span> ${s.roses}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+            window.openModal(modalId);
+        };
+
+    }, 3200); 
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 🏆 MİSALİ V57 PATCH: CANLI BİLDİRİM & GELEN KUTUSU PROFESYONEL TASARIM 🏆 -->
+<!-- ===================================================================== -->
+<style id="misali-v57-css">
+    /* Canlı Bildirim (Live Notification) Konteyneri */
+    #live-notif-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999999;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        pointer-events: none;
+        width: 340px; /* Sabit Genişlik */
+        max-width: 90vw; /* Ekrana göre maksimum sınır */
+    }
+    
+    /* Bildirim Kartı Animasyon ve Tasarımı */
+    .live-notif-card {
+        background: linear-gradient(135deg, var(--bg-card), rgba(15,20,30,0.95));
+        border-left: 4px solid var(--accent-cyan);
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        width: 100%; 
+        box-sizing: border-box !important; /* DİKKAT: Taşmayı ve ezilmeyi KESİN önler */
+        pointer-events: auto;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+        cursor: pointer;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    .live-notif-card.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    [data-theme="light"] .live-notif-card {
+        background: #ffffff;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        border-color: #0ea5e9;
+    }
+
+    /* Zil Sallanma Animasyonu */
+    @keyframes bellRing {
+        0%, 100% { transform: rotate(0); }
+        20% { transform: rotate(20deg); }
+        40% { transform: rotate(-20deg); }
+        60% { transform: rotate(15deg); }
+        80% { transform: rotate(-15deg); }
+    }
+    .bell-ring-anim {
+        animation: bellRing 1.5s ease-in-out infinite;
+        transform-origin: top center;
+        display: inline-block;
+    }
+
+    /* Mobil Uyum (Handylerde altta çıkar, ezilmez ve aşağıdan kayar) */
+    @media(max-width: 768px) {
+        #live-notif-container {
+            top: auto;
+            bottom: 20px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%); /* Tam ekran ortasına hizalar */
+            width: 92vw; /* Ekrana tam oturur ama kenarlardan boşluk bırakır */
+            max-width: 400px;
+            align-items: center;
+        }
+        .live-notif-card {
+            transform: translateY(120%); /* Sağdan değil, HÜZÜN GİBİ aşağıdan gelsin */
+        }
+        .live-notif-card.show {
+            transform: translateY(0); /* Yerine oturt */
+        }
+    }
+</style>
+
+<script id="misali-v57-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ V57 Patch: Live Bildirim & Posta Kutusu (CSS Mobil Fix) aktif.");
+
+        // ==============================================================
+        // 1. FORMATIERUNGSMASCHINE FÜR NACHRICHTEN (Renkli Etiketler & Şair Misal.i)
+        // ==============================================================
+        window.formatLogMessage = function(msg) {
+            let text = msg || "";
+            
+            // 1. "Şair Misal.i" özel turkuaz ve el yazısı stili
+            text = text.replace(/(Şair Misal\.i|Sair Misali)/gi, `<span style='font-family:"Great Vibes", cursive; font-size:1.45rem; color:var(--accent-cyan); padding:0 4px; text-shadow:0 0 5px rgba(0,206,209,0.3);'>$&</span>`);
+            
+            // 2. Özel İşlem Etiketleri (Aksiyon Başlıkları)
+            text = text.replace(/^.*?(BEĞENİ:)/i, `<div style='color:var(--accent-red); font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(239,68,68,0.15); border:1px solid var(--accent-red); border-radius:6px; display:inline-block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;'>$&</div><br>`);
+            text = text.replace(/^.*?(YORUM:)/i, `<div style='color:var(--accent-cyan); font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(0,206,209,0.15); border:1px solid var(--accent-cyan); border-radius:6px; display:inline-block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;'>$&</div><br>`);
+            text = text.replace(/^.*?(İNCELEME:)/i, `<div style='color:var(--accent-pink); font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(236,72,153,0.15); border:1px solid var(--accent-pink); border-radius:6px; display:inline-block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;'>$&</div><br>`);
+            text = text.replace(/^.*?(OYUN:)/i, `<div style='color:#a855f7; font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(168,85,247,0.15); border:1px solid #a855f7; border-radius:6px; display:inline-block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;'>$&</div><br>`);
+            text = text.replace(/^.*?(YENİ ESER:)/i, `<div style='color:var(--accent-green); font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(34,197,94,0.15); border:1px solid var(--accent-green); border-radius:6px; display:inline-block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;'>$&</div><br>`);
+            text = text.replace(/^.*?(YENİ KAYIT:)/i, `<div style='color:#f97316; font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(249,115,22,0.15); border:1px solid #f97316; border-radius:6px; display:inline-block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;'>$&</div><br>`);
+
+            return text;
+        };
+
+        // ==============================================================
+        // 2. CANLI EKRAN BİLDİRİMİ (Live Popup Toast)
+        // ==============================================================
+        window.showLiveNotification = function(text, linkId, linkType) {
+            let container = document.getElementById('live-notif-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'live-notif-container';
+                document.body.appendChild(container);
+            }
+            
+            let notif = document.createElement('div');
+            notif.className = 'live-notif-card';
+            
+            let actionAttr = (linkId && linkType && !String(linkId).includes('window.')) ? `onclick="window.goToLink('${linkId}', '${linkType}')"` : '';
+            
+            notif.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                    <strong style="color:var(--accent-cyan); font-size:0.85rem; letter-spacing:1px;"><i class="fas fa-bell bell-ring-anim" style="color:var(--accent-gold);"></i> YENİ BİLDİRİM</strong>
+                    <button onclick="event.stopPropagation(); this.closest('.live-notif-card').style.opacity='0'; setTimeout(()=>this.closest('.live-notif-card').remove(), 400);" style="background:none; border:none; color:var(--text-sub); cursor:pointer; padding:0; font-size:1.1rem;"><i class="fas fa-times"></i></button>
+                </div>
+                <div style="font-size:0.95rem; color:var(--text-main); line-height:1.5;" ${actionAttr}>${window.formatLogMessage(text)}</div>
+            `;
+            
+            container.appendChild(notif);
+            
+            // Animasyonla ekrana giriş
+            setTimeout(() => { notif.classList.add('show'); }, 50);
+            
+            // 7 saniye sonra ekrandan kaybolma (Mobilde aşağı, Masaüstünde sağa kayarak çıkar)
+            setTimeout(() => {
+                if (notif.parentNode) {
+                    notif.style.transform = window.innerWidth <= 768 ? 'translateY(120%)' : 'translateX(120%)'; 
+                    notif.style.opacity = '0';
+                    setTimeout(() => { if (notif.parentNode) notif.remove(); }, 400);
+                }
+            }, 7000);
+        };
+
+        // ==============================================================
+        // 3. ADMIN GELEN KUTUSUNU PROFESYONEL ÇİZİM VE LİVE-SYNC
+        // ==============================================================
+        window.lastNotifiedAdminTs = Date.now();
+        
+        window.renderAdminLogs = function() {
+            if (window.adminLogs && window.adminLogs.length > 0) {
+                let latestLog = window.adminLogs[0];
+                if (latestLog.ts > window.lastNotifiedAdminTs && (Date.now() - latestLog.ts < 15000)) {
+                    window.showLiveNotification(latestLog.msg, latestLog.linkId, latestLog.linkType);
+                    window.lastNotifiedAdminTs = latestLog.ts;
+                }
+            }
+
+            let box = document.getElementById('adm-logs-box-panel'), inbox = document.getElementById('adm-logs-box-inbox'); 
+            let html = window.adminLogs.map(l => {
+                let isClickable = l.linkId && l.linkType && !String(l.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${l.linkId}', '${l.linkType}')" style="cursor:pointer; padding:15px; border:1px solid rgba(0,206,209,0.4); background:rgba(0,206,209,0.08); transition:all 0.3s ease; border-radius:12px; margin-bottom:12px; position:relative; box-shadow:0 4px 10px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(0,206,209,0.2)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,206,209,0.08)'; this.style.transform='none';"` : `style="padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:12px; position:relative;"`;
+                
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-cyan); color:#000; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(0,206,209,0.5); font-size:1.1rem;"><i class="fas fa-chevron-right"></i></div>` : '';
+                
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="color:var(--text-sub); font-size:0.75rem; margin-bottom:10px; font-family:'Space Mono', monospace; display:flex; align-items:center; gap:5px;"><i class="far fa-clock" style="color:var(--accent-gold);"></i> ${l.time}</div>
+                    <div style="color:var(--text-main); font-size:1rem; line-height:1.6; padding-right:${isClickable ? '45px' : '0'};">${window.formatLogMessage(l.msg)}</div>
+                </div>`;
+            }).join('') || '<div style="padding:40px; text-align:center; color:var(--text-sub); font-style:italic; font-size:1.1rem;"><i class="fas fa-inbox" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz kayıt yok.</div>';
+            
+            if (box) box.innerHTML = html; if (inbox) inbox.innerHTML = html;
+            let bellBadge = document.getElementById('bell-counter');
+            if(bellBadge) { bellBadge.innerText = window.adminLogs.length; bellBadge.style.display = window.adminLogs.length > 0 ? 'flex' : 'none'; }
+        };
+
+        // ==============================================================
+        // 4. USER BİLDİRİM (MESAJ KUTUSU) PROFESYONEL ÇİZİM VE LİVE-SYNC
+        // ==============================================================
+        window.lastNotifiedUserTs = Date.now();
+        
+        window.renderUserMessages = function() {
+            if (window.currentUser && window.currentUser.notifications && window.currentUser.notifications.length > 0) {
+                let latestNotif = window.currentUser.notifications[0];
+                if (latestNotif.ts > window.lastNotifiedUserTs && (Date.now() - latestNotif.ts < 15000)) {
+                    window.showLiveNotification(latestNotif.msg, latestNotif.linkId, latestNotif.linkType);
+                    window.lastNotifiedUserTs = latestNotif.ts;
+                }
+            }
+
+            let msgBox = document.querySelector('#msgModal .theme-sub-panel');
+            if (!msgBox) return;
+            if (!window.currentUser || !window.currentUser.notifications || window.currentUser.notifications.length === 0) {
+                msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px; font-style:italic; font-size:1.1rem;"><i class="fas fa-envelope-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz yeni mesajınız yok.</div>';
+                return;
+            }
+            
+            let html = '<button class="noble-btn" style="margin-bottom:20px; width:100%; border-color:var(--accent-red); color:var(--accent-red); background:rgba(239,68,68,0.05); font-size:1.1rem; padding:12px;" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
+            
+            html += window.currentUser.notifications.map(n => {
+                let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer; padding:15px; border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); transition:all 0.3s ease; border-radius:12px; margin-bottom:12px; position:relative; box-shadow:0 4px 10px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(212,175,55,0.18)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(212,175,55,0.08)'; this.style.transform='none';"` : `style="padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:12px; position:relative;"`;
+                
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-gold); color:#000; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(212,175,55,0.5); font-size:1.1rem;"><i class="fas fa-search"></i></div>` : '';
+                
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="color:var(--text-sub); font-size:0.75rem; margin-bottom:10px; font-family:'Space Mono', monospace; display:flex; align-items:center; gap:5px;"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> ${n.time}</div>
+                    <div style="color:var(--text-main); font-size:1rem; line-height:1.6; padding-right:${isClickable ? '45px' : '0'};">${window.formatLogMessage(n.msg)}</div>
+                </div>`;
+            }).join('');
+            msgBox.innerHTML = html;
+        };
+
+        if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+        if(typeof window.renderUserMessages === 'function') window.renderUserMessages();
+
+    }, 3000); 
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 🌍 MİSALİ V67 PATCH: STABILIZED PROFIL & SMART BUBBLES 🌍 -->
+<!-- ===================================================================== -->
+<style id="misali-v67-css">
+    /* 1. SPRECHBLASE (HOVER BUBBLE) - STANDARD */
+    .misali-hover-bubble {
+        position: fixed;
+        background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.65rem;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 10px rgba(0,206,209,0.3);
+        pointer-events: none;
+        z-index: 9999999;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        white-space: nowrap;
+    }
+    .misali-hover-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 4px 4px 0;
+        border-style: solid;
+        border-color: #0284c7 transparent transparent transparent;
+    }
+    .misali-hover-bubble.show { opacity: 1; transform: translateY(0); }
+    
+    [data-theme="light"] .misali-hover-bubble { background: linear-gradient(135deg, #0f172a, #334155); color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    [data-theme="light"] .misali-hover-bubble::after { border-color: #334155 transparent transparent transparent; }
+
+    /* 2. SPRECHBLASE - "MINI MINI" FÜR ICONS & DATUM */
+    .misali-hover-bubble.mini-bubble { padding: 2px 6px; font-size: 0.55rem; border-radius: 4px; transform: translateY(5px); }
+    .misali-hover-bubble.mini-bubble::after { border-width: 3px 3px 0; bottom: -3px; }
+
+    /* 3. MINI ÜBERSETZUNGS-BUTTON */
+    .mini-translate-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid var(--accent-gold);
+        color: var(--accent-gold);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 0 10px rgba(212,175,55,0.2);
+    }
+    .mini-translate-btn:hover { background: var(--accent-gold); color: #000; transform: scale(1.05); }
+    [data-theme="light"] .mini-translate-btn { background: #fff; border-color: #b48608; color: #b48608; }
+    [data-theme="light"] .mini-translate-btn:hover { background: #b48608; color: #fff; }
+
+    /* 4. Profilim Inline-Translation Labels */
+    #about-view .de-lbl { display: none; color:var(--text-main); font-weight:900; }
+    #about-view.show-de .de-lbl { display: inline-block; }
+    #about-view.show-de .tr-lbl { display: none; }
+</style>
+
+<script id="misali-v67-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("⚡ V67 Patch: Stabilized Profil DE & Smart Bubbles aktiv.");
+
+        // ==============================================================
+        // 1. WÖRTERBÜCHER FÜR BLASEN (HOVER)
+        // ==============================================================
+        const uiDictionary = {
+            "ANA SAYFA": "Startseite", "ŞİİRLERİM": "Meine Gedichte", "SÖZLERİM": "Meine Sprüche",
+            "ŞAHSİYETLER": "Persönlichkeiten", "ATASÖZLERİ": "Sprichwörter", "MARŞLAR": "Hymnen",
+            "HİKAYELER": "Geschichten", "KISSALAR": "Anekdoten", "FIKRALAR": "Witze", 
+            "SAĞLIK": "Gesundheit", "BİLMECELER": "Rätsel", "BULMACALAR": "Kreuzworträtsel", 
+            "OYUNLAR": "Spiele", "PROFİLİM": "Mein Profil", "PUAN DURUMU": "Rangliste", 
+            "SOHBET": "Chat", "ÜYE ESERLERİ": "Mitglieder-Werke", "SİZİN KALEMİNİZ": "Eure Feder",
+            
+            "TÜM SESLİ ESERLER": "Alle Audio-Werke", "MÜZİK ESERLERİ": "Audio-Bibliothek",
+            "GELEN KUTUSU": "Posteingang", "AYARLAR": "Einstellungen", "BEĞENDİKLERİM": "Meine Lesezeichen",
+            "SİSTEME GİRİŞ YAP": "Einloggen", "GİRİŞ YAP": "Einloggen", "ÇIKIŞ YAP": "Ausloggen", "KAYIT OL": "Registrieren",
+            "KOZMİK GÖRÜNÜM": "Kosmische Ansicht", "NORMAL GÖRÜNÜM": "Normale Ansicht",
+            "GÜNÜN ESERİ": "Werk des Tages", "TOP 10 SESLİ ESERLER": "Top 10 Audio-Werke",
+
+            "CANLI": "Live", "ESERLER": "Werke", "AKLIMDA": "Gemerkt", "KALPLERİM": "Meine Herzen", "GÜLLERİM": "Meine Rosen",
+
+            "KOÇ": "Widder", "BOĞA": "Stier", "İKİZLER": "Zwillinge", "YENGEÇ": "Krebs", 
+            "ASLAN": "Löwe", "BAŞAK": "Jungfrau", "TERAZİ": "Waage", "AKREP": "Skorpion", 
+            "YAY": "Schütze", "OĞLAK": "Steinbock", "KOVA": "Wassermann", "BALIK": "Fische",
+
+            "SİTENİN KURUCUSU & ŞAİRİ": "Gründer & Dichter der Seite",
+            "SİTENİN KURUCUSU": "Gründer der Seite", "ŞAİRİ": "Dichter", "ROL": "Rolle", "PUAN": "Punkte",
+
+            "IMPRESSUM": "🇹🇷 Künye", "İMPRESSUM": "🇹🇷 Künye",
+            "DATENSCHUTZ": "🇹🇷 Gizlilik Politikası",
+            "COOKIES": "🇹🇷 Çerezler", "COOKİES": "🇹🇷 Çerezler"
+        };
+
+        const iconDictionary = [
+            { selector: '#u-emj, .header-zodiac, [id*="zodiac"]', text: "Sternzeichen", mini: false },
+            { selector: '#hd-date, .modal-date, [id*="date"]', text: "Datum", mini: true },
+            
+            { selector: '#horoscope-grid small', textFunc: (el) => {
+                let txt = el.innerText.trim();
+                const mMap = {"Oca":"Jan", "Şub":"Feb", "Mar":"März", "Nis":"Apr", "May":"Mai", "Haz":"Jun", "Tem":"Jul", "Ağu":"Aug", "Eyl":"Sep", "Eki":"Okt", "Kas":"Nov", "Ara":"Dez"};
+                for(let k in mMap) txt = txt.replace(k, mMap[k]);
+                return txt;
+            }, mini: true },
+
+            { selector: '#global-radio-widget', text: "Radio PL", mini: false },
+            { selector: '#floating-player', text: "Audio Player", mini: false },
+            { selector: '#ui-weather, .weather-box', text: "Wetter", mini: false },
+            { selector: '#ui-time-h, #ui-time-m, .time-box, #analog-clock', text: "Uhrzeit", mini: false },
+            { selector: '[onclick*="toggleTheme"]', text: "Hell/Dunkel Modus", mini: false },
+            { selector: '.hero-avatar, .mini-avatar', text: "Zufallsspruch", mini: false },
+            { selector: '.fa-bell, #bell-counter', text: "Benachrichtigungen", mini: false },
+            { selector: '#u-score', text: "Meine Punkte", mini: false },
+            { selector: '#u-name', text: "Benutzername", mini: false },
+            { selector: '.fa-cog, [onclick*="userModal"]', text: "Einstellungen", mini: false },
+            { selector: '[onclick*="toggleCosmos"]', text: "Ansicht wechseln", mini: false },
+            { selector: '[onclick*="triggerLogout"]', text: "Ausloggen", mini: false },
+            
+            { selector: 'p', textFunc: (el) => { if(el.innerText && el.innerText.includes('Gönülden dile')) return "Von Herzen zur Zunge, von der Zunge zur Poesie..."; return null; }, mini: false },
+            { selector: 'a[onclick*="cookies-view"]', text: "🇹🇷 Çerezler", mini: false },
+            { selector: 'a[onclick*="datenschutz-view"]', text: "🇹🇷 Gizlilik", mini: false },
+            { selector: 'a[onclick*="impressum-view"]', text: "🇹🇷 Künye", mini: false },
+
+            { selector: 'div[onclick*="openHoroscopeDetail"]', textFunc: (el) => {
+                let h4 = el.querySelector('h4');
+                if(!h4) return null;
+                let sign = h4.innerText.trim().toLocaleUpperCase('tr-TR');
+                const signs = {"KOÇ": "Widder", "BOĞA": "Stier", "İKİZLER": "Zwillinge", "YENGEÇ": "Krebs", "ASLAN": "Löwe", "BAŞAK": "Jungfrau", "TERAZİ": "Waage", "AKREP": "Skorpion", "YAY": "Schütze", "OĞLAK": "Steinbock", "KOVA": "Wassermann", "BALIK": "Fische"};
+                return signs[sign] || "Sternzeichen";
+            }, mini: false },
+
+            { selector: '.fa-eye', text: "Aufrufe", mini: true },
+            { selector: '.fa-heart', text: "Gefällt mir", mini: true },
+            { selector: '.fa-whatsapp', text: "Auf WhatsApp teilen", mini: true },
+            { selector: '.fa-copy', text: "Text kopieren", mini: true },
+            { selector: '.fa-comment', text: "Kommentare", mini: true },
+            { selector: '.fa-headphones', text: "Zuhörer", mini: true },
+            { selector: '.fa-play-circle, .fa-pause-circle, .fa-play, .fa-pause', text: "Play / Pause", mini: true },
+            { selector: '.fa-bookmark', text: "Merken", mini: true },
+            { selector: '.real-blue-rose, [title="Gül"]', text: "Spezial-Rose", mini: true }
+        ];
+
+        // Hover Engine (Sprechblasen)
+        document.body.addEventListener('mouseover', function(e) {
+            let target = e.target;
+            if (target.closest('.no-bubble')) return;
+
+            let translatedWord = null;
+            let matchedElement = null;
+            let isMini = false;
+
+            for (let item of iconDictionary) {
+                let el = target.closest(item.selector);
+                if (el) {
+                    if(item.textFunc) {
+                        let res = item.textFunc(el);
+                        if (res) { translatedWord = res; matchedElement = el; isMini = item.mini; break; }
+                    } else {
+                        translatedWord = item.text; matchedElement = el; isMini = item.mini; break;
+                    }
+                }
+            }
+
+            if (!translatedWord) {
+                let el = target.closest('a, button, .c-stat, .clean-badge, .nav-link, .s-pill, h1, h2, h3, h4, strong, span, p');
+                if (el && el.innerText) {
+                    let rawText = el.innerText.replace(/[0-9]/g, '').trim();
+                    let text = rawText.toLocaleUpperCase('tr-TR'); 
+                    
+                    if (uiDictionary[text]) {
+                        translatedWord = uiDictionary[text]; matchedElement = el;
+                    } else {
+                        for (let key in uiDictionary) {
+                            if (text.includes(key) && text.length < key.length + 6) {
+                                translatedWord = uiDictionary[key]; matchedElement = el; break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (translatedWord && matchedElement && !matchedElement.hasAttribute('data-bubble-active')) {
+                matchedElement.setAttribute('data-bubble-active', 'true');
+
+                let prefix = translatedWord.includes('🇹🇷') ? '' : '🇩🇪 ';
+                let bubble = document.createElement('div');
+                bubble.className = 'misali-hover-bubble';
+                if (isMini) bubble.classList.add('mini-bubble');
+                bubble.innerHTML = `${prefix}${translatedWord}`;
+                
+                document.body.appendChild(bubble);
+
+                let rect = matchedElement.getBoundingClientRect();
+                bubble.style.top = (rect.top - (isMini ? 22 : 28)) + 'px'; 
+                
+                setTimeout(() => {
+                    bubble.style.left = (rect.left + (rect.width / 2) - (bubble.offsetWidth / 2)) + 'px';
+                    bubble.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    bubble.classList.remove('show');
+                    setTimeout(() => bubble.remove(), 200);
+                    matchedElement.removeAttribute('data-bubble-active');
+                }, 2000);
+                
+                matchedElement.addEventListener('mouseleave', function cleanup() {
+                    bubble.classList.remove('show');
+                    setTimeout(() => bubble.remove(), 200);
+                    matchedElement.removeAttribute('data-bubble-active');
+                    matchedElement.removeEventListener('mouseleave', cleanup);
+                }, { once: true });
+            }
+        });
+
+        // ==============================================================
+        // 2. PROFIL-SEITE SICHERER INLINE-ÜBERSETZER (Non-Destructive)
+        // ==============================================================
+        window.toggleProfileInlineLang = function(btn) {
+            let aboutView = document.getElementById('about-view');
+            if(!aboutView) return;
+            let isDe = aboutView.classList.contains('show-de');
+            
+            if(isDe) {
+                aboutView.classList.remove('show-de');
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE';
+                if(window.toast) window.toast("Türkçeye çevrildi", "🇹🇷");
+            } else {
+                aboutView.classList.add('show-de');
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇹🇷 TR';
+                if(window.toast) window.toast("Auf Deutsch übersetzt", "🇩🇪");
+            }
+        };
+
+        window.injectProfileTranslatorSafely = function() {
+            let aboutView = document.getElementById('about-view');
+            if (aboutView && !aboutView.querySelector('.mini-translate-btn')) {
+                // Finde das obere Panel oder füge es direkt in about-view ein
+                aboutView.style.position = 'relative';
+                aboutView.insertAdjacentHTML('afterbegin', `<button class="mini-translate-btn" onclick="window.toggleProfileInlineLang(this)" style="top:15px; right:15px; z-index:90;"><i class="fas fa-language"></i> 🇩🇪 DE</button>`);
+                
+                // Wir wandeln die TR/DE Labels für Doğum Tarihi, Meslek etc. im bestehenden DOM um, falls sie noch nicht da sind
+                aboutView.querySelectorAll('p').forEach(p => {
+                    let html = p.innerHTML;
+                    if (html.includes('Doğum Tarihi:') && !html.includes('de-lbl')) {
+                        p.innerHTML = html.replace('Doğum Tarihi:', '<strong class="tr-lbl">Doğum Tarihi:</strong><strong class="de-lbl">Geburtsdatum:</strong>');
+                    }
+                    if (html.includes('Burç:') && !html.includes('de-lbl')) {
+                        p.innerHTML = html.replace('Burç:', '<strong class="tr-lbl">Burç:</strong><strong class="de-lbl">Sternzeichen:</strong>');
+                    }
+                    if (html.includes('Şehir:') && !html.includes('de-lbl')) {
+                        p.innerHTML = html.replace('Şehir:', '<strong class="tr-lbl">Şehir:</strong><strong class="de-lbl">Stadt:</strong>');
+                    }
+                    if (html.includes('Meslek:') && !html.includes('de-lbl')) {
+                        p.innerHTML = html.replace('Meslek:', '<strong class="tr-lbl">Meslek:</strong><strong class="de-lbl">Beruf:</strong>');
+                    }
+                    if (html.includes('Diller:') && !html.includes('de-lbl')) {
+                        p.innerHTML = html.replace('Diller:', '<strong class="tr-lbl">Diller:</strong><strong class="de-lbl">Sprachen:</strong>');
+                    }
+                });
+            }
+        };
+
+        // ==============================================================
+        // 3. HOROSKOP (STERNZEICHEN) DE / TR TRANSLATOR
+        // ==============================================================
+        window.horoTrTexts = {
+            "Koç": { a: "Aşkta ateşlisiniz. Sürpriz bir karşılaşma an meselesi.", p: "Cesur kararlarınız para getiriyor. Beklenen ödeme yolda.", s: "Enerjinizi doğru yönlendirin, spora ağırlık verin." },
+            "Boğa": { a: "Güven arayışınız sonuç veriyor. Karşınızdaki size değer veriyor.", p: "Maddi konularda sağlam adımlar. Karlı bir anlaşma var.", s: "Boğaz bölgenize dikkat edin, soğuktan korunun." },
+            "İkizler": { a: "Edebi ve zihinsel uyum ön planda. Büyüleyeceksiniz.", p: "Pratik fikirleriniz anlık ek gelir getirebilir.", s: "Zihinsel yorgunluğa karşı bol su için." },
+            "Yengeç": { a: "Duygusal bağlarınız güçleniyor. Sıcaklık verecek.", p: "Birikim yapmak için harika bir gün.", s: "Midenizi yoracak yiyeceklerden uzak durun." },
+            "Aslan": { a: "İlgi odağısınız. Etkileyici auranızla büyülüyorsunuz.", p: "Gereksiz lüks harcamalara dikkat.", s: "Kalp ve sırt sağlığınıza özen gösterin." },
+            "Başak": { a: "Detaylar aşk hayatınızda belirleyici olacak.", p: "Hesap kitap işlerinde kusursuzsunuz.", s: "Sindirim sisteminizi dinlendirin." },
+            "Terazi": { a: "Romantizm ve denge dorukta. Uyumlu diyalog.", p: "Ortaklıklardan kazanç sağlayabilirsiniz.", s: "Böbrekler ve su tüketimine dikkat." },
+            "Akrep": { a: "Tutkulu ve derin hisler sizi bekliyor.", p: "Gizli yatırımlarınız değerleniyor.", s: "Stresi kendinizden uzak tutun." },
+            "Yay": { a: "Maceracı ruhunuz aşkı bulmanızı kolaylaştırıyor.", p: "Eğitim veya seyahat kaynaklı kazanç kapıları.", s: "Bacak ve kas ağrılarına karşı esneme yapın." },
+            "Oğlak": { a: "Ciddi adımlar atma zamanı. Güven sağlamlaşıyor.", p: "Kariyerinizde kalıcı maddi başarılar gözüküyor.", s: "Diş ve kemik sağlığınıza önem verin." },
+            "Kova": { a: "Sıradışı bir romantizm... Arkadaşlıktan aşka.", p: "Teknolojik yatırımlar kazandırabilir.", s: "Dijital detokslar yapın." },
+            "Balık": { a: "Hayallerinizdeki aşk gerçeğe dönüşebilir.", p: "Sezgileriniz size doğru yatırımı fısıldıyor.", s: "Ayaklarınıza ve uyku düzeninize dikkat edin." }
+        };
+
+        window.horoDeTexts = {
+            "Koç": { a: "Feurig in der Liebe. Eine Überraschung steht bevor.", p: "Mutige Entscheidungen bringen Geld.", s: "Leite deine Energie richtig, mach Sport." },
+            "Boğa": { a: "Ihre Suche nach Sicherheit zahlt sich aus.", p: "Solide Schritte in finanziellen Angelegenheiten.", s: "Achten Sie auf Ihren Halsbereich." },
+            "İkizler": { a: "Geistige Harmonie im Vordergrund.", p: "Praktische Ideen bringen Zusatzeinkommen.", s: "Viel Wasser trinken gegen geistige Erschöpfung." },
+            "Yengeç": { a: "Emotionale Bindungen werden stärker.", p: "Ein toller Tag zum Sparen.", s: "Vermeiden Sie Stress und schwere Kost." },
+            "Aslan": { a: "Sie stehen absolut im Mittelpunkt.", p: "Vorsicht vor unnötigen Luxusausgaben.", s: "Achten Sie auf Herz und Rücken." },
+            "Başak": { a: "Details sind entscheidend in der Liebe.", p: "Perfekt in Berechnungen, Investitionen warten.", s: "Schonen Sie Ihre Verdauung." },
+            "Terazi": { a: "Romantik und Balance auf dem Höhepunkt.", p: "Gewinne durch Partnerschaften möglich.", s: "Achten Sie auf Ihre Nieren." },
+            "Akrep": { a: "Leidenschaftliche und tiefe Gefühle warten.", p: "Geheime Investitionen gewinnen an Wert.", s: "Halten Sie toxischen Stress fern." },
+            "Yay": { a: "Ihr Abenteuergeist erleichtert die Liebe.", p: "Einnahmequellen durch Reisen oder Bildung.", s: "Dehnen Sie Ihre Beinmuskulatur." },
+            "Oğlak": { a: "Zeit für ernsthafte Schritte in der Liebe.", p: "Dauerhafter finanzieller Erfolg in Sicht.", s: "Achten Sie auf Knochen und Zähne." },
+            "Kova": { a: "Außergewöhnliche Romantik wartet...", p: "Technologische Projekte können sich auszahlen.", s: "Digitale Entgiftung für die Nerven." },
+            "Balık": { a: "Ihre Traumliebe kann heute wahr werden.", p: "Ihre Intuition flüstert Ihnen das Richtige zu.", s: "Achten Sie auf Schlaf und Entspannung." }
+        };
+
+        window.toggleHoroscopeLang = function(btn, zodTrName) {
+            let modal = document.getElementById('horoscopeDetailModal');
+            if(!modal) return;
+            
+            let isDe = btn.innerHTML.includes('TR');
+            
+            modal.querySelectorAll('button').forEach(b => {
+                if(b.innerText.includes('Aşk') || b.innerText.includes('Liebe')) b.innerHTML = isDe ? '❤️ Aşk' : '❤️ Liebe';
+                if(b.innerText.includes('Para') || b.innerText.includes('Finanzen')) b.innerHTML = isDe ? '🪙 Para' : '🪙 Finanzen';
+                if(b.innerText.includes('Sağlık') || b.innerText.includes('Gesundheit')) b.innerHTML = isDe ? '🍃 Sağlık' : '🍃 Gesundheit';
+            });
+
+            let dTr = window.horoTrTexts[zodTrName] || {a:"Aşk...", p:"Para...", s:"Sağlık..."};
+            let dDe = window.horoDeTexts[zodTrName] || {a:"Liebe...", p:"Geld...", s:"Gesundheit..."};
+
+            if(isDe) {
+                if(document.getElementById('hd-text-ask')) document.getElementById('hd-text-ask').innerText = dTr.a;
+                if(document.getElementById('hd-text-para')) document.getElementById('hd-text-para').innerText = dTr.p;
+                if(document.getElementById('hd-text-saglik')) document.getElementById('hd-text-saglik').innerText = dTr.s;
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE';
+                if(window.toast) window.toast("Türkçeye çevrildi", "🇹🇷");
+            } else {
+                if(document.getElementById('hd-text-ask')) document.getElementById('hd-text-ask').innerText = dDe.a;
+                if(document.getElementById('hd-text-para')) document.getElementById('hd-text-para').innerText = dDe.p;
+                if(document.getElementById('hd-text-saglik')) document.getElementById('hd-text-saglik').innerText = dDe.s;
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇹🇷 TR';
+                if(window.toast) window.toast("Auf Deutsch übersetzt", "🇩🇪");
+            }
+        };
+
+        const origOpenHoro = window.openHoroscopeDetail;
+        window.openHoroscopeDetail = function(zod, emoji, dateRange, color) {
+            if(origOpenHoro) origOpenHoro(zod, emoji, dateRange, color);
+            
+            setTimeout(() => {
+                let modal = document.getElementById('horoscopeDetailModal');
+                if(!modal) return;
+                
+                let header = modal.querySelector('.modal-body');
+                let existingBtn = modal.querySelector('.mini-translate-btn');
+                
+                if(!existingBtn) {
+                    header.style.position = 'relative';
+                    header.insertAdjacentHTML('afterbegin', `<button class="mini-translate-btn" style="top:15px; left:15px; right:auto;" onclick="window.toggleHoroscopeLang(this, '${zod}')"><i class="fas fa-language"></i> 🇩🇪 DE</button>`);
+                } else {
+                    existingBtn.style.left = '15px';
+                    existingBtn.style.right = 'auto';
+                    existingBtn.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE';
+                    existingBtn.setAttribute('onclick', `window.toggleHoroscopeLang(this, '${zod}')`);
+                }
+            }, 50);
+        };
+
+        // ==============================================================
+        // 4. STATISCHE SEITEN ÜBERSETZER (Datenschutz, Impressum, Cookies)
+        // ==============================================================
+        const staticDeContent = {
+            'impressum': `
+                <h3 style="color:var(--accent-gold); font-size:1.4rem; margin-bottom:20px; font-weight:bold;">Seitenbetreiber / Webmaster</h3>
+                <p style="color:var(--text-main); font-size:1.1rem; line-height:1.6; margin-bottom:25px;">Şair Misal.i<br>Berlin, Deutschland</p>
+                <p style="color:var(--text-main); font-size:1.1rem; line-height:1.6; margin-bottom:25px;"><b style="color:var(--text-main); font-weight:900;">Kontakt:</b> sairmisali25@gmail.com</p>
+                <p style="color:var(--text-main); font-size:1.1rem; line-height:1.6;"><b style="color:var(--text-main); font-weight:900;">Urheberrecht (Copyright):</b><br>Alle Gedichte und Sprüche auf dieser Seite gehören Şair Misal.i und dürfen nicht kopiert werden.</p>`,
+            'datenschutz': `
+                <h3 style="color:var(--text-main); font-size:1.3rem; margin-bottom:20px; font-weight:bold;">Datenschutzerklärung:</h3>
+                <p style="color:var(--text-main); font-size:1.05rem; line-height:1.8;">Benutzerdaten werden verschlüsselt in unserem System gespeichert. Es werden keine Informationen an Dritte weitergegeben.</p>`,
+            'cookies': `
+                <p style="color:var(--text-main); font-size:1.1rem; line-height:1.6; margin-bottom:30px;">Diese Seite verwendet Cookies, um Anmeldesitzungen zu speichern.<br><br>Sie können Ihre Einstellungen ändern.</p>
+                <button class="noble-btn" style="width:auto; padding:12px 30px; background:transparent; border-color:var(--border-soft);" onclick="document.getElementById('misali-cookie-banner').classList.add('show')">Cookie-Einstellungen</button>`
+        };
+
+        window.toggleStaticLang = function(btn, pageId) {
+            let container = btn.closest('.theme-panel') || btn.closest('.custom-box');
+            let contentArea = container.querySelector('.static-content-area');
+            
+            if (!contentArea) {
+                let originalHtml = container.innerHTML;
+                container.innerHTML = '';
+                container.appendChild(btn); 
+                let wrapper = document.createElement('div');
+                wrapper.className = 'static-content-area';
+                wrapper.innerHTML = originalHtml.replace(btn.outerHTML, '');
+                container.appendChild(wrapper);
+                contentArea = wrapper;
+                contentArea.setAttribute('data-tr-html', contentArea.innerHTML);
+            }
+
+            let currentLang = contentArea.getAttribute('data-lang') || 'tr';
+
+            if (currentLang === 'tr') {
+                if (pageId === 'info') contentArea.innerHTML = window.infoSettings ? window.infoSettings.de.replace(/\n/g, '<br>') : "Willkommen!...";
+                else contentArea.innerHTML = staticDeContent[pageId];
+                contentArea.setAttribute('data-lang', 'de');
+                btn.innerHTML = '🇹🇷 TR';
+                if(window.toast) window.toast("Auf Deutsch übersetzt", "🇩🇪");
+            } else {
+                contentArea.innerHTML = contentArea.getAttribute('data-tr-html');
+                contentArea.setAttribute('data-lang', 'tr');
+                btn.innerHTML = '🇩🇪 DE';
+                if(window.toast) window.toast("Türkçeye çevrildi", "🇹🇷");
+            }
+        };
+
+        window.injectAllInjectors = function() {
+            let targets = [
+                { selector: '#impressum-view .theme-panel', key: 'impressum' },
+                { selector: '#datenschutz-view .theme-panel', key: 'datenschutz' },
+                { selector: '#cookies-view .theme-panel', key: 'cookies' },
+                { selector: '#info-popup-card .custom-box', key: 'info' }
+            ];
+
+            targets.forEach(t => {
+                let el = document.querySelector(t.selector);
+                if (el && !el.querySelector('.mini-translate-btn')) {
+                    el.style.position = 'relative'; 
+                    el.insertAdjacentHTML('afterbegin', `<button class="mini-translate-btn" onclick="window.toggleStaticLang(this, '${t.key}')"><i class="fas fa-language"></i> 🇩🇪 DE</button>`);
+                }
+            });
+
+            // Profilim için güvenli enjektör
+            window.injectProfileTranslatorSafely();
+        };
+
+        window.injectAllInjectors();
+        setInterval(window.injectAllInjectors, 2000);
+
+    }, 2500); 
+});
+</script>
 
 
 </body>
