@@ -18548,5 +18548,454 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<!-- ===================================================================== -->
+<!-- 🌌 MİSALİ V90 OMNI-PRO PATCH: ULTIMATE IOS, INBOX & UI ENGINE 🌌 -->
+<!-- ===================================================================== -->
+<style id="misali-v90-pro-css">
+    /* 1. KUSURSUZ FONT YÜKLEMESİ (Android/Edge Fix) */
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+    .misali-signature-text, .author-signature-gold, .author-signature-white, [style*="'Great Vibes'"], [style*="Great Vibes"] {
+        font-family: 'Great Vibes', 'Brush Script MT', 'Dancing Script', cursive !important;
+    }
+
+    /* 2. IOS WEBKIT MASTER KORUMASI (Taşma ve Seçim Engeli) */
+    html, body {
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+    }
+    input, textarea, [contenteditable="true"] {
+        -webkit-user-select: text !important;
+        user-select: text !important;
+        -webkit-touch-callout: default !important;
+    }
+
+    /* 3. IPHONE 13/14 DİNAMİK KÜÇÜLTME & TOP 10 FİXİ */
+    @media (max-width: 430px) {
+        .modal-content, .modal-body {
+            max-width: 100vw !important;
+            box-sizing: border-box !important;
+            overflow-x: hidden !important;
+        }
+        /* Top 10 Listesi mobilde alt alta dizersin, yan yana taşmaz! */
+        .audio-track-item {
+            display: flex !important;
+            flex-direction: column !important; 
+            align-items: stretch !important;
+            gap: 10px !important;
+            padding: 12px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+        }
+        .audio-track-item > div:nth-child(2) {
+            width: 100% !important;
+            min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .audio-track-item > div:nth-child(2) > div:first-child {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            line-height: 1.3 !important;
+        }
+        .audio-track-item div[style*="display:flex"] {
+            flex-wrap: wrap !important;
+            gap: 5px !important;
+            justify-content: flex-start !important;
+        }
+        .audio-track-item .clean-badge {
+            font-size: 0.55rem !important;
+            padding: 3px 6px !important;
+        }
+    }
+
+    /* 4. YÜZEN BUTONLAR (Pusula) EKRANDAN ÇIKMASIN */
+    @media (max-width: 768px) {
+        .n-float-btn {
+            top: auto !important;
+            bottom: 85px !important;
+            transform: none !important;
+        }
+        #n-pusula { left: 15px !important; }
+        #n-zarf { right: 15px !important; }
+        #n-mood-menu {
+            top: auto !important;
+            bottom: 135px !important;
+            left: 15px !important;
+            transform: none !important;
+            max-height: 250px !important;
+            overflow-y: auto !important;
+        }
+    }
+</style>
+
+<script id="misali-v90-pro-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🌌 V90 OMNI-PRO Patch geladen: Alle Systeme synchronisiert.");
+
+        // ==============================================================
+        // 1. USER INBOX (GELEN KUTUSU) %100 İZOLASYONU VE RENDERİ
+        // ==============================================================
+        window.renderUserMessages = function() {
+            let msgModal = document.getElementById('msgModal');
+            if (!msgModal) return;
+            
+            let msgBox = msgModal.querySelector('.theme-sub-panel') || msgModal.querySelector('.modal-body');
+            if (!msgBox) return;
+
+            // Lokale Daten sicher einlesen
+            try {
+                let sessionUsr = JSON.parse(sessionStorage.getItem('misaliUser') || localStorage.getItem('misaliUser') || 'null');
+                if (sessionUsr) window.currentUser = sessionUsr;
+            } catch(e){}
+
+            let u = window.currentUser;
+            
+            if (!u || !u.notifications || !Array.isArray(u.notifications) || u.notifications.length === 0) {
+                msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px; font-style:italic; font-size:1.1rem;"><i class="fas fa-envelope-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz yeni mesajınız yok.</div>';
+                return;
+            }
+            
+            let html = '<button class="noble-btn" style="margin-bottom:20px; width:100%; border-color:var(--accent-red); color:var(--accent-red); background:rgba(239,68,68,0.05); font-size:1.1rem; padding:12px;" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
+            
+            html += u.notifications.map(n => {
+                let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer; padding:15px; border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); border-radius:12px; margin-bottom:12px; position:relative;"` : `style="padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:12px; position:relative;"`;
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-gold); color:#000; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-search"></i></div>` : '';
+                let formattedMsg = (typeof window.formatLogMessage === 'function') ? window.formatLogMessage(n.msg) : n.msg;
+
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="color:var(--text-sub); font-size:0.75rem; margin-bottom:10px; font-family:'Space Mono', monospace;"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> ${n.time}</div>
+                    <div style="color:var(--text-main); font-size:1rem; line-height:1.6; padding-right:${isClickable ? '45px' : '0'};">${formattedMsg}</div>
+                </div>`;
+            }).join('');
+            
+            msgBox.innerHTML = html;
+        };
+
+        window.clearUserMessages = function() {
+            if (window.currentUser) {
+                window.currentUser.notifications = [];
+                sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                
+                if (window.userDatabase && window.userDatabase[window.currentUser.username]) {
+                    window.userDatabase[window.currentUser.username].notifications = [];
+                    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                }
+                
+                try { firebase.database().ref('users/' + window.currentUser.username + '/notifications').remove(); } catch(e) {}
+
+                window.renderUserMessages();
+                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+                if(window.toast) window.toast("Mesajlar temizlendi", "🗑️");
+            }
+        };
+
+        // ==============================================================
+        // 2. BELL COUNTER (ÇAN) VE HEADER GÜNCELLEMESİ
+        // ==============================================================
+        window.updateHeaderUserUI = function() {
+            let u = window.currentUser;
+            let nameEl = document.getElementById('u-name'), scoreEl = document.getElementById('u-score'), emjEl = document.getElementById('u-emj');
+            
+            if (u && nameEl) {
+                let displayedName = u.name || u.username;
+                nameEl.innerText = displayedName;
+                if (displayedName === 'Şair Misal.i' || u.username === 'AdminKing') nameEl.style.color = 'var(--accent-cyan)';
+                else if (u.color) nameEl.style.color = u.color;
+                else nameEl.style.color = 'var(--accent-gold)';
+                
+                if (scoreEl) scoreEl.innerText = (u.score || 0) + ' Puan';
+                if (emjEl) { emjEl.innerText = u.emoji || '🪶'; emjEl.style.display = 'inline-block'; }
+            } else {
+                if (emjEl) emjEl.style.display = 'none';
+            }
+            
+            let bellBadge = document.getElementById('bell-counter');
+            if(bellBadge) { 
+                let count = 0;
+                if (u && u.role === 'admin') count = window.adminLogs ? window.adminLogs.length : 0;
+                else if (u) count = (u.notifications && Array.isArray(u.notifications)) ? u.notifications.length : 0;
+                
+                bellBadge.innerText = count; 
+                bellBadge.style.display = count > 0 ? 'flex' : 'none'; 
+            }
+        };
+
+        // ==============================================================
+        // 3. BURÇ ÇEVİRİLERİ (HOROSCOPE DE/TR) DİREKT İÇERİK DEĞİŞTİRİCİ
+        // ==============================================================
+        window.toggleHoroscopeLang = function(btn, zodTrName) {
+            let modal = document.getElementById('horoscopeDetailModal');
+            if(!modal) return;
+            
+            let isDe = btn.innerHTML.includes('TR');
+            let dTr = window.horoTrTexts ? window.horoTrTexts[zodTrName] : null;
+            let dDe = window.horoDeTexts ? window.horoDeTexts[zodTrName] : null;
+
+            if (!dTr || !dDe) return;
+
+            let body = modal.querySelector('.modal-body');
+            if (!body) return;
+
+            let htmlContent = body.innerHTML;
+            if (isDe) {
+                htmlContent = htmlContent.replace('❤️ Liebe', '❤️ Aşk').replace('🪙 Finanzen', '🪙 Para').replace('🍃 Gesundheit', '🍃 Sağlık');
+                htmlContent = htmlContent.replace(dDe.a, dTr.a).replace(dDe.p, dTr.p).replace(dDe.s, dTr.s);
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE';
+                if(window.toast) window.toast("Türkçeye çevrildi", "🇹🇷");
+            } else {
+                htmlContent = htmlContent.replace('❤️ Aşk', '❤️ Liebe').replace('🪙 Para', '🪙 Finanzen').replace('🍃 Sağlık', '🍃 Gesundheit');
+                htmlContent = htmlContent.replace(dTr.a, dDe.a).replace(dTr.p, dDe.p).replace(dTr.s, dDe.s);
+                btn.innerHTML = '<i class="fas fa-language"></i> 🇹🇷 TR';
+                if(window.toast) window.toast("Auf Deutsch übersetzt", "🇩🇪");
+            }
+            body.innerHTML = htmlContent;
+        };
+
+        // Sofortiges Ausführen beim Start, um die UI zu korrigieren
+        if (window.currentUser) {
+            window.updateHeaderUserUI();
+            window.renderUserMessages();
+        }
+
+    }, 2000); // Wartet 2 Sekunden, um als letztes, dominierendes Skript einzugreifen
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 🚀🏆 MİSALİ V91 ABSOLUTE CORE-OVERRIDE (ULTIMATE FIX) 🏆🚀 -->
+<!-- ===================================================================== -->
+<style id="misali-v91-css">
+    /* 1. IPHONE (WEBKIT) KESİN ÇÖZÜMÜ: Flexbox Yerine Block Yapısı */
+    /* Webkit tarayıcıları Flexbox'ı bazen hatalı ezer. Bu yüzden mobilde kartları Blok yapısına zorluyoruz. */
+    @media (max-width: 450px) {
+        .audio-track-item {
+            display: block !important;
+            position: relative !important;
+            padding: 15px 10px 15px 45px !important; /* Sol tarafta rakam için boşluk */
+            height: auto !important;
+            overflow: hidden !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* 1, 2, 3.. Rakamları sola sabitliyoruz */
+        .audio-track-rank {
+            position: absolute !important;
+            left: 10px !important;
+            top: 15px !important;
+            transform: none !important;
+            font-size: 1.5rem !important;
+            width: 25px !important;
+            text-align: center !important;
+        }
+        
+        .audio-track-item > div:nth-child(2) {
+            display: block !important;
+            width: 100% !important;
+        }
+        
+        .audio-track-item > div:nth-child(2) > div:first-child {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            font-size: 1.05rem !important;
+            line-height: 1.3 !important;
+        }
+        
+        /* Rozetlerin kapsayıcısını (Badges) yan yana güvenli dizecek şekilde ayarlıyoruz */
+        .badge-container-fix {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+            margin-top: 10px !important;
+            width: 100% !important;
+            justify-content: flex-start !important;
+        }
+        
+        .audio-track-item .clean-badge {
+            display: inline-flex !important;
+            align-items: center !important;
+            font-size: 0.6rem !important;
+            padding: 3px 6px !important;
+            margin: 0 !important;
+        }
+    }
+
+    /* iOS Dokunma Koruması */
+    .card, .audio-track-item, .noble-btn, .action-btn {
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+    }
+</style>
+
+<script id="misali-v91-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🚀 V91 Absolute Core-Override aktiv: Listen-Counter, Inbox & iPhone Layout gefixt!");
+
+        // ==============================================================
+        // 1. DINLENME SAYACI (LISTENS COUNTER) CANLI SENKRONİZASYONU
+        // ==============================================================
+        window.lastListenedId = null;
+        let aud = document.getElementById('global-audio-element');
+        
+        if (aud && !aud.hasAttribute('data-listen-fix')) {
+            aud.setAttribute('data-listen-fix', 'true');
+            aud.addEventListener('play', function() {
+                let d = window.currentItemData;
+                if (d && d.id && window.lastListenedId !== d.id) {
+                    window.lastListenedId = d.id; // Aynı şarkıyı spamlamasını önler
+                    
+                    if (!window.poemDataStore) window.poemDataStore = {};
+                    if (!window.poemDataStore[d.id]) window.poemDataStore[d.id] = {};
+                    
+                    // Dinlenme sayısını +1 artır
+                    window.poemDataStore[d.id].listens = (window.poemDataStore[d.id].listens || 0) + 1;
+                    
+                    // Lokale ve Firebase'e yaz
+                    localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore));
+                    try { if(typeof firebase !== 'undefined') firebase.database().ref('interactions/' + d.id + '/listens').set(window.poemDataStore[d.id].listens); } catch(e){}
+                    
+                    // Ekranda anında göster!
+                    let earStat = document.querySelector(`.live-ear[data-id="${d.id}"]`);
+                    if(earStat) earStat.innerText = window.poemDataStore[d.id].listens;
+                    
+                    if(typeof window.renderAllContent === 'function') window.renderAllContent();
+                }
+            });
+        }
+
+        // ==============================================================
+        // 2. GELEN KUTUSU (INBOX) KESİN ÇÖZÜMÜ
+        // ==============================================================
+        window.renderUserMessages = function() {
+            let msgModal = document.getElementById('msgModal');
+            if(!msgModal) return;
+            
+            let msgBox = msgModal.querySelector('.modal-body') || msgModal.querySelector('.theme-sub-panel');
+            if(!msgBox) return;
+
+            // Güvenlik: Veriyi doğrudan userDatabase üzerinden ZORLA çeker.
+            let uName = window.currentUser ? window.currentUser.username : null;
+            if(!uName) return;
+            
+            let realUser = (window.userDatabase && window.userDatabase[uName]) ? window.userDatabase[uName] : window.currentUser;
+            let notifs = realUser.notifications || window.currentUser.notifications || [];
+
+            if(notifs.length === 0) {
+                msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px; font-style:italic;"><i class="fas fa-envelope-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz yeni mesajınız yok.</div>';
+                
+                // Çanı gizle
+                let bellBadge = document.getElementById('bell-counter');
+                if(bellBadge && realUser.role !== 'admin') bellBadge.style.display = 'none';
+                return;
+            }
+
+            let html = '<button class="noble-btn" style="margin-bottom:20px; width:100%; border-color:var(--accent-red); color:var(--accent-red); background:rgba(239,68,68,0.05);" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
+            
+            html += notifs.map(n => {
+                let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer; padding:15px; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.4); border-radius:12px; margin-bottom:10px; position:relative;"` : `style="padding:15px; background:rgba(255,255,255,0.05); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:10px; position:relative;"`;
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-gold); color:#000; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-search"></i></div>` : '';
+                
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="font-size:0.75rem; color:var(--accent-cyan); margin-bottom:5px; font-family:'Space Mono', monospace;"><i class="far fa-clock"></i> ${n.time}</div>
+                    <div style="font-size:0.95rem; color:var(--text-main); line-height:1.5; padding-right:${isClickable ? '45px' : '0'};">${(typeof window.formatLogMessage === 'function') ? window.formatLogMessage(n.msg) : n.msg}</div>
+                </div>`;
+            }).join('');
+
+            msgBox.innerHTML = html;
+        };
+
+        // ==============================================================
+        // 3. TÜM SESLİ ESERLER (LİMİTSİZ TAM LİSTE) VE YENİ IOS LAYOUT'U
+        // ==============================================================
+        window.openMusicLibrary = function() {
+            if (!window.currentUser && typeof window.showPremiumLock === 'function') { window.showPremiumLock('audio'); return; }
+            
+            if(!document.getElementById('musicLibModal')) {
+                document.body.insertAdjacentHTML('beforeend', `
+                <div class="modal premium-modal modal-large" id="musicLibModal">
+                    <button class="close-btn" onclick="window.closeTopModal()"><i class="fas fa-times"></i></button>
+                    <div class="modal-body custom-scroll">
+                        <h2 class="sec-title" style="color:var(--accent-pink);"><i class="fas fa-compact-disc"></i> Tüm Sesli Eserler</h2>
+                        <div style="text-align:center; color:var(--text-sub); margin-bottom:20px;">Sistemdeki tüm müzikli eserler aldıkları puanlara göre sıralanmıştır.</div>
+                        <div id="music-lib-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    </div>
+                </div>`);
+            }
+            
+            let container = document.getElementById('music-lib-list');
+            if(container) {
+                let audioWorks = [];
+                ['poems', 'quotes', 'userPoems', 'marslar'].forEach(cat => {
+                    let source = (cat === 'userPoems') ? window.userPoemsDB : (window.DB ? window.DB[cat] : null);
+                    if(source && Array.isArray(source)) {
+                        source.forEach(w => { if (w && (w.hasAudio || w.audio)) audioWorks.push({...w, type: cat}); });
+                    }
+                });
+                
+                let hDB = window.poemDataStore || JSON.parse(localStorage.getItem('misaliHeartsDB') || '{}');
+                let aDB = JSON.parse(localStorage.getItem('misaliAudioRatingsDB') || '{}');
+
+                audioWorks.forEach(w => {
+                    let sd = hDB[w.id] || {};
+                    let hearts = 0; if(sd.ratings) Object.values(sd.ratings).forEach(v => hearts += (typeof v === 'object' ? parseInt(v.val||0) : parseInt(v||0)));
+                    let aVals = Object.values(aDB[w.id] || {});
+                    let audioAvg = aVals.length > 0 ? (aVals.reduce((a,b)=>a+parseInt(b), 0) / aVals.length).toFixed(1) : "0.0";
+                    let jury = 0; if(sd.jury) { let jVals = Object.values(sd.jury); if(jVals.length > 0) jury = (jVals.reduce((a,b)=>a+b,0)/jVals.length).toFixed(1); }
+                    
+                    w.stats = { hearts, audioAvg, audioCount: aVals.length, jury, views: sd.views || 0, listens: sd.listens || 0 };
+                    w.totalScore = (parseFloat(audioAvg) * 20) + (hearts * 2) + (parseFloat(jury) * 5) + (w.stats.listens * 1.5) + (w.stats.views * 0.2); 
+                });
+                
+                audioWorks.sort((a,b) => b.totalScore - a.totalScore);
+                
+                // HİÇBİR LİMİT YOK (.slice KULLANILMADI - BÜTÜN LİSTE YÜKLENİR)
+                container.innerHTML = audioWorks.map((w, i) => {
+                    let safeId = encodeURIComponent(w.id);
+                    let aName = w.author || w.name;
+                    if (!aName || ['Sistem', 'Anonim', 'Yazar'].includes(aName.trim())) aName = 'Şair Misal.i';
+                    let aClass = aName === 'Şair Misal.i' ? 'misali-signature-text' : 'author-signature-gold';
+                    
+                    return `
+                    <div class="audio-track-item" style="background:var(--input-bg); border:1px solid var(--border-soft); border-left:4px solid var(--accent-pink); border-radius:12px; cursor:pointer;" onclick="window.closeTopModal(); setTimeout(()=> { window.openReadModal(decodeURIComponent('${safeId}'), '${w.type}'); }, 300);">
+                        <div class="audio-track-rank" style="color:var(--accent-pink); font-weight:bold;">${i+1}.</div>
+                        <div>
+                            <div style="color:var(--text-main); font-weight:bold;">${w.title || w.trTitle}</div>
+                            <div class="${aClass}" style="margin-top:2px;">~ ${aName}</div>
+                            <div class="badge-container-fix">
+                                <span class="clean-badge" title="Müzik"><i class="fas fa-music" style="color:var(--accent-cyan);"></i> <span>${w.stats.audioAvg}</span> <small style="opacity:0.7;">(${w.stats.audioCount})</small></span>
+                                <span class="clean-badge" title="Kalp"><i class="fas fa-heart" style="color:var(--accent-red);"></i> <span>${w.stats.hearts}</span></span>
+                                <span class="clean-badge" title="Dinlenme"><i class="fas fa-headphones" style="color:var(--accent-cyan);"></i> <span>${w.stats.listens}</span></span>
+                                <span class="clean-badge" title="Görüntülenme"><i class="fas fa-eye" style="color:var(--accent-green);"></i> <span>${w.stats.views}</span></span>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+            window.openModal('musicLibModal');
+        };
+
+        // Zwinge das UI, sich einmal sofort korrekt zu aktualisieren
+        if(window.currentUser) {
+            if (typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+            window.renderUserMessages();
+        }
+
+    }, 3000); // Wartet 3 Sekunden, überschreibt alle fehlerhaften Timer und fixt es.
+});
+</script>
+
 </body>
 </html>
