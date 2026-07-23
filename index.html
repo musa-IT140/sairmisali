@@ -16559,6 +16559,1035 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<!-- ===================================================================== -->
+<!-- 🌍 MİSALİ V81 OMNI-CLEAN PATCH: LIGHTWEIGHT & BUG-FREE 🌍 -->
+<!-- ===================================================================== -->
+<style id="misali-v81-css">
+    /* 1. SPRECHBLASE (HOVER BUBBLE) */
+    .misali-hover-bubble {
+        position: fixed; background: linear-gradient(135deg, var(--accent-cyan), #0284c7); color: #fff;
+        padding: 4px 8px; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 0.65rem;
+        font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,206,209,0.3);
+        pointer-events: none; z-index: 9999999; opacity: 0; transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease; white-space: nowrap;
+    }
+    .misali-hover-bubble::after {
+        content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+        border-width: 4px 4px 0; border-style: solid; border-color: #0284c7 transparent transparent transparent;
+    }
+    .misali-hover-bubble.show { opacity: 1; transform: translateY(0); }
+    [data-theme="light"] .misali-hover-bubble { background: linear-gradient(135deg, #0f172a, #334155); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    [data-theme="light"] .misali-hover-bubble::after { border-color: #334155 transparent transparent transparent; }
+
+    .misali-hover-bubble.mini-bubble { padding: 2px 6px; font-size: 0.55rem; border-radius: 4px; transform: translateY(5px); }
+    .misali-hover-bubble.mini-bubble::after { border-width: 3px 3px 0; bottom: -3px; }
+
+    /* 2. TRANSLATE BUTTONS */
+    .misali-trans-btn, .horo-trans-btn {
+        position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-gold);
+        color: var(--accent-gold); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;
+        cursor: pointer; transition: 0.3s; z-index: 999999; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(212,175,55,0.2);
+    }
+    .misali-trans-btn:hover, .horo-trans-btn:hover { background: var(--accent-gold); color: #000; transform: scale(1.05); }
+    [data-theme="light"] .misali-trans-btn, [data-theme="light"] .horo-trans-btn { background: #fff; border-color: #b48608; color: #b48608; }
+    [data-theme="light"] .misali-trans-btn:hover, [data-theme="light"] .horo-trans-btn:hover { background: #b48608; color: #fff; }
+
+    /* 3. COOKIE BLUR GATEKEEPER */
+    .misali-blur-bg {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(4, 10, 20, 0.75); backdrop-filter: blur(12px);
+        z-index: 999990; pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+    }
+    .misali-blur-bg.active { opacity: 1; pointer-events: all; } 
+    
+    #misali-cookie-banner.center-pop {
+        position: fixed !important; top: 50% !important; left: 50% !important;
+        transform: translate(-50%, -50%) !important; bottom: auto !important; margin: 0 !important;
+        z-index: 9999999 !important; width: 90%; max-width: 450px; display: block !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.9) !important;
+        border: 1px solid var(--accent-gold) !important; border-radius: 12px !important;
+    }
+</style>
+
+<script id="misali-v81-js">
+window.addEventListener('load', function() {
+    console.log("⚡ V81 Omni-Clean Patch geladen: Schnell, sicher und blockierungsfrei.");
+
+    // 1. ZERSTÖRUNGSFREIER TEXT-ÜBERSETZER (Ohne ständige Intervalle!)
+    const masterDict = {
+        "Doğum Tarihi:": "Geburtsdatum:", "Burç:": "Sternzeichen:", "Şehir:": "Stadt:", "Meslek:": "Beruf:", "Diller:": "Sprachen:",
+        "Doğum Tarihi": "Geburtsdatum", "Burç": "Sternzeichen", "Şehir": "Stadt", "Meslek": "Beruf", "Diller": "Sprachen",
+        "Hakkımda": "Über Mich", "Sitenin Kurucusu & Şairi": "Gründer & Dichter der Seite",
+        "Koç": "Widder", "Boğa": "Stier", "İkizler": "Zwillinge", "Yengeç": "Krebs", "Aslan": "Löwe", "Başak": "Jungfrau", "Terazi": "Waage", "Akrep": "Skorpion", "Yay": "Schütze", "Oğlak": "Steinbock", "Kova": "Wassermann", "Balık": "Fische",
+        "Şair": "Dichter", "Yazar": "Autor", "Tasarımcı": "Designer", "Sistem Yöneticisi": "Systemadministrator", "Yönetici": "Administrator",
+        "Türkçe": "Türkisch", "İngilizce": "Englisch", "Almanca": "Deutsch",
+        
+        "Çerez Tercihleri": "Cookie-Einstellungen",
+        "Sitemiz size daha iyi bir deneyim sunabilmek için çerezleri kullanır.": "Diese Website verwendet Cookies, um Ihnen ein besseres Erlebnis zu bieten.",
+        "Bu site, giriş oturumlarını hatırlamak ve sistem performansını sağlamak için çerezler (cookies) kullanmaktadır.": "Diese Website verwendet Cookies, um Anmeldesitzungen zu speichern.",
+        "Ayarlarınızı istediğiniz zaman değiştirebilirsiniz.": "Sie können Ihre Einstellungen jederzeit ändern.",
+        "Çerez Ayarlarını Göster": "Cookie-Einstellungen anzeigen",
+        "Zorunlu Çerezler": "Notwendige Cookies", "Performans & Analiz": "Leistung & Analyse",
+        "Tümünü Kabul Et": "Alle Akzeptieren", "Kabul Et": "Akzeptieren", "Reddet": "Ablehnen",
+
+        "Aşk": "Liebe", "Para": "Finanzen", "Sağlık": "Gesundheit",
+        "Aşkta ateşlisiniz. Sürpriz bir karşılaşma an meselesi.": "Feurig in der Liebe. Eine Überraschung steht bevor.",
+        "Cesur kararlarınız para getiriyor. Beklenen ödeme yolda.": "Mutige Entscheidungen bringen Geld.",
+        "Enerjinizi doğru yönlendirin, spora ağırlık verin.": "Leite deine Energie richtig, mach Sport.",
+        "Güven arayışınız sonuç veriyor. Karşınızdaki size değer veriyor.": "Ihre Suche nach Sicherheit zahlt sich aus.",
+        "Maddi konularda sağlam adımlar. Karlı bir anlaşma var.": "Solide Schritte in finanziellen Angelegenheiten.",
+        "Boğaz bölgenize dikkat edin, soğuktan korunun.": "Achten Sie auf Ihren Halsbereich.",
+        "Edebi ve zihinsel uyum ön planda. Büyüleyeceksiniz.": "Geistige Harmonie im Vordergrund.",
+        "Pratik fikirleriniz anlık ek gelir getirebilir.": "Praktische Ideen bringen Zusatzeinkommen.",
+        "Zihinsel yorgunluğa karşı bol su için.": "Viel Wasser trinken gegen Erschöpfung."
+    };
+
+    window.safeTranslateDOM = function(rootElement, toDE) {
+        if(!rootElement) return;
+        let walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        let revDict = {};
+        for(let k in masterDict) revDict[masterDict[k]] = k;
+        let activeDict = toDE ? masterDict : revDict;
+        let keys = Object.keys(activeDict).sort((a,b) => b.length - a.length);
+
+        while(node = walker.nextNode()) {
+            let txt = node.nodeValue;
+            if(!txt || txt.trim() === '') continue;
+            let original = txt;
+            for(let key of keys) {
+                if(txt.includes(key)) { txt = txt.split(key).join(activeDict[key]); }
+            }
+            if(txt !== original) node.nodeValue = txt;
+        }
+    };
+
+    // 2. ABSOLUTER KLICK-HANDLER (Garantiert das Öffnen und Speichern)
+    document.addEventListener('click', function(e) {
+        let btn = e.target.closest('button, a, .noble-btn, .action-btn');
+        if(!btn) return;
+        
+        if(btn.classList.contains('misali-trans-btn') || btn.classList.contains('horo-trans-btn')) return;
+
+        let txt = btn.innerText || "";
+
+        // Cookie Button öffnen Fix!
+        if(txt.includes('Çerez Ayarlarını Göster') || txt.includes('Cookie-Einstellungen')) {
+            e.preventDefault(); 
+            e.stopPropagation(); // Blockiert alle anderen störenden Skripte auf deiner Seite
+            let banner = document.getElementById('misali-cookie-banner');
+            if(banner) {
+                banner.classList.add('show', 'center-pop');
+                banner.style.display = 'block'; // Erzwingt die Sichtbarkeit
+            }
+            return;
+        }
+
+        // Akzeptieren Fix!
+        if(txt.includes('Tümünü Kabul Et') || txt.includes('Alle Akzeptieren') || txt.includes('Kabul Et') || txt.includes('Akzeptieren') || txt.includes('Reddet') || txt.includes('Ablehnen')) {
+            if(btn.closest('#misali-cookie-banner') || btn.closest('.theme-panel')) {
+                localStorage.setItem('misali-cookie-accepted', 'true');
+                let banner = document.getElementById('misali-cookie-banner');
+                if(banner) {
+                    banner.classList.remove('show', 'center-pop');
+                }
+                let blurLayer = document.getElementById('misali-blur-bg');
+                if(blurLayer) blurLayer.classList.remove('active');
+            }
+        }
+    }, true); // "true" fängt den Klick VOR allen anderen Elementen ab!
+
+    // 3. BLUR HINTERGRUND UND INJEKTOREN BAUEN
+    setTimeout(function() {
+        // Blur Background einsetzen
+        let blurLayer = document.getElementById('misali-blur-bg');
+        if(!blurLayer) {
+            blurLayer = document.createElement('div');
+            blurLayer.id = 'misali-blur-bg';
+            blurLayer.className = 'misali-blur-bg';
+            document.body.appendChild(blurLayer);
+        }
+
+        // Gatekeeper (Einmalig beim allerersten Besuch)
+        let banner = document.getElementById('misali-cookie-banner');
+        if (banner && !localStorage.getItem('misali-cookie-accepted')) {
+            setTimeout(() => { 
+                banner.classList.add('show', 'center-pop');
+                blurLayer.classList.add('active'); 
+            }, 800);
+        }
+
+        // Übersetzer Buttons platzieren (gesteuert von einem unsichtbaren Observer, kein CPU-Fressendes Intervall!)
+        function injectButtons() {
+            let targetList = [
+                '#misali-cookie-banner', '#about-view', '#cookies-view .theme-panel',
+                '#datenschutz-view .theme-panel', '#impressum-view .theme-panel', '#info-popup-card .custom-box'
+            ];
+
+            targetList.forEach(selector => {
+                let target = document.querySelector(selector);
+                if (target && !target.querySelector('.misali-trans-btn')) {
+                    target.style.position = 'relative';
+                    target.insertAdjacentHTML('afterbegin', `<button class="misali-trans-btn" data-lang="tr"><i class="fas fa-language"></i> 🇩🇪 DE</button>`);
+                    target.querySelectorAll('p, strong, span, h1, h2, h3, h4').forEach(el => el.classList.add('no-bubble'));
+
+                    target.querySelector('.misali-trans-btn').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        let isDe = this.getAttribute('data-lang') === 'de';
+                        window.safeTranslateDOM(target, !isDe);
+                        if(isDe) {
+                            this.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE'; this.setAttribute('data-lang', 'tr');
+                            if(window.toast) window.toast("Türkçeye çevrildi", "🇹🇷");
+                        } else {
+                            this.innerHTML = '<i class="fas fa-language"></i> 🇹🇷 TR'; this.setAttribute('data-lang', 'de');
+                            if(window.toast) window.toast("Auf Deutsch übersetzt", "🇩🇪");
+                        }
+                    });
+                }
+            });
+
+            // Horoskop Button
+            let horoModal = document.getElementById('horoscopeDetailModal');
+            if (horoModal && horoModal.classList.contains('show')) {
+                let body = horoModal.querySelector('.modal-body');
+                if(body && !body.querySelector('.horo-trans-btn')) {
+                    body.style.position = 'relative';
+                    body.insertAdjacentHTML('afterbegin', `<button class="horo-trans-btn" data-lang="tr" style="top:15px; left:15px; right:auto;"><i class="fas fa-language"></i> 🇩🇪 DE</button>`);
+                    body.querySelector('.horo-trans-btn').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        let isDe = this.getAttribute('data-lang') === 'de';
+                        window.safeTranslateDOM(body, !isDe);
+                        if(isDe) { this.innerHTML = '<i class="fas fa-language"></i> 🇩🇪 DE'; this.setAttribute('data-lang', 'tr'); } 
+                        else { this.innerHTML = '<i class="fas fa-language"></i> 🇹🇷 TR'; this.setAttribute('data-lang', 'de'); }
+                    });
+                }
+            }
+        }
+
+        // Überwacht das DOM (Ressourcenschonend!) auf neue Menüs
+        const observer = new MutationObserver(injectButtons);
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        injectButtons(); // 1x direkt aufrufen
+
+        // 4. SPRECHBLASEN-MOTOR (HOVER BUBBLES)
+        const iconMap = [
+            { selector: '#u-emj, .header-zodiac, [id*="zodiac"]', text: "Sternzeichen", mini: false },
+            { selector: '#hd-date, .modal-date, [id*="date"]', text: "Datum", mini: true },
+            { selector: '#horoscope-grid small', textFunc: (el) => { let txt = el.innerText.trim(); const mMap = {"Oca":"Jan", "Şub":"Feb", "Mar":"März", "Nis":"Apr", "May":"Mai", "Haz":"Jun", "Tem":"Jul", "Ağu":"Aug", "Eyl":"Sep", "Eki":"Okt", "Kas":"Nov", "Ara":"Dez"}; for(let k in mMap) txt = txt.replace(k, mMap[k]); return txt; }, mini: true },
+            { selector: '#global-radio-widget', text: "Radio PL", mini: false }, { selector: '#floating-player', text: "Audio Player", mini: false },
+            { selector: '#ui-weather, .weather-box', text: "Wetter", mini: false }, { selector: '#ui-time-h, #ui-time-m, .time-box, #analog-clock', text: "Uhrzeit", mini: false },
+            { selector: '[onclick*="toggleTheme"]', text: "Hell/Dunkel Modus", mini: false }, { selector: '.hero-avatar, .mini-avatar', text: "Zufallsspruch", mini: false },
+            { selector: '.fa-bell, #bell-counter', text: "Benachrichtigungen", mini: false }, { selector: '#u-score', text: "Meine Punkte", mini: false }, { selector: '#u-name', text: "Benutzername", mini: false },
+            { selector: '.fa-cog, [onclick*="userModal"]', text: "Einstellungen", mini: false }, { selector: '[onclick*="triggerLogout"]', text: "Ausloggen", mini: false },
+            { selector: 'p', textFunc: (el) => { if(el.innerText && el.innerText.includes('Gönülden dile')) return "Von Herzen zur Zunge, von der Zunge zur Poesie..."; return null; }, mini: false },
+            { selector: '.fa-eye', text: "Aufrufe", mini: true }, { selector: '.fa-heart', text: "Gefällt mir", mini: true }, { selector: '.fa-whatsapp', text: "Auf WhatsApp", mini: true }, { selector: '.fa-copy', text: "Text kopieren", mini: true }, { selector: '.fa-comment', text: "Kommentare", mini: true }, { selector: '.fa-headphones', text: "Zuhörer", mini: true }, { selector: '.fa-play-circle, .fa-pause-circle', text: "Play / Pause", mini: true }, { selector: '.fa-bookmark', text: "Merken", mini: true }, { selector: '.real-blue-rose, [title="Gül"]', text: "Spezial-Rose", mini: true }
+        ];
+        const hoverMap = { "ANA SAYFA": "Startseite", "ŞİİRLERİM": "Meine Gedichte", "SÖZLERİM": "Meine Sprüche", "ŞAHSİYETLER": "Persönlichkeiten", "ATASÖZLERİ": "Sprichwörter", "MARŞLAR": "Hymnen", "HİKAYELER": "Geschichten", "KISSALAR": "Anekdoten", "FIKRALAR": "Witze", "SAĞLIK": "Gesundheit", "BİLMECELER": "Rätsel", "BULMACALAR": "Kreuzworträtsel", "OYUNLAR": "Spiele", "PROFİLİM": "Mein Profil", "SOHBET": "Chat", "ÜYE ESERLERİ": "Mitglieder-Werke", "SİZİN KALEMİNİZ": "Eure Feder", "CANLI": "Live", "ESERLER": "Werke", "AKLIMDA": "Gemerkt", "KALPLERİM": "Meine Herzen", "GÜLLERİM": "Meine Rosen", "IMPRESSUM": "🇹🇷 Künye", "DATENSCHUTZ": "🇹🇷 Gizlilik Politikası", "COOKIES": "🇹🇷 Çerezler" };
+
+        document.body.addEventListener('mouseover', function(e) {
+            let target = e.target; if (target.closest('.no-bubble')) return;
+            let translatedWord = null; let matchedElement = null; let isMini = false;
+
+            for (let item of iconMap) {
+                let el = target.closest(item.selector);
+                if (el) {
+                    if(item.textFunc) { let res = item.textFunc(el); if (res) { translatedWord = res; matchedElement = el; isMini = item.mini; break; } } 
+                    else { translatedWord = item.text; matchedElement = el; isMini = item.mini; break; }
+                }
+            }
+            if (!translatedWord) {
+                let el = target.closest('a, button, .c-stat, .clean-badge, .nav-link, .s-pill, h1, h2, h3, h4, strong, span, p');
+                if (el && el.innerText) {
+                    let text = el.innerText.replace(/[0-9]/g, '').trim().toLocaleUpperCase('tr-TR'); 
+                    if (hoverMap[text]) { translatedWord = hoverMap[text]; matchedElement = el; } 
+                    else { for (let key in hoverMap) { if (text.includes(key) && text.length < key.length + 6) { translatedWord = hoverMap[key]; matchedElement = el; break; } } }
+                }
+            }
+            if (translatedWord && matchedElement && !matchedElement.hasAttribute('data-bubble-active')) {
+                matchedElement.setAttribute('data-bubble-active', 'true');
+                let prefix = translatedWord.includes('🇹🇷') ? '' : '🇩🇪 ';
+                let bubble = document.createElement('div'); bubble.className = 'misali-hover-bubble';
+                if (isMini) bubble.classList.add('mini-bubble'); bubble.innerHTML = `${prefix}${translatedWord}`;
+                document.body.appendChild(bubble);
+                let rect = matchedElement.getBoundingClientRect(); bubble.style.top = (rect.top - (isMini ? 22 : 28)) + 'px'; 
+                setTimeout(() => { bubble.style.left = (rect.left + (rect.width / 2) - (bubble.offsetWidth / 2)) + 'px'; bubble.classList.add('show'); }, 10);
+                setTimeout(() => { bubble.classList.remove('show'); setTimeout(() => bubble.remove(), 200); matchedElement.removeAttribute('data-bubble-active'); }, 2000);
+                matchedElement.addEventListener('mouseleave', function cleanup() { bubble.classList.remove('show'); setTimeout(() => bubble.remove(), 200); matchedElement.removeAttribute('data-bubble-active'); matchedElement.removeEventListener('mouseleave', cleanup); }, { once: true });
+            }
+        });
+
+    }, 1500); 
+});
+</script>
+<!-- ===================================================================== -->
+
+<!-- ===================================================================== -->
+<!-- 💎 MİSALİ V82 PATCH: ELEGANT PREMIUM GATEKEEPER (GUEST LOCK) 💎 -->
+<!-- ===================================================================== -->
+<style id="misali-v82-css">
+    /* Premium Lock Overlay (Der edle Blur-Hintergrund) */
+    .premium-lock-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(4, 10, 20, 0.85); backdrop-filter: blur(15px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999999; opacity: 0; pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .premium-lock-overlay.show { opacity: 1; pointer-events: auto; }
+
+    /* Premium Lock Box (Die elegante Einladungskarte) */
+    .premium-lock-box {
+        background: linear-gradient(145deg, var(--bg-card), rgba(15,20,30,0.95));
+        border: 2px solid var(--accent-gold);
+        padding: 40px 30px; border-radius: 20px;
+        text-align: center; max-width: 420px; width: 90%;
+        box-shadow: 0 25px 60px rgba(212, 175, 55, 0.3), inset 0 0 30px rgba(212, 175, 55, 0.05);
+        transform: translateY(50px) scale(0.9);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative; overflow: hidden;
+    }
+    .premium-lock-overlay.show .premium-lock-box { transform: translateY(0) scale(1); }
+
+    /* Light Mode Anpassung */
+    [data-theme="light"] .premium-lock-box { background: linear-gradient(145deg, #ffffff, #f8fafc); box-shadow: 0 25px 60px rgba(180,134,8,0.3); }
+
+    /* Diamant / Icon Animation */
+    .premium-icon-wrapper {
+        font-size: 4.5rem; margin-bottom: 20px;
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8));
+        animation: floatDiamond 3s infinite ease-in-out;
+    }
+    @keyframes floatDiamond { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
+
+    /* Licht-Effekt im Hintergrund der Box */
+    .premium-light-sweep {
+        position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+        transform: skewX(-25deg); animation: sweepLight 4s infinite;
+        pointer-events: none;
+    }
+    @keyframes sweepLight { 0% { left: -150%; } 50%, 100% { left: 250%; } }
+
+    /* Buttons */
+    .btn-premium-reg {
+        background: linear-gradient(45deg, var(--accent-gold), #fde047);
+        color: #000 !important; border: none; padding: 14px 20px;
+        font-size: 1.1rem; font-weight: bold; border-radius: 12px;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); cursor: pointer;
+        transition: 0.3s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-premium-reg:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(212, 175, 55, 0.9); }
+    
+    .btn-premium-log {
+        background: transparent; color: var(--text-main);
+        border: 1px solid var(--border-soft); padding: 14px 20px;
+        font-size: 1.1rem; font-weight: bold; border-radius: 12px;
+        cursor: pointer; transition: 0.3s; flex: 1;
+    }
+    .btn-premium-log:hover { background: rgba(255,255,255,0.05); border-color: var(--text-main); }
+</style>
+
+<script id="misali-v82-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("💎 V82 Patch: Elegant Premium Gatekeeper aktiv.");
+
+        // ==============================================================
+        // 1. DIE ELEGANTE PREMIUM-LOCK FUNKTION
+        // ==============================================================
+        window.showPremiumLock = function(featureType) {
+            // Aktuelle Sprache ermitteln (Türkisch oder Deutsch)
+            let isDe = window.currentLang === 'de' || (document.querySelector('.misali-trans-btn') && document.querySelector('.misali-trans-btn').innerText.includes('TR'));
+            
+            // Icon je nach gesperrtem Inhalt
+            let icon = '💎';
+            if (featureType === 'audio') icon = '🎧';
+            if (featureType === 'radio') icon = '📻';
+
+            // Texte basierend auf der Sprache
+            let t_title = isDe ? "Premium Inhalt" : "Sadece Üyelere Özel";
+            let t_desc = isDe 
+                ? "Treten Sie unserer Familie bei, um dieses Werk zu hören und alle Privilegien freizuschalten. Die Registrierung ist 100% kostenlos!" 
+                : "Bu eşsiz eseri dinlemek ve tüm ayrıcalıklardan faydalanmak için ailemize katılın. Kayıt olmak tamamen ücretsizdir!";
+            let t_log = isDe ? "Einloggen" : "Giriş Yap";
+            let t_reg = isDe ? "Kostenlos Registrieren" : "Ücretsiz Kayıt Ol";
+
+            // Overlay erstellen, falls nicht vorhanden
+            let overlay = document.getElementById('premium-lock-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'premium-lock-overlay';
+                overlay.className = 'premium-lock-overlay';
+                document.body.appendChild(overlay);
+            }
+
+            // HTML in das Overlay füllen
+            overlay.innerHTML = `
+                <div class="premium-lock-box">
+                    <div class="premium-light-sweep"></div>
+                    <div class="premium-icon-wrapper">${icon}</div>
+                    <h2 style="font-family:'Playfair Display', serif; color:var(--accent-gold); font-size:1.8rem; margin-bottom:15px;">${t_title}</h2>
+                    <p style="color:var(--text-main); font-size:1.05rem; line-height:1.6; margin-bottom:30px;">${t_desc}</p>
+                    
+                    <div style="display:flex; gap:15px; width:100%;">
+                        <button class="btn-premium-log" onclick="window.closePremiumLock(); window.openModal('loginModal'); window.openTab('logGrp', 'l-login', document.querySelector('.panel-tabs button:nth-child(1)'))">${t_log}</button>
+                        <button class="btn-premium-reg" onclick="window.closePremiumLock(); window.openModal('loginModal'); window.openTab('logGrp', 'l-register', document.querySelector('.panel-tabs button:nth-child(2)'))"><i class="fas fa-user-plus"></i> ${t_reg}</button>
+                    </div>
+                    
+                    <button onclick="window.closePremiumLock()" style="margin-top:25px; background:none; border:none; color:var(--text-sub); font-size:0.9rem; cursor:pointer; text-decoration:underline;">
+                        ${isDe ? "Vielleicht später" : "Belki daha sonra"}
+                    </button>
+                </div>
+            `;
+
+            // Fenster mit Animation anzeigen
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('show'), 10);
+        };
+
+        window.closePremiumLock = function() {
+            let overlay = document.getElementById('premium-lock-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+                setTimeout(() => { overlay.style.display = 'none'; }, 400);
+            }
+        };
+
+        // ==============================================================
+        // 2. KERN-FUNKTIONEN ÜBERSCHREIBEN (ABFANGEN DER GÄSTE)
+        // ==============================================================
+        
+        // A) Lesefenster (Modal) & Audio-Play auf Karten
+        const v81OpenModal = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            // Finde das Item in der Datenbank heraus
+            let source = type === 'userPoems' ? window.userPoemsDB : (window.DB ? window.DB[type] : []);
+            let item = (source || []).find(x => String(x.id) === String(id));
+            let hasMusic = item && (item.hasAudio || item.audio);
+            
+            // Was ist Premium?
+            // - Alle eigenen Werke von Misali (poems, quotes)
+            // - Alle Werke von Usern (userPoems)
+            // - ALLES was Musik hat!
+            let isPremium = ['poems', 'quotes', 'userPoems'].includes(type) || hasMusic;
+            
+            // Wenn der User ein Gast ist UND der Inhalt Premium ist -> SPERREN!
+            if (!window.currentUser && isPremium) {
+                window.showPremiumLock(hasMusic ? 'audio' : 'content');
+                return; // Bricht ab, das normale Fenster öffnet sich NICHT!
+            }
+            
+            // Wenn er eingeloggt ist oder das Item gratis ist (z.B. Witze, Sprichwörter ohne Musik)
+            if (v81OpenModal) await v81OpenModal(id, type);
+        };
+
+        // B) Globales Radio (Blauer Player)
+        const v81BgmToggle = window.bgmToggle;
+        window.bgmToggle = async function(forcePlay) {
+            if (!window.currentUser) {
+                window.showPremiumLock('radio');
+                return; // Bricht ab, Radio startet NICHT!
+            }
+            if (v81BgmToggle) await v81BgmToggle(forcePlay);
+        };
+
+        // C) Musik-Bibliothek (Top 10 Liste Button)
+        const v81OpenMusicLib = window.openMusicLibrary;
+        window.openMusicLibrary = function() {
+            if (!window.currentUser) {
+                window.showPremiumLock('audio');
+                return;
+            }
+            if (v81OpenMusicLib) v81OpenMusicLib();
+        };
+
+    }, 3500); // Wartet 3.5 Sekunden, bis alle alten Systeme bereit sind, und legt dann die Security-Locks darüber
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 💎 MİSALİ V83 PATCH: ELEGANT PREMIUM GATEKEEPER (GUEST LOCK) 💎 -->
+<!-- ===================================================================== -->
+<style id="misali-v83-css">
+    /* Premium Lock Overlay (Der edle Blur-Hintergrund) */
+    .premium-lock-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(4, 10, 20, 0.85); backdrop-filter: blur(15px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999999; opacity: 0; pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .premium-lock-overlay.show { opacity: 1; pointer-events: auto; }
+
+    /* Premium Lock Box (Die elegante Einladungskarte) */
+    .premium-lock-box {
+        background: linear-gradient(145deg, var(--bg-card), rgba(15,20,30,0.95));
+        border: 2px solid var(--accent-gold);
+        padding: 40px 30px; border-radius: 20px;
+        text-align: center; max-width: 420px; width: 90%;
+        box-shadow: 0 25px 60px rgba(212, 175, 55, 0.3), inset 0 0 30px rgba(212, 175, 55, 0.05);
+        transform: translateY(50px) scale(0.9);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative; overflow: hidden;
+    }
+    .premium-lock-overlay.show .premium-lock-box { transform: translateY(0) scale(1); }
+
+    /* Light Mode Anpassung */
+    [data-theme="light"] .premium-lock-box { background: linear-gradient(145deg, #ffffff, #f8fafc); box-shadow: 0 25px 60px rgba(180,134,8,0.3); }
+
+    /* Diamant / Icon Animation */
+    .premium-icon-wrapper {
+        font-size: 4.5rem; margin-bottom: 20px;
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8));
+        animation: floatDiamond 3s infinite ease-in-out;
+    }
+    @keyframes floatDiamond { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
+
+    /* Licht-Effekt im Hintergrund der Box */
+    .premium-light-sweep {
+        position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+        transform: skewX(-25deg); animation: sweepLight 4s infinite;
+        pointer-events: none;
+    }
+    @keyframes sweepLight { 0% { left: -150%; } 50%, 100% { left: 250%; } }
+
+    /* Buttons */
+    .btn-premium-reg {
+        background: linear-gradient(45deg, var(--accent-gold), #fde047);
+        color: #000 !important; border: none; padding: 14px 20px;
+        font-size: 1.1rem; font-weight: bold; border-radius: 12px;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); cursor: pointer;
+        transition: 0.3s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-premium-reg:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(212, 175, 55, 0.9); }
+    
+    .btn-premium-log {
+        background: transparent; color: var(--text-main);
+        border: 1px solid var(--border-soft); padding: 14px 20px;
+        font-size: 1.1rem; font-weight: bold; border-radius: 12px;
+        cursor: pointer; transition: 0.3s; flex: 1;
+    }
+    .btn-premium-log:hover { background: rgba(255,255,255,0.05); border-color: var(--text-main); }
+</style>
+
+<script id="misali-v83-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("💎 V83 Patch: Ultimate Premium Gatekeeper aktiv.");
+
+        // ==============================================================
+        // 1. DIE ELEGANTE PREMIUM-LOCK FUNKTION
+        // ==============================================================
+        window.showPremiumLock = function(featureType) {
+            // Aktuelle Sprache ermitteln (Türkisch oder Deutsch)
+            let isDe = window.currentLang === 'de' || (document.querySelector('.misali-trans-btn') && document.querySelector('.misali-trans-btn').innerText.includes('TR'));
+            
+            // Icon je nach gesperrtem Inhalt
+            let icon = '💎';
+            if (featureType === 'audio') icon = '🎧';
+            if (featureType === 'radio') icon = '📻';
+
+            // Texte basierend auf der Sprache
+            let t_title = isDe ? "Premium Inhalt" : "Sadece Üyelere Özel";
+            let t_desc = isDe 
+                ? "Treten Sie unserer Familie bei, um dieses Werk in voller Pracht zu erleben und alle Privilegien freizuschalten.<br><br><span style='color:var(--accent-green);'>Die Registrierung ist 100% kostenlos!</span>" 
+                : "Bu eşsiz eseri incelemek ve tüm ayrıcalıklardan faydalanmak için ailemize katılın.<br><br><span style='color:var(--accent-green);'>Kayıt olmak tamamen ücretsizdir!</span>";
+            let t_log = isDe ? "Einloggen" : "Giriş Yap";
+            let t_reg = isDe ? "Kayıt Ol" : "Kayıt Ol";
+
+            // Overlay erstellen, falls nicht vorhanden
+            let overlay = document.getElementById('premium-lock-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'premium-lock-overlay';
+                overlay.className = 'premium-lock-overlay';
+                document.body.appendChild(overlay);
+            }
+
+            // HTML in das Overlay füllen
+            overlay.innerHTML = `
+                <div class="premium-lock-box">
+                    <div class="premium-light-sweep"></div>
+                    <div class="premium-icon-wrapper">${icon}</div>
+                    <h2 style="font-family:'Playfair Display', serif; color:var(--accent-gold); font-size:1.8rem; margin-bottom:15px;">${t_title}</h2>
+                    <p style="color:var(--text-main); font-size:1.05rem; line-height:1.6; margin-bottom:30px;">${t_desc}</p>
+                    
+                    <div style="display:flex; gap:15px; width:100%;">
+                        <button class="btn-premium-log" onclick="window.closePremiumLock(); window.openModal('loginModal');">${t_log}</button>
+                        <button class="btn-premium-reg" onclick="window.closePremiumLock(); window.openModal('loginModal');"><i class="fas fa-user-plus"></i> ${t_reg}</button>
+                    </div>
+                    
+                    <button onclick="window.closePremiumLock()" style="margin-top:25px; background:none; border:none; color:var(--text-sub); font-size:0.9rem; cursor:pointer; text-decoration:underline; transition:0.3s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-sub)'">
+                        ${isDe ? "Vielleicht später" : "Belki daha sonra"}
+                    </button>
+                </div>
+            `;
+
+            // Fenster mit Animation anzeigen
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('show'), 10);
+        };
+
+        window.closePremiumLock = function() {
+            let overlay = document.getElementById('premium-lock-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+                setTimeout(() => { overlay.style.display = 'none'; }, 400);
+            }
+        };
+
+        // ==============================================================
+        // 2. KERN-FUNKTIONEN ÜBERSCHREIBEN (ABFANGEN DER GÄSTE)
+        // ==============================================================
+        
+        // Klickt ein Gast irgendwohin, schalten wir uns ein, BEVOR die Seite reagiert!
+        document.addEventListener('click', function(e) {
+            // Wenn der User eingeloggt ist, brechen wir hier sofort ab. Er darf alles klicken!
+            if (window.currentUser) return;
+
+            // Wir prüfen, ob der Gast etwas anklickt, das Premium ist:
+            let isCard = e.target.closest('.card'); // Alle quadratischen Karten
+            let isTop10 = e.target.closest('.audio-track-item'); // Top 10 Listen-Einträge
+            let isPOTD = e.target.closest('[onclick*="openPOTD"]'); // Work of the Day Klick
+            let isPOTDBadge = e.target.closest('#potd-text') || e.target.closest('.potd-container'); // Work of the Day Inhalt
+            let isRadio = e.target.closest('#global-radio-widget'); // Das globale Radio
+            let isMusicLib = e.target.closest('#music-lib-btn') || e.target.closest('[onclick*="openMusicLibrary"]'); // Musikbibliothek
+            let isRandomBtn = e.target.closest('#n-zarf') || e.target.closest('.hero-avatar'); // Zarf oder Avatar (Zufallsgedicht)
+            let isReadModalLink = e.target.closest('[onclick*="openReadModal"]'); // Jeglicher Link zu einem Gedicht
+
+            // Wenn es etwas "Wertvolles" ist:
+            if (isCard || isTop10 || isPOTD || isPOTDBadge || isRadio || isMusicLib || isRandomBtn || isReadModalLink) {
+                
+                // Wir stoppen den Klick sofort! Kein Fenster darf sich öffnen!
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Herausfinden, ob es Musik war (für das passende Icon)
+                let iconType = 'content';
+                if (isRadio || isMusicLib || isTop10 || (isCard && isCard.innerHTML.includes('fa-music'))) {
+                    iconType = 'audio';
+                }
+
+                // Wunderschönes Popup anzeigen
+                window.showPremiumLock(iconType);
+            }
+        }, true); // "true" aktiviert die CAPTURE-PHASE (Wir fangen den Klick als Allererstes ab!)
+
+        // Zur absoluten Sicherheit überschreiben wir auch die JavaScript-Befehle selbst:
+        const origOpenPOTD = window.openPOTD;
+        window.openPOTD = function() {
+            if (!window.currentUser) return window.showPremiumLock('content');
+            if (origOpenPOTD) origOpenPOTD();
+        };
+
+        const origOpenReadModal = window.openReadModal;
+        window.openReadModal = async function(id, type) {
+            if (!window.currentUser) {
+                let source = type === 'userPoems' ? window.userPoemsDB : (window.DB ? window.DB[type] : []);
+                let item = (source || []).find(x => String(x.id) === String(id));
+                let hasMusic = item && (item.hasAudio || item.audio);
+                window.showPremiumLock(hasMusic ? 'audio' : 'content');
+                return; 
+            }
+            if (origOpenReadModal) await origOpenReadModal(id, type);
+        };
+
+        const origBgmToggle = window.bgmToggle;
+        window.bgmToggle = async function(forcePlay) {
+            if (!window.currentUser) return window.showPremiumLock('radio');
+            if (origBgmToggle) await origBgmToggle(forcePlay);
+        };
+
+        const origOpenMusicLib = window.openMusicLibrary;
+        window.openMusicLibrary = function() {
+            if (!window.currentUser) return window.showPremiumLock('audio');
+            if (origOpenMusicLib) origOpenMusicLib();
+        };
+
+    }, 2500); // Wartet 2.5 Sekunden, bis alle alten Systeme bereit sind, und legt dann die Security-Locks wie ein Netz darüber!
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 🖋️ MİSALİ SNIPPET: REGISTRATION & EMOJI UPGRADE (PROFESSIONAL UI) 🖋️ -->
+<!-- ===================================================================== -->
+<style id="misali-snippet-reg-ui">
+    /* 1. EMOJI-RASTER (Dicht, Mehrzeilig, Kompakt) */
+    .avatar-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)) !important; /* Packt die Emojis extrem nah aneinander */
+        gap: 6px !important;
+        padding: 12px !important;
+        background: rgba(0, 0, 0, 0.15) !important;
+        border: 1px inset rgba(255, 255, 255, 0.05) !important;
+        border-radius: 12px !important;
+        max-height: 160px !important; /* Sorgt für eine mehrzeilige Scroll-Box */
+        overflow-y: auto !important;
+        box-shadow: inset 0 5px 15px rgba(0,0,0,0.3) !important;
+    }
+    
+    /* 2. DAS EINZELNE EMOJI (Sanfter Hover-Effekt) */
+    .avatar-opt {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1.3rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        border-radius: 8px !important;
+        transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+        background: transparent !important;
+    }
+    .avatar-opt:hover, .avatar-opt.selected {
+        background: var(--accent-gold) !important;
+        transform: scale(1.25) !important;
+        box-shadow: 0 0 12px rgba(212,175,55,0.6) !important;
+        z-index: 2;
+    }
+
+    /* 3. ELEGANTE SCROLLBAR FÜR DIE EMOJIS */
+    .avatar-grid::-webkit-scrollbar { width: 6px; }
+    .avatar-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+    .avatar-grid::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 4px; }
+
+    /* 4. PROFESSIONALISIERUNG DER REGISTRIERUNGS-FELDER */
+    #l-register .inp {
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        transition: 0.3s;
+        padding: 12px 15px !important;
+    }
+    #l-register .inp:focus {
+        border-color: var(--accent-gold) !important;
+        box-shadow: 0 0 10px rgba(212,175,55,0.2) !important;
+        background: rgba(255,255,255,0.06) !important;
+        transform: translateY(-2px);
+    }
+    
+    /* Light Mode Anpassungen für sauberen Look */
+    [data-theme="light"] .avatar-grid { background: #f8fafc !important; border-color: #e2e8f0 !important; box-shadow: inset 0 3px 10px rgba(0,0,0,0.05) !important; }
+    [data-theme="light"] #l-register .inp { background: #fff !important; border-color: #cbd5e1 !important; color: #000 !important; }
+</style>
+
+<script id="misali-snippet-emoji-engine">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🖋️ Snippet geladen: Neue Emojis und kompaktes Formular-Raster.");
+
+        // 1. NEUE, ERWEITERTE & POETISCHE EMOJI-BIBLIOTHEK
+        window.EMOJI_LIBRARY = [
+            // Şiir & Edebiyat & Estetik (Poesie & Ästhetik)
+            '🪶','✒️','🖋️','🖊️','📜','📖','📚','🕯️','⏳','🕰️','🗝️','🎭','🎨','🎼','🎵','🎶','🎻','🎹',
+            // Gök Cisimleri & Büyü (Himmel & Magie)
+            '✨','⭐','🌟','💫','☀️','🌙','🌜','🌛','🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘','🪐','🌌','☁️',
+            '👑','💎','💍','🧿','📿','🔮','🪄','⚜️','🔱','⚖️','⚔️','🛡️','⚓','🧭','🗺️','⛩️','🗼','🏰',
+            // Duygu & Kalpler (Gefühle)
+            '🖤','🤍','🤎','💜','💙','💚','💛','🧡','❤️','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝',
+            // Doğa & Canlılar (Natur)
+            '🌹','🥀','🌺','🌻','🌼','🌷','🌸','💮','🌱','🌿','☘️','🍀','🍁','🍂','🍃','🦋','🕊️','🦢','🦚','🦅',
+            '🦉','🦇','🐺','🦊','🦁','🐯','🐅','🐆','🐎','🦌','🐉','🐲','🐍',
+            // Yüzler & İfadeler (Ausdrücke)
+            '👤','👥','😊','😇','😌','😉','🙃','😍','🥰','😘','😔','😟','😕','🙁','☹️','😢','😭','🥺','😎','🥸',
+            // Bayraklar (Flaggen)
+            '🇹🇷','🇩🇪','🇦🇿','🇹🇲','🇺🇿','🇰🇿','🇰🇬','🇨🇾','🇪🇺'
+        ];
+
+        // 2. RENDER-FUNKTION ÜBERSCHREIBEN (Damit das dichte Raster auf alle Picker wirkt)
+        window.renderAvatarPicker = function() {
+            let grids = ['admin-emoji-picker', 'adm-emoji-picker-add', 'adm-emoji-picker-edit', 'edit-avatar-grid', 'reg-avatar-grid', 'chat-emoji-picker', 'write-emoji-picker', 'admin-info-emoji-picker', 'admin-ann-emoji-picker'];
+            
+            grids.forEach(gid => {
+                let g = document.getElementById(gid); 
+                if (!g) return;
+                
+                g.innerHTML = window.EMOJI_LIBRARY.map(em => {
+                    if(gid === 'chat-emoji-picker') {
+                        return `<div class="avatar-opt" onclick="let ci = document.getElementById('chat-inp'); ci.value += '${em}'; ci.focus();">${em}</div>`;
+                    } else if(gid === 'admin-info-emoji-picker' || gid === 'admin-ann-emoji-picker') {
+                        return `<div class="avatar-opt" onclick="window.insertAnnTag('${em}', '')">${em}</div>`;
+                    } else {
+                        // Klick überträgt das Emoji sofort in alle relevanten Input-Felder
+                        return `<div class="avatar-opt" onclick="
+                            document.querySelectorAll('#${gid} .avatar-opt').forEach(a=>a.classList.remove('selected')); 
+                            this.classList.add('selected'); 
+                            let inps=['adm-emoji', 'adm-e-emoji-disp', 'edit-emoji', 'reg-emoji', 'write-emoji']; 
+                            inps.forEach(i => { let el=document.getElementById(i); if(el) el.value='${em}'; });
+                        ">${em}</div>`;
+                    }
+                }).join('');
+            });
+        };
+
+        // 3. Einmal sofort ausführen, um die alten Emojis sofort durch das neue Raster zu ersetzen!
+        window.renderAvatarPicker();
+
+    }, 2000); 
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 🚫 MİSALİ SNIPPET: EXCLUSIVE EMOJIS & MASSIVE LIBRARY UPGRADE 🚫 -->
+<!-- ===================================================================== -->
+<style id="misali-snippet-exclusive-emojis">
+    /* Das Design für vergebene Emojis */
+    .avatar-opt.taken {
+        opacity: 0.3 !important;
+        cursor: not-allowed !important;
+        position: relative !important;
+        transform: scale(0.9) !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    
+    .avatar-opt.taken:hover {
+        background: rgba(239, 68, 68, 0.2) !important;
+        transform: scale(0.9) !important;
+        box-shadow: none !important;
+    }
+
+    /* Das "Verboten" Symbol, das über dem vergebenen Emoji schwebt */
+    .forbidden-mark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.6rem;
+        opacity: 0.8;
+        pointer-events: none;
+        text-shadow: 0 0 5px rgba(0,0,0,0.8);
+    }
+</style>
+
+<script id="misali-snippet-exclusive-engine">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🚫 Snippet geladen: Exklusive Symbole (Unique Avatars) & XXL Bibliothek aktiv.");
+
+        // 1. XXL EMOJI-BIBLIOTHEK (Doppelt so viele Symbole!)
+        window.EMOJI_LIBRARY = [
+            // Edebiyat & Şiir (Poesie)
+            '🪶','✒️','🖋️','🖊️','📜','📖','📚','🕯️','⏳','🕰️','🗝️','🎭','🎨','🎼','🎵','🎶','🎻','🎹',
+            // Astroloji & Gök (Kosmos)
+            '✨','⭐','🌟','💫','☀️','🌙','🌜','🌛','🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘','🪐','🌌','☁️','☄️','🌦️','🌬️','❄️',
+            // Büyü & Gizem (Magie & Mystik)
+            '👑','💎','💍','🧿','📿','🔮','🪄','⚜️','🔱','⚖️','⚔️','🛡️','⚓','🧭','🗺️','⛩️','🗼','🏰',
+            // Elementler & Doğa (Elemente & Natur)
+            '🔥','💧','🌊','⚡','🌈','🫧','🪴','🌲','🌳','🌴','🌵','🍁','🍂','🍃','🌿','☘️','🍀','🌱',
+            // Çiçekler (Blumen)
+            '🌹','🥀','🌺','🌻','🌼','🌷','🌸','💮',
+            // Ruh & Duygu (Seele & Gefühle)
+            '🖤','🤍','🤎','💜','💙','💚','💛','🧡','❤️','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝',
+            // Hayvanlar (Krafttiere)
+            '🦅','🦉','🦇','🐺','🦊','🦁','🐯','🐅','🐆','🐎','🦌','🐉','🐲','🐍','🐢','🦎','🦋','🕊️','🦢','🦚',
+            // Objeler (Objekte)
+            '☕','🍵','🍷','🥂','🍹','🧉','💡','🏮','🪔','🎉','🎊','🎈','🎏','🎀','🎁','🧩','🧸','🪆',
+            // Yüzler (Gesichter)
+            '👤','👥','😊','😇','😌','😉','🙃','😍','🥰','😘','😔','😟','😕','🙁','☹️','😢','😭','🥺','😎','🥸',
+            // Bayraklar (Flaggen)
+            '🇹🇷','🇩🇪','🇦🇿','🇹🇲','🇺🇿','🇰🇿','🇰🇬','🇨🇾','🇪🇺'
+        ];
+
+        // 2. RENDER-FUNKTION ÜBERSCHREIBEN (Einzigartigkeits-Filter einbauen)
+        window.renderAvatarPicker = function() {
+            let grids = ['admin-emoji-picker', 'adm-emoji-picker-add', 'adm-emoji-picker-edit', 'edit-avatar-grid', 'reg-avatar-grid', 'chat-emoji-picker', 'write-emoji-picker', 'admin-info-emoji-picker', 'admin-ann-emoji-picker'];
+            
+            // Finde alle vergebenen Emojis in der Datenbank
+            let takenEmojis = [];
+            if (window.userDatabase) {
+                Object.values(window.userDatabase).forEach(u => {
+                    // Das EIGENE Emoji nicht blockieren (damit man es beim Bearbeiten behalten kann)
+                    if (window.currentUser && window.currentUser.username === u.username) return;
+                    if (u.emoji) takenEmojis.push(u.emoji);
+                });
+            }
+
+            grids.forEach(gid => {
+                let g = document.getElementById(gid); 
+                if (!g) return;
+                
+                g.innerHTML = window.EMOJI_LIBRARY.map(em => {
+                    
+                    // Wir blockieren Emojis NUR bei der Registrierung und beim Profil-Bearbeiten!
+                    // In Chats, beim Schreiben von Gedichten oder als Admin darf man alle nutzen.
+                    let isUniquePicker = ['edit-avatar-grid', 'reg-avatar-grid'].includes(gid);
+                    let isTaken = isUniquePicker && takenEmojis.includes(em);
+
+                    if(gid === 'chat-emoji-picker') {
+                        return `<div class="avatar-opt" onclick="let ci = document.getElementById('chat-inp'); ci.value += '${em}'; ci.focus();">${em}</div>`;
+                    } else if(gid === 'admin-info-emoji-picker' || gid === 'admin-ann-emoji-picker') {
+                        return `<div class="avatar-opt" onclick="window.insertAnnTag('${em}', '')">${em}</div>`;
+                    } else {
+                        // Wenn das Emoji vergeben ist -> Blockiert & Ausgegraut
+                        if (isTaken) {
+                            return `
+                                <div class="avatar-opt taken" title="Bu sembol başka bir kullanıcı tarafından alınmış">
+                                    ${em}
+                                    <span class="forbidden-mark">🚫</span>
+                                </div>`;
+                        } else {
+                            // Wenn frei -> Klickbar und elegant
+                            return `<div class="avatar-opt" onclick="
+                                document.querySelectorAll('#${gid} .avatar-opt').forEach(a=>a.classList.remove('selected')); 
+                                this.classList.add('selected'); 
+                                let inps=['adm-emoji', 'adm-e-emoji-disp', 'edit-emoji', 'reg-emoji', 'write-emoji']; 
+                                inps.forEach(i => { let el=document.getElementById(i); if(el) el.value='${em}'; });
+                            ">${em}</div>`;
+                        }
+                    }
+                }).join('');
+            });
+        };
+
+        // 3. Sofort neu rendern lassen
+        window.renderAvatarPicker();
+
+        // 4. Den Emoji Picker bei jedem Öffnen des Modals frisch laden (wegen neuen Registrierungen)
+        const v83ModalOpener = window.openModal;
+        window.openModal = function(id) {
+            if(v83ModalOpener) v83ModalOpener(id);
+            if (id === 'avatarModal' || id === 'loginModal') {
+                window.renderAvatarPicker();
+            }
+        };
+
+    }, 2500); 
+});
+</script>
+
+<!-- ===================================================================== -->
+<!-- 📱 MİSALİ V84 PATCH: IOS WEBKIT, FONTS & INBOX RENDERING FIX 📱 -->
+<!-- ===================================================================== -->
+<style id="misali-v84-mobile-css">
+    /* 1. KUSURSUZ FONT YÜKLEMESİ VE ANDROID/EDGE FALLBACK */
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+    
+    .misali-signature-text, 
+    .author-signature-gold, 
+    .author-signature-white, 
+    [style*="'Great Vibes'"] {
+        font-family: 'Great Vibes', 'Brush Script MT', 'Dancing Script', 'Segoe Print', cursive !important;
+    }
+
+    /* 2. IPHONE & WEBKIT STANDARTLARI (TAŞMAYI ÖNLER) */
+    html, body {
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none; /* iPhone'daki istenmeyen menüleri engeller */
+    }
+
+    /* 3. MOBİL EKRANLAR İÇİN DİNAMİK KÜÇÜLTME (iPhone 13/14 vb. max 430px) */
+    @media (max-width: 430px) {
+        /* Top 10 Sesli Eserler Listesi Sıkışma Koruması */
+        .audio-track-item {
+            flex-direction: column !important; /* Yan yana sığmazsa alt alta at! */
+            align-items: flex-start !important;
+            padding: 12px !important;
+            gap: 8px !important;
+        }
+        .audio-track-item > div:nth-child(2) { width: 100% !important; }
+        .audio-track-item .clean-badge { font-size: 0.55rem !important; padding: 3px 5px !important; }
+        
+        /* Kartların İçeriği */
+        .card { padding: 12px 10px !important; }
+        .card-t { font-size: 0.95rem !important; white-space: normal !important; overflow: visible !important; }
+        .card-sub { font-size: 0.75rem !important; line-height: 1.3 !important; }
+        
+        /* Kart Altı Butonları (Gül, Kalp, Yorum) */
+        .clean-card-footer { flex-direction: column !important; gap: 8px !important; align-items: center !important; }
+        .footer-left, .footer-right { width: 100% !important; justify-content: center !important; }
+        .c-stat { font-size: 0.65rem !important; padding: 2px 4px !important; }
+    }
+</style>
+
+<script id="misali-v84-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("📱 V84 Patch: Webkit UI, Fonts & User Inbox Fix aktiv.");
+
+        // ==============================================================
+        // 1. GELEN KUTUSU (USER INBOX) KESİN GÖRÜNÜRLÜK FİXİ
+        // ==============================================================
+        window.renderUserMessages = function() {
+            // Findet die Box, egal wo sie im HTML versteckt ist
+            let msgModal = document.getElementById('msgModal');
+            if (!msgModal) return;
+            
+            let msgBox = msgModal.querySelector('.theme-sub-panel') || msgModal.querySelector('.modal-body');
+            if (!msgBox) return;
+
+            if (!window.currentUser || !window.currentUser.notifications || window.currentUser.notifications.length === 0) {
+                msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px; font-style:italic; font-size:1.1rem;"><i class="fas fa-envelope-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz yeni mesajınız yok.</div>';
+                return;
+            }
+            
+            let html = '<button class="noble-btn" style="margin-bottom:20px; width:100%; border-color:var(--accent-red); color:var(--accent-red); background:rgba(239,68,68,0.05); font-size:1.1rem; padding:12px;" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
+            
+            html += window.currentUser.notifications.map(n => {
+                let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer; padding:15px; border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); transition:all 0.3s ease; border-radius:12px; margin-bottom:12px; position:relative; box-shadow:0 4px 10px rgba(0,0,0,0.1);"` : `style="padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:12px; position:relative;"`;
+                
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-gold); color:#000; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(212,175,55,0.5); font-size:1.1rem;"><i class="fas fa-search"></i></div>` : '';
+                
+                // Formatiert die Nachricht
+                let formattedMsg = (typeof window.formatLogMessage === 'function') ? window.formatLogMessage(n.msg) : n.msg;
+
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="color:var(--text-sub); font-size:0.75rem; margin-bottom:10px; font-family:'Space Mono', monospace; display:flex; align-items:center; gap:5px;"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> ${n.time}</div>
+                    <div style="color:var(--text-main); font-size:1rem; line-height:1.6; padding-right:${isClickable ? '45px' : '0'};">${formattedMsg}</div>
+                </div>`;
+            }).join('');
+            
+            msgBox.innerHTML = html;
+        };
+
+        // ==============================================================
+        // 2. ADMIN MELDUNGEN FÜR NORMALE USER BLOCKIEREN
+        // ==============================================================
+        // Der Hintergrund-Scanner für gelöschte User darf keine Toasts bei normalen Usern auslösen!
+        const origRunSafeBackgroundUserRecovery = window.runSafeBackgroundUserRecovery;
+        window.runSafeBackgroundUserRecovery = function() {
+            // Brich komplett ab, wenn niemand eingeloggt ist, oder der User KEIN Admin ist
+            if (!window.currentUser || window.currentUser.role !== 'admin') {
+                return;
+            }
+            // Ansonsten führe die normale Wiederherstellung durch
+            if(origRunSafeBackgroundUserRecovery) origRunSafeBackgroundUserRecovery();
+        };
+
+        // ==============================================================
+        // 3. ANZAHL DER BENACHRICHTIGUNGEN (ZÄHLER) KORRIGIEREN
+        // ==============================================================
+        const origUpdateHeaderUserUI = window.updateHeaderUserUI;
+        window.updateHeaderUserUI = function() {
+            if(origUpdateHeaderUserUI) origUpdateHeaderUserUI();
+            
+            let u = window.currentUser;
+            let bellBadge = document.getElementById('bell-counter');
+            if(bellBadge) { 
+                let count = 0;
+                if (u && u.role === 'admin') {
+                    count = window.adminLogs ? window.adminLogs.length : 0;
+                } else if (u) {
+                    count = u.notifications ? u.notifications.length : 0;
+                }
+                bellBadge.innerText = count; 
+                bellBadge.style.display = count > 0 ? 'flex' : 'none'; 
+            }
+        };
+
+        // Lade die Inbox für den aktuell angemeldeten User direkt neu
+        if(window.currentUser) {
+            window.updateHeaderUserUI();
+            window.renderUserMessages();
+        }
+
+    }, 2500); 
+});
+</script>
 
 </body>
 </html>
