@@ -18207,5 +18207,158 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<!-- ===================================================================== -->
+<!-- 📱🔥 MİSALİ V87 MASTER-FIX: IPHONE UI, MOOD MENU & USER NOTIFICATIONS 🔥📱 -->
+<!-- ===================================================================== -->
+<style id="misali-v87-css">
+    /* 1. IPHONE (WEBKIT) TOP 10 & TÜM SESLİ ESERLER TAŞMA KORUMASI */
+    @media (max-width: 430px) {
+        /* Sesli eserler satırını tamamen esnek ve alt alta uyumlu yapıyoruz */
+        .audio-track-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 10px !important;
+            gap: 8px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        
+        .audio-track-item > div:nth-child(2) {
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        /* İstatistik rozetlerini mobilde alt alta ve düzenli hizala */
+        .audio-track-item .clean-badge, 
+        .audio-track-item span[style*="background"] {
+            font-size: 0.55rem !important;
+            padding: 2px 5px !important;
+        }
+        
+        .audio-track-item div[style*="display:flex"] {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 4px !important;
+            margin-top: 5px !important;
+        }
+    }
+
+    /* 2. DUYGU PUSULASI MENÜSÜ EKRAN TAŞMA FİXİ (Yukarı Doğru Açılma) */
+    @media (max-width: 768px) {
+        #n-mood-menu {
+            bottom: 75px !important; /* Pusula butonunun hemen üzerinden yukarı doğru açılır */
+            top: auto !important;
+            left: 15px !important;
+            transform: none !important;
+            max-height: 200px !important;
+            overflow-y: auto !important;
+        }
+        #n-mood-menu.show {
+            transform: none !important;
+        }
+    }
+</style>
+
+<script id="misali-v87-js">
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        console.log("🔥 V87 Master-Fix: iPhone UI, Mood Menu & User Inbox geladen.");
+
+        // ==============================================================
+        // 1. KULLANICI BİLDİRİMLERİ (GELEN KUTUSU) KESİN SENKRONİZASYON FİXİ
+        // ==============================================================
+        // Kullanıcı giriş yaptığında bildirimleri hem oturumdan hem de Firebase'den garantili çekiyoruz
+        window.renderUserMessages = function() {
+            let msgModal = document.getElementById('msgModal');
+            if (!msgModal) return;
+            
+            let msgBox = msgModal.querySelector('.theme-sub-panel') || msgModal.querySelector('.modal-body');
+            if (!msgBox) return;
+
+            // Güncel oturum verisini tazeleyelim
+            try {
+                let sessionUsr = JSON.parse(sessionStorage.getItem('misaliUser') || localStorage.getItem('misaliUser') || 'null');
+                if (sessionUsr) window.currentUser = sessionUsr;
+            } catch(e){}
+
+            let u = window.currentUser;
+            if (!u || !u.notifications || u.notifications.length === 0) {
+                msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px; font-style:italic; font-size:1.1rem;"><i class="fas fa-envelope-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5; display:block;"></i>Henüz yeni mesajınız yok.</div>';
+                return;
+            }
+            
+            let html = '<button class="noble-btn" style="margin-bottom:20px; width:100%; border-color:var(--accent-red); color:var(--accent-red); background:rgba(239,68,68,0.05); font-size:1.1rem; padding:12px;" onclick="window.clearUserMessages()"><i class="fas fa-trash"></i> Tümünü Temizle</button>';
+            
+            html += u.notifications.map(n => {
+                let isClickable = n.linkId && n.linkType && !String(n.linkId).includes('window.');
+                let actionAttr = isClickable ? `onclick="window.goToLink('${n.linkId}', '${n.linkType}')" style="cursor:pointer; padding:15px; border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); transition:all 0.3s ease; border-radius:12px; margin-bottom:12px; position:relative;"` : `style="padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-soft); border-radius:12px; margin-bottom:12px; position:relative;"`;
+                let openIcon = isClickable ? `<div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--accent-gold); color:#000; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-search"></i></div>` : '';
+                
+                let formattedMsg = (typeof window.formatLogMessage === 'function') ? window.formatLogMessage(n.msg) : n.msg;
+
+                return `<div ${actionAttr}>
+                    ${openIcon}
+                    <div style="color:var(--text-sub); font-size:0.75rem; margin-bottom:10px; font-family:'Space Mono', monospace;"><i class="far fa-clock" style="color:var(--accent-cyan);"></i> ${n.time}</div>
+                    <div style="color:var(--text-main); font-size:1rem; line-height:1.6; padding-right:${isClickable ? '45px' : '0'};">${formattedMsg}</div>
+                </div>`;
+            }).join('');
+            
+            msgBox.innerHTML = html;
+        };
+
+        // Kullanıcı bildirimlerini temizleme fonksiyonu
+        window.clearUserMessages = function() {
+            if (window.currentUser) {
+                window.currentUser.notifications = [];
+                sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
+                
+                if (window.userDatabase && window.userDatabase[window.currentUser.username]) {
+                    window.userDatabase[window.currentUser.username].notifications = [];
+                    localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                }
+                
+                try {
+                    firebase.database().ref('users/' + window.currentUser.username + '/notifications').remove();
+                } catch(e) {}
+
+                window.renderUserMessages();
+                if(typeof window.updateHeaderUserUI === 'function') window.updateHeaderUserUI();
+                if(window.toast) window.toast("Mesajlar temizlendi", "🗑️");
+            }
+        };
+
+        // ==============================================================
+        // 2. ÇAN (BELL COUNTER) HAK KARIŞIKLIĞI KESİN ÇÖZÜMÜ
+        // ==============================================================
+        const origUpdateHeaderUserUI_V87 = window.updateHeaderUserUI;
+        window.updateHeaderUserUI = function() {
+            if (origUpdateHeaderUserUI_V87) origUpdateHeaderUserUI_V87();
+            
+            let u = window.currentUser;
+            let bellBadge = document.getElementById('bell-counter');
+            if (bellBadge) { 
+                let count = 0;
+                if (u && u.role === 'admin') {
+                    count = window.adminLogs ? window.adminLogs.length : 0;
+                } else if (u) {
+                    count = (u.notifications && Array.isArray(u.notifications)) ? u.notifications.length : 0;
+                }
+                bellBadge.innerText = count; 
+                bellBadge.style.display = count > 0 ? 'flex' : 'none'; 
+            }
+        };
+
+        // Otomatik tetikleme
+        if (window.currentUser) {
+            window.updateHeaderUserUI();
+            window.renderUserMessages();
+        }
+
+    }, 2000);
+});
+</script>
+
 </body>
 </html>
