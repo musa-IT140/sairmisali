@@ -18267,5 +18267,172 @@ window.addEventListener('load', function() {
     }
 </style>
 
+<!-- ===================================================================== -->
+<!-- 🟢 ŞAİR MİSAL.İ - TRUE LIVE SYNC & FIREBASE SHIELD 🟢 -->
+<!-- ===================================================================== -->
+<script id="misali-true-live-sync-fix">
+// 1. ZÄHLER-FUNKTION (Global & Sofort)
+window.updateBellBadge = function(count) {
+    document.querySelectorAll('.fa-bell').forEach(icon => {
+        let btn = icon.closest('button') || icon.closest('a');
+        if (btn) {
+            btn.querySelectorAll('.notif-badge, #bell-counter, #immortal-badge, .misali-super-badge').forEach(b => b.remove());
+            let num = parseInt(count) || 0;
+            if (num > 0) {
+                btn.style.position = 'relative';
+                btn.insertAdjacentHTML('beforeend', `<strong class="misali-super-badge" style="position:absolute; top:-6px; right:-8px; background:#ef4444; color:#fff; font-size:0.75rem; font-family:'Space Mono', monospace; min-width:20px; height:20px; border-radius:10px; display:flex; align-items:center; justify-content:center; border:2px solid var(--bg-glass); z-index:9999; font-weight:bold; box-shadow: 0 0 8px rgba(239,68,68,0.8); transition: transform 0.2s;">${num}</strong>`);
+            }
+        }
+    });
+};
+
+// 2. SOFORT-START (0 Gecikme)
+(function instantBoot() {
+    let u = null;
+    try { u = JSON.parse(sessionStorage.getItem('misaliUser') || localStorage.getItem('misaliUser')); } catch(e){}
+    if (!u) return;
+    let count = u.role === 'admin' ? (JSON.parse(localStorage.getItem('misaliAdminLogs') || '[]')).length : (JSON.parse(localStorage.getItem('misali_inbox_cache') || '[]')).length;
+    window.addEventListener('DOMContentLoaded', () => window.updateBellBadge(count));
+})();
+
+window.addEventListener('load', function() {
+    // 3. ALTE SCHLEIFEN ABSCHALTEN
+    ['startNotificationEngine', 'immortalSync', 'immortalSyncFixed', 'antiFlickerEngine', 'syncUserNotifications', 'syncUserNotifications_OLD', 'startUserInboxSync', 'omniscientSync'].forEach(fn => {
+        try { Object.defineProperty(window, fn, { get: () => function(){}, set: () => {}, configurable: true }); } catch(e){}
+        window[fn] = function(){}; 
+    });
+
+    // 4. DYNAMISCHE SIGNATUREN (Şair Misal.i & User)
+    window.formatLogMessage = function(msg) {
+        let text = msg || "";
+        if (window.userDatabase) {
+            let users = Object.values(window.userDatabase).sort((a,b) => (b.name||b.username).length - (a.name||a.username).length);
+            users.forEach(u => {
+                let uName = u.name || u.username;
+                if (uName && uName !== "AdminKing" && uName !== "Sistem" && uName !== "Anonim") text = text.split(uName).join(`%%USR_${u.username}%%`);
+            });
+            users.forEach(u => {
+                let uName = u.name || u.username;
+                if (uName && uName !== "AdminKing" && uName !== "Sistem" && uName !== "Anonim") {
+                    let uColor = u.color || "var(--accent-gold)"; 
+                    if (uName === 'Şair Misal.i' || u.username === 'Sair Misali') uColor = 'var(--accent-cyan)';
+                    text = text.split(`%%USR_${u.username}%%`).join(`<span style="font-family:'Great Vibes', cursive; font-size:1.45rem; color:${uColor}; padding:0 3px; text-shadow:0 0 8px ${uColor}40;">${uName}</span>`);
+                }
+            });
+        }
+        text = text.replace(/^.*?(BEĞENİ:)/i, `<div style='color:var(--accent-red); font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(239,68,68,0.15); border:1px solid var(--accent-red); border-radius:6px; display:inline-block; margin-bottom:6px;'>$&</div><br>`);
+        text = text.replace(/^.*?(YORUM:)/i, `<div style='color:var(--accent-cyan); font-weight:bold; font-size:0.75rem; padding:3px 8px; background:rgba(0,206,209,0.15); border:1px solid var(--accent-cyan); border-radius:6px; display:inline-block; margin-bottom:6px;'>$&</div><br>`);
+        text = text.replace(/(👑 Sistem Özel Mesajı:)/g, `<span style="color:#ffffff; background:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.8rem; border: 1px solid var(--accent-gold);"><i class="fas fa-crown" style="color:var(--accent-gold);"></i> Misal.i:</span>`);
+        text = text.replace(/(💬 Sana özel bir sohbet mesajı geldi!)/i, `<span style="font-family:'Great Vibes', cursive; font-size:1.45rem; color:var(--accent-cyan);">Şair Misal.i</span><span style="font-weight:400; font-size:0.95rem;">'den özel bir mesaj geldi <i class="fas fa-envelope-open-text" style="color:var(--accent-gold);"></i></span>`);
+        return text;
+    };
+
+    // 5. EDLES LÖSCH-MODAL
+    window.openBeautifulConfirm = function(text, onConfirm) {
+        let oldOverlay = document.getElementById('beautiful-del-overlay');
+        if(oldOverlay) oldOverlay.remove();
+        let overlay = document.createElement('div');
+        overlay.id = 'beautiful-del-overlay';
+        overlay.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:9999999; backdrop-filter:blur(5px); opacity:0; transition:opacity 0.3s ease;";
+        let isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        overlay.innerHTML = `
+            <div style="${isLight ? "background:#ffffff; border:2px solid #ef4444;" : "background:linear-gradient(145deg, #0f172a, #050814); border:1px solid #ef4444;"} padding:30px; border-radius:16px; width:90%; max-width:380px; text-align:center; box-shadow:0 10px 40px rgba(239,68,68,0.25);">
+                <div style="font-size:3.5rem; color:#ef4444; margin-bottom:15px;"><i class="fas fa-trash-alt"></i></div>
+                <h3 style="color:${isLight ? "#0f172a" : "#f8fafc"}; font-size:1.3rem; margin-bottom:10px; font-family:'Poppins', sans-serif;">Onay Gerekli</h3>
+                <p style="color:${isLight ? "#475569" : "#94a3b8"}; font-size:0.95rem; margin-bottom:25px;">${text}</p>
+                <div style="display:flex; gap:15px;">
+                    <button id="bd-cancel" style="flex:1; background:transparent; border:1px solid ${isLight ? "#475569" : "#94a3b8"}; color:${isLight ? "#475569" : "#94a3b8"}; padding:12px; font-size:1rem; cursor:pointer; border-radius:8px; font-weight:bold;">İptal</button>
+                    <button id="bd-confirm" style="flex:1; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; padding:12px; font-size:1rem; cursor:pointer; border-radius:8px; font-weight:bold;">Evet, Sil</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        setTimeout(() => overlay.style.opacity = '1', 10);
+        document.getElementById('bd-cancel').onclick = () => { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 300); };
+        document.getElementById('bd-confirm').onclick = () => { overlay.style.opacity = '0'; setTimeout(() => { overlay.remove(); onConfirm(); }, 300); };
+    };
+
+    window.clearUserMessages = function() {
+        window.openBeautifulConfirm("Tüm bildirimleri kalıcı olarak silmek istediğinize emin misiniz?", () => {
+            let safeUser = window.currentUser.username.replace(/[.#$\[\]]/g, '');
+            try { firebase.database().ref('notifications/' + safeUser).remove(); } catch(e){}
+            window.MY_PRIVATE_INBOX = [];
+            window.updateBellBadge(0);
+            window.renderUserMessages();
+        });
+    };
+    window.clearLogs = function() { 
+        window.openBeautifulConfirm("Tüm logları ve mesajları kalıcı olarak silmek istediğinize emin misiniz?", () => {
+            window.adminLogs = []; 
+            try { firebase.database().ref('adminOnlineLogs').remove(); } catch(e){}
+            document.querySelectorAll('#adm-logs-box-panel, #adm-logs-box-inbox').forEach(el => el.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-sub);">Kayıt yok.</div>');
+            window.updateBellBadge(0);
+        });
+    };
+    window.logUserAction = function(msg, linkId = null, linkType = null) {
+        if(typeof firebase === 'undefined') return;
+        let uName = window.currentUser ? (window.currentUser.name || window.currentUser.username) : "Misafir";
+        try { firebase.database().ref('adminOnlineLogs').push({ user: uName, msg: msg, linkId: linkId || "", linkType: linkType || "", time: new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}), ts: Date.now() }); } catch(e) {}
+    };
+
+    // 6. DER FIREBASE-SCHILD & TRUE LIVE SYNC
+    let shieldInterval = setInterval(() => {
+        if (typeof firebase !== 'undefined' && firebase.database && window.currentUser) {
+            clearInterval(shieldInterval); // Gefunden!
+            
+            // HACKER SCHILD: Verhindert, dass alte Skripte die Live-Verbindung töten!
+            if (!window._firebaseShieldActive) {
+                window._firebaseShieldActive = true;
+                const originalRef = firebase.database().ref;
+                firebase.database().ref = function(path) {
+                    const refObj = originalRef.apply(this, arguments);
+                    const originalOff = refObj.off;
+                    refObj.off = function() {
+                        if (path && (path.includes('adminOnlineLogs') || path.includes('notifications/'))) {
+                            console.log("🛡️ FIREBASE SHIELD: Ein altes Skript wurde blockiert!");
+                            return; // VERBINDUNG WIRD NICHT GEKAPPT!
+                        }
+                        return originalOff.apply(this, arguments);
+                    };
+                    return refObj;
+                };
+            }
+
+            // UNZERSTÖRBARER LIVE SYNC (Bleibt für immer offen)
+            if (window._trueLiveSyncRunning) return;
+            window._trueLiveSyncRunning = true;
+            
+            let isAdm = window.currentUser.role === 'admin';
+            let safeUser = window.currentUser.username.replace(/[.#$\[\]]/g, '');
+            let dbPath = isAdm ? 'adminOnlineLogs' : 'notifications/' + safeUser;
+
+            console.log("🟢 TRUE LIVE SYNC gestartet für:", dbPath);
+            firebase.database().ref(dbPath).on('value', snap => {
+                let data = snap.val();
+                let inbox = data ? Object.values(data).sort((a,b) => b.ts - a.ts) : [];
+                
+                if (isAdm) {
+                    window.adminLogs = inbox;
+                    localStorage.setItem('misaliAdminLogs', JSON.stringify(inbox));
+                } else {
+                    window.MY_PRIVATE_INBOX = inbox;
+                    localStorage.setItem('misali_inbox_cache', JSON.stringify(inbox));
+                }
+                
+                // LIVE UI UPDATE (sofort!)
+                window.updateBellBadge(inbox.length);
+                
+                let mAdmin = document.getElementById('adminLogsModal');
+                if (isAdm && mAdmin && mAdmin.classList.contains('show') && typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+                
+                let mUser = document.getElementById('msgModal');
+                if (!isAdm && mUser && mUser.classList.contains('show') && typeof window.renderUserMessages === 'function') window.renderUserMessages();
+            });
+        }
+    }, 500); // Überprüft alle 0.5 Sekunden, bis Firebase bereit ist
+
+});
+</script>
+
 </body>
 </html>
