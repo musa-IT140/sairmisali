@@ -17924,62 +17924,201 @@ window.addEventListener('load', function() {
     }
 </style>
 
-
-
 <!-- ===================================================================== -->
-<!-- 👑 ŞAİR MİSAL.İ - TITANIUM INBOX & CLICK ENGINE (CHAT-VIEW FIX) 👑 -->
+<!-- 🛡️ ŞAİR MİSAL.İ - IMMORTAL BADGE & CLICK ENGINE (FINAL FLICKER FIX) 🛡️ -->
 <!-- ===================================================================== -->
-<style id="titanium-inbox-css">
-    .titanium-card {
-        background-color: rgba(10, 20, 35, 0.8) !important;
-        border: 1px solid rgba(0, 206, 209, 0.3) !important;
+<style id="immortal-inbox-css">
+    /* 1. VERSTECKE ALLE ALTEN, FLACKERNDEN SPAN-BADGES FÜR IMMER */
+    span.notif-badge, span#bell-counter, span#omega-bell-badge {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transform: scale(0) !important;
+        pointer-events: none !important;
+    }
+
+    /* 2. DAS UNZERSTÖRBARE "STRONG"-BADGE (Wird von alten Skripten ignoriert) */
+    strong#immortal-badge {
+        position: absolute !important;
+        top: -6px !important;
+        right: -8px !important;
+        background: var(--accent-red) !important;
+        color: #fff !important;
+        font-size: 0.75rem !important;
+        font-family: 'Space Mono', monospace !important;
+        min-width: 20px !important;
+        height: 20px !important;
+        border-radius: 10px !important;
+        display: none; /* Flex when active */
+        align-items: center !important;
+        justify-content: center !important;
+        border: 2px solid var(--bg-glass) !important;
+        z-index: 9999 !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 8px rgba(239,68,68,0.8) !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    /* 3. LIGHT MODE & INBOX KARTEN DESIGN */
+    .misali-inbox-card {
+        background-color: rgba(10, 20, 35, 0.85) !important;
+        border: 1px solid rgba(0, 206, 209, 0.35) !important;
         border-left: 3px solid var(--accent-cyan) !important;
-        border-radius: 8px !important;
-        padding: 12px 16px !important;
-        margin-bottom: 10px !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        margin-bottom: 12px !important;
         position: relative !important;
         cursor: pointer !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
     }
-    .titanium-card:hover {
+    .misali-inbox-card:hover {
         background-color: rgba(0, 206, 209, 0.15) !important;
-        box-shadow: 0 0 10px rgba(0, 206, 209, 0.2) !important;
+        border-color: rgba(0, 206, 209, 0.6) !important;
+        transform: translateY(-2px);
     }
-    .titanium-date {
-        color: #adb5bd !important; 
+    .inbox-date {
+        color: #94a3b8 !important; 
         font-size: 0.75rem !important;
         margin-bottom: 6px !important;
         font-family: 'Poppins', sans-serif !important;
     }
+    .inbox-text {
+        color: #f8fafc !important;
+        font-size: 0.95rem !important;
+        font-family: 'Poppins', sans-serif !important;
+        line-height: 1.5 !important;
+    }
+    .misali-sig-cyan {
+        font-family: 'Great Vibes', cursive !important;
+        font-size: 1.45rem !important;
+        color: #0097a7 !important; 
+        text-shadow: 0 0 8px rgba(0, 151, 167, 0.3) !important;
+        padding: 0 4px !important;
+    }
+
+    /* HELL-MODUS (LIGHT MODE) ZWANG FÜR DAS MODAL */
+    [data-theme="light"] #msgModal .modal-body,
+    [data-theme="light"] #msgModal .theme-sub-panel {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+    [data-theme="light"] .misali-inbox-card {
+        background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+        border: 1px solid #cbd5e1 !important;
+        border-left: 3px solid #008b8b !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+    }
+    [data-theme="light"] .misali-inbox-card:hover {
+        background: linear-gradient(135deg, #ffffff, #f0fdfe) !important;
+        border-color: #008b8b !important;
+        box-shadow: 0 6px 20px rgba(0, 139, 139, 0.12) !important;
+        transform: translateY(-2px);
+    }
+    [data-theme="light"] .inbox-date { color: #64748b !important; }
+    [data-theme="light"] .inbox-text { color: #1e293b !important; font-weight: 500 !important; }
+    [data-theme="light"] .misali-sig-cyan { color: #00838f !important; text-shadow: none !important; }
 </style>
 
-<script id="titanium-inbox-js">
+<script id="immortal-inbox-js">
 window.addEventListener('load', function() {
     setTimeout(function() {
-        console.log("🚀 TITANIUM ENGINE: Chat-View Fix geladen...");
+        console.log("🛡️ IMMORTAL ENGINE: Töte den 'Span'-Virus, der das Flackern verursacht!");
 
-        // Alte, flackernde Listener ausschalten
-        ['syncUserNotifications', 'syncUserNotifications_OLD', 'startUserInboxSync'].forEach(fn => {
+        window.IMMORTAL_INBOX = [];
+
+        // 1. ERSCHAFFUNG DES UNANTASTBAREN STRONG-BADGES
+        let bellIcon = document.querySelector('.fa-bell');
+        if (bellIcon) {
+            let btn = bellIcon.closest('button') || bellIcon.closest('a');
+            if (btn && !document.getElementById('immortal-badge')) {
+                btn.style.position = 'relative';
+                // Wir nutzen absichtlich <strong> statt <span>! Die alten Fehler-Skripte suchen nur nach <span>.
+                btn.insertAdjacentHTML('beforeend', '<strong id="immortal-badge">0</strong>');
+                
+                // Klick auf Glocke reparieren
+                btn.onclick = function(e) {
+                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                    if (!window.currentUser) {
+                        if(window.toast) window.toast('Lütfen giriş yapın', '🔒');
+                    } else if (window.currentUser.role === 'admin') {
+                        if(typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+                        if(window.openModal) window.openModal('adminLogsModal');
+                    } else {
+                        if(typeof window.renderUserMessages === 'function') window.renderUserMessages();
+                        if(window.openModal) window.openModal('msgModal');
+                    }
+                };
+            }
+        }
+
+        // 2. DIE NEUE FIREBASE-VERBINDUNG FÜR DAS STRONG-BADGE
+        const immortalSync = function() {
+            if (!window.currentUser || typeof firebase === 'undefined') return;
+            
+            let safeUser = window.currentUser.username.replace(/[.#$\[\]]/g, '');
+            let immortalBadge = document.getElementById('immortal-badge');
+            let isAdm = window.currentUser.role === 'admin';
+            let dbPath = isAdm ? 'adminOnlineLogs' : 'notifications/' + safeUser;
+
+            // Kappe alte Verbindungen
+            firebase.database().ref('adminOnlineLogs').off();
+            firebase.database().ref('notifications/' + safeUser).off();
+
+            firebase.database().ref(dbPath).on('value', snap => {
+                let data = snap.val();
+                let inbox = data ? Object.values(data).sort((a,b) => b.ts - a.ts) : [];
+                
+                if (isAdm) {
+                    window.adminLogs = inbox;
+                } else {
+                    let oldLen = window.IMMORTAL_INBOX.length;
+                    window.IMMORTAL_INBOX = inbox;
+                    
+                    // Badge Updaten
+                    if (immortalBadge) {
+                        if (inbox.length > 0) {
+                            immortalBadge.innerText = inbox.length;
+                            immortalBadge.style.setProperty('display', 'flex', 'important');
+                            if (inbox.length > oldLen) {
+                                immortalBadge.style.transform = 'scale(1.4)';
+                                setTimeout(() => immortalBadge.style.transform = 'scale(1)', 300);
+                            }
+                        } else {
+                            immortalBadge.style.setProperty('display', 'none', 'important');
+                        }
+                    }
+                    
+                    let m = document.getElementById('msgModal');
+                    if (m && m.classList.contains('show')) window.renderUserMessages();
+                }
+            });
+        };
+
+        // Kill all old sync starters (Böswillige Intervalle deaktivieren)
+        ['syncUserNotifications', 'syncUserNotifications_OLD', 'startUserInboxSync', 'startNotificationEngine'].forEach(fn => {
             try { Object.defineProperty(window, fn, { get: () => function(){}, set: () => {} }); } catch(e){}
         });
 
-        // DER KORRIGIERTE KLICK-MOTOR
-        window.misaliDirectClick = function(id, type) {
-            // 1. Modals schließen
+        // Start Immortal Sync
+        immortalSync();
+
+        // 3. SICHERER KLICK-MOTOR (mit event.stopPropagation)
+        window.misaliDirectClick = function(event, id, type) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
             document.querySelectorAll('.modal, .modal-backdrop, .custom-overlay, .guest-lock-overlay').forEach(el => {
                 el.classList.remove('show');
                 el.style.display = 'none';
             });
             document.body.classList.remove('modal-open');
-            if (typeof window.closeTopModal === 'function') window.closeTopModal();
 
-            // 2. Ziel öffnen
             setTimeout(() => {
                 if (type === 'chat' || id === 'chat-view' || id === 'chatModal') {
-                    
-                    // CHAT IST EINE SEITE (NAV), KEIN MODAL!
                     if (typeof window.nav === 'function') window.nav('chat');
-                    
                     setTimeout(() => {
                         let sel = document.getElementById('chat-partner-select');
                         if (sel && sel.options) {
@@ -17991,7 +18130,6 @@ window.addEventListener('load', function() {
                             }
                         }
                     }, 150);
-
                 } 
                 else if (type === 'modal' && id) {
                     if (typeof window.openModal === 'function') window.openModal(id);
@@ -18002,58 +18140,14 @@ window.addEventListener('load', function() {
             }, 150);
         };
 
-        const perfectEngine = function() {
-            if (!window.currentUser) return;
-            let safeUser = window.currentUser.username.replace(/[.#$\[\]]/g, '');
-            let badge = document.getElementById('bell-counter');
-
-            if (typeof firebase !== 'undefined') {
-                firebase.database().ref('notifications/' + safeUser).off();
-                firebase.database().ref('adminOnlineLogs').off();
-                
-                if (window.currentUser.role === 'admin') {
-                    firebase.database().ref('adminOnlineLogs').on('value', snap => {
-                        let data = snap.val();
-                        window.adminLogs = data ? Object.values(data).sort((a,b) => b.ts - a.ts) : [];
-                        if (badge) {
-                            badge.innerText = window.adminLogs.length;
-                            badge.style.display = window.adminLogs.length > 0 ? 'flex' : 'none';
-                        }
-                        if (document.getElementById('adminLogsModal')?.classList.contains('show') && typeof window.renderAdminLogs === 'function') {
-                            window.renderAdminLogs();
-                        }
-                    });
-                } else {
-                    firebase.database().ref('notifications/' + safeUser).on('value', snap => {
-                        let data = snap.val();
-                        let newInbox = data ? Object.values(data).sort((a,b) => b.ts - a.ts) : [];
-                        
-                        if (JSON.stringify(newInbox) !== JSON.stringify(window.MY_PRIVATE_INBOX)) {
-                            window.MY_PRIVATE_INBOX = newInbox;
-                            localStorage.setItem('misali_inbox_cache', JSON.stringify(window.MY_PRIVATE_INBOX));
-                            
-                            if (badge) {
-                                badge.innerText = window.MY_PRIVATE_INBOX.length;
-                                badge.style.display = window.MY_PRIVATE_INBOX.length > 0 ? 'flex' : 'none';
-                            }
-                            let m = document.getElementById('msgModal');
-                            if (m && m.classList.contains('show')) perfectRenderUserMessages();
-                        }
-                    });
-                }
-            }
-        };
-
-        try { Object.defineProperty(window, 'startNotificationEngine', { get: () => perfectEngine, set: () => {}, configurable: true }); } 
-        catch(e){ window.startNotificationEngine = perfectEngine; }
-
-        const perfectRenderUserMessages = function() {
+        // 4. POSTFACH RENDERER (Nutzt IMMORTAL_INBOX)
+        window.renderUserMessages = function() {
             let msgModal = document.getElementById('msgModal');
             if (!msgModal) return;
             let msgBox = msgModal.querySelector('.theme-sub-panel') || msgModal.querySelector('.modal-body');
             if (!msgBox) return;
 
-            let notifs = window.MY_PRIVATE_INBOX || [];
+            let notifs = window.IMMORTAL_INBOX || [];
 
             if (notifs.length === 0) {
                 msgBox.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:40px;"><i class="fas fa-envelope-open" style="font-size:3.5rem; margin-bottom:10px; color:rgba(0, 206, 209, 0.2); display:block;"></i><span>Henüz yeni mesajınız yok.</span></div>';
@@ -18062,44 +18156,116 @@ window.addEventListener('load', function() {
 
             let html = '<div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid rgba(0,206,209,0.2); padding-bottom:10px; align-items:center;">';
             html += '<h2 style="color:var(--accent-gold); margin:0; font-size:1.2rem; font-family:\'Poppins\', sans-serif;"><i class="fas fa-bell" style="color:var(--accent-cyan);"></i> Bildirimler</h2>';
-            html += '<button onclick="if(window.clearUserMessages) window.clearUserMessages()" style="background:rgba(239,68,68,0.1); border:1px solid var(--accent-red); color:var(--accent-red); border-radius:6px; padding:5px 12px; cursor:pointer;"><i class="fas fa-trash-alt"></i> Temizle</button></div>';
+            html += '<button onclick="event.stopPropagation(); if(window.clearUserMessages) window.clearUserMessages()" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.5); color:var(--accent-red); border-radius:6px; padding:5px 12px; cursor:pointer; font-weight:bold;"><i class="fas fa-trash-alt"></i> Temizle</button></div>';
             
             html += notifs.map(n => {
                 let msgTextLower = (n.msg || "").toLowerCase();
                 let isChatMsg = msgTextLower.includes("sohbet") || msgTextLower.includes("özel mesaj");
-                
                 let finalId = n.linkId || (isChatMsg ? 'chat-view' : '');
                 let finalType = n.linkType || (isChatMsg ? 'chat' : '');
                 let isClickable = (finalId !== '' || finalType !== '');
                 
-                let clickAttr = isClickable ? `onclick="window.misaliDirectClick('${finalId}', '${finalType}')"` : "";
+                // MUSS EVENT MITGEBEN!
+                let clickAttr = isClickable ? `onclick="window.misaliDirectClick(event, '${finalId}', '${finalType}')"` : "";
                 
                 let dateObj = n.ts ? new Date(n.ts) : new Date();
                 let dateTimeDisplay = `<i class="far fa-calendar-alt"></i> ${dateObj.toLocaleDateString('tr-TR')} <span style="margin:0 5px; opacity:0.3;">|</span> <i class="far fa-clock"></i> ${n.time || dateObj.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}`;
 
                 let formattedMsg = typeof window.formatLogMessage === 'function' ? window.formatLogMessage(n.msg) : n.msg;
-                
-                formattedMsg = formattedMsg.replace(/(💬 Sana özel bir sohbet mesajı geldi!)/i, `<span style="font-family:'Great Vibes', cursive; font-size:1.4rem; color:var(--accent-cyan);">Şair Misal.i</span><span style="color:#ffffff;">'den özel bir mesaj geldi <i class="fas fa-envelope-open-text" style="color:var(--accent-gold);"></i></span>`);
-                formattedMsg = formattedMsg.replace(/(👑 Sistem Özel Mesajı:)/g, `<span style="color:#ffffff; background:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.8rem; border: 1px solid var(--accent-gold);"><i class="fas fa-crown" style="color:var(--accent-gold);"></i> Misal.i:</span>`);
+                formattedMsg = formattedMsg.replace(/(💬 Sana özel bir sohbet mesajı geldi!)/i, `<span class="misali-sig-cyan">Şair Misal.i</span><span class="inbox-text">'den özel bir mesaj geldi <i class="fas fa-envelope-open-text" style="color:var(--accent-gold);"></i></span>`);
+                formattedMsg = formattedMsg.replace(/(👑 Sistem Özel Mesajı:)/g, `<span style="background:var(--accent-cyan); color:#000; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.8rem; border: 1px solid var(--accent-gold);"><i class="fas fa-crown" style="color:var(--accent-gold);"></i> Misal.i:</span>`);
 
                 return `
-                <div class="titanium-card" ${clickAttr}>
-                    ${isClickable ? '<div style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-sub);"><i class="fas fa-chevron-right"></i></div>' : ''}
-                    <div class="titanium-date">${dateTimeDisplay}</div>
-                    <div style="font-size:0.95rem; color:#ffffff; padding-right:${isClickable?'25px':'0'}; font-family:'Poppins', sans-serif;">${formattedMsg}</div>
+                <div class="misali-inbox-card" ${clickAttr}>
+                    ${isClickable ? '<div style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--text-sub);"><i class="fas fa-chevron-right"></i></div>' : ''}
+                    <div class="inbox-date">${dateTimeDisplay}</div>
+                    <div class="inbox-text" style="padding-right:${isClickable?'25px':'0'};">${formattedMsg}</div>
                 </div>`;
             }).join('');
             msgBox.innerHTML = html;
         };
 
-        try { Object.defineProperty(window, 'renderUserMessages', { get: () => perfectRenderUserMessages, set: () => {}, configurable: true }); } 
-        catch(e){ window.renderUserMessages = perfectRenderUserMessages; }
+        // Löschen der Box an IMMORTAL_INBOX anpassen
+        window.clearUserMessages = function() {
+            if(confirm("Tüm bildirimleri kalıcı olarak silmek istediğinize emin misiniz?")) {
+                let safeUser = window.currentUser.username.replace(/[.#$\[\]]/g, '');
+                try { firebase.database().ref('notifications/' + safeUser).remove(); } catch(e){}
+                window.IMMORTAL_INBOX = [];
+                window.renderUserMessages();
+                let immortalBadge = document.getElementById('immortal-badge');
+                if (immortalBadge) immortalBadge.style.setProperty('display', 'none', 'important');
+                if (window.toast) window.toast("Mesajlar temizlendi", "🗑️");
+            }
+        };
 
-        perfectEngine();
-
-    }, 3500); 
+    }, 3500);
 });
 </script>
+
+<!-- ===================================================================== -->
+<!-- 🎇 ŞAİR MİSAL.İ - SPLASH SCREEN MOBILE CENTER FIX 🎇 -->
+<!-- ===================================================================== -->
+<style id="misali-splash-center-fix">
+    /* 1. Mobile Viewport (100dvh) für perfekte vertikale Zentrierung */
+    #welcome-splash {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        /* 100dvh ignoriert die mobile Adressleiste und zentriert exakt! */
+        height: 100dvh !important; 
+        background: var(--bg-main) !important;
+        z-index: 99999999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 2. Responsive Schriftgröße (Gummiband-Effekt) für Handys */
+    .splash-signature {
+        font-size: clamp(3.2rem, 12vw, 5.5rem) !important; 
+        text-align: center !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* 3. Willkommenstext zentrieren und responsiv machen */
+    #welcome-splash > div:last-child {
+        font-size: clamp(0.95rem, 4vw, 1.5rem) !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin-top: 15px !important;
+        padding: 0 15px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+    /* 4. Feuerwerk-Radius für Handys anpassen (verhindert unsichtbares Verschieben) */
+    @media (max-width: 768px) {
+        .fw-particle {
+            font-size: 1.8rem !important; /* Symbole etwas kleiner */
+        }
+        /* Explosions-Radius auf schmale Displays abstimmen */
+        .fw-1 { --tx: -85px; --ty: -105px; }
+        .fw-2 { --tx: 95px; --ty: -85px; }
+        .fw-3 { --tx: -75px; --ty: 95px; }
+        .fw-4 { --tx: 85px; --ty: 105px; }
+        .fw-5 { --tx: 0px; --ty: -140px; }
+        .fw-6 { --tx: -120px; --ty: 0px; }
+    }
+</style>
 
 </body>
 </html>
