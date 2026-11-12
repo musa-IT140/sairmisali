@@ -11963,12 +11963,13 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                     font-size: 0.48rem !important; padding: 1px 4px !important; margin-right: 4px !important; line-height: 1 !important;
                 }
 
-                html body header#master-header .h-row-1 { padding: 2px 6px !important; gap: 3px !important; min-height: 32px !important; }
-                html body header#master-header .brand { width: auto !important; font-size: 1.02rem !important; padding: 1px 6px !important; gap: 4px !important; }
-                html body header#master-header .dt-group { gap: 3px !important; overflow-x: auto !important; max-width: 100% !important; scrollbar-width: none !important; }
-                html body header#master-header .dt-group::-webkit-scrollbar { display: none !important; }
-                html body header#master-header .dt-box { padding: 2px 6px !important; font-size: 0.56rem !important; gap: 3px !important; border-radius: 12px !important; }
-                html body header#master-header .pwa-header-btn, html body header#master-header .dt-group .action-btn { width: 22px !important; height: 22px !important; min-width: 22px !important; }
+                html body header#master-header .h-row-1 { padding: 2px 3px !important; gap: 2px !important; min-height: 30px !important; justify-content: center !important; }
+                html body header#master-header .brand { width: auto !important; font-size: 0.98rem !important; padding: 1px 6px !important; gap: 4px !important; }
+                html body header#master-header .dt-group { display: flex !important; flex-wrap: nowrap !important; justify-content: center !important; align-items: center !important; gap: 2px !important; width: 100% !important; max-width: 100vw !important; padding: 0 2px !important; overflow: hidden !important; box-sizing: border-box !important; }
+                html body header#master-header .dt-box { padding: 2px 4px !important; font-size: 0.47rem !important; gap: 2px !important; border-radius: 9px !important; white-space: nowrap !important; flex-shrink: 1 !important; letter-spacing: -0.2px !important; }
+                html body header#master-header .dt-box i { font-size: 0.5rem !important; }
+                html body header#master-header .dt-box .misali-mini-flag { width: 12px !important; height: 9px !important; margin-right: 2px !important; }
+                html body header#master-header .pwa-header-btn, html body header#master-header .dt-group .action-btn { width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important; font-size: 0.5rem !important; padding: 0 !important; flex-shrink: 0 !important; }
                 html body header#master-header .h-right { width: auto !important; gap: 5px !important; }
                 html body header#master-header .user-prof-box { padding: 2px 7px !important; gap: 4px !important; }
                 html body header#master-header .mini-avatar { width: 22px !important; height: 22px !important; min-width: 22px !important; }
@@ -14420,5 +14421,257 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
     })();
     </script>
 
+    <script id="misali-mobile-top-bar-fix">
+(function() {
+    const st = document.createElement('style');
+    st.id = 'misali-mobile-top-bar-css';
+    st.textContent = `
+        @media (max-width: 768px) {
+            html body header#master-header .h-row-1 {
+                padding: 2px 3px !important;
+                gap: 2px !important;
+                justify-content: center !important;
+            }
+            html body header#master-header .dt-group {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 2px !important;
+                width: auto !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+                padding: 0 2px !important;
+                overflow: visible !important;
+            }
+            html body header#master-header .dt-box {
+                padding: 2px 4px !important;
+                font-size: 0.47rem !important;
+                gap: 2px !important;
+                border-radius: 9px !important;
+                white-space: nowrap !important;
+                letter-spacing: -0.2px !important;
+            }
+            html body header#master-header .dt-box i {
+                font-size: 0.5rem !important;
+            }
+            html body header#master-header .dt-box .misali-mini-flag {
+                width: 12px !important;
+                height: 9px !important;
+                margin-right: 2px !important;
+            }
+            html body header#master-header .pwa-header-btn,
+            html body header#master-header .dt-group .action-btn {
+                width: 18px !important;
+                height: 18px !important;
+                min-width: 18px !important;
+                min-height: 18px !important;
+                font-size: 0.5rem !important;
+                padding: 0 !important;
+                flex-shrink: 0 !important;
+            }
+        }
+    `;
+    document.head.appendChild(st);
+
+    function fitMobileTopRow() {
+        const dtGroup = document.querySelector('header#master-header .dt-group');
+        if (!dtGroup) return;
+        if (window.innerWidth > 768) {
+            dtGroup.style.zoom = '';
+            return;
+        }
+        dtGroup.style.zoom = '1';
+        const availW = window.innerWidth - 8;
+        const neededW = dtGroup.scrollWidth;
+        if (neededW > availW && availW > 0) {
+            dtGroup.style.zoom = Math.max(0.75, (availW / neededW) - 0.015).toFixed(3);
+        }
+    }
+
+    window.addEventListener('resize', fitMobileTopRow, { passive: true });
+    document.addEventListener('DOMContentLoaded', fitMobileTopRow);
+    setTimeout(fitMobileTopRow, 300);
+    setTimeout(fitMobileTopRow, 1200);
+})();
+</script>
+
+<script id="misali-smart-collapsible-docks">
+(function() {
+    "use strict";
+
+    const oldStyle = document.getElementById('misali-collapsible-docks-css');
+    if (oldStyle) oldStyle.remove();
+
+    const st = document.createElement('style');
+    st.id = 'misali-collapsible-docks-css';
+    st.textContent = `
+        /* Sanfte Gleit-Animation für beide 7er-Leisten */
+        html body #misali-left-stats-dock-v16,
+        html body #misali-right-dock-v14 {
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+                        opacity 0.28s ease,
+                        box-shadow 0.28s ease !important;
+            will-change: transform;
+        }
+
+        /* Zugeklappter Zustand: 72% im Rand versteckt (bunte Kante bleibt sichtbar!) */
+        html body #misali-left-stats-dock-v16:not(.is-dock-open) {
+            left: 0px !important;
+            transform: translateY(-50%) translateX(-72%) !important;
+            opacity: 0.72 !important;
+            padding-right: 11px !important;
+        }
+        html body #misali-right-dock-v14:not(.is-dock-open) {
+            right: 0px !important;
+            transform: translateY(-50%) translateX(72%) !important;
+            opacity: 0.72 !important;
+            padding-left: 11px !important;
+        }
+
+        /* Im zugeklappten Zustand Zähler-Badges leicht ausblenden für sauberen Look */
+        html body #misali-left-stats-dock-v16:not(.is-dock-open) .v16-mono-badge,
+        html body #misali-right-dock-v14:not(.is-dock-open) .v17-right-badge {
+            opacity: 0 !important;
+            transform: scale(0.5) !important;
+            transition: opacity 0.2s ease, transform 0.2s ease !important;
+        }
+
+        /* Aufgeklappter Zustand (oder Maus-Hover am PC) */
+        html body #misali-left-stats-dock-v16.is-dock-open,
+        html body #misali-right-dock-v14.is-dock-open {
+            transform: translateY(-50%) translateX(0) !important;
+            opacity: 0.98 !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 15px rgba(212, 175, 55, 0.28) !important;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            html body #misali-left-stats-dock-v16:hover,
+            html body #misali-right-dock-v14:hover {
+                transform: translateY(-50%) translateX(0) !important;
+                opacity: 1 !important;
+            }
+            html body #misali-left-stats-dock-v16:hover .v16-mono-badge,
+            html body #misali-right-dock-v14:hover .v17-right-badge {
+                opacity: 1 !important;
+                transform: scale(1) !important;
+            }
+        }
+
+        /* Kleine Leucht-Lasche (Pfeil-Indikator), damit man sofort sieht, dass man aufklappen kann */
+        .misali-dock-peek-handle {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 13px !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: linear-gradient(180deg, rgba(212, 175, 55, 0.92), rgba(0, 206, 209, 0.92)) !important;
+            color: #000000 !important;
+            font-size: 0.55rem !important;
+            font-weight: 900 !important;
+            cursor: pointer !important;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5) !important;
+            z-index: 25 !important;
+            user-select: none !important;
+            transition: transform 0.25s ease, background 0.25s ease !important;
+        }
+        #misali-left-stats-dock-v16 .misali-dock-peek-handle {
+            right: -11px !important;
+            border-radius: 0 8px 8px 0 !important;
+        }
+        #misali-right-dock-v14 .misali-dock-peek-handle {
+            left: -11px !important;
+            border-radius: 8px 0 0 8px !important;
+        }
+
+        /* Pfeil dreht sich um, wenn die Leiste offen ist */
+        #misali-left-stats-dock-v16.is-dock-open .misali-dock-peek-handle i,
+        #misali-right-dock-v14.is-dock-open .misali-dock-peek-handle i {
+            transform: rotate(180deg) !important;
+        }
+        .misali-dock-peek-handle i {
+            transition: transform 0.3s ease !important;
+            color: #050814 !important;
+            font-size: 0.52rem !important;
+        }
+    `;
+    document.head.appendChild(st);
+
+    function setupCollapsibleDocks() {
+        const leftDock = document.getElementById('misali-left-stats-dock-v16');
+        const rightDock = document.getElementById('misali-right-dock-v14');
+
+        [
+            { el: leftDock, icon: 'fa-chevron-right', side: 'left' },
+            { el: rightDock, icon: 'fa-chevron-left', side: 'right' }
+        ].forEach(function(cfg) {
+            const dock = cfg.el;
+            if (!dock) return;
+
+            // Griff-Lasche hinzufügen, falls noch nicht vorhanden
+            if (!dock.querySelector('.misali-dock-peek-handle')) {
+                const handle = document.createElement('div');
+                handle.className = 'misali-dock-peek-handle';
+                handle.title = 'Menüyü Aç / Kapat';
+                handle.innerHTML = '<i class="fas ' + cfg.icon + '"></i>';
+                handle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dock.classList.toggle('is-dock-open');
+                });
+                dock.appendChild(handle);
+            }
+
+            // Wenn die Leiste noch zugeklappt ist: 1. Tipp klappt sie nur auf (verhindert Fehlklicks am Handy)
+            if (!dock.hasAttribute('data-peek-bound')) {
+                dock.setAttribute('data-peek-bound', 'true');
+                dock.addEventListener('click', function(e) {
+                    if (e.target.closest('.misali-dock-peek-handle')) return;
+                    if (!dock.classList.contains('is-dock-open')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dock.classList.add('is-dock-open');
+                    }
+                }, true);
+            }
+        });
+    }
+
+    // Beim Scrollen oder Tippen außerhalb automatisch wieder sanft einklappen
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', function() {
+        if (Math.abs(window.scrollY - lastScrollY) > 18) {
+            lastScrollY = window.scrollY;
+            const l = document.getElementById('misali-left-stats-dock-v16');
+            const r = document.getElementById('misali-right-dock-v14');
+            if (l) l.classList.remove('is-dock-open');
+            if (r) r.classList.remove('is-dock-open');
+        }
+    }, { passive: true });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#misali-left-stats-dock-v16')) {
+            const l = document.getElementById('misali-left-stats-dock-v16');
+            if (l) l.classList.remove('is-dock-open');
+        }
+        if (!e.target.closest('#misali-right-dock-v14') && !e.target.closest('#n-mood-menu')) {
+            const r = document.getElementById('misali-right-dock-v14');
+            if (r) r.classList.remove('is-dock-open');
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupCollapsibleDocks);
+    } else {
+        setupCollapsibleDocks();
+    }
+    setTimeout(setupCollapsibleDocks, 600);
+    setTimeout(setupCollapsibleDocks, 1800);
+})();
+</script>
+
 </body>
-</html>    
+</html>
