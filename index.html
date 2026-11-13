@@ -24381,6 +24381,504 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         return res;
     };
 
+    // =========================================================================
+    // 13. FINAL STABILIZATION UPDATE: Z-INDEX, MODAL LOCK, ZERO-JITTER SEEK,
+    //     GERÇEK STOP, KAYMA ENGELLEYİCİ & ADMİN ÜYE İSİMLERİ TAM GÖSTERİMİ
+    // =========================================================================
+    (function applyFinalStabilizationPatchX() {
+        const oldPatchCss = document.getElementById('misali-video-final-patch-css');
+        if (oldPatchCss) oldPatchCss.remove();
+
+        const patchCss = document.createElement('style');
+        patchCss.id = 'misali-video-final-patch-css';
+        patchCss.textContent = `
+            /* 1. Z-INDEX DÜZENİ: Pil, Açık Video ve Extern Player HER ZAMAN Modalların (Pencerelerin) Altında Kalır! */
+            .x-video-wing-card:not(.is-fullpage-cinema) {
+                z-index: 35 !important;
+                /* Çift kayma (double-offset) hatasını önlemek için sadece left/top kullanılır */
+                transform: none !important;
+            }
+            .x-video-wing-card.is-free-floating-mode:not(.is-fullpage-cinema) {
+                z-index: 42 !important;
+            }
+            .x-video-wing-card.minimized,
+            #x-extern-video-player:not(.is-fullpage-cinema),
+            #x-extern-video-player.minimized {
+                z-index: 45 !important;
+            }
+            .x-video-wing-card.x-is-actively-dragging:not(.is-fullpage-cinema),
+            #x-extern-video-player.x-is-actively-dragging:not(.is-fullpage-cinema) {
+                z-index: 48 !important;
+            }
+            /* Tüm Pencereler (Modals) ve Lügat her zaman videoların ve pilin ÜSTÜNDE açılır! */
+            .modal.show,
+            .modal[style*="display: block"],
+            .modal[style*="display: flex"],
+            #lugat-overlay.show {
+                z-index: 100050 !important;
+            }
+
+            /* 2. ADMİN PANELİ "ÜYELER" LİSTESİ: ALT ALTA DİZİLİM & TAM İSİM GÖRÜNÜMÜ */
+            #adminModal .x-adm-users-vertical-list {
+                display: flex !important;
+                flex-direction: column !important;
+                flex-wrap: nowrap !important;
+                gap: 8px !important;
+                width: 100% !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+            }
+            #adminModal .x-adm-single-user-row {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 8px !important;
+                width: 100% !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: thin !important;
+                padding: 8px 10px !important;
+                box-sizing: border-box !important;
+            }
+            #adminModal .x-adm-single-user-row > * {
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+                max-width: none !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+            }
+            #adminModal .x-adm-injected-fullname {
+                display: inline-block !important;
+                font-weight: 800 !important;
+                font-size: 0.85rem !important;
+                color: var(--accent-gold, #d4af37) !important;
+                background: rgba(212, 175, 55, 0.12) !important;
+                border: 1px solid rgba(212, 175, 55, 0.38) !important;
+                padding: 2px 8px !important;
+                border-radius: 7px !important;
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+                min-width: max-content !important;
+            }
+            :root[data-theme="light"] #adminModal .x-adm-injected-fullname,
+            body.light-mode #adminModal .x-adm-injected-fullname {
+                color: #92400e !important;
+                background: #fef3c7 !important;
+                border-color: #d97706 !important;
+            }
+        `;
+        document.head.appendChild(patchCss);
+
+        // Yardımcı: Şu an ekranda açık bir pencere (Modal) var mı?
+        window.isAnyModalOpenOnPageX = function() {
+            const modals = document.querySelectorAll('.modal.show, .modal[style*="display: block"], .modal[style*="display: flex"], #lugat-overlay.show');
+            for (let i = 0; i < modals.length; i++) {
+                const m = modals[i];
+                if (m.offsetWidth > 0 && m.offsetHeight > 0) return true;
+            }
+            return false;
+        };
+
+        // Yardımcı: Alttaki mavi/sarı Media Player veya başka bir sabit bar tutuluyor mu?
+        window.isOtherMediaPlayerTouchedX = function(target) {
+            if (!target || !target.closest) return false;
+            return !!target.closest(
+                '#misali-right-dock-v14, #misali-left-stats-dock-v16, header#master-header, ' +
+                '.audio-player, .radio-player, [id*="audio"], [id*="radio"], [id*="music"], [class*="player"]:not(.x-video-wing-card):not(#x-extern-video-player)'
+            );
+        };
+
+        // 3. KAYMA YAPMAYAN, MODAL AÇIKKEN KİLİTLENEN YENİ SÜRÜKLEME MOTORU
+        window.bindPerfectGluedDragX = function(el, side) {
+            if (!el) return;
+            // Eski dinleyicileri temizlemek için yeni bayrak
+            if (el.hasAttribute('data-glued-drag-v14')) return;
+            el.setAttribute('data-glued-drag-v14', 'true');
+            el.setAttribute('data-glued-drag-bound', 'true');
+
+            let isDragging = false, hasMoved = false;
+            let startClientX = 0, startClientY = 0;
+            let grabOffsetX = 0, grabOffsetY = 0;
+            let baseOffsetX = 0, baseOffsetY = 0;
+            let dragMode = 'none';
+            let cinemaBoxEl = null;
+
+            const onStart = function(clientX, clientY, target, ev) {
+                // KRİTİK 1: Ekranda herhangi bir pencere (Modal) açıksa video/pil sürüklenemez!
+                if (!el.classList.contains('is-fullpage-cinema') && window.isAnyModalOpenOnPageX()) return;
+                // KRİTİK 2: Alttaki/soldaki ses veya radyo player'a dokunulduysa videoya asla dokunma!
+                if (window.isOtherMediaPlayerTouchedX(target)) return;
+                // KRİTİK 3: Oynat, Durdur, Seek çubuğu veya Ses çubuğuna dokunulduysa sürükleme başlatma!
+                if (target.closest('button:not(.x-drag-grip-btn), input, select, .x-vw-seek-row, .x-vw-compact-bar')) return;
+
+                const isCinema = el.classList.contains('is-fullpage-cinema');
+                const isMin = el.classList.contains('minimized');
+                const isStrictAdmin = window.isStrictAdminModeX();
+                const isMobileUser = window.isMobileTouchViewX();
+
+                if (isCinema) {
+                    if (!target.closest('.x-vw-cinema-top-bar') && !target.closest('.x-vw-top-hud')) return;
+                    cinemaBoxEl = el.querySelector('.x-vw-full-content, .x-ext-full-wrap');
+                    if (!cinemaBoxEl) return;
+                    dragMode = 'cinema_box';
+                    const st = window._vwRuntimeState[side];
+                    baseOffsetX = st.cinemaDx || 0;
+                    baseOffsetY = st.cinemaDy || 0;
+                } else if (isMin) {
+                    dragMode = 'fixed';
+                } else {
+                    if (!isStrictAdmin && !isMobileUser) return;
+                    // Maksimize haldeyken yanlışlıkla kaymayı önlemek için üst bar, çerçeve veya ✥ taşıma ikonundan tutulmalı
+                    if (side === 'extern') {
+                        if (!target.closest('.x-ext-drag-bar')) return;
+                        dragMode = 'fixed';
+                    } else {
+                        const activeCfg = window.getActiveVideoConfigForRenderX();
+                        if (activeCfg[side].placement === 'free_float' || el.classList.contains('is-free-floating-mode')) {
+                            dragMode = 'fixed';
+                        } else {
+                            dragMode = isStrictAdmin ? 'relative_admin' : 'relative_mobile_user';
+                            baseOffsetX = parseInt(el.dataset.curOx || activeCfg[side].offsetX || 0, 10);
+                            baseOffsetY = parseInt(el.dataset.curOy || activeCfg[side].offsetY || 0, 10);
+                        }
+                    }
+                }
+
+                if (ev && ev.stopPropagation) ev.stopPropagation();
+                isDragging = true;
+                hasMoved = false;
+                startClientX = clientX;
+                startClientY = clientY;
+
+                const rect = el.getBoundingClientRect();
+                grabOffsetX = clientX - rect.left;
+                grabOffsetY = clientY - rect.top;
+            };
+
+            const onMove = function(clientX, clientY, ev) {
+                if (!isDragging) return;
+                const dx = clientX - startClientX;
+                const dy = clientY - startClientY;
+
+                if (!hasMoved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+
+                if (!hasMoved) {
+                    hasMoved = true;
+                    el.classList.add('x-is-actively-dragging');
+                }
+
+                if (ev && ev.cancelable) ev.preventDefault();
+
+                if (dragMode === 'cinema_box' && cinemaBoxEl) {
+                    const newCx = Math.round(baseOffsetX + dx);
+                    const newCy = Math.round(baseOffsetY + dy);
+                    cinemaBoxEl.style.setProperty('--x-cinema-dx', newCx + 'px');
+                    cinemaBoxEl.style.setProperty('--x-cinema-dy', newCy + 'px');
+                    window._vwRuntimeState[side].cinemaDx = newCx;
+                    window._vwRuntimeState[side].cinemaDy = newCy;
+                } else if (dragMode === 'relative_admin' || dragMode === 'relative_mobile_user') {
+                    const newOx = Math.round(baseOffsetX + dx);
+                    const newOy = Math.round(baseOffsetY + dy);
+                    el.dataset.curOx = String(newOx);
+                    el.dataset.curOy = String(newOy);
+                    el.style.setProperty('left', newOx + 'px', 'important');
+                    el.style.setProperty('top', newOy + 'px', 'important');
+                } else if (dragMode === 'fixed') {
+                    const w = el.offsetWidth || 72;
+                    const h = el.offsetHeight || 72;
+                    const newLeft = Math.max(4, Math.min(clientX - grabOffsetX, window.innerWidth - w - 4));
+                    const newTop = Math.max(54, Math.min(clientY - grabOffsetY, window.innerHeight - h - 4));
+
+                    el.style.setProperty('position', 'fixed', 'important');
+                    el.style.setProperty('left', Math.round(newLeft) + 'px', 'important');
+                    el.style.setProperty('top', Math.round(newTop) + 'px', 'important');
+                    el.style.setProperty('right', 'auto', 'important');
+                    el.style.setProperty('bottom', 'auto', 'important');
+                    el.style.setProperty('margin', '0px', 'important');
+                }
+            };
+
+            const onEnd = function(clientX, clientY) {
+                if (!isDragging) return;
+                isDragging = false;
+                el.classList.remove('x-is-actively-dragging');
+
+                if (hasMoved) {
+                    el._justDraggedTs = Date.now();
+                    if (side !== 'extern' && dragMode !== 'cinema_box') {
+                        const isMin = el.classList.contains('minimized');
+                        const draft = window.getDraftVideoConfigX();
+                        if (isMin) {
+                            const rect = el.getBoundingClientRect();
+                            draft[side].pillLeft = Math.round(rect.left);
+                            draft[side].pillTop = Math.round(rect.top);
+                            localStorage.setItem('misali_pill_pos_' + side, JSON.stringify({ left: draft[side].pillLeft, top: draft[side].pillTop }));
+                        } else if (dragMode === 'relative_admin' && window.isStrictAdminModeX()) {
+                            const finalOx = parseInt(el.dataset.curOx || 0, 10);
+                            const finalOy = parseInt(el.dataset.curOy || 0, 10);
+                            draft[side].offsetX = finalOx;
+                            draft[side].offsetY = finalOy;
+                            window.publishFreigebenVideoConfigX(draft);
+                        } else if (dragMode === 'relative_mobile_user') {
+                            const finalOx = parseInt(el.dataset.curOx || 0, 10);
+                            const finalOy = parseInt(el.dataset.curOy || 0, 10);
+                            localStorage.setItem('misali_mob_user_offset_' + side, JSON.stringify({ ox: finalOx, oy: finalOy }));
+                        } else if (dragMode === 'fixed' && window.isStrictAdminModeX()) {
+                            const rect = el.getBoundingClientRect();
+                            draft[side].placement = 'free_float';
+                            draft[side].freeLeft = Math.round(rect.left);
+                            draft[side].freeTop = Math.round(rect.top);
+                            window.publishFreigebenVideoConfigX(draft);
+                        }
+                    }
+                }
+            };
+
+            el.addEventListener('mousedown', function(e) { if (e.button === 0) onStart(e.clientX, e.clientY, e.target, e); });
+            window.addEventListener('mousemove', function(e) { if (isDragging) onMove(e.clientX, e.clientY, e); });
+            window.addEventListener('mouseup', function(e) { if (isDragging) onEnd(e.clientX, e.clientY); });
+
+            el.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) onStart(e.touches[0].clientX, e.touches[0].clientY, e.target, e);
+            }, { passive: true });
+            window.addEventListener('touchmove', function(e) {
+                if (isDragging && e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+            }, { passive: false });
+            window.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
+                const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : { clientX: startClientX, clientY: startClientY };
+                onEnd(t.clientX, t.clientY);
+            });
+        };
+
+        // Mevcut kartlara yeni izole sürükleme motorunu bağla
+        ['left', 'right', 'extern'].forEach(function(s) {
+            const el = document.getElementById(s === 'extern' ? 'x-extern-video-player' : ('x-video-wing-' + s));
+            if (el) {
+                const clone = el.cloneNode(true);
+                el.parentNode.replaceChild(clone, el);
+                window.bindPerfectGluedDragX(clone, s);
+            }
+        });
+
+        // 4. TİTREMEYEN (ZERO-JITTER) İLERİ/GERİ SARMA ÇUBUĞU & %100 DURDURAN STOP MOTORU
+        window._vwSeekWasPlaying = {};
+
+        window.vwStartSeekLockX = function(side, ev) {
+            if (ev) ev.stopPropagation();
+            window._vwIsSeeking[side] = true;
+            const vid = document.getElementById(side === 'extern' ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+            const st = window._vwRuntimeState[side];
+            if (vid) {
+                window._vwSeekWasPlaying[side] = !vid.paused && (!st || !st.isStopped);
+                // Çubuğu tutarken videoyu geçici duraklat ki çubuk asla ileri-geri titremesin!
+                vid.pause();
+            }
+            window.vwWakeControlsX(side);
+        };
+
+        window.vwMoveSeekSliderX = function(side, pctVal, ev) {
+            if (ev) ev.stopPropagation();
+            window._vwIsSeeking[side] = true;
+            const vid = document.getElementById(side === 'extern' ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+            const curEl = document.getElementById('x-vw-cur-' + side);
+            if (vid && vid.duration && isFinite(vid.duration)) {
+                const targetSec = (parseFloat(pctVal || 0) / 100) * vid.duration;
+                if (curEl) curEl.innerText = window.fmtVideoTimeX(targetSec);
+            }
+        };
+
+        window.vwEndSeekLockX = function(side, pctVal, ev) {
+            if (ev) ev.stopPropagation();
+            const vid = document.getElementById(side === 'extern' ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+            const st = window._vwRuntimeState[side];
+            if (vid && vid.duration && isFinite(vid.duration) && pctVal !== undefined) {
+                const targetSec = (parseFloat(pctVal || 0) / 100) * vid.duration;
+                try { vid.currentTime = targetSec; } catch(e){}
+                const curEl = document.getElementById('x-vw-cur-' + side);
+                if (curEl) curEl.innerText = window.fmtVideoTimeX(targetSec);
+            }
+            setTimeout(function() {
+                window._vwIsSeeking[side] = false;
+                if (vid && window._vwSeekWasPlaying[side] && (!st || !st.isStopped)) {
+                    vid.play().catch(function(){});
+                }
+                window.vwWakeControlsX(side);
+            }, 80);
+        };
+
+        // Videodaki titremeye sebep olan zorla-oynatma (onpause) döngüsünü temizle
+        window.sanitizeVideoElementEventsX = function(side) {
+            const isExt = (side === 'extern');
+            const vidEl = document.getElementById(isExt ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+            if (!vidEl) return;
+            const st = window._vwRuntimeState[side];
+
+            vidEl.ontimeupdate = function() {
+                if (window._vwIsSeeking[side]) return;
+                if (st && st.isStopped) {
+                    if (!vidEl.paused) vidEl.pause();
+                    return;
+                }
+                const curEl = document.getElementById('x-vw-cur-' + side);
+                const totEl = document.getElementById('x-vw-tot-' + side);
+                const seekEl = document.getElementById('x-vw-seek-' + side);
+                if (curEl) curEl.innerText = window.fmtVideoTimeX(vidEl.currentTime);
+                if (totEl && vidEl.duration) totEl.innerText = window.fmtVideoTimeX(vidEl.duration);
+                if (seekEl && vidEl.duration > 0) {
+                    seekEl.value = ((vidEl.currentTime / vidEl.duration) * 100).toFixed(1);
+                }
+            };
+
+            vidEl.onplay = function() {
+                if (st && st.isStopped) {
+                    vidEl.pause();
+                    return;
+                }
+                const pb = document.getElementById(isExt ? 'x-ext-play-btn' : ('x-vw-play-' + side));
+                if (pb) pb.innerHTML = '<i class="fas fa-pause"></i>';
+            };
+
+            // Zorla yeniden oynatma kaldırıldı -> Durdurulduğunda %100 durur, asla titremez!
+            vidEl.onpause = function() {
+                const pb = document.getElementById(isExt ? 'x-ext-play-btn' : ('x-vw-play-' + side));
+                if (pb) pb.innerHTML = '<i class="fas fa-play"></i>';
+            };
+        };
+
+        const origRenderSingleForCleanEvents = window.renderSingleVideoWingX;
+        window.renderSingleVideoWingX = async function(side, forceReloadVideo) {
+            const res = await origRenderSingleForCleanEvents(side, forceReloadVideo);
+            window.sanitizeVideoElementEventsX(side);
+            const wingEl = document.getElementById('x-video-wing-' + side);
+            if (wingEl) window.bindPerfectGluedDragX(wingEl, side);
+            return res;
+        };
+
+        const origOpenExternForCleanEvents = window.openExternVideoPlayerX;
+        window.openExternVideoPlayerX = async function(side, silent, directTrackObj) {
+            const res = await origOpenExternForCleanEvents(side, silent, directTrackObj);
+            window.sanitizeVideoElementEventsX('extern');
+            const extEl = document.getElementById('x-extern-video-player');
+            if (extEl) window.bindPerfectGluedDragX(extEl, 'extern');
+            return res;
+        };
+
+        // 5. ADMİN PANELİ "ÜYELER" LİSTESİNDE İSİMLERİ %100 GARANTİLİ GÖSTEREN VE A-Z SIRALAYAN MOTOR
+        window.fixAndSortAdminUsersVerticalAZX = function() {
+            const adminModal = document.getElementById('adminModal');
+            if (!adminModal) return;
+
+            const actionBtns = adminModal.querySelectorAll('button[onclick*="editUserScore"], button[onclick*="deleteUser"], button[onclick*="banUser"], button[onclick*="openUserInspectorModal"]');
+            if (!actionBtns.length) return;
+
+            let listContainer = null;
+            actionBtns.forEach(function(btn) {
+                if (listContainer) return;
+                let curr = btn.parentElement;
+                while (curr && curr !== adminModal) {
+                    if (curr.parentElement && curr.parentElement.children.length >= 2 && (curr.textContent.includes('OFFLINE') || curr.textContent.includes('ONLINE') || curr.textContent.includes(' P'))) {
+                        listContainer = curr.parentElement;
+                        break;
+                    }
+                    curr = curr.parentElement;
+                }
+            });
+            if (!listContainer) return;
+
+            listContainer.classList.add('x-adm-users-vertical-list');
+
+            const rows = Array.from(listContainer.children).filter(function(el) {
+                return el.tagName === 'DIV' && (el.querySelector('button') || el.textContent.includes('OFFLINE') || el.textContent.includes('ONLINE'));
+            });
+            if (!rows.length) return;
+
+            rows.forEach(function(row) {
+                row.classList.add('x-adm-single-user-row');
+
+                // 1. Satırdaki onclick parametresinden gerçek üye anahtarını (username) yakala
+                let rawKey = '';
+                const allClickables = [row].concat(Array.from(row.querySelectorAll('[onclick]')));
+                for (let i = 0; i < allClickables.length; i++) {
+                    const oc = allClickables[i].getAttribute('onclick') || '';
+                    const m = oc.match(/\(\s*['"]([^'"]+)['"]/);
+                    if (m && m[1]) {
+                        rawKey = m[1];
+                        break;
+                    }
+                }
+
+                // 2. userDatabase içinden üyenin tam ismini al
+                let fullDisplayName = '';
+                if (rawKey && window.userDatabase) {
+                    const uKey = (typeof window.resolveUserKey === 'function') ? window.resolveUserKey(rawKey) : rawKey;
+                    const uObj = window.userDatabase[uKey] || window.userDatabase[rawKey];
+                    if (uObj) {
+                        fullDisplayName = uObj.name || uObj.username || rawKey;
+                    } else {
+                        fullDisplayName = rawKey;
+                    }
+                }
+                if (!fullDisplayName) fullDisplayName = rawKey || 'Üye';
+
+                // 3. Emojinin hemen yanına görünür tam isim rozetini yerleştir (Eski kesilmiş/gizlenmiş ismi de aç)
+                row.querySelectorAll('div, span, b, strong').forEach(function(child) {
+                    if (child.style && (child.style.overflow === 'hidden' || child.style.textOverflow === 'ellipsis' || child.style.maxWidth)) {
+                        child.style.setProperty('overflow', 'visible', 'important');
+                        child.style.setProperty('text-overflow', 'clip', 'important');
+                        child.style.setProperty('max-width', 'none', 'important');
+                        child.style.setProperty('flex-shrink', '0', 'important');
+                    }
+                });
+
+                let badgeEl = row.querySelector('.x-adm-injected-fullname');
+                if (!badgeEl) {
+                    badgeEl = document.createElement('span');
+                    badgeEl.className = 'x-adm-injected-fullname';
+                    if (row.firstElementChild) {
+                        row.firstElementChild.insertAdjacentElement('afterend', badgeEl);
+                    } else {
+                        row.insertBefore(badgeEl, row.firstChild);
+                    }
+                }
+                badgeEl.textContent = fullDisplayName;
+
+                const checkStr = String(fullDisplayName + ' ' + rawKey).toLowerCase();
+                const isFounder = checkStr.includes('şair misal') || checkStr.includes('sair misal') || checkStr.includes('adminking');
+
+                row.dataset.sortName = fullDisplayName.toLowerCase();
+                row.dataset.isAdminRow = isFounder ? '1' : '0';
+            });
+
+            // 4. SIRALAMA: Şair Misal.i en üstte (1. sırada), diğer tüm üyeler A'dan Z'ye alt alta!
+            rows.sort(function(a, b) {
+                if (a.dataset.isAdminRow === '1' && b.dataset.isAdminRow !== '1') return -1;
+                if (b.dataset.isAdminRow === '1' && a.dataset.isAdminRow !== '1') return 1;
+                return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '', 'tr');
+            });
+
+            rows.forEach(function(r) {
+                listContainer.appendChild(r);
+            });
+        };
+
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.closest('#adminModal') || e.target.closest('[onclick*="adminModal"]') || e.target.closest('.ptab-btn'))) {
+                setTimeout(window.fixAndSortAdminUsersVerticalAZX, 50);
+                setTimeout(window.fixAndSortAdminUsersVerticalAZX, 220);
+            }
+        }, true);
+
+        setTimeout(function() {
+            window.sanitizeVideoElementEventsX('left');
+            window.sanitizeVideoElementEventsX('right');
+            window.fixAndSortAdminUsersVerticalAZX();
+        }, 300);
+    })();
+
     function bootVideoStudioEngineX() {
         window.initFirebaseVideoSyncListenersX();
         lastAuthStatusX = window.isUserLoggedInForVideoX();
