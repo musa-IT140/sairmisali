@@ -1611,6 +1611,65 @@
             .insp-mini-row { padding:4px 6px !important; font-size:0.57rem !important; }
             .atmo-wm-item { font-size:1.15rem !important; }
         }
+
+/* ===================================================================
+           M) ADMİN PANELİ "ÜYELER" LİSTESİ: ALT ALTA DİZİLİM & TEKİL SATIR KAYDIRMA
+           =================================================================== */
+        /* 1. Dış Liste Kapsayıcısı: Tüm üyeler kesinlikle ALT ALTA (Yukarıdan Aşağıya) dizilir! */
+        #adminModal .x-adm-users-vertical-list {
+            display: flex !important;
+            flex-direction: column !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+            width: 100% !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        /* 2. Tekil Üye Satırı: Sadece tek bir üyenin kendi satırı sağa-sola kayabilir, isim asla silinmez! */
+        #adminModal .x-adm-single-user-row {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 10px !important;
+            width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            padding: 8px 12px !important;
+            box-sizing: border-box !important;
+        }
+        #adminModal .x-adm-single-user-row::-webkit-scrollbar {
+            height: 3px !important;
+        }
+        #adminModal .x-adm-single-user-row > * {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+        }
+        #adminModal .x-adm-user-fullname {
+            font-weight: 800 !important;
+            font-size: 0.84rem !important;
+            color: var(--text-main) !important;
+            min-width: max-content !important;
+            flex-shrink: 0 !important;
+            margin-right: 4px !important;
+        }
+
+        /* ===================================================================
+           N) MOBİLDE KULLANICILARA DA VİDEO SAĞA-SOLA ÇEKME İZNİ & SEMBOLÜ
+           =================================================================== */
+        @media (max-width: 1099px), (hover: none) and (pointer: coarse) {
+            .x-video-wing-card:not(.minimized):not(.is-fullpage-cinema) {
+                cursor: grab !important;
+            }
+            .x-video-wing-card:not(.is-admin-viewing) .x-drag-grip-btn.x-admin-only-ctrl,
+            #x-extern-video-player:not(.is-admin-viewing) .fa-arrows-alt.x-admin-only-ctrl {
+                display: inline-flex !important;
+            }
+        }
+
     </style>
     <script id="misali-css-nbsp-fixer">
         (function() {
@@ -21841,154 +21900,264 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
     };
 
-    // =========================================================================
-    // 6. SÜRÜKLEME MOTORU (Her İki Video Handle'ı %100 Aktif!)
-    // =========================================================================
-    window.bindPerfectGluedDragX = function(el, side) {
-        if (!el || el.hasAttribute('data-glued-drag-bound')) return;
-        el.setAttribute('data-glued-drag-bound', 'true');
+// =========================================================================
+    // 6. SÜRÜKLEME MOTORU & ADMİN ÜYE LİSTESİ (ALT ALTA + ŞAİR MİSAL.İ EN ÜSTTE + A-Z)
+    // =========================================================================
+    window.isMobileTouchViewX = function() {
+        return window.innerWidth <= 1099 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    };
 
-        let isDragging = false, hasMoved = false;
-        let startClientX = 0, startClientY = 0;
-        let grabOffsetX = 0, grabOffsetY = 0;
-        let baseOffsetX = 0, baseOffsetY = 0;
-        let dragMode = 'none';
-        let cinemaBoxEl = null;
+    // Admin Panelindeki Üye Listesini Alt Alta Dizer, İsimleri Tam Gösterir, Şair Misal.i'yi 1. Sıraya Koyup A-Z Sıralar!
+    window.fixAndSortAdminUsersVerticalAZX = function() {
+        const adminModal = document.getElementById('adminModal');
+        if (!adminModal) return;
 
-        const onPointerDown = function(clientX, clientY, target) {
-            if (target.closest('button:not(.x-drag-grip-btn), input, select, .x-vw-seek-row, .x-vw-compact-bar')) return;
+        // Üye satırlarını (içinde puan veya üye işlem butonları olan satırları) bul
+        const allButtons = adminModal.querySelectorAll('button[onclick*="editUserScore"], button[onclick*="deleteUser"], button[onclick*="banUser"], button[onclick*="openUserInspectorModal"], .fa-star, .fa-user-slash');
+        if (!allButtons.length) return;
 
-            const isCinema = el.classList.contains('is-fullpage-cinema');
-            const isMin = el.classList.contains('minimized');
-            const isStrictAdmin = window.isStrictAdminModeX();
+        let listContainer = null;
+        allButtons.forEach(function(btn) {
+            if (listContainer) return;
+            const row = btn.closest('div[style*="flex"], .user-row, .member-row, .adm-user-card');
+            if (row && row.parentElement) {
+                listContainer = row.parentElement;
+            }
+        });
+        if (!listContainer) return;
 
-            if (isCinema) {
-                if (!target.closest('.x-vw-cinema-top-bar') && !target.closest('.x-vw-top-hud')) return;
-                cinemaBoxEl = el.querySelector('.x-vw-full-content, .x-ext-full-wrap');
-                if (!cinemaBoxEl) return;
-                dragMode = 'cinema_box';
-                const st = window._vwRuntimeState[side];
-                baseOffsetX = st.cinemaDx || 0;
-                baseOffsetY = st.cinemaDy || 0;
-            } else if (isMin) {
-                dragMode = 'fixed';
-            } else {
-                if (!isStrictAdmin) return;
-                if (side === 'extern') {
-                    if (!target.closest('.x-ext-drag-bar')) return;
-                    dragMode = 'fixed';
-                } else {
-                    const draft = window.getDraftVideoConfigX();
-                    if (draft[side].placement === 'free_float' || el.classList.contains('is-free-floating-mode')) {
-                        dragMode = 'fixed';
-                    } else {
-                        dragMode = 'relative_admin';
-                        baseOffsetX = parseInt(draft[side].offsetX || 0, 10);
-                        baseOffsetY = parseInt(draft[side].offsetY || 0, 10);
-                    }
-                }
-            }
+        // 1. Ana listeyi kesinlikle ALT ALTA (Yukarıdan Aşağıya) yap!
+        listContainer.classList.add('x-adm-users-vertical-list');
+        listContainer.style.setProperty('display', 'flex', 'important');
+        listContainer.style.setProperty('flex-direction', 'column', 'important');
+        listContainer.style.setProperty('flex-wrap', 'nowrap', 'important');
+        listContainer.style.setProperty('overflow-x', 'hidden', 'important');
 
-            isDragging = true;
-            hasMoved = false;
-            startClientX = clientX;
-            startClientY = clientY;
+        const rows = Array.from(listContainer.children).filter(function(el) {
+            return el.tagName === 'DIV' && (el.querySelector('button') || el.textContent.includes('OFFLINE') || el.textContent.includes('ONLINE'));
+        });
+        if (!rows.length) return;
 
-            const rect = el.getBoundingClientRect();
-            grabOffsetX = clientX - rect.left;
-            grabOffsetY = clientY - rect.top;
-        };
+        rows.forEach(function(row) {
+            row.classList.add('x-adm-single-user-row');
 
-        const onPointerMove = function(clientX, clientY, e) {
-            if (!isDragging) return;
-            const dx = clientX - startClientX;
-            const dy = clientY - startClientY;
+            // Satır içindeki kullanıcı adını veritabanından tespit et ve kesilmişse tam adını geri yaz
+            let rawKey = '';
+            const anyOc = row.querySelector('[onclick*="("]')?.getAttribute('onclick') || row.getAttribute('onclick') || '';
+            const m = anyOc.match(/\(['"]([^'"]+)['"]\)/);
+            if (m && m[1]) rawKey = m[1];
 
-            if (!hasMoved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+            let fullDisplayName = '';
+            let isFounderAdmin = false;
+            if (rawKey && window.userDatabase) {
+                const uKey = (typeof window.resolveUserKey === 'function') ? window.resolveUserKey(rawKey) : rawKey;
+                const uObj = window.userDatabase[uKey] || window.userDatabase[rawKey];
+                if (uObj) {
+                    fullDisplayName = uObj.name || uObj.username || rawKey;
+                } else {
+                    fullDisplayName = rawKey;
+                }
+            }
 
-            if (!hasMoved) {
-                hasMoved = true;
-                el.classList.add('x-is-actively-dragging');
-            }
+            // İsim elemanını bul ve tam ismi görünür yap
+            const nameEl = row.querySelector('b, strong, .u-name, span[style*="font-weight"]');
+            if (nameEl) {
+                nameEl.classList.add('x-adm-user-fullname');
+                if (fullDisplayName && nameEl.textContent.trim().length <= 3) {
+                    nameEl.textContent = fullDisplayName;
+                } else if (!fullDisplayName) {
+                    fullDisplayName = nameEl.textContent.trim();
+                }
+                nameEl.style.setProperty('max-width', 'none', 'important');
+                nameEl.style.setProperty('overflow', 'visible', 'important');
+                nameEl.style.setProperty('text-overflow', 'clip', 'important');
+                nameEl.style.setProperty('white-space', 'nowrap', 'important');
+                nameEl.style.setProperty('flex-shrink', '0', 'important');
+            }
 
-            if (e && e.cancelable) e.preventDefault();
+            const checkStr = String(fullDisplayName + ' ' + rawKey + ' ' + row.textContent).toLowerCase();
+            if (checkStr.includes('şair misal') || checkStr.includes('sair misal') || checkStr.includes('adminking') || row.textContent.includes('👑')) {
+                isFounderAdmin = true;
+            }
 
-            if (dragMode === 'cinema_box' && cinemaBoxEl) {
-                const newCx = Math.round(baseOffsetX + dx);
-                const newCy = Math.round(baseOffsetY + dy);
-                cinemaBoxEl.style.setProperty('--x-cinema-dx', newCx + 'px');
-                cinemaBoxEl.style.setProperty('--x-cinema-dy', newCy + 'px');
-                window._vwRuntimeState[side].cinemaDx = newCx;
-                window._vwRuntimeState[side].cinemaDy = newCy;
-            } else if (dragMode === 'relative_admin') {
-                const newOx = Math.round(baseOffsetX + dx);
-                const newOy = Math.round(baseOffsetY + dy);
-                el.style.setProperty('--x-vw-tx', newOx + 'px');
-                el.style.setProperty('--x-vw-ty', newOy + 'px');
-                el.style.setProperty('left', newOx + 'px', 'important');
-                el.style.setProperty('top', newOy + 'px', 'important');
-            } else if (dragMode === 'fixed') {
-                const w = el.offsetWidth || 72;
-                const h = el.offsetHeight || 72;
-                const newLeft = Math.max(4, Math.min(clientX - grabOffsetX, window.innerWidth - w - 4));
-                const newTop = Math.max(54, Math.min(clientY - grabOffsetY, window.innerHeight - h - 4));
+            row.dataset.sortName = (fullDisplayName || row.textContent.trim()).toLowerCase();
+            row.dataset.isAdminRow = isFounderAdmin ? '1' : '0';
+        });
 
-                el.style.setProperty('position', 'fixed', 'important');
-                el.style.setProperty('left', Math.round(newLeft) + 'px', 'important');
-                el.style.setProperty('top', Math.round(newTop) + 'px', 'important');
-                el.style.setProperty('right', 'auto', 'important');
-                el.style.setProperty('bottom', 'auto', 'important');
-                el.style.setProperty('margin', '0px', 'important');
-            }
-        };
+        // 2. SIRALAMA: "Şair Misal.i" her zaman EN ÜSTTE (1. Sırada), diğer tüm üyeler altında A'dan Z'ye Alfabetik!
+        rows.sort(function(a, b) {
+            if (a.dataset.isAdminRow === '1' && b.dataset.isAdminRow !== '1') return -1;
+            if (b.dataset.isAdminRow === '1' && a.dataset.isAdminRow !== '1') return 1;
+            return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '', 'tr');
+        });
 
-        const onPointerUp = function(clientX, clientY) {
-            if (!isDragging) return;
-            isDragging = false;
-            el.classList.remove('x-is-actively-dragging');
+        rows.forEach(function(r) {
+            listContainer.appendChild(r);
+        });
+    };
 
-            if (hasMoved) {
-                el._justDraggedTs = Date.now();
-                if (side !== 'extern' && dragMode !== 'cinema_box') {
-                    const isMin = el.classList.contains('minimized');
-                    const draft = window.getDraftVideoConfigX();
-                    if (isMin) {
-                        const rect = el.getBoundingClientRect();
-                        draft[side].pillLeft = Math.round(rect.left);
-                        draft[side].pillTop = Math.round(rect.top);
-                        localStorage.setItem('misali_pill_pos_' + side, JSON.stringify({ left: draft[side].pillLeft, top: draft[side].pillTop }));
-                    } else if (dragMode === 'relative_admin' && window.isStrictAdminModeX()) {
-                        const finalOx = Math.round(baseOffsetX + (clientX - startClientX));
-                        const finalOy = Math.round(baseOffsetY + (clientY - startClientY));
-                        draft[side].offsetX = finalOx;
-                        draft[side].offsetY = finalOy;
-                        window.publishFreigebenVideoConfigX(draft);
-                    } else if (dragMode === 'fixed' && window.isStrictAdminModeX()) {
-                        const rect = el.getBoundingClientRect();
-                        draft[side].placement = 'free_float';
-                        draft[side].freeLeft = Math.round(rect.left);
-                        draft[side].freeTop = Math.round(rect.top);
-                        window.publishFreigebenVideoConfigX(draft);
-                    }
-                }
-            }
-        };
+    // Admin paneli veya Üyeler sekmesi açıldığında otomatik olarak alt alta ve A-Z sırala
+    document.addEventListener('click', function(e) {
+        if (e.target && (e.target.closest('#adminModal') || e.target.closest('[onclick*="adminModal"]') || e.target.closest('.ptab-btn'))) {
+            setTimeout(window.fixAndSortAdminUsersVerticalAZX, 60);
+            setTimeout(window.fixAndSortAdminUsersVerticalAZX, 250);
+        }
+    }, true);
 
-        el.addEventListener('mousedown', function(e) { if (e.button === 0) onPointerDown(e.clientX, e.clientY, e.target); });
-        window.addEventListener('mousemove', function(e) { onPointerMove(e.clientX, e.clientY, e); });
-        window.addEventListener('mouseup', function(e) { onPointerUp(e.clientX, e.clientY); });
+    window.bindPerfectGluedDragX = function(el, side) {
+        if (!el || el.hasAttribute('data-glued-drag-bound')) return;
+        el.setAttribute('data-glued-drag-bound', 'true');
 
-        el.addEventListener('touchstart', function(e) {
-            if (e.touches.length === 1) onPointerDown(e.touches[0].clientX, e.touches[0].clientY, e.target);
-        }, { passive: true });
-        el.addEventListener('touchmove', function(e) {
-            if (isDragging && e.touches.length === 1) onPointerMove(e.touches[0].clientX, e.touches[0].clientY, e);
-        }, { passive: false });
-        window.addEventListener('touchend', function(e) {
-            const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : { clientX: startClientX, clientY: startClientY };
-            onPointerUp(t.clientX, t.clientY);
-        });
-    };
+        let isDragging = false, hasMoved = false;
+        let startClientX = 0, startClientY = 0;
+        let grabOffsetX = 0, grabOffsetY = 0;
+        let baseOffsetX = 0, baseOffsetY = 0;
+        let dragMode = 'none';
+        let cinemaBoxEl = null;
+
+        const onPointerDown = function(clientX, clientY, target) {
+            if (target.closest('button:not(.x-drag-grip-btn), input, select, .x-vw-seek-row, .x-vw-compact-bar')) return;
+
+            const isCinema = el.classList.contains('is-fullpage-cinema');
+            const isMin = el.classList.contains('minimized');
+            const isStrictAdmin = window.isStrictAdminModeX();
+            const isMobileUser = window.isMobileTouchViewX();
+
+            if (isCinema) {
+                if (!target.closest('.x-vw-cinema-top-bar') && !target.closest('.x-vw-top-hud')) return;
+                cinemaBoxEl = el.querySelector('.x-vw-full-content, .x-ext-full-wrap');
+                if (!cinemaBoxEl) return;
+                dragMode = 'cinema_box';
+                const st = window._vwRuntimeState[side];
+                baseOffsetX = st.cinemaDx || 0;
+                baseOffsetY = st.cinemaDy || 0;
+            } else if (isMin) {
+                dragMode = 'fixed';
+            } else {
+                if (!isStrictAdmin && !isMobileUser) return;
+
+                if (side === 'extern') {
+                    if (!target.closest('.x-ext-drag-bar')) return;
+                    dragMode = 'fixed';
+                } else {
+                    const activeCfg = window.getActiveVideoConfigForRenderX();
+                    if (activeCfg[side].placement === 'free_float' || el.classList.contains('is-free-floating-mode')) {
+                        dragMode = 'fixed';
+                    } else {
+                        dragMode = isStrictAdmin ? 'relative_admin' : 'relative_mobile_user';
+                        baseOffsetX = parseInt(el.style.getPropertyValue('--x-vw-tx') || activeCfg[side].offsetX || 0, 10);
+                        baseOffsetY = parseInt(el.style.getPropertyValue('--x-vw-ty') || activeCfg[side].offsetY || 0, 10);
+                    }
+                }
+            }
+
+            isDragging = true;
+            hasMoved = false;
+            startClientX = clientX;
+            startClientY = clientY;
+
+            const rect = el.getBoundingClientRect();
+            grabOffsetX = clientX - rect.left;
+            grabOffsetY = clientY - rect.top;
+        };
+
+        const onPointerMove = function(clientX, clientY, e) {
+            if (!isDragging) return;
+            const dx = clientX - startClientX;
+            const dy = clientY - startClientY;
+
+            if (!hasMoved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+
+            if (!hasMoved) {
+                hasMoved = true;
+                el.classList.add('x-is-actively-dragging');
+            }
+
+            if (e && e.cancelable) e.preventDefault();
+
+            if (dragMode === 'cinema_box' && cinemaBoxEl) {
+                const newCx = Math.round(baseOffsetX + dx);
+                const newCy = Math.round(baseOffsetY + dy);
+                cinemaBoxEl.style.setProperty('--x-cinema-dx', newCx + 'px');
+                cinemaBoxEl.style.setProperty('--x-cinema-dy', newCy + 'px');
+                window._vwRuntimeState[side].cinemaDx = newCx;
+                window._vwRuntimeState[side].cinemaDy = newCy;
+            } else if (dragMode === 'relative_admin' || dragMode === 'relative_mobile_user') {
+                const newOx = Math.round(baseOffsetX + dx);
+                const newOy = Math.round(baseOffsetY + dy);
+                el.style.setProperty('--x-vw-tx', newOx + 'px');
+                el.style.setProperty('--x-vw-ty', newOy + 'px');
+                el.style.setProperty('left', newOx + 'px', 'important');
+                el.style.setProperty('top', newOy + 'px', 'important');
+            } else if (dragMode === 'fixed') {
+                const w = el.offsetWidth || 72;
+                const h = el.offsetHeight || 72;
+                const newLeft = Math.max(4, Math.min(clientX - grabOffsetX, window.innerWidth - w - 4));
+                const newTop = Math.max(54, Math.min(clientY - grabOffsetY, window.innerHeight - h - 4));
+
+                el.style.setProperty('position', 'fixed', 'important');
+                el.style.setProperty('left', Math.round(newLeft) + 'px', 'important');
+                el.style.setProperty('top', Math.round(newTop) + 'px', 'important');
+                el.style.setProperty('right', 'auto', 'important');
+                el.style.setProperty('bottom', 'auto', 'important');
+                el.style.setProperty('margin', '0px', 'important');
+            }
+        };
+
+        const onPointerUp = function(clientX, clientY) {
+            if (!isDragging) return;
+            isDragging = false;
+            el.classList.remove('x-is-actively-dragging');
+
+            if (hasMoved) {
+                el._justDraggedTs = Date.now();
+                if (side !== 'extern' && dragMode !== 'cinema_box') {
+                    const isMin = el.classList.contains('minimized');
+                    const draft = window.getDraftVideoConfigX();
+                    if (isMin) {
+                        const rect = el.getBoundingClientRect();
+                        draft[side].pillLeft = Math.round(rect.left);
+                        draft[side].pillTop = Math.round(rect.top);
+                        localStorage.setItem('misali_pill_pos_' + side, JSON.stringify({ left: draft[side].pillLeft, top: draft[side].pillTop }));
+                    } else if (dragMode === 'relative_admin' && window.isStrictAdminModeX()) {
+                        const finalOx = Math.round(baseOffsetX + (clientX - startClientX));
+                        const finalOy = Math.round(baseOffsetY + (clientY - startClientY));
+                        draft[side].offsetX = finalOx;
+                        draft[side].offsetY = finalOy;
+                        window.publishFreigebenVideoConfigX(draft);
+                    } else if (dragMode === 'relative_mobile_user') {
+                        const finalOx = Math.round(baseOffsetX + (clientX - startClientX));
+                        const finalOy = Math.round(baseOffsetY + (clientY - startClientY));
+                        el.style.setProperty('--x-vw-tx', finalOx + 'px');
+                        el.style.setProperty('--x-vw-ty', finalOy + 'px');
+                        el.style.setProperty('left', finalOx + 'px', 'important');
+                        el.style.setProperty('top', finalOy + 'px', 'important');
+                    } else if (dragMode === 'fixed' && window.isStrictAdminModeX()) {
+                        const rect = el.getBoundingClientRect();
+                        draft[side].placement = 'free_float';
+                        draft[side].freeLeft = Math.round(rect.left);
+                        draft[side].freeTop = Math.round(rect.top);
+                        window.publishFreigebenVideoConfigX(draft);
+                    }
+                }
+            }
+        };
+
+        el.addEventListener('mousedown', function(e) { if (e.button === 0) onPointerDown(e.clientX, e.clientY, e.target); });
+        window.addEventListener('mousemove', function(e) { onPointerMove(e.clientX, e.clientY, e); });
+        window.addEventListener('mouseup', function(e) { onPointerUp(e.clientX, e.clientY); });
+
+        el.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) onPointerDown(e.touches[0].clientX, e.touches[0].clientY, e.target);
+        }, { passive: true });
+        el.addEventListener('touchmove', function(e) {
+            if (isDragging && e.touches.length === 1) onPointerMove(e.touches[0].clientX, e.touches[0].clientY, e);
+        }, { passive: false });
+        window.addEventListener('touchend', function(e) {
+            const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : { clientX: startClientX, clientY: startClientY };
+            onPointerUp(t.clientX, t.clientY);
+        });
+    };
 
     // =========================================================================
     // 7. TOP-LEVEL TAM EKRAN (SİNEMA PORTALI), TEKİL SES ODAĞI & AUTO-REMIX TIMER
@@ -23931,6 +24100,286 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             window.renderHomeDualVideoStageX(false);
         }
     }, 1200);
+
+    // =========================================================================
+    // 12. %100 GARANTİLİ TELEFON ➔ PC (TÜM CİHAZLAR) FIREBASE BULUT SENKRONİZASYONU
+    // =========================================================================
+
+    // 1. Videoyu Sitenin İzinli 'audioFiles' ve 'profileData_v2' Yollarına Hızlı Paralel Paketlerle Yazar
+    window.uploadVideoToFirebaseChunksX = function(vidId, file) {
+        return new Promise(function(resolve) {
+            if (typeof firebase === 'undefined' || !firebase.database) return resolve(false);
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const fullDataUri = String(e.target.result || '');
+                    const chunkSize = 250000; // 250 KB hızlı mobil paket boyutu
+                    const totalChunks = Math.ceil(fullDataUri.length / chunkSize);
+                    const basePath = 'audioFiles/videoCloud_v3/' + vidId;
+
+                    const metaObj = {
+                        totalChunks: totalChunks,
+                        mime: file.type || 'video/mp4',
+                        size: file.size,
+                        copyright: '© Şair Misal.i',
+                        ready: false,
+                        ts: Date.now()
+                    };
+
+                    // Önce meta kaydını aç
+                    await firebase.database().ref(basePath + '/meta').set(metaObj);
+
+                    // Parçaları 4'erli paralel gruplar halinde çok hızlı yükle
+                    const batchSize = 4;
+                    for (let i = 0; i < totalChunks; i += batchSize) {
+                        const promises = [];
+                        for (let j = i; j < Math.min(i + batchSize, totalChunks); j++) {
+                            const part = fullDataUri.slice(j * chunkSize, (j + 1) * chunkSize);
+                            promises.push(firebase.database().ref(basePath + '/chunks/c_' + j).set(part));
+                        }
+                        await Promise.all(promises);
+                        const pct = Math.round((Math.min(i + batchSize, totalChunks) / totalChunks) * 100);
+                        document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
+                            el.textContent = "☁️ Buluta Yükleniyor: %" + pct + " (Lütfen bekleyin...)";
+                        });
+                    }
+
+                    // Yükleme tamamlandı bayrağını kaldır
+                    metaObj.ready = true;
+                    metaObj.ts = Date.now();
+                    await firebase.database().ref(basePath + '/meta').set(metaObj);
+
+                    document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
+                        el.textContent = "✅ Firebase Buluta Kaydedildi (%100)";
+                    });
+                    resolve(true);
+                } catch(err) {
+                    console.error("Firebase Chunk Upload Hatası:", err);
+                    resolve(false);
+                }
+            };
+            reader.onerror = function() { resolve(false); };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    // 2. Bilgisayardan Girildiğinde Videoyu Buluttan İndirip Binary Blob'a Çevirir
+    window.downloadVideoFromFirebaseChunksX = async function(vidId) {
+        if (typeof firebase === 'undefined' || !firebase.database) return null;
+        const pathsToTry = [
+            'audioFiles/videoCloud_v3/' + vidId,
+            'videoCloudChunks_v2/' + vidId
+        ];
+        for (let p = 0; p < pathsToTry.length; p++) {
+            try {
+                const basePath = pathsToTry[p];
+                const metaSnap = await firebase.database().ref(basePath + '/meta').once('value');
+                if (metaSnap.exists() && metaSnap.val()) {
+                    const meta = metaSnap.val();
+                    const total = parseInt(meta.totalChunks || 0, 10);
+                    if (total > 0) {
+                        const chunksSnap = await firebase.database().ref(basePath + '/chunks').once('value');
+                        if (chunksSnap.exists() && chunksSnap.val()) {
+                            const cObj = chunksSnap.val();
+                            let combined = '';
+                            for (let i = 0; i < total; i++) {
+                                if (cObj['c_' + i]) combined += cObj['c_' + i];
+                            }
+                            if (combined.length > 100) {
+                                await window.videoBlobDBX.save(vidId, combined);
+                                return window.base64ToBlobUrlX(combined);
+                            }
+                        }
+                    }
+                }
+            } catch(e){}
+        }
+        try {
+            const legacySnap = await firebase.database().ref('audioFiles/' + vidId).once('value');
+            if (legacySnap.exists() && legacySnap.val()) {
+                const b64 = legacySnap.val();
+                await window.videoBlobDBX.save(vidId, b64);
+                return window.base64ToBlobUrlX(b64);
+            }
+        } catch(e){}
+        return null;
+    };
+
+    // 3. Ayarları 'undefined' Hatasız Olarak İzinli 'profileData_v2' Yoluna Yazar
+    window.publishFreigebenVideoConfigX = async function(draftCfg) {
+        const norm = window.normalizeVideoConfigPlaylistsX(draftCfg);
+        norm.updatedAt = Date.now();
+        // Firebase 'undefined' içeren objeleri reddettiği için JSON ile tertemiz yapıyoruz
+        const cleanPayload = JSON.parse(JSON.stringify(norm));
+
+        window._ignoreNextCloudVideoEchoTs = Date.now();
+        localStorage.setItem('misali_video_studio_draft_v1', JSON.stringify(cleanPayload));
+        localStorage.setItem('misali_video_studio_cfg_v1', JSON.stringify(cleanPayload));
+
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            try {
+                await Promise.all([
+                    firebase.database().ref('profileData_v2/videoStudioSettings_v3').set(cleanPayload),
+                    firebase.database().ref('videoStudioSettings_v1').set(cleanPayload)
+                ]);
+                return true;
+            } catch(e) {
+                try {
+                    await firebase.database().ref('profileData_v2/videoStudioSettings_v3').set(cleanPayload);
+                    return true;
+                } catch(err2) {
+                    console.error("Firebase Config Yazma Hatası:", err2);
+                }
+            }
+        }
+        return false;
+    };
+
+    // 4. Bilgisayar Sayfayı Açtığında Eski Yerel Taslağı Silip Doğrudan Buluttaki Videoyu Çeker!
+    window._firebaseVideoSyncBoundV3 = false;
+    window.initFirebaseVideoSyncListenersX = function() {
+        if (window._firebaseVideoSyncBoundV3 || typeof firebase === 'undefined' || !firebase.database) return;
+        window._firebaseVideoSyncBoundV3 = true;
+
+        const handleIncomingCloudConfig = function(rawVal) {
+            if (!rawVal) return;
+            if (Date.now() - (window._ignoreNextCloudVideoEchoTs || 0) < 1200) return;
+
+            const cloudNorm = window.normalizeVideoConfigPlaylistsX(rawVal);
+            const localPub = window.getPublishedVideoConfigX();
+
+            // Buluttaki veri daha yeniyse veya bilgisayardaki liste boşsa anında üzerine yaz!
+            const cloudHasVideos = (cloudNorm.left.playlist.length + cloudNorm.right.playlist.length) > 0;
+            const localHasVideos = (localPub.left.playlist.length + localPub.right.playlist.length) > 0;
+
+            if ((cloudNorm.updatedAt || 0) >= (localPub.updatedAt || 0) || (cloudHasVideos && !localHasVideos)) {
+                const cloudStr = JSON.stringify(cloudNorm);
+                const prevStr = localStorage.getItem('misali_video_studio_cfg_v1');
+                localStorage.setItem('misali_video_studio_cfg_v1', cloudStr);
+                localStorage.setItem('misali_video_studio_draft_v1', cloudStr);
+
+                if (cloudStr !== prevStr) {
+                    window._vwRuntimeState.left.currentVidId = null;
+                    window._vwRuntimeState.right.currentVidId = null;
+                    window.renderHomeDualVideoStageX(true);
+                    if (typeof window.refreshVideoAdminContainersX === 'function') {
+                        window.refreshVideoAdminContainersX();
+                    }
+                }
+            }
+        };
+
+        // Hem izinli ana yolu hem yedek yolu dinle
+        try {
+            firebase.database().ref('profileData_v2/videoStudioSettings_v3').on('value', function(snap) {
+                if (snap.exists() && snap.val()) handleIncomingCloudConfig(snap.val());
+            });
+            firebase.database().ref('videoStudioSettings_v1').on('value', function(snap) {
+                if (snap.exists() && snap.val()) handleIncomingCloudConfig(snap.val());
+            });
+            firebase.database().ref('profileData_v2/videoCloudLibrary_v3').on('value', function(snap) {
+                if (snap.exists() && snap.val()) {
+                    const arr = Object.values(snap.val()).filter(Boolean);
+                    localStorage.setItem('misali_videothek_lib_v1', JSON.stringify(arr));
+                    if (typeof window.refreshVideothekContainersOnlyX === 'function') window.refreshVideothekContainersOnlyX();
+                }
+            });
+        } catch(e){}
+    };
+
+    window.saveTrackToCentralVideothekX = function(trackObj) {
+        if (!trackObj || !trackObj.id) return;
+        const cleanTrack = JSON.parse(JSON.stringify(trackObj));
+        const list = window.getCentralVideothekListX().filter(function(x) { return x.id !== cleanTrack.id; });
+        list.unshift(cleanTrack);
+        localStorage.setItem('misali_videothek_lib_v1', JSON.stringify(list));
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            try { firebase.database().ref('profileData_v2/videoCloudLibrary_v3/' + cleanTrack.id).set(cleanTrack); } catch(e){}
+        }
+    };
+
+    // 5. Telefondan Video Seçildiğinde ÖNCE Listeye Ekler, Sonra Buluta Yükleyip Otomatik Yayınlar!
+    window.uploadAdminVideoFileX = async function(input, side) {
+        if (!input || !input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+        const draft = window.readStudioFormToDraftX(side);
+        const customTitle = draft[side].title || file.name.replace(/\.[^/.]+$/, "");
+        const customSub = draft[side].sub || "";
+        const vidId = 'vid_' + side + '_' + Date.now();
+
+        const newTrack = {
+            id: vidId,
+            title: customTitle,
+            sub: customSub,
+            sizeLabel: sizeMB,
+            copyright: '© Şair Misal.i',
+            addedAt: Date.now()
+        };
+
+        // 1. ÖNCE yerel veritabanına ve listeye hemen ekle (Kullanıcı Freigeben'e bassa bile liste boş gitmez!)
+        await window.videoBlobDBX.save(vidId, file);
+        window._vwUrlCache[vidId] = URL.createObjectURL(file);
+
+        draft[side].playlist = Array.isArray(draft[side].playlist) ? draft[side].playlist : [];
+        draft[side].playlist.push(newTrack);
+        draft[side].published = true;
+
+        window._vwRuntimeState[side].idx = draft[side].playlist.length - 1;
+        window._vwRuntimeState[side].currentVidId = null;
+        window._vwRuntimeState[side].isStopped = false;
+        window._vwRuntimeState[side].userPaused = false;
+
+        window.saveTrackToCentralVideothekX(newTrack);
+        window.saveDraftVideoConfigX(draft);
+        input.value = '';
+
+        await window.renderHomeDualVideoStageX(true);
+        window.refreshVideoAdminContainersX();
+
+        window.toast("☁️ Video Firebase Buluta yükleniyor (" + sizeMB + "), lütfen %100 olana kadar bekleyin...", "⏳");
+
+        // 2. Şimdi paralel paketlerle Firebase Buluta yükle
+        const cloudOk = await window.uploadVideoToFirebaseChunksX(vidId, file);
+
+        // 3. Yükleme biter bitmez güncel listeyi tüm cihazlara (PC & Mobil) otomatik yayınla!
+        const latestDraft = window.getDraftVideoConfigX();
+        latestDraft[side].published = true;
+        await window.publishFreigebenVideoConfigX(latestDraft);
+
+        window.refreshVideoAdminContainersX();
+        if (cloudOk) {
+            window.toast("🚀 %100 TAMAMLANDI! Video Firebase Buluta kaydedildi; şimdi bilgisayardan da izleyebilirsiniz!", "✅");
+        } else {
+            window.toast("⚠️ Video bu cihaza kaydedildi ancak bulut kotası aşıldı. Çok büyük videolar için URL kullanabilirsiniz.", "⚠️");
+        }
+    };
+
+    // 6. Bilgisayarda Buluttan İndirme Gecikirse Asla Siyah Ekranda Kalmaz, Otomatik Tekrar Dener!
+    const origRenderSingleWingV3 = window.renderSingleVideoWingX;
+    window.renderSingleVideoWingX = async function(side, forceReloadVideo) {
+        const vidCheck = document.getElementById('x-vw-vid-' + side);
+        // Eğer video etiketi var ama içinde 'src' yoksa (buluttan henüz inmemişse), kilidi kır ve yeniden indir!
+        if (vidCheck && !vidCheck.getAttribute('src')) {
+            vidCheck.removeAttribute('data-loaded-vid');
+            forceReloadVideo = true;
+        }
+        const res = await origRenderSingleWingV3(side, forceReloadVideo);
+
+        const vidAfter = document.getElementById('x-vw-vid-' + side);
+        const cfg = window.getActiveVideoConfigForRenderX();
+        const playlist = (cfg[side] && cfg[side].playlist) || [];
+        if (playlist.length > 0 && vidAfter && !vidAfter.getAttribute('src')) {
+            vidAfter.removeAttribute('data-loaded-vid');
+            // Buluttan indirme devam ediyorsa 2.5 saniye sonra otomatik tekrar dene
+            clearTimeout(window['_retryCloudVidTimer_' + side]);
+            window['_retryCloudVidTimer_' + side] = setTimeout(function() {
+                window.renderSingleVideoWingX(side, true);
+            }, 2500);
+        }
+        return res;
+    };
 
     function bootVideoStudioEngineX() {
         window.initFirebaseVideoSyncListenersX();
