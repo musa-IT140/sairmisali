@@ -2,7 +2,7 @@
 <html lang="tr" data-theme="dark" class="is-guest">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#050814">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -10,7 +10,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Şair Misal.i">
     <title>Şair Misal.i - Şiir ve Söz Dünyası</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Lokale Schriftarten (DSGVO-konform, über gwfh.mranftl.com herunterladen und in /fonts/ ablegen) -->
+    <link rel="stylesheet" href="fonts/misali-fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script id="misali-core-pwa-init">
@@ -129,6 +130,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBhcm2ch-3wbjmXPpKLmwTrozbcr8xrPTg",
@@ -3234,6 +3236,14 @@
     (function() {
         "use strict";
 
+        window.escapeHTML = function(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
         window.fontSize = 0.85;
         window.currentLang = 'tr';
         window.currentCalDate = new Date();
@@ -3875,7 +3885,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         let savedUsers = JSON.parse(localStorage.getItem('misaliUsersDB')) || {};
         if (savedUsers["AdminKing"]) delete savedUsers["AdminKing"];
         if (!savedUsers["Sair Misali"]) {
-            savedUsers["Sair Misali"] = { approved: true, emoji: "🪶", name: "Şair Misal.i", role: "admin", score: 18664, gamesPlayed: 42, gamesWon: 38, streak: 5, username: "Sair Misali", birthdate: "1980-06-05", zodiac: "İkizler", pass: btoa("25361980"), scoreUpdatedAt: 1710000000000 };
+            savedUsers["Sair Misali"] = { approved: true, emoji: "🪶", name: "Şair Misal.i", role: "admin", score: 18664, gamesPlayed: 42, gamesWon: 38, streak: 5, username: "Sair Misali", birthdate: "1980-06-05", zodiac: "İkizler", scoreUpdatedAt: 1710000000000 };
         }
         window.userDatabase = savedUsers;
         window.deduplicateUsersDB();
@@ -4381,7 +4391,12 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             let rawU = uInput.value.trim(), u = rawU.toLowerCase(), p = pInput.value.trim();
             if (!rawU || !p) return window.showMisaliAlert("Eksik Bilgi", "Lütfen kullanıcı adı ve şifrenizi girin.");
 
-            if ((rawU === 'Sair Misali' || u === 'sair misali') && p === '25361980') {
+            if (rawU === 'Sair Misali' || u === 'sair misali' || u === 'sairmisali25@gmail.com') {
+                try {
+                    await firebase.auth().signInWithEmailAndPassword('sairmisali25@gmail.com', p);
+                } catch(authErr) {
+                    return window.showMisaliAlert("Hatalı Şifre", "Admin şifresi doğrulanamadı.");
+                }
                 let existingAdmin = window.userDatabase["Sair Misali"] || {};
                 let savedScore = existingAdmin.score !== undefined ? parseInt(existingAdmin.score) : 18664;
                 window.currentUser = Object.assign({}, existingAdmin, {
@@ -4729,6 +4744,9 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 if (tm) tm.innerText = String(d.getMinutes()).padStart(2, '0');
                 if (dt && !dt.hasAttribute('data-manual')) dt.innerText = window.formatStandardCalKey(d);
 
+                const clockModalOpen = document.getElementById('clockModal')?.classList.contains('show');
+                if (!clockModalOpen) return;
+
                 updateCityClock('Europe/Berlin', 'clk-de', 'dn-de');
                 updateCityClock('Europe/Istanbul', 'clk-tr', 'dn-tr');
                 updateCityClock('Asia/Riyadh', 'clk-mk', 'dn-mk');
@@ -4747,7 +4765,11 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                     ahS.style.transform = 'rotate(' + (bTime.getSeconds() * 6) + 'deg)';
                 }
             }, 1000);
-            setInterval(window.enhanceWorldClocksDetails, 2500);
+            setInterval(function() {
+                if (!document.hidden && document.getElementById('clockModal')?.classList.contains('show')) {
+                    window.enhanceWorldClocksDetails();
+                }
+            }, 5000);
         };
 
         window.zoomClock = function(boxEl) {
@@ -7966,7 +7988,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                             delBtn +
                         '</div>' +
                     '</div>' +
-                    '<div style="margin-bottom:8px; color:var(--text-main); font-size:0.85rem; line-height:1.45;">' + c.text + '</div>' +
+                    '<div style="margin-bottom:8px; color:var(--text-main); font-size:0.85rem; line-height:1.45;">' + window.escapeHTML(c.text) + '</div>' +
                     '<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">' +
                         '<button type="button" class="misali-rose-Interactive-btn ' + (hasRosed ? 'is-ro-lit' : '') + '" onclick="window.roseCommentNested(\'' + currentPath + '\', this)" title="Mavi Gül Ver (1 -> 2 -> 3 -> Boşalt)">' +
                             '<span style="' + roseStyle + '">🌹</span>' +
@@ -13873,7 +13895,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                             '<button type="button" class="action-btn" style="color:var(--accent-red);" onclick="window.deleteAdminComment(\'' + c.pId + '\', ' + c.idx + ')" title="Yorumu Sil"><i class="fas fa-trash"></i></button>' +
                         '</div>' +
                     '</div>' +
-                    '<div class="adm-comment-msg-body">' + c.text + '</div>' +
+                    '<div class="adm-comment-msg-body">' + window.escapeHTML(c.text) + '</div>' +
                 '</div>';
             }).join('');
         };
@@ -14472,1358 +14494,14 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         else bootMegaFixV007();
         setTimeout(bootMegaFixV007, 400);
         setInterval(function() {
-            window.upgradeWorldClocksAndWeatherFlags();
-            window.normalizeTickerSignaturesForMobile();
+            if (document.hidden) return;
             window.syncLeftAndRightDockCountersV17();
             window.syncBellCounterExact(false);
-        }, 2200);
+        }, 8000);
     })();
     </script>
 
-    <script id="misali-mobile-top-bar-fix">
-(function() {
-    const st = document.createElement('style');
-    st.id = 'misali-mobile-top-bar-css';
-    st.textContent = `
-        @media (max-width: 768px) {
-            html body header#master-header .h-row-1 {
-                padding: 2px 3px !important;
-                gap: 2px !important;
-                justify-content: center !important;
-            }
-            html body header#master-header .dt-group {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: center !important;
-                align-items: center !important;
-                gap: 2px !important;
-                width: auto !important;
-                max-width: 100% !important;
-                margin: 0 auto !important;
-                padding: 0 2px !important;
-                overflow: visible !important;
-            }
-            html body header#master-header .dt-box {
-                padding: 2px 4px !important;
-                font-size: 0.47rem !important;
-                gap: 2px !important;
-                border-radius: 9px !important;
-                white-space: nowrap !important;
-                letter-spacing: -0.2px !important;
-            }
-            html body header#master-header .dt-box i {
-                font-size: 0.5rem !important;
-            }
-            html body header#master-header .dt-box .misali-mini-flag {
-                width: 12px !important;
-                height: 9px !important;
-                margin-right: 2px !important;
-            }
-            html body header#master-header .pwa-header-btn,
-            html body header#master-header .dt-group .action-btn {
-                width: 18px !important;
-                height: 18px !important;
-                min-width: 18px !important;
-                min-height: 18px !important;
-                font-size: 0.5rem !important;
-                padding: 0 !important;
-                flex-shrink: 0 !important;
-            }
-        }
-    `;
-    document.head.appendChild(st);
-
-    function fitMobileTopRow() {
-        const dtGroup = document.querySelector('header#master-header .dt-group');
-        if (!dtGroup) return;
-        if (window.innerWidth > 768) {
-            dtGroup.style.zoom = '';
-            return;
-        }
-        dtGroup.style.zoom = '1';
-        const availW = window.innerWidth - 8;
-        const neededW = dtGroup.scrollWidth;
-        if (neededW > availW && availW > 0) {
-            dtGroup.style.zoom = Math.max(0.75, (availW / neededW) - 0.015).toFixed(3);
-        }
-    }
-
-    window.addEventListener('resize', fitMobileTopRow, { passive: true });
-    document.addEventListener('DOMContentLoaded', fitMobileTopRow);
-    setTimeout(fitMobileTopRow, 300);
-    setTimeout(fitMobileTopRow, 1200);
-})();
-</script>
-
-<script id="misali-smart-collapsible-docks">
-(function() {
-    "use strict";
-
-    const oldStyle = document.getElementById('misali-collapsible-docks-css');
-    if (oldStyle) oldStyle.remove();
-
-    const st = document.createElement('style');
-    st.id = 'misali-collapsible-docks-css';
-    st.textContent = `
-        /* Sanfte Gleit-Animation für beide 7er-Leisten */
-        html body #misali-left-stats-dock-v16,
-        html body #misali-right-dock-v14 {
-            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-                        opacity 0.28s ease,
-                        box-shadow 0.28s ease !important;
-            will-change: transform;
-        }
-
-        /* Zugeklappter Zustand: 72% im Rand versteckt (bunte Kante bleibt sichtbar!) */
-        html body #misali-left-stats-dock-v16:not(.is-dock-open) {
-            left: 0px !important;
-            transform: translateY(-50%) translateX(-72%) !important;
-            opacity: 0.72 !important;
-            padding-right: 11px !important;
-        }
-        html body #misali-right-dock-v14:not(.is-dock-open) {
-            right: 0px !important;
-            transform: translateY(-50%) translateX(72%) !important;
-            opacity: 0.72 !important;
-            padding-left: 11px !important;
-        }
-
-        /* Im zugeklappten Zustand Zähler-Badges leicht ausblenden für sauberen Look */
-        html body #misali-left-stats-dock-v16:not(.is-dock-open) .v16-mono-badge,
-        html body #misali-right-dock-v14:not(.is-dock-open) .v17-right-badge {
-            opacity: 0 !important;
-            transform: scale(0.5) !important;
-            transition: opacity 0.2s ease, transform 0.2s ease !important;
-        }
-
-        /* Aufgeklappter Zustand (oder Maus-Hover am PC) */
-        html body #misali-left-stats-dock-v16.is-dock-open,
-        html body #misali-right-dock-v14.is-dock-open {
-            transform: translateY(-50%) translateX(0) !important;
-            opacity: 0.98 !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 15px rgba(212, 175, 55, 0.28) !important;
-        }
-
-        @media (hover: hover) and (pointer: fine) {
-            html body #misali-left-stats-dock-v16:hover,
-            html body #misali-right-dock-v14:hover {
-                transform: translateY(-50%) translateX(0) !important;
-                opacity: 1 !important;
-            }
-            html body #misali-left-stats-dock-v16:hover .v16-mono-badge,
-            html body #misali-right-dock-v14:hover .v17-right-badge {
-                opacity: 1 !important;
-                transform: scale(1) !important;
-            }
-        }
-
-        /* Kleine Leucht-Lasche (Pfeil-Indikator), damit man sofort sieht, dass man aufklappen kann */
-        .misali-dock-peek-handle {
-            position: absolute !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            width: 13px !important;
-            height: 44px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            background: linear-gradient(180deg, rgba(212, 175, 55, 0.92), rgba(0, 206, 209, 0.92)) !important;
-            color: #000000 !important;
-            font-size: 0.55rem !important;
-            font-weight: 900 !important;
-            cursor: pointer !important;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5) !important;
-            z-index: 25 !important;
-            user-select: none !important;
-            transition: transform 0.25s ease, background 0.25s ease !important;
-        }
-        #misali-left-stats-dock-v16 .misali-dock-peek-handle {
-            right: -11px !important;
-            border-radius: 0 8px 8px 0 !important;
-        }
-        #misali-right-dock-v14 .misali-dock-peek-handle {
-            left: -11px !important;
-            border-radius: 8px 0 0 8px !important;
-        }
-
-        /* Pfeil dreht sich um, wenn die Leiste offen ist */
-        #misali-left-stats-dock-v16.is-dock-open .misali-dock-peek-handle i,
-        #misali-right-dock-v14.is-dock-open .misali-dock-peek-handle i {
-            transform: rotate(180deg) !important;
-        }
-        .misali-dock-peek-handle i {
-            transition: transform 0.3s ease !important;
-            color: #050814 !important;
-            font-size: 0.52rem !important;
-        }
-    `;
-    document.head.appendChild(st);
-
-    function setupCollapsibleDocks() {
-        const leftDock = document.getElementById('misali-left-stats-dock-v16');
-        const rightDock = document.getElementById('misali-right-dock-v14');
-
-        [
-            { el: leftDock, icon: 'fa-chevron-right', side: 'left' },
-            { el: rightDock, icon: 'fa-chevron-left', side: 'right' }
-        ].forEach(function(cfg) {
-            const dock = cfg.el;
-            if (!dock) return;
-
-            // Griff-Lasche hinzufügen, falls noch nicht vorhanden
-            if (!dock.querySelector('.misali-dock-peek-handle')) {
-                const handle = document.createElement('div');
-                handle.className = 'misali-dock-peek-handle';
-                handle.title = 'Menüyü Aç / Kapat';
-                handle.innerHTML = '<i class="fas ' + cfg.icon + '"></i>';
-                handle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dock.classList.toggle('is-dock-open');
-                });
-                dock.appendChild(handle);
-            }
-
-            // Wenn die Leiste noch zugeklappt ist: 1. Tipp klappt sie nur auf (verhindert Fehlklicks am Handy)
-            if (!dock.hasAttribute('data-peek-bound')) {
-                dock.setAttribute('data-peek-bound', 'true');
-                dock.addEventListener('click', function(e) {
-                    if (e.target.closest('.misali-dock-peek-handle')) return;
-                    if (!dock.classList.contains('is-dock-open')) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        dock.classList.add('is-dock-open');
-                    }
-                }, true);
-            }
-        });
-    }
-
-    // Beim Scrollen oder Tippen außerhalb automatisch wieder sanft einklappen
-    let lastScrollY = window.scrollY;
-    window.addEventListener('scroll', function() {
-        if (Math.abs(window.scrollY - lastScrollY) > 18) {
-            lastScrollY = window.scrollY;
-            const l = document.getElementById('misali-left-stats-dock-v16');
-            const r = document.getElementById('misali-right-dock-v14');
-            if (l) l.classList.remove('is-dock-open');
-            if (r) r.classList.remove('is-dock-open');
-        }
-    }, { passive: true });
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#misali-left-stats-dock-v16')) {
-            const l = document.getElementById('misali-left-stats-dock-v16');
-            if (l) l.classList.remove('is-dock-open');
-        }
-        if (!e.target.closest('#misali-right-dock-v14') && !e.target.closest('#n-mood-menu')) {
-            const r = document.getElementById('misali-right-dock-v14');
-            if (r) r.classList.remove('is-dock-open');
-        }
-    });
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupCollapsibleDocks);
-    } else {
-        setupCollapsibleDocks();
-    }
-    setTimeout(setupCollapsibleDocks, 600);
-    setTimeout(setupCollapsibleDocks, 1800);
-})();
-</script>
-
-<script id="misali-master-x-script">
-(function() {
-    "use strict";
-
-    // Önceki küçük yama scriptlerini temizle (çakışma ve ikili animasyonu önler)
-    ['misali-mobile-top-bar-css', 'misali-collapsible-docks-css', 'misali-x-master-css'].forEach(function(id) {
-        const old = document.getElementById(id);
-        if (old) old.remove();
-    });
-
-    // =========================================================================
-    // 1. MASTER X-CSS: GLOCKE, KİBAR DOCK, MOBİL ARAMA, AVATAR DÖNÜŞ & PROFİL TEMA
-    // =========================================================================
-    const xStyle = document.createElement('style');
-    xStyle.id = 'misali-x-master-css';
-    xStyle.textContent = `
-        /* A) Giriş İkili Animasyon Engeli & İpeksi Avatar Dönüş Animasyonu */
-        .page-view.active {
-            animation: none !important;
-        }
-        @keyframes xHeroSingleReveal {
-            0%   { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes xAvatarSpinAndSettle {
-            0%   { opacity: 0.2; transform: scale(0.45) rotate(-360deg); filter: brightness(1.6) drop-shadow(0 0 25px #d4af37); }
-            65%  { opacity: 1; transform: scale(1.06) rotate(12deg); filter: brightness(1.2) drop-shadow(0 0 22px #00ced1); }
-            85%  { transform: scale(0.98) rotate(-4deg); }
-            100% { opacity: 1; transform: scale(1) rotate(0deg); filter: brightness(1) drop-shadow(0 8px 24px rgba(212,175,55,0.45)); }
-        }
-        .hero-section {
-            animation: xHeroSingleReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
-        }
-        #hero-main-avatar, .hero-avatar {
-            animation: none !important;
-            transition: transform 0.35s ease, box-shadow 0.35s ease !important;
-        }
-        #hero-main-avatar.x-avatar-spinning,
-        .hero-avatar.x-avatar-spinning {
-            animation: xAvatarSpinAndSettle 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
-        }
-
-        /* B) Glocke (Zil) & Bildirim Rozeti: Sayfa Tasarımına Uyumlu Lüks Altın-Turkuaz Stil */
-        html body #master-bell-btn {
-            position: relative !important;
-            width: 34px !important;
-            height: 34px !important;
-            border-radius: 50% !important;
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(8, 47, 73, 0.85)) !important;
-            border: 1.5px solid rgba(212, 175, 55, 0.72) !important;
-            box-shadow: 0 3px 12px rgba(0, 206, 209, 0.25), inset 0 0 8px rgba(212, 175, 55, 0.22) !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
-            overflow: visible !important;
-        }
-        html[data-theme="light"] body #master-bell-btn {
-            background: linear-gradient(145deg, #ffffff, #fef9c3) !important;
-            border-color: #b48608 !important;
-            box-shadow: 0 3px 10px rgba(180, 134, 8, 0.22) !important;
-        }
-        html body #master-bell-btn i.fa-bell {
-            background: linear-gradient(135deg, #fde047 0%, #d4af37 55%, #22d3ee 100%) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            color: #fde047 !important;
-            font-size: 0.98rem !important;
-            filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.5)) !important;
-        }
-        html[data-theme="light"] body #master-bell-btn i.fa-bell {
-            background: linear-gradient(135deg, #b45309 0%, #0284c7 100%) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-        }
-        html body #master-bell-btn:hover {
-            transform: scale(1.08) !important;
-            border-color: var(--accent-cyan) !important;
-            box-shadow: 0 0 16px rgba(0, 206, 209, 0.55) !important;
-        }
-        html body #bell-count-badge {
-            position: absolute !important;
-            top: -5px !important;
-            right: -6px !important;
-            min-width: 17px !important;
-            height: 17px !important;
-            padding: 0 4px !important;
-            border-radius: 9px !important;
-            font-family: 'Space Mono', monospace !important;
-            font-size: 0.58rem !important;
-            font-weight: 900 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            background: linear-gradient(135deg, #00ced1, #0369a1) !important;
-            color: #ffffff !important;
-            border: 1.2px solid #fde047 !important;
-            box-shadow: 0 2px 8px rgba(0, 206, 209, 0.65) !important;
-            z-index: 999999 !important;
-        }
-
-        /* C) Kibar Yan Docklar: Açılınca Ok Kaybolur ve Dock Aydınlanır, Kapanınca Ok Geri Gelir */
-        html body #misali-left-stats-dock-v16,
-        html body #misali-right-dock-v14 {
-            transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-                        opacity 0.3s ease,
-                        box-shadow 0.3s ease,
-                        border-color 0.3s ease,
-                        background 0.3s ease !important;
-            padding: 6px 3px !important;
-            gap: 5px !important;
-            will-change: transform, opacity, box-shadow;
-        }
-
-        /* Kapalı (Kibar) Durum */
-        html body #misali-left-stats-dock-v16:not(.is-dock-open) {
-            left: 0px !important;
-            transform: translateY(-50%) translateX(-76%) !important;
-            opacity: 0.62 !important;
-            padding-right: 8px !important;
-        }
-        html body #misali-right-dock-v14:not(.is-dock-open) {
-            right: 0px !important;
-            transform: translateY(-50%) translateX(76%) !important;
-            opacity: 0.62 !important;
-            padding-left: 8px !important;
-        }
-        html body #misali-left-stats-dock-v16:not(.is-dock-open) .v16-mono-badge,
-        html body #misali-right-dock-v14:not(.is-dock-open) .v17-right-badge {
-            opacity: 0 !important;
-            transform: scale(0.3) !important;
-            transition: all 0.22s ease !important;
-        }
-
-        /* Açık (Aydınlanmış) Durum */
-        html body #misali-left-stats-dock-v16.is-dock-open,
-        html body #misali-right-dock-v14.is-dock-open {
-            transform: translateY(-50%) translateX(0) !important;
-            opacity: 1 !important;
-            border-color: rgba(212, 175, 55, 0.88) !important;
-            background: rgba(8, 15, 32, 0.92) !important;
-            box-shadow: 0 0 24px rgba(212, 175, 55, 0.45), 0 0 14px rgba(0, 206, 209, 0.35) !important;
-        }
-        html[data-theme="light"] body #misali-left-stats-dock-v16.is-dock-open,
-        html[data-theme="light"] body #misali-right-dock-v14.is-dock-open {
-            background: rgba(255, 255, 255, 0.98) !important;
-            border-color: #d4af37 !important;
-            box-shadow: 0 6px 24px rgba(212, 175, 55, 0.38) !important;
-        }
-        html body #misali-left-stats-dock-v16.is-dock-open .v16-mono-badge,
-        html body #misali-right-dock-v14.is-dock-open .v17-right-badge {
-            opacity: 1 !important;
-            transform: scale(1) !important;
-        }
-
-        /* Çok Kibar Ok Kulakçığı (Açılınca Kaybolur, Kapanınca Geri Gelir) */
-        .misali-dock-peek-handle {
-            position: absolute !important;
-            top: 50% !important;
-            transform: translateY(-50%) scale(1) !important;
-            width: 9px !important;
-            height: 28px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            background: rgba(15, 23, 42, 0.85) !important;
-            border: 1px solid rgba(212, 175, 55, 0.65) !important;
-            color: #fde047 !important;
-            font-size: 0.42rem !important;
-            cursor: pointer !important;
-            box-shadow: 0 0 8px rgba(212, 175, 55, 0.35) !important;
-            z-index: 25 !important;
-            opacity: 0.85 !important;
-            transition: opacity 0.25s ease, transform 0.25s ease !important;
-        }
-        #misali-left-stats-dock-v16 .misali-dock-peek-handle {
-            right: -8px !important;
-            border-left: none !important;
-            border-radius: 0 6px 6px 0 !important;
-        }
-        #misali-right-dock-v14 .misali-dock-peek-handle {
-            left: -8px !important;
-            border-right: none !important;
-            border-radius: 6px 0 0 6px !important;
-        }
-        .misali-dock-peek-handle i {
-            color: #fde047 !important;
-            font-size: 0.42rem !important;
-        }
-        /* Dock açıldığında ok tamamen kaybolur */
-        #misali-left-stats-dock-v16.is-dock-open .misali-dock-peek-handle,
-        #misali-right-dock-v14.is-dock-open .misali-dock-peek-handle {
-            opacity: 0 !important;
-            transform: translateY(-50%) scale(0.1) !important;
-            pointer-events: none !important;
-        }
-
-        @media (hover: hover) and (pointer: fine) {
-            html body #misali-left-stats-dock-v16:hover,
-            html body #misali-right-dock-v14:hover {
-                transform: translateY(-50%) translateX(0) !important;
-                opacity: 1 !important;
-                border-color: rgba(212, 175, 55, 0.88) !important;
-                box-shadow: 0 0 24px rgba(212, 175, 55, 0.45), 0 0 14px rgba(0, 206, 209, 0.35) !important;
-            }
-            html body #misali-left-stats-dock-v16:hover .v16-mono-badge,
-            html body #misali-right-dock-v14:hover .v17-right-badge {
-                opacity: 1 !important;
-                transform: scale(1) !important;
-            }
-            html body #misali-left-stats-dock-v16:hover .misali-dock-peek-handle,
-            html body #misali-right-dock-v14:hover .misali-dock-peek-handle {
-                opacity: 0 !important;
-                transform: translateY(-50%) scale(0.1) !important;
-                pointer-events: none !important;
-            }
-        }
-
-        /* D) Profilim Sayfası Kişisel Renk Seçici Paleti */
-        .x-prof-theme-bar {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 5px !important;
-            flex-wrap: wrap !important;
-            margin: 8px 0 4px 0 !important;
-            padding: 5px 8px !important;
-            background: rgba(0, 0, 0, 0.22) !important;
-            border-radius: 20px !important;
-            border: 1px dashed rgba(255, 255, 255, 0.18) !important;
-        }
-        :root[data-theme="light"] .x-prof-theme-bar {
-            background: rgba(255, 255, 255, 0.65) !important;
-            border-color: rgba(15, 23, 42, 0.18) !important;
-        }
-        .x-prof-swatch {
-            width: 18px !important;
-            height: 18px !important;
-            border-radius: 50% !important;
-            cursor: pointer !important;
-            border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-            flex-shrink: 0 !important;
-        }
-        .x-prof-swatch:hover, .x-prof-swatch.active {
-            transform: scale(1.25) !important;
-            border-color: #ffffff !important;
-            box-shadow: 0 0 8px currentColor !important;
-        }
-
-        /* E) Mobil Üst Satır & Arama Kutusu (Eingabefeld) Küçültme */
-        @media (max-width: 768px) {
-            html body header#master-header .h-row-1 {
-                padding: 2px 3px !important;
-                gap: 2px !important;
-                justify-content: center !important;
-            }
-            html body header#master-header .dt-group {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: center !important;
-                align-items: center !important;
-                gap: 2px !important;
-                width: auto !important;
-                max-width: 100% !important;
-                margin: 0 auto !important;
-                padding: 0 2px !important;
-                overflow: visible !important;
-            }
-            html body header#master-header .dt-box {
-                padding: 2px 4px !important;
-                font-size: 0.46rem !important;
-                gap: 2px !important;
-                border-radius: 8px !important;
-                white-space: nowrap !important;
-                letter-spacing: -0.2px !important;
-            }
-            html body header#master-header .dt-box i {
-                font-size: 0.48rem !important;
-            }
-            html body header#master-header .dt-box .misali-mini-flag {
-                width: 11px !important;
-                height: 8px !important;
-                margin-right: 2px !important;
-            }
-            html body header#master-header .pwa-header-btn,
-            html body header#master-header .dt-group .action-btn {
-                width: 17px !important;
-                height: 17px !important;
-                min-width: 17px !important;
-                min-height: 17px !important;
-                font-size: 0.48rem !important;
-                padding: 0 !important;
-                flex-shrink: 0 !important;
-            }
-
-            /* Mobil Arama Kutusu (Eingabefeld) Kibar & Kompakt */
-            html body .cat-search-box {
-                max-width: 86% !important;
-                margin: 4px auto 10px auto !important;
-                position: relative !important;
-            }
-            html body .cat-search-box input {
-                height: 31px !important;
-                min-height: 31px !important;
-                padding: 4px 28px 4px 28px !important;
-                font-size: 0.7rem !important;
-                border-radius: 16px !important;
-            }
-            html body .cat-search-box .fa-search,
-            html body .cat-search-box i:first-child {
-                font-size: 0.7rem !important;
-                left: 11px !important;
-            }
-
-            /* Mobilde Yan Dock Butonları Daha Kibar */
-            html body #misali-left-stats-dock-v16 .v16-left-mono-btn,
-            html body #misali-right-dock-v14 .v14-dock-btn {
-                width: 20px !important;
-                height: 20px !important;
-                min-width: 20px !important;
-                min-height: 20px !important;
-                font-size: 0.56rem !important;
-            }
-        }
-    `;
-    document.head.appendChild(xStyle);
-
-    // =========================================================================
-    // 2. ANA SAYFA AVATAR DÖNÜŞ ANİMASYONU & SEKME GEÇİŞLERİNDE KART KORUMASI
-    // =========================================================================
-    window.triggerHeroAvatarSpinX = function() {
-        const avatars = document.querySelectorAll('#hero-main-avatar, .hero-avatar');
-        avatars.forEach(function(av) {
-            av.classList.remove('x-avatar-spinning');
-            void av.offsetWidth;
-            av.classList.add('x-avatar-spinning');
-        });
-    };
-
-    window.nav = function(viewId) {
-        if (!window.ensureActiveUserObject() && viewId !== 'home') {
-            if (typeof window.showGuestLock === 'function') window.showGuestLock('🔒');
-            return;
-        }
-
-        document.querySelectorAll('.page-view').forEach(function(v) {
-            v.classList.remove('active');
-        });
-        const target = document.getElementById(viewId + '-view') || document.getElementById('home-view');
-        if (target) {
-            target.classList.add('active');
-            // Sekmeye gelindiğinde takılı kalmış arama filtresi varsa temizle ve tüm kartları göster
-            const searchInp = target.querySelector('.cat-search-box input');
-            if (searchInp && searchInp.value.trim() !== '') {
-                searchInp.value = '';
-                const clearBtn = target.querySelector('.cat-search-clear');
-                if (clearBtn) clearBtn.style.display = 'none';
-            }
-            target.querySelectorAll('.card.search-hidden').forEach(function(c) {
-                c.classList.remove('search-hidden');
-                c.style.setProperty('display', 'flex', 'important');
-            });
-            const emptyMsg = target.querySelector('.search-empty-msg');
-            if (emptyMsg) emptyMsg.remove();
-        }
-
-        // Şiirlerim veya diğer içerik sekmelerine geçildiğinde eksik kart varsa yeniden güvenli çiz
-        const contentTabs = ['poems', 'quotes', 'persons', 'atasozleri', 'marslar', 'stories', 'jokes', 'saglik', 'bilmeceler', 'bulmacalar', 'userPoems'];
-        if (contentTabs.indexOf(viewId) !== -1 && typeof window.renderAllContent === 'function') {
-            window.renderAllContent();
-        }
-
-        // Ana sayfaya her gelindiğinde avatar resmini döndürerek yerine oturt
-        if (viewId === 'home' || !document.getElementById(viewId + '-view')) {
-            window.triggerHeroAvatarSpinX();
-        }
-
-        document.querySelectorAll('.nav-link').forEach(function(l) {
-            const navKey = l.getAttribute('data-nav');
-            const oc = l.getAttribute('onclick') || '';
-            const isMatch = (navKey === viewId) || oc.indexOf("'" + viewId + "'") !== -1 || oc.indexOf('"' + viewId + '"') !== -1;
-            l.classList.toggle('active', isMatch);
-            if (isMatch && typeof l.scrollIntoView === 'function') {
-                try { l.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e){}
-            }
-        });
-
-        document.querySelectorAll('.s-pill[data-nav]').forEach(function(p) {
-            p.classList.toggle('active', p.getAttribute('data-nav') === viewId);
-        });
-
-        if (viewId === 'games' && typeof window.updateUserGameHUD === 'function') window.updateUserGameHUD();
-        if (viewId === 'about' && typeof window.renderProfileView === 'function') window.renderProfileView();
-        if (viewId === 'chat') {
-            if (typeof window.recoverAllChatMessagesX === 'function') window.recoverAllChatMessagesX();
-            if (typeof window.populateChatUsers === 'function') window.populateChatUsers();
-            if (typeof window.renderChatBox === 'function') window.renderChatBox();
-        }
-
-        if (document.querySelectorAll('.modal.show').length > 0) {
-            window.closeTopModal();
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(window.syncHeaderHeightOffset, 60);
-    };
-
-    // =========================================================================
-    // 3. ŞİİRLERİM KARTLARININ KAYBOLMASINI ÖNLEYEN GÜVENLİ KART MOTORU
-    // =========================================================================
-    window.safeAttrStrX = function(str) {
-        return String(str || '')
-            .replace(/<[^>]*>?/gm, '')
-            .replace(/[\r\n\t]+/g, ' ')
-            .replace(/\\/g, '\\\\')
-            .replace(/'/g, "\\'")
-            .replace(/"/g, '&quot;')
-            .trim();
-    };
-
-    // Şiir/Eser veritabanında hiçbir eserin kaybolmaması için başlığa ve ID'ye göre akıllı birleştirme
-    const origMergeDB = window.mergeDBWithMaster;
-    window.mergeDBWithMaster = function(customDB) {
-        const res = origMergeDB ? origMergeDB(customDB) : (window.DB || {});
-        const localSaved = JSON.parse(localStorage.getItem('misaliFullDB') || '{}') || {};
-        ['poems', 'quotes', 'persons', 'atasozleri', 'stories', 'jokes', 'saglik', 'bilmeceler', 'bulmacalar'].forEach(function(cat) {
-            const combinedMap = new Map();
-            [res[cat] || [], localSaved[cat] || [], (customDB && customDB[cat]) ? (Array.isArray(customDB[cat]) ? customDB[cat] : Object.values(customDB[cat])) : []].forEach(function(arr) {
-                (arr || []).forEach(function(item) {
-                    if (item && (item.id || item.title || item.trTitle)) {
-                        const key = String(item.id || item.title || item.trTitle);
-                        if (!combinedMap.has(key)) combinedMap.set(key, item);
-                    }
-                });
-            });
-            res[cat] = Array.from(combinedMap.values());
-        });
-        return res;
-    };
-
-    // renderAllContent içinde çift tırnak ("") ve satır sonu (\r\n) nedeniyle kartların silinmesini önle
-    const origRenderAllContent = window.renderAllContent;
-    window.renderAllContent = function() {
-        if (window.DB) {
-            ['poems', 'quotes', 'persons', 'atasozleri', 'marslar', 'stories', 'jokes', 'saglik', 'bilmeceler', 'bulmacalar'].forEach(function(cat) {
-                (window.DB[cat] || []).forEach(function(item) {
-                    if (!item) return;
-                    if (item.title) item.title = String(item.title).replace(/[\r\n]+/g, ' ').trim();
-                    if (item.text) item.text = String(item.text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                    if (item.quote) item.quote = String(item.quote).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                });
-            });
-        }
-        if (origRenderAllContent) origRenderAllContent();
-
-        // Kartların üzerindeki paylaşım/kopyalama butonlarını tırnak kırılmalarına karşı 100% güvenli hale getir
-        ['poems', 'quotes', 'persons', 'atasozleri', 'marslar', 'stories', 'jokes', 'saglik', 'bilmeceler', 'bulmacalar', 'userPoems'].forEach(function(type) {
-            const grid = document.getElementById(type + '-grid');
-            if (!grid) return;
-            const searchInp = grid.parentElement ? grid.parentElement.querySelector('.cat-search-box input') : null;
-            const hasActiveQuery = searchInp && searchInp.value.trim().length > 0;
-            if (!hasActiveQuery) {
-                grid.querySelectorAll('.card').forEach(function(c) {
-                    c.classList.remove('search-hidden');
-                    c.style.setProperty('display', 'flex', 'important');
-                });
-            }
-        });
-    };
-
-    // =========================================================================
-    // 4. OYUN PUANLARI (ALINAN & KAYBEDİLEN) VE ŞAİRLER LİGİ TAM SENKRONİZASYONU
-    // =========================================================================
-    window.deduplicateUsersDB = function() {
-        try {
-            if (!window.userDatabase || typeof window.userDatabase !== 'object') return;
-            const canonicalMap = {};
-            Object.keys(window.userDatabase).forEach(function(rawKey) {
-                const u = window.userDatabase[rawKey];
-                if (!u || typeof u !== 'object') return;
-                let normId = window.cleanAliasStr(u.username || u.name || rawKey);
-                if (!normId) return;
-                if (normId === 'sairmisali' || normId === 'adminking' || normId === 'sairmisal') normId = 'sairmisali';
-                if (normId !== 'sairmisali' && u.customRank === 'Divan Şairi') delete u.customRank;
-                u.role = (normId === 'sairmisali') ? 'admin' : 'user';
-
-                const prefKey = (normId === 'sairmisali') ? 'Sair Misali' : (u.username || rawKey).toLowerCase();
-                if (!canonicalMap[normId]) {
-                    canonicalMap[normId] = { key: prefKey, data: Object.assign({}, u, { username: prefKey }) };
-                } else {
-                    const existing = canonicalMap[normId].data;
-                    const uTs = parseInt(u.scoreUpdatedAt || u.updatedAt || 0, 10);
-                    const exTs = parseInt(existing.scoreUpdatedAt || existing.updatedAt || 0, 10);
-                    // En güncel zaman damgalı puanı (kazanç veya kayıp) koru!
-                    if (uTs >= exTs && u.score !== undefined) {
-                        existing.score = parseInt(u.score || 0, 10);
-                        existing.scoreUpdatedAt = uTs;
-                    }
-                    existing.pointsEarned = Math.max(parseInt(existing.pointsEarned || 0, 10), parseInt(u.pointsEarned || 0, 10));
-                    existing.pointsLost = Math.max(parseInt(existing.pointsLost || 0, 10), parseInt(u.pointsLost || 0, 10));
-                    existing.gamesPlayed = Math.max(parseInt(existing.gamesPlayed || 0, 10), parseInt(u.gamesPlayed || 0, 10));
-                    existing.gamesWon = Math.max(parseInt(existing.gamesWon || 0, 10), parseInt(u.gamesWon || 0, 10));
-                    if (uTs >= exTs && u.streak !== undefined) existing.streak = parseInt(u.streak || 0, 10);
-                    if (u.profileTheme) existing.profileTheme = u.profileTheme;
-                    if (normId === 'sairmisali') { existing.name = "Şair Misal.i"; existing.role = "admin"; existing.emoji = "🪶"; }
-                }
-            });
-            const cleanedDB = {};
-            Object.values(canonicalMap).forEach(function(entry) { cleanedDB[entry.key] = entry.data; });
-            window.userDatabase = cleanedDB;
-            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-        } catch(e) {}
-    };
-
-    window.addGamePoints = function(pts, gameName, isWin, gameId) {
-        if (!window.ensureActiveUserObject()) return window.showGuestLock('🎮');
-        const uKey = window.resolveUserKey(window.currentUser.username);
-        const userRec = window.userDatabase[uKey] || window.currentUser;
-
-        const safePts = Math.min(parseInt(pts, 10) || 10, 20);
-        const penalty = Math.max(1, Math.floor(safePts / 2));
-
-        userRec.gamesPlayed = parseInt(userRec.gamesPlayed || 0, 10) + 1;
-        userRec.pointsEarned = parseInt(userRec.pointsEarned || 0, 10);
-        userRec.pointsLost = parseInt(userRec.pointsLost || 0, 10);
-        if (!userRec.gameWins) userRec.gameWins = {};
-        if (!userRec.gameLosses) userRec.gameLosses = {};
-
-        let bonusPts = 0;
-        let delta = 0;
-
-        // Mevcut gerçek puanı al (Math.max ile eski puanı geri getirme hatası kaldırıldı!)
-        const currentScore = parseInt(window.currentUser.score !== undefined ? window.currentUser.score : (userRec.score || 0), 10);
-
-        if (isWin) {
-            userRec.gamesWon = parseInt(userRec.gamesWon || 0, 10) + 1;
-            userRec.streak = parseInt(userRec.streak || 0, 10) + 1;
-            if (gameId) userRec.gameWins[gameId] = parseInt(userRec.gameWins[gameId] || 0, 10) + 1;
-            if (userRec.streak >= 3) bonusPts = 2;
-            delta = safePts + bonusPts;
-            userRec.pointsEarned += delta;
-            userRec.score = Math.max(0, currentScore + delta);
-        } else {
-            userRec.streak = 0;
-            if (gameId) userRec.gameLosses[gameId] = parseInt(userRec.gameLosses[gameId] || 0, 10) + 1;
-            delta = -penalty;
-            userRec.pointsLost += penalty;
-            userRec.score = Math.max(0, currentScore - penalty);
-        }
-
-        const nowTs = Date.now();
-        userRec.scoreUpdatedAt = nowTs;
-        userRec.updatedAt = nowTs;
-
-        window.currentUser = Object.assign({}, window.currentUser, userRec);
-        window.userDatabase[uKey] = window.currentUser;
-        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-        sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-
-        const fbPayload = {
-            score: window.currentUser.score,
-            pointsEarned: window.currentUser.pointsEarned,
-            pointsLost: window.currentUser.pointsLost,
-            gamesPlayed: window.currentUser.gamesPlayed,
-            gamesWon: window.currentUser.gamesWon,
-            streak: window.currentUser.streak,
-            gameWins: window.currentUser.gameWins,
-            gameLosses: window.currentUser.gameLosses,
-            scoreUpdatedAt: nowTs,
-            updatedAt: nowTs
-        };
-        try { firebase.database().ref('users/' + uKey).update(fbPayload); } catch(e){}
-
-        if (isWin) {
-            const msgTxt = bonusPts > 0 ? ("+" + delta + " Puan (" + userRec.streak + "x Seri Bonusu! 🔥)") : ("+" + safePts + " Puan Kazandın!");
-            window.spawnFloatingScorePop("+" + delta + " Puan 🏆", 'var(--accent-green)');
-            window.toast(msgTxt + " (Net: " + window.currentUser.score + " P)", "🏆");
-        } else {
-            window.spawnFloatingScorePop("-" + penalty + " Puan", 'var(--accent-red)');
-            window.toast("-" + penalty + " Puan Kaybettin! (Net: " + window.currentUser.score + " P)", "📉");
-        }
-
-        if (typeof window.logUserAction === 'function') {
-            window.logUserAction("🎮 OYUN: " + (window.currentUser.name || window.currentUser.username) + ', "' + gameName + '" oyununu ' + (isWin ? ('kazandı (+' + delta + ' P)') : ('kaybetti (-' + penalty + ' P)')) + '. Net Puan: ' + window.currentUser.score + ' P');
-        }
-
-        window.updateUserGameHUD();
-        const headerScore = document.getElementById('u-score');
-        if (headerScore) headerScore.innerHTML = "🏆 " + window.currentUser.score + " P";
-        window.renderLeaderboard();
-        window.renderAllContent();
-    };
-
-    window.updateUserGameHUD = function() {
-        if (!window.ensureActiveUserObject()) return;
-        const uKey = window.resolveUserKey(window.currentUser.username);
-        const uObj = (uKey && window.userDatabase[uKey]) ? window.userDatabase[uKey] : window.currentUser;
-
-        // En son güncellenen puanı baz al
-        const uTs = parseInt(uObj.scoreUpdatedAt || 0, 10);
-        const curTs = parseInt(window.currentUser.scoreUpdatedAt || 0, 10);
-        const myScore = (curTs >= uTs && window.currentUser.score !== undefined) ? parseInt(window.currentUser.score, 10) : parseInt(uObj.score || 0, 10);
-
-        const myWins = Math.max(parseInt(uObj.gamesWon || 0, 10), parseInt(window.currentUser.gamesWon || 0, 10));
-        const myPlayed = Math.max(parseInt(uObj.gamesPlayed || 0, 10), parseInt(window.currentUser.gamesPlayed || 0, 10));
-        const myStreak = (curTs >= uTs && window.currentUser.streak !== undefined) ? parseInt(window.currentUser.streak, 10) : parseInt(uObj.streak || 0, 10);
-        const myEarned = Math.max(parseInt(uObj.pointsEarned || 0, 10), parseInt(window.currentUser.pointsEarned || 0, 10));
-        const myLost = Math.max(parseInt(uObj.pointsLost || 0, 10), parseInt(window.currentUser.pointsLost || 0, 10));
-
-        window.currentUser.score = myScore;
-        window.currentUser.gamesWon = myWins;
-        window.currentUser.gamesPlayed = myPlayed;
-        window.currentUser.streak = myStreak;
-        window.currentUser.pointsEarned = myEarned;
-        window.currentUser.pointsLost = myLost;
-        if (uKey && window.userDatabase[uKey]) {
-            window.userDatabase[uKey].score = myScore;
-            window.userDatabase[uKey].pointsEarned = myEarned;
-            window.userDatabase[uKey].pointsLost = myLost;
-        }
-
-        const allUsers = Object.values(window.userDatabase || {}).sort(function(a, b) { return (parseInt(b.score || 0, 10)) - (parseInt(a.score || 0, 10)); });
-        const rankIdx = allUsers.findIndex(function(u) { return (u.username || '').toLowerCase() === (window.currentUser.username || '').toLowerCase(); });
-        const myRank = rankIdx > -1 ? (rankIdx + 1) : 1;
-
-        const elScore = document.getElementById('hud-my-score');
-        if (elScore) elScore.innerHTML = myScore + " P <small style='font-size:0.58rem;opacity:0.85;'>(+" + myEarned + " / -" + myLost + ")</small>";
-        const elRank = document.getElementById('hud-my-rank'); if (elRank) elRank.innerText = "#" + myRank + " / " + Math.max(1, allUsers.length);
-        const elWins = document.getElementById('hud-my-wins'); if (elWins) elWins.innerText = myWins + " / " + myPlayed;
-        const elStreak = document.getElementById('hud-my-streak'); if (elStreak) elStreak.innerText = myStreak + " 🔥";
-        const gmScore = document.getElementById('game-modal-my-score'); if (gmScore) gmScore.innerText = myScore + " P";
-        const gmStreak = document.getElementById('game-modal-my-streak'); if (gmStreak) gmStreak.innerText = myStreak + " 🔥";
-        const headerScore = document.getElementById('u-score'); if (headerScore) headerScore.innerHTML = "🏆 " + myScore + " P";
-    };
-
-    // Şairler Ligi Tablosunda Kişiye Münhasır Alınan (+) ve Kaybedilen (-) Puan Gösterimi
-    window.renderLeaderboard = function() {
-        window.deduplicateUsersDB();
-        const list = document.getElementById('leaderboard-body');
-        if (!list) return;
-        const myU = window.currentUser ? (window.currentUser.username || '').toLowerCase() : '';
-        const sorted = Object.values(window.userDatabase || {}).sort(function(a, b) { return (parseInt(b.score, 10) || 0) - (parseInt(a.score, 10) || 0); });
-        const top3 = sorted.slice(0, 3);
-        const podiumColors = ['var(--accent-gold)', '#cbd5e1', '#fb923c'];
-        const podiumMedals = ['🥇 1. Şampiyon', '🥈 2. İkinci', '🥉 3. Üçüncü'];
-
-        const podiumHtml = '<div style="display:grid;grid-template-columns:repeat(' + Math.min(3, top3.length) + ',1fr);gap:8px;margin-bottom:14px;">' +
-            top3.map(function(u, idx) {
-                const rankObj = window.getPoetRankTitle(parseInt(u.score || 0, 10), 5, 5, 5, false, u);
-                const earned = parseInt(u.pointsEarned || 0, 10);
-                const lost = parseInt(u.pointsLost || 0, 10);
-                return '<div class="league-podium-card vis-clickable-box" onclick="window.openUserInspectorModal(\'' + u.username + '\')" style="border:1.5px solid ' + podiumColors[idx] + ';flex-direction:column;">' +
-                    '<div style="font-size:0.65rem;font-weight:800;color:' + podiumColors[idx] + ';margin-bottom:4px;">' + podiumMedals[idx] + '</div>' +
-                    '<div style="font-size:1.5rem;margin-bottom:2px;">' + (u.emoji || '👤') + '</div>' +
-                    '<div style="font-weight:700;font-size:0.78rem;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (u.name || u.username) + '</div>' +
-                    '<div style="font-size:0.6rem;color:var(--accent-cyan);margin:2px 0;">' + rankObj.title + '</div>' +
-                    '<span class="league-score-pill" style="margin-top:3px;">🏆 ' + (parseInt(u.score, 10) || 0) + ' P</span>' +
-                    '<div style="font-family:\'Space Mono\',monospace;font-size:0.55rem;margin-top:3px;"><span style="color:var(--accent-green);">+' + earned + ' P</span> • <span style="color:var(--accent-red);">-' + lost + ' P</span></div>' +
-                '</div>';
-            }).join('') + '</div>';
-
-        list.innerHTML = podiumHtml +
-            '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.78rem;"><thead><tr style="border-bottom:2px solid var(--border-soft);color:var(--text-sub);font-size:0.68rem;"><th style="padding:8px 4px;">#</th><th>Şair / Rütbe</th><th style="text-align:center;">Zafer / Maç</th><th style="text-align:center;">Alınan / Kaybedilen</th><th style="text-align:right;color:var(--accent-gold);">Net Puan</th></tr></thead><tbody>' +
-            sorted.map(function(u, i) {
-                const isMe = myU && (u.username || '').toLowerCase() === myU;
-                const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ('<b>' + (i + 1) + '.</b>')));
-                const liveBadge = window.getUserLiveBadgeHTML ? window.getUserLiveBadgeHTML(u) : '';
-                const won = parseInt(u.gamesWon || 0, 10);
-                const played = parseInt(u.gamesPlayed || 0, 10);
-                const lostGames = Math.max(0, played - won);
-                const earnedPts = parseInt(u.pointsEarned || (won * 12), 10);
-                const lostPts = parseInt(u.pointsLost || (lostGames * 5), 10);
-                const rankObj = window.getPoetRankTitle(parseInt(u.score || 0, 10), 3, 3, 3, false, u);
-
-                return '<tr style="border-bottom:1px solid rgba(255,255,255,0.06);background:' + (isMe ? 'rgba(212,175,55,0.14)' : 'transparent') + ';cursor:pointer;" onclick="window.openUserInspectorModal(\'' + u.username + '\')">' +
-                    '<td style="padding:8px 4px;">' + medal + '</td>' +
-                    '<td style="padding:6px 4px;"><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"><span>' + (u.emoji || '👤') + '</span><b style="color:var(--text-main);">' + (u.name || u.username) + '</b>' + liveBadge + (isMe ? '<span class="clean-badge" style="border-color:var(--accent-gold);color:var(--accent-gold);font-size:0.52rem;">SEN</span>' : '') + '</div><div style="font-size:0.62rem;color:var(--text-sub);margin-top:2px;">' + rankObj.title + '</div></td>' +
-                    '<td style="text-align:center;font-family:\'Space Mono\',monospace;font-size:0.7rem;color:var(--text-main);">' + won + ' / ' + played + '<br><small style="color:#f97316;font-size:0.58rem;">' + (u.streak || 0) + ' 🔥</small></td>' +
-                    '<td style="text-align:center;font-family:\'Space Mono\',monospace;font-size:0.68rem;"><span style="color:var(--accent-green);font-weight:700;">+' + earnedPts + ' P</span><br><span style="color:var(--accent-red);font-size:0.62rem;">-' + lostPts + ' P</span></td>' +
-                    '<td style="text-align:right;padding-right:4px;"><span class="league-score-pill">🏆 ' + (parseInt(u.score, 10) || 0) + ' P</span></td>' +
-                '</tr>';
-            }).join('') + '</tbody></table></div>';
-    };
-
-    // =========================================================================
-    // 5. PROFİLİM SAYFASI: KİŞİSEL TEMA RENGİ SEÇİMİ (ÜYE KARTI SEÇMELİ, ŞAİR MİSAL.İ SABİT)
-    // =========================================================================
-    window.PROFILE_PAGE_THEMES = {
-        cyan:     { name: "Turkuaz Okyanus",  bg: "linear-gradient(145deg, rgba(6, 28, 45, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #f0f9ff, #e0f2fe)", border: "#00ced1", accent: "#22d3ee", swatch: "#00ced1" },
-        emerald:  { name: "Zümrüt Saray",     bg: "linear-gradient(145deg, rgba(6, 48, 35, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #ecfdf5, #d1fae5)", border: "#10b981", accent: "#34d399", swatch: "#10b981" },
-        purple:   { name: "Mor Divan",        bg: "linear-gradient(145deg, rgba(46, 16, 101, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #faf5ff, #f3e8ff)", border: "#a855f7", accent: "#c084fc", swatch: "#a855f7" },
-        ruby:     { name: "Kızıl Yakut",      bg: "linear-gradient(145deg, rgba(76, 5, 25, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #fff1f2, #ffe4e6)", border: "#f43f5e", accent: "#fb7185", swatch: "#f43f5e" },
-        sapphire: { name: "Gece Safiri",      bg: "linear-gradient(145deg, rgba(23, 37, 84, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #eff6ff, #dbeafe)", border: "#3b82f6", accent: "#60a5fa", swatch: "#3b82f6" },
-        amber:    { name: "Kehribar Ateşi",   bg: "linear-gradient(145deg, rgba(69, 26, 3, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #fffbeb, #fef3c7)", border: "#f59e0b", accent: "#fbbf24", swatch: "#f59e0b" },
-        rose:     { name: "Kiraz Çiçeği",     bg: "linear-gradient(145deg, rgba(80, 7, 36, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #fdf2f8, #fce7f3)", border: "#ec4899", accent: "#f472b6", swatch: "#ec4899" },
-        aurora:   { name: "Kuzey Işıkları",   bg: "linear-gradient(145deg, rgba(4, 78, 64, 0.92), rgba(49, 46, 129, 0.92))", lightBg: "linear-gradient(145deg, #f0fdfa, #ede9fe)", border: "#14b8a6", accent: "#2dd4bf", swatch: "#14b8a6" },
-        gold:     { name: "Altın Klasik",     bg: "linear-gradient(145deg, rgba(42, 28, 6, 0.92), rgba(15, 23, 42, 0.95))", lightBg: "linear-gradient(145deg, #fefce8, #fef08a)", border: "#d4af37", accent: "#fde047", swatch: "#d4af37" },
-        silver:   { name: "Gümüş Mehtap",     bg: "linear-gradient(145deg, rgba(30, 41, 59, 0.94), rgba(9, 13, 22, 0.96))", lightBg: "linear-gradient(145deg, #f8fafc, #e2e8f0)", border: "#94a3b8", accent: "#e2e8f0", swatch: "#94a3b8" }
-    };
-
-    window.selectMyProfileThemeX = function(themeKey, isFounderTarget) {
-        if (!window.ensureActiveUserObject()) return window.showGuestLock('🎨');
-        const th = window.PROFILE_PAGE_THEMES[themeKey];
-        if (!th) return;
-
-        if (isFounderTarget) {
-            if (!window.isUserTrueAdmin(window.currentUser)) return;
-            window.profileDB = window.profileDB || {};
-            window.profileDB.founderTheme = themeKey;
-            localStorage.setItem('misaliProfileDB_v3', JSON.stringify(window.profileDB));
-            try { firebase.database().ref('profileData_v2/founderTheme').set(themeKey); } catch(e){}
-            window.applyProfilePageThemesX();
-            window.toast("👑 Kurucu Kartı Teması: " + th.name, "🎨");
-            return;
-        }
-
-        const uKey = window.resolveUserKey(window.currentUser.username);
-        const rec = (uKey && window.userDatabase[uKey]) ? window.userDatabase[uKey] : window.currentUser;
-        rec.profileTheme = themeKey;
-        window.currentUser.profileTheme = themeKey;
-        if (uKey) window.userDatabase[uKey] = rec;
-        localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
-        sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
-        try { if (uKey) firebase.database().ref('users/' + uKey + '/profileTheme').set(themeKey); } catch(e){}
-
-        window.applyProfilePageThemesX();
-        window.toast("✨ Profil Teman Güncellendi: " + th.name, "🎨");
-    };
-
-    window.applyProfilePageThemesX = function() {
-        const aboutView = document.getElementById('about-view');
-        if (!aboutView) return;
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        const u = window.ensureActiveUserObject();
-        const uKey = u ? window.resolveUserKey(u.username) : null;
-        const uObj = (uKey && window.userDatabase[uKey]) ? window.userDatabase[uKey] : u;
-        const isAdmin = window.isUserTrueAdmin(u);
-
-        const userThemeKey = (uObj && uObj.profileTheme && window.PROFILE_PAGE_THEMES[uObj.profileTheme]) ? uObj.profileTheme : 'emerald';
-        const uTh = window.PROFILE_PAGE_THEMES[userThemeKey];
-
-        // Şair Misal.i Kurucu Kartı: Normal üyelerde sabit Altın/Divan teması, Admin değiştirirse seçilen tema
-        const founderThemeKey = (window.profileDB && window.profileDB.founderTheme && window.PROFILE_PAGE_THEMES[window.profileDB.founderTheme]) ? window.profileDB.founderTheme : 'gold';
-        const fTh = window.PROFILE_PAGE_THEMES[founderThemeKey];
-
-        const masterHeader = aboutView.querySelector('.profile-master-header');
-        const userCard = aboutView.querySelector('.profile-col-card.user-col');
-        const founderCard = aboutView.querySelector('.profile-col-card.founder-col');
-
-        if (masterHeader && uTh) {
-            masterHeader.style.setProperty('background', isLight ? uTh.lightBg : uTh.bg, 'important');
-            masterHeader.style.setProperty('border-color', uTh.border, 'important');
-            masterHeader.style.setProperty('box-shadow', '0 10px 28px rgba(0,0,0,0.35), inset 0 0 18px ' + uTh.border + '33', 'important');
-        }
-
-        if (userCard && uTh) {
-            userCard.style.setProperty('background', isLight ? uTh.lightBg : uTh.bg, 'important');
-            userCard.style.setProperty('border-color', uTh.border, 'important');
-            userCard.style.setProperty('box-shadow', '0 10px 28px rgba(0,0,0,0.35), inset 0 0 18px ' + uTh.border + '33', 'important');
-
-            let bar = userCard.querySelector('.x-user-theme-picker');
-            if (!bar) {
-                bar = document.createElement('div');
-                bar.className = 'x-prof-theme-bar x-user-theme-picker';
-                const firstBadge = userCard.querySelector('div[style*="inline-block"]');
-                if (firstBadge) firstBadge.insertAdjacentElement('afterend', bar);
-                else userCard.prepend(bar);
-            }
-            bar.innerHTML = '<span style="font-size:0.62rem;color:var(--text-sub);font-weight:700;margin-right:3px;"><i class="fas fa-palette" style="color:' + uTh.border + ';"></i> Kart Rengim:</span>' +
-                Object.keys(window.PROFILE_PAGE_THEMES).map(function(k) {
-                    const t = window.PROFILE_PAGE_THEMES[k];
-                    return '<span class="x-prof-swatch ' + (k === userThemeKey ? 'active' : '') + '" style="background:' + t.swatch + ';color:' + t.swatch + ';" onclick="window.selectMyProfileThemeX(\'' + k + '\', false)" title="' + t.name + '"></span>';
-                }).join('');
-        }
-
-        if (founderCard && fTh) {
-            founderCard.style.setProperty('background', isLight ? fTh.lightBg : fTh.bg, 'important');
-            founderCard.style.setProperty('border-color', fTh.border, 'important');
-            founderCard.style.setProperty('box-shadow', '0 10px 28px rgba(0,0,0,0.35), inset 0 0 18px ' + fTh.border + '33', 'important');
-
-            let fBar = founderCard.querySelector('.x-founder-theme-picker');
-            if (isAdmin) {
-                if (!fBar) {
-                    fBar = document.createElement('div');
-                    fBar.className = 'x-prof-theme-bar x-founder-theme-picker';
-                    const firstBadge = founderCard.querySelector('div[style*="inline-block"]');
-                    if (firstBadge) firstBadge.insertAdjacentElement('afterend', fBar);
-                }
-                if (fBar) {
-                    fBar.innerHTML = '<span style="font-size:0.62rem;color:var(--accent-gold);font-weight:700;margin-right:3px;">👑 Kurucu Rengi:</span>' +
-                        Object.keys(window.PROFILE_PAGE_THEMES).map(function(k) {
-                            const t = window.PROFILE_PAGE_THEMES[k];
-                            return '<span class="x-prof-swatch ' + (k === founderThemeKey ? 'active' : '') + '" style="background:' + t.swatch + ';color:' + t.swatch + ';" onclick="window.selectMyProfileThemeX(\'' + k + '\', true)" title="' + t.name + '"></span>';
-                        }).join('');
-                }
-            } else if (fBar) {
-                fBar.remove();
-            }
-        }
-    };
-
-    const origRenderProfileView = window.renderProfileView;
-    window.renderProfileView = function() {
-        if (origRenderProfileView) origRenderProfileView();
-        window.applyProfilePageThemesX();
-    };
-
-    // =========================================================================
-    // 6. SOHBET (CHAT) KURTARMA VE HİÇBİR MESAJIN KAYBOLMAMASI SİSTEMİ
-    // =========================================================================
-    window.recoverAllChatMessagesX = function() {
-        const msgMap = new Map();
-        const addMsgToMap = function(m) {
-            if (!m || !m.text) return;
-            const key = String(m.time || '') + '_' + window.cleanAliasStr(m.sender || m.senderName || 'u') + '_' + String(m.text).slice(0, 18);
-            if (!msgMap.has(key)) msgMap.set(key, m);
-        };
-
-        // 1. Mevcut bellek ve localStorage anahtarlarını tara
-        [
-            window.chatDB,
-            JSON.parse(localStorage.getItem('misaliChatDB_V0') || '[]'),
-            JSON.parse(localStorage.getItem('misaliChatDB') || '[]'),
-            JSON.parse(localStorage.getItem('misali_chat_backup_x') || '[]')
-        ].forEach(function(arr) {
-            if (Array.isArray(arr)) arr.forEach(addMsgToMap);
-        });
-
-        // 2. Bildirim ve Admin Loglarında kalmış olan sohbet mesajlarını da kurtar
-        const allLogs = [].concat(
-            window.adminLogs || [],
-            JSON.parse(localStorage.getItem('misali_v20_vault_ADMIN') || '[]') || [],
-            window.MY_PRIVATE_INBOX || [],
-            JSON.parse(localStorage.getItem('misaliPrivateInbox') || '[]') || []
-        );
-        allLogs.forEach(function(l) {
-            if (!l || !l.msg) return;
-            const raw = String(l.msg);
-            // Format 1: 💬 SOHBET (Gönderen ➔ Alıcı): "Mesaj"
-            const m1 = raw.match(/SOHBET\s*\(([^➔)]+)➔\s*([^)]+)\)\s*:\s*"([^"]+)"/i);
-            if (m1) {
-                addMsgToMap({
-                    sender: m1[1].trim(),
-                    senderName: m1[1].trim(),
-                    receiver: m1[2].trim(),
-                    text: m1[3].trim(),
-                    time: Number(l.ts || Date.now())
-                });
-                return;
-            }
-            // Format 2: 💬 İsim sana bir sohbet mesajı gönderdi: "Mesaj"
-            const m2 = raw.match(/💬\s*(.+?)\s+sana bir sohbet mesajı gönderdi:\s*"([^"]+)"/i);
-            if (m2 && window.currentUser) {
-                addMsgToMap({
-                    sender: l.linkId || m2[1].trim(),
-                    senderName: m2[1].trim(),
-                    receiver: window.currentUser.username,
-                    text: m2[2].trim(),
-                    time: Number(l.ts || Date.now())
-                });
-            }
-        });
-
-        const merged = Array.from(msgMap.values()).sort(function(a, b) { return (a.time || 0) - (b.time || 0); });
-        window.chatDB = merged;
-        localStorage.setItem('misaliChatDB_V0', JSON.stringify(merged));
-        localStorage.setItem('misali_chat_backup_x', JSON.stringify(merged));
-        return merged;
-    };
-
-    window.populateChatUsers = function() {
-        const select = document.getElementById('chat-partner-select');
-        if (!select || !window.ensureActiveUserObject()) return;
-        window.recoverAllChatMessagesX();
-        const currentVal = select.value || window.activeChatUser || '';
-        const myClean = window.cleanAliasStr(window.currentUser.username || window.currentUser.name);
-        const users = Object.values(window.userDatabase || {});
-
-        let options = '<option value="">📬 Tüm Sohbet Mesajlarım (Genel Bakış)</option>';
-        users.forEach(function(u) {
-            if (u && u.username && !window.isSameUserAlias(u.username)) {
-                const pClean = window.cleanAliasStr(u.username);
-                const pNameClean = window.cleanAliasStr(u.name || '');
-                const msgCount = (window.chatDB || []).filter(function(m) {
-                    if (!m) return false;
-                    const s = window.cleanAliasStr(m.sender || m.senderName);
-                    const r = window.cleanAliasStr(m.receiver);
-                    return ((s === myClean && (r === pClean || r === pNameClean)) || ((s === pClean || s === pNameClean) && r === myClean));
-                }).length;
-                const countTxt = msgCount > 0 ? (' • 💬 ' + msgCount + ' Mesaj') : '';
-                const liveTxt = window.isUserLiveNow(u) ? '🟢 LIVE' : '⚪ OFFLINE';
-                options += '<option value="' + u.username + '">' + (u.emoji || '👤') + ' ' + (u.name || u.username) + ' (' + liveTxt + countTxt + ')' + (window.isUserTrueAdmin(u) ? ' 👑' : '') + '</option>';
-            }
-        });
-        select.innerHTML = options;
-        if (currentVal) select.value = currentVal;
-    };
-
-    window.renderChatBox = function() {
-        const box = document.getElementById('chat-box');
-        if (!box) return;
-        if (!window.ensureActiveUserObject()) {
-            box.innerHTML = '<div style="text-align:center; color:var(--text-sub); margin-top:20px; font-size:0.84rem;">Sohbet için lütfen giriş yapın.</div>';
-            return;
-        }
-        window.recoverAllChatMessagesX();
-        const selectEl = document.getElementById('chat-partner-select');
-        const partnerId = selectEl ? selectEl.value : '';
-        const myClean = window.cleanAliasStr(window.currentUser.username || window.currentUser.name);
-        const myNameClean = window.cleanAliasStr(window.currentUser.name || '');
-        const isAdmin = window.isUserTrueAdmin(window.currentUser);
-
-        const isMeMatch = function(raw) {
-            const c = window.cleanAliasStr(raw);
-            if (!c) return false;
-            if (c === myClean || (myNameClean && c === myNameClean)) return true;
-            if (isAdmin && (c === 'sairmisali' || c === 'adminking' || c === 'sairmisal' || c.indexOf('sairmisali') !== -1)) return true;
-            return false;
-        };
-
-        // Eğer yukarıdan belirli bir kişi seçilmemişse: Kullanıcının TÜM mesajlarını göster (Hiçbir mesaj gizli kalmaz!)
-        if (!partnerId) {
-            const allMyMessages = (window.chatDB || []).filter(function(m) {
-                return m && (isMeMatch(m.sender) || isMeMatch(m.senderName) || isMeMatch(m.receiver) || isAdmin);
-            });
-
-            if (allMyMessages.length === 0) {
-                box.innerHTML = '<div style="text-align:center; color:var(--text-sub); margin-top:20px; font-size:0.84rem;">Henüz kayıtlı mesaj yok. Yukarıdan bir üye seçerek ilk mesajı gönderebilirsin!</div>';
-                return;
-            }
-
-            box.innerHTML = '<div style="font-size:0.72rem; color:var(--accent-gold); text-align:center; margin-bottom:8px; padding:4px; border-bottom:1px dashed var(--border-soft);"><i class="fas fa-comments"></i> Tüm Sohbet Geçmişin (' + allMyMessages.length + ' Mesaj) — Yanıtlamak için mesajın üzerine dokun:</div>' +
-                allMyMessages.map(function(m) {
-                    const isMe = isMeMatch(m.sender) || isMeMatch(m.senderName);
-                    const otherPerson = isMe ? m.receiver : (m.sender || m.senderName);
-                    const fullDateTime = window.formatDateTimeDisplay(m.time, m.time);
-                    const deleteBtn = (isAdmin || isMe) ? '<button onclick="event.stopPropagation(); window.deleteChatMessage(' + m.time + ')" style="background:transparent; border:none; color:var(--accent-red); cursor:pointer; font-size:0.75rem; margin-left:6px;"><i class="fas fa-trash"></i></button>' : '';
-                    return '<div class="chat-msg-row" style="align-items:' + (isMe ? 'flex-end' : 'flex-start') + '; cursor:pointer;" onclick="window.openChatWithSenderV007(\'' + String(otherPerson || '').replace(/'/g, "\\'") + '\')" title="Bu kişiyle sohbete geçmek için dokun">' +
-                        '<div class="chat-msg-meta">' +
-                            '<b>' + (m.senderName || m.sender) + ' ➔ ' + (m.receiver || '') + '</b>' +
-                            '<span class="chat-msg-time"><i class="far fa-clock"></i> ' + fullDateTime + '</span>' +
-                            deleteBtn +
-                        '</div>' +
-                        '<div class="chat-msg-bubble" style="background:' + (isMe ? 'rgba(212,175,55,0.2)' : 'rgba(0,206,209,0.12)') + '; border:1px solid ' + (isMe ? 'var(--accent-gold)' : 'var(--accent-cyan)') + ';">' + m.text + '</div>' +
-                    '</div>';
-                }).join('');
-            box.scrollTop = box.scrollHeight;
-            return;
-        }
-
-        // Belirli bir kişi seçiliyse
-        const partnerLookup = window.findUserObjectByNameOrUsername ? window.findUserObjectByNameOrUsername(partnerId) : null;
-        const pClean = window.cleanAliasStr(partnerId);
-        const pNameClean = partnerLookup && partnerLookup.user ? window.cleanAliasStr(partnerLookup.user.name || '') : '';
-        const isPartnerAdmin = (pClean === 'sairmisali' || pClean === 'adminking');
-
-        const isPartnerMatch = function(raw) {
-            const c = window.cleanAliasStr(raw);
-            if (!c) return false;
-            if (c === pClean || (pNameClean && c === pNameClean)) return true;
-            if (isPartnerAdmin && (c === 'sairmisali' || c === 'adminking' || c.indexOf('sairmisali') !== -1)) return true;
-            return false;
-        };
-
-        const messages = (window.chatDB || []).filter(function(m) {
-            if (!m) return false;
-            return ((isMeMatch(m.sender) || isMeMatch(m.senderName)) && isPartnerMatch(m.receiver)) ||
-                   ((isPartnerMatch(m.sender) || isPartnerMatch(m.senderName)) && isMeMatch(m.receiver));
-        });
-
-        if (messages.length === 0) {
-            box.innerHTML = '<div style="text-align:center; color:var(--text-sub); margin-top:20px; font-size:0.84rem;">Bu kişiyle henüz mesaj yok. İlk mesajı sen gönder!<br><button type="button" class="noble-btn" style="width:auto;margin-top:10px;padding:5px 12px;font-size:0.72rem;" onclick="document.getElementById(\'chat-partner-select\').value=\'\';window.renderChatBox();">📬 Tüm Mesajlarımı Göster</button></div>';
-            return;
-        }
-
-        box.innerHTML = messages.map(function(m) {
-            const isMe = isMeMatch(m.sender) || isMeMatch(m.senderName);
-            const liveBadge = window.getUserLiveBadgeHTML(m.sender);
-            const deleteBtn = (isAdmin || isMe) ? '<button onclick="window.deleteChatMessage(' + m.time + ')" style="background:transparent; border:none; color:var(--accent-red); cursor:pointer; font-size:0.75rem; margin-left:6px;"><i class="fas fa-trash"></i></button>' : '';
-            const fullDateTime = window.formatDateTimeDisplay(m.time, m.time);
-            return '<div class="chat-msg-row" style="align-items:' + (isMe ? 'flex-end' : 'flex-start') + ';">' +
-                '<div class="chat-msg-meta">' +
-                    '<b>' + (m.senderName || m.sender) + '</b>' + liveBadge +
-                    '<span class="chat-msg-time"><i class="far fa-clock"></i> ' + fullDateTime + '</span>' +
-                    deleteBtn +
-                '</div>' +
-                '<div class="chat-msg-bubble" style="background:' + (isMe ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.05)') + '; border:1px solid ' + (isMe ? 'var(--accent-gold)' : 'var(--border-soft)') + ';">' + m.text + '</div>' +
-            '</div>';
-        }).join('');
-        box.scrollTop = box.scrollHeight;
-    };
-
-    // =========================================================================
-    // 7. KİBAR YAN DOCKLAR & MOBİL ÜST BAR OTOMATİK SIĞDIRMA
-    // =========================================================================
-    function initPoliteSideDocksAndTopBar() {
-        const leftDock = document.getElementById('misali-left-stats-dock-v16');
-        const rightDock = document.getElementById('misali-right-dock-v14');
-
-        [
-            { el: leftDock, icon: 'fa-chevron-right' },
-            { el: rightDock, icon: 'fa-chevron-left' }
-        ].forEach(function(cfg) {
-            const dock = cfg.el;
-            if (!dock) return;
-            let handle = dock.querySelector('.misali-dock-peek-handle');
-            if (!handle) {
-                handle = document.createElement('div');
-                handle.className = 'misali-dock-peek-handle';
-                handle.innerHTML = '<i class="fas ' + cfg.icon + '"></i>';
-                handle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dock.classList.toggle('is-dock-open');
-                });
-                dock.appendChild(handle);
-            }
-            if (!dock.hasAttribute('data-x-dock-bound')) {
-                dock.setAttribute('data-x-dock-bound', 'true');
-                dock.addEventListener('click', function(e) {
-                    if (e.target.closest('.misali-dock-peek-handle')) return;
-                    if (!dock.classList.contains('is-dock-open')) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        dock.classList.add('is-dock-open');
-                    }
-                }, true);
-            }
-        });
-
-        // Mobil üst satır sığdırma
-        const dtGroup = document.querySelector('header#master-header .dt-group');
-        if (dtGroup) {
-            if (window.innerWidth > 768) {
-                dtGroup.style.zoom = '';
-            } else {
-                dtGroup.style.zoom = '1';
-                const availW = window.innerWidth - 6;
-                const neededW = dtGroup.scrollWidth;
-                if (neededW > availW && availW > 0) {
-                    dtGroup.style.zoom = Math.max(0.74, (availW / neededW) - 0.015).toFixed(3);
-                }
-            }
-        }
-    }
-
-    let lastScrollPos = window.scrollY;
-    window.addEventListener('scroll', function() {
-        if (Math.abs(window.scrollY - lastScrollPos) > 16) {
-            lastScrollPos = window.scrollY;
-            const l = document.getElementById('misali-left-stats-dock-v16');
-            const r = document.getElementById('misali-right-dock-v14');
-            if (l) l.classList.remove('is-dock-open');
-            if (r) r.classList.remove('is-dock-open');
-        }
-    }, { passive: true });
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#misali-left-stats-dock-v16')) {
-            const l = document.getElementById('misali-left-stats-dock-v16');
-            if (l) l.classList.remove('is-dock-open');
-        }
-        if (!e.target.closest('#misali-right-dock-v14') && !e.target.closest('#n-mood-menu')) {
-            const r = document.getElementById('misali-right-dock-v14');
-            if (r) r.classList.remove('is-dock-open');
-        }
-    });
-
-    window.addEventListener('resize', initPoliteSideDocksAndTopBar, { passive: true });
-
-    // Tek seferlik temiz başlatma (İkili animasyonu önler)
-    function bootMasterX() {
-        if (window._misaliXBooted) return;
-        window._misaliXBooted = true;
-        initPoliteSideDocksAndTopBar();
-        window.recoverAllChatMessagesX();
-        window.updateUserGameHUD();
-        window.renderAllContent();
-        window.applyProfilePageThemesX();
-        window.triggerHeroAvatarSpinX();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootMasterX, { once: true });
-    } else {
-        bootMasterX();
-    }
-})();
-</script>
-
+<!-- Bereinigt: misali-mobile-top-bar-fix, misali-smart-collapsible-docks & misali-master-x-script entfernt (vollständig in misali-master-x-part1 enthalten) -->
 <script id="misali-master-x-part1">
 (function() {
     "use strict";
@@ -20381,13 +19059,14 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         }
     };
 
-    if (!document.getElementById('misali-video-google-fonts')) {
-        const fontLink = document.createElement('link');
-        fontLink.id = 'misali-video-google-fonts';
-        fontLink.rel = 'stylesheet';
-        fontLink.href = 'https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alex+Brush&family=Bebas+Neue&family=Caveat:wght@700&family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@1,700&family=Great+Vibes&family=Montserrat:wght@800;900&family=Orbitron:wght@800&family=Oswald:wght@700&family=Permanent+Marker&family=Righteous&display=swap';
-        document.head.appendChild(fontLink);
-    }
+// Lokale Video-Fonts einbinden (DSGVO-konform, kein externer Google-Abruf)
+    if (!document.getElementById('misali-video-google-fonts')) {
+        const fontLink = document.createElement('link');
+        fontLink.id = 'misali-video-google-fonts';
+        fontLink.rel = 'stylesheet';
+        fontLink.href = 'fonts/video-fonts.css';
+        document.head.appendChild(fontLink);
+    }
 
     // =========================================================================
     // 1. CSS: MOBİL PROFİL-METİN ARASI KÖPRÜ, HELL/DUNKEL THEME, SİNEMA & REMIX
@@ -24093,77 +22772,64 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
 
     let lastAuthStatusX = null;
     setInterval(function() {
+        if (document.hidden) return;
         window.initFirebaseVideoSyncListenersX();
         const curAuth = window.isUserLoggedInForVideoX();
         if (curAuth !== lastAuthStatusX) {
             lastAuthStatusX = curAuth;
             window.renderHomeDualVideoStageX(false);
         }
-    }, 1200);
+    }, 3500);
 
     // =========================================================================
     // 12. %100 GARANTİLİ TELEFON ➔ PC (TÜM CİHAZLAR) FIREBASE BULUT SENKRONİZASYONU
     // =========================================================================
 
-    // 1. Videoyu Sitenin İzinli 'audioFiles' ve 'profileData_v2' Yollarına Hızlı Paralel Paketlerle Yazar
+    // 1. Direktes Hochladen in Firebase Storage (ohne Base64-Aufblähung)
     window.uploadVideoToFirebaseChunksX = function(vidId, file) {
         return new Promise(function(resolve) {
-            if (typeof firebase === 'undefined' || !firebase.database) return resolve(false);
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const fullDataUri = String(e.target.result || '');
-                    const chunkSize = 250000; // 250 KB hızlı mobil paket boyutu
-                    const totalChunks = Math.ceil(fullDataUri.length / chunkSize);
-                    const basePath = 'audioFiles/videoCloud_v3/' + vidId;
+            if (typeof firebase === 'undefined' || !firebase.storage || !firebase.database) return resolve(false);
+            try {
+                const safeName = String(file.name || 'video.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
+                const storageRef = firebase.storage().ref('videos/' + vidId + '_' + safeName);
+                const uploadTask = storageRef.put(file, { contentType: file.type || 'video/mp4' });
 
-                    const metaObj = {
-                        totalChunks: totalChunks,
-                        mime: file.type || 'video/mp4',
-                        size: file.size,
-                        copyright: '© Şair Misal.i',
-                        ready: false,
-                        ts: Date.now()
-                    };
-
-                    // Önce meta kaydını aç
-                    await firebase.database().ref(basePath + '/meta').set(metaObj);
-
-                    // Parçaları 4'erli paralel gruplar halinde çok hızlı yükle
-                    const batchSize = 4;
-                    for (let i = 0; i < totalChunks; i += batchSize) {
-                        const promises = [];
-                        for (let j = i; j < Math.min(i + batchSize, totalChunks); j++) {
-                            const part = fullDataUri.slice(j * chunkSize, (j + 1) * chunkSize);
-                            promises.push(firebase.database().ref(basePath + '/chunks/c_' + j).set(part));
-                        }
-                        await Promise.all(promises);
-                        const pct = Math.round((Math.min(i + batchSize, totalChunks) / totalChunks) * 100);
+                uploadTask.on('state_changed',
+                    function(snapshot) {
+                        const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
                         document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
-                            el.textContent = "☁️ Buluta Yükleniyor: %" + pct + " (Lütfen bekleyin...)";
+                            el.textContent = "☁️ Storage'a Yükleniyor: %" + pct;
                         });
+                    },
+                    function(err) {
+                        console.error("Firebase Storage Upload Hatası:", err);
+                        resolve(false);
+                    },
+                    async function() {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        await firebase.database().ref('audioFiles/videoCloud_v3/' + vidId + '/meta').set({
+                            downloadURL: downloadURL,
+                            storagePath: 'videos/' + vidId + '_' + safeName,
+                            mime: file.type || 'video/mp4',
+                            size: file.size,
+                            copyright: '© Şair Misal.i',
+                            ready: true,
+                            ts: Date.now()
+                        });
+                        document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
+                            el.textContent = "✅ Firebase Storage'a Kaydedildi (%100)";
+                        });
+                        resolve(true);
                     }
-
-                    // Yükleme tamamlandı bayrağını kaldır
-                    metaObj.ready = true;
-                    metaObj.ts = Date.now();
-                    await firebase.database().ref(basePath + '/meta').set(metaObj);
-
-                    document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
-                        el.textContent = "✅ Firebase Buluta Kaydedildi (%100)";
-                    });
-                    resolve(true);
-                } catch(err) {
-                    console.error("Firebase Chunk Upload Hatası:", err);
-                    resolve(false);
-                }
-            };
-            reader.onerror = function() { resolve(false); };
-            reader.readAsDataURL(file);
+                );
+            } catch(err) {
+                console.error("Storage Init Hatası:", err);
+                resolve(false);
+            }
         });
     };
 
-    // 2. Bilgisayardan Girildiğinde Videoyu Buluttan İndirip Binary Blob'a Çevirir
+    // 2. Direkte Stream-URL aus Storage laden (mit Fallback für alte Chunk-Videos)
     window.downloadVideoFromFirebaseChunksX = async function(vidId) {
         if (typeof firebase === 'undefined' || !firebase.database) return null;
         const pathsToTry = [
@@ -24176,6 +22842,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 const metaSnap = await firebase.database().ref(basePath + '/meta').once('value');
                 if (metaSnap.exists() && metaSnap.val()) {
                     const meta = metaSnap.val();
+                    if (meta.downloadURL) return meta.downloadURL;
                     const total = parseInt(meta.totalChunks || 0, 10);
                     if (total > 0) {
                         const chunksSnap = await firebase.database().ref(basePath + '/chunks').once('value');
@@ -24194,14 +22861,6 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 }
             } catch(e){}
         }
-        try {
-            const legacySnap = await firebase.database().ref('audioFiles/' + vidId).once('value');
-            if (legacySnap.exists() && legacySnap.val()) {
-                const b64 = legacySnap.val();
-                await window.videoBlobDBX.save(vidId, b64);
-                return window.base64ToBlobUrlX(b64);
-            }
-        } catch(e){}
         return null;
     };
 
