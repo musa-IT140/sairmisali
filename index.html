@@ -1907,6 +1907,7 @@
             <div id="pill-duel-btn" class="s-pill" style="border-color:#ec4899; color:#ec4899;" onclick="window.openPoemDuelModal()" title="Gönül Terazisi: Beyit & Mısra Düellosu"><i class="fas fa-balance-scale"></i> Beyit Düellosu</div>
             <div id="pill-capsule-btn" class="s-pill" style="border-color:#38bdf8; color:#38bdf8;" onclick="window.openTimeCapsuleModal()" title="Şairin Zaman Kapsülü (Geleceğe Mühürlü Mektup)"><i class="fas fa-hourglass-half"></i> Zaman Kapsülü</div>
             <div id="pill-ambiance-btn" class="s-pill" style="border-color:#34d399; color:#34d399;" onclick="window.openAmbianceStudioModal()" title="5 Kanallı Doğa & Huzur Atmosfer Stüdyosu"><i class="fas fa-sliders-h"></i> Atmosfer Stüdyosu</div>
+            <div id="pill-contest-btn" class="s-pill" style="border-color:#f43f5e; color:#f43f5e;" onclick="window.openWeeklyContestModal()" title="Haftanın Şiir Meydanı (Haftalık Yarışma)"><i class="fas fa-crown"></i> Şiir Meydanı</div>
         </div>
         <nav class="h-row-3 drag-scroll">
             <div class="nav-link active" data-nav="home" onclick="window.nav('home')"><i class="fas fa-home"></i> Ana Sayfa</div>
@@ -2674,6 +2675,11 @@
         </div>
     </div>
 
+    <div class="modal premium-modal modal-large" id="weeklyContestModal">
+        <button class="close-btn" onclick="window.closeTopModal()"><i class="fas fa-times"></i></button>
+        <div class="modal-body custom-scroll" id="weekly-contest-body" style="text-align:center;"></div>
+    </div>
+
 <div class="modal modal-large premium-modal" id="readModal">
         <button class="close-btn" onclick="window.closeTopModal()"><i class="fas fa-times"></i></button>
         <div class="modal-body custom-scroll" id="read-modal-scroll-box">
@@ -2699,6 +2705,7 @@
                 <button class="action-btn" id="n-btn-echo" onclick="window.toggleSalonEchoMode()" title="Salon Akustiği & Derin Eko Modu"><i class="fas fa-wave-square" style="color:#c084fc;"></i></button>
                 <button class="action-btn" id="n-btn-highlight" onclick="window.toggleVerseHighlighterMode()" title="Favori Mısra Vurgulayıcı (Altın Kalem)"><i class="fas fa-highlighter" style="color:var(--accent-gold);"></i></button>
                 <button class="action-btn" id="n-btn-stage" onclick="window.toggleStageTheaterMode(event)" title="Şiir Tiyatrosu (Sahne Işığı Sunum Modu)" style="color:var(--accent-pink);"><i class="fas fa-theater-masks"></i></button>
+                <button class="action-btn" id="n-btn-karaoke" onclick="window.toggleAudioKaraokeSync(event)" title="Müzikle Senkronize Mısra Takibi (Karaoke Modu)" style="color:#38bdf8;"><i class="fas fa-closed-captioning"></i></button>
                 <button class="action-btn" id="auto-scroll-btn" onclick="window.toggleAutoScroll()" title="Otomatik Kaydır (Teleprompter)"><i class="fas fa-angle-double-down"></i></button>
                 <button class="action-btn" onclick="window.downloadPoemAsCard()" title="Hatıra Kartı Olarak İndir (PNG)"><i class="fas fa-camera-retro" style="color:var(--accent-gold);"></i></button>
                 <button class="action-btn" onclick="window.toggleBookmark()" title="Aklıma Yaz"><i id="modal-bookmark-icon" class="fas fa-bookmark" style="color:rgba(255,255,255,0.35);"></i></button>
@@ -6034,12 +6041,45 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         window.stageTheaterTimer = null;
         window.stageTheaterIndex = 0;
 
+        window._audioKaraokeSyncActive = false;
+        window._lastKaraokeLineIdx = -1;
+
         window.stopStageTheaterMode = function() {
             if (window.stageTheaterTimer) { clearInterval(window.stageTheaterTimer); window.stageTheaterTimer = null; }
+            window._audioKaraokeSyncActive = false;
+            window._lastKaraokeLineIdx = -1;
             document.body.classList.remove('stage-theater-mode');
             document.querySelectorAll('.poem-line-interactive.stage-active-verse').forEach(el => el.classList.remove('stage-active-verse'));
             let btn = document.getElementById('n-btn-stage');
             if (btn) btn.style.color = 'var(--accent-pink)';
+            let kBtn = document.getElementById('n-btn-karaoke');
+            if (kBtn) { kBtn.style.color = '#38bdf8'; kBtn.classList.remove('x-tool-active'); }
+        };
+
+        window.toggleAudioKaraokeSync = function(e) {
+            if (e) e.stopPropagation();
+            if (window._audioKaraokeSyncActive) {
+                window.stopStageTheaterMode();
+                window.toast("🎤 Karaoke Mısra Takibi Kapatıldı", "🔇");
+                return;
+            }
+            const lines = document.querySelectorAll('#read-text .poem-line-interactive');
+            if (lines.length === 0) return window.toast("Bu eserde takip edilecek mısra bulunamadı.", "⚠️");
+
+            if (window.stageTheaterTimer) { clearInterval(window.stageTheaterTimer); window.stageTheaterTimer = null; }
+            window._audioKaraokeSyncActive = true;
+            window._lastKaraokeLineIdx = -1;
+            document.body.classList.add('stage-theater-mode');
+
+            const kBtn = document.getElementById('n-btn-karaoke');
+            if (kBtn) { kBtn.style.color = 'var(--accent-green)'; kBtn.classList.add('x-tool-active'); }
+
+            const mainAud = document.getElementById('global-audio-element');
+            const hasMusic = window.currentItemData && (window.currentItemData.hasAudio || window.currentItemData.audio || window.currentItemData.type === 'marslar');
+            if (hasMusic && mainAud && mainAud.paused && typeof window.fpToggle === 'function') {
+                window.fpToggle(true);
+            }
+            window.toast("🎤 Müzikle Senkronize Karaoke Modu Aktif!", "✨");
         };
 
         window.toggleStageTheaterMode = function(e) {
@@ -7455,6 +7495,18 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 if (fpCur) fpCur.innerText = isModalTrackActive ? fmt(cur) : "00:00";
                 if (fpTot) fpTot.innerText = isModalTrackActive ? fmt(dur) : "00:00";
                 if (fpProg && document.activeElement !== fpProg) fpProg.value = isModalTrackActive ? pct : 0;
+
+                if (window._audioKaraokeSyncActive && isModalPlaying && dur > 0) {
+                    const kLines = Array.from(document.querySelectorAll('#read-text .poem-line-interactive'));
+                    if (kLines.length > 0) {
+                        const targetIdx = Math.min(kLines.length - 1, Math.floor((cur / dur) * kLines.length));
+                        if (targetIdx !== window._lastKaraokeLineIdx) {
+                            window._lastKaraokeLineIdx = targetIdx;
+                            kLines.forEach(function(l, i) { l.classList.toggle('stage-active-verse', i === targetIdx); });
+                            try { kLines[targetIdx].scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+                        }
+                    }
+                }
             }
 
             const list = window.getYellowPlayersList();
@@ -11291,6 +11343,206 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 if (sl) sl.value = v;
             });
             window.toast("🌧️🔥 Şairin Gece Karışımı (Yağmur + Şömine + 432 Hz) Aktif!", "✨");
+        };
+
+        // =========================================================================
+        // HAFTANIN ŞİİR MEYDANI (WÖCHENTLICHER POESIE-WETTBEWERB)
+        // =========================================================================
+        window.getCurrentWeekContestKey = function() {
+            const d = new Date();
+            const start = new Date(d.getFullYear(), 0, 1);
+            const weekNo = Math.ceil((((d - start) / 86400000) + start.getDay() + 1) / 7);
+            return d.getFullYear() + '_H' + weekNo;
+        };
+
+        window.getWeeklyContestData = function() {
+            const weekKey = window.getCurrentWeekContestKey();
+            const defaultThemes = ['Vefa', 'Sükût', 'Gurbet', 'Mavi Gül', 'Hasret', 'Vuslat', 'Gece ve Kalem', 'Umut', 'Sabır', 'Zaman'];
+            const wkNum = parseInt(weekKey.split('_H')[1] || '1', 10);
+            const fallback = {
+                weekKey: weekKey,
+                themeWord: defaultThemes[wkNum % defaultThemes.length],
+                themeDesc: 'Bu haftanın anahtar kelimesinden ilham alarak en güzel dörtlüğünü veya şiirini paylaş; topluluk oylarıyla haftanın birincisi ol!',
+                entries: []
+            };
+            const saved = JSON.parse(localStorage.getItem('misali_weekly_contest_v1') || 'null');
+            if (!saved || saved.weekKey !== weekKey) return fallback;
+            if (!Array.isArray(saved.entries)) saved.entries = Object.values(saved.entries || {}).filter(Boolean);
+            return saved;
+        };
+
+        window.saveWeeklyContestData = function(data) {
+            localStorage.setItem('misali_weekly_contest_v1', JSON.stringify(data));
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                try { firebase.database().ref('weeklyContest_v1/' + data.weekKey).set(data); } catch(e){}
+            }
+        };
+
+        window.openWeeklyContestModal = function() {
+            if (!window.ensureActiveUserObject()) return window.showGuestLock('👑');
+            const weekKey = window.getCurrentWeekContestKey();
+            if (typeof firebase !== 'undefined' && firebase.database && !window._contestFbBound) {
+                window._contestFbBound = true;
+                try {
+                    firebase.database().ref('weeklyContest_v1/' + weekKey).on('value', function(snap) {
+                        if (snap.exists() && snap.val()) {
+                            const remote = snap.val();
+                            remote.entries = Array.isArray(remote.entries) ? remote.entries : Object.values(remote.entries || {}).filter(Boolean);
+                            localStorage.setItem('misali_weekly_contest_v1', JSON.stringify(remote));
+                            if (document.getElementById('weeklyContestModal')?.classList.contains('show')) {
+                                window.renderWeeklyContestModal();
+                            }
+                        }
+                    });
+                } catch(e){}
+            }
+            window.renderWeeklyContestModal();
+            window.openModal('weeklyContestModal');
+        };
+
+        window.renderWeeklyContestModal = function() {
+            const body = document.getElementById('weekly-contest-body');
+            if (!body) return;
+            const esc = window.escapeHTML || function(s) { return String(s || ''); };
+            const data = window.getWeeklyContestData();
+            const isAdmin = window.isUserTrueAdmin ? window.isUserTrueAdmin(window.currentUser) : (window.currentUser && window.currentUser.role === 'admin');
+            const myKey = window.getCanonicalUserKey ? window.getCanonicalUserKey() : (window.currentUser && window.currentUser.username);
+
+            const sortedEntries = [...(data.entries || [])].sort(function(a, b) {
+                const va = Array.isArray(a.voters) ? a.voters.length : 0;
+                const vb = Array.isArray(b.voters) ? b.voters.length : 0;
+                return (vb - va) || ((b.ts || 0) - (a.ts || 0));
+            });
+
+            const adminCtrlHtml = isAdmin
+                ? '<div class="theme-sub-panel" style="padding:10px 12px; margin-bottom:12px; border-color:var(--accent-gold); text-align:left;">' +
+                    '<div style="font-size:0.72rem; font-weight:800; color:var(--accent-gold); margin-bottom:6px;">👑 Admin: Haftanın Kelimesini Değiştir</div>' +
+                    '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+                        '<input type="text" id="wc-admin-theme-inp" class="inp" value="' + esc(data.themeWord) + '" placeholder="Haftanın Kelimesi..." style="margin:0; flex:1; font-size:0.78rem;">' +
+                        '<button type="button" class="noble-btn primary" style="width:auto; padding:6px 14px; font-size:0.74rem;" onclick="window.updateWeeklyContestThemeAdmin()"><i class="fas fa-save"></i> Güncelle</button>' +
+                    '</div>' +
+                  '</div>'
+                : '';
+
+            const entriesHtml = sortedEntries.length === 0
+                ? '<div style="text-align:center; padding:20px; color:var(--text-sub); font-size:0.78rem; font-style:italic;">Bu hafta henüz katılım olmadı. İlk şiiri sen yaz ve +15 Puan kazan!</div>'
+                : sortedEntries.map(function(entry, idx) {
+                    const voters = Array.isArray(entry.voters) ? entry.voters : [];
+                    const hasVoted = myKey && voters.includes(myKey);
+                    const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : ('#' + (idx + 1))));
+                    const canDel = isAdmin || (myKey && entry.userKey === myKey);
+                    return '<div style="background:var(--input-bg); border:1.5px solid ' + (idx === 0 ? 'var(--accent-gold)' : 'var(--border-soft)') + '; border-radius:14px; padding:12px 14px; text-align:left;">' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">' +
+                            '<div style="font-weight:800; color:var(--accent-gold); font-size:0.86rem;">' + medal + ' ' + esc(entry.title) + '</div>' +
+                            '<div style="display:flex; align-items:center; gap:6px;">' +
+                                '<button type="button" class="noble-btn ' + (hasVoted ? 'primary' : '') + '" style="width:auto; padding:4px 10px; font-size:0.72rem;" onclick="window.voteWeeklyContestEntry(\'' + entry.id + '\')">' +
+                                    '<i class="fas fa-heart" style="color:' + (hasVoted ? '#ef4444' : 'var(--text-sub)') + ';"></i> ' + voters.length + ' Oy' +
+                                '</button>' +
+                                (canDel ? '<button type="button" class="action-btn" style="color:var(--accent-red); font-size:0.78rem;" onclick="window.deleteWeeklyContestEntry(\'' + entry.id + '\')"><i class="fas fa-trash"></i></button>' : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="font-family:\'Playfair Display\',serif; font-style:italic; font-size:0.84rem; line-height:1.55; color:var(--text-main); white-space:pre-wrap; margin-bottom:6px;">' + esc(entry.text) + '</div>' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.68rem; color:var(--text-sub);">' +
+                            '<span>📅 ' + esc(entry.date || '') + '</span>' +
+                            '<span class="sig-user" style="font-size:1.15rem !important;">~ ' + esc(entry.author) + '</span>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+
+            body.innerHTML =
+                '<h2 class="sec-title" style="color:#f43f5e; margin-bottom:6px; font-size:1.45rem;"><i class="fas fa-crown"></i> Haftanın Şiir Meydanı</h2>' +
+                '<div style="display:inline-block; background:linear-gradient(135deg, rgba(244,63,94,0.18), rgba(212,175,55,0.2)); border:1.5px solid var(--accent-gold); padding:8px 18px; border-radius:20px; margin-bottom:10px;">' +
+                    '<small style="color:var(--accent-cyan); font-family:\'Space Mono\',monospace; font-size:0.66rem; display:block;">HAFTANIN ANAHTAR KELİMESİ (' + data.weekKey.replace('_', ' • ') + ')</small>' +
+                    '<strong style="font-family:\'Playfair Display\',serif; font-size:1.35rem; color:var(--accent-gold);">✨ "' + esc(data.themeWord) + '" ✨</strong>' +
+                '</div>' +
+                '<p style="color:var(--text-sub); font-size:0.74rem; margin-bottom:12px;">' + esc(data.themeDesc) + '</p>' +
+                adminCtrlHtml +
+                '<div class="theme-sub-panel" style="padding:12px; margin-bottom:14px; text-align:left;">' +
+                    '<input type="text" id="wc-entry-title" class="inp" placeholder="Yarışma Şiirinin Başlığı..." style="margin-bottom:8px; font-size:0.82rem;">' +
+                    '<textarea id="wc-entry-text" class="inp" rows="3" placeholder="Haftanın kelimesiyle mısralarını buraya yaz..." style="margin-bottom:8px; font-size:0.82rem;"></textarea>' +
+                    '<button type="button" class="noble-btn primary" style="padding:9px;" onclick="window.submitWeeklyContestEntry()"><i class="fas fa-feather-alt"></i> Yarışmaya Katıl (+15 Puan)</button>' +
+                '</div>' +
+                '<div style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto;" class="custom-scroll">' + entriesHtml + '</div>';
+        };
+
+        window.updateWeeklyContestThemeAdmin = function() {
+            if (!window.isUserTrueAdmin || !window.isUserTrueAdmin(window.currentUser)) return;
+            const val = document.getElementById('wc-admin-theme-inp')?.value.trim();
+            if (!val) return window.toast("Lütfen bir tema kelimesi girin!", "⚠️");
+            const data = window.getWeeklyContestData();
+            data.themeWord = val;
+            window.saveWeeklyContestData(data);
+            window.renderWeeklyContestModal();
+            window.toast("👑 Haftanın kelimesi güncellendi: " + val, "✨");
+        };
+
+        window.submitWeeklyContestEntry = function() {
+            if (!window.ensureActiveUserObject()) return window.showGuestLock('👑');
+            const title = document.getElementById('wc-entry-title')?.value.trim();
+            const text = document.getElementById('wc-entry-text')?.value.trim();
+            if (!title || !text) return window.toast("Lütfen başlık ve mısralarınızı yazın!", "⚠️");
+
+            const data = window.getWeeklyContestData();
+            const myKey = window.getCanonicalUserKey ? window.getCanonicalUserKey() : window.currentUser.username;
+            const alreadyIn = (data.entries || []).some(function(e) { return e.userKey === myKey; });
+            if (alreadyIn && !(window.isUserTrueAdmin && window.isUserTrueAdmin(window.currentUser))) {
+                return window.toast("Bu haftaki yarışmaya zaten katıldınız!", "ℹ️");
+            }
+
+            data.entries = data.entries || [];
+            data.entries.unshift({
+                id: 'wc_' + Date.now(),
+                userKey: myKey,
+                author: window.currentUser.name || window.currentUser.username,
+                title: title,
+                text: text,
+                voters: [],
+                date: new Date().toLocaleDateString('tr-TR'),
+                ts: Date.now()
+            });
+            window.saveWeeklyContestData(data);
+
+            const uKey = window.resolveUserKey(window.currentUser.username);
+            if (uKey && window.userDatabase[uKey]) {
+                window.userDatabase[uKey].score = (parseInt(window.userDatabase[uKey].score || 0, 10)) + 15;
+                window.currentUser.score = window.userDatabase[uKey].score;
+                localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+                try { firebase.database().ref('users/' + uKey + '/score').set(window.currentUser.score); } catch(e){}
+                window.updateHeaderUserUI();
+            }
+            window.spawnFloatingScorePop("+15 Puan 👑", "var(--accent-gold)");
+            if (typeof window.logUserAction === 'function') {
+                window.logUserAction('👑 ŞİİR MEYDANI: ' + (window.currentUser.name || window.currentUser.username) + ', haftanın yarışmasına "' + title + '" eseriyle katıldı!');
+            }
+            window.renderWeeklyContestModal();
+            window.toast("🏆 Şiiriniz yarışmaya eklendi! (+15 Puan)", "🎉");
+        };
+
+        window.voteWeeklyContestEntry = function(entryId) {
+            if (!window.ensureActiveUserObject()) return window.showGuestLock('❤️');
+            const myKey = window.getCanonicalUserKey ? window.getCanonicalUserKey() : window.currentUser.username;
+            const data = window.getWeeklyContestData();
+            const target = (data.entries || []).find(function(e) { return String(e.id) === String(entryId); });
+            if (!target) return;
+            target.voters = Array.isArray(target.voters) ? target.voters : [];
+            const idx = target.voters.indexOf(myKey);
+            if (idx > -1) {
+                target.voters.splice(idx, 1);
+                window.toast("Oyunuz geri alındı.", "🗑️");
+            } else {
+                target.voters.push(myKey);
+                window.toast("❤️ Yarışma eserine oy verdiniz!", "👑");
+            }
+            window.saveWeeklyContestData(data);
+            window.renderWeeklyContestModal();
+        };
+
+        window.deleteWeeklyContestEntry = function(entryId) {
+            const data = window.getWeeklyContestData();
+            data.entries = (data.entries || []).filter(function(e) { return String(e.id) !== String(entryId); });
+            window.saveWeeklyContestData(data);
+            window.renderWeeklyContestModal();
+            window.toast("Yarışma eseri silindi.", "🗑️");
         };
 
         window.runMigration = async function() {
