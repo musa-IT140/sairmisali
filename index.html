@@ -13,7 +13,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Şair Misal.i - Şiir ve Söz Dünyası">
     <meta property="og:description" content="Gönülden dile, dilden şiire. Sesli şiirler, sözler, oyunlar ve edebiyat meclisi.">
-    <meta property="og:image" content="./image_01d1a0.png">
+    <meta property="og:image" content="https://sairmisali.de/image_01d1a0.png">
     <meta name="twitter:card" content="summary_large_image">
     <title>Şair Misal.i - Şiir ve Söz Dünyası</title>
     <link rel="manifest" href="./manifest.json">
@@ -1804,7 +1804,7 @@
 
     <div id="misali-yellow-players-layer"></div>
 
-    <div id="misali-cookie-banner" class="cookie-banner">
+<div id="misali-cookie-banner" class="cookie-banner">
         <button class="mini-translate-btn" style="top:10px; right:10px;" onclick="let b=this.closest('.cookie-banner'); let isDe=this.innerHTML.includes('DE'); this.innerHTML=isDe?'<i class=\'fas fa-language\'></i> 🇹🇷 TR':'<i class=\'fas fa-language\'></i> 🇩🇪 DE'; b.querySelectorAll('.lang-tr').forEach(e=>e.style.display=isDe?'none':'inline'); b.querySelectorAll('.lang-de').forEach(e=>e.style.display=isDe?'inline':'none');"><i class="fas fa-language"></i> 🇩🇪 DE</button>
         <h3 style="color:var(--accent-gold); font-family:'Playfair Display', serif; margin-bottom:10px; margin-top:10px;">
             <i class="fas fa-cookie-bite"></i> <span class="lang-tr">Çerez Tercihleri</span><span class="lang-de" style="display:none;">Cookie-Einstellungen</span>
@@ -1823,9 +1823,14 @@
                 <input type="checkbox" id="cookie-perf" checked style="width:16px; cursor:pointer;">
             </label>
         </div>
-        <button class="noble-btn primary" style="width:auto; padding:10px 30px;" onclick="window.acceptAllCookies()">
-            <span class="lang-tr">Tümünü Kabul Et</span><span class="lang-de" style="display:none;">Alle Akzeptieren</span>
-        </button>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; width:100%;">
+            <button class="noble-btn" style="flex:1; min-width:130px; padding:10px 14px; font-size:0.8rem;" onclick="window.acceptEssentialCookies()">
+                <span class="lang-tr">Sadece Zorunlu</span><span class="lang-de" style="display:none;">Nur Notwendige</span>
+            </button>
+            <button class="noble-btn primary" style="flex:1; min-width:130px; padding:10px 14px; font-size:0.8rem;" onclick="window.acceptAllCookies()">
+                <span class="lang-tr">Tümünü Kabul Et</span><span class="lang-de" style="display:none;">Alle Akzeptieren</span>
+            </button>
+        </div>
     </div>
 
     <div id="random-quote-popup">
@@ -2554,8 +2559,7 @@
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--text-main);"><input type="checkbox" id="log-rem"> Beni Hatırla</label>
             </div>
-            <button class="noble-btn primary" onclick="window.execLogin()" style="margin-bottom:10px;">Giriş</button>
-            <button class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="window.toast('Biyometrik doğrulama başlatılıyor...', '📱')"><i class="fas fa-fingerprint"></i> Biometrik Giriş (Face / Touch ID)</button>
+            <button class="noble-btn primary" onclick="window.execLogin()">Giriş</button>
         </div>
     </div>
 
@@ -4464,7 +4468,8 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 sessionStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
                 localStorage.setItem('misaliUser', JSON.stringify(window.currentUser));
                 try { firebase.database().ref('users/Sair Misali').update({ lastLogin: Date.now(), lastSeen: Date.now(), isOnline: true }); } catch(e){}
-                if (remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); localStorage.setItem('misali_rem_p', p); }
+                localStorage.removeItem('misali_rem_p');
+                if (remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); }
                 let lockOv = document.getElementById('guest-lock-overlay'); if (lockOv) lockOv.classList.remove('show');
                 window.closeTopModal();
                 window.startUserPresenceHeartbeat();
@@ -4521,8 +4526,9 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                         if (passCheckRes.needsUpgrade) loginUpdate.pass = user.pass;
                         try { firebase.database().ref('users/' + uKey).update(loginUpdate); } catch(e){}
 
-                        if (remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); localStorage.setItem('misali_rem_p', p); }
-                        else { localStorage.removeItem('misali_rem_u'); localStorage.removeItem('misali_rem_p'); }
+                        localStorage.removeItem('misali_rem_p');
+                        if (remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); }
+                        else { localStorage.removeItem('misali_rem_u'); }
 
                         window.startUserPresenceHeartbeat();
                         if (typeof window.logUserAction === 'function') window.logUserAction("👤 GİRİŞ: " + (user.name || u) + " sisteme giriş yaptı.");
@@ -4537,6 +4543,11 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             } catch(err) {
                 let user = window.userDatabase[window.resolveUserKey(rawU)];
                 if (user) {
+                    const offlinePassCheck = window.verifyUserPassword(p, user.pass);
+                    if (!offlinePassCheck.ok) return window.showMisaliAlert("Hatalı Şifre", "Girdiğiniz şifre yanlış.");
+                    if (user.banned) return window.showMisaliAlert("Engellendiniz", "Hesabınız sistem yöneticisi tarafından askıya alınmıştır.");
+                    if (!user.approved && user.role !== 'admin') return window.showMisaliAlert("Onay Bekleniyor", "Hesabınız henüz Admin tarafından onaylanmadı.");
+
                     user.lastLogin = Date.now(); user.lastSeen = Date.now(); user.isOnline = true;
                     window.currentUser = user;
                     sessionStorage.setItem('misaliUser', JSON.stringify(user));
@@ -4922,7 +4933,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             listBox.innerHTML = notes.map((n, idx) => {
                 const txt = (typeof n === 'object' && n !== null) ? (n.text || '') : String(n);
                 const tm = (typeof n === 'object' && n !== null && n.time) ? ('<small style="color:var(--accent-gold); font-family:\'Space Mono\',monospace; margin-right:6px;">[' + n.time + ']</small>') : '';
-                return '<div class="cal-note-item"><div style="flex:1; word-break:break-word;">' + tm + '<span>' + txt + '</span></div><button type="button" class="cal-note-del" onclick="window.deleteCalDayNoteItem(\'' + key + '\', ' + idx + ')" title="Notu Sil"><i class="fas fa-trash"></i></button></div>';
+                return '<div class="cal-note-item"><div style="flex:1; word-break:break-word;">' + tm + '<span>' + window.escapeHTML(txt) + '</span></div><button type="button" class="cal-note-del" onclick="window.deleteCalDayNoteItem(\'' + key + '\', ' + idx + ')" title="Notu Sil"><i class="fas fa-trash"></i></button></div>';
             }).join('');
         };
 
@@ -6690,8 +6701,15 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             else setVoiceAndPlay();
         };
 
-        window.twAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/01/18/audio_d1a293dc2c.mp3');
-        window.twAudio.loop = true; window.twAudio.volume = 0.5;
+        window.twAudio = null;
+        window.getTypewriterAudio = function() {
+            if (!window.twAudio) {
+                window.twAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/01/18/audio_d1a293dc2c.mp3');
+                window.twAudio.loop = true;
+                window.twAudio.volume = 0.5;
+            }
+            return window.twAudio;
+        };
         window.isTypingActive = false; window.typeTimers = [];
         window.toggleNukeSepia = function(e) { if (e) e.stopPropagation(); document.body.classList.remove('cinematic-mode', 'candle-mode'); document.body.classList.toggle('sepia-mode'); };
         window.toggleNukeCine = function(e) { if (e) e.stopPropagation(); document.body.classList.remove('sepia-mode', 'candle-mode'); document.body.classList.toggle('cinematic-mode'); };
@@ -6701,23 +6719,25 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             if (!textEl || !window.currentItemData) return;
             let fullStr = (window.currentLang === 'de' && window.currentItemData.deText) ? window.currentItemData.deText : (window.currentItemData._origBodyTR || window.extractPoemBodyText(window.currentItemData));
             if (window.isTypingActive || forceStop) {
-                window.typeTimers.forEach(clearTimeout); window.typeTimers = []; window.isTypingActive = false; window.twAudio.pause();
+                window.typeTimers.forEach(clearTimeout); window.typeTimers = []; window.isTypingActive = false;
+                if (window.twAudio) window.twAudio.pause();
                 textEl.innerHTML = window.renderInteractivePoemLines(fullStr, window.currentItemData.id);
                 return;
             }
             window.isTypingActive = true;
             let rawText = fullStr.replace(/<[^>]*>?/gm, '');
             textEl.innerHTML = '<span id="tw-cursor">|</span>';
-            window.twAudio.currentTime = 0; window.twAudio.play().catch(()=>{});
+            let aud = window.getTypewriterAudio();
+            aud.currentTime = 0; aud.play().catch(()=>{});
             let i = 0;
             function typeChar() {
-                if (!window.isTypingActive) { window.twAudio.pause(); return; }
+                if (!window.isTypingActive) { if (window.twAudio) window.twAudio.pause(); return; }
                 if (i < rawText.length) {
                     let char = rawText.charAt(i) === '\n' ? '<br>' : rawText.charAt(i);
                     textEl.innerHTML = textEl.innerHTML.replace('<span id="tw-cursor">|</span>', '') + char + '<span id="tw-cursor">|</span>';
                     i++; window.typeTimers.push(setTimeout(typeChar, (char === '<br>' || char === '.') ? 180 : 55));
                 } else {
-                    window.isTypingActive = false; window.twAudio.pause();
+                    window.isTypingActive = false; if (window.twAudio) window.twAudio.pause();
                     textEl.innerHTML = window.renderInteractivePoemLines(rawText, window.currentItemData.id);
                 }
             }
@@ -10436,9 +10456,18 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         };
         window.openTitanCookieBanner = function() { let cb = document.getElementById('misali-cookie-banner'); if (cb) cb.classList.add('show'); };
         window.acceptAllCookies = function() {
-            localStorage.setItem('misaliCookiesAccepted', 'true');
+            const perfChk = document.getElementById('cookie-perf');
+            if (perfChk) perfChk.checked = true;
+            localStorage.setItem('misaliCookiesAccepted', 'all');
             let cb = document.getElementById('misali-cookie-banner'); if (cb) cb.classList.remove('show');
-            window.toast("Çerez tercihleri kaydedildi.", "🍪");
+            window.toast("Tüm çerez tercihleri kaydedildi.", "🍪");
+        };
+        window.acceptEssentialCookies = function() {
+            const perfChk = document.getElementById('cookie-perf');
+            if (perfChk) perfChk.checked = false;
+            localStorage.setItem('misaliCookiesAccepted', 'essential');
+            let cb = document.getElementById('misali-cookie-banner'); if (cb) cb.classList.remove('show');
+            window.toast("Sadece zorunlu çerezler kaydedildi.", "🛡️");
         };
 
         const N_LUGAT = [
@@ -14047,13 +14076,13 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
 
                 return '<div style="background:var(--input-bg); border:1.5px solid ' + borderCol + '; border-radius:12px; padding:10px 12px; text-align:left;">' +
                     '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:5px; flex-wrap:wrap;">' +
-                        '<strong style="color:' + borderCol + '; font-size:0.84rem;">' + (isDateReached ? '🔓 ' : '🔒 ') + c.title + '</strong>' +
+                        '<strong style="color:' + borderCol + '; font-size:0.84rem;">' + (isDateReached ? '🔓 ' : '🔒 ') + window.escapeHTML(c.title) + '</strong>' +
                         '<div style="display:flex; align-items:center; gap:6px;">' + countdownBadge + delBtn + '</div>' +
                     '</div>' +
                     (canRead
-                        ? '<p style="font-family:\'Playfair Display\',serif; font-style:italic; font-size:0.82rem; color:var(--text-main); margin-bottom:4px;">"' + c.text + '"</p>'
-                        : '<div style="font-size:0.74rem; color:var(--text-sub); font-style:italic;"><i class="fas fa-shield-alt" style="color:' + borderCol + ';"></i> Bu kapsül <b>' + c.unlockDate + '</b> tarihine kadar mühürlüdür.</div>') +
-                    '<div style="text-align:right; font-family:\'Great Vibes\',cursive; color:var(--accent-cyan); font-size:1.05rem;">~ ' + c.author + '</div>' +
+                        ? '<p style="font-family:\'Playfair Display\',serif; font-style:italic; font-size:0.82rem; color:var(--text-main); margin-bottom:4px;">"' + window.escapeHTML(c.text) + '"</p>'
+                        : '<div style="font-size:0.74rem; color:var(--text-sub); font-style:italic;"><i class="fas fa-shield-alt" style="color:' + borderCol + ';"></i> Bu kapsül <b>' + window.escapeHTML(c.unlockDate) + '</b> tarihine kadar mühürlüdür.</div>') +
+                    '<div style="text-align:right; font-family:\'Great Vibes\',cursive; color:var(--accent-cyan); font-size:1.05rem;">~ ' + window.escapeHTML(c.author) + '</div>' +
                 '</div>';
             }).join('');
         };
@@ -14630,7 +14659,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             if (!box) return;
             const list = window.getPoeticBottlesList();
             const pick = list[Math.floor(Math.random() * list.length)];
-            box.innerHTML = '<div>"' + pick.text + '"</div><div class="sig-misali" style="text-align:right; font-size:1.05rem !important; margin-top:4px;">~ ' + (pick.author || 'Anonim Şair') + ' <small style="font-family:Poppins,sans-serif; font-size:0.58rem; color:var(--text-sub);">(' + (pick.date || 'Kozmos') + ')</small></div>';
+            box.innerHTML = '<div>"' + window.escapeHTML(pick.text) + '"</div><div class="sig-misali" style="text-align:right; font-size:1.05rem !important; margin-top:4px;">~ ' + window.escapeHTML(pick.author || 'Anonim Şair') + ' <small style="font-family:Poppins,sans-serif; font-size:0.58rem; color:var(--text-sub);">(' + window.escapeHTML(pick.date || 'Kozmos') + ')</small></div>';
             if (!silent && window.currentUser) {
                 window.spawnFloatingScorePop("+5 Puan 🍾", "var(--accent-cyan)");
                 window.toast("Denizden ilham dolu bir şişe yakaladın! (+5 P)", "🍾");
@@ -14725,8 +14754,8 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             box.innerHTML = list.map(function(item, idx) {
                 const delBtn = isAdmin ? '<button type="button" style="background:none;border:none;color:#991b1b;cursor:pointer;font-size:0.72rem;margin-left:6px;" onclick="let l=window.getChainPoemListV17();l.splice(' + idx + ',1);localStorage.setItem(\'misali_chain_poem_v17\',JSON.stringify(l));window.renderChainPoemListV17();"><i class="fas fa-trash"></i></button>' : '';
                 return '<div style="padding:6px 0; border-bottom:1px dashed rgba(139,69,19,0.25); display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;">' +
-                    '<div style="font-size:0.86rem; font-style:italic; color:#2b180a; flex:1;"><b style="color:#8b4513; font-style:normal; margin-right:4px;">#' + (idx + 1) + '</b> "' + item.verse + '"</div>' +
-                    '<div style="font-size:0.68rem; color:#5c2e0e; font-weight:700; white-space:nowrap;">~ ' + item.author + ' <small style="opacity:0.75;">(' + (item.syllables || 14) + ' Hece)</small>' + delBtn + '</div>' +
+                    '<div style="font-size:0.86rem; font-style:italic; color:#2b180a; flex:1;"><b style="color:#8b4513; font-style:normal; margin-right:4px;">#' + (idx + 1) + '</b> "' + window.escapeHTML(item.verse) + '"</div>' +
+                    '<div style="font-size:0.68rem; color:#5c2e0e; font-weight:700; white-space:nowrap;">~ ' + window.escapeHTML(item.author) + ' <small style="opacity:0.75;">(' + (item.syllables || 14) + ' Hece)</small>' + delBtn + '</div>' +
                 '</div>';
             }).join('');
             box.scrollTop = box.scrollHeight;
@@ -18155,6 +18184,24 @@ window.nav = function(viewId) {
         if (currentVal) select.value = currentVal;
     };
 
+    window.openChatWithSenderV007 = function(senderIdentifier) {
+        if (!senderIdentifier || !window.ensureActiveUserObject()) return;
+        const lookup = window.findUserObjectByNameOrUsername ? window.findUserObjectByNameOrUsername(senderIdentifier) : null;
+        const targetUsername = (lookup && lookup.user && lookup.user.username) ? lookup.user.username : String(senderIdentifier).trim();
+        window.activeChatUser = targetUsername;
+        if (typeof window.populateChatUsers === 'function') window.populateChatUsers();
+        const sel = document.getElementById('chat-partner-select');
+        if (sel) {
+            const matchOpt = Array.from(sel.options).find(function(o) {
+                return o.value && window.cleanAliasStr(o.value) === window.cleanAliasStr(targetUsername);
+            });
+            if (matchOpt) sel.value = matchOpt.value;
+        }
+        window.renderChatBox();
+        const inp = document.getElementById('chat-inp');
+        if (inp) inp.focus();
+    };
+
     window.renderChatBox = function() {
         const box = document.getElementById('chat-box');
         if (!box) return;
@@ -18199,7 +18246,7 @@ window.nav = function(viewId) {
                             '<span class="chat-msg-time"><i class="far fa-clock"></i> ' + fullDateTime + '</span>' +
                             deleteBtn +
                         '</div>' +
-                        '<div class="chat-msg-bubble" style="background:' + (isMe ? 'rgba(212,175,55,0.2)' : 'rgba(0,206,209,0.12)') + '; border:1px solid ' + (isMe ? 'var(--accent-gold)' : 'var(--accent-cyan)') + ';">' + m.text + '</div>' +
+                        '<div class="chat-msg-bubble" style="background:' + (isMe ? 'rgba(212,175,55,0.2)' : 'rgba(0,206,209,0.12)') + '; border:1px solid ' + (isMe ? 'var(--accent-gold)' : 'var(--accent-cyan)') + ';">' + window.escapeHTML(m.text) + '</div>' +
                     '</div>';
                 }).join('');
             box.scrollTop = box.scrollHeight;
@@ -18241,7 +18288,7 @@ window.nav = function(viewId) {
                     '<span class="chat-msg-time"><i class="far fa-clock"></i> ' + fullDateTime + '</span>' +
                     deleteBtn +
                 '</div>' +
-                '<div class="chat-msg-bubble" style="background:' + (isMe ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.05)') + '; border:1px solid ' + (isMe ? 'var(--accent-gold)' : 'var(--border-soft)') + ';">' + m.text + '</div>' +
+                '<div class="chat-msg-bubble" style="background:' + (isMe ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.05)') + '; border:1px solid ' + (isMe ? 'var(--accent-gold)' : 'var(--border-soft)') + ';">' + window.escapeHTML(m.text) + '</div>' +
             '</div>';
         }).join('');
         box.scrollTop = box.scrollHeight;
