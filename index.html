@@ -10,6 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Şair Misal.i">
     <title>Şair Misal.i - Şiir ve Söz Dünyası</title>
+    <link rel="manifest" href="./manifest.json">
     <!-- Lokale Schriftarten (DSGVO-konform, über gwfh.mranftl.com herunterladen und in /fonts/ ablegen) -->
     <link rel="stylesheet" href="fonts/misali-fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -100,31 +101,9 @@
                     } catch(e) {}
                 };
 
-                const cleanUrl = window.location.href.split('#')[0].split('?')[0];
-                const manifestObj = {
-                    id: cleanUrl,
-                    name: "Şair Misal.i - Şiir ve Söz Dünyası",
-                    short_name: "Şair Misal.i",
-                    description: "Gönülden dile, dilden şiire. Sesli şiirler, sözler ve kültür uygulaması.",
-                    start_url: cleanUrl,
-                    scope: "./",
-                    display: "standalone",
-                    display_override: ["standalone", "fullscreen"],
-                    background_color: "#050814",
-                    theme_color: "#050814",
-                    orientation: "portrait-primary",
-                    icons: [
-                        { src: icon192, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-                        { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
-                    ]
-                };
-                const blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
-                const link = document.createElement('link');
-                link.rel = 'manifest';
-                link.href = URL.createObjectURL(blob);
-                document.head.appendChild(link);
-            } catch(e) {}
-        })();
+               // Echte manifest.json ist fest im <head> eingebunden
+            } catch(e) {}
+        })();
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -2147,6 +2126,9 @@
         <button class="close-btn" onclick="window.closeTopModal()"><i class="fas fa-times"></i></button>
         <div class="modal-body custom-scroll">
             <h2 class="sec-title" style="margin-bottom:12px;"><i class="fas fa-bookmark" style="color:var(--accent-pink);"></i> <span style="color:var(--text-main);">Aklımda Kalanlar</span></h2>
+            <div style="text-align:center; margin-bottom:12px;">
+                <button type="button" class="noble-btn primary" style="width:auto; padding:7px 16px; font-size:0.78rem;" onclick="window.exportMyPoemBookPDF()"><i class="fas fa-file-pdf"></i> Şiir Defterimi PDF İndir</button>
+            </div>
             <div class="c-grid" id="col-saved-grid"></div>
         </div>
     </div>
@@ -3209,25 +3191,9 @@
         });
 
         if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-            try {
-                const swCode = [
-                    "const CACHE_NAME = 'sair-misali-app-cache-v3';",
-                    "self.addEventListener('install', event => { self.skipWaiting(); });",
-                    "self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });",
-                    "self.addEventListener('message', event => {",
-                    "    if (event.data && event.data.type === 'SET_APP_BADGE') {",
-                    "        const cnt = parseInt(event.data.count || 0, 10);",
-                    "        if ('setAppBadge' in self.navigator) {",
-                    "            if (cnt > 0) self.navigator.setAppBadge(cnt).catch(()=>{});",
-                    "            else if ('clearAppBadge' in self.navigator) self.navigator.clearAppBadge().catch(()=>{});",
-                    "        }",
-                    "    }",
-                    "});",
-                    "self.addEventListener('fetch', event => { event.respondWith(fetch(event.request).catch(() => caches.match(event.request))); });"
-                ].join('\n');
-                const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
-            } catch(e) {}
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
         }
     })();
     </script>
@@ -4542,11 +4508,32 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             if (cz) { cz.style.display = 'none'; cz.classList.remove('show'); }
         };
 
+        window.canGuestPreviewWork = function(workId) {
+            try {
+                let seen = JSON.parse(localStorage.getItem('misali_guest_reads_v1') || '[]');
+                if (!Array.isArray(seen)) seen = [];
+                const strId = String(workId || '');
+                if (seen.includes(strId)) return true;
+                if (seen.length < 3) {
+                    seen.push(strId);
+                    localStorage.setItem('misali_guest_reads_v1', JSON.stringify(seen));
+                    const rem = 3 - seen.length;
+                    if (typeof window.toast === 'function') {
+                        window.toast(rem > 0 ? ('✨ Misafir Önizleme (' + seen.length + '/3) • ' + rem + ' ücretsiz hakkınız kaldı') : '✨ Son ücretsiz önizleme (3/3) • Devamı için ücretsiz kayıt olun!', '🪶');
+                    }
+                    return true;
+                }
+                return false;
+            } catch(e) { return false; }
+        };
+
         window.openModal = function(id) {
-            if (!window.ensureActiveUserObject() && !['loginModal', 'registerModal', 'pwaModal'].includes(id)) {
+            const allowGuestRead = (id === 'readModal' && window._guestReadAllowed === true);
+            if (!window.ensureActiveUserObject() && !allowGuestRead && !['loginModal', 'registerModal', 'pwaModal'].includes(id)) {
                 if (typeof window.showGuestLock === 'function') window.showGuestLock('🔒');
                 return;
             }
+            if (id === 'readModal') window._guestReadAllowed = false;
             window.resetAllModalScrollsToTop();
             try {
                 if (id === 'visitorModal' && typeof window.enhanceVisitorAnalyticsModal === 'function') window.enhanceVisitorAnalyticsModal();
@@ -4669,6 +4656,7 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             if (window.currentUser && typeof firebase !== 'undefined') {
                 const uKey = window.resolveUserKey(window.currentUser.username);
                 if (uKey) { try { firebase.database().ref('users/' + uKey).update({ isOnline: false, lastSeen: Date.now() }); } catch(e){} }
+                try { if (firebase.auth && firebase.auth().currentUser) firebase.auth().signOut(); } catch(e){}
             }
             sessionStorage.removeItem('misaliUser');
             localStorage.removeItem('misaliUser');
@@ -5458,7 +5446,6 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         };
 
         window.openPOTD = function() {
-            if (!window.ensureActiveUserObject()) return window.showGuestLock('🪶');
             if (!window.potdItem || !window.potdItem.id) return;
             window.openReadModal(window.potdItem.id, window.potdItem.type || 'poems');
         };
@@ -5707,6 +5694,74 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             let bSav = document.getElementById('b-sav');
             if (bSav) { bSav.classList.add('bump'); setTimeout(() => bSav.classList.remove('bump'), 350); }
             window.renderAllContent();
+        };
+
+        window.exportMyPoemBookPDF = function() {
+            if (!window.ensureActiveUserObject()) return window.showGuestLock('📖');
+            const savedIds = window.getUserSavedArray ? window.getUserSavedArray() : [];
+            if (savedIds.length === 0) return window.toast("PDF oluşturmak için önce 'Aklımda' listesine en az 1 eser ekleyin!", "⚠️");
+
+            const esc = window.escapeHTML || function(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+            const allWorks = [];
+            if (window.DB) {
+                ['poems', 'quotes', 'atasozleri', 'marslar', 'stories', 'jokes', 'saglik'].forEach(function(cat) {
+                    (window.DB[cat] || []).forEach(function(item) {
+                        if (item && savedIds.includes(String(item.id))) allWorks.push(Object.assign({}, item, { type: cat }));
+                    });
+                });
+            }
+            (window.userPoemsDB || []).forEach(function(item) {
+                if (item && savedIds.includes(String(item.id))) allWorks.push(Object.assign({}, item, { type: 'userPoems' }));
+            });
+
+            if (allWorks.length === 0) return window.toast("Kaydedilen eserler bulunamadı.", "⚠️");
+
+            const ownerName = esc(window.currentUser.name || window.currentUser.username || 'Şair Dostu');
+            const dateStr = new Date().toLocaleDateString('tr-TR');
+
+            const pagesHtml = allWorks.map(function(w, idx) {
+                const title = esc(w.title || w.trTitle || 'Eser');
+                const body = esc(window.extractPoemBodyText ? window.extractPoemBodyText(w) : (w.text || w.quote || '')).replace(/\n/g, '<br>');
+                const author = esc(window.resolveTrueAuthor ? window.resolveTrueAuthor(w, w.type) : (w.author || 'Şair Misal.i'));
+                return '<section class="poem-page">' +
+                    '<div class="page-num">— ' + (idx + 1) + ' —</div>' +
+                    '<h2>' + title + '</h2>' +
+                    '<div class="poem-body">' + body + '</div>' +
+                    '<div class="poem-sig">~ ' + author + '</div>' +
+                '</section>';
+            }).join('');
+
+            const printWin = window.open('', '_blank', 'width=850,height=950');
+            if (!printWin) return window.toast("Lütfen tarayıcıda açılır pencerelere (Pop-up) izin verin.", "⚠️");
+
+            printWin.document.write(
+                '<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Şiir Defterim — Şair Misal.i</title>' +
+                '<style>' +
+                    '@page { size: A4; margin: 22mm; }' +
+                    'body { font-family: Georgia, "Times New Roman", serif; color: #1e293b; background: #fffdf8; margin: 0; padding: 0; }' +
+                    '.cover { min-height: 85vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 4px double #b48608; padding: 36px; page-break-after: always; }' +
+                    '.cover h1 { font-size: 34pt; color: #92400e; margin: 12px 0; }' +
+                    '.cover p { font-size: 13pt; color: #475569; font-style: italic; }' +
+                    '.poem-page { border: 1.5px solid #d4af37; border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; page-break-inside: avoid; page-break-after: always; text-align: center; }' +
+                    '.poem-page:last-child { page-break-after: auto; }' +
+                    '.page-num { font-size: 9pt; color: #94a3b8; margin-bottom: 12px; }' +
+                    '.poem-page h2 { font-size: 20pt; color: #92400e; margin: 0 0 18px 0; border-bottom: 1px dashed #d4af37; padding-bottom: 10px; }' +
+                    '.poem-body { font-size: 12.5pt; line-height: 1.8; color: #0f172a; margin-bottom: 22px; }' +
+                    '.poem-sig { font-size: 14pt; font-style: italic; color: #0e7490; text-align: right; }' +
+                '</style></head><body>' +
+                '<section class="cover">' +
+                    '<div style="font-size:44pt;">🪶</div>' +
+                    '<h1>Şiir Defterim</h1>' +
+                    '<p>Gönülden dile, dilden şiire...</p>' +
+                    '<div style="margin-top:34px; font-size:12pt; color:#0f172a;"><b>Hazırlayan:</b> ' + ownerName + '<br><b>Eser Sayısı:</b> ' + allWorks.length + ' • <b>Tarih:</b> ' + dateStr + '</div>' +
+                    '<div style="margin-top:45px; font-size:10pt; color:#92400e;">Şair Misal.i — Şiir ve Söz Dünyası</div>' +
+                '</section>' +
+                pagesHtml +
+                '<script>window.onload=function(){ setTimeout(function(){ window.print(); }, 350); };<\/script>' +
+                '</body></html>'
+            );
+            printWin.document.close();
+            window.toast("📖 Şiir Defterin hazır! Yazdır penceresinden 'PDF olarak kaydet' seçebilirsin.", "✨");
         };
 
         window.openCol = function(type) {
@@ -6166,7 +6221,13 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         };
 
         window.openReadModal = async function(id, type) {
-            if (!window.ensureActiveUserObject()) return window.showGuestLock('📖');
+            if (!window.ensureActiveUserObject()) {
+                if (typeof window.canGuestPreviewWork === 'function' && window.canGuestPreviewWork(id)) {
+                    window._guestReadAllowed = true;
+                } else {
+                    return window.showGuestLock('📖');
+                }
+            }
             if (window.autoScrollTimer) { clearInterval(window.autoScrollTimer); window.autoScrollTimer = null; }
             window.stopStageTheaterMode();
 
@@ -16834,8 +16895,9 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
         window._xScoreRafId = requestAnimationFrame(stepFrame);
     };
 
-    window.nav = function(viewId) {
-        if (!window.ensureActiveUserObject() && viewId !== 'home') {
+window.nav = function(viewId) {
+        const guestAllowedViews = ['home', 'poems', 'quotes', 'impressum', 'datenschutz', 'cookies'];
+        if (!window.ensureActiveUserObject() && guestAllowedViews.indexOf(viewId) === -1) {
             if (typeof window.showGuestLock === 'function') window.showGuestLock('🔒');
             return;
         }
