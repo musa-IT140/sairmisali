@@ -887,7 +887,8 @@
         @keyframes realBlueRoseBloom { 0%, 100% { filter:hue-rotate(220deg) saturate(3.5) brightness(1.15) drop-shadow(0 0 8px rgba(0,206,209,0.9)); } 50% { filter:hue-rotate(220deg) saturate(4.2) brightness(1.35) drop-shadow(0 0 14px rgba(0,206,209,1)); } }
         .comment-rose-anim { animation:realBlueRoseBloom 1.5s infinite ease-in-out !important; opacity:1 !important; }
 
-        .poem-line-interactive { display:block; padding:2px 8px; margin:1px auto; border-radius:6px; transition:background 0.25s, color 0.25s, opacity 0.35s ease; }
+        .poem-line-interactive { display:block; padding:2px 8px; margin:1px auto; border-radius:6px; font-family:inherit !important; transition:background 0.25s, color 0.25s, opacity 0.35s ease; }
+        #read-text > div, #read-text .secret-answer { font-family:inherit !important; }
         body.highlighter-active .poem-line-interactive { cursor:pointer !important; }
         body.highlighter-active .poem-line-interactive:hover { background:rgba(212, 175, 55, 0.14); }
         .poem-line-highlighted { background:linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.28), transparent) !important; color:var(--accent-gold) !important; text-shadow:0 0 12px rgba(212, 175, 55, 0.5) !important; border-left:3px solid var(--accent-gold); border-right:3px solid var(--accent-gold); font-weight:600; }
@@ -2700,9 +2701,9 @@
                 <button class="action-btn" onclick="window.changeFontSize(-1)" title="Yazıyı Küçült">A-</button>
                 <button class="action-btn" onclick="window.changeFontSize(1)" title="Yazıyı Büyüt">A+</button>
                 <div></div>
-                <button class="action-btn" onclick="document.getElementById('read-text').style.fontFamily='Playfair Display, serif'" title="Klasik Yazı"><i class="fas fa-feather"></i></button>
-                <button class="action-btn" onclick="document.getElementById('read-text').style.fontFamily='Poppins, sans-serif'" title="Modern Yazı"><i class="fas fa-align-left"></i></button>
-                <button class="action-btn" onclick="document.getElementById('read-text').style.fontFamily='Great Vibes, cursive'" title="El Yazısı"><i class="fas fa-signature"></i></button>
+                <button class="action-btn" onclick="window.setReadFont('playfair')" title="Klasik Yazı"><i class="fas fa-feather"></i></button>
+                <button class="action-btn" onclick="window.setReadFont('poppins')" title="Modern Yazı"><i class="fas fa-align-left"></i></button>
+                <button class="action-btn" onclick="window.setReadFont('vibes')" title="El Yazısı"><i class="fas fa-signature"></i></button>
                 <div></div>
                 <button class="action-btn" onclick="window.readAloudText()" title="Sesli Oku (Vorlesen TR/DE)"><i class="fas fa-headset"></i></button>
                 <button class="action-btn" id="mic-studio-toggle-btn" onclick="window.toggleMicStudio()" title="Kendi Sesinle Kaydet (Yeşil Ses Stüdyosu)" style="color:var(--accent-green);"><i class="fas fa-microphone-alt"></i></button>
@@ -6633,6 +6634,27 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 if (btn) btn.style.color = 'var(--accent-cyan)';
                 window.toast(window.ambientMode === 1 ? "🌧️ Hafif Yağmur Sesi Aktif" : "🌊 Huzurlu Dalga Sesi Aktif", "🎧");
             } catch(e) {}
+        };
+
+        window.setReadFont = function(mode) {
+            const el = document.getElementById('read-text');
+            if (!el) return;
+            if (mode === 'playfair') {
+                el.style.setProperty('font-family', "'Playfair Display', serif", 'important');
+                window.fontSize = 0.95;
+                el.style.setProperty('font-size', '0.95rem', 'important');
+                window.toast("Klasik Yazı (Playfair Display)", "✒️");
+            } else if (mode === 'vibes') {
+                el.style.setProperty('font-family', "'Great Vibes', cursive", 'important');
+                window.fontSize = 1.45;
+                el.style.setProperty('font-size', '1.45rem', 'important');
+                window.toast("El Yazısı (Great Vibes)", "✍️");
+            } else {
+                el.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                window.fontSize = 0.85;
+                el.style.setProperty('font-size', '0.85rem', 'important');
+                window.toast("Modern Yazı (Poppins)", "🔤");
+            }
         };
 
         window.changeFontSize = function(dir) {
