@@ -17755,52 +17755,287 @@ window.nav = function(viewId) {
         window.setHeaderScoreStaticX(myScore);
     };
 
+    // =========================================================================
+    // 8B. MODERN & MOBİL UYUMLU OYUN PUANLARI DETAY PENCERESİ + ŞAİRLER LİGİ
+    // =========================================================================
+    (function injectGameStatsResponsiveCSS() {
+        if (document.getElementById('misali-game-stats-pro-css')) return;
+        const st = document.createElement('style');
+        st.id = 'misali-game-stats-pro-css';
+        st.textContent = `
+            .gp-drawer-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+            .gp-tab-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+            .gp-tab-btn { flex:1; min-width:95px; padding:6px 10px; border-radius:10px; border:1px solid var(--border-soft); background:var(--bg-card); color:var(--text-sub); font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s ease; }
+            .gp-tab-btn.active { background:linear-gradient(135deg, rgba(212,175,55,0.24), rgba(0,206,209,0.16)); border-color:var(--accent-gold); color:var(--accent-gold); }
+            .gp-kpi-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; margin-bottom:12px; }
+            .gp-kpi-card { background:var(--bg-card); border:1px solid var(--border-soft); border-radius:12px; padding:9px 8px; text-align:center; }
+            .gp-kpi-card small { display:block; font-size:0.62rem; color:var(--text-sub); margin-bottom:3px; }
+            .gp-kpi-card strong { display:block; font-family:'Space Mono', monospace; font-size:0.95rem; font-variant-numeric:tabular-nums; }
+            .gp-ratio-bar { width:100%; height:9px; border-radius:8px; background:rgba(239,68,68,0.28); overflow:hidden; display:flex; margin:5px 0 3px 0; }
+            .gp-ratio-win { height:100%; background:linear-gradient(90deg, #16a34a, #4ade80); transition:width 0.35s ease; }
+            .gp-game-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:7px; max-height:220px; overflow-y:auto; padding-right:2px; }
+            .gp-game-row { display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--bg-card); border:1px solid var(--border-soft); border-radius:11px; padding:8px 10px; }
+            .gp-play-mini { background:rgba(212,175,55,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); border-radius:8px; padding:4px 8px; font-size:0.66rem; font-weight:700; cursor:pointer; flex-shrink:0; }
+            .gp-play-mini:hover { background:var(--accent-gold); color:#000; }
+            .gp-flame-steps { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:10px 0; }
+            .gp-flame-step { background:var(--bg-card); border:1px solid var(--border-soft); border-radius:11px; padding:8px 6px; text-align:center; font-size:0.7rem; opacity:0.55; }
+            .gp-flame-step.lit { opacity:1; border-color:#f97316; background:rgba(249,115,22,0.16); color:var(--text-main); box-shadow:0 0 12px rgba(249,115,22,0.25); }
+            .lb-my-banner { background:linear-gradient(135deg, rgba(212,175,55,0.16), rgba(0,206,209,0.12)); border:1.5px solid var(--accent-gold); border-radius:14px; padding:10px 12px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; text-align:left; }
+            .lb-podium-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:12px; }
+            .lb-row-list { display:flex; flex-direction:column; gap:7px; }
+            .lb-row-card { display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--input-bg); border:1px solid var(--border-soft); border-radius:12px; padding:9px 11px; cursor:pointer; transition:border-color 0.2s ease; }
+            .lb-row-card:hover { border-color:var(--accent-gold); }
+            .lb-row-card.is-me { border-color:var(--accent-gold); background:rgba(212,175,55,0.12); }
+            .lb-row-left { display:flex; align-items:center; gap:8px; min-width:0; flex:1; }
+            .lb-row-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+            @media (max-width: 640px) {
+                .gp-kpi-grid { grid-template-columns:repeat(2, minmax(0, 1fr)) !important; gap:6px !important; }
+                .gp-kpi-card { padding:7px 6px !important; }
+                .gp-kpi-card strong { font-size:0.86rem !important; }
+                .gp-game-list { grid-template-columns:1fr !important; }
+                .lb-podium-grid { gap:5px !important; }
+                .lb-podium-grid .league-podium-card { padding:8px 4px !important; }
+                .lb-row-card { padding:8px 9px !important; }
+            }
+        `;
+        document.head.appendChild(st);
+    })();
+
+    window.showGameHUDDetail = function(type, pillEl) {
+        if (!window.ensureActiveUserObject()) return window.showGuestLock('🎮');
+        const hud = document.getElementById('user-game-hud');
+        if (!hud) return;
+        const activeTab = type || 'score';
+
+        document.querySelectorAll('#user-game-hud .hud-stat-pill').forEach(function(p) { p.classList.remove('active-hud-pill'); });
+        if (pillEl) pillEl.classList.add('active-hud-pill');
+
+        let drawer = document.getElementById('hud-detail-drawer');
+        if (!drawer) {
+            drawer = document.createElement('div');
+            drawer.id = 'hud-detail-drawer';
+            hud.insertAdjacentElement('afterend', drawer);
+        }
+
+        const esc = window.escapeHTML || function(s) { return String(s || ''); };
+        const uKey = window.resolveUserKey(window.currentUser.username);
+        const uObj = (uKey && window.userDatabase[uKey]) ? window.userDatabase[uKey] : window.currentUser;
+
+        const totalScore = parseInt(uObj.score || 0, 10);
+        const won = parseInt(uObj.gamesWon || 0, 10);
+        const played = parseInt(uObj.gamesPlayed || 0, 10);
+        const lost = Math.max(0, played - won);
+        const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
+        const streak = parseInt(uObj.streak || 0, 10);
+        const earned = parseInt(uObj.pointsEarned !== undefined ? uObj.pointsEarned : (won * 12), 10);
+        const lostPts = parseInt(uObj.pointsLost !== undefined ? uObj.pointsLost : (lost * 5), 10);
+        const avgPerGame = played > 0 ? ((earned - lostPts) / played).toFixed(1) : '0.0';
+        const netGamePts = earned - lostPts;
+        const literaryPts = Math.max(0, totalScore - Math.max(0, netGamePts));
+        const earnedShare = (earned + lostPts) > 0 ? Math.round((earned / (earned + lostPts)) * 100) : 100;
+
+        const allGames = (window.DB && Array.isArray(window.DB.games)) ? window.DB.games : [];
+        const winsMap = (uObj.gameWins && typeof uObj.gameWins === 'object') ? uObj.gameWins : {};
+        const lossMap = (uObj.gameLosses && typeof uObj.gameLosses === 'object') ? uObj.gameLosses : {};
+        const gameStats = [];
+        allGames.forEach(function(g) {
+            const wCnt = parseInt(winsMap[g.id] || 0, 10);
+            const lCnt = parseInt(lossMap[g.id] || 0, 10);
+            if (wCnt > 0 || lCnt > 0) {
+                const ptsVal = Math.min(parseInt(g.points || 10, 10), 20);
+                const penVal = Math.max(1, Math.floor(ptsVal / 2));
+                const gTotal = wCnt + lCnt;
+                gameStats.push({
+                    id: g.id, title: g.title, emoji: g.emoji || '🎮', pts: ptsVal,
+                    wins: wCnt, losses: lCnt, total: gTotal,
+                    rate: gTotal > 0 ? Math.round((wCnt / gTotal) * 100) : 0,
+                    gained: wCnt * ptsVal, lostP: lCnt * penVal
+                });
+            }
+        });
+        gameStats.sort(function(a, b) { return (b.wins - a.wins) || (b.gained - a.gained); });
+
+        const sortedUsers = Object.values(window.userDatabase || {}).sort(function(a, b) { return (parseInt(b.score || 0, 10)) - (parseInt(a.score || 0, 10)); });
+        const myIdx = sortedUsers.findIndex(function(u) { return (u.username || '').toLowerCase() === (window.currentUser.username || '').toLowerCase(); });
+        const myRank = myIdx > -1 ? (myIdx + 1) : 1;
+        const nextAbove = myIdx > 0 ? sortedUsers[myIdx - 1] : null;
+        const ptsToNext = nextAbove ? Math.max(1, (parseInt(nextAbove.score || 0, 10) - totalScore) + 1) : 0;
+
+        const tabsHtml =
+            '<div class="gp-drawer-header">' +
+                '<strong style="color:var(--accent-gold); font-size:0.86rem;"><i class="fas fa-chart-bar"></i> Oyun & Puan Analiz Merkezi</strong>' +
+                '<button type="button" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-soft);color:var(--text-sub);width:26px;height:26px;border-radius:50%;cursor:pointer;" onclick="document.getElementById(\'hud-detail-drawer\').remove()" title="Kapat"><i class="fas fa-times"></i></button>' +
+            '</div>' +
+            '<div class="gp-tab-row">' +
+                '<button type="button" class="gp-tab-btn ' + (activeTab === 'score' ? 'active' : '') + '" onclick="window.showGameHUDDetail(\'score\')"><i class="fas fa-coins"></i> Puan Analizi</button>' +
+                '<button type="button" class="gp-tab-btn ' + (activeTab === 'wins' ? 'active' : '') + '" onclick="window.showGameHUDDetail(\'wins\')"><i class="fas fa-gamepad"></i> Oyun Karnesi</button>' +
+                '<button type="button" class="gp-tab-btn ' + (activeTab === 'streak' ? 'active' : '') + '" onclick="window.showGameHUDDetail(\'streak\')"><i class="fas fa-fire"></i> Seri & Lig</button>' +
+            '</div>';
+
+        const buildGameRowsHtml = function(list) {
+            if (list.length === 0) {
+                return '<div style="text-align:center; padding:12px; color:var(--text-sub); font-size:0.74rem; font-style:italic;">Oyun oynadıkça her oyunun detaylı puan ve başarı karnesi burada görünür.</div>';
+            }
+            return '<div class="gp-game-list custom-scroll">' + list.map(function(g) {
+                const safeT = g.title.replace(/'/g, "\\'");
+                return '<div class="gp-game-row">' +
+                    '<div style="min-width:0; flex:1;">' +
+                        '<div style="font-weight:700; color:var(--text-main); font-size:0.76rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + g.emoji + ' ' + esc(g.title) + '</div>' +
+                        '<div style="font-size:0.64rem; font-family:\'Space Mono\',monospace; color:var(--text-sub); margin-top:2px;">' +
+                            '<span style="color:var(--accent-green);">' + g.wins + 'Z (+' + g.gained + 'P)</span>' +
+                            (g.losses > 0 ? ' • <span style="color:var(--accent-red);">' + g.losses + 'Y (-' + g.lostP + 'P)</span>' : '') +
+                            ' • <span style="color:var(--accent-cyan);">%' + g.rate + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<button type="button" class="gp-play-mini" onclick="window.startMiniGame(\'' + g.id + '\', \'' + safeT + '\', ' + g.pts + ', \'' + g.emoji + '\')">▶ Oyna</button>' +
+                '</div>';
+            }).join('') + '</div>';
+        };
+
+        let bodyHtml = '';
+        if (activeTab === 'score') {
+            bodyHtml =
+                '<div class="gp-kpi-grid">' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-gold);"><small>Net Toplam</small><strong style="color:var(--accent-gold);">🏆 ' + totalScore + ' P</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-green);"><small>Oyun Kazancı</small><strong style="color:var(--accent-green);">+' + earned + ' P</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-red);"><small>Oyun Kaybı</small><strong style="color:var(--accent-red);">-' + lostPts + ' P</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-cyan);"><small>Eser & Bonus</small><strong style="color:var(--accent-cyan);">+' + literaryPts + ' P</strong></div>' +
+                '</div>' +
+                '<div style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:11px; padding:8px 10px; margin-bottom:10px;">' +
+                    '<div style="display:flex; justify-content:space-between; font-size:0.66rem; color:var(--text-sub);">' +
+                        '<span>📊 Kazanç / Kayıp Dengesi (Ø ' + avgPerGame + ' P / Maç)</span>' +
+                        '<strong style="color:var(--accent-green);">%' + earnedShare + ' Kazanç</strong>' +
+                    '</div>' +
+                    '<div class="gp-ratio-bar"><div class="gp-ratio-win" style="width:' + earnedShare + '%;"></div></div>' +
+                '</div>' +
+                buildGameRowsHtml(gameStats);
+        } else if (activeTab === 'wins') {
+            const bestGame = gameStats.length > 0 ? gameStats[0] : null;
+            bodyHtml =
+                '<div class="gp-kpi-grid">' +
+                    '<div class="gp-kpi-card"><small>Oynanan</small><strong>' + played + '</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-green);"><small>Kazanılan</small><strong style="color:var(--accent-green);">' + won + '</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-red);"><small>Kaybedilen</small><strong style="color:var(--accent-red);">' + lost + '</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-cyan);"><small>Başarı Oranı</small><strong style="color:var(--accent-cyan);">%' + winRate + '</strong></div>' +
+                '</div>' +
+                '<div style="background:var(--bg-card); border:1px solid var(--border-soft); border-radius:11px; padding:8px 10px; margin-bottom:10px;">' +
+                    '<div style="display:flex; justify-content:space-between; font-size:0.68rem; margin-bottom:4px;">' +
+                        '<span>🎯 Genel Galibiyet Yüzdesi</span>' +
+                        '<strong style="color:var(--accent-cyan);">%' + winRate + '</strong>' +
+                    '</div>' +
+                    '<div class="gp-ratio-bar"><div class="gp-ratio-win" style="width:' + winRate + '%;"></div></div>' +
+                    (bestGame ? '<div style="font-size:0.68rem; color:var(--accent-gold); margin-top:6px;">🌟 En Başarılı Oyunun: <b>' + bestGame.emoji + ' ' + esc(bestGame.title) + '</b> (' + bestGame.wins + ' Zafer • %' + bestGame.rate + ')</div>' : '') +
+                '</div>' +
+                buildGameRowsHtml(gameStats);
+        } else {
+            bodyHtml =
+                '<div class="gp-kpi-grid">' +
+                    '<div class="gp-kpi-card" style="border-color:#f97316;"><small>Aktif Seri</small><strong style="color:#f97316;">' + streak + ' 🔥</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-cyan);"><small>Lig Sıran</small><strong style="color:var(--accent-cyan);">#' + myRank + ' / ' + Math.max(1, sortedUsers.length) + '</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-green);"><small>Seri Bonusu</small><strong style="color:' + (streak >= 3 ? 'var(--accent-green)' : 'var(--text-sub)') + ';">' + (streak >= 3 ? '+2 P Aktif' : (Math.max(0, 3 - streak) + ' Zafer')) + '</strong></div>' +
+                    '<div class="gp-kpi-card" style="border-color:var(--accent-gold);"><small>Üst Sıra Hedefi</small><strong style="color:var(--accent-gold);">' + (nextAbove ? ('+' + ptsToNext + ' P') : '👑 Zirve!') + '</strong></div>' +
+                '</div>' +
+                '<div class="gp-flame-steps">' +
+                    '<div class="gp-flame-step ' + (streak >= 1 ? 'lit' : '') + '">🔥 1. Zafer<br><small>Seri Başladı</small></div>' +
+                    '<div class="gp-flame-step ' + (streak >= 2 ? 'lit' : '') + '">🔥🔥 2. Zafer<br><small>Isınıyorsun</small></div>' +
+                    '<div class="gp-flame-step ' + (streak >= 3 ? 'lit' : '') + '">🔥🔥🔥 3+ Zafer<br><small>+2 Bonus Aktif!</small></div>' +
+                '</div>' +
+                '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; background:var(--bg-card); border:1px dashed var(--accent-gold); border-radius:11px; padding:8px 12px;">' +
+                    '<span style="font-size:0.72rem; color:var(--text-main);">' +
+                        (nextAbove
+                            ? ('🚀 <b>#' + (myRank - 1) + ' ' + esc(nextAbove.name || nextAbove.username) + '</b> sırasını geçmek için <b style="color:var(--accent-gold);">' + ptsToNext + ' Puan</b> kaldı!')
+                            : '👑 Tebrikler! Şairler Liginde 1. sırada zirvedesin!') +
+                    '</span>' +
+                    '<button type="button" class="noble-btn primary" style="width:auto; padding:5px 12px; font-size:0.7rem;" onclick="window.openModal(\'leaderboardModal\'); window.renderLeaderboard();"><i class="fas fa-crown"></i> Ligi Aç</button>' +
+                '</div>';
+        }
+
+        drawer.innerHTML = tabsHtml + bodyHtml;
+    };
+
     window.renderLeaderboard = function() {
         window.deduplicateUsersDB();
         const list = document.getElementById('leaderboard-body');
         if (!list) return;
+        const esc = window.escapeHTML || function(s) { return String(s || ''); };
         const myU = window.currentUser ? (window.currentUser.username || '').toLowerCase() : '';
         const sorted = Object.values(window.userDatabase || {}).sort(function(a, b) { return (parseInt(b.score, 10) || 0) - (parseInt(a.score, 10) || 0); });
         const top3 = sorted.slice(0, 3);
         const podiumColors = ['var(--accent-gold)', '#cbd5e1', '#fb923c'];
-        const podiumMedals = ['🥇 1. Şampiyon', '🥈 2. İkinci', '🥉 3. Üçüncü'];
+        const podiumMedals = ['🥇 1.', '🥈 2.', '🥉 3.'];
 
-        const podiumHtml = '<div style="display:grid;grid-template-columns:repeat(' + Math.min(3, top3.length) + ',1fr);gap:8px;margin-bottom:14px;">' +
+        const myIdx = sorted.findIndex(function(u) { return myU && (u.username || '').toLowerCase() === myU; });
+        let myBannerHtml = '';
+        if (myIdx > -1) {
+            const me = sorted[myIdx];
+            const myScore = parseInt(me.score || 0, 10);
+            const myWon = parseInt(me.gamesWon || 0, 10);
+            const myPlayed = parseInt(me.gamesPlayed || 0, 10);
+            const myRate = myPlayed > 0 ? Math.round((myWon / myPlayed) * 100) : 0;
+            const above = myIdx > 0 ? sorted[myIdx - 1] : null;
+            const gap = above ? Math.max(1, (parseInt(above.score || 0, 10) - myScore) + 1) : 0;
+            myBannerHtml =
+                '<div class="lb-my-banner">' +
+                    '<div>' +
+                        '<div style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎯 Senin Lig Durumun: #' + (myIdx + 1) + ' / ' + sorted.length + '</div>' +
+                        '<div style="font-size:0.66rem; color:var(--text-sub); margin-top:2px;">' +
+                            (above ? ('Üst sıradaki <b>' + esc(above.name || above.username) + '</b> için +' + gap + ' P kaldı') : '👑 Ligin Zirvesindesin!') +
+                            ' • %' + myRate + ' Başarı (' + myWon + '/' + myPlayed + ')' +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="league-score-pill">🏆 ' + myScore + ' P</span>' +
+                '</div>';
+        }
+
+        const podiumHtml = '<div class="lb-podium-grid">' +
             top3.map(function(u, idx) {
                 const rankObj = window.getPoetRankTitle(parseInt(u.score || 0, 10), 5, 5, 5, false, u);
                 const earned = parseInt(u.pointsEarned || 0, 10);
                 const lost = parseInt(u.pointsLost || 0, 10);
-                return '<div class="league-podium-card vis-clickable-box" onclick="window.openUserInspectorModal(\'' + u.username + '\')" style="border:1.5px solid ' + podiumColors[idx] + ';flex-direction:column;">' +
-                    '<div style="font-size:0.65rem;font-weight:800;color:' + podiumColors[idx] + ';margin-bottom:4px;">' + podiumMedals[idx] + '</div>' +
-                    '<div style="font-size:1.5rem;margin-bottom:2px;">' + (u.emoji || '👤') + '</div>' +
-                    '<div style="font-weight:700;font-size:0.78rem;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (u.name || u.username) + '</div>' +
-                    '<div style="font-size:0.6rem;color:var(--accent-cyan);margin:2px 0;">' + rankObj.title + '</div>' +
-                    '<span class="league-score-pill" style="margin-top:3px;">🏆 ' + (parseInt(u.score, 10) || 0) + ' P</span>' +
-                    '<div style="font-family:\'Space Mono\',monospace;font-size:0.55rem;margin-top:3px;"><span style="color:var(--accent-green);">+' + earned + ' P</span> • <span style="color:var(--accent-red);">-' + lost + ' P</span></div>' +
+                return '<div class="league-podium-card vis-clickable-box" onclick="window.openUserInspectorModal(\'' + u.username + '\')" style="border:1.5px solid ' + podiumColors[idx] + ';flex-direction:column;min-width:0;">' +
+                    '<div style="font-size:0.64rem;font-weight:800;color:' + podiumColors[idx] + ';margin-bottom:3px;">' + podiumMedals[idx] + '</div>' +
+                    '<div style="font-size:1.35rem;margin-bottom:2px;">' + (u.emoji || '👤') + '</div>' +
+                    '<div style="font-weight:700;font-size:0.74rem;color:var(--text-main);width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(u.name || u.username) + '</div>' +
+                    '<div style="font-size:0.56rem;color:var(--accent-cyan);margin:2px 0;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(rankObj.key || rankObj.title) + '</div>' +
+                    '<span class="league-score-pill" style="margin-top:3px;font-size:0.66rem !important;padding:2px 7px !important;">🏆 ' + (parseInt(u.score, 10) || 0) + ' P</span>' +
+                    '<div style="font-family:\'Space Mono\',monospace;font-size:0.52rem;margin-top:3px;"><span style="color:var(--accent-green);">+' + earned + '</span> / <span style="color:var(--accent-red);">-' + lost + '</span></div>' +
                 '</div>';
             }).join('') + '</div>';
 
-        list.innerHTML = podiumHtml +
-            '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.78rem;"><thead><tr style="border-bottom:2px solid var(--border-soft);color:var(--text-sub);font-size:0.68rem;"><th style="padding:8px 4px;">#</th><th>Şair / Rütbe</th><th style="text-align:center;">Zafer / Maç</th><th style="text-align:center;">Alınan / Kaybedilen</th><th style="text-align:right;color:var(--accent-gold);">Net Puan</th></tr></thead><tbody>' +
+        const cardsHtml = '<div class="lb-row-list">' +
             sorted.map(function(u, i) {
                 const isMe = myU && (u.username || '').toLowerCase() === myU;
-                const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ('<b>' + (i + 1) + '.</b>')));
+                const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ('#' + (i + 1))));
                 const liveBadge = window.getUserLiveBadgeHTML ? window.getUserLiveBadgeHTML(u) : '';
                 const won = parseInt(u.gamesWon || 0, 10);
                 const played = parseInt(u.gamesPlayed || 0, 10);
                 const lostGames = Math.max(0, played - won);
+                const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
                 const earnedPts = parseInt(u.pointsEarned !== undefined ? u.pointsEarned : (won * 12), 10);
                 const lostPts = parseInt(u.pointsLost !== undefined ? u.pointsLost : (lostGames * 5), 10);
                 const rankObj = window.getPoetRankTitle(parseInt(u.score || 0, 10), 3, 3, 3, false, u);
 
-                return '<tr style="border-bottom:1px solid rgba(255,255,255,0.06);background:' + (isMe ? 'rgba(212,175,55,0.14)' : 'transparent') + ';cursor:pointer;" onclick="window.openUserInspectorModal(\'' + u.username + '\')">' +
-                    '<td style="padding:8px 4px;">' + medal + '</td>' +
-                    '<td style="padding:6px 4px;"><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"><span>' + (u.emoji || '👤') + '</span><b style="color:var(--text-main);">' + (u.name || u.username) + '</b>' + liveBadge + (isMe ? '<span class="clean-badge" style="border-color:var(--accent-gold);color:var(--accent-gold);font-size:0.52rem;">SEN</span>' : '') + '</div><div style="font-size:0.62rem;color:var(--text-sub);margin-top:2px;">' + rankObj.title + '</div></td>' +
-                    '<td style="text-align:center;font-family:\'Space Mono\',monospace;font-size:0.7rem;color:var(--text-main);">' + won + ' / ' + played + '<br><small style="color:#f97316;font-size:0.58rem;">' + (u.streak || 0) + ' 🔥</small></td>' +
-                    '<td style="text-align:center;font-family:\'Space Mono\',monospace;font-size:0.68rem;"><span style="color:var(--accent-green);font-weight:700;">+' + earnedPts + ' P</span><br><span style="color:var(--accent-red);font-size:0.62rem;">-' + lostPts + ' P</span></td>' +
-                    '<td style="text-align:right;padding-right:4px;"><span class="league-score-pill">🏆 ' + (parseInt(u.score, 10) || 0) + ' P</span></td>' +
-                '</tr>';
-            }).join('') + '</tbody></table></div>';
+                return '<div class="lb-row-card ' + (isMe ? 'is-me' : '') + '" onclick="window.openUserInspectorModal(\'' + u.username + '\')">' +
+                    '<div class="lb-row-left">' +
+                        '<div style="min-width:26px;text-align:center;font-family:\'Space Mono\',monospace;font-weight:900;font-size:0.8rem;color:var(--accent-gold);">' + medal + '</div>' +
+                        '<div style="font-size:1.35rem;flex-shrink:0;">' + (u.emoji || '👤') + '</div>' +
+                        '<div style="min-width:0;flex:1;">' +
+                            '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">' +
+                                '<b style="color:var(--text-main);font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(u.name || u.username) + '</b>' +
+                                liveBadge +
+                                (isMe ? '<span class="clean-badge" style="border-color:var(--accent-gold);color:var(--accent-gold);font-size:0.5rem;padding:1px 5px !important;">SEN</span>' : '') +
+                            '</div>' +
+                            '<div style="font-size:0.62rem;color:var(--text-sub);margin-top:2px;">' + esc(rankObj.key || rankObj.title) + ' • 🎮 ' + won + '/' + played + ' (%' + winRate + ') • <span style="color:#f97316;">' + (u.streak || 0) + '🔥</span></div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="lb-row-right">' +
+                        '<span class="league-score-pill" style="font-size:0.68rem !important;padding:2px 8px !important;">🏆 ' + (parseInt(u.score, 10) || 0) + ' P</span>' +
+                        '<div style="font-family:\'Space Mono\',monospace;font-size:0.58rem;"><span style="color:var(--accent-green);font-weight:700;">+' + earnedPts + '</span> • <span style="color:var(--accent-red);">-' + lostPts + '</span></div>' +
+                    '</div>' +
+                '</div>';
+            }).join('') + '</div>';
+
+        list.innerHTML = myBannerHtml + podiumHtml + cardsHtml;
         window.applyAdminSpecialVisualsX();
     };
 
@@ -23511,6 +23746,18 @@ window.nav = function(viewId) {
         const patchCss = document.createElement('style');
         patchCss.id = 'misali-video-final-patch-css';
         patchCss.textContent = `
+            /* 0. VİDEO WIEDERGABELEISTE STABILITÄT (KEIN ZITTERN) */
+            .x-vw-time-lbl {
+                width: 36px !important;
+                min-width: 36px !important;
+                font-variant-numeric: tabular-nums !important;
+                flex-shrink: 0 !important;
+            }
+            .x-video-wing-card:hover > .x-vw-full-content,
+            .x-video-wing-card.is-controls-visible > .x-vw-full-content {
+                animation-play-state: paused !important;
+            }
+
             /* 1. Z-INDEX DÜZENİ: Pil, Açık Video ve Extern Player HER ZAMAN Modalların (Pencerelerin) Altında Kalır! */
             .x-video-wing-card:not(.is-fullpage-cinema) {
                 z-index: 35 !important;
@@ -23829,26 +24076,49 @@ window.nav = function(viewId) {
             }, 80);
         };
 
-        // Videodaki titremeye sebep olan zorla-oynatma (onpause) döngüsünü temizle
+        // Alle Videos starten stumm (Ton erst nach manuellem Klick auf Lautsprecher/Regler)
+        ['left', 'right', 'extern'].forEach(function(s) {
+            if (window._vwRuntimeState && window._vwRuntimeState[s]) {
+                window._vwRuntimeState[s].muted = true;
+                window._vwRuntimeState[s].userManuallyMuted = true;
+            }
+        });
+
+        // Videodaki titremeye sebep olan zorla-oynatma & erken ses açma döngüsünü temizle
         window.sanitizeVideoElementEventsX = function(side) {
             const isExt = (side === 'extern');
             const vidEl = document.getElementById(isExt ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
             if (!vidEl) return;
             const st = window._vwRuntimeState[side];
 
+            if (st && st.muted) {
+                vidEl.muted = true;
+                const mBtn = document.getElementById(isExt ? 'x-ext-mute-btn' : ('x-vw-mute-' + side));
+                const vSl = document.getElementById(isExt ? 'x-ext-vol-slider' : ('x-vw-vol-' + side));
+                if (mBtn) mBtn.innerHTML = '<i class="fas fa-volume-mute" style="color:var(--accent-red);"></i>';
+                if (vSl) vSl.value = 0;
+            }
+
+            let lastSmoothTick = 0;
             vidEl.ontimeupdate = function() {
-                if (window._vwIsSeeking[side]) return;
+                if (window._vwIsSeeking[side] || vidEl.seeking) return;
                 if (st && st.isStopped) {
                     if (!vidEl.paused) vidEl.pause();
                     return;
                 }
+                const now = performance.now();
+                if (now - lastSmoothTick < 220) return;
+                lastSmoothTick = now;
+
+                const cur = isFinite(vidEl.currentTime) ? vidEl.currentTime : 0;
+                const dur = (isFinite(vidEl.duration) && vidEl.duration > 0.5) ? vidEl.duration : 0;
                 const curEl = document.getElementById('x-vw-cur-' + side);
                 const totEl = document.getElementById('x-vw-tot-' + side);
                 const seekEl = document.getElementById('x-vw-seek-' + side);
-                if (curEl) curEl.innerText = window.fmtVideoTimeX(vidEl.currentTime);
-                if (totEl && vidEl.duration) totEl.innerText = window.fmtVideoTimeX(vidEl.duration);
-                if (seekEl && vidEl.duration > 0) {
-                    seekEl.value = ((vidEl.currentTime / vidEl.duration) * 100).toFixed(1);
+                if (curEl) curEl.innerText = window.fmtVideoTimeX(cur);
+                if (totEl && dur > 0) totEl.innerText = window.fmtVideoTimeX(dur);
+                if (seekEl && dur > 0 && document.activeElement !== seekEl) {
+                    seekEl.value = Math.min(100, Math.max(0, (cur / dur) * 100)).toFixed(1);
                 }
             };
 
@@ -23857,6 +24127,7 @@ window.nav = function(viewId) {
                     vidEl.pause();
                     return;
                 }
+                if (st && st.muted) vidEl.muted = true;
                 const pb = document.getElementById(isExt ? 'x-ext-play-btn' : ('x-vw-play-' + side));
                 if (pb) pb.innerHTML = '<i class="fas fa-pause"></i>';
             };
@@ -24015,5 +24286,1171 @@ window.nav = function(viewId) {
 })();
 </script>
 
+<script id="misali-video-fix-and-admin-pro">
+(function() {
+    "use strict";
+
+    // =========================================================================
+    // TEIL A: ENDGÜLTIGER VIDEO-STABILIZER (STUMMSTART + NULL ZITTERN)
+    // =========================================================================
+    const oldFixStyle = document.getElementById('misali-vfix-admin-pro-css');
+    if (oldFixStyle) oldFixStyle.remove();
+
+    const proStyle = document.createElement('style');
+    proStyle.id = 'misali-vfix-admin-pro-css';
+    proStyle.textContent = `
+        /* 1. VIDEO-ERDBEBEN KOMPLETT BESEITIGEN (KEINE HÖHEN-/PADDING-SPRÜNGE BEI HOVER) */
+        .x-video-wing-card.seamless-autohide:not(.minimized):not(.is-fullpage-cinema),
+        .x-video-wing-card.seamless-autohide:not(:hover):not(.is-controls-visible):not(.minimized):not(.is-fullpage-cinema) {
+            padding: 4px !important;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
+        }
+        .x-video-wing-card.seamless-autohide:not(:hover):not(.is-controls-visible):not(.minimized):not(.is-fullpage-cinema) .x-vw-banner-top,
+        .x-video-wing-card.seamless-autohide:not(:hover):not(.is-controls-visible):not(.minimized):not(.is-fullpage-cinema) .x-vw-banner-bottom {
+            opacity: 0 !important;
+            max-height: 120px !important;
+            margin-top: 6px !important;
+            margin-bottom: 6px !important;
+            padding: 5px 10px !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+        .x-video-wing-card.seamless-autohide:hover .x-vw-banner-top,
+        .x-video-wing-card.seamless-autohide:hover .x-vw-banner-bottom,
+        .x-video-wing-card.seamless-autohide.is-controls-visible .x-vw-banner-top,
+        .x-video-wing-card.seamless-autohide.is-controls-visible .x-vw-banner-bottom {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        .x-video-wing-card .x-vw-compact-bar,
+        #x-extern-video-player .x-vw-compact-bar {
+            transform: translateZ(0) !important;
+            backface-visibility: hidden !important;
+            contain: layout style !important;
+            transition: opacity 0.2s ease !important;
+        }
+        .x-video-wing-card .x-vw-seek-row,
+        #x-extern-video-player .x-vw-seek-row {
+            height: 18px !important;
+            min-height: 18px !important;
+            overflow: hidden !important;
+        }
+        .x-video-wing-card .x-vw-time-lbl,
+        #x-extern-video-player .x-vw-time-lbl {
+            width: 38px !important;
+            min-width: 38px !important;
+            max-width: 38px !important;
+            font-variant-numeric: tabular-nums !important;
+            text-align: center !important;
+            flex-shrink: 0 !important;
+        }
+        .x-video-wing-card .x-vw-seek-slider,
+        #x-extern-video-player .x-vw-seek-slider {
+            transition: none !important;
+            will-change: auto !important;
+        }
+        .x-video-wing-card .x-vw-btn,
+        #x-extern-video-player .x-vw-btn {
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+            transform: none !important;
+        }
+        .x-video-wing-card:hover > .x-vw-full-content,
+        .x-video-wing-card.is-controls-visible > .x-vw-full-content,
+        .x-video-wing-card.is-video-paused > .x-vw-full-content {
+            animation-play-state: paused !important;
+        }
+
+        /* 2. ADMIN PANEL PRO DESIGN (ALLE 10 TABS, DARK/LIGHT & MOBIL) */
+        .adm-pro-kpi-bar {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .adm-pro-kpi-box {
+            background: var(--input-bg);
+            border: 1px solid var(--border-soft);
+            border-radius: 11px;
+            padding: 7px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+        .adm-pro-kpi-box:hover { border-color: var(--accent-gold); }
+        .adm-pro-kpi-box small { display: block; font-size: 0.58rem; color: var(--text-sub); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .adm-pro-kpi-box strong { display: block; font-family: 'Space Mono', monospace; font-size: 0.88rem; color: var(--text-main); font-variant-numeric: tabular-nums; }
+        .adm-pro-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.16);
+            border: 1px dashed var(--border-soft);
+            border-radius: 11px;
+        }
+        :root[data-theme="light"] .adm-pro-toolbar { background: #f8fafc; border-color: #cbd5e1; }
+        .adm-pro-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            color: var(--text-main);
+            border-radius: 14px;
+            padding: 3px 9px;
+            font-size: 0.66rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .adm-pro-chip:hover, .adm-pro-chip.active {
+            border-color: var(--accent-gold);
+            background: rgba(212, 175, 55, 0.18);
+            color: var(--accent-gold);
+        }
+        .adm-pro-preview-box {
+            background: var(--bg-card);
+            border: 1.5px solid var(--accent-gold);
+            border-radius: 14px;
+            padding: 12px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .adm-pro-user-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-soft);
+            border-left: 3.5px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 9px 11px;
+            margin-bottom: 7px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+        .adm-pro-user-card.is-pending { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.08); }
+        .adm-pro-user-card.is-banned { border-left-color: var(--accent-red); opacity: 0.68; }
+        .adm-pro-user-card.is-founder { border-left-color: var(--accent-gold); background: rgba(212, 175, 55, 0.08); }
+        .adm-pro-user-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .adm-pro-user-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.64rem; color: var(--text-sub); font-family: 'Space Mono', monospace; }
+        .adm-pro-user-btns { display: flex; flex-wrap: wrap; gap: 5px; }
+        .adm-pro-user-btns button {
+            padding: 4px 8px;
+            border-radius: 7px;
+            border: 1px solid var(--border-soft);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 0.66rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .adm-pro-user-btns button:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .adm-pro-theme-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .adm-pro-theme-tile {
+            padding: 7px 5px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border-soft);
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-size: 0.64rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+        .adm-pro-theme-tile.active, .adm-pro-theme-tile:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .adm-pro-health-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+        @media (max-width: 680px) {
+            .adm-pro-kpi-bar { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+            .adm-pro-theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+            .adm-pro-health-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
+    `;
+    document.head.appendChild(proStyle);
+
+    // Video-Status sofort auf stumm & ruhig schalten
+    ['left', 'right', 'extern'].forEach(function(s) {
+        if (window._vwRuntimeState && window._vwRuntimeState[s]) {
+            window._vwRuntimeState[s].muted = true;
+            window._vwRuntimeState[s].userManuallyMuted = true;
+        }
+    });
+
+    window._vwSeekActiveLock = { left: false, right: false, extern: false };
+    window._vwLastRenderedPct = { left: -1, right: -1, extern: -1 };
+    window._vwActiveVideoInstances = window._vwActiveVideoInstances || {};
+    window._vwRenderGen = window._vwRenderGen || { left: 0, right: 0, extern: 0 };
+    window._vwIsLoadingSide = window._vwIsLoadingSide || { left: false, right: false };
+    window._vwPendingReload = window._vwPendingReload || { left: false, right: false };
+
+    // Verwaiste/alte Geister-Videos vollständig vernichten (damit sie nie mehr im Hintergrund die Leiste bewegen!)
+    window.killGhostVideoElX = function(vid) {
+        if (!vid) return;
+        try {
+            vid._isDeadGhostX = true;
+            vid.ontimeupdate = null;
+            vid.onplay = null;
+            vid.onpause = null;
+            vid.onended = null;
+            vid.onloadedmetadata = null;
+            vid.muted = true;
+            vid.pause();
+            vid.play = function() { return Promise.resolve(); };
+            vid.removeAttribute('src');
+            vid.load();
+        } catch(e) {}
+    };
+
+    // Sicherheitsnetz: Kein vom DOM abgetrenntes Geister-Video darf je wieder starten
+    if (!window._vwProtoPlayGuarded && typeof HTMLMediaElement !== 'undefined') {
+        window._vwProtoPlayGuarded = true;
+        const _nativePlay = HTMLMediaElement.prototype.play;
+        HTMLMediaElement.prototype.play = function() {
+            if (this.tagName === 'VIDEO' && this.classList && this.classList.contains('x-vw-video-el')) {
+                if (this._isDeadGhostX || !this.isConnected) {
+                    window.killGhostVideoElX(this);
+                    return Promise.resolve();
+                }
+            }
+            return _nativePlay.apply(this, arguments);
+        };
+    }
+
+    // Doppelte/parallele Render-Aufrufe pro Seite serialisieren (verhindert Race Condition beim 1. Laden!)
+    const _baseRenderSingleWingPro = window.renderSingleVideoWingX;
+    if (typeof _baseRenderSingleWingPro === 'function') {
+        window.renderSingleVideoWingX = async function(side, forceReloadVideo) {
+            if (!side) return false;
+
+            const existingDomVid = document.getElementById('x-vw-vid-' + side);
+            const st = window._vwRuntimeState && window._vwRuntimeState[side];
+            const cfg = window.getActiveVideoConfigForRenderX ? window.getActiveVideoConfigForRenderX() : null;
+            const sideCfg = cfg && cfg[side];
+            const pl = sideCfg ? (Array.isArray(sideCfg.playlist) ? sideCfg.playlist : Object.values(sideCfg.playlist || {})) : [];
+            const targetTrack = pl[(st && st.idx) || 0] || null;
+
+            // Falls gerade schon ein Ladevorgang für diese Seite läuft: NICHT parallel überschreiben!
+            if (window._vwIsLoadingSide[side]) {
+                if (forceReloadVideo) window._vwPendingReload[side] = true;
+                return true;
+            }
+
+            // Falls genau dieser Track bereits sauber im DOM läuft -> NICHT neu zerstören/aufbauen!
+            if (existingDomVid && targetTrack && existingDomVid.getAttribute('data-loaded-vid') === String(targetTrack.id) && existingDomVid.getAttribute('src')) {
+                if (typeof window.applyWingVisualStylesLiveX === 'function') window.applyWingVisualStylesLiveX(side);
+                window.sanitizeVideoElementEventsX(side);
+                return true;
+            }
+
+            window._vwIsLoadingSide[side] = true;
+            window._vwPendingReload[side] = false;
+            const myGen = ++window._vwRenderGen[side];
+
+            clearTimeout(window['_retryCloudVidTimer_' + side]);
+            if (existingDomVid) window.killGhostVideoElX(existingDomVid);
+            if (window._vwActiveVideoInstances[side] && window._vwActiveVideoInstances[side] !== existingDomVid) {
+                window.killGhostVideoElX(window._vwActiveVideoInstances[side]);
+            }
+            window._vwActiveVideoInstances[side] = null;
+
+            let res = false;
+            try {
+                res = await _baseRenderSingleWingPro(side, true);
+            } finally {
+                window._vwIsLoadingSide[side] = false;
+            }
+
+            const activeVid = document.getElementById('x-vw-vid-' + side);
+            if (activeVid) {
+                activeVid._vwActiveGenX = myGen;
+                window._vwActiveVideoInstances[side] = activeVid;
+                window.sanitizeVideoElementEventsX(side);
+            }
+
+            // Falls während des Ladens ein Track-Wechsel angefordert wurde, jetzt sauber nachholen
+            if (window._vwPendingReload[side]) {
+                window._vwPendingReload[side] = false;
+                const freshCfg = window.getActiveVideoConfigForRenderX ? window.getActiveVideoConfigForRenderX() : null;
+                const freshPl = freshCfg && freshCfg[side] ? (Array.isArray(freshCfg[side].playlist) ? freshCfg[side].playlist : Object.values(freshCfg[side].playlist || {})) : [];
+                const freshTrack = freshPl[(st && st.idx) || 0] || null;
+                if (freshTrack && (!activeVid || activeVid.getAttribute('data-loaded-vid') !== String(freshTrack.id) || !activeVid.getAttribute('src'))) {
+                    return window.renderSingleVideoWingX(side, true);
+                }
+            }
+            return res;
+        };
+    }
+
+    window.vwStartSeekLockX = function(side, ev) {
+        if (ev) ev.stopPropagation();
+        if (window._vwSeekActiveLock[side]) return;
+        window._vwSeekActiveLock[side] = true;
+        window._vwIsSeeking[side] = true;
+        const vid = document.getElementById(side === 'extern' ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+        const st = window._vwRuntimeState && window._vwRuntimeState[side];
+        if (vid) {
+            window._vwSeekWasPlaying = window._vwSeekWasPlaying || {};
+            window._vwSeekWasPlaying[side] = !vid.paused && (!st || !st.isStopped);
+            vid.pause();
+        }
+        if (typeof window.vwWakeControlsX === 'function') window.vwWakeControlsX(side);
+    };
+
+    window.vwMoveSeekSliderX = function(side, pctVal, ev) {
+        if (ev) ev.stopPropagation();
+        window._vwIsSeeking[side] = true;
+        const vid = document.getElementById(side === 'extern' ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+        const curEl = document.getElementById('x-vw-cur-' + side);
+        if (vid && isFinite(vid.duration) && vid.duration > 0.5) {
+            const targetSec = (parseFloat(pctVal || 0) / 100) * vid.duration;
+            if (curEl) curEl.innerText = window.fmtVideoTimeX(targetSec);
+        }
+    };
+
+    window.vwEndSeekLockX = function(side, pctVal, ev) {
+        if (ev) ev.stopPropagation();
+        if (!window._vwSeekActiveLock[side] && !window._vwIsSeeking[side]) return;
+        window._vwSeekActiveLock[side] = false;
+        const vid = document.getElementById(side === 'extern' ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+        const st = window._vwRuntimeState && window._vwRuntimeState[side];
+        if (vid && isFinite(vid.duration) && vid.duration > 0.5 && pctVal !== undefined) {
+            const targetSec = (parseFloat(pctVal || 0) / 100) * vid.duration;
+            try { vid.currentTime = targetSec; } catch(e) {}
+            const curEl = document.getElementById('x-vw-cur-' + side);
+            if (curEl) curEl.innerText = window.fmtVideoTimeX(targetSec);
+            window._vwLastRenderedPct[side] = parseFloat(pctVal || 0);
+        }
+        clearTimeout(window['_vwSeekRelTimer_' + side]);
+        window['_vwSeekRelTimer_' + side] = setTimeout(function() {
+            window._vwIsSeeking[side] = false;
+            if (vid && window._vwSeekWasPlaying && window._vwSeekWasPlaying[side] && (!st || !st.isStopped)) {
+                vid.play().catch(function(){});
+            }
+            if (typeof window.vwWakeControlsX === 'function') window.vwWakeControlsX(side);
+        }, 120);
+    };
+
+    // Play/Pause ohne Auto-Ton & ohne Zittern
+    window.vwTogglePlayX = function(side, ev) {
+        if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+        const isExt = (side === 'extern');
+        const vid = document.getElementById(isExt ? 'x-ext-vid-el' : ('x-vw-vid-' + side));
+        const st = window._vwRuntimeState && window._vwRuntimeState[side];
+        const card = document.getElementById(isExt ? 'x-extern-video-player' : ('x-video-wing-' + side));
+        const pb = document.getElementById(isExt ? 'x-ext-play-btn' : ('x-vw-play-' + side));
+        if (!vid || !st) return;
+
+        if (vid.paused || st.isStopped) {
+            st.isStopped = false;
+            st.userPaused = false;
+            vid.muted = !!st.muted;
+            vid.play().then(function() {
+                if (card) card.classList.remove('is-video-paused');
+                if (pb) pb.innerHTML = '<i class="fas fa-pause"></i>';
+            }).catch(function() {
+                vid.muted = true;
+                st.muted = true;
+                vid.play().catch(function(){});
+            });
+        } else {
+            st.userPaused = true;
+            vid.pause();
+            if (card) card.classList.add('is-video-paused');
+            if (pb) pb.innerHTML = '<i class="fas fa-play"></i>';
+        }
+        if (typeof window.vwWakeControlsX === 'function') window.vwWakeControlsX(side);
+    };
+
+    window.sanitizeVideoElementEventsX = function(side) {
+        const isExt = (side === 'extern');
+        const vidId = isExt ? 'x-ext-vid-el' : ('x-vw-vid-' + side);
+        const vidEl = document.getElementById(vidId);
+        if (!vidEl) return;
+        const st = window._vwRuntimeState && window._vwRuntimeState[side];
+        const card = document.getElementById(isExt ? 'x-extern-video-player' : ('x-video-wing-' + side));
+
+        if (st && st.muted) {
+            vidEl.muted = true;
+            const mBtn = document.getElementById(isExt ? 'x-ext-mute-btn' : ('x-vw-mute-' + side));
+            const vSl = document.getElementById(isExt ? 'x-ext-vol-slider' : ('x-vw-vol-' + side));
+            if (mBtn) mBtn.innerHTML = '<i class="fas fa-volume-mute" style="color:var(--accent-red);"></i>';
+            if (vSl) vSl.value = 0;
+        }
+
+        let lastTick = 0;
+        const isStillCurrent = function() {
+            if (!vidEl.isConnected || vidEl._isDeadGhostX || vidEl !== document.getElementById(vidId)) {
+                window.killGhostVideoElX(vidEl);
+                return false;
+            }
+            return true;
+        };
+
+        vidEl.onloadedmetadata = function() {
+            if (!isStillCurrent()) return;
+            const totEl = document.getElementById('x-vw-tot-' + side);
+            if (totEl && isFinite(vidEl.duration) && vidEl.duration > 0) {
+                totEl.innerText = window.fmtVideoTimeX(vidEl.duration);
+            }
+        };
+        vidEl.ontimeupdate = function() {
+            if (!isStillCurrent()) return;
+            if (vidEl.paused || vidEl.seeking || window._vwIsSeeking[side] || window._vwSeekActiveLock[side]) return;
+            if (st && st.isStopped) { vidEl.pause(); return; }
+            const now = performance.now();
+            if (now - lastTick < 260) return;
+            lastTick = now;
+
+            const cur = isFinite(vidEl.currentTime) ? vidEl.currentTime : 0;
+            const dur = (isFinite(vidEl.duration) && vidEl.duration > 0.5) ? vidEl.duration : 0;
+            const curEl = document.getElementById('x-vw-cur-' + side);
+            const totEl = document.getElementById('x-vw-tot-' + side);
+            const seekEl = document.getElementById('x-vw-seek-' + side);
+
+            const curStr = window.fmtVideoTimeX(cur);
+            if (curEl && curEl.innerText !== curStr) curEl.innerText = curStr;
+            if (totEl && dur > 0) {
+                const totStr = window.fmtVideoTimeX(dur);
+                if (totEl.innerText !== totStr) totEl.innerText = totStr;
+            }
+            if (seekEl && dur > 0 && document.activeElement !== seekEl) {
+                const newPct = Math.min(100, Math.max(0, (cur / dur) * 100));
+                if (Math.abs(newPct - (window._vwLastRenderedPct[side] || 0)) >= 0.4) {
+                    window._vwLastRenderedPct[side] = newPct;
+                    seekEl.value = newPct.toFixed(1);
+                }
+            }
+        };
+        vidEl.onplay = function() {
+            if (!isStillCurrent()) return;
+            if (st && st.isStopped) { vidEl.pause(); return; }
+            if (st && st.muted) vidEl.muted = true;
+            if (card) card.classList.remove('is-video-paused');
+            const pb = document.getElementById(isExt ? 'x-ext-play-btn' : ('x-vw-play-' + side));
+            if (pb) pb.innerHTML = '<i class="fas fa-pause"></i>';
+        };
+        vidEl.onpause = function() {
+            if (!isStillCurrent()) return;
+            if (card) card.classList.add('is-video-paused');
+            const pb = document.getElementById(isExt ? 'x-ext-play-btn' : ('x-vw-play-' + side));
+            if (pb) pb.innerHTML = '<i class="fas fa-play"></i>';
+        };
+    };
+
+    // Alte DOM-Sortierung für Admin-User deaktivieren (wird durch Tab 3 Pro sauber gerendert)
+    window.fixAndSortAdminUsersVerticalAZX = function() {};
+
+    // =========================================================================
+    // TEIL B: ADMIN PANEL PRO — LIVE-DASHBOARD + ALLE 10 TABS AUFGEWERTET
+    // =========================================================================
+    const esc = function(s) { return window.escapeHTML ? window.escapeHTML(s) : String(s || ''); };
+
+    window.renderAdminProDashboardHeader = function() {
+        const body = document.querySelector('#adminModal .modal-body');
+        const tabs = document.querySelector('#adminModal .panel-tabs');
+        if (!body || !tabs) return;
+
+        let bar = document.getElementById('adm-pro-kpi-bar');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'adm-pro-kpi-bar';
+            bar.className = 'adm-pro-kpi-bar';
+            tabs.insertAdjacentElement('beforebegin', bar);
+        }
+
+        let totalWorks = (window.userPoemsDB || []).length;
+        if (window.DB) {
+            ['poems','quotes','marslar','persons','atasozleri','stories','jokes','saglik','bilmeceler','bulmacalar'].forEach(function(c) {
+                totalWorks += (window.DB[c] || []).length;
+            });
+        }
+        const users = Object.values(window.userDatabase || {});
+        const pending = users.filter(function(u) { return u && !u.approved && u.role !== 'admin'; }).length;
+        const online = users.filter(function(u) { return window.isUserLiveNow && window.isUserLiveNow(u); }).length || 1;
+        let totalComments = 0, totalHearts = 0;
+        Object.keys(window.poemDataStore || {}).forEach(function(pid) {
+            const st = window.getOmniStats ? window.getOmniStats(pid) : { comments: 0, hearts: 0 };
+            totalComments += (st.comments || 0);
+            totalHearts += (st.hearts || 0);
+        });
+
+        bar.innerHTML =
+            '<div class="adm-pro-kpi-box" onclick="window.admProJumpTab(\'a-edit\')"><small>📚 Eserler</small><strong style="color:var(--accent-gold);">' + totalWorks + '</strong></div>' +
+            '<div class="adm-pro-kpi-box" onclick="window.admProJumpTab(\'a-users\')"><small>👥 Üyeler</small><strong style="color:var(--accent-cyan);">' + users.length + '</strong></div>' +
+            '<div class="adm-pro-kpi-box" style="' + (pending > 0 ? 'border-color:#f59e0b;' : '') + '" onclick="window._admUserFilter=\'pending\'; window.admProJumpTab(\'a-users\')"><small>⏳ Onay Bekl.</small><strong style="color:' + (pending > 0 ? '#f59e0b' : 'var(--accent-green)') + ';">' + pending + '</strong></div>' +
+            '<div class="adm-pro-kpi-box" onclick="window._admUserFilter=\'online\'; window.admProJumpTab(\'a-users\')"><small>🟢 Canlı</small><strong style="color:var(--accent-green);">' + online + '</strong></div>' +
+            '<div class="adm-pro-kpi-box" onclick="window.admProJumpTab(\'a-comments\')"><small>💬 Yorum</small><strong style="color:#c084fc;">' + totalComments + '</strong></div>' +
+            '<div class="adm-pro-kpi-box" onclick="window.admProJumpTab(\'a-logs\')"><small>❤️ Beğeni</small><strong style="color:var(--accent-red);">' + totalHearts + '</strong></div>';
+    };
+
+    window.admProJumpTab = function(tabId) {
+        const btn = document.querySelector('#adminModal .ptab-btn[onclick*="' + tabId + '"]');
+        if (typeof window.openTab === 'function') window.openTab('adminGrp', tabId, btn);
+        if (tabId === 'a-edit') window.adminLoadEditList();
+        if (tabId === 'a-users') window.renderOnlineUsers();
+        if (tabId === 'a-comments') window.renderAdminComments();
+        if (tabId === 'a-logs') window.renderAdminLogs();
+        if (tabId === 'a-ticker') window.renderAdminTickerList();
+    };
+
+    // --- TAB 1 (a-add): LIVE-ZÄHLER, SCHNELL-AUTOREN & KARTEN-VORSCHAU ---
+    window.enhanceAdminAddTabPro = function() {
+        const panel = document.querySelector('#a-add .theme-sub-panel');
+        if (!panel || document.getElementById('adm-pro-add-bar')) return;
+
+        const bar = document.createElement('div');
+        bar.id = 'adm-pro-add-bar';
+        bar.className = 'adm-pro-toolbar';
+        bar.innerHTML =
+            '<span style="font-size:0.66rem; color:var(--accent-gold); font-weight:800;">⚡ Hızlı Yazar:</span>' +
+            ['Şair Misal.i', 'Türk Atasözü', 'Nasreddin Hoca', 'Kıssadan Hisse', 'Sağlık Rehberi'].map(function(a) {
+                return '<button type="button" class="adm-pro-chip" onclick="document.getElementById(\'adm-author\').value=\'' + a + '\'; window.updateAdmAddLivePreview();">' + a + '</button>';
+            }).join('') +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="let t=document.getElementById(\'adm-text\'); if(t){ t.value += (t.value?\'\\n\':\'\') + \'Cevap: \'; t.focus(); window.updateAdmAddLivePreview(); }">+ Cevap Satırı</button>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-red);color:var(--accent-red);margin-left:auto;" onclick="[\'adm-title\',\'adm-author\',\'adm-text\',\'adm-audio-disp\',\'adm-audio-hidden\'].forEach(function(k){let e=document.getElementById(k);if(e)e.value=\'\';}); window.updateAdmAddLivePreview();">Temizle</button>';
+        panel.insertBefore(bar, panel.firstChild);
+
+        const prev = document.createElement('div');
+        prev.id = 'adm-pro-add-preview';
+        prev.className = 'adm-pro-preview-box';
+        prev.innerHTML =
+            '<div style="display:flex; justify-content:space-between; font-size:0.64rem; color:var(--accent-cyan); font-family:\'Space Mono\',monospace; margin-bottom:6px;">' +
+                '<span>👁️ Canlı Kart Önizleme</span>' +
+                '<span id="adm-pro-add-stats">0 Mısra • 0 Kelime • 0 Hece</span>' +
+            '</div>' +
+            '<div id="adm-pro-prev-em" style="font-size:1.5rem;">✨</div>' +
+            '<div id="adm-pro-prev-t" style="font-family:\'Playfair Display\',serif; font-weight:700; color:var(--accent-gold); font-size:0.95rem;">Eser Başlığı</div>' +
+            '<div id="adm-pro-prev-b" style="font-size:0.74rem; color:var(--text-sub); margin:4px 0; white-space:pre-wrap; max-height:70px; overflow:hidden;">İçerik önizlemesi burada görünür...</div>' +
+            '<div id="adm-pro-prev-a" class="sig-misali" style="font-size:1.15rem !important;">~ Şair Misal.i</div>';
+
+        const addBtn = panel.querySelector('button[onclick*="adminSaveNew"]');
+        if (addBtn) addBtn.insertAdjacentElement('beforebegin', prev);
+        else panel.appendChild(prev);
+
+        ['adm-title', 'adm-author', 'adm-emoji', 'adm-text', 'adm-cat'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', window.updateAdmAddLivePreview);
+        });
+        window.updateAdmAddLivePreview();
+    };
+
+    window.updateAdmAddLivePreview = function() {
+        const t = document.getElementById('adm-title')?.value.trim() || 'Eser Başlığı';
+        const a = document.getElementById('adm-author')?.value.trim() || 'Şair Misal.i';
+        const e = document.getElementById('adm-emoji')?.value.trim() || '✨';
+        const b = document.getElementById('adm-text')?.value || '';
+        const lines = b.split('\n').filter(function(l) { return l.trim().length > 0; }).length;
+        const words = b.trim() ? b.trim().split(/\s+/).length : 0;
+        const syls = (b.match(/[aeıioöuüAEIİOÖUÜâîûÂÎÛ]/g) || []).length;
+
+        const elEm = document.getElementById('adm-pro-prev-em'); if (elEm) elEm.innerText = e;
+        const elT = document.getElementById('adm-pro-prev-t'); if (elT) elT.innerText = t;
+        const elB = document.getElementById('adm-pro-prev-b'); if (elB) elB.innerText = b.trim() ? b.trim().slice(0, 140) : 'İçerik önizlemesi burada görünür...';
+        const elA = document.getElementById('adm-pro-prev-a'); if (elA) elA.innerText = '~ ' + a;
+        const elSt = document.getElementById('adm-pro-add-stats'); if (elSt) elSt.innerText = lines + ' Satır • ' + words + ' Kelime • ' + syls + ' Hece';
+    };
+
+    // --- TAB 2 (a-edit): SUCHFELD, KATEGORIE-ZÄHLER, STATS, KLONEN & DIREKT-LÖSCHEN ---
+    window.enhanceAdminEditTabPro = function() {
+        const panel = document.querySelector('#a-edit .theme-sub-panel');
+        const sel = document.getElementById('adm-edit-sel');
+        if (!panel || !sel) return;
+
+        if (!document.getElementById('adm-pro-edit-search')) {
+            const searchInp = document.createElement('input');
+            searchInp.type = 'text';
+            searchInp.id = 'adm-pro-edit-search';
+            searchInp.className = 'inp';
+            searchInp.placeholder = '🔍 Kategori içinde başlık veya metin ara...';
+            searchInp.oninput = function() { window.adminLoadEditList(this.value); };
+            sel.insertAdjacentElement('beforebegin', searchInp);
+        }
+
+        const fields = document.getElementById('adm-edit-fields');
+        if (fields && !document.getElementById('adm-pro-edit-item-bar')) {
+            const iBar = document.createElement('div');
+            iBar.id = 'adm-pro-edit-item-bar';
+            iBar.className = 'adm-pro-toolbar';
+            iBar.innerHTML =
+                '<span id="adm-pro-edit-item-stats" style="font-size:0.66rem; font-family:\'Space Mono\',monospace; color:var(--accent-cyan); flex:1;"></span>' +
+                '<button type="button" class="adm-pro-chip" onclick="window.admProPreviewEditedItem()">👁️ Kartı Aç</button>' +
+                '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="window.admProDuplicateEditedItem()">📑 Çoğalt</button>' +
+                '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-red);color:var(--accent-red);" onclick="let id=document.getElementById(\'adm-edit-sel\').value; let cat=document.getElementById(\'adm-edit-cat\').value; if(id) window.deleteAnyItem(id, cat);">🗑️ Sil</button>';
+            fields.insertBefore(iBar, fields.firstChild);
+        }
+    };
+
+    const _origAdminLoadEditList = window.adminLoadEditList;
+    window.adminLoadEditList = function(filterQ) {
+        window.enhanceAdminEditTabPro();
+        const cat = document.getElementById('adm-edit-cat')?.value || 'poems';
+        const sel = document.getElementById('adm-edit-sel');
+        if (!sel) return;
+        const q = (filterQ !== undefined ? filterQ : (document.getElementById('adm-pro-edit-search')?.value || '')).trim().toLowerCase();
+        const source = (cat === 'userPoems' ? window.userPoemsDB : (window.DB && window.DB[cat])) || [];
+        const filtered = !q ? source : source.filter(function(item) {
+            return item && ((item.title || item.trTitle || '') + ' ' + (item.text || item.quote || '') + ' ' + (item.author || '')).toLowerCase().includes(q);
+        });
+        sel.innerHTML = '<option value="">-- Eser Seçin (' + filtered.length + ' / ' + source.length + ') --</option>' +
+            filtered.map(function(item) {
+                return '<option value="' + item.id + '">' + esc(item.title || item.trTitle || 'Eser') + (item.hasAudio || item.audio ? ' 🎵' : '') + '</option>';
+            }).join('');
+        const fields = document.getElementById('adm-edit-fields');
+        if (fields) fields.style.display = 'none';
+    };
+
+    const _origAdminSelectEdit = window.adminSelectEditItem;
+    window.adminSelectEditItem = function() {
+        if (typeof _origAdminSelectEdit === 'function') _origAdminSelectEdit();
+        window.enhanceAdminEditTabPro();
+        const id = document.getElementById('adm-edit-sel')?.value;
+        const stEl = document.getElementById('adm-pro-edit-item-stats');
+        if (id && stEl && typeof window.getOmniStats === 'function') {
+            const s = window.getOmniStats(id);
+            stEl.innerText = '👁️ ' + s.views + ' • ❤️ ' + s.hearts + ' • 🌹 ' + s.roses + ' • 🎵 ' + s.audioSum + ' • 💬 ' + s.comments;
+        }
+    };
+
+    window.admProPreviewEditedItem = function() {
+        const id = document.getElementById('adm-edit-sel')?.value;
+        const cat = document.getElementById('adm-edit-cat')?.value || 'poems';
+        if (id) { window.closeTopModal(); setTimeout(function() { window.openReadModal(id, cat); }, 250); }
+    };
+
+    window.admProDuplicateEditedItem = function() {
+        const id = document.getElementById('adm-edit-sel')?.value;
+        const cat = document.getElementById('adm-edit-cat')?.value || 'poems';
+        const src = cat === 'userPoems' ? window.userPoemsDB : (window.DB && window.DB[cat]);
+        const orig = (src || []).find(function(x) { return String(x.id) === String(id); });
+        if (!orig) return;
+        const copy = Object.assign({}, orig, { id: 'item_' + Date.now(), title: (orig.title || 'Eser') + ' (Kopya)', timestamp: Date.now() });
+        src.unshift(copy);
+        if (cat === 'userPoems') { localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); try { firebase.database().ref('userPoemsDB').set(window.userPoemsDB); } catch(e){} }
+        else { localStorage.setItem('misaliFullDB', JSON.stringify(window.DB)); try { firebase.database().ref('contentDB').set(window.DB); } catch(e){} }
+        window.adminLoadEditList();
+        window.renderAllContent();
+        window.toast('📑 Eser başarıyla çoğaltıldı!', '✅');
+    };
+
+    // --- TAB 3 (a-users): SUCHE, FILTER, ALLE GENEHMIGEN & SAUBERE ÜYE-KARTEN ---
+    window._admUserFilter = 'all';
+    window._admUserSearch = '';
+
+    window.approveAllPendingUsersPro = function() {
+        let count = 0;
+        Object.keys(window.userDatabase || {}).forEach(function(k) {
+            const u = window.userDatabase[k];
+            if (u && !u.approved && u.role !== 'admin') {
+                u.approved = true;
+                u.updatedAt = Date.now();
+                count++;
+                try { firebase.database().ref('users/' + k).update({ approved: true, updatedAt: Date.now() }); } catch(e){}
+                if (typeof window.notifyUser === 'function') window.notifyUser(u.username || k, '✅ Üyeliğiniz Admin tarafından onaylandı!');
+            }
+        });
+        if (count > 0) {
+            localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase));
+            window.renderOnlineUsers();
+            window.renderAdminProDashboardHeader();
+            window.toast('✅ ' + count + ' bekleyen üye topluca onaylandı!', '👑');
+        }
+    };
+
+    window.renderOnlineUsers = function() {
+        if (typeof window.deduplicateUsersDB === 'function') window.deduplicateUsersDB();
+        const box = document.getElementById('adm-users-box');
+        if (!box) return;
+
+        const allUsers = Object.values(window.userDatabase || {}).filter(Boolean);
+        const pendingCnt = allUsers.filter(function(u) { return !u.approved && u.role !== 'admin'; }).length;
+        const onlineCnt = allUsers.filter(function(u) { return window.isUserLiveNow && window.isUserLiveNow(u); }).length;
+        const bannedCnt = allUsers.filter(function(u) { return !!u.banned; }).length;
+
+        const q = (window._admUserSearch || '').trim().toLowerCase();
+        const flt = window._admUserFilter || 'all';
+
+        let filtered = allUsers.filter(function(u) {
+            if (flt === 'online' && !(window.isUserLiveNow && window.isUserLiveNow(u))) return false;
+            if (flt === 'pending' && (u.approved || u.role === 'admin')) return false;
+            if (flt === 'banned' && !u.banned) return false;
+            if (q) {
+                const hay = ((u.name || '') + ' ' + (u.username || '') + ' ' + (u.email || '')).toLowerCase();
+                if (!hay.includes(q)) return false;
+            }
+            return true;
+        });
+
+        filtered.sort(function(a, b) {
+            const aAdm = window.isUserTrueAdmin && window.isUserTrueAdmin(a);
+            const bAdm = window.isUserTrueAdmin && window.isUserTrueAdmin(b);
+            if (aAdm && !bAdm) return -1;
+            if (bAdm && !aAdm) return 1;
+            if (flt === 'score') return (parseInt(b.score || 0, 10)) - (parseInt(a.score || 0, 10));
+            return String(a.name || a.username || '').localeCompare(String(b.name || b.username || ''), 'tr');
+        });
+
+        const toolbarHtml =
+            '<div class="adm-pro-toolbar" style="flex-direction:column; align-items:stretch;">' +
+                '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+                    '<input type="text" id="adm-pro-user-search" class="inp" value="' + esc(window._admUserSearch) + '" placeholder="🔍 Üye adı, @kullanıcı veya e-posta ara..." style="margin:0; flex:1; min-width:170px; font-size:0.78rem;" oninput="window._admUserSearch=this.value; window.renderOnlineUsers(); setTimeout(function(){let i=document.getElementById(\'adm-pro-user-search\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},0);">' +
+                    (pendingCnt > 0 ? '<button type="button" class="noble-btn primary" style="width:auto; padding:6px 12px; font-size:0.72rem;" onclick="window.approveAllPendingUsersPro()">✅ Tümünü Onayla (' + pendingCnt + ')</button>' : '') +
+                '</div>' +
+                '<div style="display:flex; gap:5px; flex-wrap:wrap;">' +
+                    '<button type="button" class="adm-pro-chip ' + (flt==='all'?'active':'') + '" onclick="window._admUserFilter=\'all\'; window.renderOnlineUsers();">Tümü (' + allUsers.length + ')</button>' +
+                    '<button type="button" class="adm-pro-chip ' + (flt==='online'?'active':'') + '" onclick="window._admUserFilter=\'online\'; window.renderOnlineUsers();">🟢 Online (' + onlineCnt + ')</button>' +
+                    '<button type="button" class="adm-pro-chip ' + (flt==='pending'?'active':'') + '" onclick="window._admUserFilter=\'pending\'; window.renderOnlineUsers();">⏳ Onay Bekl. (' + pendingCnt + ')</button>' +
+                    '<button type="button" class="adm-pro-chip ' + (flt==='banned'?'active':'') + '" onclick="window._admUserFilter=\'banned\'; window.renderOnlineUsers();">🚫 Engelli (' + bannedCnt + ')</button>' +
+                    '<button type="button" class="adm-pro-chip ' + (flt==='score'?'active':'') + '" onclick="window._admUserFilter=\'score\'; window.renderOnlineUsers();">🏆 Puana Göre</button>' +
+                '</div>' +
+            '</div>';
+
+        const cardsHtml = filtered.length === 0
+            ? '<div style="text-align:center; padding:24px; color:var(--text-sub); font-size:0.8rem;">Bu filtreye uyan üye bulunamadı.</div>'
+            : filtered.map(function(u) {
+                const isFounder = window.isUserTrueAdmin && window.isUserTrueAdmin(u);
+                const isBanned = !!u.banned;
+                const isApproved = !!u.approved || isFounder;
+                const zInfo = window.calculateUserZodiacSign ? window.calculateUserZodiacSign(u) : { e: '✨', key: '' };
+                const liveBadge = window.getUserLiveBadgeHTML ? window.getUserLiveBadgeHTML(u) : '';
+                const rankObj = window.getPoetRankTitle ? window.getPoetRankTitle(parseInt(u.score || 0, 10), 3, 3, 3, false, u) : { key: 'Üye' };
+                const safeU = String(u.username || '').replace(/'/g, "\\'");
+
+                return '<div class="adm-pro-user-card ' + (isFounder ? 'is-founder' : (isBanned ? 'is-banned' : (!isApproved ? 'is-pending' : ''))) + '">' +
+                    '<div class="adm-pro-user-top">' +
+                        '<div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap; cursor:pointer;" onclick="window.openUserInspectorModal(\'' + safeU + '\')">' +
+                            '<span style="font-size:1.25rem;">' + (u.emoji || '👤') + '</span>' +
+                            '<strong style="color:var(--text-main); font-size:0.86rem;">' + esc(u.name || u.username) + '</strong>' +
+                            '<small style="color:var(--accent-cyan); font-family:\'Space Mono\',monospace; font-size:0.66rem;">@' + esc(u.username) + '</small>' +
+                            liveBadge +
+                            (!isApproved ? '<span class="clean-badge" style="border-color:#f59e0b;color:#f59e0b;font-size:0.56rem;">⏳ ONAY BEKLİYOR</span>' : '') +
+                            (isBanned ? '<span class="clean-badge" style="border-color:var(--accent-red);color:var(--accent-red);font-size:0.56rem;">🚫 ENGELLİ</span>' : '') +
+                        '</div>' +
+                        '<span class="league-score-pill" style="font-size:0.68rem !important; padding:2px 8px !important;">🏆 ' + (parseInt(u.score || 0, 10)) + ' P</span>' +
+                    '</div>' +
+                    '<div class="adm-pro-user-meta">' +
+                        '<span>🏅 ' + esc(rankObj.key || rankObj.title) + '</span>' +
+                        '<span>• ' + zInfo.e + ' ' + esc(zInfo.key) + '</span>' +
+                        '<span>• 🎮 ' + (u.gamesWon || 0) + '/' + (u.gamesPlayed || 0) + '</span>' +
+                        (u.email ? '<span>• ✉️ ' + esc(u.email) + '</span>' : '') +
+                    '</div>' +
+                    '<div class="adm-pro-user-btns">' +
+                        (!isApproved ? '<button type="button" style="border-color:var(--accent-green);color:var(--accent-green);" onclick="window.approveUser(\'' + safeU + '\'); window.renderAdminProDashboardHeader();"><i class="fas fa-user-check"></i> Onayla</button>' : '') +
+                        '<button type="button" onclick="window.openUserInspectorModal(\'' + safeU + '\')"><i class="fas fa-user-edit" style="color:var(--accent-cyan);"></i> Düzenle</button>' +
+                        '<button type="button" onclick="window.editUserScore(\'' + safeU + '\')"><i class="fas fa-star" style="color:var(--accent-gold);"></i> Puan</button>' +
+                        '<button type="button" onclick="window.adminSendMessage(\'' + safeU + '\')"><i class="fas fa-envelope" style="color:var(--accent-cyan);"></i> Mesaj</button>' +
+                        (!isFounder ? '<button type="button" onclick="window.toggleUserBan(\'' + safeU + '\')"><i class="fas ' + (isBanned ? 'fa-lock-open' : 'fa-ban') + '" style="color:#f59e0b;"></i> ' + (isBanned ? 'Aç' : 'Engelle') + '</button>' : '') +
+                        (!isFounder ? '<button type="button" style="border-color:var(--accent-red);color:var(--accent-red);" onclick="window.deleteUser(\'' + safeU + '\')"><i class="fas fa-trash"></i> Sil</button>' : '') +
+                    '</div>' +
+                '</div>';
+            }).join('');
+
+        box.innerHTML = toolbarHtml + cardsHtml;
+    };
+
+    // --- TAB 4 (a-settings): VISUELLE THEME-KACHELN, LIVE-SIGNATUR-VORSCHAU & GLOBAL-PUSH ---
+    window.enhanceAdminSettingsTabPro = function() {
+        const panel = document.querySelector('#a-settings .theme-sub-panel');
+        if (!panel || document.getElementById('adm-pro-theme-grid')) return;
+
+        const themes = [
+            ['dark','🌑 Dark'],['light','☀️ Light'],['ocean','🌊 Ocean'],['sunset','🌅 Sunset'],['forest','🌲 Forest'],
+            ['cherry','🍒 Cherry'],['midnight','🌌 Midnight'],['cyberpunk','⚡ Cyber'],['royal','👑 Royal'],['emerald','🌿 Emerald'],
+            ['coffee','☕ Coffee'],['neon','💜 Neon'],['lavender','🪻 Lavender'],['slate','🪨 Slate'],['autumn','🍂 Autumn']
+        ];
+        const curTh = document.documentElement.getAttribute('data-theme') || 'dark';
+        const grid = document.createElement('div');
+        grid.id = 'adm-pro-theme-grid';
+        grid.className = 'adm-pro-theme-grid';
+        grid.innerHTML = themes.map(function(t) {
+            return '<div class="adm-pro-theme-tile ' + (curTh === t[0] ? 'active' : '') + '" onclick="document.getElementById(\'adm-theme-sel\').value=\'' + t[0] + '\'; document.documentElement.setAttribute(\'data-theme\',\'' + t[0] + '\'); localStorage.setItem(\'global_theme_set\',\'' + t[0] + '\'); document.querySelectorAll(\'.adm-pro-theme-tile\').forEach(function(x){x.classList.remove(\'active\');}); this.classList.add(\'active\'); window.toast(\'Tema: ' + t[1] + '\', \'🎨\');">' + t[1] + '</div>';
+        }).join('');
+        const firstH3 = panel.querySelector('h3');
+        if (firstH3) firstH3.insertAdjacentElement('afterend', grid);
+
+        const extraTools = document.createElement('div');
+        extraTools.className = 'adm-pro-toolbar';
+        extraTools.style.marginTop = '12px';
+        extraTools.innerHTML =
+            '<span style="font-size:0.68rem; color:var(--accent-gold); font-weight:800; width:100%;">⚡ Hızlı Yönetim Araçları:</span>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-gold);color:var(--accent-gold);" onclick="if(window.pushThemesToAllUsersGlobalX) window.pushThemesToAllUsersGlobalX();">🌍 Görünümleri Tüm Üyelere Yayınla</button>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="localStorage.removeItem(\'misali_guest_reads_v1\'); window.toast(\'Misafir 3 eser önizleme sayacı sıfırlandı.\', \'🔄\');">🔄 Misafir Test Sayacını Sıfırla</button>';
+        panel.appendChild(extraTools);
+    };
+
+    // --- TAB 5 (a-radio): LIVE-DECK, 4 DJ-PRESETS & PLAYLIST-SORTIERUNG ---
+    window.enhanceAdminRadioTabPro = function() {
+        const panel = document.querySelector('#a-radio .theme-sub-panel');
+        if (!panel || document.getElementById('adm-pro-radio-deck')) return;
+
+        const deck = document.createElement('div');
+        deck.id = 'adm-pro-radio-deck';
+        deck.className = 'adm-pro-toolbar';
+        deck.innerHTML =
+            '<span style="font-size:0.68rem; color:var(--accent-cyan); font-weight:800; width:100%;">🎛️ Canlı Radyo Stüdyo Kontrolü & Hazır DJ Presetleri:</span>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-green);color:var(--accent-green);" onclick="window.bgmToggle()">⏯️ Oynat / Duraklat</button>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-red);color:var(--accent-red);" onclick="window.bgmStop()">⏹️ Durdur</button>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="if(window.executeRadioMixTransition) window.executeRadioMixTransition();">⏭️ Mix Geçiş</button>' +
+            '<button type="button" class="adm-pro-chip" onclick="window.applyRadioPresetPro(\'dj\',2,30)">⚡ Club Mix</button>' +
+            '<button type="button" class="adm-pro-chip" onclick="window.applyRadioPresetPro(\'crossfade\',4,60)">✨ Şiir Mix</button>' +
+            '<button type="button" class="adm-pro-chip" onclick="window.applyRadioPresetPro(\'cinema\',10,0)">🎬 Sinematik Tam</button>';
+        const h3 = panel.querySelector('h3');
+        if (h3) h3.insertAdjacentElement('afterend', deck);
+    };
+
+    window.applyRadioPresetPro = function(type, fadeSec, playLimit) {
+        const t = document.getElementById('adm-bgm-transition'); if (t) t.value = type;
+        const f = document.getElementById('adm-bgm-fade-sec'); if (f) f.value = String(fadeSec);
+        const l = document.getElementById('adm-bgm-play-limit'); if (l) l.value = String(playLimit);
+        window.toast('🎛️ Preset uygulandı! Kaydetmek için "Yayına Al" butonuna basın.', '📻');
+    };
+
+    window.moveRadioSongOrderPro = function(idx, dir) {
+        const list = window.radioSettings && window.radioSettings.playlist;
+        if (!list) return;
+        const target = idx + dir;
+        if (target < 0 || target >= list.length) return;
+        const tmp = list[idx]; list[idx] = list[target]; list[target] = tmp;
+        localStorage.setItem('misaliRadioSettings', JSON.stringify(window.radioSettings));
+        try { firebase.database().ref('radioSettings').set(window.radioSettings); } catch(e){}
+        window.renderRadioPlaylist();
+    };
+
+    const _origRenderRadioPlaylist = window.renderRadioPlaylist;
+    window.renderRadioPlaylist = function() {
+        if (typeof _origRenderRadioPlaylist === 'function') _origRenderRadioPlaylist();
+        window.enhanceAdminRadioTabPro();
+        const listEl = document.getElementById('adm-radio-playlist');
+        if (!listEl) return;
+        Array.from(listEl.children).forEach(function(row, idx) {
+            const btnWrap = row.querySelector('div:last-child');
+            if (btnWrap && !btnWrap.querySelector('.rad-mv-btn')) {
+                btnWrap.insertAdjacentHTML('afterbegin',
+                    '<button class="rad-mv-btn" onclick="window.moveRadioSongOrderPro(' + idx + ',-1)" style="background:rgba(255,255,255,0.06);border:1px solid var(--border-soft);color:var(--text-sub);border-radius:6px;padding:4px 6px;cursor:pointer;" title="Yukarı">↑</button>' +
+                    '<button class="rad-mv-btn" onclick="window.moveRadioSongOrderPro(' + idx + ',1)" style="background:rgba(255,255,255,0.06);border:1px solid var(--border-soft);color:var(--text-sub);border-radius:6px;padding:4px 6px;cursor:pointer;" title="Aşağı">↓</button>'
+                );
+            }
+        });
+    };
+
+    // --- TAB 6 (a-migration): SPEICHER-MONITOR + JSON BACKUP & RESTORE ---
+    window.enhanceAdminMigrationTabPro = function() {
+        const panel = document.querySelector('#a-migration .theme-sub-panel');
+        if (!panel) return;
+        let box = document.getElementById('adm-pro-backup-box');
+        if (!box) {
+            box = document.createElement('div');
+            box.id = 'adm-pro-backup-box';
+            box.style.marginTop = '14px';
+            panel.appendChild(box);
+        }
+        let lsBytes = 0;
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                lsBytes += (k.length + (localStorage.getItem(k) || '').length) * 2;
+            }
+        } catch(e){}
+        const lsKB = (lsBytes / 1024).toFixed(1);
+        const totalPoems = (window.DB?.poems?.length || 0) + (window.DB?.quotes?.length || 0);
+        const totalUserP = (window.userPoemsDB || []).length;
+        const totalUsers = Object.keys(window.userDatabase || {}).length;
+
+        box.innerHTML =
+            '<div class="adm-pro-health-grid">' +
+                '<div class="adm-pro-kpi-box"><small>💾 Yerel Hafıza</small><strong style="color:var(--accent-cyan);">' + lsKB + ' KB</strong></div>' +
+                '<div class="adm-pro-kpi-box"><small>🪶 Şiir & Söz</small><strong style="color:var(--accent-gold);">' + totalPoems + '</strong></div>' +
+                '<div class="adm-pro-kpi-box"><small>👥 Üye / Eser</small><strong style="color:var(--accent-green);">' + totalUsers + ' / ' + totalUserP + '</strong></div>' +
+            '</div>' +
+            '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:8px;">' +
+                '<button type="button" class="noble-btn" style="border-color:var(--accent-gold); color:var(--accent-gold);" onclick="window.downloadFullBackupJSONPro()"><i class="fas fa-download"></i> Tam Yedek İndir (.json)</button>' +
+                '<label class="noble-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan); cursor:pointer; margin:0;"><i class="fas fa-upload"></i> Yedekten Geri Yükle<input type="file" accept=".json" style="display:none;" onchange="window.restoreFullBackupJSONPro(this)"></label>' +
+            '</div>';
+    };
+
+    window.downloadFullBackupJSONPro = function() {
+        const payload = {
+            exportedAt: new Date().toISOString(),
+            contentDB: window.DB,
+            userPoemsDB: window.userPoemsDB,
+            users: window.userDatabase,
+            interactions: window.poemDataStore,
+            audioRatings: window.audioRatingsDB,
+            profileDB: window.profileDB,
+            tickerDB: window.tickerDB,
+            radioSettings: window.radioSettings
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'Sair_Misali_Yedek_' + new Date().toISOString().slice(0, 10) + '.json';
+        a.click();
+        window.toast('📥 Tam sistem yedeği indirildi!', '💾');
+    };
+
+    window.restoreFullBackupJSONPro = function(input) {
+        if (!input.files || !input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data || !data.contentDB) return window.toast('Geçersiz yedek dosyası!', '❌');
+                window.openBeautifulConfirm('Yedek dosyasındaki veriler mevcut verilerin üzerine yazılsın mı?', function() {
+                    if (data.contentDB) { window.DB = data.contentDB; localStorage.setItem('misaliFullDB', JSON.stringify(window.DB)); }
+                    if (data.userPoemsDB) { window.userPoemsDB = data.userPoemsDB; localStorage.setItem('misaliUserPoems', JSON.stringify(window.userPoemsDB)); }
+                    if (data.users) { window.userDatabase = data.users; localStorage.setItem('misaliUsersDB', JSON.stringify(window.userDatabase)); }
+                    if (data.interactions) { window.poemDataStore = data.interactions; localStorage.setItem('misaliHeartsDB', JSON.stringify(window.poemDataStore)); }
+                    if (data.tickerDB) { window.tickerDB = data.tickerDB; localStorage.setItem('misaliTickerDB_v3', JSON.stringify(window.tickerDB)); }
+                    window.renderAllContent();
+                    window.renderOnlineUsers();
+                    window.updateLiveTickers(true);
+                    window.toast('✅ Yedek başarıyla geri yüklendi! Buluta yazmak için Senkronize Et butonuna basın.', '☁️');
+                });
+            } catch(err) { window.toast('JSON okuma hatası!', '❌'); }
+        };
+        reader.readAsText(input.files[0]);
+        input.value = '';
+    };
+
+    // --- TAB 7 (a-logs): SUCHE & TXT-EXPORT ---
+    window.enhanceAdminLogsTabPro = function() {
+        const panel = document.querySelector('#a-logs .theme-sub-panel');
+        const box = document.getElementById('adm-logs-box-panel');
+        if (!panel || !box || document.getElementById('adm-pro-logs-bar')) return;
+
+        const bar = document.createElement('div');
+        bar.id = 'adm-pro-logs-bar';
+        bar.className = 'adm-pro-toolbar';
+        bar.innerHTML =
+            '<input type="text" id="adm-pro-logs-search" class="inp" placeholder="🔍 Raporlarda üye veya eser ara..." style="margin:0; flex:1; min-width:160px; font-size:0.76rem;" oninput="window.filterAdminLogsPanelPro(this.value)">' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="window.exportAdminLogsTxtPro()">📄 Raporu İndir (.txt)</button>';
+        box.insertAdjacentElement('beforebegin', bar);
+    };
+
+    window.filterAdminLogsPanelPro = function(q) {
+        const norm = (q || '').trim().toLowerCase();
+        document.querySelectorAll('#adm-logs-box-panel .misali-inbox-card').forEach(function(card) {
+            card.style.display = (!norm || card.innerText.toLowerCase().includes(norm)) ? 'flex' : 'none';
+        });
+    };
+
+    window.exportAdminLogsTxtPro = function() {
+        const logs = window.getActiveInboxArray ? window.getActiveInboxArray() : (window.adminLogs || []);
+        const txt = logs.map(function(l, i) {
+            return (i + 1) + '. [' + (l.time || '') + '] ' + String(l.msg || '').replace(/<[^>]*>?/gm, '');
+        }).join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([txt || 'Rapor boş.'], { type: 'text/plain;charset=utf-8' }));
+        a.download = 'Sair_Misali_Raporlar_' + new Date().toISOString().slice(0, 10) + '.txt';
+        a.click();
+        window.toast('📄 Raporlar .txt olarak indirildi!', '✅');
+    };
+
+    // --- TAB 8 (a-info): 4 DUYURU-VORLAGEN + LIVE-TEST-BUTTONS ---
+    window.enhanceAdminInfoTabPro = function() {
+        const panels = document.querySelectorAll('#a-info .theme-sub-panel');
+        if (panels.length < 2 || document.getElementById('adm-pro-ann-templates')) return;
+
+        const tpls = document.createElement('div');
+        tpls.id = 'adm-pro-ann-templates';
+        tpls.className = 'adm-pro-toolbar';
+        tpls.innerHTML =
+            '<span style="font-size:0.66rem; color:var(--accent-cyan); font-weight:800; width:100%;">⚡ Hazır Duyuru Şablonları & Canlı Test:</span>' +
+            '<button type="button" class="adm-pro-chip" onclick="window.applyAnnTemplatePro(\'poem\')">🪶 Yeni Şiir</button>' +
+            '<button type="button" class="adm-pro-chip" onclick="window.applyAnnTemplatePro(\'contest\')">👑 Şiir Meydanı</button>' +
+            '<button type="button" class="adm-pro-chip" onclick="window.applyAnnTemplatePro(\'radio\')">📻 Radyo Yayını</button>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-gold);color:var(--accent-gold);" onclick="window.toggleInfoPopup()">👁️ Bilgi Test</button>' +
+            '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="window.toggleAnnouncementPopup()">👁️ Duyuru Test</button>';
+        const annH3 = panels[1].querySelector('h3');
+        if (annH3) annH3.insertAdjacentElement('afterend', tpls);
+    };
+
+    window.applyAnnTemplatePro = function(key) {
+        const map = {
+            poem: '<div style="background:rgba(212,175,55,0.15); border-left:4px solid var(--accent-gold); padding:10px; border-radius:6px;">🪶 <b>YENİ ŞİİR YAYINDA!</b><br>Şiirlerim bölümüne yeni sesli eserimiz eklendi. Keyifli okumalar dileriz!</div>',
+            contest: '<div style="background:rgba(244,63,94,0.14); border-left:4px solid #f43f5e; padding:10px; border-radius:6px;">👑 <b>HAFTANIN ŞİİR MEYDANI BAŞLADI!</b><br>Üst menüden Şiir Meydanı\'na katılın, +15 Puan kazanın!</div>',
+            radio: '<div style="background:rgba(0,206,209,0.14); border-left:4px solid var(--accent-cyan); padding:10px; border-radius:6px;">📻 <b>MİSAL.İ RADYO YENİLENDİ!</b><br>Yeni eserlerimizle 7/24 huzurlu şiir ve müzik yayını aktif.</div>'
+        };
+        const inp = document.getElementById('adm-ann-text-inp');
+        if (inp && map[key]) { inp.value = map[key]; window.toast('Şablon yüklendi! Kaydetmek için "Duyuruyu Kaydet"e basın.', '✨'); }
+    };
+
+    // --- TAB 9 (a-comments): SUCHE, SORTIERUNG & KLICKBARER ESER-BADGE ---
+    window._admCommSearch = '';
+    window._admCommSort = 'newest';
+
+    window.renderAdminComments = function() {
+        const listEl = document.getElementById('adm-comments-list');
+        if (!listEl) return;
+
+        if (!document.getElementById('adm-pro-comm-bar')) {
+            const bar = document.createElement('div');
+            bar.id = 'adm-pro-comm-bar';
+            bar.className = 'adm-pro-toolbar';
+            bar.innerHTML =
+                '<input type="text" id="adm-pro-comm-search" class="inp" placeholder="🔍 Yorum, yazar veya eser adı ara..." style="margin:0; flex:1; min-width:150px; font-size:0.76rem;" oninput="window._admCommSearch=this.value; window.renderAdminComments();">' +
+                '<select class="inp" style="margin:0; width:auto; font-size:0.74rem;" onchange="window._admCommSort=this.value; window.renderAdminComments();">' +
+                    '<option value="newest">🕒 En Yeni</option>' +
+                    '<option value="roses">🌹 En Çok Gül</option>' +
+                    '<option value="author">🔤 Yazar A-Z</option>' +
+                '</select>';
+            listEl.insertAdjacentElement('beforebegin', bar);
+        }
+
+        let allComments = [];
+        const hDB = window.poemDataStore || {};
+        for (let pId in hDB) {
+            const cArr = hDB[pId].comments ? (Array.isArray(hDB[pId].comments) ? hDB[pId].comments : Object.values(hDB[pId].comments)) : [];
+            const workObj = window.findWorkItemGlobal ? window.findWorkItemGlobal(pId) : null;
+            const workTitle = workObj ? (workObj.title || workObj.trTitle || pId) : ('Eser #' + pId);
+            const workType = workObj ? (workObj.type || 'poems') : 'poems';
+            cArr.forEach(function(c, idx) {
+                if (c) {
+                    const repCnt = c.replies ? (Array.isArray(c.replies) ? c.replies.length : Object.keys(c.replies).length) : 0;
+                    allComments.push({ pId: pId, workTitle: workTitle, workType: workType, idx: idx, user: c.user, text: c.text, time: c.time, ts: c.ts || 0, roses: window.getTotalRosesOnComment(c), replies: repCnt });
+                }
+            });
+        }
+
+        const q = (window._admCommSearch || '').trim().toLowerCase();
+        if (q) {
+            allComments = allComments.filter(function(c) {
+                return ((c.user || '') + ' ' + (c.text || '') + ' ' + (c.workTitle || '')).toLowerCase().includes(q);
+            });
+        }
+        if (window._admCommSort === 'roses') allComments.sort(function(a, b) { return b.roses - a.roses; });
+        else if (window._admCommSort === 'author') allComments.sort(function(a, b) { return String(a.user || '').localeCompare(String(b.user || ''), 'tr'); });
+        else allComments.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+
+        if (allComments.length === 0) {
+            listEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);">Eşleşen yorum bulunamadı.</div>';
+            return;
+        }
+        listEl.innerHTML = allComments.map(function(c) {
+            return '<div class="adm-comment-compact-card" style="background:var(--input-bg); border:1px solid var(--border-soft); border-left:3px solid var(--accent-cyan); border-radius:10px; padding:8px 10px; margin-bottom:7px; text-align:left;">' +
+                '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">' +
+                    '<div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">' +
+                        '<strong style="color:var(--accent-gold); font-size:0.78rem; cursor:pointer;" onclick="window.openUserInspectorModal(\'' + String(c.user || '').replace(/'/g, "\\'") + '\')">' + esc(c.user) + '</strong>' +
+                        '<span class="adm-pro-chip" style="padding:1px 7px; font-size:0.6rem;" onclick="window.closeTopModal(); setTimeout(function(){window.openReadModal(\'' + c.pId + '\',\'' + c.workType + '\');},250);">📖 ' + esc(c.workTitle) + '</span>' +
+                        '<span style="font-size:0.6rem; color:var(--text-sub); font-family:\'Space Mono\',monospace;">🌹 ' + c.roses + (c.replies > 0 ? ' • ↩️ ' + c.replies : '') + '</span>' +
+                    '</div>' +
+                    '<div style="display:flex; gap:6px;">' +
+                        '<button type="button" class="action-btn" style="color:var(--accent-cyan); font-size:0.82rem;" onclick="window.editAdminComment(\'' + c.pId + '\', ' + c.idx + ')" title="Düzenle"><i class="fas fa-pen"></i></button>' +
+                        '<button type="button" class="action-btn" style="color:var(--accent-red); font-size:0.82rem;" onclick="window.deleteAdminComment(\'' + c.pId + '\', ' + c.idx + ')" title="Sil"><i class="fas fa-trash"></i></button>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="font-size:0.78rem; color:var(--text-main); line-height:1.4;">' + esc(c.text) + '</div>' +
+            '</div>';
+        }).join('');
+    };
+
+    // --- TAB 10 (a-ticker): LIVE-TICKER-VORSCHAU + ESERDEN SCHNELL-EINFÜGEN ---
+    window.enhanceAdminTickerTabPro = function() {
+        const panel = document.querySelector('#a-ticker .theme-sub-panel');
+        if (!panel || document.getElementById('adm-pro-ticker-prev')) return;
+
+        const prevWrap = document.createElement('div');
+        prevWrap.id = 'adm-pro-ticker-prev';
+        prevWrap.className = 'adm-pro-toolbar';
+        prevWrap.style.justifyContent = 'space-between';
+        prevWrap.innerHTML =
+            '<div style="width:100%; font-size:0.64rem; color:var(--accent-cyan); font-weight:800;">👁️ Canlı Ticker Önizleme & Eserden Hızlı Ekle:</div>' +
+            '<div id="adm-pro-tick-live" style="width:100%; background:var(--bg-main); border:1px solid var(--border-soft); border-radius:8px; padding:6px 10px; font-size:0.8rem; overflow:hidden; white-space:nowrap;">Önizleme...</div>' +
+            '<div style="display:flex; gap:6px; width:100%; margin-top:4px; flex-wrap:wrap;">' +
+                '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-gold);color:var(--accent-gold);" onclick="window.fillTickerFromRandomWorkPro()">✨ Rastgele Eserden Doldur</button>' +
+                '<button type="button" class="adm-pro-chip" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="window.renderAdminTickerList(); window.updateLiveTickers(true); window.toast(\'Ticker canlı yenilendi!\', \'🚀\');">🔄 Canlı Yenile</button>' +
+            '</div>';
+        const subBtn = document.getElementById('tick-submit-btn');
+        if (subBtn) subBtn.insertAdjacentElement('beforebegin', prevWrap);
+
+        ['tick-txt', 'tick-auth', 'tick-badge', 'tick-effect', 'tick-textcolor', 'tick-authcolor'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', window.updateAdminTickerLivePreviewPro);
+                el.addEventListener('change', window.updateAdminTickerLivePreviewPro);
+            }
+        });
+        window.updateAdminTickerLivePreviewPro();
+    };
+
+    window.updateAdminTickerLivePreviewPro = function() {
+        const box = document.getElementById('adm-pro-tick-live');
+        if (!box) return;
+        const txt = document.getElementById('tick-txt')?.value.trim() || 'Özlü söz veya duyuru önizlemesi...';
+        const auth = document.getElementById('tick-auth')?.value.trim() || 'Şair Misal.i';
+        const badge = document.getElementById('tick-badge')?.value || 'none';
+        const eff = document.getElementById('tick-effect')?.value || 'eff-none';
+        const tCol = document.getElementById('tick-textcolor')?.value || '#ffffff';
+        const aCol = document.getElementById('tick-authcolor')?.value || '#0ea5e9';
+        const bHtml = badge !== 'none' ? '<span class="ticker-custom-badge ' + badge + '">ETİKET</span>' : '';
+        box.innerHTML = bHtml + '<span class="' + eff + '" style="color:' + (tCol.toLowerCase()==='#ffffff'?'var(--text-main)':tCol) + '; margin-right:8px;">' + esc(txt) + '</span><span style="color:' + aCol + '; font-family:\'Great Vibes\',cursive; font-size:1.15rem;">~ ' + esc(auth) + '</span>';
+    };
+
+    window.fillTickerFromRandomWorkPro = function() {
+        const pool = [...(window.DB?.quotes || []), ...(window.DB?.poems || [])].filter(Boolean);
+        if (pool.length === 0) return;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const raw = String(pick.quote || pick.text || '').split('\n')[0].trim();
+        const tEl = document.getElementById('tick-txt'); if (tEl) tEl.value = raw;
+        const aEl = document.getElementById('tick-auth'); if (aEl) aEl.value = pick.author || 'Şair Misal.i';
+        window.updateAdminTickerLivePreviewPro();
+        window.toast('✨ Eser metni forma aktarıldı!', '📜');
+    };
+
+    // Alle Pro-Enhancer an openModal & openTab koppeln
+    const _origOpenModalPro = window.openModal;
+    window.openModal = function(id) {
+        if (typeof _origOpenModalPro === 'function') _origOpenModalPro(id);
+        if (id === 'adminModal') {
+            setTimeout(function() {
+                window.renderAdminProDashboardHeader();
+                window.enhanceAdminAddTabPro();
+                window.enhanceAdminEditTabPro();
+                window.enhanceAdminSettingsTabPro();
+                window.enhanceAdminRadioTabPro();
+                window.enhanceAdminMigrationTabPro();
+                window.enhanceAdminLogsTabPro();
+                window.enhanceAdminInfoTabPro();
+                window.enhanceAdminTickerTabPro();
+            }, 40);
+        }
+    };
+
+    const _origOpenTabPro = window.openTab;
+    window.openTab = function(group, tabId, btnEl) {
+        if (typeof _origOpenTabPro === 'function') _origOpenTabPro(group, tabId, btnEl);
+        if (group === 'adminGrp') {
+            window.renderAdminProDashboardHeader();
+            if (tabId === 'a-add') window.enhanceAdminAddTabPro();
+            if (tabId === 'a-edit') window.enhanceAdminEditTabPro();
+            if (tabId === 'a-settings') window.enhanceAdminSettingsTabPro();
+            if (tabId === 'a-radio') window.enhanceAdminRadioTabPro();
+            if (tabId === 'a-migration') window.enhanceAdminMigrationTabPro();
+            if (tabId === 'a-logs') window.enhanceAdminLogsTabPro();
+            if (tabId === 'a-info') window.enhanceAdminInfoTabPro();
+            if (tabId === 'a-ticker') window.enhanceAdminTickerTabPro();
+        }
+    };
+
+    // Beim Start sofort Video-Events beruhigen
+    setTimeout(function() {
+        window.sanitizeVideoElementEventsX('left');
+        window.sanitizeVideoElementEventsX('right');
+        window.sanitizeVideoElementEventsX('extern');
+    }, 500);
+})();
+</script>
 </body>
 </html>
