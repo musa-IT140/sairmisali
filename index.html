@@ -12981,90 +12981,111 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             window.toast("Bildirim kutunuz temizlendi!", "🗑️");
         };
 
-        // Canlı Firebase Senkronizasyonu: Admin'e tüm loglar, Üyeye sadece kendi kişisel bildirimleri gelir
-        if (typeof firebase !== 'undefined' && firebase.database) {
-            try {
-                let firstRemoteSync = true;
-                firebase.database().ref('adminLogs').on('value', function(snap) {
-                    if (!window.isUserTrueAdmin || !window.isUserTrueAdmin(window.currentUser)) return;
-                    if (Date.now() - (window._v20ClearedAt || 0) < 4000) return;
+        // Canlı Firebase Senkronizasyonu (PC & Mobil 1:1 Eşitlenir — Ekleme & Silme Dahil)
+        window.bindCloudBellSyncV21 = function() {
+            if (typeof firebase === 'undefined' || !firebase.database) return;
+            const u = window.ensureActiveUserObject ? window.ensureActiveUserObject() : window.currentUser;
+            if (!u) return;
 
-                    const remoteRaw = snap.val();
-                    if (!remoteRaw) { firstRemoteSync = false; return; }
-                    const remoteClean = window.sanitizeLogArrayV20(remoteRaw, true);
-                    if (remoteClean.length === 0) { firstRemoteSync = false; return; }
+            const isAdm = window.isUserTrueAdmin(u);
+            const uKey = window.resolveUserKey ? window.resolveUserKey(u.username) : u.username;
+            const syncTag = isAdm ? 'ADMIN' : ('USER_' + uKey);
+            if (window._v21ActiveBellSyncTag === syncTag) return;
+
+            try {
+                if (window._v21BellRef) window._v21BellRef.off();
+            } catch(e) {}
+            window._v21ActiveBellSyncTag = syncTag;
+
+            if (isAdm) {
+                let firstRemoteSync = true;
+                window._v21BellRef = firebase.database().ref('adminLogs');
+                window._v21BellRef.on('value', function(snap) {
+                    if (!window.isUserTrueAdmin || !window.isUserTrueAdmin(window.currentUser)) return;
+                    if (Date.now() - (window._v20ClearedAt || 0) < 1500) return;
+
+                    const remoteClean = window.sanitizeLogArrayV20(snap.val() || [], true);
+                    remoteClean.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+
+                    const prevLocal = window.loadV20VaultArray();
+                    const prevIds = new Set(prevLocal.map(function(x) { return String(x.id); }));
+
+                    // Firebase verisini (boş veya silinmiş olsa bile!) yerel kasaya 1:1 yaz
+                    localStorage.setItem('misali_v20_vault_ADMIN', JSON.stringify(remoteClean));
+                    localStorage.setItem('misaliAdminLogs', JSON.stringify(remoteClean));
+                    window.adminLogs = remoteClean;
 
                     if (firstRemoteSync) {
                         remoteClean.forEach(function(item) {
                             if (item && item.id) window._shownToastIdsV21.add(String(item.id));
                         });
                         firstRemoteSync = false;
+                        window.syncBellCounterExact(false);
+                        if (typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
                         return;
                     }
 
-                    const localVault = window.loadV20VaultArray();
-                    const localIds = new Set(localVault.map(function(x) { return String(x.id); }));
-                    let newestUnseen = null;
+                    const newestUnseen = remoteClean.find(function(rItem) {
+                        return rItem && rItem.id && !prevIds.has(String(rItem.id)) && !window._shownToastIdsV21.has(String(rItem.id));
+                    }) || null;
 
-                    remoteClean.forEach(function(rItem) {
-                        if (rItem && rItem.id && !localIds.has(String(rItem.id))) {
-                            localVault.push(rItem);
-                            if (!newestUnseen) newestUnseen = rItem;
-                        }
-                    });
-
-                    if (newestUnseen) {
-                        localVault.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
-                        window.saveV20VaultArray(localVault, true);
-                        window.syncBellCounterExact(true);
-                        window.showLiveFeedToast(newestUnseen);
-                    }
+                    window.syncBellCounterExact(!!newestUnseen);
+                    if (newestUnseen) window.showLiveFeedToast(newestUnseen);
+                    if (typeof window.renderAdminLogs === 'function') window.renderAdminLogs();
+                }, function() {
+                    window._v21ActiveBellSyncTag = null;
                 });
+            } else if (uKey) {
+                let firstUserSync = true;
+                window._v21BellRef = firebase.database().ref('users/' + uKey + '/notifications');
+                window._v21BellRef.on('value', function(snap) {
+                    if (window.isUserTrueAdmin(window.currentUser)) return;
+                    if (Date.now() - (window._v20ClearedAt || 0) < 1500) return;
 
-                // Normal üye için sadece kendi kişisel bildirim dinleyicisi
-                const attachPersonalListener = function() {
-                    const u = window.ensureActiveUserObject ? window.ensureActiveUserObject() : window.currentUser;
-                    if (!u || window.isUserTrueAdmin(u)) return;
-                    const uKey = window.resolveUserKey ? window.resolveUserKey(u.username) : u.username;
-                    if (!uKey || window._v007PersonalSyncedKey === uKey) return;
-                    window._v007PersonalSyncedKey = uKey;
-
-                    let firstUserSync = true;
-                    firebase.database().ref('users/' + uKey + '/notifications').on('value', function(snap) {
-                        if (window.isUserTrueAdmin(window.currentUser)) return;
-                        if (Date.now() - (window._v20ClearedAt || 0) < 4000) return;
-                        const raw = snap.val();
-                        if (!raw) { firstUserSync = false; return; }
-                        const cleanPersonal = window.sanitizeLogArrayV20(raw, false);
-
-                        if (firstUserSync) {
-                            cleanPersonal.forEach(function(item) {
-                                if (item && item.id) window._shownToastIdsV21.add(String(item.id));
-                            });
-                            firstUserSync = false;
-                        }
-
-                        const localVault = window.loadV20VaultArray();
-                        const localIds = new Set(localVault.map(function(x) { return String(x.id); }));
-                        let newestPersonal = null;
-
-                        cleanPersonal.forEach(function(pItem) {
-                            if (pItem && pItem.id && !localIds.has(String(pItem.id))) {
-                                pItem.isPersonalNotif = true;
-                                localVault.push(pItem);
-                                if (!newestPersonal) newestPersonal = pItem;
-                            }
-                        });
-
-                        if (newestPersonal) {
-                            localVault.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
-                            window.saveV20VaultArray(localVault, false);
-                            window.syncBellCounterExact(true);
-                            window.showLiveFeedToast(newestPersonal);
-                        }
+                    const cleanPersonal = window.sanitizeLogArrayV20(snap.val() || [], false).map(function(it) {
+                        it.isPersonalNotif = true;
+                        return it;
                     });
-                };
-                setTimeout(attachPersonalListener, 600);
+                    cleanPersonal.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+
+                    const prevLocal = window.loadV20VaultArray();
+                    const prevIds = new Set(prevLocal.map(function(x) { return String(x.id); }));
+
+                    const vKey = window.getV20VaultKey();
+                    localStorage.setItem(vKey, JSON.stringify(cleanPersonal));
+                    localStorage.setItem('misaliPrivateInbox', JSON.stringify(cleanPersonal));
+                    window.MY_PRIVATE_INBOX = cleanPersonal;
+
+                    if (firstUserSync) {
+                        cleanPersonal.forEach(function(item) {
+                            if (item && item.id) window._shownToastIdsV21.add(String(item.id));
+                        });
+                        firstUserSync = false;
+                        window.syncBellCounterExact(false);
+                        if (typeof window.renderUserMsgModal === 'function') window.renderUserMsgModal();
+                        return;
+                    }
+
+                    const newestPersonal = cleanPersonal.find(function(pItem) {
+                        return pItem && pItem.id && !prevIds.has(String(pItem.id)) && !window._shownToastIdsV21.has(String(pItem.id));
+                    }) || null;
+
+                    window.syncBellCounterExact(!!newestPersonal);
+                    if (newestPersonal) window.showLiveFeedToast(newestPersonal);
+                    if (typeof window.renderUserMsgModal === 'function') window.renderUserMsgModal();
+                }, function() {
+                    window._v21ActiveBellSyncTag = null;
+                });
+            }
+        };
+
+        setTimeout(window.bindCloudBellSyncV21, 500);
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            try {
+                firebase.auth().onAuthStateChanged(function() {
+                    window._v21ActiveBellSyncTag = null;
+                    setTimeout(window.bindCloudBellSyncV21, 200);
+                });
             } catch(e) {}
         }
 
