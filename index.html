@@ -22847,47 +22847,45 @@ window.nav = function(viewId) {
     // 12. %100 GARANTİLİ TELEFON ➔ PC (TÜM CİHAZLAR) FIREBASE BULUT SENKRONİZASYONU
     // =========================================================================
 
-    // 1. Direktes Hochladen in Firebase Storage (ohne Base64-Aufblähung)
+    // 1. Kostenloser Chunk-Upload über Realtime Database (ohne Blaze/Storage-Zwang)
     window.uploadVideoToFirebaseChunksX = function(vidId, file) {
         return new Promise(function(resolve) {
-            if (typeof firebase === 'undefined' || !firebase.storage || !firebase.database) return resolve(false);
-            try {
-                const safeName = String(file.name || 'video.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
-                const storageRef = firebase.storage().ref('videos/' + vidId + '_' + safeName);
-                const uploadTask = storageRef.put(file, { contentType: file.type || 'video/mp4' });
-
-                uploadTask.on('state_changed',
-                    function(snapshot) {
-                        const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            if (typeof firebase === 'undefined' || !firebase.database) return resolve(false);
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const fullDataUri = String(e.target.result || '');
+                    const chunkSize = 250000;
+                    const totalChunks = Math.ceil(fullDataUri.length / chunkSize);
+                    const basePath = 'audioFiles/videoCloud_v3/' + vidId;
+                    const metaObj = { totalChunks: totalChunks, mime: file.type || 'video/mp4', size: file.size, copyright: '© Şair Misal.i', ready: false, ts: Date.now() };
+                    await firebase.database().ref(basePath + '/meta').set(metaObj);
+                    const batchSize = 4;
+                    for (let i = 0; i < totalChunks; i += batchSize) {
+                        const promises = [];
+                        for (let j = i; j < Math.min(i + batchSize, totalChunks); j++) {
+                            promises.push(firebase.database().ref(basePath + '/chunks/c_' + j).set(fullDataUri.slice(j * chunkSize, (j + 1) * chunkSize)));
+                        }
+                        await Promise.all(promises);
+                        const pct = Math.round((Math.min(i + batchSize, totalChunks) / totalChunks) * 100);
                         document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
-                            el.textContent = "☁️ Storage'a Yükleniyor: %" + pct;
+                            el.textContent = "☁️ Buluta Yükleniyor: %" + pct;
                         });
-                    },
-                    function(err) {
-                        console.error("Firebase Storage Upload Hatası:", err);
-                        resolve(false);
-                    },
-                    async function() {
-                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                        await firebase.database().ref('audioFiles/videoCloud_v3/' + vidId + '/meta').set({
-                            downloadURL: downloadURL,
-                            storagePath: 'videos/' + vidId + '_' + safeName,
-                            mime: file.type || 'video/mp4',
-                            size: file.size,
-                            copyright: '© Şair Misal.i',
-                            ready: true,
-                            ts: Date.now()
-                        });
-                        document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
-                            el.textContent = "✅ Firebase Storage'a Kaydedildi (%100)";
-                        });
-                        resolve(true);
                     }
-                );
-            } catch(err) {
-                console.error("Storage Init Hatası:", err);
-                resolve(false);
-            }
+                    metaObj.ready = true;
+                    metaObj.ts = Date.now();
+                    await firebase.database().ref(basePath + '/meta').set(metaObj);
+                    document.querySelectorAll('.vadm-cloud-prog-txt').forEach(function(el) {
+                        el.textContent = "✅ Firebase Buluta Kaydedildi (%100)";
+                    });
+                    resolve(true);
+                } catch(err) {
+                    console.error("Firebase Chunk Upload Hatası:", err);
+                    resolve(false);
+                }
+            };
+            reader.onerror = function() { resolve(false); };
+            reader.readAsDataURL(file);
         });
     };
 
