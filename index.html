@@ -4347,8 +4347,82 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             document.body.appendChild(overlay);
         };
 
-        window.encodePass = function(str) { return btoa(encodeURIComponent(str)); };
-        window.decodePass = function(str) { try { return decodeURIComponent(atob(str)); } catch(e) { return atob(str); } };
+        window.sha256Raw = function(input) {
+            function rightRotate(v, a) { return (v >>> a) | (v << (32 - a)); }
+            const utf8 = unescape(encodeURIComponent(String(input || '')));
+            const maxWord = Math.pow(2, 32);
+            const words = [], bitLen = utf8.length * 8;
+            let hash = window._sha256H = window._sha256H || [];
+            const k = window._sha256K = window._sha256K || [];
+            let primeCounter = k.length;
+            const isComp = {};
+            for (let c = 2; primeCounter < 64; c++) {
+                if (!isComp[c]) {
+                    for (let i = 0; i < 313; i += c) isComp[i] = c;
+                    hash[primeCounter] = (Math.pow(c, 0.5) * maxWord) | 0;
+                    k[primeCounter++] = (Math.pow(c, 1 / 3) * maxWord) | 0;
+                }
+            }
+            let msg = utf8 + '\x80';
+            while (msg.length % 64 - 56) msg += '\x00';
+            for (let i = 0; i < msg.length; i++) {
+                const code = msg.charCodeAt(i);
+                words[i >> 2] |= code << ((3 - (i % 4)) * 8);
+            }
+            words.push((bitLen / maxWord) | 0, bitLen | 0);
+            const h = hash.slice(0, 8);
+            for (let j = 0; j < words.length;) {
+                const w = words.slice(j, j += 16);
+                const oldH = h.slice(0);
+                for (let i = 0; i < 64; i++) {
+                    const w15 = w[i - 15], w2 = w[i - 2];
+                    const a = h[0], e = h[4];
+                    const t1 = h[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & h[5]) ^ ((~e) & h[6])) + k[i] +
+                        (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
+                    const t2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & h[1]) ^ (a & h[2]) ^ (h[1] & h[2]));
+                    h.unshift((t1 + t2) | 0);
+                    h[4] = (h[4] + t1) | 0;
+                    h.pop();
+                }
+                for (let i = 0; i < 8; i++) h[i] = (h[i] + oldH[i]) | 0;
+            }
+            let out = '';
+            for (let i = 0; i < 8; i++) {
+                for (let j = 3; j >= 0; j--) {
+                    const b = (h[i] >> (j * 8)) & 255;
+                    out += (b < 16 ? '0' : '') + b.toString(16);
+                }
+            }
+            return out;
+        };
+
+        window.encodePass = function(str) {
+            const salt = Math.random().toString(16).slice(2, 10) + Date.now().toString(16).slice(-4);
+            return 'sha256:' + salt + ':' + window.sha256Raw(salt + ':' + String(str || ''));
+        };
+
+        window.decodePass = function(str) {
+            if (String(str || '').startsWith('sha256:')) return '🔒 SHA-256 Şifreli';
+            try { return decodeURIComponent(atob(str)); } catch(e) { try { return atob(str); } catch(e2) { return '***'; } }
+        };
+
+        window.verifyUserPassword = function(plainInput, storedPass) {
+            const p = String(plainInput || '');
+            const sp = String(storedPass || '');
+            if (!p || !sp) return { ok: false, needsUpgrade: false };
+            if (sp.startsWith('sha256:')) {
+                const parts = sp.split(':');
+                if (parts.length === 3) {
+                    return { ok: window.sha256Raw(parts[1] + ':' + p) === parts[2], needsUpgrade: false };
+                }
+                return { ok: false, needsUpgrade: false };
+            }
+            let legacyOk = false;
+            try {
+                legacyOk = (sp === btoa(encodeURIComponent(p)) || sp === btoa(p) || sp === p || decodeURIComponent(atob(sp)) === p || atob(sp) === p);
+            } catch(e) { legacyOk = (sp === p); }
+            return { ok: legacyOk, needsUpgrade: legacyOk };
+        };
 
         window.execLogin = async function() {
             let uInput = document.getElementById('log-u'), pInput = document.getElementById('log-p'), remCheck = document.getElementById('log-rem');
@@ -4410,15 +4484,14 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                 let user = remoteUser ? Object.assign({}, localCandidate || {}, remoteUser) : localCandidate;
 
                 if (user) {
-                    let isPassCorrect = false;
-                    try {
-                        isPassCorrect = (user.pass === window.encodePass(p) || user.pass === btoa(p) || user.pass === p || window.decodePass(user.pass) === p || atob(user.pass || '') === p);
-                    } catch(e) { isPassCorrect = (user.pass === p); }
-
-                    if (isPassCorrect) {
+                    const passCheckRes = window.verifyUserPassword(p, user.pass);
+                    if (passCheckRes.ok) {
                         if (user.banned) return window.showMisaliAlert("Engellendiniz", "Hesabınız sistem yöneticisi tarafından askıya alınmıştır.");
                         if (!user.approved && user.role !== 'admin') return window.showMisaliAlert("Onay Bekleniyor", "Hesabınız henüz Admin tarafından onaylanmadı.");
 
+                        if (passCheckRes.needsUpgrade) {
+                            user.pass = window.encodePass(p);
+                        }
                         user.score = parseInt(user.score || 0);
                         user.lastLogin = Date.now();
                         user.lastSeen = Date.now();
@@ -4430,7 +4503,9 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
                         window.deduplicateUsersDB();
                         sessionStorage.setItem('misaliUser', JSON.stringify(user));
                         localStorage.setItem('misaliUser', JSON.stringify(user));
-                        try { firebase.database().ref('users/' + uKey).update({ lastLogin: user.lastLogin, lastSeen: user.lastSeen, isOnline: true, zodiac: user.zodiac }); } catch(e){}
+                        const loginUpdate = { lastLogin: user.lastLogin, lastSeen: user.lastSeen, isOnline: true, zodiac: user.zodiac };
+                        if (passCheckRes.needsUpgrade) loginUpdate.pass = user.pass;
+                        try { firebase.database().ref('users/' + uKey).update(loginUpdate); } catch(e){}
 
                         if (remCheck && remCheck.checked) { localStorage.setItem('misali_rem_u', rawU); localStorage.setItem('misali_rem_p', p); }
                         else { localStorage.removeItem('misali_rem_u'); localStorage.removeItem('misali_rem_p'); }
@@ -5231,10 +5306,9 @@ let loadedDB = JSON.parse(localStorage.getItem('misaliFullDB')) || {};
             if (type === 'avatar') {
                 let newEmoji = document.getElementById('edit-emoji').value;
                 let passCheck = document.getElementById('edit-pass-avatar').value.trim();
-                let userActualPass = window.currentUser.pass;
-                let isCorrect = false;
-                try { isCorrect = (window.encodePass(passCheck) === userActualPass || btoa(passCheck) === userActualPass || passCheck === userActualPass || window.decodePass(userActualPass) === passCheck); } catch(e){}
-                if (!isCorrect) return window.toast("Şifre yanlış! Güvenlik doğrulaması başarısız.", "❌");
+                let isAdm = window.isUserTrueAdmin ? window.isUserTrueAdmin(window.currentUser) : (window.currentUser.role === 'admin');
+                let avatarPassRes = window.verifyUserPassword(passCheck, window.currentUser.pass);
+                if (!isAdm && !avatarPassRes.ok) return window.toast("Şifre yanlış! Güvenlik doğrulaması başarısız.", "❌");
                 if (newEmoji) {
                     window.currentUser.emoji = newEmoji;
                     let uKey = window.resolveUserKey(window.currentUser.username);
