@@ -126,6 +126,14 @@
             appId: "1:605117806675:web:7582affc3036c8cf6baea6"
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.auth().onAuthStateChanged(function(fbUser) {
+                if (!fbUser && !window._anonAuthTried) {
+                    window._anonAuthTried = true;
+                    firebase.auth().signInAnonymously().catch(function() {});
+                }
+            });
+        } catch(e) {}
     </script>
 
     <style id="misali-master-css">
